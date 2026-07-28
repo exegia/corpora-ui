@@ -1,0 +1,63 @@
+# Promotion gate on `dev`. On success it triggers the `dev → next` promotion workflow.
+#
+# IMPORTANT: the `name:` below must stay "Validation" unless `dev-to-next.md` is updated too.
+name: Validation
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validation-dev
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Verify release policy assets
+        run: |
+          set -euo pipefail
+          test -f .github/BRANCH-AND-RELEASE-POLICY.md
+          test -f .github/LIFECYCLE.md
+          test -x .github/scripts/release-version.sh || test -f .github/scripts/release-version.sh
+
+      - name: Detect package
+        id: pkg
+        run: |
+          set -euo pipefail
+          if [ -f package.json ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install dependencies
+        if: steps.pkg.outputs.present == 'true'
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        if: steps.pkg.outputs.present == 'true'
+        run: bun run --if-present lint
+
+      - name: Typecheck
+        if: steps.pkg.outputs.present == 'true'
+        run: bun run --if-present typecheck
+
+      - name: Unit tests
+        if: steps.pkg.outputs.present == 'true'
+        run: bun run --if-present test
+
+      - name: Build (verification only)
+        if: steps.pkg.outputs.present == 'true'
+        run: bun run --if-present build

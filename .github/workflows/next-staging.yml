@@ -1,0 +1,163 @@
+# Staging — everything that happens when work lands on `next`.
+#
+# Two jobs, in order:
+#   1. `test`    — the full staging test surface, including e2e. Builds only to verify.
+#                  No publishing of any kind happens on `next`.
+#   2. `tag`     — release tagging (rules 2.i and 2.ii):
+#                    · no open release tag  → cut a new vX.Y.Z from the lines changed
+#                    · open release tag     → move that same tag forward onto this merge,
+#                                             so the merged PR's changes ship under it
+#
+# The tag on `next` is provisional and moves. It is frozen onto `main` by `release-tag.yml`
+# when the promotion PR lands. No GitHub Release is created here.
+name: Next Staging
+
+on:
+  push:
+    branches: [next]
+  workflow_dispatch:
+
+permissions:
+  contents: write        # create and move the release tag
+  pull-requests: read    # detect an in-flight promotion PR
+
+# Serialize: two merges landing at once must not both try to cut a tag.
+concurrency:
+  group: next-staging
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Detect package
+        id: pkg
+        run: |
+          set -euo pipefail
+          if [ -f package.json ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "No package.json yet — skipping the staging test surface." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Install dependencies
+        if: steps.pkg.outputs.present == 'true'
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        if: steps.pkg.outputs.present == 'true'
+        run: bun run --if-present lint
+
+      - name: Typecheck
+        if: steps.pkg.outputs.present == 'true'
+        run: bun run --if-present typecheck
+
+      - name: Unit tests
+        if: steps.pkg.outputs.present == 'true'
+        run: bun run --if-present test
+
+      - name: Build (verification only — never published from staging)
+        if: steps.pkg.outputs.present == 'true'
+        run: bun run --if-present build
+
+      - name: End-to-end tests
+        if: steps.pkg.outputs.present == 'true'
+        run: bun run --if-present test:e2e
+
+  tag:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: next
+
+      - name: Fetch all branches and tags
+        run: |
+          set -euo pipefail
+          git fetch --force origin \
+            '+refs/heads/*:refs/remotes/origin/*' \
+            '+refs/tags/*:refs/tags/*'
+
+      - name: Cut or advance the release tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          . .github/scripts/release-version.sh
+          configure_git_bot
+
+          open_tag="$(open_release_tag)"
+
+          # A promotion PR already carries a fixed set of cherry-picks. Advancing the tag now
+          # would make it cover commits that are not in that PR, and release-tag.yml would then
+          # re-anchor the tag on main — shipping less than the version claims. Leave the tag
+          # alone; the merge sitting on next is picked up by the next version instead.
+          if [ -n "$open_tag" ]; then
+            promo=$(gh pr list --repo "$REPOSITORY" --base main --head "release/$open_tag" \
+              --state open --json number --jq '.[0].number // empty')
+            if [ -n "${promo:-}" ]; then
+              echo "::warning::Release $open_tag is being promoted in PR #$promo — tag not advanced."
+              {
+                echo "### Release tag left in place"
+                echo ""
+                echo "\`$open_tag\` is in flight in promotion PR #$promo, so it was **not** moved onto"
+                echo "\`${HEAD_SHA:0:7}\`. This commit is not part of that release."
+                echo ""
+                echo "Merge or close #$promo; the next merge into \`next\` cuts a fresh version that"
+                echo "includes it."
+              } >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+          fi
+
+          if [ -n "$open_tag" ]; then
+            # Rule 2.ii — a release is already open on next. Move it forward so the changes
+            # from the PR that just merged are covered by it. This is a deliberate force-move
+            # of a published tag; anyone who already fetched it gets a divergent ref.
+            git tag -f -a "$open_tag" -m "Release $open_tag (staging, advanced to ${HEAD_SHA:0:7})" "$HEAD_SHA"
+            git push --force origin "refs/tags/$open_tag"
+            echo "Advanced open release tag $open_tag → ${HEAD_SHA:0:7}"
+            {
+              echo "### Release tag advanced"
+              echo ""
+              echo "\`$open_tag\` now points at \`${HEAD_SHA:0:7}\`. No new version was cut because"
+              echo "this release has not been promoted to \`main\` yet."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          # Rule 2.i — no open release. Cut a new version, sized by lines changed since the
+          # last released tag.
+          base="$(latest_released_tag)"
+          lines="$(changed_lines "$base" "$HEAD_SHA")"
+          bump="$(bump_for_lines "$lines")"
+          new_tag="$(next_version "$base" "$bump")"
+
+          git tag -a "$new_tag" -m "Release $new_tag (staging, cut at ${HEAD_SHA:0:7})" "$HEAD_SHA"
+          git push origin "refs/tags/$new_tag"
+
+          echo "Cut $new_tag from $base ($lines changed lines → $bump)"
+          {
+            echo "### Release tag cut"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Previous release | \`$base\` |"
+            echo "| Changed lines | $lines |"
+            echo "| Bump | **$bump** |"
+            echo "| New tag | \`$new_tag\` |"
+            echo ""
+            echo "Thresholds: patch < \`$PATCH_MAX\` ≤ minor < \`$MINOR_MAX\` ≤ major."
+          } >> "$GITHUB_STEP_SUMMARY"

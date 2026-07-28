@@ -1,0 +1,77 @@
+# Publish — the only place anything is built for distribution.
+#
+# Triggered by the GitHub Release that `release-tag.yml` publishes after a promotion PR lands
+# on `main`. Nothing is tested here: the exact source being published already passed the full
+# suite on `next`, and re-running it would only add a second chance to fail.
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write   # npm provenance
+
+concurrency:
+  group: publish-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Check the package is publishable
+        id: pkg
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          if [ ! -f package.json ]; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "No package.json — ${RELEASE_TAG} is a source-only release." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [ "$(node -p "require('./package.json').private === true")" = "true" ]; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "package.json is marked private — skipping publish." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          echo "publish=true" >> "$GITHUB_OUTPUT"
+
+      - name: Install dependencies
+        if: steps.pkg.outputs.publish == 'true'
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        if: steps.pkg.outputs.publish == 'true'
+        run: bun run --if-present build
+
+      - name: Publish to npm
+        if: steps.pkg.outputs.publish == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          test -n "${NODE_AUTH_TOKEN:-}" || { echo "NPM_TOKEN is not set on the production environment"; exit 1; }
+
+          # The tag is the source of truth for the version; package.json follows it.
+          npm version "${RELEASE_TAG#v}" --no-git-tag-version --allow-same-version
+          npm publish --provenance --access public
+
+          echo "Published ${RELEASE_TAG} to npm." >> "$GITHUB_STEP_SUMMARY"
