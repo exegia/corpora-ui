@@ -8,13 +8,22 @@ name: Publish
 on:
   release:
     types: [published]
+  # Manual escape hatch: releases created with GITHUB_TOKEN (release-tag.yml)
+  # never emit a `release: published` trigger, so a maintainer dispatches the
+  # publish for the given tag instead.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish (e.g. v0.0.1)"
+        required: true
+        type: string
 
 permissions:
   contents: read
   id-token: write   # npm provenance
 
 concurrency:
-  group: publish-${{ github.event.release.tag_name }}
+  group: publish-${{ github.event.release.tag_name || inputs.tag }}
   cancel-in-progress: false
 
 jobs:
@@ -24,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -38,7 +47,7 @@ jobs:
       - name: Check the package is publishable
         id: pkg
         env:
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
         run: |
           set -euo pipefail
           if [ ! -f react/package.json ]; then
@@ -68,7 +77,7 @@ jobs:
         working-directory: react
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
         run: |
           set -euo pipefail
           test -n "${NODE_AUTH_TOKEN:-}" || { echo "NPM_TOKEN is not set on the production environment"; exit 1; }
