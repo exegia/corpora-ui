@@ -87,17 +87,30 @@ jobs:
           # patch-id, which a squash merge changes — so already-released commits still
           # reach this loop. Dropping them keeps a genuine conflict fatal.
           for sha in $commits; do
-            if ! git cherry-pick -x --empty=drop "$sha"; then
-              git cherry-pick --abort || true
-              {
-                echo "### Promotion failed"
-                echo ""
-                echo "Cherry-pick of \`${sha:0:7}\` onto \`main\` conflicted."
-                echo "Resolve it on a \`$branch\` branch by hand, then open the release PR manually."
-              } >> "$GITHUB_STEP_SUMMARY"
-              echo "Cherry-pick conflict on $sha — aborting." >&2
-              exit 1
+            if git cherry-pick -x --empty=drop "$sha"; then
+              continue
             fi
+
+            # --empty only governs commits that start out empty. A pick can also stop
+            # with an empty result when merge resolution consumes the whole patch —
+            # git reports "now empty, possibly due to conflict resolution" and waits.
+            # No unmerged paths and nothing staged means there was nothing left to
+            # apply, so skip it; a real conflict leaves unmerged paths and still aborts.
+            if [ -z "$(git ls-files --unmerged)" ] && git diff --cached --quiet; then
+              git cherry-pick --skip
+              echo "Skipped ${sha:0:7} — resolved to no change against main."
+              continue
+            fi
+
+            git cherry-pick --abort || true
+            {
+              echo "### Promotion failed"
+              echo ""
+              echo "Cherry-pick of \`${sha:0:7}\` onto \`main\` conflicted."
+              echo "Resolve it on a \`$branch\` branch by hand, then open the release PR manually."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "Cherry-pick conflict on $sha — aborting." >&2
+            exit 1
           done
 
           # Stamp the changelog here rather than on main: main is review-gated, so nothing in
