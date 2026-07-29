@@ -26,4 +26,21 @@ jobs:
           # which is cheaper than checking out a tree the job never reads.
           GH_REPO: ${{ github.repository }}
           PR_URL: ${{ github.event.pull_request.html_url }}
-        run: gh pr ready --undo "$PR_URL"
+        # Not fatal on failure. `convertPullRequestToDraft` is one of the GraphQL mutations the
+        # default GITHUB_TOKEN cannot perform — it returns "Resource not accessible by
+        # integration" no matter what `permissions:` says — so this needs a GitHub App or PAT
+        # to work at all. Until one is wired up, warn and move on: a check that can never pass
+        # is worse than no check, because it teaches everyone to merge past red.
+        run: |
+          if gh pr ready --undo "$PR_URL"; then
+            echo "Converted $PR_URL to draft."
+          else
+            echo "::warning::Could not convert the PR to draft — GITHUB_TOKEN cannot perform convertPullRequestToDraft. Wire up an App token to enable this."
+            {
+              echo "### PR not converted to draft"
+              echo ""
+              echo "\`GITHUB_TOKEN\` cannot perform \`convertPullRequestToDraft\`; this needs a"
+              echo "GitHub App or PAT with \`pull-requests: write\`. Mark the PR draft by hand,"
+              echo "or wire up an app token to automate it."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
