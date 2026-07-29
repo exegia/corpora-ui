@@ -37,11 +37,11 @@ release branch and opens the next one (minor bump by default).
 
 ## Workflows
 
-| File             | Trigger                     | Does                                        |
-| ---------------- | --------------------------- | ------------------------------------------- |
-| `pr.yml`         | PR opened / ready / pushed  | `guard`, `check`, `package`, `review`        |
-| `pr-merged.yml`  | PR merged into `release/v*` | deletes the branch, upserts the release PR   |
-| `release.yml`    | PR merged into `main`       | publishes, tags, cuts the next release       |
+| File            | Trigger                     | Does                                       |
+|-----------------|-----------------------------|--------------------------------------------|
+| `pr.yml`        | PR opened / ready / pushed  | `guard`, `check`, `package`, `review`      |
+| `pr-merged.yml` | PR merged into `release/v*` | deletes the branch, upserts the release PR |
+| `release.yml`   | PR merged into `main`       | publishes, tags, cuts the next release     |
 
 Every step is a `make` target, so anything CI does can be reproduced locally.
 
@@ -70,11 +70,11 @@ or a tag already released is skipped, not an error.
 
 ## Secrets
 
-| Name                                          | Where                | Used by                    |
-| --------------------------------------------- | -------------------- | -------------------------- |
-| `NPM_TOKEN`                                    | `production` env     | `release.yml` publish      |
-| `AUTOMATION_APP_ID` / `AUTOMATION_APP_PRIVATE_KEY` | repository       | opening PRs and branches   |
-| `CLAUDE_CODE_OAUTH_TOKEN`                      | repository           | the AI review (optional)   |
+| Name                                               | Where            | Used by                  |
+|----------------------------------------------------|------------------|--------------------------|
+| `NPM_TOKEN`                                        | `production` env | `release.yml` publish    |
+| `AUTOMATION_APP_ID` / `AUTOMATION_APP_PRIVATE_KEY` | repository       | opening PRs and branches |
+| `CLAUDE_CODE_OAUTH_TOKEN`                          | repository       | the AI review (optional) |
 
 Without `CLAUDE_CODE_OAUTH_TOKEN` the review job skips with a note in the job
 summary rather than failing.
