@@ -1,0 +1,137 @@
+# Promotion — rule 3. Cherry-picks every commit covered by the open release tag on `next`
+# onto a `release/vX.Y.Z` branch cut from `main`, then opens the release PR.
+#
+# Run manually when staging is ready to ship. The PR is opened for review, never auto-merged.
+# When it merges, `release-tag.yml` freezes the tag onto `main` and `publish.yml` ships it.
+name: Promote to Main
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to promote (defaults to the open tag on next)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: promote-to-main
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Fetch all branches and tags
+        run: |
+          set -euo pipefail
+          git fetch --force origin \
+            '+refs/heads/*:refs/remotes/origin/*' \
+            '+refs/tags/*:refs/tags/*'
+
+      - name: Cherry-pick the release onto a promotion branch
+        id: pick
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          . .github/scripts/release-version.sh
+          configure_git_bot
+
+          tag="${INPUT_TAG:-$(open_release_tag)}"
+          if [ -z "$tag" ]; then
+            echo "No open release tag on next — nothing to promote."
+            echo "Cut a release by merging work into \`next\` first." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          if ! git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            echo "Tag $tag does not exist." >&2
+            exit 1
+          fi
+
+          commits=$(git rev-list --reverse --no-merges "origin/main..$tag")
+          if [ -z "$commits" ]; then
+            echo "$tag adds no commits on top of main — nothing to promote."
+            exit 1
+          fi
+          count=$(printf '%s\n' "$commits" | wc -l | tr -d ' ')
+
+          branch="release/$tag"
+          git checkout -B "$branch" origin/main
+
+          for sha in $commits; do
+            if ! git cherry-pick -x "$sha"; then
+              git cherry-pick --abort || true
+              {
+                echo "### Promotion failed"
+                echo ""
+                echo "Cherry-pick of \`${sha:0:7}\` onto \`main\` conflicted."
+                echo "Resolve it on a \`$branch\` branch by hand, then open the release PR manually."
+              } >> "$GITHUB_STEP_SUMMARY"
+              echo "Cherry-pick conflict on $sha — aborting." >&2
+              exit 1
+            fi
+          done
+
+          # Stamp the changelog here rather than on main: main is review-gated, so nothing in
+          # this design ever pushes to it directly.
+          today=$(date -u +%Y-%m-%d)
+          if [ -f CHANGELOG.md ] && grep -qE '^##[[:space:]]*\[Unreleased\]' CHANGELOG.md; then
+            sed -i -E "0,/^##[[:space:]]*\[Unreleased\]/s|^##[[:space:]]*\[Unreleased\].*|## [${tag}] - ${today}|" CHANGELOG.md
+            git add CHANGELOG.md
+            git commit -m "chore(release): stamp ${tag} in CHANGELOG"
+          fi
+
+          git push --force origin "$branch"
+
+          {
+            echo "tag=$tag"
+            echo "branch=$branch"
+            echo "count=$count"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Open the release PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          TAG: ${{ steps.pick.outputs.tag }}
+          BRANCH: ${{ steps.pick.outputs.branch }}
+          COUNT: ${{ steps.pick.outputs.count }}
+        run: |
+          set -euo pipefail
+
+          existing=$(gh pr list --repo "$REPOSITORY" --base main --head "$BRANCH" \
+            --state open --json number --jq '.[0].number // empty')
+          if [ -n "${existing:-}" ]; then
+            gh pr comment "$existing" --body "Refreshed \`$BRANCH\` with the current contents of \`$TAG\` ($COUNT commits)."
+            echo "Updated existing release PR #$existing."
+            exit 0
+          fi
+
+          body=$(printf '%s\n' \
+            "Promotes **$TAG** from \`next\` to production." \
+            "" \
+            "$COUNT commit(s) cherry-picked from \`next\` onto \`main\`." \
+            "" \
+            "On merge:" \
+            "1. \`release-tag.yml\` moves \`$TAG\` onto the \`main\` commit and publishes the GitHub Release." \
+            "2. \`publish.yml\` builds and publishes the package from that release." \
+            "" \
+            "No tests run on this PR — they already ran on \`next\`. See \`.github/BRANCH-AND-RELEASE-POLICY.md\`.")
+
+          gh pr create \
+            --repo "$REPOSITORY" \
+            --base main \
+            --head "$BRANCH" \
+            --title "release: $TAG" \
+            --body "$body"
