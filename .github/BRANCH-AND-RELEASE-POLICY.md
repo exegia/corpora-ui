@@ -23,8 +23,12 @@ This repo diverges from the shared `repo-template` in three ways, all in the rel
 > **Do not use the merge button on `dev → next` or `next → main`.** GitHub has no per-PR
 > merge-method setting, so the button leaves the strategy to whoever clicks it. Approve the PR
 > instead: `promotion-merge.yml` performs the merge with git — `--no-ff` into `next`, `--ff-only`
-> into `main` — so the strategy is guaranteed. It refuses to run on an unapproved PR or one whose
-> checks are not green, so review remains the gate.
+> into `main` — so the strategy is guaranteed.
+>
+> If you opened the PR yourself, GitHub will not let you approve it. Run **Promotion Merge**
+> manually with the PR number instead: only write access can dispatch a workflow, so the
+> dispatch carries the same human signal an approval does. The branch pair, open state and
+> green checks are enforced identically on both paths.
 
 ## Branch model
 
