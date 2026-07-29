@@ -16,10 +16,15 @@ This repo diverges from the shared `repo-template` in three ways, all in the rel
 > [!IMPORTANT]
 > Invariant 3 is load-bearing: `main` must always be an ancestor of `next`. Every "has this
 > shipped?" question in `release-version.sh` is a `git merge-base --is-ancestor` test, and those
-> are only meaningful while the branches share history. **PRs into `next` and `main` must be
-> merged with a merge commit or fast-forward — never squashed.** Squashing rewrites SHAs and
-> severs the two branches; `.github/scripts/reconcile-ancestry.sh` exists to repair that, and
+> are only meaningful while the branches share history. A single squash into `next` or `main`
+> severs them; `.github/scripts/reconcile-ancestry.sh` exists to repair that, and
 > `promote-to-main.yml` refuses to run while it holds false.
+>
+> **Do not use the merge button on `dev → next` or `next → main`.** GitHub has no per-PR
+> merge-method setting, so the button leaves the strategy to whoever clicks it. Approve the PR
+> instead: `promotion-merge.yml` performs the merge with git — `--no-ff` into `next`, `--ff-only`
+> into `main` — so the strategy is guaranteed. It refuses to run on an unapproved PR or one whose
+> checks are not green, so review remains the gate.
 
 ## Branch model
 
@@ -112,8 +117,9 @@ There is no cherry-pick, no `release/*` branch and no conflict path: the release
 already on `next`.
 
 > [!IMPORTANT]
-> Merge the release PR with a **merge commit or fast-forward, never a squash**. Squashing would
-> rewrite the SHAs and put `main` back on a lineage of its own.
+> Approve the release PR; do not merge it by hand. `promotion-merge.yml` fast-forwards `main`
+> onto the tagged commit, which the merge button cannot do — it would leave `main` on a merge
+> commit *above* the tag instead of on the tag itself.
 
 ### 4. Publishing
 
@@ -167,13 +173,14 @@ issue (type:feature) ──status:in-progress──▶ feature/123-slug
                                               │
                                               ▼  Validation green on dev
                                   PR dev → next
+                                              │  approve → Promotion Merge (--no-ff)
                                               │  merge → Next Staging
                                               ▼  cut vX.Y.Z, or advance the open tag
                                   [ tests + e2e, no publish ]
                                               │  Promote to Main (manual)
                                               ▼  stamp changelog, no copying
                                   PR next → main
-                                              │  merge commit / fast-forward
+                                              │  approve → Promotion Merge (--ff-only)
                                               ▼
                                   main lands on the already-tagged commit
                                   + GitHub Release → npm publish
