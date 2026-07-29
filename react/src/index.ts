@@ -6,4 +6,5 @@
  * The docs site (main.tsx + routes.tsx + pages/) is NOT part of the package.
  */
 export * from "./components/ui/button"
+export * from "./lib/sound"
 export * from "./lib/utils"

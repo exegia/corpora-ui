@@ -6,6 +6,16 @@ source in `src/components/{ui,composed,blocks}`, docs site driven by
 `make check` (runs `tsc -b --noEmit` + eslint) — plain `tsc --noEmit` checks
 nothing here (references-only root tsconfig).
 
+## Interaction sound (cuelume)
+
+Components emit inert `data-cuelume-*` attributes (Button: press/release,
+gated by its `sound` prop, default true). Nothing plays until an app calls
+`bindSounds()` (re-exported from `src/lib/sound.ts`; the docs site does this
+in `main.tsx`). Never call `bind()` at library-module scope — opting into
+sound is the consumer's decision. Pick sound names from cuelume's palette by
+suggested use (`toggle` for switches/tabs, `success`/`error` for outcomes,
+`tick` for nav hover).
+
 ## Glass variants
 
 Glass is NOT a separate component family — it is a `variant="glass"` on the

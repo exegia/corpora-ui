@@ -99,6 +99,7 @@ export default function ButtonDemo() {
     React.useState<FrostGlassVariant>("liquid-refract")
   const [loading, setLoading] = React.useState(false)
   const [disabled, setDisabled] = React.useState(false)
+  const [sound, setSound] = React.useState(true)
 
   const isGlass = variant === "glass"
   const effectiveSize: Size = iconOnly ? ICON_SIZE[size] : size
@@ -118,6 +119,7 @@ export default function ButtonDemo() {
           size={effectiveSize}
           loading={loading}
           disabled={disabled}
+          sound={sound}
         >
           {iconOnly ? <BookOpen /> : "Button"}
         </Button>
@@ -155,6 +157,7 @@ export default function ButtonDemo() {
           checked={disabled}
           onChange={setDisabled}
         />
+        <DemoToggle label="sound" checked={sound} onChange={setSound} />
       </div>
     </div>
   )

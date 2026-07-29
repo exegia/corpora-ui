@@ -28,6 +28,13 @@ export const atoms: RegistryEntry[] = [
         description: 'Glass finish. Only accepted when variant is "glass".',
       },
       {
+        name: "sound",
+        type: "boolean",
+        default: "true",
+        description:
+          "Emit cuelume press/release sound attributes. Silent until the app calls bindSounds().",
+      },
+      {
         name: "size",
         type: '"default" | "sm" | "lg" | "icon"',
         default: '"default"',

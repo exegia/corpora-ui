@@ -64,6 +64,11 @@ type ButtonVariant = VariantProps<typeof buttonVariants>["variant"];
 interface ButtonBaseProps extends useRender.ComponentProps<"button"> {
   size?: VariantProps<typeof buttonVariants>["size"];
   loading?: boolean;
+  /**
+   * Emit cuelume press/release attributes. Inert unless the app opts into
+   * interaction sound by calling `bindSounds()` once.
+   */
+  sound?: boolean;
 }
 
 export type ButtonProps = ButtonBaseProps &
@@ -88,6 +93,7 @@ export function Button({
   loading = false,
   disabled: disabledProp,
   glassVariant,
+  sound = true,
   ...props
 }: ButtonProps): React.ReactElement {
   const isDisabled: boolean = Boolean(loading || disabledProp);
@@ -142,6 +148,8 @@ export function Button({
       className,
     ),
     "aria-disabled": loading || undefined,
+    "data-cuelume-press": sound ? "" : undefined,
+    "data-cuelume-release": sound ? "" : undefined,
     "data-loading": loading ? "" : undefined,
     "data-glass-variant": resolvedGlassVariant,
     "data-slot": "button",
