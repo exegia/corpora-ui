@@ -2,6 +2,7 @@
 .github/aw/logs/
 .DS_Store
 **/node_modules
+dist-pack/
 /.idea/inspectionProfiles/Project_Default.xml
 /.idea/.gitignore
 /.idea/corpora-ui.iml
