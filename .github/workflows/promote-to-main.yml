@@ -124,9 +124,16 @@ jobs:
             url=$(gh pr view "$existing" --repo "$REPOSITORY" --json url --jq .url)
             echo "Updated existing release PR #$existing"
           else
+            # Deliberately unlabelled here. `gh pr create --label` validates the label up front
+            # and aborts the whole call if it does not exist, so a renamed or deleted label
+            # silently blocks releases — with an error ("could not add label") that gives no
+            # hint a release is stuck. Labelling is cosmetic; promotion is not.
             url=$(gh pr create --repo "$REPOSITORY" \
               --base main --head next \
-              --title "release: $tag" --body "$body" --label release)
+              --title "release: $tag" --body "$body")
+
+            gh pr edit "$url" --add-label release \
+              || echo "::warning::Could not add the 'release' label — create it with: gh label create release"
           fi
 
           {

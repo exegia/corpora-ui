@@ -51,11 +51,35 @@ jobs:
        ((github.event.pull_request.base.ref == 'next' && github.event.pull_request.head.ref == 'dev') ||
         (github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.ref == 'next')))
     runs-on: ubuntu-latest
+    env:
+      # `secrets` cannot be read from an `if:` — GitHub rejects the workflow file outright.
+      # Mapping to job-level env makes emptiness testable from a step-level `if`.
+      APP_ID: ${{ secrets.AUTOMATION_APP_ID }}
     steps:
+      # A ruleset that requires pull requests on `main`/`next` blocks the direct push below,
+      # and the built-in GITHUB_TOKEN cannot be granted a bypass: repo-level rulesets reject
+      # it with "Actor GitHub Actions integration must be part of the ruleset source or owner
+      # organization". A GitHub App identity can be allowlisted, so the push runs as the app
+      # when one is configured.
+      #
+      # Falls back to GITHUB_TOKEN when the app secrets are absent, so this is safe to merge
+      # before the app exists — it simply keeps working as it does today, and only stops
+      # working if the ruleset gains a pull_request rule without the app being set up.
+      - name: Mint an app token
+        id: app-token
+        if: ${{ env.APP_ID != '' }}
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_APP_PRIVATE_KEY }}
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # The push at the end of this job uses these credentials, so the app token has to be
+          # wired in here rather than only into `gh`.
+          token: ${{ steps.app-token.outputs.token || github.token }}
 
       - name: Fetch all branches and tags
         run: |
@@ -67,7 +91,7 @@ jobs:
       - name: Validate the promotion
         id: check
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
           REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr }}
         run: |
@@ -116,7 +140,7 @@ jobs:
 
       - name: Merge
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
           REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr }}
           BASE: ${{ steps.check.outputs.base }}
