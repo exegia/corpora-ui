@@ -12,18 +12,25 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { type AuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
+import { cn } from "@/lib/utils";
 import {
   AuthCard,
   AuthError,
   AuthSeparator,
   AuthSuccess,
   MorphStep,
+  Reveal,
   type AuthStatus,
 } from "./auth-shell";
 
 export interface LoginBlockProps {
   title?: string;
   description?: string;
+  /** Brand mark rendered above the title. Omit for no logo row at all. */
+  logo?: React.ReactNode;
+  /** Brand accent for the primary action. Omit to keep the default primary. */
+  accent?: AuthAccent;
   /** Social providers to offer; empty array hides the social section. */
   providers?: SocialProvider[];
   showRememberMe?: boolean;
@@ -42,6 +49,8 @@ export interface LoginBlockProps {
 export function LoginBlock({
   title = "Login to your account",
   description = "Enter your email and password to login",
+  logo,
+  accent,
   providers = ["google", "apple", "github"],
   showRememberMe = true,
   showForgotPassword = true,
@@ -57,11 +66,26 @@ export function LoginBlock({
   const [loadingProvider, setLoadingProvider] =
     React.useState<SocialProvider | null>(null);
   const [remember, setRemember] = React.useState(false);
+  const [email, setEmail] = React.useState("");
+  const [emailValid, setEmailValid] = React.useState(false);
+  const [password, setPassword] = React.useState("");
 
   const busy = status === "loading" || loadingProvider !== null;
 
+  // Progressive disclosure: each step unlocks the next. The password field is
+  // gated on the email input's own constraint validation (required + type
+  // email), the submit button on the password being non-empty — a login form
+  // verifies a credential rather than enforcing policy, so strength rules here
+  // would lock out anyone whose password predates them. The submit gate
+  // re-checks emailValid so a stale password (typed, then the email was edited
+  // back into an invalid state) can't leave the button on its own.
+  const passwordValid = password.trim().length > 0;
+  const canSubmit = emailValid && passwordValid;
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    // Enter in any field submits the form even while the button is hidden.
+    if (!canSubmit) return;
     const form = new FormData(event.currentTarget);
     setError(null);
     setStatus("loading");
@@ -97,11 +121,13 @@ export function LoginBlock({
     <AuthCard
       title={title}
       description={description}
+      logo={logo}
+      accent={accent}
       footer={
         status !== "success" && (
           <>
             Don&apos;t have an account?{" "}
-            <Button variant="link" className="h-auto p-0" onClick={onSignup}>
+            <Button variant="link" onClick={onSignup}>
               Sign up
             </Button>
           </>
@@ -121,41 +147,54 @@ export function LoginBlock({
                 <FieldLabel htmlFor={emailId}>Email</FieldLabel>
                 <Input
                   id={emailId}
+                  aria-label="Email"
                   name="email"
                   type="email"
                   autoComplete="email"
                   placeholder="you@example.com"
                   required
                   disabled={busy}
+                  value={email}
+                  onChange={(event) => {
+                    setEmail(event.currentTarget.value);
+                    setEmailValid(event.currentTarget.validity.valid);
+                  }}
                 />
               </Field>
-              <Field name="password">
-                <div className="flex items-center justify-between">
-                  <FieldLabel>Password</FieldLabel>
+              <Reveal show={emailValid}>
+                <Field name="password">
+                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <PasswordInput
+                    id="password"
+                    name="password"
+                    autoComplete="current-password"
+                    required
+                    disabled={busy}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                  />
                   {showForgotPassword && (
+                    // self-end: Field root is items-start, so this aligns the
+                    // link with the input's trailing edge. sm:text-xs is
+                    // required — the cva's sm:text-sm survives tailwind-merge
+                    // and would otherwise win at the breakpoint.
                     <Button
                       variant="link"
                       type="button"
-                      className="h-auto p-0 text-xs"
+                      className="self-end font-normal text-muted-foreground text-xs hover:text-foreground sm:text-xs"
                       onClick={onForgotPassword}
                     >
                       Forgot password?
                     </Button>
                   )}
-                </div>
-                <PasswordInput
-                  name="password"
-                  autoComplete="current-password"
-                  required
-                  disabled={busy}
-                />
-              </Field>
+                </Field>
+              </Reveal>
               {showRememberMe && (
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id={rememberId}
                     checked={remember}
-                    onCheckedChange={(checked) => setRemember(checked === true)}
+                    onCheckedChange={(checked) => setRemember(checked)}
                     disabled={busy}
                   />
                   <Label htmlFor={rememberId} className="font-normal">
@@ -164,17 +203,24 @@ export function LoginBlock({
                 </div>
               )}
               <AuthError message={error} />
-              <Button
-                className="w-full"
-                type="submit"
-                loading={status === "loading"}
-                disabled={busy}
-              >
-                Login
-              </Button>
+              <Reveal show={canSubmit}>
+                <Button
+                  className={cn("w-full", accent && authAccentActionStyles)}
+                  type="submit"
+                  loading={status === "loading"}
+                  disabled={busy}
+                >
+                  Login
+                </Button>
+              </Reveal>
             </form>
             {providers.length > 0 && (
-              <>
+              // The social providers retire once the email path is filled in
+              // and valid — the user has committed to a path, so the
+              // alternatives are just noise. They come back if a field is
+              // invalidated again. gap-4 on the wrapper reproduces the spacing
+              // the two children had as direct flex items of the column above.
+              <Reveal show={!canSubmit} className="flex flex-col gap-4">
                 <AuthSeparator label="Or continue with" />
                 <SocialProviders
                   providers={providers}
@@ -183,7 +229,7 @@ export function LoginBlock({
                   disabled={status === "loading"}
                   onSelect={handleProvider}
                 />
-              </>
+              </Reveal>
             )}
           </div>
         )}

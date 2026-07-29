@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Frame, FrameFooter } from "@/components/ui/frame";
 import { Separator } from "@/components/ui/separator";
+import { type AuthAccent, authAccentVars } from "@/lib/auth-accent";
 import { cn } from "@/lib/utils";
 
 /** transitions.dev motion scale, shared by all auth blocks. */
@@ -31,16 +32,28 @@ export function AuthCard({
   children,
   footer,
   className,
+  logo,
+  accent,
 }: {
   title: React.ReactNode;
   description?: React.ReactNode;
   children: React.ReactNode;
   footer?: React.ReactNode;
   className?: string;
+  /** Brand mark rendered above the title. Omit for no logo row at all. */
+  logo?: React.ReactNode;
+  /** Brand accent for the card's primary action. Omit to keep `bg-primary`. */
+  accent?: AuthAccent;
 }) {
   return (
     <MotionConfig reducedMotion="user">
-      <Frame className={cn("w-full max-w-sm", className)}>
+      <Frame
+        className={cn("w-full max-w-sm", className)}
+        data-accent={accent}
+        style={
+          accent ? (authAccentVars[accent] as React.CSSProperties) : undefined
+        }
+      >
         <motion.div
           layout
           transition={{ duration: 0.3, ease: EASE }}
@@ -48,6 +61,16 @@ export function AuthCard({
         >
           <Card>
             <CardHeader>
+              {logo && (
+                // Sized like the button's icon rule: a bare img/svg gets a
+                // default height, an explicitly sized one keeps its own.
+                <div
+                  className="mb-1.5 flex items-center [&_img:not([class*='h-'])]:h-8 [&_img]:w-auto [&_svg:not([class*='size-'])]:size-8"
+                  data-slot="auth-logo"
+                >
+                  {logo}
+                </div>
+              )}
               <CardTitle>{title}</CardTitle>
               {description && <CardDescription>{description}</CardDescription>}
             </CardHeader>
@@ -86,6 +109,47 @@ export function MorphStep({
       >
         {children}
       </motion.div>
+    </AnimatePresence>
+  );
+}
+
+/**
+ * Progressive-disclosure wrapper: collapses/expands a step as `show` flips.
+ *
+ * `overflow-hidden` is only worn while the height is in flight — leaving it on
+ * would clip the focus ring of any full-width control inside (the ring sits
+ * 3px outside the input's border box, so the left/right edges would be cut).
+ */
+export function Reveal({
+  show,
+  children,
+  className,
+}: {
+  show: boolean;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  // Reset during render (not in an effect) when `show` flips, matching
+  // useCountdown below.
+  const [state, setState] = React.useState({ show, settled: show });
+  if (state.show !== show) setState({ show, settled: false });
+
+  return (
+    <AnimatePresence initial={false}>
+      {show && (
+        <motion.div
+          className={cn(!state.settled && "overflow-hidden", className)}
+          initial={{ height: 0, opacity: 0, y: -4, filter: "blur(2px)" }}
+          animate={{ height: "auto", opacity: 1, y: 0, filter: "blur(0px)" }}
+          exit={{ height: 0, opacity: 0, y: -4, filter: "blur(2px)" }}
+          transition={{ duration: 0.25, ease: EASE }}
+          onAnimationComplete={() =>
+            setState((current) => ({ ...current, settled: true }))
+          }
+        >
+          {children}
+        </motion.div>
+      )}
     </AnimatePresence>
   );
 }

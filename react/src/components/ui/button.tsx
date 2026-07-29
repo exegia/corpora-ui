@@ -16,6 +16,28 @@ import {
 export const buttonVariants = cva(
   "relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border font-medium text-base outline-none transition-[scale,box-shadow,width,height,background-color,border-color] [transition-duration:150ms,150ms,300ms,300ms,150ms,150ms] ease-smooth-out active:scale-97 data-pressed:scale-97 motion-reduce:transition-none motion-reduce:active:scale-100 motion-reduce:data-pressed:scale-100 [&_svg]:transition-transform [&_svg]:duration-150 [&_svg]:ease-smooth-out motion-reduce:[&_svg]:transition-none before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] pointer-coarse:after:absolute pointer-coarse:after:size-full pointer-coarse:after:min-h-11 pointer-coarse:after:min-w-11 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-64 data-loading:select-none sm:text-sm [&_svg:not([class*='opacity-'])]:opacity-80 [&_svg:not([class*='size-'])]:size-4.5 sm:[&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:-mx-0.5 [&_svg]:shrink-0",
   {
+    compoundVariants: [
+      {
+        // `link` is inline text, not a control surface: drop the button box so
+        // it sits with the surrounding copy instead of riding high in a 32/36px
+        // flex box. Both the bare and `sm:` heights have to be reset —
+        // tailwind-merge keeps modifier-prefixed classes in a separate group,
+        // so a call-site `h-auto` alone still loses to `sm:h-8`. border-0 makes
+        // the inline box exactly one line-height so it doesn't grow the line.
+        //
+        // align-middle is the alignment that holds: an inline-flex box exposes
+        // the baseline of its *first* flex item, which here is the always-
+        // mounted loading indicator rather than the label, so plain baseline
+        // alignment leaves the text ~3px high. `items-baseline` fixes that but
+        // then hangs icons 3px above the label. Centering the box lands within
+        // ~1px in every state without touching the loading-morph machinery.
+        //
+        // Icon sizes are excluded; they keep their square hit area.
+        class: "h-auto border-0 px-0 align-middle sm:h-auto",
+        size: ["xs", "sm", "default", "lg", "xl"],
+        variant: "link",
+      },
+    ],
     defaultVariants: {
       size: "default",
       variant: "default",

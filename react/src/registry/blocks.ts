@@ -11,7 +11,7 @@ export const blocks: RegistryEntry[] = [
     slug: "login",
     name: "Login",
     description:
-      "Login form with email/password, social providers, remember-me and animated success/error states.",
+      "Progressive login form: a valid email reveals the password field, a non-empty password reveals the submit button. Social providers, remember-me and animated success/error states.",
     category: "blocks",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/login-demo")),
@@ -24,6 +24,18 @@ export const blocks: RegistryEntry[] = [
       "social-providers",
     ],
     props: [
+      {
+        name: "logo",
+        type: "React.ReactNode",
+        description:
+          "Brand mark rendered above the title. Omitted leaves no logo row at all.",
+      },
+      {
+        name: "accent",
+        type: '"corpora" | "exegia"',
+        description:
+          "Brand accent for the primary action \u2014 corpora is a solid #E8B124, exegia a purple gradient. Omit to keep the default primary.",
+      },
       {
         name: "providers",
         type: "SocialProvider[]",
@@ -51,7 +63,7 @@ export const blocks: RegistryEntry[] = [
     slug: "signup",
     name: "Signup",
     description:
-      "Account creation with password strength, terms consent and social providers.",
+      "Account creation with a progressively revealed password field, password strength, terms consent and social providers.",
     category: "blocks",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/signup-demo")),
@@ -64,6 +76,18 @@ export const blocks: RegistryEntry[] = [
       "social-providers",
     ],
     props: [
+      {
+        name: "logo",
+        type: "React.ReactNode",
+        description:
+          "Brand mark rendered above the title. Omitted leaves no logo row at all.",
+      },
+      {
+        name: "accent",
+        type: '"corpora" | "exegia"',
+        description:
+          "Brand accent for the primary action \u2014 corpora is a solid #E8B124, exegia a purple gradient. Omit to keep the default primary.",
+      },
       {
         name: "showNameField / showTerms",
         type: "boolean",
@@ -97,6 +121,18 @@ export const blocks: RegistryEntry[] = [
     registryDependencies: ["card", "field", "input"],
     props: [
       {
+        name: "logo",
+        type: "React.ReactNode",
+        description:
+          "Brand mark rendered above the title. Omitted leaves no logo row at all.",
+      },
+      {
+        name: "accent",
+        type: '"corpora" | "exegia"',
+        description:
+          "Brand accent for the primary action \u2014 corpora is a solid #E8B124, exegia a purple gradient. Omit to keep the default primary.",
+      },
+      {
         name: "onSubmit",
         type: "({ email }) => Promise<void>",
         description: "Reject to surface the error state.",
@@ -121,6 +157,18 @@ export const blocks: RegistryEntry[] = [
     preview: React.lazy(() => import("./demos/code-auth-demo")),
     registryDependencies: ["card", "otp-field"],
     props: [
+      {
+        name: "logo",
+        type: "React.ReactNode",
+        description:
+          "Brand mark rendered above the title. Omitted leaves no logo row at all.",
+      },
+      {
+        name: "accent",
+        type: '"corpora" | "exegia"',
+        description:
+          "Brand accent for the primary action \u2014 corpora is a solid #E8B124, exegia a purple gradient. Omit to keep the default primary.",
+      },
       {
         name: "channel",
         type: '"email" | "sms"',

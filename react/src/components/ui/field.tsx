@@ -24,7 +24,7 @@ export function FieldLabel({
   return (
     <FieldPrimitive.Label
       className={cn(
-        "inline-flex items-center gap-2 font-medium text-base/4.5 text-foreground data-disabled:opacity-64 sm:text-sm/4",
+        "inline-flex cursor-pointer items-center gap-2 font-medium text-base/4 text-foreground data-disabled:cursor-not-allowed data-disabled:opacity-64 sm:text-xs/3.5 ml-3",
         className,
       )}
       data-slot="field-label"
