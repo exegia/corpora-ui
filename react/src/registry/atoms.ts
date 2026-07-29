@@ -17,9 +17,15 @@ export const atoms: RegistryEntry[] = [
     props: [
       {
         name: "variant",
-        type: '"default" | "destructive" | "outline" | "secondary" | "ghost" | "link"',
+        type: '"default" | "destructive" | "destructive-outline" | "outline" | "secondary" | "ghost" | "link" | "glass"',
         default: '"default"',
         description: "Visual style of the button.",
+      },
+      {
+        name: "glassVariant",
+        type: '"clear" | "frosted" | "subtle" | "liquid" | "liquid-refract"',
+        default: '"liquid-refract"',
+        description: 'Glass finish. Only accepted when variant is "glass".',
       },
       {
         name: "size",

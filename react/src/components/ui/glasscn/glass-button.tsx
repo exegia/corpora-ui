@@ -1,32 +1,22 @@
 "use client";
 
-import { type FrostGlassVariantProp, glassVariantStyles } from "@/lib/glass-variants";
-import { cn } from "@/lib/utils";
+import type { FrostGlassVariantProp } from "@/lib/glass-variants";
 
-import { Button } from "../button";
-import { LiquidGlass } from "./liquid-glass";
+import { Button, type ButtonProps } from "../button";
 
-type GlassButtonProps = React.ComponentProps<typeof Button> & FrostGlassVariantProp;
+type GlassButtonProps = Omit<ButtonProps, "variant" | "glassVariant"> &
+  FrostGlassVariantProp;
 
-function GlassButton({ className, glassVariant = "liquid-refract", ...props }: GlassButtonProps) {
-  if (glassVariant === "liquid-refract") {
-    return (
-      <LiquidGlass>
-        <Button
-          data-slot="glass-button"
-          data-glass-variant={glassVariant}
-          className={cn("text-foreground cursor-pointer bg-transparent border-0 shadow-none", className)}
-          {...props}
-        />
-      </LiquidGlass>
-    );
-  }
-
+/** @deprecated Use `<Button variant="glass" glassVariant="…">` instead. */
+function GlassButton({
+  glassVariant = "liquid-refract",
+  ...props
+}: GlassButtonProps) {
   return (
     <Button
       data-slot="glass-button"
-      data-glass-variant={glassVariant}
-      className={cn("text-foreground cursor-pointer", glassVariantStyles[glassVariant], className)}
+      variant="glass"
+      glassVariant={glassVariant}
       {...props}
     />
   );
