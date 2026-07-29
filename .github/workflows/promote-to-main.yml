@@ -81,8 +81,13 @@ jobs:
           branch="release/$tag"
           git checkout -B "$branch" origin/main
 
+          # --empty=drop: a pick whose content is already on main under a different
+          # SHA lands empty, and git exits non-zero for that exactly as it does for a
+          # real conflict. --cherry-pick above catches most of those, but it matches on
+          # patch-id, which a squash merge changes — so already-released commits still
+          # reach this loop. Dropping them keeps a genuine conflict fatal.
           for sha in $commits; do
-            if ! git cherry-pick -x "$sha"; then
+            if ! git cherry-pick -x --empty=drop "$sha"; then
               git cherry-pick --abort || true
               {
                 echo "### Promotion failed"
