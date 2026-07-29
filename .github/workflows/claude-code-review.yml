@@ -26,14 +26,38 @@ jobs:
       id-token: write
       actions: read # Required for Claude to read CI results on PRs
 
+    env:
+      # The `secrets` context cannot be referenced from an `if:` — GitHub rejects the whole
+      # workflow file with "Unrecognized named-value: 'secrets'". Mapping it to a job-level env
+      # var makes it reachable from a step-level `if`, which can read `env`. Only emptiness is
+      # ever tested; the value is not printed.
+      CLAUDE_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
+      # The repository has no CLAUDE_CODE_OAUTH_TOKEN configured, so the action was failing
+      # on every single PR — a red check that means "unconfigured", not "review found a
+      # problem". A permanently-red check is worse than no check: it trains everyone to merge
+      # past red. Skip cleanly instead, and say so in the summary so the gap stays visible.
+      #
+      - name: Note that review is unconfigured
+        if: ${{ env.CLAUDE_TOKEN == '' }}
+        run: |
+          {
+            echo "### Claude review skipped"
+            echo ""
+            echo "\`CLAUDE_CODE_OAUTH_TOKEN\` is not set on this repository, so there is nothing"
+            echo "to authenticate with. Add it under **Settings → Secrets and variables →"
+            echo "Actions** to turn the review back on."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Run Claude Code Review
         id: claude-review
+        if: ${{ env.CLAUDE_TOKEN != '' }}
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
