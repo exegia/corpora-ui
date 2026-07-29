@@ -41,12 +41,12 @@ jobs:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
           set -euo pipefail
-          if [ ! -f package.json ]; then
+          if [ ! -f react/package.json ]; then
             echo "publish=false" >> "$GITHUB_OUTPUT"
-            echo "No package.json — ${RELEASE_TAG} is a source-only release." >> "$GITHUB_STEP_SUMMARY"
+            echo "No react/package.json — ${RELEASE_TAG} is a source-only release." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
-          if [ "$(node -p "require('./package.json').private === true")" = "true" ]; then
+          if [ "$(node -p "require('./react/package.json').private === true")" = "true" ]; then
             echo "publish=false" >> "$GITHUB_OUTPUT"
             echo "package.json is marked private — skipping publish." >> "$GITHUB_STEP_SUMMARY"
             exit 0
@@ -55,14 +55,17 @@ jobs:
 
       - name: Install dependencies
         if: steps.pkg.outputs.publish == 'true'
+        working-directory: react
         run: bun install --frozen-lockfile
 
       - name: Build
         if: steps.pkg.outputs.publish == 'true'
+        working-directory: react
         run: bun run --if-present build
 
       - name: Publish to npm
         if: steps.pkg.outputs.publish == 'true'
+        working-directory: react
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}

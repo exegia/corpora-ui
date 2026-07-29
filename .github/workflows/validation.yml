@@ -36,7 +36,7 @@ jobs:
         id: pkg
         run: |
           set -euo pipefail
-          if [ -f package.json ]; then
+          if [ -f react/package.json ]; then
             echo "present=true" >> "$GITHUB_OUTPUT"
           else
             echo "present=false" >> "$GITHUB_OUTPUT"
@@ -44,20 +44,25 @@ jobs:
 
       - name: Install dependencies
         if: steps.pkg.outputs.present == 'true'
+        working-directory: react
         run: bun install --frozen-lockfile
 
       - name: Lint
         if: steps.pkg.outputs.present == 'true'
+        working-directory: react
         run: bun run --if-present lint
 
       - name: Typecheck
         if: steps.pkg.outputs.present == 'true'
+        working-directory: react
         run: bun run --if-present typecheck
 
       - name: Unit tests
         if: steps.pkg.outputs.present == 'true'
+        working-directory: react
         run: bun run --if-present test
 
       - name: Build (verification only)
         if: steps.pkg.outputs.present == 'true'
+        working-directory: react
         run: bun run --if-present build
