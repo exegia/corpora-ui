@@ -10,7 +10,21 @@ This repo diverges from the shared `repo-template` in three ways, all in the rel
    fail. `main` builds and publishes, nothing else.
 2. **Versions are cut on `next`, not on `main`,** and the bump is derived from **lines changed**
    rather than conventional-commit prefixes.
-3. **Promotion is by cherry-pick,** not by merging `next` into `main`.
+3. **Promotion is a fast-forward.** `next` descends from `main`, so releasing moves `main` onto
+   the already-tagged commit. Nothing is copied and no SHA changes.
+
+> [!IMPORTANT]
+> Invariant 3 is load-bearing: `main` must always be an ancestor of `next`. Every "has this
+> shipped?" question in `release-version.sh` is a `git merge-base --is-ancestor` test, and those
+> are only meaningful while the branches share history. A single squash into `next` or `main`
+> severs them; `.github/scripts/reconcile-ancestry.sh` exists to repair that, and
+> `promote-to-main.yml` refuses to run while it holds false.
+>
+> **Do not use the merge button on `dev → next` or `next → main`.** GitHub has no per-PR
+> merge-method setting, so the button leaves the strategy to whoever clicks it. Approve the PR
+> instead: `promotion-merge.yml` performs the merge with git — `--no-ff` into `next`, `--ff-only`
+> into `main` — so the strategy is guaranteed. It refuses to run on an unapproved PR or one whose
+> checks are not green, so review remains the gate.
 
 ## Branch model
 
@@ -23,7 +37,6 @@ This repo diverges from the shared `repo-template` in three ways, all in the rel
 | `dev` | Integration branch | protected long-lived branch | yes |
 | `next` | Staging / pre-release branch | protected long-lived branch | yes |
 | `main` | Production branch — latest published tag | protected long-lived branch | yes |
-| `release/vX.Y.Z` | Cherry-picked promotion branch | `promote-to-main.yml` | yes |
 | `hotfix/*`, `dependabot/*`, `copilot/*`, `claude/*` | Bot and exception flows | respective bots / maintainers | exempt from branch-tag enforcement |
 
 ## PR targeting rules (enforced by `pr-base-policy.yml`)
@@ -32,8 +45,8 @@ This repo diverges from the shared `repo-template` in three ways, all in the rel
    to `dev`.
 2. **Only `dev` promotes into `next`.** Any other head branch targeting `next` is redirected back
    to `dev`.
-3. **Only `release/vX.Y.Z` releases into `main`.** PRs into `main` from any other head are closed —
-   *including `next` itself*, since releases are cherry-picked rather than merged from staging.
+3. **Only `next` releases into `main`.** PRs into `main` from any other head are closed: `main` is
+   a fast-forward of `next`, so anything arriving from elsewhere severs the two branches.
 
 ## Where CI runs
 
@@ -65,10 +78,9 @@ of two things:
 
 Exactly one release tag is open at a time. The tag is provisional while it lives on `next`.
 
-**Exception — promotion in flight.** If a `release/vX.Y.Z → main` PR is already open, the tag is
-*not* advanced. That PR carries a fixed set of cherry-picks; moving the tag past it would make the
-tag claim commits the PR does not contain, and `release-tag.yml` would then re-anchor that tag on
-`main` — publishing a version that silently dropped work. The merge stays on `next` untagged and is
+**Exception — promotion in flight.** If a `next → main` PR is already open, the tag is *not*
+advanced. A reviewer has read that PR against a specific commit; moving the tag past it would
+silently change both what was approved and what ships. The merge stays on `next` untagged and is
 picked up by the next version instead. The job succeeds with a warning annotation.
 
 ### 2. Line-based semantic versioning
@@ -95,33 +107,38 @@ count — without it a routine lockfile refresh reads as a major release.
 
 Run the **Promote to Main** workflow (`promote-to-main.yml`) when staging is ready. It:
 
-1. resolves the open release tag on `next`
-2. cuts `release/vX.Y.Z` from `main`
-3. cherry-picks (`-x`) every non-merge commit in `main..vX.Y.Z`, in order
-4. stamps `## [Unreleased]` → `## [vX.Y.Z] - YYYY-MM-DD` in `CHANGELOG.md` on that branch
-5. opens the `release/vX.Y.Z → main` PR
+1. verifies `main` is an ancestor of `next`, and refuses to run if it is not
+2. resolves the open release tag on `next`
+3. stamps `## [Unreleased]` → `## [vX.Y.Z] - YYYY-MM-DD` in `CHANGELOG.md` on `next`, and moves
+   the still-provisional tag onto that commit
+4. opens the `next → main` PR
 
-A cherry-pick conflict aborts the run and asks for manual resolution rather than pushing a
-half-applied release.
+There is no cherry-pick, no `release/*` branch and no conflict path: the release is the commits
+already on `next`.
 
 > [!IMPORTANT]
-> Step 3 uses `--no-merges`, which assumes `dev → next` PRs are **squash-merged** — one commit per
-> PR, as `dev-to-next.md` instructs. Switching that repo to merge commits would make promotion
-> cherry-pick the individual feature commits instead, changing what lands and in what order.
+> Approve the release PR; do not merge it by hand. `promotion-merge.yml` fast-forwards `main`
+> onto the tagged commit, which the merge button cannot do — it would leave `main` on a merge
+> commit *above* the tag instead of on the tag itself.
 
 ### 4. Publishing
 
-When the promotion PR merges, `release-tag.yml`:
+When `main` advances, `release-tag.yml` runs on the push and:
 
-1. **moves the tag onto the `main` commit** — the cherry-picks have different SHAs than their
-   `next` originals, so the tag must be re-anchored for `main` to be the released code
+1. reads the `vX.Y.Z` tag already pointing at `main`'s head — **no re-anchoring**, because the
+   fast-forward preserved the SHA that was tagged on `next`
 2. publishes the GitHub Release
+3. dispatches `publish.yml` for that tag
 
-Nothing is pushed to `main` outside the PR merge itself: the changelog was stamped on the promotion
-branch precisely so a review-gated `main` never has to accept a direct bot push.
+Step 3 is explicit because a Release created with `GITHUB_TOKEN` does not emit
+`release: published`, so `publish.yml` would otherwise never fire and a maintainer would have to
+notice and run it by hand.
 
-That release triggers `publish.yml`, which builds and publishes to npm with provenance. The cycle
-then ends: the tag is frozen, and the next merge into `next` cuts a new version.
+Nothing is pushed to `main` outside the PR merge itself: the changelog was stamped on `next`
+precisely so a review-gated `main` never has to accept a direct bot push.
+
+`publish.yml` builds and publishes to npm with provenance. The cycle then ends: the tag is frozen,
+and the next merge into `next` cuts a new version.
 
 ### Force-moved tags
 
@@ -156,15 +173,16 @@ issue (type:feature) ──status:in-progress──▶ feature/123-slug
                                               │
                                               ▼  Validation green on dev
                                   PR dev → next
+                                              │  approve → Promotion Merge (--no-ff)
                                               │  merge → Next Staging
                                               ▼  cut vX.Y.Z, or advance the open tag
                                   [ tests + e2e, no publish ]
                                               │  Promote to Main (manual)
-                                              ▼  cherry-pick main..vX.Y.Z
-                                  PR release/vX.Y.Z → main
-                                              │  merge
+                                              ▼  stamp changelog, no copying
+                                  PR next → main
+                                              │  approve → Promotion Merge (--ff-only)
                                               ▼
-                                  tag vX.Y.Z re-anchored on main
+                                  main lands on the already-tagged commit
                                   + GitHub Release → npm publish
 ```
 
