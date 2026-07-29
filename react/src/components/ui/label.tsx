@@ -8,15 +8,20 @@ import { cn } from "@/lib/utils";
 export function Label({
   className,
   render,
-  sound = true,
+  sound = false,
   ...props
 }: useRender.ComponentProps<"label"> & {
-  /** Emit the cuelume hover tick. Inert until the app calls bindSounds(). */
+  /**
+   * Emit the cuelume hover tick. Opt-in: a label is a click target for its
+   * control, and that control already owns the interaction cue (Checkbox
+   * plays `toggle` on check/uncheck), so hover-ticking here double-sounds.
+   * Inert until the app calls bindSounds().
+   */
   sound?: boolean;
 }): React.ReactElement {
   const defaultProps = {
     className: cn(
-      "inline-flex items-center gap-2 font-medium text-base/4.5 text-foreground sm:text-sm/4",
+      "inline-flex cursor-pointer items-center gap-2 font-medium text-base/4.5 text-foreground sm:text-sm/4",
       className,
     ),
     "data-cuelume-hover": sound ? "tick" : undefined,

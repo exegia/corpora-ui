@@ -2,3 +2,10 @@
 .github/aw/logs/
 .DS_Store
 **/node_modules
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/.gitignore
+/.idea/corpora-ui.iml
+/.idea/modules.xml
+/.idea/prettier.xml
+/.idea/ShadcnHelperSettings.xml
+/.idea/vcs.xml

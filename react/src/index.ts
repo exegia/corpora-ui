@@ -32,5 +32,6 @@ export * from "./components/blocks/auth/login-block"
 export * from "./components/blocks/auth/signup-block"
 
 // lib
+export * from "./lib/auth-accent"
 export * from "./lib/sound"
 export * from "./lib/utils"

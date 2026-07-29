@@ -2,21 +2,31 @@
 
 import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox";
 import type React from "react";
+import { playCue } from "@/lib/sound";
 import { cn } from "@/lib/utils";
 
 export function Checkbox({
   className,
   sound = true,
+  onCheckedChange,
   ...props
 }: CheckboxPrimitive.Root.Props & {
-  /** Emit the cuelume toggle cue. Inert until the app calls bindSounds(). */
+  /** Play the cuelume toggle cue on check/uncheck. Silent until bindSounds(). */
   sound?: boolean;
 }): React.ReactElement {
   return (
     <CheckboxPrimitive.Root
-      data-cuelume-toggle={sound ? "" : undefined}
+      // Cued off the state change rather than data-cuelume-toggle: Base UI
+      // renders the native input as a *sibling* of this root, so a click on an
+      // associated <label> never bubbles through an element carrying the
+      // attribute and would toggle silently. This fires once for box clicks,
+      // label clicks and keyboard Space alike, and not for programmatic changes.
+      onCheckedChange={(checked, eventDetails) => {
+        if (sound) playCue("toggle");
+        onCheckedChange?.(checked, eventDetails);
+      }}
       className={cn(
-        "relative inline-flex size-4.5 shrink-0 items-center justify-center rounded-[.25rem] border border-input bg-background not-dark:bg-clip-padding shadow-xs/5 outline-none ring-ring transition-shadow before:pointer-events-none before:absolute before:inset-0 before:rounded-[3px] not-data-disabled:not-data-checked:not-aria-invalid:before:shadow-[0_1px_--theme(--color-black/4%)] focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-offset-background aria-invalid:border-destructive/36 focus-visible:aria-invalid:border-destructive/64 focus-visible:aria-invalid:ring-destructive/48 data-disabled:cursor-not-allowed data-disabled:opacity-64 sm:size-4 dark:not-data-checked:bg-input/32 dark:aria-invalid:ring-destructive/24 dark:not-data-disabled:not-data-checked:not-aria-invalid:before:shadow-[0_-1px_--theme(--color-white/6%)] [[data-disabled],[data-checked],[aria-invalid]]:shadow-none",
+        "relative inline-flex size-4.5 shrink-0 cursor-pointer items-center justify-center rounded-[.25rem] border border-input bg-background not-dark:bg-clip-padding shadow-xs/5 outline-none ring-ring transition-shadow before:pointer-events-none before:absolute before:inset-0 before:rounded-[3px] not-data-disabled:not-data-checked:not-aria-invalid:before:shadow-[0_1px_--theme(--color-black/4%)] focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-offset-background aria-invalid:border-destructive/36 focus-visible:aria-invalid:border-destructive/64 focus-visible:aria-invalid:ring-destructive/48 data-disabled:cursor-not-allowed data-disabled:opacity-64 sm:size-4 dark:not-data-checked:bg-input/32 dark:aria-invalid:ring-destructive/24 dark:not-data-disabled:not-data-checked:not-aria-invalid:before:shadow-[0_-1px_--theme(--color-white/6%)] [[data-disabled],[data-checked],[aria-invalid]]:shadow-none",
         className,
       )}
       data-slot="checkbox"
