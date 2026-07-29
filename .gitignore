@@ -1,0 +1,4 @@
+.agents/
+.github/aw/logs/
+.DS_Store
+**/node_modules

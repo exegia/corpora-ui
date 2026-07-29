@@ -1,0 +1,36 @@
+/**
+ * npm library entry point (`@corpora/ui`).
+ *
+ * Export every published component here — atoms from `components/ui`,
+ * compositions from `components/composed`, blocks from `components/blocks`.
+ * The docs site (main.tsx + routes.tsx + pages/) is NOT part of the package.
+ */
+
+// atoms
+export * from "./components/ui/button"
+export * from "./components/ui/card"
+export * from "./components/ui/checkbox"
+export * from "./components/ui/field"
+export * from "./components/ui/frame"
+export * from "./components/ui/input"
+export * from "./components/ui/input-group"
+export * from "./components/ui/label"
+export * from "./components/ui/otp-field"
+export * from "./components/ui/separator"
+export * from "./components/ui/spinner"
+export * from "./components/ui/textarea"
+
+// components
+export * from "./components/composed/password-input"
+export * from "./components/composed/social-providers"
+
+// blocks
+export * from "./components/blocks/auth/auth-shell"
+export * from "./components/blocks/auth/code-auth-block"
+export * from "./components/blocks/auth/forgot-password-block"
+export * from "./components/blocks/auth/login-block"
+export * from "./components/blocks/auth/signup-block"
+
+// lib
+export * from "./lib/sound"
+export * from "./lib/utils"
