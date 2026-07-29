@@ -104,7 +104,7 @@ export function CodeAuthBlock({
       }
       footer={
         status !== "success" && (
-          <Button variant="link" className="h-auto p-0" onClick={onBack}>
+          <Button variant="link" onClick={onBack}>
             Use a different {channelLabel}
           </Button>
         )
@@ -165,7 +165,6 @@ export function CodeAuthBlock({
               ) : (
                 <Button
                   variant="link"
-                  className="h-auto p-0"
                   disabled={status === "loading"}
                   onClick={() => void handleResend()}
                 >

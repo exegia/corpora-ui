@@ -90,6 +90,47 @@ export function MorphStep({
   );
 }
 
+/**
+ * Progressive-disclosure wrapper: collapses/expands a step as `show` flips.
+ *
+ * `overflow-hidden` is only worn while the height is in flight — leaving it on
+ * would clip the focus ring of any full-width control inside (the ring sits
+ * 3px outside the input's border box, so the left/right edges would be cut).
+ */
+export function Reveal({
+  show,
+  children,
+  className,
+}: {
+  show: boolean;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  // Reset during render (not in an effect) when `show` flips, matching
+  // useCountdown below.
+  const [state, setState] = React.useState({ show, settled: show });
+  if (state.show !== show) setState({ show, settled: false });
+
+  return (
+    <AnimatePresence initial={false}>
+      {show && (
+        <motion.div
+          className={cn(!state.settled && "overflow-hidden", className)}
+          initial={{ height: 0, opacity: 0, y: -4, filter: "blur(2px)" }}
+          animate={{ height: "auto", opacity: 1, y: 0, filter: "blur(0px)" }}
+          exit={{ height: 0, opacity: 0, y: -4, filter: "blur(2px)" }}
+          transition={{ duration: 0.25, ease: EASE }}
+          onAnimationComplete={() =>
+            setState((current) => ({ ...current, settled: true }))
+          }
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 /** Inline error message that shakes each time `message` changes. */
 export function AuthError({ message }: { message: string | null }) {
   return (

@@ -54,7 +54,7 @@ export function ForgotPasswordBlock({
       footer={
         <Button
           variant="link"
-          className="h-auto gap-1 p-0"
+          className="gap-1"
           onClick={onBackToLogin}
         >
           <ArrowLeftIcon className="size-3.5" />
@@ -75,7 +75,7 @@ export function ForgotPasswordBlock({
           >
             <Button
               variant="link"
-              className="h-auto p-0 text-xs"
+              className="text-xs sm:text-xs"
               onClick={() => setStatus("idle")}
             >
               Use a different email

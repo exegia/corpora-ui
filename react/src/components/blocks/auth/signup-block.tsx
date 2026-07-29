@@ -122,7 +122,7 @@ export function SignupBlock({
         status !== "success" && (
           <>
             Already have an account?{" "}
-            <Button variant="link" className="h-auto p-0" onClick={onLogin}>
+            <Button variant="link" onClick={onLogin}>
               Login
             </Button>
           </>
@@ -201,7 +201,6 @@ export function SignupBlock({
                     <Button
                       variant="link"
                       type="button"
-                      className="h-auto p-0"
                       onClick={onTerms}
                     >
                       terms
