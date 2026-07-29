@@ -26,6 +26,13 @@ jobs:
       id-token: write
       actions: read # Required for Claude to read CI results on PRs
 
+    env:
+      # The `secrets` context cannot be referenced from an `if:` — GitHub rejects the whole
+      # workflow file with "Unrecognized named-value: 'secrets'". Mapping it to a job-level env
+      # var makes it reachable from a step-level `if`, which can read `env`. Only emptiness is
+      # ever tested; the value is not printed.
+      CLAUDE_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -37,10 +44,8 @@ jobs:
       # problem". A permanently-red check is worse than no check: it trains everyone to merge
       # past red. Skip cleanly instead, and say so in the summary so the gap stays visible.
       #
-      # Secrets are readable in a step-level `if` (they are not in a job-level one), which is
-      # why the guard sits here rather than on the job.
       - name: Note that review is unconfigured
-        if: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN == '' }}
+        if: ${{ env.CLAUDE_TOKEN == '' }}
         run: |
           {
             echo "### Claude review skipped"
@@ -52,7 +57,7 @@ jobs:
 
       - name: Run Claude Code Review
         id: claude-review
-        if: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+        if: ${{ env.CLAUDE_TOKEN != '' }}
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
