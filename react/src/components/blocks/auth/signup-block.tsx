@@ -16,6 +16,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { type AuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
+import { cn } from "@/lib/utils";
 import {
   AuthCard,
   AuthError,
@@ -29,6 +31,10 @@ import {
 export interface SignupBlockProps {
   title?: string;
   description?: string;
+  /** Brand mark rendered above the title. Omit for no logo row at all. */
+  logo?: React.ReactNode;
+  /** Brand accent for the primary action. Omit to keep the default primary. */
+  accent?: AuthAccent;
   providers?: SocialProvider[];
   showNameField?: boolean;
   /** Require the terms checkbox before submitting. */
@@ -48,6 +54,8 @@ export interface SignupBlockProps {
 export function SignupBlock({
   title = "Create your account",
   description = "Start exploring manuscripts in minutes",
+  logo,
+  accent,
   providers = ["google", "apple", "github"],
   showNameField = true,
   showTerms = true,
@@ -131,6 +139,8 @@ export function SignupBlock({
     <AuthCard
       title={title}
       description={description}
+      logo={logo}
+      accent={accent}
       footer={
         status !== "success" && (
           <>
@@ -234,7 +244,7 @@ export function SignupBlock({
               )}
               <AuthError message={error} />
               <Button
-                className="w-full"
+                className={cn("w-full", accent && authAccentActionStyles)}
                 type="submit"
                 loading={status === "loading"}
                 disabled={busy}

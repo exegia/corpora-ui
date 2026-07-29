@@ -6,6 +6,8 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { type AuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
+import { cn } from "@/lib/utils";
 import {
   AuthCard,
   AuthError,
@@ -17,12 +19,18 @@ import {
 export interface ForgotPasswordBlockProps {
   title?: string;
   description?: string;
+  /** Brand mark rendered above the title. Omit for no logo row at all. */
+  logo?: React.ReactNode;
+  /** Brand accent for the primary action. Omit to keep the default primary. */
+  accent?: AuthAccent;
   onSubmit?: (data: { email: string }) => Promise<void> | void;
   onBackToLogin?: () => void;
 }
 
 export function ForgotPasswordBlock({
   title = "Reset your password",
+  logo,
+  accent,
   description = "Enter your email and we will send you a reset link",
   onSubmit,
   onBackToLogin,
@@ -51,6 +59,8 @@ export function ForgotPasswordBlock({
     <AuthCard
       title={title}
       description={description}
+      logo={logo}
+      accent={accent}
       footer={
         <Button
           variant="link"
@@ -99,7 +109,7 @@ export function ForgotPasswordBlock({
             </Field>
             <AuthError message={error} />
             <Button
-              className="w-full"
+              className={cn("w-full", accent && authAccentActionStyles)}
               type="submit"
               loading={status === "loading"}
             >

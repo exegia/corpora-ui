@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Frame, FrameFooter } from "@/components/ui/frame";
 import { Separator } from "@/components/ui/separator";
+import { type AuthAccent, authAccentVars } from "@/lib/auth-accent";
 import { cn } from "@/lib/utils";
 
 /** transitions.dev motion scale, shared by all auth blocks. */
@@ -31,16 +32,28 @@ export function AuthCard({
   children,
   footer,
   className,
+  logo,
+  accent,
 }: {
   title: React.ReactNode;
   description?: React.ReactNode;
   children: React.ReactNode;
   footer?: React.ReactNode;
   className?: string;
+  /** Brand mark rendered above the title. Omit for no logo row at all. */
+  logo?: React.ReactNode;
+  /** Brand accent for the card's primary action. Omit to keep `bg-primary`. */
+  accent?: AuthAccent;
 }) {
   return (
     <MotionConfig reducedMotion="user">
-      <Frame className={cn("w-full max-w-sm", className)}>
+      <Frame
+        className={cn("w-full max-w-sm", className)}
+        data-accent={accent}
+        style={
+          accent ? (authAccentVars[accent] as React.CSSProperties) : undefined
+        }
+      >
         <motion.div
           layout
           transition={{ duration: 0.3, ease: EASE }}
@@ -48,6 +61,16 @@ export function AuthCard({
         >
           <Card>
             <CardHeader>
+              {logo && (
+                // Sized like the button's icon rule: a bare img/svg gets a
+                // default height, an explicitly sized one keeps its own.
+                <div
+                  className="mb-1.5 flex items-center [&_img:not([class*='h-'])]:h-8 [&_img]:w-auto [&_svg:not([class*='size-'])]:size-8"
+                  data-slot="auth-logo"
+                >
+                  {logo}
+                </div>
+              )}
               <CardTitle>{title}</CardTitle>
               {description && <CardDescription>{description}</CardDescription>}
             </CardHeader>

@@ -12,6 +12,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { type AuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
+import { cn } from "@/lib/utils";
 import {
   AuthCard,
   AuthError,
@@ -25,6 +27,10 @@ import {
 export interface LoginBlockProps {
   title?: string;
   description?: string;
+  /** Brand mark rendered above the title. Omit for no logo row at all. */
+  logo?: React.ReactNode;
+  /** Brand accent for the primary action. Omit to keep the default primary. */
+  accent?: AuthAccent;
   /** Social providers to offer; empty array hides the social section. */
   providers?: SocialProvider[];
   showRememberMe?: boolean;
@@ -43,6 +49,8 @@ export interface LoginBlockProps {
 export function LoginBlock({
   title = "Login to your account",
   description = "Enter your email and password to login",
+  logo,
+  accent,
   providers = ["google", "apple", "github"],
   showRememberMe = true,
   showForgotPassword = true,
@@ -113,6 +121,8 @@ export function LoginBlock({
     <AuthCard
       title={title}
       description={description}
+      logo={logo}
+      accent={accent}
       footer={
         status !== "success" && (
           <>
@@ -195,7 +205,7 @@ export function LoginBlock({
               <AuthError message={error} />
               <Reveal show={canSubmit}>
                 <Button
-                  className="w-full"
+                  className={cn("w-full", accent && authAccentActionStyles)}
                   type="submit"
                   loading={status === "loading"}
                   disabled={busy}
