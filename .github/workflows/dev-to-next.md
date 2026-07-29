@@ -31,9 +31,13 @@ safe-outputs:
     labels: [release]
     draft: false
     base-branch: next
-    # Blast radius: auto-merge is intentionally OFF. A human approves, then the repo's
-    # squash-merge setting takes over. To fully automate squash-merge on green, add:
-    #   auto-merge: true
+    # Blast radius: auto-merge is intentionally OFF. A human approves, then merges.
+    #
+    # MERGE THIS WITH A MERGE COMMIT — NEVER SQUASH. Squashing dev into next rewrites the
+    # SHAs, so next stops descending from dev and main stops descending from next. That is
+    # what forced the old cherry-pick promotion model and every heuristic under it. To
+    # automate, add `auto-merge: true` only once the repo's default merge method for this
+    # PR is a merge commit.
 ---
 
 # Dev → Next
@@ -69,8 +73,10 @@ Keep edits scoped to documentation; do not touch source in this PR.
 
 - Open the release PR with a description that lists what's included, links the closed issues, and
   states the validation status (validation passed on `dev`).
-- The PR is created **ready for review but not auto-merged**. A maintainer approves; squash-merge
-  to `next` is then performed via the repo's merge settings (or auto-merge if you enabled the
+- The PR is created **ready for review but not auto-merged**. A maintainer approves; the merge
+  to `next` **must be a merge commit, not a squash** — squashing severs the ancestry the release
+  model depends on (see `.github/BRANCH-AND-RELEASE-POLICY.md`). Merge is then performed via the
+  repo's merge settings (or auto-merge if you enabled the
   toggle above).
 
 If there is nothing to release or document, call `noop`.
