@@ -31,6 +31,15 @@ jobs:
           fetch-depth: 0
           ref: main
 
+      # The release tooling comes from the dispatching ref, not from main:
+      # on a first-ever promotion main predates .github/scripts entirely.
+      - name: Checkout release tooling
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          path: .release-tooling
+          sparse-checkout: .github/scripts
+
       - name: Fetch all branches and tags
         run: |
           set -euo pipefail
@@ -45,7 +54,7 @@ jobs:
           REPOSITORY: ${{ github.repository }}
         run: |
           set -euo pipefail
-          . .github/scripts/release-version.sh
+          . .release-tooling/.github/scripts/release-version.sh
           configure_git_bot
 
           tag="${INPUT_TAG:-$(open_release_tag)}"
