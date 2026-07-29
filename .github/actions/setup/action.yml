@@ -1,0 +1,17 @@
+name: Setup
+description: Bun and Node, with npm pointed at the public registry.
+
+runs:
+  using: composite
+  steps:
+    - uses: oven-sh/setup-bun@v2
+      with:
+        bun-version: latest
+
+    # npm is only used for `npm pkg`, `npm pack` and `npm publish` — bun runs
+    # everything else. The registry-url is what writes the .npmrc that
+    # `make publish` authenticates with.
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24
+        registry-url: https://registry.npmjs.org
