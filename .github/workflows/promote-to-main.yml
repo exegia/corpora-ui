@@ -109,11 +109,12 @@ jobs:
             "copied: the commits keep their SHAs and \`$tag\` already points at" \
             "\`${release_sha:0:7}\`, which this carries onto \`main\` intact." \
             "" \
-            "**Merge this with a merge commit or fast-forward — never squash.** Squashing" \
-            "rewrites the SHAs, severs \`main\` from \`next\`, and puts the repository back into" \
-            "the state \`.github/scripts/reconcile-ancestry.sh\` exists to repair." \
+            "**Approve — do not use the merge button.** \`promotion-merge.yml\` fast-forwards" \
+            "\`main\` onto this commit once the PR is approved and green, so \`main\` becomes the" \
+            "tagged commit itself rather than a merge commit above it. The button cannot" \
+            "fast-forward, and a squash would sever \`main\` from \`next\` entirely." \
             "" \
-            "On merge, \`release-tag.yml\` publishes the GitHub Release for \`$tag\` and hands off" \
+            "Then \`release-tag.yml\` publishes the GitHub Release for \`$tag\` and hands off" \
             "to \`publish.yml\`.")
 
           existing=$(gh pr list --repo "$REPOSITORY" --base main --head next \
