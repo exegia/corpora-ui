@@ -37,13 +37,13 @@ jobs:
       && github.event.pull_request.merged == true
       && startsWith(github.head_ref, 'release/v')
     runs-on: ubuntu-latest
-    # NPM_TOKEN lives on this environment.
+    # NPM_TOKEN lives in this environment.
     environment: production
     permissions:
       contents: write # create the tag and the GitHub Release
       id-token: write # npm provenance
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           ref: main
           fetch-depth: 0
@@ -78,14 +78,14 @@ jobs:
     if: ${{ always() && (github.event_name == 'workflow_dispatch' || needs.publish.result == 'success') }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/create-github-app-token@v2
+      - uses: actions/create-github-app-token@v3
         id: app-token
         with:
           app-id: ${{ secrets.AUTOMATION_APP_ID }}
           private-key: ${{ secrets.AUTOMATION_APP_PRIVATE_KEY }}
 
       # Full history and tags: `make next-version` reads the newest vX.Y.Z tag.
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           ref: main
           fetch-depth: 0
