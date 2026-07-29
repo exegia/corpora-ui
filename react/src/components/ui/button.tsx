@@ -14,7 +14,7 @@ import {
 } from "@/lib/glass-variants";
 
 export const buttonVariants = cva(
-  "relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border font-medium text-base outline-none transition-shadow before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] pointer-coarse:after:absolute pointer-coarse:after:size-full pointer-coarse:after:min-h-11 pointer-coarse:after:min-w-11 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-64 data-loading:select-none data-loading:text-transparent sm:text-sm [&_svg:not([class*='opacity-'])]:opacity-80 [&_svg:not([class*='size-'])]:size-4.5 sm:[&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:-mx-0.5 [&_svg]:shrink-0",
+  "relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border font-medium text-base outline-none transition-[scale,box-shadow,width,height] [transition-duration:150ms,150ms,300ms,300ms] ease-smooth-out active:scale-97 data-pressed:scale-97 motion-reduce:transition-none motion-reduce:active:scale-100 motion-reduce:data-pressed:scale-100 before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] pointer-coarse:after:absolute pointer-coarse:after:size-full pointer-coarse:after:min-h-11 pointer-coarse:after:min-w-11 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-64 data-loading:select-none sm:text-sm [&_svg:not([class*='opacity-'])]:opacity-80 [&_svg:not([class*='size-'])]:size-4.5 sm:[&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:-mx-0.5 [&_svg]:shrink-0",
   {
     defaultVariants: {
       size: "default",
@@ -98,11 +98,35 @@ export function Button({
     variant === "glass" ? (glassVariant ?? "liquid-refract") : undefined;
   const isLiquidRefract = resolvedGlassVariant === "liquid-refract";
 
+  // Icon-only sizes overlay the spinner on top of the (hidden) icon; text
+  // sizes keep the label visible and show the spinner inline before it.
+  const isIconSize = (size ?? "default").startsWith("icon");
+
   const defaultProps = {
     children: (
       <>
+        {!isIconSize && (
+          // Always mounted so the button width morphs as the slot collapses
+          // and expands; the closed state cancels the flex gap (which varies
+          // per size) with a matching negative margin.
+          <span
+            aria-hidden={loading ? undefined : true}
+            data-slot="button-loading-indicator"
+            className={cn(
+              "pointer-events-none inline-flex shrink-0 items-center overflow-hidden transition-[max-width,margin-inline-start,opacity,filter] duration-300 ease-smooth-out motion-reduce:transition-none",
+              loading
+                ? "max-w-6"
+                : cn(
+                    "max-w-0 opacity-0 blur-[2px]",
+                    size === "xs" ? "-ms-1" : size === "sm" ? "-ms-1.5" : "-ms-2",
+                  ),
+            )}
+          >
+            <Spinner className={loading ? undefined : "animate-none"} />
+          </span>
+        )}
         {children}
-        {loading && (
+        {loading && isIconSize && (
           <Spinner
             className="pointer-events-none absolute"
             data-slot="button-loading-indicator"
@@ -112,6 +136,7 @@ export function Button({
     ),
     className: cn(
       buttonVariants({ size, variant }),
+      loading && isIconSize && "data-loading:text-transparent",
       resolvedGlassVariant && glassVariantStyles[resolvedGlassVariant],
       isLiquidRefract && liquidRefractStyles,
       className,
