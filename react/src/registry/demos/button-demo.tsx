@@ -2,6 +2,7 @@ import * as React from "react"
 import type { VariantProps } from "class-variance-authority"
 import { BookOpen } from "lucide-react"
 
+import { DemoSelect, DemoToggle } from "@/components/docs/demo-controls"
 import { Button, buttonVariants } from "@/components/ui/button"
 import type { FrostGlassVariant } from "@/lib/glass-variants"
 import { cn } from "@/lib/utils"
@@ -40,56 +41,6 @@ const GLASS_VARIANTS: FrostGlassVariant[] = [
   "clear",
   "subtle",
 ]
-
-function DemoSelect<T extends string>({
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string
-  value: T
-  options: readonly T[]
-  onChange: (value: T) => void
-}) {
-  return (
-    <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-      {label}
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value as T)}
-        className="h-7 rounded-md border bg-background px-2 text-xs text-foreground"
-      >
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </label>
-  )
-}
-
-function DemoToggle({
-  label,
-  checked,
-  onChange,
-}: {
-  label: string
-  checked: boolean
-  onChange: (checked: boolean) => void
-}) {
-  return (
-    <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-      />
-      {label}
-    </label>
-  )
-}
 
 export default function ButtonDemo() {
   const [variant, setVariant] = React.useState<Variant>("outline")

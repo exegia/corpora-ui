@@ -7,15 +7,30 @@ are installed HERE (`cd react && bun add <pkg>`), never at the repo root. Verify
 `make check` (runs `tsc -b --noEmit` + eslint) — plain `tsc --noEmit` checks
 nothing here (references-only root tsconfig).
 
+## Pulling coss components
+
+`components.json` maps the `@coss` registry (coss.com/ui). Install base
+components with `bunx shadcn add @coss/<name> --yes` (never `--overwrite` —
+our button/atoms carry local customizations). Copy-paste patterns come from
+coss "particles" (`https://coss.com/ui/r/p-<type>-<n>.json`) via the
+coss-particles skill; adapt imports to `@/components/ui/*`. Auth blocks in
+`src/components/blocks/auth/` share `auth-shell.tsx` (AuthCard, MorphStep,
+AuthError shake, AuthSuccess check, useCountdown) — new multi-state blocks
+should reuse it, with `motion/react` for step morphs.
+
 ## Interaction sound (cuelume)
 
 Components emit inert `data-cuelume-*` attributes (Button: press/release,
 gated by its `sound` prop, default true). Nothing plays until an app calls
 `bindSounds()` (re-exported from `src/lib/sound.ts`; the docs site does this
 in `main.tsx`). Never call `bind()` at library-module scope — opting into
-sound is the consumer's decision. Pick sound names from cuelume's palette by
+sound is the consumer's decision. For keyboard-driven cues the attributes
+can't cover (OTP typing, visibility toggles), use `playCue()` from
+`lib/sound.ts` — it no-ops until bindSounds() has run; never call cuelume's
+raw `play()` from a component. Every sounded component takes a
+`sound?: boolean` prop (default true). Pick names from cuelume's palette by
 suggested use (`toggle` for switches/tabs, `success`/`error` for outcomes,
-`tick` for nav hover).
+`tick` for nav hover/typing, `bloom`/`droplet` for reveal/dismiss).
 
 ## Glass variants
 

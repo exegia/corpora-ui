@@ -20,8 +20,13 @@ export default defineConfig([
     },
   },
   {
-    // shadcn ui files export variants (cva) alongside the component by design
-    files: ['src/components/ui/**/*.tsx'],
+    // Library files export variants, helpers and hooks alongside components
+    // by design (buttonVariants, passwordRequirements, useCountdown, …).
+    files: [
+      'src/components/ui/**/*.tsx',
+      'src/components/composed/**/*.tsx',
+      'src/components/blocks/**/*.tsx',
+    ],
     rules: {
       'react-refresh/only-export-components': 'off',
     },

@@ -1,0 +1,227 @@
+"use client";
+
+import * as React from "react";
+
+import {
+  PasswordInput,
+  getPasswordStrength,
+  passwordRequirements,
+} from "@/components/composed/password-input";
+import {
+  SocialProviders,
+  type SocialProvider,
+} from "@/components/composed/social-providers";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  AuthCard,
+  AuthError,
+  AuthSeparator,
+  AuthSuccess,
+  MorphStep,
+  type AuthStatus,
+} from "./auth-shell";
+
+export interface SignupBlockProps {
+  title?: string;
+  description?: string;
+  providers?: SocialProvider[];
+  showNameField?: boolean;
+  /** Require the terms checkbox before submitting. */
+  showTerms?: boolean;
+  /** Block submission until every password requirement is met. */
+  enforceStrongPassword?: boolean;
+  onSubmit?: (data: {
+    name: string;
+    email: string;
+    password: string;
+  }) => Promise<void> | void;
+  onProviderSelect?: (provider: SocialProvider) => Promise<void> | void;
+  onLogin?: () => void;
+  onTerms?: () => void;
+}
+
+export function SignupBlock({
+  title = "Create your account",
+  description = "Start exploring manuscripts in minutes",
+  providers = ["google", "apple", "github"],
+  showNameField = true,
+  showTerms = true,
+  enforceStrongPassword = true,
+  onSubmit,
+  onProviderSelect,
+  onLogin,
+  onTerms,
+}: SignupBlockProps) {
+  const nameId = React.useId();
+  const emailId = React.useId();
+  const termsId = React.useId();
+  const [status, setStatus] = React.useState<AuthStatus>("idle");
+  const [error, setError] = React.useState<string | null>(null);
+  const [loadingProvider, setLoadingProvider] =
+    React.useState<SocialProvider | null>(null);
+  const [password, setPassword] = React.useState("");
+  const [terms, setTerms] = React.useState(false);
+
+  const busy = status === "loading" || loadingProvider !== null;
+  const strongEnough =
+    !enforceStrongPassword ||
+    getPasswordStrength(password) === passwordRequirements.length;
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    if (!strongEnough) {
+      setError("Please meet all password requirements.");
+      return;
+    }
+    if (showTerms && !terms) {
+      setError("Please accept the terms to continue.");
+      return;
+    }
+    const form = new FormData(event.currentTarget);
+    setStatus("loading");
+    try {
+      await onSubmit?.({
+        name: String(form.get("name") ?? ""),
+        email: String(form.get("email") ?? ""),
+        password,
+      });
+      setStatus("success");
+    } catch (cause) {
+      setStatus("idle");
+      setError(
+        cause instanceof Error ? cause.message : "Unable to create account.",
+      );
+    }
+  }
+
+  async function handleProvider(provider: SocialProvider) {
+    setError(null);
+    setLoadingProvider(provider);
+    try {
+      await onProviderSelect?.(provider);
+      setStatus("success");
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "Unable to create account.",
+      );
+    } finally {
+      setLoadingProvider(null);
+    }
+  }
+
+  return (
+    <AuthCard
+      title={title}
+      description={description}
+      footer={
+        status !== "success" && (
+          <>
+            Already have an account?{" "}
+            <Button variant="link" className="h-auto p-0" onClick={onLogin}>
+              Login
+            </Button>
+          </>
+        )
+      }
+    >
+      <MorphStep step={status === "success" ? "success" : "form"}>
+        {status === "success" ? (
+          <AuthSuccess
+            title="Account created"
+            description="Check your inbox to confirm your email address."
+          />
+        ) : (
+          <div className="flex flex-col gap-4">
+            {providers.length > 0 && (
+              <>
+                <SocialProviders
+                  providers={providers}
+                  action="signup"
+                  loadingProvider={loadingProvider}
+                  disabled={status === "loading"}
+                  onSelect={handleProvider}
+                />
+                <AuthSeparator label="Or with email" />
+              </>
+            )}
+            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+              {showNameField && (
+                <Field name="name">
+                  <FieldLabel htmlFor={nameId}>Name</FieldLabel>
+                  <Input
+                    id={nameId}
+                    name="name"
+                    autoComplete="name"
+                    placeholder="Your name"
+                    required
+                    disabled={busy}
+                  />
+                </Field>
+              )}
+              <Field name="email">
+                <FieldLabel htmlFor={emailId}>Email</FieldLabel>
+                <Input
+                  id={emailId}
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  required
+                  disabled={busy}
+                />
+              </Field>
+              <Field name="password">
+                <FieldLabel>Password</FieldLabel>
+                <PasswordInput
+                  name="password"
+                  autoComplete="new-password"
+                  placeholder="Create a password"
+                  showStrength
+                  required
+                  disabled={busy}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                />
+              </Field>
+              {showTerms && (
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id={termsId}
+                    checked={terms}
+                    onCheckedChange={(checked) => setTerms(checked === true)}
+                    disabled={busy}
+                  />
+                  <Label htmlFor={termsId} className="font-normal">
+                    I agree to the{" "}
+                    <Button
+                      variant="link"
+                      type="button"
+                      className="h-auto p-0"
+                      onClick={onTerms}
+                    >
+                      terms
+                    </Button>
+                  </Label>
+                </div>
+              )}
+              <AuthError message={error} />
+              <Button
+                className="w-full"
+                type="submit"
+                loading={status === "loading"}
+                disabled={busy}
+              >
+                Create account
+              </Button>
+            </form>
+          </div>
+        )}
+      </MorphStep>
+    </AuthCard>
+  );
+}
