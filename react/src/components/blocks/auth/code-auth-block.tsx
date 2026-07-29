@@ -6,6 +6,8 @@ import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import { OTPField, OTPFieldInput } from "@/components/ui/otp-field";
+import { type AuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
+import { cn } from "@/lib/utils";
 import {
   AuthCard,
   AuthError,
@@ -17,6 +19,10 @@ import {
 } from "./auth-shell";
 
 export interface CodeAuthBlockProps {
+  /** Brand mark rendered above the title. Omit for no logo row at all. */
+  logo?: React.ReactNode;
+  /** Brand accent for the primary action. Omit to keep the default primary. */
+  accent?: AuthAccent;
   /** Where the code was sent; drives copy and icon. */
   channel?: "email" | "sms";
   /** Masked destination shown in the description, e.g. "y•••@example.com". */
@@ -34,6 +40,8 @@ export interface CodeAuthBlockProps {
 
 export function CodeAuthBlock({
   channel = "email",
+  logo,
+  accent,
   destination,
   length = 6,
   autoSubmit = true,
@@ -85,6 +93,8 @@ export function CodeAuthBlock({
   return (
     <AuthCard
       title="Enter verification code"
+      logo={logo}
+      accent={accent}
       description={
         <span className="inline-flex items-center gap-1.5">
           <ChannelIcon className="size-3.5 shrink-0" />
@@ -104,7 +114,7 @@ export function CodeAuthBlock({
       }
       footer={
         status !== "success" && (
-          <Button variant="link" className="h-auto p-0" onClick={onBack}>
+          <Button variant="link" onClick={onBack}>
             Use a different {channelLabel}
           </Button>
         )
@@ -142,7 +152,7 @@ export function CodeAuthBlock({
             <AuthError message={error} />
             {!autoSubmit && (
               <Button
-                className="w-full"
+                className={cn("w-full", accent && authAccentActionStyles)}
                 loading={status === "loading"}
                 disabled={code.length !== length}
                 onClick={() => void verify(code)}
@@ -165,7 +175,6 @@ export function CodeAuthBlock({
               ) : (
                 <Button
                   variant="link"
-                  className="h-auto p-0"
                   disabled={status === "loading"}
                   onClick={() => void handleResend()}
                 >

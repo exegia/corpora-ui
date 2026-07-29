@@ -34,6 +34,41 @@ export function DemoSelect<T extends string>({
   )
 }
 
+/**
+ * Stand-in brand mark for demos of the auth blocks' `logo` slot. Deliberately
+ * unbranded — it exists to show the slot's spacing and default sizing, not to
+ * represent a real product.
+ */
+export function DemoBrandMark() {
+  return (
+    <svg
+      aria-label="Example logo"
+      role="img"
+      viewBox="0 0 32 32"
+      className="text-foreground"
+    >
+      <rect
+        x="2"
+        y="2"
+        width="28"
+        height="28"
+        rx="9"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+      />
+      <path
+        d="M11 20.5V11.5h4.5a3.5 3.5 0 0 1 0 7H11"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
 export function DemoToggle({
   label,
   checked,

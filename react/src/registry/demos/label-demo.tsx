@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 export default function LabelDemo() {
   const id = React.useId()
   const [disabled, setDisabled] = React.useState(false)
-  const [sound, setSound] = React.useState(true)
+  const [sound, setSound] = React.useState(false)
 
   return (
     <DemoStage

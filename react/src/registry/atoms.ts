@@ -88,9 +88,9 @@ export const atoms: RegistryEntry[] = [
       {
         name: "sound",
         type: "boolean",
-        default: "true",
+        default: "false",
         description:
-          "Emit the cuelume hover tick. Silent until the app calls bindSounds().",
+          "Opt into the cuelume hover tick. Off by default — the labelled control owns the interaction cue. Silent until the app calls bindSounds().",
       },
     ],
     usage: `import { Label } from "@corpora/ui"
