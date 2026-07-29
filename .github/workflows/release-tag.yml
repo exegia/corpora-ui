@@ -1,0 +1,81 @@
+# Release tag — freezes the promoted release onto `main`.
+#
+# Runs when a `release/vX.Y.Z → main` promotion PR merges. The tag already exists on `next`,
+# but the cherry-picked commits on `main` have different SHAs, so the tag is moved onto the
+# `main` commit here. That is what makes `main` an alias for the latest published version:
+# every released tag points at a commit on `main`, and nothing else is ever tagged there.
+#
+# This is the last force-move of the tag. Once the GitHub Release is published it is frozen,
+# and the next merge into `next` starts a new version.
+name: Release Tag
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write   # move the tag, create the release
+
+concurrency:
+  group: release-tag
+  cancel-in-progress: false
+
+jobs:
+  freeze:
+    if: |
+      github.event.pull_request.merged == true &&
+      startsWith(github.head_ref, 'release/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Fetch all branches and tags
+        run: |
+          set -euo pipefail
+          git fetch --force origin \
+            '+refs/heads/*:refs/remotes/origin/*' \
+            '+refs/tags/*:refs/tags/*'
+
+      - name: Move the tag onto main and publish the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_REF: ${{ github.head_ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          set -euo pipefail
+          . .github/scripts/release-version.sh
+          configure_git_bot
+
+          tag="${HEAD_REF#release/}"
+          if ! printf '%s\n' "$tag" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Promotion branch '$HEAD_REF' does not carry a vX.Y.Z tag name." >&2
+            exit 1
+          fi
+
+          # CHANGELOG.md was already stamped on the promotion branch, so nothing needs to be
+          # pushed to main here — only the tag moves.
+          release_sha=$(git rev-parse HEAD)
+
+          # The tag currently points at the pre-cherry-pick commit on next. Re-anchor it to main.
+          git tag -f -a "$tag" -m "Release $tag (promoted via PR #$PR_NUMBER)" "$release_sha"
+          git push --force origin "refs/tags/$tag"
+
+          notes=$(printf '%s\n' \
+            "Release ${tag} — promoted from \`next\` via PR #${PR_NUMBER}." \
+            "" \
+            "Tagged at \`${release_sha:0:7}\` on \`main\`." \
+            "" \
+            "PR: ${PR_URL}")
+
+          gh release create "$tag" \
+            --target main \
+            --title "$tag" \
+            --notes "$notes" --generate-notes
+
+          echo "✓ Froze $tag at ${release_sha:0:7} on main and published the release."
