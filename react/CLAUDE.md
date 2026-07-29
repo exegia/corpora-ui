@@ -2,7 +2,8 @@
 
 Vite + React 19 + Tailwind v4 + shadcn (base-ui, style "base-mira"). Library
 source in `src/components/{ui,composed,blocks}`, docs site driven by
-`src/registry/`. See `ARCHITECTURE.md` for the full layout. Verify with
+`src/registry/`. See `ARCHITECTURE.md` for the full layout. Node dependencies
+are installed HERE (`cd react && bun add <pkg>`), never at the repo root. Verify with
 `make check` (runs `tsc -b --noEmit` + eslint) — plain `tsc --noEmit` checks
 nothing here (references-only root tsconfig).
 
