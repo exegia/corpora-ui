@@ -69,33 +69,36 @@ succeeds. The job log names the identity it pushed as.
 Verify *before* step 5. If the app is misconfigured and the ruleset is already tightened, every
 release fails at its last step.
 
-## 5. Lock down `main`
+## 5. Lock down `main` — done
 
-Only once step 4 passes. Add the app as a bypass actor on the `prod` ruleset (which covers
-`refs/heads/main` and `refs/heads/next`), **then** add the `pull_request` rule:
+Applied 2026-07-29 as the `main-no-direct-push` ruleset (id `19980985`):
 
-```bash
-gh api repos/exegia/corpora-ui/rulesets/19884404
-```
+| | |
+|---|---|
+| scope | `refs/heads/main` |
+| rule | `pull_request` — no direct pushes |
+| merge methods | `merge` only — **squash and rebase are forbidden**, since both rewrite SHAs and sever `main` from `next` |
+| bypass | `Integration:4425676` — the app, so `promotion-merge` can still fast-forward |
 
-Add to `bypass_actors`:
+Deliberately a **new** ruleset rather than an edit to `prod` (id `19884404`). `prod` covers
+`refs/heads/next` as well, and until this change `promote-to-main.yml` pushed the changelog
+stamp to `next` with `GITHUB_TOKEN`. Adding a `pull_request` rule there would have broken
+promotion — but only once a `CHANGELOG.md` existed, since the stamp block is skipped without
+one. The breakage would have surfaced long after the rule was set.
+
+### Extending the same protection to `next`
+
+Now possible, because `promote-to-main.yml` mints an app token. Do it only once that change has
+reached `next` — the workflow runs from the dispatched ref, so a dispatch against a `next` that
+predates it would still push as `GITHUB_TOKEN` and be blocked.
+
+Add to the `prod` ruleset, bypass actor first:
 
 ```json
-{ "actor_id": <app id>, "actor_type": "Integration", "bypass_mode": "always" }
+{ "actor_id": 4425676, "actor_type": "Integration", "bypass_mode": "always" }
 ```
 
-Add to `rules`:
-
-```json
-{ "type": "pull_request", "parameters": { "required_approving_review_count": 0 } }
-```
-
-Bypass first, rule second — never the reverse.
-
-The `prod` ruleset today carries only `deletion` and `non_fast_forward`, which prevent removing
-or rewriting `main` but do nothing about an ordinary push. That gap is how a PR was merged
-straight into `main` on 2026-07-29, severing it from `next` and requiring
-`.github/scripts/reconcile-ancestry.sh` to repair.
+then the `pull_request` rule. Never the reverse.
 
 ## Rotation
 
