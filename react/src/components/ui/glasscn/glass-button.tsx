@@ -1,6 +1,6 @@
 "use client";
 
-import { FrostGlassVariantProp, glassVariantStyles } from "@/lib/glass-variants";
+import { type FrostGlassVariantProp, glassVariantStyles } from "@/lib/glass-variants";
 import { cn } from "@/lib/utils";
 
 import { Button } from "../button";
