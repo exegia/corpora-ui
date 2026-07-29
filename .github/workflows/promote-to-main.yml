@@ -68,7 +68,10 @@ jobs:
             exit 1
           fi
 
-          commits=$(git rev-list --reverse --no-merges "origin/main..$tag")
+          # --cherry-pick/--right-only drops commits whose patch already exists
+          # on main under a different SHA — squash merges and prior promotions
+          # rewrite SHAs, so a plain main..tag range would re-pick released work.
+          commits=$(git rev-list --reverse --no-merges --right-only --cherry-pick "origin/main...$tag")
           if [ -z "$commits" ]; then
             echo "$tag adds no commits on top of main — nothing to promote."
             exit 1
