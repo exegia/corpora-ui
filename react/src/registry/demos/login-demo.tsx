@@ -1,9 +1,11 @@
 import * as React from "react"
 
-import { DemoSelect, DemoStage, DemoToggle } from "@/components/docs/demo-controls"
+import { DemoBrandMark, DemoSelect, DemoStage, DemoToggle } from "@/components/docs/demo-controls"
 import { LoginBlock } from "@/components/blocks/auth/login-block"
 
 const OUTCOMES = ["success", "error"] as const
+
+const ACCENTS = ["none", "corpora", "exegia"] as const
 
 const delay = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms))
@@ -14,6 +16,8 @@ export default function LoginDemo() {
   const [rememberMe, setRememberMe] = React.useState(true)
   const [forgotPassword, setForgotPassword] = React.useState(true)
   const [resetKey, setResetKey] = React.useState(0)
+  const [accent, setAccent] = React.useState<(typeof ACCENTS)[number]>("none")
+  const [logo, setLogo] = React.useState(false)
 
   return (
     <DemoStage
@@ -32,6 +36,8 @@ export default function LoginDemo() {
             checked={forgotPassword}
             onChange={setForgotPassword}
           />
+          <DemoSelect label="accent" value={accent} options={ACCENTS} onChange={setAccent} />
+          <DemoToggle label="logo" checked={logo} onChange={setLogo} />
           <button
             type="button"
             className="text-xs underline"
@@ -44,6 +50,8 @@ export default function LoginDemo() {
     >
       <LoginBlock
         key={resetKey}
+        accent={accent === "none" ? undefined : accent}
+        logo={logo ? <DemoBrandMark /> : undefined}
         providers={social ? ["google", "apple", "github"] : []}
         showRememberMe={rememberMe}
         showForgotPassword={forgotPassword}

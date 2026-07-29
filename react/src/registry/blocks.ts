@@ -25,6 +25,18 @@ export const blocks: RegistryEntry[] = [
     ],
     props: [
       {
+        name: "logo",
+        type: "React.ReactNode",
+        description:
+          "Brand mark rendered above the title. Omitted leaves no logo row at all.",
+      },
+      {
+        name: "accent",
+        type: '"corpora" | "exegia"',
+        description:
+          "Brand accent for the primary action \u2014 corpora is a solid #E8B124, exegia a purple gradient. Omit to keep the default primary.",
+      },
+      {
         name: "providers",
         type: "SocialProvider[]",
         default: '["google", "apple", "github"]',
@@ -65,6 +77,18 @@ export const blocks: RegistryEntry[] = [
     ],
     props: [
       {
+        name: "logo",
+        type: "React.ReactNode",
+        description:
+          "Brand mark rendered above the title. Omitted leaves no logo row at all.",
+      },
+      {
+        name: "accent",
+        type: '"corpora" | "exegia"',
+        description:
+          "Brand accent for the primary action \u2014 corpora is a solid #E8B124, exegia a purple gradient. Omit to keep the default primary.",
+      },
+      {
         name: "showNameField / showTerms",
         type: "boolean",
         default: "true",
@@ -97,6 +121,18 @@ export const blocks: RegistryEntry[] = [
     registryDependencies: ["card", "field", "input"],
     props: [
       {
+        name: "logo",
+        type: "React.ReactNode",
+        description:
+          "Brand mark rendered above the title. Omitted leaves no logo row at all.",
+      },
+      {
+        name: "accent",
+        type: '"corpora" | "exegia"',
+        description:
+          "Brand accent for the primary action \u2014 corpora is a solid #E8B124, exegia a purple gradient. Omit to keep the default primary.",
+      },
+      {
         name: "onSubmit",
         type: "({ email }) => Promise<void>",
         description: "Reject to surface the error state.",
@@ -121,6 +157,18 @@ export const blocks: RegistryEntry[] = [
     preview: React.lazy(() => import("./demos/code-auth-demo")),
     registryDependencies: ["card", "otp-field"],
     props: [
+      {
+        name: "logo",
+        type: "React.ReactNode",
+        description:
+          "Brand mark rendered above the title. Omitted leaves no logo row at all.",
+      },
+      {
+        name: "accent",
+        type: '"corpora" | "exegia"',
+        description:
+          "Brand accent for the primary action \u2014 corpora is a solid #E8B124, exegia a purple gradient. Omit to keep the default primary.",
+      },
       {
         name: "channel",
         type: '"email" | "sms"',
