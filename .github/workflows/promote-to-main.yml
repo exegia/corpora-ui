@@ -27,12 +27,36 @@ concurrency:
 jobs:
   promote:
     runs-on: ubuntu-latest
+    env:
+      # `secrets` cannot be read from an `if:` — GitHub rejects the workflow file outright.
+      # Mapping to job-level env makes emptiness testable from a step-level `if`.
+      APP_ID: ${{ secrets.AUTOMATION_APP_ID }}
     steps:
+      # This job pushes the changelog stamp to `next` and force-moves the staging tag. Both are
+      # writes to a protected ref, and the built-in GITHUB_TOKEN cannot be granted a ruleset
+      # bypass — repo-level rulesets reject it with "Actor GitHub Actions integration must be
+      # part of the ruleset source or owner organization". The app identity can be, so the
+      # pushes run as the app when one is configured.
+      #
+      # Without this, extending the `pull_request` rule to cover `next` would break promotion
+      # at the changelog stamp. That block is skipped while no CHANGELOG.md exists, so the
+      # breakage would not appear until someone added one — long after the rule was set.
+      - name: Mint an app token
+        id: app-token
+        if: ${{ env.APP_ID != '' }}
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_APP_PRIVATE_KEY }}
+
       - name: Checkout next
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: next
+          # The pushes below use these credentials, so the token has to be wired in here
+          # rather than only into `gh`.
+          token: ${{ steps.app-token.outputs.token || github.token }}
 
       - name: Fetch all branches and tags
         run: |
@@ -43,7 +67,7 @@ jobs:
 
       - name: Open the release PR
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
           INPUT_TAG: ${{ inputs.tag }}
           REPOSITORY: ${{ github.repository }}
         run: |
