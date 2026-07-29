@@ -18,7 +18,9 @@
 # The second is strictly better than anything the UI offers: `main` becomes the tagged commit
 # rather than a merge commit above it.
 #
-# Review is still the gate. This only ever runs on an approved PR whose checks are green.
+# A deliberate human signal is still the gate: an approval on the review path, or the dispatch
+# itself on the manual path (only write access can dispatch). Either way the branch pair, open
+# state and green checks are enforced identically.
 name: Promotion Merge
 
 on:
@@ -94,6 +96,8 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
           REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr }}
+          EVENT_NAME: ${{ github.event_name }}
+          ACTOR: ${{ github.actor }}
         run: |
           set -euo pipefail
 
@@ -117,9 +121,25 @@ jobs:
               ;;
           esac
 
-          # Re-checked here rather than trusting the event: a workflow_dispatch carries no
-          # review payload at all, and an approval can be dismissed between event and run.
-          if [ "$decision" != "APPROVED" ]; then
+          # The human gate. Which signal counts depends on how the run was triggered:
+          #
+          #   pull_request_review  the approval itself. Re-read here rather than trusted from
+          #                        the event payload, because an approval can be dismissed
+          #                        between the event firing and this job starting.
+          #
+          #   workflow_dispatch    the dispatch is the signal. Only someone with write access
+          #                        can dispatch a workflow, so the deliberate human action has
+          #                        already happened — and requiring an approval on top makes
+          #                        the workflow unusable for the person who opened the PR:
+          #                        GitHub refuses "Can not approve your own pull request", so a
+          #                        solo maintainer can satisfy neither path. Belt-and-braces
+          #                        here locked the door from both sides.
+          #
+          # Everything else — the branch pair, the open state, green checks — is still enforced
+          # identically on both paths, so dispatch relaxes *who vouches*, not *what is checked*.
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "Dispatched by @${ACTOR} — treating the dispatch as the approval."
+          elif [ "$decision" != "APPROVED" ]; then
             echo "PR #$PR_NUMBER is not approved (reviewDecision: $decision) — refusing." >&2
             exit 1
           fi
@@ -145,6 +165,8 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr }}
           BASE: ${{ steps.check.outputs.base }}
           HEAD: ${{ steps.check.outputs.head }}
+          EVENT_NAME: ${{ github.event_name }}
+          ACTOR: ${{ github.actor }}
         run: |
           set -euo pipefail
           . .github/scripts/release-version.sh
@@ -209,4 +231,5 @@ jobs:
             echo "| Strategy | $([ "$BASE" = "main" ] && echo 'fast-forward' || echo 'merge commit') |"
             echo "| Result | \`$(git rev-parse --short HEAD)\` |"
             echo "| PR | #$PR_NUMBER |"
+            echo "| Gated by | $([ "$EVENT_NAME" = "workflow_dispatch" ] && echo "dispatch (@${ACTOR})" || echo 'review approval') |"
           } >> "$GITHUB_STEP_SUMMARY"
