@@ -20,11 +20,11 @@ jobs:
 
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
       issues: write
       id-token: write
-      actions: read # Required for Claude to read CI results on PRs
+      actions: write # Required for Claude to read CI results on PRs
 
     steps:
       - name: Checkout repository
@@ -39,7 +39,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
-          prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
+          prompt: '/code-review:code-review --comment https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
           # Allow PRs opened by bot accounts (e.g. anthropic-code-agent[bot],
           # copilot-swe-agent[bot], dependabot[bot]) to pass the action's
           # actor write-access check during OIDC token exchange. Without this,
