@@ -2,11 +2,7 @@
 
 import * as React from "react";
 
-import {
-  PasswordInput,
-  getPasswordStrength,
-  passwordRequirements,
-} from "@/components/composed/password-input";
+import { PasswordInput } from "@/components/composed/password-input";
 import {
   SocialProviders,
   type SocialProvider,
@@ -70,11 +66,12 @@ export function LoginBlock({
 
   // Progressive disclosure: each step unlocks the next. The password field is
   // gated on the email input's own constraint validation (required + type
-  // email), the submit button on the shared password requirements. The submit
-  // gate re-checks emailValid so a stale password (typed, then the email was
-  // edited back into an invalid state) can't leave the button on its own.
-  const passwordValid =
-    getPasswordStrength(password) === passwordRequirements.length;
+  // email), the submit button on the password being non-empty — a login form
+  // verifies a credential rather than enforcing policy, so strength rules here
+  // would lock out anyone whose password predates them. The submit gate
+  // re-checks emailValid so a stale password (typed, then the email was edited
+  // back into an invalid state) can't leave the button on its own.
+  const passwordValid = password.trim().length > 0;
   const canSubmit = emailValid && passwordValid;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -140,6 +137,7 @@ export function LoginBlock({
                 <FieldLabel htmlFor={emailId}>Email</FieldLabel>
                 <Input
                   id={emailId}
+                  aria-label="Email"
                   name="email"
                   type="email"
                   autoComplete="email"
@@ -155,8 +153,9 @@ export function LoginBlock({
               </Field>
               <Reveal show={emailValid}>
                 <Field name="password">
-                  <FieldLabel>Password</FieldLabel>
+                  <FieldLabel htmlFor="password">Password</FieldLabel>
                   <PasswordInput
+                    id="password"
                     name="password"
                     autoComplete="current-password"
                     required
@@ -185,7 +184,7 @@ export function LoginBlock({
                   <Checkbox
                     id={rememberId}
                     checked={remember}
-                    onCheckedChange={(checked) => setRemember(checked === true)}
+                    onCheckedChange={(checked) => setRemember(checked)}
                     disabled={busy}
                   />
                   <Label htmlFor={rememberId} className="font-normal">
@@ -206,7 +205,12 @@ export function LoginBlock({
               </Reveal>
             </form>
             {providers.length > 0 && (
-              <>
+              // The social providers retire once the email path is filled in
+              // and valid — the user has committed to a path, so the
+              // alternatives are just noise. They come back if a field is
+              // invalidated again. gap-4 on the wrapper reproduces the spacing
+              // the two children had as direct flex items of the column above.
+              <Reveal show={!canSubmit} className="flex flex-col gap-4">
                 <AuthSeparator label="Or continue with" />
                 <SocialProviders
                   providers={providers}
@@ -215,7 +219,7 @@ export function LoginBlock({
                   disabled={status === "loading"}
                   onSelect={handleProvider}
                 />
-              </>
+              </Reveal>
             )}
           </div>
         )}

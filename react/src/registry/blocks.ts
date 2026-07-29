@@ -11,7 +11,7 @@ export const blocks: RegistryEntry[] = [
     slug: "login",
     name: "Login",
     description:
-      "Progressive login form: a valid email reveals the password field, valid password requirements reveal the submit button. Social providers, remember-me and animated success/error states.",
+      "Progressive login form: a valid email reveals the password field, a non-empty password reveals the submit button. Social providers, remember-me and animated success/error states.",
     category: "blocks",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/login-demo")),
@@ -51,7 +51,7 @@ export const blocks: RegistryEntry[] = [
     slug: "signup",
     name: "Signup",
     description:
-      "Account creation with password strength, terms consent and social providers.",
+      "Account creation with a progressively revealed password field, password strength, terms consent and social providers.",
     category: "blocks",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/signup-demo")),
