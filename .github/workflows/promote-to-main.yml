@@ -1,8 +1,11 @@
-# Promotion — rule 3. Cherry-picks every commit covered by the open release tag on `next`
-# onto a `release/vX.Y.Z` branch cut from `main`, then opens the release PR.
+# Promotion — opens the release PR from `next` into `main`.
+#
+# `next` descends from `main`, so the release *is* the commits already sitting on `next`.
+# Nothing is copied: no cherry-pick, no `release/*` branch, no patch-id matching, and no
+# re-anchoring of the tag afterwards. Merging the PR carries those commits onto `main` with
+# their SHAs intact, and `release-tag.yml` publishes from there.
 #
 # Run manually when staging is ready to ship. The PR is opened for review, never auto-merged.
-# When it merges, `release-tag.yml` freezes the tag onto `main` and `publish.yml` ships it.
 name: Promote to Main
 
 on:
@@ -25,20 +28,11 @@ jobs:
   promote:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout next
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: main
-
-      # The release tooling comes from the dispatching ref, not from main:
-      # on a first-ever promotion main predates .github/scripts entirely.
-      - name: Checkout release tooling
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
-          path: .release-tooling
-          sparse-checkout: .github/scripts
+          ref: next
 
       - name: Fetch all branches and tags
         run: |
@@ -47,20 +41,36 @@ jobs:
             '+refs/heads/*:refs/remotes/origin/*' \
             '+refs/tags/*:refs/tags/*'
 
-      - name: Cherry-pick the release onto a promotion branch
-        id: pick
+      - name: Open the release PR
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           INPUT_TAG: ${{ inputs.tag }}
           REPOSITORY: ${{ github.repository }}
         run: |
           set -euo pipefail
-          . .release-tooling/.github/scripts/release-version.sh
+          . .github/scripts/release-version.sh
           configure_git_bot
+
+          # The invariant the whole model rests on. If it does not hold, the promotion
+          # cannot fast-forward and every "has this shipped?" answer below is unreliable —
+          # so fail loudly here rather than produce a subtly wrong release.
+          if ! git merge-base --is-ancestor origin/main origin/next; then
+            {
+              echo "### Promotion blocked"
+              echo ""
+              echo '`main` is not an ancestor of `next`, so the release cannot fast-forward.'
+              echo ""
+              echo "Someone pushed to \`main\` directly, or a PR into a long-lived branch was"
+              echo "squashed instead of merged. Re-establish the ancestry with"
+              echo '`.github/scripts/reconcile-ancestry.sh`, then re-run this workflow.'
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "main is not an ancestor of next — refusing to promote." >&2
+            exit 1
+          fi
 
           tag="${INPUT_TAG:-$(open_release_tag)}"
           if [ -z "$tag" ]; then
-            echo "No open release tag on next — nothing to promote."
-            echo "Cut a release by merging work into \`next\` first." >> "$GITHUB_STEP_SUMMARY"
+            echo "No open release tag on next — nothing to promote." >&2
             exit 1
           fi
           if ! git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
@@ -68,100 +78,64 @@ jobs:
             exit 1
           fi
 
-          # --cherry-pick/--right-only drops commits whose patch already exists
-          # on main under a different SHA — squash merges and prior promotions
-          # rewrite SHAs, so a plain main..tag range would re-pick released work.
-          commits=$(git rev-list --reverse --no-merges --right-only --cherry-pick "origin/main...$tag")
-          if [ -z "$commits" ]; then
-            echo "$tag adds no commits on top of main — nothing to promote."
+          count=$(git rev-list --count --no-merges "origin/main..origin/next")
+          if [ "$count" -eq 0 ]; then
+            echo "$tag adds no commits on top of main — nothing to promote." >&2
             exit 1
           fi
-          count=$(printf '%s\n' "$commits" | wc -l | tr -d ' ')
 
-          branch="release/$tag"
-          git checkout -B "$branch" origin/main
-
-          # --empty=drop: a pick whose content is already on main under a different
-          # SHA lands empty, and git exits non-zero for that exactly as it does for a
-          # real conflict. --cherry-pick above catches most of those, but it matches on
-          # patch-id, which a squash merge changes — so already-released commits still
-          # reach this loop. Dropping them keeps a genuine conflict fatal.
-          for sha in $commits; do
-            if git cherry-pick -x --empty=drop "$sha"; then
-              continue
-            fi
-
-            # --empty only governs commits that start out empty. A pick can also stop
-            # with an empty result when merge resolution consumes the whole patch —
-            # git reports "now empty, possibly due to conflict resolution" and waits.
-            # No unmerged paths and nothing staged means there was nothing left to
-            # apply, so skip it; a real conflict leaves unmerged paths and still aborts.
-            if [ -z "$(git ls-files --unmerged)" ] && git diff --cached --quiet; then
-              git cherry-pick --skip
-              echo "Skipped ${sha:0:7} — resolved to no change against main."
-              continue
-            fi
-
-            git cherry-pick --abort || true
-            {
-              echo "### Promotion failed"
-              echo ""
-              echo "Cherry-pick of \`${sha:0:7}\` onto \`main\` conflicted."
-              echo "Resolve it on a \`$branch\` branch by hand, then open the release PR manually."
-            } >> "$GITHUB_STEP_SUMMARY"
-            echo "Cherry-pick conflict on $sha — aborting." >&2
-            exit 1
-          done
-
-          # Stamp the changelog here rather than on main: main is review-gated, so nothing in
-          # this design ever pushes to it directly.
+          # Stamp the changelog on `next` rather than on a promotion branch: the release is
+          # next's own history now, so the stamp has to be part of it. main still never takes
+          # a direct push — it only ever receives this commit through the PR merge.
           today=$(date -u +%Y-%m-%d)
           if [ -f CHANGELOG.md ] && grep -qE '^##[[:space:]]*\[Unreleased\]' CHANGELOG.md; then
             sed -i -E "0,/^##[[:space:]]*\[Unreleased\]/s|^##[[:space:]]*\[Unreleased\].*|## [${tag}] - ${today}|" CHANGELOG.md
             git add CHANGELOG.md
-            git commit -m "chore(release): stamp ${tag} in CHANGELOG"
+            git commit -m "docs(changelog): stamp ${tag} (${today})"
+            git push origin HEAD:next
+
+            # The tag is still provisional at this point — nothing has been released under
+            # it — so moving it onto the stamp keeps it on what main will actually contain.
+            git tag -f -a "$tag" -m "Release $tag (staging, stamped ${today})" HEAD
+            git push --force origin "refs/tags/$tag"
           fi
 
-          git push --force origin "$branch"
-
-          {
-            echo "tag=$tag"
-            echo "branch=$branch"
-            echo "count=$count"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Open the release PR
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPOSITORY: ${{ github.repository }}
-          TAG: ${{ steps.pick.outputs.tag }}
-          BRANCH: ${{ steps.pick.outputs.branch }}
-          COUNT: ${{ steps.pick.outputs.count }}
-        run: |
-          set -euo pipefail
-
-          existing=$(gh pr list --repo "$REPOSITORY" --base main --head "$BRANCH" \
-            --state open --json number --jq '.[0].number // empty')
-          if [ -n "${existing:-}" ]; then
-            gh pr comment "$existing" --body "Refreshed \`$BRANCH\` with the current contents of \`$TAG\` ($COUNT commits)."
-            echo "Updated existing release PR #$existing."
-            exit 0
-          fi
+          release_sha=$(git rev-parse HEAD)
 
           body=$(printf '%s\n' \
-            "Promotes **$TAG** from \`next\` to production." \
+            "Promotes \`next\` into \`main\` as **$tag**." \
             "" \
-            "$COUNT commit(s) cherry-picked from \`next\` onto \`main\`." \
+            "$count commit(s) ahead of \`main\`. \`next\` descends from \`main\`, so nothing is" \
+            "copied: the commits keep their SHAs and \`$tag\` already points at" \
+            "\`${release_sha:0:7}\`, which this carries onto \`main\` intact." \
             "" \
-            "On merge:" \
-            "1. \`release-tag.yml\` moves \`$TAG\` onto the \`main\` commit and publishes the GitHub Release." \
-            "2. \`publish.yml\` builds and publishes the package from that release." \
+            "**Approve — do not use the merge button.** \`promotion-merge.yml\` fast-forwards" \
+            "\`main\` onto this commit once the PR is approved and green, so \`main\` becomes the" \
+            "tagged commit itself rather than a merge commit above it. The button cannot" \
+            "fast-forward, and a squash would sever \`main\` from \`next\` entirely." \
             "" \
-            "No tests run on this PR — they already ran on \`next\`. See \`.github/BRANCH-AND-RELEASE-POLICY.md\`.")
+            "Then \`release-tag.yml\` publishes the GitHub Release for \`$tag\` and hands off" \
+            "to \`publish.yml\`.")
 
-          gh pr create \
-            --repo "$REPOSITORY" \
-            --base main \
-            --head "$BRANCH" \
-            --title "release: $TAG" \
-            --body "$body"
+          existing=$(gh pr list --repo "$REPOSITORY" --base main --head next \
+            --state open --json number --jq '.[0].number // empty')
+          if [ -n "${existing:-}" ]; then
+            gh pr edit "$existing" --title "release: $tag" --body "$body"
+            url=$(gh pr view "$existing" --repo "$REPOSITORY" --json url --jq .url)
+            echo "Updated existing release PR #$existing"
+          else
+            url=$(gh pr create --repo "$REPOSITORY" \
+              --base main --head next \
+              --title "release: $tag" --body "$body" --label release)
+          fi
+
+          {
+            echo "### Release PR ready"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Tag | \`$tag\` |"
+            echo "| Commits ahead of main | $count |"
+            echo "| Copied commits | none |"
+            echo "| PR | $url |"
+          } >> "$GITHUB_STEP_SUMMARY"

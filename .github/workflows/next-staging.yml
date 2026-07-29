@@ -8,8 +8,9 @@
 #                    · open release tag     → move that same tag forward onto this merge,
 #                                             so the merged PR's changes ship under it
 #
-# The tag on `next` is provisional and moves. It is frozen onto `main` by `release-tag.yml`
-# when the promotion PR lands. No GitHub Release is created here.
+# The tag on `next` is provisional and moves while the release is still open. It stops moving
+# the moment a promotion PR exists, and `main` then fast-forwards onto the exact commit it
+# points at — so no re-anchoring is ever needed. No GitHub Release is created here.
 name: Next Staging
 
 on:
@@ -106,12 +107,12 @@ jobs:
 
           open_tag="$(open_release_tag)"
 
-          # A promotion PR already carries a fixed set of cherry-picks. Advancing the tag now
-          # would make it cover commits that are not in that PR, and release-tag.yml would then
-          # re-anchor the tag on main — shipping less than the version claims. Leave the tag
-          # alone; the merge sitting on next is picked up by the next version instead.
+          # A promotion PR under review has already been read against a specific commit.
+          # Advancing the tag past it would silently change what the reviewer approved and
+          # what ships. Leave the tag alone; the merge sitting on next is picked up by the
+          # next version instead.
           if [ -n "$open_tag" ]; then
-            promo=$(gh pr list --repo "$REPOSITORY" --base main --head "release/$open_tag" \
+            promo=$(gh pr list --repo "$REPOSITORY" --base main --head next \
               --state open --json number --jq '.[0].number // empty')
             if [ -n "${promo:-}" ]; then
               echo "::warning::Release $open_tag is being promoted in PR #$promo — tag not advanced."
@@ -131,7 +132,9 @@ jobs:
           if [ -n "$open_tag" ]; then
             # Rule 2.ii — a release is already open on next. Move it forward so the changes
             # from the PR that just merged are covered by it. This is a deliberate force-move
-            # of a published tag; anyone who already fetched it gets a divergent ref.
+            # of a staging tag; anyone who already fetched it gets a divergent ref. It is only
+            # reachable while no promotion PR is open (guarded above), so a tag that has been
+            # put in front of a reviewer never moves.
             git tag -f -a "$open_tag" -m "Release $open_tag (staging, advanced to ${HEAD_SHA:0:7})" "$HEAD_SHA"
             git push --force origin "refs/tags/$open_tag"
             echo "Advanced open release tag $open_tag → ${HEAD_SHA:0:7}"
