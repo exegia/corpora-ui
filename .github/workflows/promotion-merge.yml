@@ -214,14 +214,18 @@ jobs:
           git push origin "HEAD:$BASE"
 
           # Pushing the head's commits into the base makes GitHub mark the PR merged on its
-          # own. Comment for the audit trail, and close explicitly if it somehow stayed open.
+          # own — observed on #34 and #37, so no fallback close is needed. The previous
+          # attempt at one raced GitHub: the state read returned OPEN, GitHub finished marking
+          # the PR merged, and `gh pr close` then failed with "already merged", which under
+          # `set -e` turned a cosmetic cleanup into a failed promotion. The merge had already
+          # succeeded and been pushed; only the report was wrong.
+          #
+          # A green pipeline that reports red is worse than no report — it teaches everyone to
+          # ignore the signal. So this is a comment for the audit trail and nothing else, and
+          # it must never be able to fail the job.
           gh pr comment "$PR_NUMBER" --repo "$REPOSITORY" --body \
-            "✅ Merged \`$HEAD\` → \`$BASE\` at \`$(git rev-parse --short HEAD)\` by **Promotion Merge**, so the strategy is guaranteed rather than left to the merge button."
-
-          if [ "$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json state --jq .state)" = "OPEN" ]; then
-            gh pr close "$PR_NUMBER" --repo "$REPOSITORY" \
-              --comment "Commits are on \`$BASE\`; closing."
-          fi
+            "✅ Merged \`$HEAD\` → \`$BASE\` at \`$(git rev-parse --short HEAD)\` by **Promotion Merge**, so the strategy is guaranteed rather than left to the merge button." \
+            || echo "::warning::Could not comment on PR #$PR_NUMBER — the merge itself succeeded."
 
           {
             echo "### Promoted $HEAD → $BASE"

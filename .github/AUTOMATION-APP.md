@@ -86,19 +86,26 @@ stamp to `next` with `GITHUB_TOKEN`. Adding a `pull_request` rule there would ha
 promotion — but only once a `CHANGELOG.md` existed, since the stamp block is skipped without
 one. The breakage would have surfaced long after the rule was set.
 
-### Extending the same protection to `next`
+### `next` — done
 
-Now possible, because `promote-to-main.yml` mints an app token. Do it only once that change has
-reached `next` — the workflow runs from the dispatched ref, so a dispatch against a `next` that
-predates it would still push as `GITHUB_TOKEN` and be blocked.
+Applied 2026-07-29 to the `prod` ruleset (id `19884404`), which covers `refs/heads/main` and
+`refs/heads/next`:
 
-Add to the `prod` ruleset, bypass actor first:
+| | |
+|---|---|
+| rules | `deletion`, `non_fast_forward`, **`pull_request`** |
+| merge methods | `merge` only — squash and rebase forbidden |
+| bypass | `Integration:4425676` added alongside the existing actors |
 
-```json
-{ "actor_id": 4425676, "actor_type": "Integration", "bypass_mode": "always" }
-```
+Applied in two separate writes — bypass actor first, verified, then the rule — so there was no
+window in which the rule existed without the app being able to bypass it.
 
-then the `pull_request` rule. Never the reverse.
+This was only safe once `promote-to-main.yml` reached `next`, because that workflow pushes the
+changelog stamp there and is `workflow_dispatch`-only: it runs the file from the dispatched ref,
+so a dispatch against an older `next` would still have pushed as `GITHUB_TOKEN`.
+
+`main` is additionally covered by `main-no-direct-push` (id `19980985`). The two rulesets
+compose; both are active.
 
 ## Rotation
 
