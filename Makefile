@@ -30,8 +30,8 @@ pkg_name = node -p "require('./$(REACT_DIR)/package.json').name"
 
 .PHONY: help install serve build preview test typecheck lint format check ci pack \
         clean distclean pkg-version next-version version-set release-notes \
-        pr-guard release-pr release-branch delete-branch publish tag-release \
-        rulesets-apply rulesets-diff
+        pr-guard release-pr release-branch delete-branch publish publish-github \
+        tag-release rulesets-apply rulesets-diff
 
 help: ## List available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -161,6 +161,17 @@ publish: ## Publish react/ to npm, skipping a version that is already public
 	  echo "$$name@$$version is already on npm — skipping"; exit 0; \
 	fi; \
 	cd $(REACT_DIR) && npm publish --provenance --access public
+
+# GitHub Packages requires auth even for reads, so the skip-check relies on the
+# same .npmrc token `npm publish` does. No --provenance: npmjs-only feature.
+publish-github: ## Publish react/ to GitHub Packages, skipping a version already there
+	@set -eu; \
+	name="$$($(pkg_name))"; version="$$($(pkg_version))"; \
+	registry=https://npm.pkg.github.com; \
+	if npm view "$$name@$$version" version --registry "$$registry" >/dev/null 2>&1; then \
+	  echo "$$name@$$version is already on GitHub Packages — skipping"; exit 0; \
+	fi; \
+	cd $(REACT_DIR) && npm publish --registry "$$registry"
 
 tag-release: ## Tag HEAD as v<package version> and publish the GitHub Release
 	@set -eu; \
