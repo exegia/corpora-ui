@@ -10,3 +10,6 @@ dist-pack/
 /.idea/prettier.xml
 /.idea/ShadcnHelperSettings.xml
 /.idea/vcs.xml
+
+# Claude Code local permission overrides
+.claude/settings.local.json

@@ -5,8 +5,8 @@ plus its documentation site — in one Vite + React codebase.
 
 ## Two things live in `src/`
 
-1. **The library** (published to npm as `@corpora/ui`, entry: `src/index.ts`)
-2. **The docs site** (this Vite app, entry: `src/main.tsx`) — like
+1. **The library** (published to npm as `@exegia/corpora-ui`, entry: `react/src/index.ts`)
+2. **The docs site** (this Vite app, entry: `react/src/main.tsx`) — like
    ui.elevenlabs.io for audio, but for corpora's research UI.
 
 ```
@@ -49,16 +49,16 @@ src/
 
 ## Routes
 
-| Path                | Page              |
-| ------------------- | ----------------- |
-| `/`                 | Home              |
-| `/atoms`            | Category index    |
-| `/atoms/:slug`      | Entry detail      |
-| `/components`       | Category index    |
-| `/components/:slug` | Entry detail      |
-| `/blocks`           | Category index    |
-| `/blocks/:slug`     | Entry detail      |
-| `*`                 | Not found         |
+| Path                | Page           |
+| ------------------- | -------------- |
+| `/`                 | Home           |
+| `/atoms`            | Category index |
+| `/atoms/:slug`      | Entry detail   |
+| `/components`       | Category index |
+| `/components/:slug` | Entry detail   |
+| `/blocks`           | Category index |
+| `/blocks/:slug`     | Entry detail   |
+| `*`                 | Not found      |
 
 Routes are generated in `routes.tsx` by iterating `registry/index.ts`
 categories — adding a category never touches the router by hand.
@@ -81,6 +81,6 @@ props table and usage snippet.
   the first components stabilize; externalize react/react-dom).
 - **shadcn registry**: the registry files mirror the shadcn `registry.json`
   item shape (slug = registry name, `registryDependencies`), so generating
-  `registry.json` for `bunx shadcn add @corpora/<name>` is a mechanical step.
+  `registry.json` for `bunx shadcn add @exegia/corpora-ui/<name>` is a mechanical step.
 - **SPA hosting**: client-side routing needs a catch-all rewrite to
   `index.html` on the host (Vite dev/preview handle it automatically).

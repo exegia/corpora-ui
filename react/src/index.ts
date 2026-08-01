@@ -28,8 +28,13 @@ export * from "./components/composed/social-providers"
 export * from "./components/blocks/auth/auth-shell"
 export * from "./components/blocks/auth/code-auth-block"
 export * from "./components/blocks/auth/forgot-password-block"
+export * from "./components/blocks/auth/linked-accounts-block"
 export * from "./components/blocks/auth/login-block"
+export * from "./components/blocks/auth/onboarding-block"
+export * from "./components/blocks/auth/passkey-manager-block"
+export * from "./components/blocks/auth/passkey-sign-in-block"
 export * from "./components/blocks/auth/signup-block"
+export * from "./components/blocks/auth/update-password-block"
 
 // lib
 export * from "./lib/auth-accent"
