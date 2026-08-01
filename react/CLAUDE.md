@@ -7,6 +7,16 @@ are installed HERE (`cd react && bun add <pkg>`), never at the repo root. Verify
 `make check` (runs `tsc -b --noEmit` + eslint) — plain `tsc --noEmit` checks
 nothing here (references-only root tsconfig).
 
+## Tests
+
+`bun test` (run it from `react/`, not the repo root — `bunfig.toml` lives here
+and carries the preload). `src/test/setup.ts` registers happy-dom and stubs
+`matchMedia` + `Element.animate`, which motion needs; component tests use
+`@testing-library/react`. Anything behind `MorphStep`/`Reveal` arrives on an
+animation frame, so assert with `findBy*`, not `getBy*`. Base UI renders a
+hidden native input beside its Checkbox root, so query checkboxes by role
+rather than by label — `getByLabelText` matches both.
+
 ## Pulling coss components
 
 `components.json` maps the `@coss` registry (coss.com/ui). Install base
