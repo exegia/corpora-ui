@@ -13,7 +13,8 @@ import { cn } from "@/lib/utils";
 
 export type SocialProvider = "google" | "apple" | "github" | "x";
 
-const PROVIDERS: Record<
+/** Label + brand mark per provider, shared with the auth blocks. */
+export const SOCIAL_PROVIDERS: Record<
   SocialProvider,
   { label: string; Icon: React.ComponentType<{ className?: string }> }
 > = {
@@ -63,7 +64,7 @@ export function SocialProviders({
       )}
     >
       {providers.map((provider) => {
-        const { label, Icon } = PROVIDERS[provider];
+        const { label, Icon } = SOCIAL_PROVIDERS[provider];
         return (
           <Button
             key={provider}
