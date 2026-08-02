@@ -44,6 +44,16 @@ export interface SignupBlockProps {
   showNameField?: boolean;
   /** Require the terms checkbox before submitting. */
   showTerms?: boolean;
+  /**
+   * Controls the terms checkbox. Pass it with `onTermsCheckedChange` when
+   * something outside the block has to tick the box — an "I agree" action in
+   * your own terms dialog, say. Omit to let the block own the state.
+   */
+  termsChecked?: boolean;
+  /** Starting state of the terms checkbox while it is uncontrolled. */
+  defaultTermsChecked?: boolean;
+  /** Fires on every change, controlled or not. */
+  onTermsCheckedChange?: (checked: boolean) => void;
   /** Block submission until every password requirement is met. */
   enforceStrongPassword?: boolean;
   onSubmit?: (data: {
@@ -64,6 +74,9 @@ export function SignupBlock({
   providers = ["google", "apple", "github"],
   showNameField = true,
   showTerms = true,
+  termsChecked,
+  defaultTermsChecked = false,
+  onTermsCheckedChange,
   enforceStrongPassword = true,
   onSubmit,
   termsComponent,
@@ -79,7 +92,17 @@ export function SignupBlock({
   const [loadingProvider, setLoadingProvider] =
     React.useState<SocialProvider | null>(null);
   const [password, setPassword] = React.useState("");
-  const [terms, setTerms] = React.useState(false);
+  // Controlled when `termsChecked` is passed, uncontrolled otherwise. The
+  // internal state is kept either way, so a block that switches between the
+  // two mid-life does not lose the box, and the callback fires in both modes.
+  const [uncontrolledTerms, setUncontrolledTerms] =
+    React.useState(defaultTermsChecked);
+  const terms = termsChecked ?? uncontrolledTerms;
+
+  function handleTermsChange(checked: boolean) {
+    if (termsChecked === undefined) setUncontrolledTerms(checked);
+    onTermsCheckedChange?.(checked);
+  }
   // Tracked from each input's own constraint validation rather than a regex.
   // The values stay uncontrolled — only validity is needed, and the form reads
   // values from FormData on submit.
@@ -233,7 +256,9 @@ export function SignupBlock({
                   <Checkbox
                     id={termsId}
                     checked={terms}
-                    onCheckedChange={(checked) => setTerms(checked === true)}
+                    onCheckedChange={(checked) =>
+                      handleTermsChange(checked === true)
+                    }
                     disabled={busy}
                   />
                   <Label htmlFor={termsId} className="font-normal">
