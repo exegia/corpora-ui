@@ -13,8 +13,13 @@ on:
       - "release/v*"
 
 # Two features merging at once must not both rewrite the release PR body.
+#
+# `event.pull_request.base.ref` throughout, NOT `github.base_ref`: on a stacked
+# PR the latter reports the stack's ultimate base (main), which would group the
+# release branches together here and hand `make release-pr` the wrong branch
+# below. See .github/workflows/pr.yml for the full explanation.
 concurrency:
-  group: release-pr-${{ github.base_ref }}
+  group: release-pr-${{ github.event.pull_request.base.ref }}
   cancel-in-progress: false
 
 permissions:
@@ -49,5 +54,5 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           GH_REPO: ${{ github.repository }}
-          BRANCH: ${{ github.base_ref }}
+          BRANCH: ${{ github.event.pull_request.base.ref }}
         run: make release-pr

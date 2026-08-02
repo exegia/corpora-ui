@@ -11,12 +11,7 @@ const STRONG = "Str0ngPassword";
 async function fillForm(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText("Name"), "Ada Researcher");
   await user.type(screen.getByLabelText("Email"), "ada@corpora.local");
-  // The password field carries no accessible name on this branch, so it is
-  // reached by placeholder.
-  await user.type(
-    await screen.findByPlaceholderText("Create a password"),
-    STRONG,
-  );
+  await user.type(await screen.findByLabelText("Password"), STRONG);
 }
 
 // Base UI renders a hidden native input beside the Checkbox root, so the box is
@@ -108,6 +103,40 @@ describe("SignupBlock terms checkbox", () => {
       "Please accept the terms to continue.",
     );
     expect(onSubmit).not.toHaveBeenCalled();
+  });
+});
+
+describe("SignupBlock field labelling", () => {
+  test("names every field, including the revealed password", async () => {
+    const user = userEvent.setup();
+    render(<SignupBlock />);
+
+    expect(screen.getByLabelText("Name")).toBeDefined();
+    expect(screen.getByLabelText("Email")).toBeDefined();
+
+    // The password field only appears once the email validates.
+    await user.type(screen.getByLabelText("Email"), "ada@corpora.local");
+    expect(await screen.findByLabelText("Password")).toBeDefined();
+  });
+
+  test("gives each instance its own password id", async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <SignupBlock showNameField={false} />
+        <SignupBlock showNameField={false} />
+      </>,
+    );
+
+    const emails = screen.getAllByLabelText("Email");
+    await user.type(emails[0], "ada@corpora.local");
+    await user.type(emails[1], "ben@corpora.local");
+
+    // Two blocks on one page must not collide on a hard-coded id, or the
+    // second label would point at the first block's input.
+    const passwords = await screen.findAllByLabelText("Password");
+    expect(passwords).toHaveLength(2);
+    expect(passwords[0].id).not.toBe(passwords[1].id);
   });
 });
 
