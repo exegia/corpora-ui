@@ -15,6 +15,8 @@ export default function SignupDemo() {
   const [social, setSocial] = React.useState(true)
   const [nameField, setNameField] = React.useState(true)
   const [terms, setTerms] = React.useState(true)
+  const [controlTerms, setControlTerms] = React.useState(false)
+  const [accepted, setAccepted] = React.useState(false)
   const [resetKey, setResetKey] = React.useState(0)
   const [accent, setAccent] = React.useState<(typeof ACCENTS)[number]>("none")
   const [logo, setLogo] = React.useState(false)
@@ -32,6 +34,23 @@ export default function SignupDemo() {
           <DemoToggle label="social" checked={social} onChange={setSocial} />
           <DemoToggle label="showNameField" checked={nameField} onChange={setNameField} />
           <DemoToggle label="showTerms" checked={terms} onChange={setTerms} />
+          {/* Stands in for a consumer that ticks the box from its own terms
+              dialog: with this on the state lives out here, so "I agree" moves
+              the checkbox without the checkbox being touched. */}
+          <DemoToggle
+            label="controlled terms"
+            checked={controlTerms}
+            onChange={setControlTerms}
+          />
+          {controlTerms && (
+            <button
+              type="button"
+              className="text-xs underline"
+              onClick={() => setAccepted((value) => !value)}
+            >
+              {accepted ? "withdraw agreement" : "I agree"}
+            </button>
+          )}
           <DemoSelect label="accent" value={accent} options={ACCENTS} onChange={setAccent} />
           <DemoToggle label="logo" checked={logo} onChange={setLogo} />
           <button
@@ -51,6 +70,8 @@ export default function SignupDemo() {
         providers={social ? ["google", "apple", "github"] : []}
         showNameField={nameField}
         showTerms={terms}
+        termsChecked={controlTerms ? accepted : undefined}
+        onTermsCheckedChange={controlTerms ? setAccepted : undefined}
         onSubmit={async () => {
           await delay(1200)
           if (outcome === "error") {

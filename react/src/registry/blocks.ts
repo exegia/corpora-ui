@@ -95,6 +95,12 @@ export const blocks: RegistryEntry[] = [
         description: "Toggle the name field and terms checkbox.",
       },
       {
+        name: "termsChecked / onTermsCheckedChange",
+        type: "boolean / (checked: boolean) => void",
+        description:
+          "Control the terms checkbox from outside \u2014 an \u201cI agree\u201d action in your own terms dialog, say. Omit both to let the block own it; defaultTermsChecked sets the uncontrolled starting state.",
+      },
+      {
         name: "enforceStrongPassword",
         type: "boolean",
         default: "true",
