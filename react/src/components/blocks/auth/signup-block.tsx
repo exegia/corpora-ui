@@ -67,6 +67,7 @@ export function SignupBlock({
 }: SignupBlockProps) {
   const nameId = React.useId();
   const emailId = React.useId();
+  const passwordId = React.useId();
   const termsId = React.useId();
   const [status, setStatus] = React.useState<AuthStatus>("idle");
   const [error, setError] = React.useState<string | null>(null);
@@ -198,6 +199,7 @@ export function SignupBlock({
                   id={emailId}
                   name="email"
                   type="email"
+                  aria-label="Email"
                   autoComplete="email"
                   placeholder="you@example.com"
                   required
@@ -209,9 +211,11 @@ export function SignupBlock({
               </Field>
               <Reveal show={emailValid}>
                 <Field name="password">
-                  <FieldLabel>Password</FieldLabel>
+                  <FieldLabel htmlFor={passwordId}>Password</FieldLabel>
                   <PasswordInput
+                    id={passwordId}
                     name="password"
+                    aria-label="Password"
                     autoComplete="new-password"
                     placeholder="Create a password"
                     showStrength
