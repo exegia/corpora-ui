@@ -101,6 +101,12 @@ export const blocks: RegistryEntry[] = [
           "Control the terms checkbox from outside \u2014 an \u201cI agree\u201d action in your own terms dialog, say. Omit both to let the block own it; defaultTermsChecked sets the uncontrolled starting state.",
       },
       {
+        name: "termsComponent",
+        type: "React.ReactNode",
+        description:
+          "Replaces the built-in \u201cterms\u201d link inside the consent label \u2014 pass your own dialog trigger to render it inline instead of wiring onTerms.",
+      },
+      {
         name: "enforceStrongPassword",
         type: "boolean",
         default: "true",
