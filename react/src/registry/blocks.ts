@@ -95,6 +95,12 @@ export const blocks: RegistryEntry[] = [
         description: "Toggle the name field and terms checkbox.",
       },
       {
+        name: "termsComponent",
+        type: "React.ReactNode",
+        description:
+          "Replaces the built-in \u201cterms\u201d link inside the consent label \u2014 pass your own dialog trigger to render it inline instead of wiring onTerms.",
+      },
+      {
         name: "enforceStrongPassword",
         type: "boolean",
         default: "true",

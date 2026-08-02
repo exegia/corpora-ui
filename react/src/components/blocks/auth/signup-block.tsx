@@ -31,6 +31,11 @@ import {
 export interface SignupBlockProps {
   title?: string;
   description?: string;
+  /**
+   * Replaces the built-in "terms" link inside the consent label — pass your
+   * own dialog trigger to render it inline instead of wiring `onTerms`.
+   */
+  termsComponent?: React.ReactNode;
   /** Brand mark rendered above the title. Omit for no logo row at all. */
   logo?: React.ReactNode;
   /** Brand accent for the primary action. Omit to keep the default primary. */
@@ -61,6 +66,7 @@ export function SignupBlock({
   showTerms = true,
   enforceStrongPassword = true,
   onSubmit,
+  termsComponent,
   onProviderSelect,
   onLogin,
   onTerms,
@@ -232,13 +238,11 @@ export function SignupBlock({
                   />
                   <Label htmlFor={termsId} className="font-normal">
                     I agree to the{" "}
-                    <Button
-                      variant="link"
-                      type="button"
-                      onClick={onTerms}
-                    >
-                      terms
-                    </Button>
+                    {termsComponent ?? (
+                      <Button variant="link" type="button" onClick={onTerms}>
+                        terms
+                      </Button>
+                    )}
                   </Label>
                 </div>
               )}
