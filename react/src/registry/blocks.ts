@@ -450,6 +450,67 @@ export const blocks: RegistryEntry[] = [
 <OnboardingBlock steps={steps} onComplete={saveProfile} />`,
   },
   {
+    slug: "profile-card",
+    name: "Profile card",
+    description:
+      "Account card that opens an action menu: the trigger is a rich identity chip (avatar over name and handle), the popup a grouped menu ending in a destructive sign-out.",
+    category: "blocks",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/profile-card-demo")),
+    registryDependencies: ["user-avatar", "button", "menu"],
+    props: [
+      {
+        name: "user",
+        type: "ProfileCardUser",
+        required: true,
+        description:
+          "Identity on the card ({ name, username?, avatar?, initials? }). Initials fall back to the name's first and last word.",
+      },
+      {
+        name: "items",
+        type: "ProfileCardItem[]",
+        default: "defaultProfileCardItems",
+        description:
+          "The whole menu, flat: actions ({ id, label, icon?, shortcut?, disabled?, variant?, onSelect? }) plus { type: “separator” } and { type: “label”, label } entries. Each run between separators becomes its own group, headed by the label inside it.",
+      },
+      {
+        name: "onSelect",
+        type: "() => void | Promise<void>",
+        description:
+          "Per item. Returning a promise puts the card in its loading state until it settles; a rejection goes to onError.",
+      },
+      {
+        name: "align / side / sideOffset",
+        type: '"center" | "start" | "end" / Side / number',
+        default: '"center" / "bottom" / 8',
+        description: "Menu placement relative to the card.",
+      },
+      {
+        name: "open / defaultOpen / onOpenChange",
+        type: "boolean / boolean / (open, details) => void",
+        description: "Control the menu, or observe it.",
+      },
+      {
+        name: "sound",
+        type: "boolean",
+        default: "true",
+        description:
+          "Press/release cues on the card plus open/close cues on the menu. Inert until the app calls bindSounds().",
+      },
+    ],
+    usage: `import { ProfileCardBlock } from "@corpora/ui"
+
+<ProfileCardBlock
+  user={{ name: "Jenny Hamilton", username: "@jennycodes", avatar: src }}
+  items={[
+    { type: "label", label: "Management" },
+    { id: "profile", label: "Profile", icon: <UserIcon />, onSelect: () => navigate("/profile") },
+    { type: "separator" },
+    { id: "sign-out", label: "Log out", icon: <LogOutIcon />, variant: "destructive", onSelect: signOut },
+  ]}
+/>`,
+  },
+  {
     slug: "navbar",
     name: "Navbar",
     description: "Application top navigation with branding and user menu.",
@@ -459,8 +520,87 @@ export const blocks: RegistryEntry[] = [
   {
     slug: "sidebar",
     name: "Sidebar",
-    description: "Collapsible application sidebar navigation.",
+    description:
+      "Collapsible application sidebar navigation, driven by section/item data. The navigation panel only — it claims no page layout. Collapses to an icon rail (⌘B), becomes a drawer under 768px, and animates the active pill between entries.",
     category: "blocks",
-    status: "planned",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/sidebar-demo")),
+    registryDependencies: ["animated-sidebar"],
+    props: [
+      {
+        name: "sections",
+        type: "SidebarNavSection[]",
+        required: true,
+        description:
+          "Titled runs of entries — { id, label?, items }. An item is { id, label, icon?, href?, badge?, disabled?, target?, onSelect?, items? }; an item with `items` expands instead of navigating. Section titles hide while collapsed.",
+      },
+      {
+        name: "activeId",
+        type: "string",
+        description:
+          "Id of the current entry — top-level or nested. Drives the sliding active pill, aria-current, and auto-expands the parent of an active child.",
+      },
+      {
+        name: "onNavigate",
+        type: "(item) => void",
+        description:
+          "Fires for every selection, after the entry's own onSelect. Entries with children toggle instead and never fire it.",
+      },
+      {
+        name: "header / footer",
+        type: "React.ReactNode",
+        description:
+          "Brand row above the navigation, and a pinned area below it — an account card, a version note.",
+      },
+      {
+        name: "collapsible / variant / side",
+        type: '"icon" | "offcanvas" | "none" / "sidebar" | "floating" | "inset" / "left" | "right"',
+        default: '"icon" / "sidebar" / "left"',
+        description: "How the rail collapses, how the panel is framed, and which edge it sits on.",
+      },
+      {
+        name: "open / defaultOpen / onOpenChange",
+        type: "boolean / boolean / (open) => void",
+        description:
+          "Control the desktop rail. ⌘B toggles it either way. Uncontrolled by default (open).",
+      },
+      {
+        name: "openMobile / defaultOpenMobile / onOpenMobileChange",
+        type: "boolean / boolean / (open) => void",
+        description:
+          "Under 768px the panel is a modal drawer. The in-panel trigger can't reach it from outside, so open it from your own header button through these.",
+      },
+      {
+        name: "width / iconWidth / mobileWidth",
+        type: "string",
+        default: '"16rem" / "4.25rem" / "18rem"',
+        description: "Rail widths as CSS lengths.",
+      },
+      {
+        name: "showTrigger",
+        type: "boolean",
+        default: "true",
+        description: "Collapse toggle in the header row.",
+      },
+    ],
+    usage: `import { SidebarBlock } from "@corpora/ui"
+
+<SidebarBlock
+  sections={[
+    {
+      id: "work",
+      label: "Research",
+      items: [
+        { id: "search", label: "Search", icon: <SearchIcon /> },
+        { id: "library", label: "Library", icon: <LibraryIcon />, items: [
+          { id: "manuscripts", label: "Manuscripts" },
+        ] },
+      ],
+    },
+  ]}
+  activeId={route}
+  onNavigate={(item) => navigate(item.id)}
+  footer={<ProfileCardBlock user={user} side="top" />}
+/>`,
   },
 ]
