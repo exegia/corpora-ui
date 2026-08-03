@@ -450,6 +450,62 @@ export const blocks: RegistryEntry[] = [
 <OnboardingBlock steps={steps} onComplete={saveProfile} />`,
   },
   {
+    slug: "profile-card",
+    name: "Profile card",
+    description:
+      "Account card that opens an action menu: the trigger is a rich identity chip (avatar over name and handle), the popup a grouped menu ending in a destructive sign-out.",
+    category: "blocks",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/profile-card-demo")),
+    registryDependencies: ["avatar", "button", "menu"],
+    props: [
+      {
+        name: "user",
+        type: "ProfileCardUser",
+        required: true,
+        description:
+          "Identity on the card ({ name, username?, avatar?, initials? }). Initials fall back to the name's first and last word.",
+      },
+      {
+        name: "groups",
+        type: "ProfileCardGroup[]",
+        description:
+          "Replaces the default menu entirely — { label?, items: { id, label, icon?, shortcut?, disabled?, variant? } }. Groups are separated automatically.",
+      },
+      {
+        name: "onProfile / onSettings / onTeams / onInvite / onSignOut",
+        type: "() => void | Promise<void>",
+        description:
+          "Drive the default menu. Returning a promise puts the card in its loading state until it settles; a rejection goes to onError.",
+      },
+      {
+        name: "align / side / sideOffset",
+        type: '"center" | "start" | "end" / Side / number',
+        default: '"center" / "bottom" / 8',
+        description: "Menu placement relative to the card.",
+      },
+      {
+        name: "open / defaultOpen / onOpenChange",
+        type: "boolean / boolean / (open, details) => void",
+        description: "Control the menu, or observe it.",
+      },
+      {
+        name: "sound",
+        type: "boolean",
+        default: "true",
+        description:
+          "Press/release cues on the card plus open/close cues on the menu. Inert until the app calls bindSounds().",
+      },
+    ],
+    usage: `import { ProfileCardBlock } from "@corpora/ui"
+
+<ProfileCardBlock
+  user={{ name: "Jenny Hamilton", username: "@jennycodes", avatar: src }}
+  onProfile={() => navigate("/profile")}
+  onSignOut={signOut}
+/>`,
+  },
+  {
     slug: "navbar",
     name: "Navbar",
     description: "Application top navigation with branding and user menu.",
