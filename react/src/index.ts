@@ -19,12 +19,14 @@ export * from "./components/ui/label"
 export * from "./components/ui/menu"
 export * from "./components/ui/otp-field"
 export * from "./components/ui/separator"
+export * from "./components/ui/skeleton"
 export * from "./components/ui/spinner"
 export * from "./components/ui/textarea"
 
 // components
 export * from "./components/composed/password-input"
 export * from "./components/composed/social-providers"
+export * from "./components/composed/user-avatar"
 
 // blocks
 export * from "./components/blocks/auth/auth-shell"

@@ -457,7 +457,7 @@ export const blocks: RegistryEntry[] = [
     category: "blocks",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/profile-card-demo")),
-    registryDependencies: ["avatar", "button", "menu"],
+    registryDependencies: ["user-avatar", "button", "menu"],
     props: [
       {
         name: "user",

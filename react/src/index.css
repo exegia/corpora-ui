@@ -139,6 +139,10 @@
   --animate-caret-blink: 1s ease-out infinite caret-blink
 ;
   --animate-input-shake: input-shake 0.4s ease-in-out;
+  --animate-skeleton: skeleton 2s -1s infinite linear;
+  @keyframes skeleton {
+    to { background-position: -200% 0; }
+  }
   @keyframes input-shake {
     0%, 100% { translate: 0; }
     20% { translate: -6px 0; }
