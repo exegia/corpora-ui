@@ -39,9 +39,15 @@ export * from "./components/blocks/auth/passkey-manager-block"
 export * from "./components/blocks/auth/passkey-sign-in-block"
 export * from "./components/blocks/auth/signup-block"
 export * from "./components/blocks/auth/update-password-block"
+export * from "./components/blocks/nav/sidebar-block"
 export * from "./components/blocks/profile/profile-card-block"
+
+// motion primitives
+export * from "./components/motion/animated-sidebar"
+export * from "./components/motion/shared-layout-bg"
 
 // lib
 export * from "./lib/auth-accent"
+export * from "./lib/ease"
 export * from "./lib/sound"
 export * from "./lib/utils"
