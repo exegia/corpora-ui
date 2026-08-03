@@ -1,7 +1,11 @@
+import { LogOutIcon, SettingsIcon, UserIcon, UserPlusIcon, UsersIcon } from "lucide-react"
 import * as React from "react"
 
 import { DemoSelect, DemoStage, DemoToggle } from "@/components/docs/demo-controls"
-import { ProfileCardBlock } from "@/components/blocks/profile/profile-card-block"
+import {
+  ProfileCardBlock,
+  type ProfileCardItem,
+} from "@/components/blocks/profile/profile-card-block"
 
 const USER = {
   name: "Jenny Hamilton",
@@ -19,6 +23,48 @@ export default function ProfileCardDemo() {
   const [withAvatar, setWithAvatar] = React.useState(true)
   const [withUsername, setWithUsername] = React.useState(true)
   const [action, setAction] = React.useState<string | null>(null)
+
+  const items: ProfileCardItem[] = [
+    { type: "label", label: "Management" },
+    {
+      id: "profile",
+      label: "Profile",
+      icon: <UserIcon aria-hidden="true" />,
+      onSelect: () => setAction("profile"),
+    },
+    {
+      id: "settings",
+      label: "Settings",
+      icon: <SettingsIcon aria-hidden="true" />,
+      shortcut: "⌘,",
+      onSelect: () => setAction("settings"),
+    },
+    { type: "separator" },
+    {
+      id: "teams",
+      label: "Teams",
+      icon: <UsersIcon aria-hidden="true" />,
+      onSelect: () => setAction("teams"),
+    },
+    {
+      id: "invite",
+      label: "Invite",
+      icon: <UserPlusIcon aria-hidden="true" />,
+      onSelect: () => setAction("invite"),
+    },
+    { type: "separator" },
+    {
+      id: "sign-out",
+      label: "Log out",
+      icon: <LogOutIcon aria-hidden="true" />,
+      variant: "destructive",
+      onSelect: async () => {
+        setAction("signing out…")
+        await delay(1200)
+        setAction("signed out")
+      },
+    },
+  ]
 
   return (
     <DemoStage
@@ -49,19 +95,11 @@ export default function ProfileCardDemo() {
       <div className="w-full max-w-64">
         <ProfileCardBlock
           align={align}
+          items={items}
           user={{
             name: USER.name,
             username: withUsername ? USER.username : undefined,
             avatar: withAvatar ? USER.avatar : undefined,
-          }}
-          onProfile={() => setAction("profile")}
-          onSettings={() => setAction("settings")}
-          onTeams={() => setAction("teams")}
-          onInvite={() => setAction("invite")}
-          onSignOut={async () => {
-            setAction("signing out…")
-            await delay(1200)
-            setAction("signed out")
           }}
         />
       </div>

@@ -51,25 +51,26 @@ describe("ProfileCardBlock", () => {
 
   test("fires the handler behind the selected item", async () => {
     const user = userEvent.setup();
-    const onSettings = mock(() => {});
-    render(<ProfileCardBlock user={USER} onSettings={onSettings} />);
+    const onSelect = mock(() => {});
+    render(
+      <ProfileCardBlock
+        items={[{ id: "settings", label: "Settings", onSelect }]}
+        user={USER}
+      />,
+    );
 
     await user.click(screen.getByRole("button"));
     await user.click(await screen.findByRole("menuitem", { name: "Settings" }));
 
-    expect(onSettings).toHaveBeenCalled();
+    expect(onSelect).toHaveBeenCalled();
   });
 
-  test("groups replace the default menu", async () => {
+  test("items replace the default menu", async () => {
     const user = userEvent.setup();
-    const onSelect = mock(() => {});
     render(
       <ProfileCardBlock
+        items={[{ id: "switch", label: "Switch team" }]}
         user={USER}
-        groups={[
-          { label: "Workspace", items: [{ id: "switch", label: "Switch team", onSelect }] },
-        ]}
-        onSignOut={() => {}}
       />,
     );
 
@@ -81,16 +82,46 @@ describe("ProfileCardBlock", () => {
     expect(screen.queryByRole("menuitem", { name: "Log out" })).toBeNull();
   });
 
+  test("labels name the group they head, up to the next separator", async () => {
+    const user = userEvent.setup();
+    render(
+      <ProfileCardBlock
+        items={[
+          { type: "label", label: "Workspace" },
+          { id: "switch", label: "Switch team" },
+          { type: "separator" },
+          { id: "sign-out", label: "Log out", variant: "destructive" },
+        ]}
+        user={USER}
+      />,
+    );
+
+    await user.click(screen.getByRole("button"));
+
+    const named = await screen.findByRole("group", { name: "Workspace" });
+    expect(named.querySelectorAll('[data-slot="menu-item"]')).toHaveLength(1);
+    expect(screen.getAllByRole("group")).toHaveLength(2);
+    expect(
+      screen.getByRole("menuitem", { name: "Log out" }).getAttribute("data-variant"),
+    ).toBe("destructive");
+  });
+
   test("reports a rejected action through onError", async () => {
     const user = userEvent.setup();
     const onError = mock(() => {});
     render(
       <ProfileCardBlock
-        user={USER}
+        items={[
+          {
+            id: "sign-out",
+            label: "Log out",
+            onSelect: async () => {
+              throw new Error("Session already ended.");
+            },
+          },
+        ]}
         onError={onError}
-        onSignOut={async () => {
-          throw new Error("Session already ended.");
-        }}
+        user={USER}
       />,
     );
 

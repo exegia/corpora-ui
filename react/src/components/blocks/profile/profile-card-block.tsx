@@ -37,8 +37,9 @@ export interface ProfileCardUser {
   initials?: string;
 }
 
-/** One row of the menu. */
+/** An actionable row of the menu. */
 export interface ProfileCardAction {
+  type?: "item";
   id: string;
   label: string;
   icon?: React.ReactNode;
@@ -46,27 +47,63 @@ export interface ProfileCardAction {
   shortcut?: string;
   disabled?: boolean;
   variant?: "default" | "destructive";
-  /** Returning a promise puts the trigger in its loading state until it settles. */
+  /** Returning a promise puts the card in its loading state until it settles. */
   onSelect?: () => void | Promise<void>;
 }
 
-/** A labelled section of the menu; sections are separated automatically. */
-export interface ProfileCardGroup {
-  label?: string;
-  items: ProfileCardAction[];
+/** A heading over the rows that follow it, up to the next separator. */
+export interface ProfileCardLabel {
+  type: "label";
+  label: string;
 }
+
+/** A rule between two sections. */
+export interface ProfileCardSeparator {
+  type: "separator";
+}
+
+/**
+ * One entry of `items`. Authored flat; the block renders each run between
+ * separators as its own menu group so a label actually names its section.
+ */
+export type ProfileCardItem =
+  | ProfileCardAction
+  | ProfileCardLabel
+  | ProfileCardSeparator;
+
+/**
+ * The menu the card ships with. Spread it to keep the shape and attach your
+ * own handlers, or ignore it and pass `items` of your own.
+ */
+export const defaultProfileCardItems: ProfileCardItem[] = [
+  { type: "label", label: "Management" },
+  { id: "profile", label: "Profile", icon: <UserIcon aria-hidden="true" /> },
+  {
+    id: "settings",
+    label: "Settings",
+    icon: <SettingsIcon aria-hidden="true" />,
+  },
+  { type: "separator" },
+  { id: "teams", label: "Teams", icon: <UsersIcon aria-hidden="true" /> },
+  { id: "invite", label: "Invite", icon: <UserPlusIcon aria-hidden="true" /> },
+  { type: "separator" },
+  {
+    id: "sign-out",
+    label: "Log out",
+    icon: <LogOutIcon aria-hidden="true" />,
+    variant: "destructive",
+  },
+];
 
 type PopupProps = React.ComponentProps<typeof DropdownMenuContent>;
 
 export interface ProfileCardBlockProps {
   user: ProfileCardUser;
-  /** Replaces the default menu entirely. The `on*` handlers are then unused. */
-  groups?: ProfileCardGroup[];
-  onProfile?: () => void | Promise<void>;
-  onSettings?: () => void | Promise<void>;
-  onTeams?: () => void | Promise<void>;
-  onInvite?: () => void | Promise<void>;
-  onSignOut?: () => void | Promise<void>;
+  /**
+   * The menu, flat: actions plus `{ type: "separator" }` / `{ type: "label" }`
+   * entries. Defaults to `defaultProfileCardItems` (no handlers attached).
+   */
+  items?: ProfileCardItem[];
   /** Menu placement relative to the card. */
   align?: PopupProps["align"];
   side?: PopupProps["side"];
@@ -93,22 +130,42 @@ function initialsFrom(name: string): string {
   return (first + last).toUpperCase();
 }
 
+/** Split a flat item list into the groups the menu renders. */
+function toGroups(
+  items: ProfileCardItem[],
+): { label?: string; actions: ProfileCardAction[] }[] {
+  const groups: { label?: string; actions: ProfileCardAction[] }[] = [];
+  let current: { label?: string; actions: ProfileCardAction[] } = {
+    actions: [],
+  };
+
+  for (const item of items) {
+    if (item.type === "separator") {
+      groups.push(current);
+      current = { actions: [] };
+    } else if (item.type === "label") {
+      current.label = item.label;
+    } else {
+      current.actions.push(item);
+    }
+  }
+  groups.push(current);
+
+  return groups.filter(
+    (group) => group.actions.length > 0 || group.label !== undefined,
+  );
+}
+
 /**
  * Avatar card that opens an account menu.
  *
  * The trigger is the rich identity chip (avatar + name over handle) and the
- * popup is a plain action menu — profile/settings, teams/invite and a
- * destructive sign-out. Pass `groups` to replace the menu wholesale; the named
- * handlers only drive the default set.
+ * popup is a plain action menu. `items` is the whole menu — a flat list of
+ * actions, separators and labels — defaulting to `defaultProfileCardItems`.
  */
 export function ProfileCardBlock({
   user,
-  groups,
-  onProfile,
-  onSettings,
-  onTeams,
-  onInvite,
-  onSignOut,
+  items = defaultProfileCardItems,
   align = "center",
   side = "bottom",
   sideOffset = 8,
@@ -129,52 +186,7 @@ export function ProfileCardBlock({
     };
   }, []);
 
-  const resolvedGroups: ProfileCardGroup[] = groups ?? [
-    {
-      label: "Management",
-      items: [
-        {
-          id: "profile",
-          label: "Profile",
-          icon: <UserIcon aria-hidden="true" />,
-          onSelect: onProfile,
-        },
-        {
-          id: "settings",
-          label: "Settings",
-          icon: <SettingsIcon aria-hidden="true" />,
-          onSelect: onSettings,
-        },
-      ],
-    },
-    {
-      items: [
-        {
-          id: "teams",
-          label: "Teams",
-          icon: <UsersIcon aria-hidden="true" />,
-          onSelect: onTeams,
-        },
-        {
-          id: "invite",
-          label: "Invite",
-          icon: <UserPlusIcon aria-hidden="true" />,
-          onSelect: onInvite,
-        },
-      ],
-    },
-    {
-      items: [
-        {
-          id: "sign-out",
-          label: "Log out",
-          icon: <LogOutIcon aria-hidden="true" />,
-          variant: "destructive",
-          onSelect: onSignOut,
-        },
-      ],
-    },
-  ];
+  const groups = React.useMemo(() => toGroups(items), [items]);
 
   function select(action: ProfileCardAction) {
     const result = action.onSelect?.();
@@ -243,20 +255,22 @@ export function ProfileCardBlock({
       />
       <DropdownMenuContent
         align={align}
+        // Content-width menu (not the card's width) so `align` reads: a popup
+        // locked to `--anchor-width` lands in the same place for every value.
         // `!` because the popup's own `not-[class*='w-']:min-w-32` compiles to
         // a higher-specificity `:not(:is())` that would otherwise win.
-        className="min-w-(--anchor-width)!"
+        className="min-w-44! origin-(--transform-origin) transition-[opacity,scale,translate] duration-150 ease-smooth-out data-ending-style:opacity-0 data-starting-style:opacity-0 data-ending-style:scale-98 data-starting-style:scale-98 data-ending-style:duration-100 data-[side=bottom]:data-starting-style:-translate-y-1 data-[side=bottom]:data-ending-style:-translate-y-1 data-[side=top]:data-starting-style:translate-y-1 data-[side=top]:data-ending-style:translate-y-1 motion-reduce:transition-none"
         side={side}
         sideOffset={sideOffset}
       >
-        {resolvedGroups.map((group, index) => (
-          <React.Fragment key={group.label ?? `group-${group.items[0]?.id}`}>
+        {groups.map((group, index) => (
+          <React.Fragment key={group.label ?? `group-${group.actions[0]?.id}`}>
             {index > 0 ? <DropdownMenuSeparator /> : null}
             <DropdownMenuGroup>
               {group.label ? (
                 <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
               ) : null}
-              {group.items.map((item) => (
+              {group.actions.map((item) => (
                 <DropdownMenuItem
                   disabled={item.disabled}
                   key={item.id}

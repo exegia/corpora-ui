@@ -467,16 +467,17 @@ export const blocks: RegistryEntry[] = [
           "Identity on the card ({ name, username?, avatar?, initials? }). Initials fall back to the name's first and last word.",
       },
       {
-        name: "groups",
-        type: "ProfileCardGroup[]",
+        name: "items",
+        type: "ProfileCardItem[]",
+        default: "defaultProfileCardItems",
         description:
-          "Replaces the default menu entirely — { label?, items: { id, label, icon?, shortcut?, disabled?, variant? } }. Groups are separated automatically.",
+          "The whole menu, flat: actions ({ id, label, icon?, shortcut?, disabled?, variant?, onSelect? }) plus { type: “separator” } and { type: “label”, label } entries. Each run between separators becomes its own group, headed by the label inside it.",
       },
       {
-        name: "onProfile / onSettings / onTeams / onInvite / onSignOut",
+        name: "onSelect",
         type: "() => void | Promise<void>",
         description:
-          "Drive the default menu. Returning a promise puts the card in its loading state until it settles; a rejection goes to onError.",
+          "Per item. Returning a promise puts the card in its loading state until it settles; a rejection goes to onError.",
       },
       {
         name: "align / side / sideOffset",
@@ -501,8 +502,12 @@ export const blocks: RegistryEntry[] = [
 
 <ProfileCardBlock
   user={{ name: "Jenny Hamilton", username: "@jennycodes", avatar: src }}
-  onProfile={() => navigate("/profile")}
-  onSignOut={signOut}
+  items={[
+    { type: "label", label: "Management" },
+    { id: "profile", label: "Profile", icon: <UserIcon />, onSelect: () => navigate("/profile") },
+    { type: "separator" },
+    { id: "sign-out", label: "Log out", icon: <LogOutIcon />, variant: "destructive", onSelect: signOut },
+  ]}
 />`,
   },
   {
