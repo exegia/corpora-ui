@@ -1,6 +1,6 @@
 {
   "name": "@exegia/corpora-ui",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "shadcn-ready React UI library for the corpora manuscript-research apps.",
   "license": "MIT",
   "repository": {
