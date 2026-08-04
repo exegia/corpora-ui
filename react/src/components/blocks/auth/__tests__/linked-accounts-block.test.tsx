@@ -89,6 +89,24 @@ describe("LinkedAccountsBlock", () => {
     expect(onUnlink).not.toHaveBeenCalled();
   });
 
+  test("lifts the guard when another sign-in method exists off-list", async () => {
+    const user = userEvent.setup();
+    const onUnlink = mock(async () => {});
+    render(
+      <LinkedAccountsBlock
+        identities={[IDENTITIES[0]!]}
+        hasOtherSignInMethods
+        onUnlink={onUnlink}
+      />,
+    );
+
+    const button = screen.getByRole("button", { name: "Disconnect Google" });
+    expect(button.hasAttribute("disabled")).toBe(false);
+
+    await user.click(button);
+    expect(onUnlink).toHaveBeenCalledWith("id-1");
+  });
+
   test("surfaces a failing link as an error", async () => {
     const user = userEvent.setup();
     render(
