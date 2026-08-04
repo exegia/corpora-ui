@@ -36,6 +36,12 @@ export interface LinkedAccountsBlockProps {
   providers?: SocialProvider[];
   /** Shows the loading row instead of the list. */
   loading?: boolean;
+  /**
+   * The account can also sign in through a method that has no row in this
+   * list — an email/password credential, say. Lifts the last-method guard,
+   * which otherwise refuses to disconnect the final listed identity.
+   */
+  hasOtherSignInMethods?: boolean;
   /** Reject (or throw) to show the inline error. */
   onLink?: (provider: SocialProvider) => Promise<void> | void;
   onUnlink?: (id: string) => Promise<void> | void;
@@ -57,6 +63,7 @@ export function LinkedAccountsBlock({
   identities = [],
   providers = ["google", "apple", "github"],
   loading = false,
+  hasOtherSignInMethods = false,
   onLink,
   onUnlink,
   className,
@@ -70,8 +77,9 @@ export function LinkedAccountsBlock({
   const connectable = providers.filter((provider) => !connected.has(provider));
   const busy = linking !== null || unlinking !== null;
   // The backend rule, enforced here so we never fire a request that would
-  // remove the account's only way in.
-  const lastMethod = identities.length <= 1;
+  // remove the account's only way in. An off-list method (a password) keeps
+  // the account reachable, so it lifts the guard.
+  const lastMethod = !hasOtherSignInMethods && identities.length <= 1;
 
   async function connect(provider: SocialProvider) {
     if (busy) return;
