@@ -146,12 +146,18 @@ interface AnimatedSidebarContextValue {
   layoutId: string
   open: boolean
   openMobile: boolean
+  /** The right panel is a single hidden/shown state — no icon rail, no
+   * separate mobile state. */
+  openRight: boolean
   reduce: boolean
   setOpen: (open: boolean) => void
   setOpenMobile: (open: boolean) => void
+  setOpenRight: (open: boolean) => void
   state: SidebarState
   toggleSidebar: () => void
+  toggleRightSidebar: () => void
   triggerRef: React.RefObject<HTMLButtonElement | null>
+  rightTriggerRef: React.RefObject<HTMLButtonElement | null>
 }
 
 const AnimatedSidebarContext =
@@ -199,6 +205,9 @@ export interface AnimatedSidebarProviderProps extends HTMLAttributes<HTMLDivElem
   openMobile?: boolean
   defaultOpenMobile?: boolean
   onOpenMobileChange?: (open: boolean) => void
+  openRight?: boolean
+  defaultOpenRight?: boolean
+  onOpenRightChange?: (open: boolean) => void
   style?: SidebarProviderStyle
 }
 
@@ -210,6 +219,9 @@ export function AnimatedSidebarProvider({
   openMobile,
   defaultOpenMobile = false,
   onOpenMobileChange,
+  openRight,
+  defaultOpenRight = false,
+  onOpenRightChange,
   className,
   style,
   ...props
@@ -217,12 +229,15 @@ export function AnimatedSidebarProvider({
   const [internalOpen, setInternalOpen] = useState(defaultOpen)
   const [internalOpenMobile, setInternalOpenMobile] =
     useState(defaultOpenMobile)
+  const [internalOpenRight, setInternalOpenRight] = useState(defaultOpenRight)
   const isMobile = useIsMobile()
   const reduce = useReducedMotion() ?? false
   const generatedId = useId()
   const triggerRef = useRef<HTMLButtonElement>(null)
+  const rightTriggerRef = useRef<HTMLButtonElement>(null)
   const desktopOpen = open ?? internalOpen
   const mobileOpen = openMobile ?? internalOpenMobile
+  const rightOpen = openRight ?? internalOpenRight
 
   const setOpen = useCallback(
     (nextOpen: boolean) => {
@@ -240,10 +255,22 @@ export function AnimatedSidebarProvider({
     [onOpenMobileChange, openMobile]
   )
 
+  const setOpenRight = useCallback(
+    (nextOpen: boolean) => {
+      if (openRight === undefined) setInternalOpenRight(nextOpen)
+      onOpenRightChange?.(nextOpen)
+    },
+    [onOpenRightChange, openRight]
+  )
+
   const toggleSidebar = useCallback(() => {
     if (isMobile) setOpenMobile(!mobileOpen)
     else setOpen(!desktopOpen)
   }, [desktopOpen, isMobile, mobileOpen, setOpen, setOpenMobile])
+
+  const toggleRightSidebar = useCallback(() => {
+    setOpenRight(!rightOpen)
+  }, [rightOpen, setOpenRight])
 
   useEffect(() => {
     const handleShortcut = (event: KeyboardEvent) => {
@@ -267,18 +294,23 @@ export function AnimatedSidebarProvider({
         layoutId: `${generatedId}-active`,
         open: desktopOpen,
         openMobile: mobileOpen,
+        openRight: rightOpen,
         reduce,
         setOpen,
         setOpenMobile,
+        setOpenRight,
         state: desktopOpen ? "expanded" : "collapsed",
         toggleSidebar,
+        toggleRightSidebar,
         triggerRef,
+        rightTriggerRef,
       }}
     >
       <div
         {...props}
         data-slot="sidebar-wrapper"
         data-state={desktopOpen ? "expanded" : "collapsed"}
+        data-right-state={rightOpen ? "expanded" : "collapsed"}
         style={{
           "--sidebar-width": "16rem",
           "--sidebar-width-icon": "4.25rem",
@@ -308,16 +340,21 @@ function MobileSidebar({
   side: SidebarSide
 }) {
   const context = useAnimatedSidebar()
+  const isRight = side === "right"
+  const open = isRight ? context.openRight : context.openMobile
+  const setOpen = isRight ? context.setOpenRight : context.setOpenMobile
+  const triggerRef = isRight ? context.rightTriggerRef : context.triggerRef
   const panelRef = useRef<HTMLDivElement>(null)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => setMounted(true), [])
 
   useEffect(() => {
-    if (!context.openMobile) return
+    if (!open) return
 
     const body = document.body
     const scrollY = window.scrollY
+    const trigger = triggerRef.current
     const previousBodyStyles = {
       left: body.style.left,
       overflow: body.style.overflow,
@@ -346,9 +383,9 @@ function MobileSidebar({
       body.style.right = previousBodyStyles.right
       body.style.overflow = previousBodyStyles.overflow
       window.scrollTo(0, scrollY)
-      context.triggerRef.current?.focus({ preventScroll: true })
+      trigger?.focus({ preventScroll: true })
     }
-  }, [context.openMobile, context.triggerRef])
+  }, [open, triggerRef])
 
   if (!mounted) return null
 
@@ -356,20 +393,20 @@ function MobileSidebar({
     <div
       className={cn(
         "pointer-events-none fixed inset-0 z-50 md:hidden",
-        context.openMobile ? "visible" : "invisible"
+        open ? "visible" : "invisible"
       )}
     >
       <motion.button
         type="button"
         aria-label="Close sidebar"
-        tabIndex={context.openMobile ? 0 : -1}
+        tabIndex={open ? 0 : -1}
         initial={false}
-        animate={{ opacity: context.openMobile ? 1 : 0 }}
+        animate={{ opacity: open ? 1 : 0 }}
         transition={context.reduce ? REDUCED_TRANSITION : PANEL_TRANSITION}
-        onClick={() => context.setOpenMobile(false)}
+        onClick={() => setOpen(false)}
         className={cn(
           "absolute inset-0",
-          context.openMobile ? "pointer-events-auto" : "pointer-events-none"
+          open ? "pointer-events-auto" : "pointer-events-none"
         )}
       />
 
@@ -378,18 +415,18 @@ function MobileSidebar({
         role="dialog"
         aria-modal="true"
         aria-label={ariaLabel}
-        aria-hidden={!context.openMobile}
-        inert={!context.openMobile}
+        aria-hidden={!open}
+        inert={!open}
         tabIndex={-1}
         data-mobile="true"
-        data-state={context.openMobile ? "expanded" : "collapsed"}
+        data-state={open ? "expanded" : "collapsed"}
         data-side={side}
         initial={false}
         animate={{
-          opacity: context.reduce ? (context.openMobile ? 1 : 0) : 1,
+          opacity: context.reduce ? (open ? 1 : 0) : 1,
           x: context.reduce
             ? 0
-            : context.openMobile
+            : open
               ? "0%"
               : side === "left"
                 ? "-100%"
@@ -399,7 +436,7 @@ function MobileSidebar({
         onKeyDown={(event) => {
           if (event.key === "Escape") {
             event.preventDefault()
-            context.setOpenMobile(false)
+            setOpen(false)
             return
           }
 
@@ -432,7 +469,7 @@ function MobileSidebar({
           "pointer-events-auto absolute inset-y-0 flex h-dvh w-(--sidebar-width-mobile) max-w-[88vw] flex-col overflow-hidden",
           "will-change-transform",
           side === "left" ? "left-0 border-r" : "right-0",
-          !context.openMobile && "pointer-events-none",
+          !open && "pointer-events-none",
           className
         )}
       >
@@ -475,7 +512,8 @@ export const AnimatedSidebar = forwardRef<HTMLElement, AnimatedSidebarProps>(
     forwardedRef
   ) {
     const context = useAnimatedSidebar()
-    const collapsed = collapsible !== "none" && !context.open
+    const sideOpen = side === "right" ? context.openRight : context.open
+    const collapsed = collapsible !== "none" && !sideOpen
     const offcanvas = collapsed && collapsible === "offcanvas"
     const width = offcanvas
       ? "0px"
@@ -508,6 +546,12 @@ export const AnimatedSidebar = forwardRef<HTMLElement, AnimatedSidebarProps>(
         className={cn(
           "group/sidebar relative hidden h-auto shrink-0 will-change-[width] md:block",
           "peer",
+          // The offcanvas panel keeps its full width and slides out of the
+          // zero-width rail, so clip it rather than letting it bleed past the
+          // shell edge. The clip margin lets the panel's own shadow escape
+          // without letting the slid-out panel escape with it.
+          collapsible === "offcanvas" &&
+            "overflow-x-clip [overflow-clip-margin:1.5rem]",
           side === "right" && "order-last",
           className
         )}
@@ -539,23 +583,31 @@ export const AnimatedSidebar = forwardRef<HTMLElement, AnimatedSidebarProps>(
   }
 )
 
-export interface AnimatedSidebarTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {}
+export interface AnimatedSidebarTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  side?: SidebarSide
+}
 
 export const AnimatedSidebarTrigger = forwardRef<
   HTMLButtonElement,
   AnimatedSidebarTriggerProps
 >(function AnimatedSidebarTrigger(
-  { className, onClick, type = "button", ...props },
+  { className, onClick, side = "left", type = "button", ...props },
   forwardedRef
 ) {
   const context = useAnimatedSidebar()
-  const expanded = context.isMobile ? context.openMobile : context.open
+  const isRight = side === "right"
+  const expanded = isRight
+    ? context.openRight
+    : context.isMobile
+      ? context.openMobile
+      : context.open
+  const triggerRef = isRight ? context.rightTriggerRef : context.triggerRef
 
   return (
     <button
       {...props}
       ref={(node) => {
-        context.triggerRef.current = node
+        triggerRef.current = node
         if (typeof forwardedRef === "function") forwardedRef(node)
         else if (forwardedRef) forwardedRef.current = node
       }}
@@ -563,10 +615,13 @@ export const AnimatedSidebarTrigger = forwardRef<
       aria-label={props["aria-label"] ?? "Toggle sidebar"}
       aria-expanded={expanded}
       data-slot="sidebar-trigger"
+      data-side={side}
       data-state={expanded ? "expanded" : "collapsed"}
       onClick={(event) => {
         onClick?.(event)
-        if (!event.defaultPrevented) context.toggleSidebar()
+        if (event.defaultPrevented) return
+        if (isRight) context.toggleRightSidebar()
+        else context.toggleSidebar()
       }}
       className={cn(
         "inline-flex size-10 shrink-0 items-center justify-center rounded-xl outline-none",
@@ -577,13 +632,15 @@ export const AnimatedSidebarTrigger = forwardRef<
   )
 })
 
-export interface AnimatedSidebarCloseProps extends ButtonHTMLAttributes<HTMLButtonElement> {}
+export interface AnimatedSidebarCloseProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  side?: SidebarSide
+}
 
 export const AnimatedSidebarClose = forwardRef<
   HTMLButtonElement,
   AnimatedSidebarCloseProps
 >(function AnimatedSidebarClose(
-  { className, onClick, type = "button", ...props },
+  { className, onClick, side = "left", type = "button", ...props },
   forwardedRef
 ) {
   const context = useAnimatedSidebar()
@@ -593,11 +650,13 @@ export const AnimatedSidebarClose = forwardRef<
       {...props}
       ref={forwardedRef}
       type={type}
+      data-side={side}
       aria-label={props["aria-label"] ?? "Close sidebar"}
       onClick={(event) => {
         onClick?.(event)
         if (event.defaultPrevented) return
-        if (context.isMobile) context.setOpenMobile(false)
+        if (side === "right") context.setOpenRight(false)
+        else if (context.isMobile) context.setOpenMobile(false)
         else context.setOpen(false)
       }}
       className={cn(
@@ -632,7 +691,9 @@ export const AnimatedSidebarRail = forwardRef<
       tabIndex={-1}
       onClick={(event) => {
         onClick?.(event)
-        if (!event.defaultPrevented) context.toggleSidebar()
+        if (event.defaultPrevented) return
+        if (panel.side === "right") context.toggleRightSidebar()
+        else context.toggleSidebar()
       }}
       className={cn(
         "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 outline-none md:block",

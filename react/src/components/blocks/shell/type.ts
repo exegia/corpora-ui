@@ -1,8 +1,8 @@
-import type {
-  ISidebarNavItem,
-  ISidebarNavSection,
-  ISidebarNavSubItem,
-} from "@/components/blocks/nav/types"
+// import type {
+//   ISidebarNavItem,
+//   ISidebarNavSection,
+//   ISidebarNavSubItem,
+// } from "@/components/blocks/nav/types"
 
 
 export interface ShellAction {
@@ -34,6 +34,12 @@ export interface ShellLayoutProps {
   open?: boolean
   defaultOpen?: boolean
   onOpenChange?: (open: boolean) => void
+  /** Content of the right drawer. It has no icon rail — it is either fully
+   * shown or fully hidden. */
+  rightDrawer?: React.ReactNode
+  rightOpen?: boolean
+  defaultRightOpen?: boolean
+  onRightOpenChange?: (open: boolean) => void
  // openMobile?: boolean
   //defaultOpenMobile?: boolean
   //onOpenMobileChange?: (open: boolean) => void
