@@ -1,76 +1,17 @@
-import {
-  BookOpenIcon,
-  FileTextIcon,
-  FolderIcon,
-  HomeIcon,
-  LibraryIcon,
-  SearchIcon,
-  SettingsIcon,
-  SparklesIcon,
-} from "lucide-react"
-import * as React from "react"
+import { SparklesIcon, XIcon } from "lucide-react"
 
 import { ShellLayout } from "@/components/blocks/shell/shell-layout"
-import { ProfileCardBlock } from "@/components/blocks/profile/profile-card-block"
-import type { SidebarNavSection } from "@/components/blocks/nav/sidebar-block"
-import { DemoBrandMark, DemoStage } from "@/components/docs/demo-controls"
-
-const SECTIONS: SidebarNavSection[] = [
-  {
-    id: "workspace",
-    label: "Workspace",
-    items: [
-      { id: "home", label: "Home", icon: <HomeIcon /> },
-      { id: "projects", label: "Projects", icon: <FolderIcon />, badge: "8" },
-      {
-        id: "library",
-        label: "Library",
-        icon: <LibraryIcon />,
-        defaultOpen: true,
-        items: [
-          { id: "manuscripts", label: "Manuscripts" },
-          { id: "codices", label: "Codices" },
-          { id: "fragments", label: "Fragments" },
-        ],
-      },
-    ],
-  },
-  {
-    id: "research",
-    label: "Research",
-    items: [
-      { id: "search", label: "Search", icon: <SearchIcon /> },
-      { id: "reading", label: "Reading list", icon: <BookOpenIcon /> },
-      { id: "notes", label: "Notes", icon: <FileTextIcon /> },
-      { id: "settings", label: "Settings", icon: <SettingsIcon /> },
-    ],
-  },
-]
+import { AnimatedSidebarClose } from "@/components/motion/animated-sidebar"
+import { DemoStage } from "@/components/docs/demo-controls"
 
 export default function ShellDemo() {
-  const [activeId, setActiveId] = React.useState("manuscripts")
-
   return (
     <DemoStage controls={null} canvasClassName="w-full p-0">
       <div className="h-[42rem] w-full overflow-hidden rounded-lg border bg-background">
         <ShellLayout
-          activeId={activeId}
           className="min-h-full"
-          contentClassName="my-2 mr-2"
-          onNavigate={(item) => setActiveId(item.id)}
-          sections={SECTIONS}
-          sidebarFooter={
-            <ProfileCardBlock
-              side="top"
-              user={{ name: "Jenny Hamilton", username: "@jennycodes" }}
-            />
-          }
-          title="Manuscript research"
-          workspace={{
-            name: "Corpora",
-            meta: "Alexandria workspace",
-            logo: <DemoBrandMark />,
-          }}
+          rightDrawer={<ShellDemoInspector />}
+          variant="web"
         >
           <div className="grid gap-5">
             <div className="grid gap-5 lg:grid-cols-3">
@@ -83,7 +24,7 @@ export default function ShellDemo() {
                 <div>
                   <h2 className="text-base font-semibold">Active collection</h2>
                   <p className="text-sm text-muted-foreground">
-                    Test the collapsible sidebar, nested navigation, and mobile drawer.
+                    Toggle the left rail and the right drawer from the header.
                   </p>
                 </div>
                 <SparklesIcon className="size-5 text-muted-foreground" />
@@ -107,6 +48,36 @@ export default function ShellDemo() {
         </ShellLayout>
       </div>
     </DemoStage>
+  )
+}
+
+function ShellDemoInspector() {
+  return (
+    <>
+      <div className="flex h-16 shrink-0 items-center justify-between gap-3 px-4">
+        <span className="text-sm font-semibold">Inspector</span>
+        <AnimatedSidebarClose
+          aria-label="Close panel"
+          className="text-muted-foreground hover:text-foreground"
+          side="right"
+        >
+          <XIcon className="size-4" />
+        </AnimatedSidebarClose>
+      </div>
+      <div className="min-h-0 flex-1 space-y-4 overflow-auto px-4 pb-4">
+        {[
+          { label: "Shelfmark", value: "Add. MS 43725" },
+          { label: "Provenance", value: "Saint Catherine's Monastery" },
+          { label: "Script", value: "Biblical majuscule" },
+          { label: "Folios", value: "347" },
+        ].map((field) => (
+          <div key={field.label}>
+            <div className="text-xs text-muted-foreground">{field.label}</div>
+            <div className="mt-1 text-sm">{field.value}</div>
+          </div>
+        ))}
+      </div>
+    </>
   )
 }
 

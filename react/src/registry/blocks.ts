@@ -614,42 +614,42 @@ export const blocks: RegistryEntry[] = [
     registryDependencies: ["animated-sidebar", "sidebar"],
     props: [
       {
-        name: "sections",
-        type: "SidebarNavSection[]",
-        description:
-          "Sidebar navigation sections. Omit to use the built-in shell sample navigation.",
-      },
-      {
-        name: "workspace",
-        type: "{ name: string; logo?: React.ReactNode; meta?: React.ReactNode }",
-        description: "Branding shown at the top of the sidebar.",
-      },
-      {
-        name: "activeId / onNavigate",
-        type: "string / (item) => void",
-        description:
-          "Drive the active navigation item and respond when a sidebar item is selected.",
-      },
-      {
-        name: "title / eyebrow / children",
+        name: "children",
         type: "React.ReactNode",
         description:
-          "Header copy and the main scrollable content rendered inside the inset panel.",
+          "Main scrollable content rendered inside the inset panel.",
+      },
+      {
+        name: "variant",
+        type: '"web" | "desktop"',
+        description:
+          "Desktop reserves room at the top for a native title bar; web does not.",
       },
       {
         name: "open / defaultOpen / onOpenChange",
         type: "boolean / boolean / (open) => void",
-        description: "Control or observe the desktop sidebar rail. ⌘B toggles it.",
+        description:
+          "Control or observe the left rail, which collapses to icons. ⌘B toggles it.",
+      },
+      {
+        name: "rightDrawer",
+        type: "React.ReactNode",
+        description:
+          "Content of the right drawer. Unlike the left rail it has no icon state — it is either fully shown or fully hidden.",
+      },
+      {
+        name: "rightOpen / defaultRightOpen / onRightOpenChange",
+        type: "boolean / boolean / (open) => void",
+        description:
+          "Control or observe the right drawer. The header trigger toggles it.",
       },
     ],
     usage: `import { ShellLayout } from "@corpora/ui"
 
 <ShellLayout
-  sections={sections}
-  activeId={route}
-  onNavigate={(item) => navigate(item.id)}
-  workspace={{ name: "Corpora", meta: "Research workspace" }}
-  title="Manuscript research"
+  variant="web"
+  defaultRightOpen
+  rightDrawer={<Inspector />}
 >
   <Dashboard />
 </ShellLayout>`,
