@@ -603,4 +603,55 @@ export const blocks: RegistryEntry[] = [
   footer={<ProfileCardBlock user={user} side="top" />}
 />`,
   },
+  {
+    slug: "shell",
+    name: "Shell",
+    description:
+      "Inset application shell with a collapsible sidebar, workspace header, command-style search affordance, top actions, and scrollable content area.",
+    category: "blocks",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/shell-demo")),
+    registryDependencies: ["animated-sidebar", "sidebar"],
+    props: [
+      {
+        name: "sections",
+        type: "SidebarNavSection[]",
+        description:
+          "Sidebar navigation sections. Omit to use the built-in shell sample navigation.",
+      },
+      {
+        name: "workspace",
+        type: "{ name: string; logo?: React.ReactNode; meta?: React.ReactNode }",
+        description: "Branding shown at the top of the sidebar.",
+      },
+      {
+        name: "activeId / onNavigate",
+        type: "string / (item) => void",
+        description:
+          "Drive the active navigation item and respond when a sidebar item is selected.",
+      },
+      {
+        name: "title / eyebrow / children",
+        type: "React.ReactNode",
+        description:
+          "Header copy and the main scrollable content rendered inside the inset panel.",
+      },
+      {
+        name: "open / defaultOpen / onOpenChange",
+        type: "boolean / boolean / (open) => void",
+        description: "Control or observe the desktop sidebar rail. ⌘B toggles it.",
+      },
+    ],
+    usage: `import { ShellLayout } from "@corpora/ui"
+
+<ShellLayout
+  sections={sections}
+  activeId={route}
+  onNavigate={(item) => navigate(item.id)}
+  workspace={{ name: "Corpora", meta: "Research workspace" }}
+  title="Manuscript research"
+>
+  <Dashboard />
+</ShellLayout>`,
+  },
 ]

@@ -93,10 +93,10 @@ export default function SidebarDemo() {
           </span>
         </>
       }
-      canvasClassName="flex w-full justify-center"
+      canvasClassName="flex w-full"
     >
       {/* The block claims no page layout, so the demo supplies the frame. */}
-      <div className="flex h-[26rem] w-full max-w-2xl overflow-hidden rounded-lg border">
+      <div className="flex h-[26rem] w-full overflow-hidden rounded-lg border">
         <SidebarBlock
           activeId={activeId}
           collapsible={collapsible}
