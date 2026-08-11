@@ -312,7 +312,7 @@ export function AnimatedSidebarProvider({
         data-state={desktopOpen ? "expanded" : "collapsed"}
         data-right-state={rightOpen ? "expanded" : "collapsed"}
         style={{
-          "--sidebar-width": "16rem",
+          "--sidebar-width": "19rem",
           "--sidebar-width-icon": "4.25rem",
           "--sidebar-width-mobile": "18rem",
           ...style,
@@ -545,17 +545,20 @@ export const AnimatedSidebar = forwardRef<HTMLElement, AnimatedSidebarProps>(
         style={style}
         className={cn(
           "group/sidebar relative hidden h-auto shrink-0 will-change-[width] md:block",
-          "peer",
+          "peer flex!",
           // The offcanvas panel keeps its full width and slides out of the
           // zero-width rail, so clip it rather than letting it bleed past the
           // shell edge. The clip margin lets the panel's own shadow escape
-          // without letting the slid-out panel escape with it.
+          // without letting the slid-out panel escape with it
           collapsible === "offcanvas" &&
-            "overflow-x-clip [overflow-clip-margin:1.5rem]",
+            "overflow-x-visible [overflow-clip-margin:1rem]",
           side === "right" && "order-last",
           className
         )}
       >
+        {side === "right" && !collapsed && (
+          <motion.div className="h-full p-0.5 flex flex-1  bg-radial/decreasing from-amber-400 to-0% hover:to-50% ease-smooth-out to-amber-500/0 cursor-col-resize transition-colors duration-1000 animate-in" />
+        )}
         <motion.div
           initial={false}
           animate={{

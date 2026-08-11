@@ -17,7 +17,5 @@ export const titleBarStyle = (
     expanded: "",
   }
 
-  const cssName =
-    component == "title" ? titleBarClassName[style] : bodyClassName[style]
-  return cssName
+  return component == "title" ? titleBarClassName[style] : bodyClassName[style]
 }

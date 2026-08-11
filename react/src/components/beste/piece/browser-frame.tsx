@@ -23,7 +23,7 @@ export function BrowserFrame({
       )}
     >
       <div className="flex min-h-96 w-full flex-col overflow-hidden rounded-lg border border-border bg-neutral-50 shadow-lg dark:bg-neutral-900 relative">
-        <div id="title-bar" className={cn("flex items-center gap-2 px-4 py-3", titleBarStyle(titleStyle, 'title'))}>
+        <div id="title-bar" className={cn("flex flex-1 w-full items-center gap-2 px-4 py-3 z-20", titleBarStyle(titleStyle, 'title'))}>
           <div className="flex items-center gap-2" aria-hidden="true">
             <span className="size-3 cursor-pointer rounded-full bg-rose-500 shadow-md outline outline-rose-800" />
             <span className="size-3 cursor-pointer rounded-full bg-amber-500 shadow-md outline outline-amber-800" />
@@ -46,7 +46,7 @@ export function BrowserFrame({
             </div>
           )}
         </div>
-        <div className={cn("flex flex-1", titleBarStyle(titleStyle, "frame"))}>
+        <div className={cn("flex flex-1 ", titleBarStyle(titleStyle, "frame"))}>
           {children}
         </div>
       </div>
