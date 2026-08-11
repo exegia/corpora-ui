@@ -718,7 +718,7 @@ export const AnimatedSidebarInset = forwardRef<
       data-slot="sidebar-inset"
       className={cn(
         "relative flex min-w-0 flex-1 flex-col bg-background",
-        "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-md md:peer-data-[variant=inset]:shadow-md",
+        "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:mr-1.5 md:peer-data-[variant=inset]:rounded-md md:peer-data-[variant=inset]:shadow-md",
         className
       )}
     />

@@ -38,8 +38,7 @@ export function ShellLayout({
       open={open}
       openRight={rightOpen}
       style={{
-        paddingTop: variant === "desktop" ? TITLE_BAR_HEIGHT : 0,
-      //  background: meshBg,
+        paddingTop: variant === "desktop" ? TITLE_BAR_HEIGHT : 0
       }}
     >
       <AnimatedSidebar

@@ -122,7 +122,7 @@ export function SignupBlock({
   const emailPathComplete =
     (!showNameField || nameValid) && emailValid && passwordValid;
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
     if (!strongEnough) {
