@@ -75,12 +75,12 @@ export function ShellLayout({
 
       <AnimatedSidebar
         ariaLabel="Secondary panel"
-        // Below md the panel is portalled over the page, so it carries the
+        // Below md the panel is portal led over the page, so it carries the
         // surface itself; the desktop rail keeps it on the inner panel.
         className="max-md:border-l max-md:border-neutral-200 max-md:bg-white dark:max-md:border-neutral-700 dark:max-md:bg-card"
         collapsible="offcanvas"
         panelClassName={cn(
-          // The offcanvas panel keeps a fixed width so it can slide out of the
+          // The off canvas panel keeps a fixed width so it can slide out of the
           // zero-width rail, so the inset gutter has to come out of that width
           // rather than from a left margin.
           "top-2 ml-0 h-[calc(100%-1rem)] w-[calc(var(--sidebar-width)-0.5rem)]",
