@@ -1,60 +1,61 @@
-"use client";
+"use client"
 
-import { AnimatePresence, MotionConfig, motion } from "motion/react";
-import * as React from "react";
+import { KeyRoundIcon } from "lucide-react"
+import { AnimatePresence, MotionConfig, motion } from "motion/react"
+import * as React from "react"
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardDescription,
   CardHeader,
   CardPanel,
   CardTitle,
-} from "@/components/ui/card";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Spinner } from "@/components/ui/spinner";
-import { cn } from "@/lib/utils";
-import { AuthError, EASE, Reveal } from "./auth-shell";
+} from "@/components/ui/card"
+import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { Spinner } from "@/components/ui/spinner"
+import { cn } from "@/lib/utils"
+import { AuthError, EASE, Reveal } from "./auth-shell"
 
 /** One registered passkey, as rendered by {@link PasskeyManagerBlock}. */
 export interface PasskeyRecord {
-  id: string;
+  id: string
   /** Server-derived name; falls back to "Passkey" when absent. */
-  name?: string | null;
+  name?: string | null
   /** ISO timestamps. Unparseable values are simply not shown. */
-  createdAt?: string | null;
-  lastUsedAt?: string | null;
+  createdAt?: string | null
+  lastUsedAt?: string | null
 }
 
 export interface PasskeyManagerBlockProps {
-  title?: string;
-  description?: string;
+  title?: string
+  description?: string
   /** The account's passkeys, newest first. */
-  passkeys?: PasskeyRecord[];
+  passkeys?: PasskeyRecord[]
   /** Whether this device can register passkeys at all. */
-  available?: boolean;
+  available?: boolean
   /** Shows the loading row instead of the list. */
-  loading?: boolean;
+  loading?: boolean
   /**
    * Reject (or throw) to show the error. Resolving with `{ cancelled: true }`
    * returns silently to idle — a dismissed OS prompt is not a failure.
    */
-  onRegister?: () => Promise<{ cancelled?: boolean } | void> | void;
-  onRename?: (id: string, name: string) => Promise<void> | void;
-  onDelete?: (id: string) => Promise<void> | void;
-  className?: string;
+  onRegister?: () => Promise<{ cancelled?: boolean } | void> | void
+  onRename?: (id: string, name: string) => Promise<void> | void
+  onDelete?: (id: string) => Promise<void> | void
+  className?: string
 }
 
-const NAME_MAX = 120;
+const NAME_MAX = 120
 
 const LAST_PASSKEY_WARNING =
-  "This is your last passkey. After deleting it you won't be able to sign in with a passkey until you register a new one.";
+  "This is your last passkey. After deleting it you won't be able to sign in with a passkey until you register a new one."
 
 function formatDate(iso: string | null | undefined): string | null {
-  if (!iso) return null;
-  const date = new Date(iso);
-  return Number.isNaN(date.getTime()) ? null : date.toLocaleDateString();
+  if (!iso) return null
+  const date = new Date(iso)
+  return Number.isNaN(date.getTime()) ? null : date.toLocaleDateString()
 }
 
 /**
@@ -75,63 +76,61 @@ export function PasskeyManagerBlock({
   onDelete,
   className,
 }: PasskeyManagerBlockProps) {
-  const [error, setError] = React.useState<string | null>(null);
-  const [busy, setBusy] = React.useState(false);
-  const [registering, setRegistering] = React.useState(false);
-  const [renamingId, setRenamingId] = React.useState<string | null>(null);
-  const [renameValue, setRenameValue] = React.useState("");
-  const [renameError, setRenameError] = React.useState<string | null>(null);
-  const [confirmingId, setConfirmingId] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null)
+  const [busy, setBusy] = React.useState(false)
+  const [registering, setRegistering] = React.useState(false)
+  const [renamingId, setRenamingId] = React.useState<string | null>(null)
+  const [renameValue, setRenameValue] = React.useState("")
+  const [renameError, setRenameError] = React.useState<string | null>(null)
+  const [confirmingId, setConfirmingId] = React.useState<string | null>(null)
 
-  const lastPasskey = passkeys.length === 1;
+  const lastPasskey = passkeys.length === 1
 
   async function run(action: () => Promise<unknown> | unknown) {
-    if (busy) return { ok: false } as const;
-    setError(null);
-    setBusy(true);
+    if (busy) return { ok: false } as const
+    setError(null)
+    setBusy(true)
     try {
-      const result = await action();
-      return { ok: true, result } as const;
+      const result = await action()
+      return { ok: true, result } as const
     } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : "Something went wrong.",
-      );
-      return { ok: false } as const;
+      setError(cause instanceof Error ? cause.message : "Something went wrong.")
+      return { ok: false } as const
     } finally {
-      setBusy(false);
+      setBusy(false)
     }
   }
 
   async function handleRegister() {
-    setRegistering(true);
-    await run(() => onRegister?.());
-    setRegistering(false);
+    setRegistering(true)
+    await run(() => onRegister?.())
+    setRegistering(false)
   }
 
   function startRename(passkey: PasskeyRecord) {
-    setConfirmingId(null);
-    setRenamingId(passkey.id);
-    setRenameValue(passkey.name ?? "");
-    setRenameError(null);
+    setConfirmingId(null)
+    setRenamingId(passkey.id)
+    setRenameValue(passkey.name ?? "")
+    setRenameError(null)
   }
 
   async function submitRename(id: string) {
-    const name = renameValue.trim();
+    const name = renameValue.trim()
     if (name.length < 1 || name.length > NAME_MAX) {
-      setRenameError(`Name must be between 1 and ${NAME_MAX} characters.`);
-      return;
+      setRenameError(`Name must be between 1 and ${NAME_MAX} characters.`)
+      return
     }
-    const outcome = await run(() => onRename?.(id, name));
-    if (!outcome.ok) return;
-    setRenamingId(null);
-    setRenameError(null);
+    const outcome = await run(() => onRename?.(id, name))
+    if (!outcome.ok) return
+    setRenamingId(null)
+    setRenameError(null)
   }
 
   async function confirmDelete(id: string) {
-    const outcome = await run(() => onDelete?.(id));
-    setConfirmingId(null);
-    if (!outcome.ok) return;
-    if (renamingId === id) setRenamingId(null);
+    const outcome = await run(() => onDelete?.(id))
+    setConfirmingId(null)
+    if (!outcome.ok) return
+    if (renamingId === id) setRenamingId(null)
   }
 
   return (
@@ -164,9 +163,9 @@ export function PasskeyManagerBlock({
                 <ul aria-label="Passkeys" className="flex flex-col gap-2">
                   <AnimatePresence initial={false}>
                     {passkeys.map((passkey, index) => {
-                      const name = passkey.name ?? "Passkey";
-                      const created = formatDate(passkey.createdAt);
-                      const lastUsed = formatDate(passkey.lastUsedAt);
+                      const name = passkey.name ?? "Passkey"
+                      const created = formatDate(passkey.createdAt)
+                      const lastUsed = formatDate(passkey.lastUsedAt)
                       return (
                         <motion.li
                           key={passkey.id}
@@ -184,15 +183,23 @@ export function PasskeyManagerBlock({
                           }}
                         >
                           <div className="flex items-center justify-between gap-3">
-                            <div className="flex min-w-0 flex-col">
-                              <span className="truncate font-medium text-sm">
-                                {name}
+                            <div className="flex min-w-0 items-center gap-2.5">
+                              <span
+                                aria-hidden="true"
+                                className="grid size-8 shrink-0 place-items-center rounded-md bg-muted text-muted-foreground"
+                              >
+                                <KeyRoundIcon className="size-4" />
                               </span>
-                              <span className="text-xs text-muted-foreground">
-                                {created ? `Added ${created}` : null}
-                                {created && lastUsed ? " · " : null}
-                                {lastUsed ? `Last used ${lastUsed}` : null}
-                              </span>
+                              <div className="flex min-w-0 flex-col">
+                                <span className="truncate text-sm font-medium">
+                                  {name}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {created ? `Added ${created}` : null}
+                                  {created && lastUsed ? " · " : null}
+                                  {lastUsed ? `Last used ${lastUsed}` : null}
+                                </span>
+                              </div>
                             </div>
                             <div className="flex shrink-0 gap-2">
                               <Button
@@ -212,8 +219,8 @@ export function PasskeyManagerBlock({
                                 variant="destructive-outline"
                                 disabled={busy}
                                 onClick={() => {
-                                  setRenamingId(null);
-                                  setConfirmingId(passkey.id);
+                                  setRenamingId(null)
+                                  setConfirmingId(passkey.id)
                                 }}
                               >
                                 Delete
@@ -225,8 +232,8 @@ export function PasskeyManagerBlock({
                             <form
                               className="flex items-start gap-2 pt-1"
                               onSubmit={(event) => {
-                                event.preventDefault();
-                                void submitRename(passkey.id);
+                                event.preventDefault()
+                                void submitRename(passkey.id)
                               }}
                             >
                               <Field
@@ -304,7 +311,7 @@ export function PasskeyManagerBlock({
                             </div>
                           </Reveal>
                         </motion.li>
-                      );
+                      )
                     })}
                   </AnimatePresence>
                 </ul>
@@ -330,5 +337,5 @@ export function PasskeyManagerBlock({
         </CardPanel>
       </Card>
     </MotionConfig>
-  );
+  )
 }

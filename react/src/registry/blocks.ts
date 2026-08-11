@@ -486,6 +486,13 @@ export const blocks: RegistryEntry[] = [
         description: "Menu placement relative to the card.",
       },
       {
+        name: "menuWidth",
+        type: '"content" | "card"',
+        default: '"content"',
+        description:
+          "“content” sizes the menu to its items; “card” locks it to the trigger's width.",
+      },
+      {
         name: "open / defaultOpen / onOpenChange",
         type: "boolean / boolean / (open, details) => void",
         description: "Control the menu, or observe it.",
@@ -556,7 +563,8 @@ export const blocks: RegistryEntry[] = [
         name: "collapsible / variant / side",
         type: '"icon" | "offcanvas" | "none" / "sidebar" | "floating" | "inset" / "left" | "right"',
         default: '"icon" / "sidebar" / "left"',
-        description: "How the rail collapses, how the panel is framed, and which edge it sits on.",
+        description:
+          "How the rail collapses, how the panel is framed, and which edge it sits on.",
       },
       {
         name: "open / defaultOpen / onOpenChange",
@@ -616,8 +624,7 @@ export const blocks: RegistryEntry[] = [
       {
         name: "children",
         type: "React.ReactNode",
-        description:
-          "Main scrollable content rendered inside the inset panel.",
+        description: "Main scrollable content rendered inside the inset panel.",
       },
       {
         name: "variant",

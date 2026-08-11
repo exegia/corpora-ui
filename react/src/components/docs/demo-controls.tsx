@@ -3,11 +3,11 @@ import type * as React from "react"
 import {
   Select,
   SelectItem,
-  SelectPopup,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+ SelectContent} from "@/components/ui/select"
 import { Field, FieldLabel } from "@/components/ui/field"
+import { Card , CardContent} from "@/components/ui/card";
 
 /**
  * Lightweight playground controls for registry demos — docs-only, never
@@ -20,7 +20,7 @@ export function DemoSelect<T extends string>({
   options,
   onChange,
 }: {
-  label: string
+  label?: string
   value: T
   options: readonly T[]
   onChange: (value: T) => void
@@ -29,22 +29,22 @@ export function DemoSelect<T extends string>({
 
   return (
     <Field className="flex flex-col gap-1 text-xs text-muted-foreground">
-      <FieldLabel>{label}</FieldLabel>
+      {label && <FieldLabel>{label}</FieldLabel>}
       <Select
         items={items}
         onValueChange={(next) => onChange(next as T)}
         value={value}
       >
-        <SelectTrigger className="h-7 min-w-0 text-xs" size="sm">
+        <SelectTrigger className="h-7 min-w-0 text-xs capitalize rounded-sm " size="sm">
           <SelectValue />
         </SelectTrigger>
-        <SelectPopup>
-          {items.map((item) => (
-            <SelectItem key={item.value} value={item.value}>
-              {item.label}
-            </SelectItem>
-          ))}
-        </SelectPopup>
+        <SelectContent>
+            {items.map((item) => (
+              <SelectItem key={item.value} value={item.value}>
+                {item.label}
+              </SelectItem>
+            ))}
+        </SelectContent>
       </Select>
     </Field>
   )
@@ -117,10 +117,10 @@ export function DemoStage({
   canvasClassName?: string
 }) {
   return (
-    <div className="flex w-full flex-col items-center">
-      <div className="flex flex-wrap items-end justify-center gap-x-2 gap-y-3">
-        {controls}
-      </div>
+    <div className="relative flex w-full flex-col items-center">
+      <Card className="absolute top-3 right-3 z-20 rounded-xl shadow-lg">
+        <CardContent className="flex flex-row items-center gap-x-2">{controls}</CardContent>
+      </Card>
       <div
         className={
           canvasClassName ??
