@@ -1,7 +1,9 @@
 import {
+  cloneElement,
   useEffect,
   useRef,
   useState,
+  type MouseEvent,
 } from "react"
 import type { ResourceRowProps } from "@/components/agents/type.ts"
 import {
@@ -10,7 +12,7 @@ import {
   useReducedMotion,
   type Variants,
 } from "motion/react"
-import { MoreHorizontal, Pencil } from "lucide-react"
+import { ChevronRight, MoreHorizontal, Pencil } from "lucide-react"
 import { SPRING_LAYOUT } from "@/lib/ease.ts"
 import { cn } from "@/lib/utils.ts"
 import { canContain } from "@/components/agents/utils.ts"
@@ -21,6 +23,7 @@ import {
   MorphPopoverContent,
   MorphPopoverTrigger,
 } from "@/components/motion/popover-morph.tsx"
+import { Button } from "@/components/ui/button";
 
 // Same choreography as SharedLayoutBg: the wrapper only fades/blurs out when
 // the pointer leaves the whole tree; a row-to-row move exits instantly so the
@@ -65,6 +68,7 @@ export function ResourceRow({
   onHoverChange,
   renderIcon,
   renderMenu,
+  renderActionsTrigger,
   setRef,
 }: ResourceRowProps) {
   const reduce = useReducedMotion() ?? false
@@ -175,7 +179,9 @@ export function ResourceRow({
         "data-[drop=inside]:bg-primary/10 data-[drop=inside]:ring-1 data-[drop=inside]:ring-primary/45",
         "data-[drop=before]:before:absolute data-[drop=before]:before:-top-0.5 data-[drop=before]:before:right-2 data-[drop=before]:before:left-2 data-[drop=before]:before:h-0.5 data-[drop=before]:before:rounded-full data-[drop=before]:before:bg-primary",
         "data-[drop=after]:after:absolute data-[drop=after]:after:right-2 data-[drop=after]:after:-bottom-0.5 data-[drop=after]:after:left-2 data-[drop=after]:after:h-0.5 data-[drop=after]:after:rounded-full data-[drop=after]:after:bg-primary",
-        !acceptsChildren && active && "bg-accent text-foreground",
+        !acceptsChildren &&
+          active &&
+          "bg-primary/10 text-primary dark:bg-primary/25 dark:text-primary-foreground",
         row.item.disabled && "cursor-not-allowed opacity-45"
       )}
       style={{ paddingLeft: `${12 + row.depth * 16}px` }}
@@ -196,7 +202,7 @@ export function ResourceRow({
                 <motion.span
                   layoutId={hoverLayoutId}
                   transition={reduce ? { duration: 0 } : SPRING_LAYOUT}
-                  className="block h-full w-full rounded-md bg-muted/50"
+                  className="block h-full w-full rounded-md bg-foreground/8 dark:bg-muted/50"
                 />
               ) : null}
             </motion.span>
@@ -233,7 +239,7 @@ export function ResourceRow({
               onRenameCancel()
             }
           }}
-          className="relative mx-1 h-7 min-w-0 flex-1 rounded-md border border-border bg-background px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="relative h-7 min-w-0 flex-1 text-sm text-foreground outline-none focus-visible:ring-0 focus-visible:ring-ring"
         />
       ) : (
         <MarqueeLabel active={hovered || menuOpen}>
@@ -244,16 +250,36 @@ export function ResourceRow({
       {!renaming && !row.item.disabled ? (
         <MorphPopover open={menuOpen} onOpenChange={onMenuOpenChange}>
           <MorphPopoverTrigger>
-            <button
-              type="button"
-              draggable={false}
-              tabIndex={-1}
-              aria-label={`Actions for ${row.item.label}`}
-              onClick={(event) => event.stopPropagation()}
-              className="relative grid size-7 shrink-0 place-items-center rounded-lg opacity-0 transition-opacity duration-150 ease-smooth-out outline-none group-hover/resource:opacity-80 group-hover/resource:delay-150 group-data-[menu-open=true]/resource:opacity-100 hover:bg-foreground/5 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
-            >
-              <MoreHorizontal aria-hidden="true" className="size-4" />
-            </button>
+            {(() => {
+              const custom = renderActionsTrigger?.(row.item)
+              if (custom) {
+                // A row click selects/toggles — the trigger must not bubble.
+                const customOnClick = (
+                  custom.props as {
+                    onClick?: (event: MouseEvent<HTMLElement>) => void
+                  }
+                ).onClick
+                return cloneElement(custom, {
+                  draggable: false,
+                  onClick: (event: MouseEvent<HTMLElement>) => {
+                    event.stopPropagation()
+                    customOnClick?.(event)
+                  },
+                } as Partial<unknown>)
+              }
+              return (
+                <Button
+                  draggable={false}
+                  tabIndex={-1}
+                  variant="link"
+                  aria-label={`Actions for ${row.item.label}`}
+                  onClick={(event) => event.stopPropagation()}
+                  className="relative grid size-7 shrink-0 place-items-center rounded-lg opacity-0 transition-opacity duration-150 ease-smooth-out outline-none group-hover/resource:opacity-80 group-hover/resource:delay-150 group-data-[menu-open=true]/resource:opacity-100 hover:bg-foreground/5 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
+                >
+                  <MoreHorizontal aria-hidden="true" className="size-4" />
+                </Button>
+              )
+            })()}
           </MorphPopoverTrigger>
           <MorphPopoverContent
             side="bottom"
@@ -265,6 +291,18 @@ export function ResourceRow({
             <div data-sidebar-resource-menu={row.item.id}>{menu}</div>
           </MorphPopoverContent>
         </MorphPopover>
+      ) : null}
+
+      {row.depth === 0 &&
+      acceptsChildren &&
+      (row.item.children?.length ?? 0) > 0 ? (
+        <ChevronRight
+          aria-hidden="true"
+          className={cn(
+            "relative size-3.5 shrink-0 text-muted-foreground transition-transform duration-200 ease-smooth-out motion-reduce:transition-none",
+            expanded && "rotate-90"
+          )}
+        />
       ) : null}
     </motion.div>
   )
