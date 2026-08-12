@@ -73,6 +73,25 @@ describe("ShellLayout", () => {
     expect(leftRail().getAttribute("data-state")).toBe("collapsed")
   })
 
+  test("a panel's trigger node replaces the default icon, keeping the toggle", async () => {
+    const user = userEvent.setup()
+    render(
+      <ShellLayout
+        panels={{
+          ...PANELS,
+          right: { ...PANELS.right!, trigger: <span>Custom trigger</span> },
+        }}
+        variant="web"
+      />
+    )
+
+    const rightTrigger = screen.getByRole("button", { name: "Toggle panel" })
+    expect(rightTrigger.textContent).toContain("Custom trigger")
+
+    await user.click(rightTrigger)
+    expect(rightDrawer().getAttribute("data-state")).toBe("expanded")
+  })
+
   test("a panel's own open flag seeds its side's initial state", () => {
     render(
       <ShellLayout

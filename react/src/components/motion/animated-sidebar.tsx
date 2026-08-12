@@ -31,7 +31,7 @@ import { EASE_DRAWER, EASE_OUT, SPRING_LAYOUT, SPRING_PRESS } from "@/lib/ease"
 import { cn } from "@/lib/utils"
 
 export type SidebarSide = "left" | "right"
-/** Open flags keyed by side. Sides left out stay uncontrolled / at their
+/** Open flags keyed by the side. Sides left out stay uncontrolled / at their
  * default — there is no per-side prop, the record IS the API. */
 export type SidebarOpenState = Partial<Record<SidebarSide, boolean>>
 type SidebarVariant = "sidebar" | "floating" | "inset"
@@ -198,7 +198,7 @@ type SidebarProviderStyle = CSSProperties & {
 }
 
 export interface AnimatedSidebarProviderProps extends HTMLAttributes<HTMLDivElement> {
-  /** Controlled desktop open state, keyed by side. A side left undefined
+  /** Controlled desktop open state, keyed by the side. A side left undefined
    * stays uncontrolled. */
   open?: SidebarOpenState
   /** Initial desktop open state, merged over `{ left: true, right: false }`. */
@@ -572,7 +572,7 @@ export const AnimatedSidebar = forwardRef<HTMLElement, AnimatedSidebarProps>(
         className={cn(
           "group/sidebar relative hidden h-auto shrink-0 will-change-[width] md:block",
           "peer flex!",
-          // The offcanvas panel keeps its full width and slides out of the
+          // The off canvas panel keeps its full width and slides out of the
           // zero-width rail, so clip it rather than letting it bleed past the
           // shell edge. The clip margin lets the panel's own shadow escape
           // without letting the slid-out panel escape with it
@@ -594,7 +594,7 @@ export const AnimatedSidebar = forwardRef<HTMLElement, AnimatedSidebarProps>(
           transition={context.reduce ? REDUCED_TRANSITION : PANEL_TRANSITION}
           className={cn(
             "sticky top-0 flex h-svh w-full flex-col overflow-hidden",
-            collapsible === "offcanvas" && "w-[var(--sidebar-width)]",
+            collapsible === "offcanvas" && "w-(--sidebar-width)",
 
             variant === "floating" && "m-2 h-[calc(100svh-1rem)]",
             variant === "inset" && "m-2 h-[calc(100svh-1rem)]",
