@@ -112,15 +112,15 @@ export function DemoStage({
   children,
   canvasClassName,
 }: {
-  controls: React.ReactNode
+  controls?: React.ReactNode
   children: React.ReactNode
   canvasClassName?: string
 }) {
   return (
     <div className="relative flex w-full flex-col items-center">
-      <Card className="absolute top-3 right-3 z-20 rounded-xl shadow-lg">
+      {controls && <Card className="absolute top-3 right-3 z-20 rounded-xl shadow-lg">
         <CardContent className="flex flex-row items-center gap-x-2">{controls}</CardContent>
-      </Card>
+      </Card>}
       <div
         className={
           canvasClassName ??
