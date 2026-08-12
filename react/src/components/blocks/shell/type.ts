@@ -23,6 +23,10 @@ export interface IPanel {
   id: string
   name: string
   component: ReactNode
+  /** Replaces the default icon inside the panel's header trigger. The shell
+   * keeps the trigger button itself (toggle wiring, aria-label) — this only
+   * swaps what renders inside it. */
+  trigger?: ReactNode
   open: boolean
   defaultOpen?: boolean
   side: "left" | "bottom" | "right" | "sidebar"

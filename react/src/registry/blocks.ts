@@ -636,7 +636,7 @@ export const blocks: RegistryEntry[] = [
         name: "panels",
         type: "TPanelMap",
         description:
-          "Panel content keyed by side. `left` fills the collapsible icon rail, `right` fills the offcanvas drawer — it has no icon state, it is either fully shown or fully hidden. Each panel's own `open`/`defaultOpen` seeds its side's initial state.",
+          "Panel content keyed by side. `left` fills the collapsible icon rail, `right` fills the offcanvas drawer — it has no icon state, it is either fully shown or fully hidden. Each panel's own `open`/`defaultOpen` seeds its side's initial state, and its optional `trigger` node replaces the default icon inside that side's header trigger.",
       },
       {
         name: "open / defaultOpen / onOpenChange",
