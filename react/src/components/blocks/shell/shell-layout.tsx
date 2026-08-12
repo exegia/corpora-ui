@@ -1,6 +1,6 @@
 "use client"
 
-import { MenuIcon, PanelRightIcon } from "lucide-react"
+import { MotionIcon } from "motion-icons-react"
 import * as React from "react"
 
 import {
@@ -10,44 +10,51 @@ import {
   AnimatedSidebarTrigger,
 } from "@/components/motion/animated-sidebar"
 import { cn } from "@/lib/utils"
-import type { ShellLayoutProps } from "./type"
+import type { ShellLayoutProps, ShellPanelControlProps } from "./type"
 import { TITLE_BAR_HEIGHT } from "./utils"
 import type { ClassNameValue } from "tailwind-merge"
 
 export function ShellLayout({
   children,
-  open,
-  defaultOpen,
-  onOpenChange,
-  rightDrawer,
-  rightOpen,
-  defaultRightOpen,
-  onRightOpenChange,
   variant = "desktop",
+  panels,
   className,
+  defaultOpen,
+  ...panelControlProps
 }: ShellLayoutProps): React.ReactElement {
 
   const background: ClassNameValue = `bg-linear-to-tr/increasing from-neutral-200 via-neutral-100 to-stone-200 dark:from-neutral-900 dark:via-neutral-950 dark:to-stone-950`
+
+  // Each panel seeds its own side's initial state (`defaultOpen ?? open`);
+  // an explicit `defaultOpen` record — usually from useShellPanels — wins
+  // per side.
+  const initialOpen: ShellPanelControlProps["defaultOpen"] = {
+    ...(panels?.left && {
+      left: panels.left.defaultOpen ?? panels.left.open,
+    }),
+    ...(panels?.right && {
+      right: panels.right.defaultOpen ?? panels.right.open,
+    }),
+    ...(defaultOpen)
+  }
+
   return (
     <AnimatedSidebarProvider
-      className={cn("block-full", className, background, 'relative pr-2')}
-      defaultOpen={defaultOpen}
-      defaultOpenRight={defaultRightOpen}
-      onOpenChange={onOpenChange}
-      onOpenRightChange={onRightOpenChange}
-      open={open}
-      openRight={rightOpen}
+      {...panelControlProps}
+      defaultOpen={initialOpen}
+      className={cn("block-full", className, background, "relative pr-2")}
       style={{
         paddingTop: variant === "desktop" ? TITLE_BAR_HEIGHT : 0
       }}
     >
       <AnimatedSidebar
         ariaLabel="Primary navigation"
-        className={cn("")}
         collapsible="icon"
         role="navigation"
         variant="inset"
-      ></AnimatedSidebar>
+      >
+        {panels?.left?.component}
+      </AnimatedSidebar>
 
       <AnimatedSidebarInset
         className={cn(
@@ -58,12 +65,7 @@ export function ShellLayout({
         <header className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <AnimatedSidebarTrigger>
-              <MenuIcon className="size-5" />
-            </AnimatedSidebarTrigger>
-          </div>
-          <div className="flex shrink-0 items-center gap-3">
-            <AnimatedSidebarTrigger aria-label="Toggle panel" side="right">
-              <PanelRightIcon className="size-5" />
+              <MotionIcon name="PanelLeft" size={24} animation="press" />
             </AnimatedSidebarTrigger>
           </div>
         </header>
@@ -72,10 +74,8 @@ export function ShellLayout({
         </div>
       </AnimatedSidebarInset>
 
-
-
       <AnimatedSidebar
-        ariaLabel="Secondary panel"
+        ariaLabel={panels?.right?.name ?? "Secondary panel"}
         // Below md the panel is portal led over the page, so it carries the
         // surface itself; the desktop rail keeps it on the inner panel.
         className={cn("max-md:border-l max-md:border-neutral-200 max-md:bg-white dark:max-md:border-neutral-700 dark:max-md:bg-card")}
@@ -92,7 +92,7 @@ export function ShellLayout({
         side="right"
         variant="inset"
       >
-        {rightDrawer}
+        {panels?.right?.component}
       </AnimatedSidebar>
     </AnimatedSidebarProvider>
   )

@@ -20,6 +20,7 @@ import {
   useContext,
   useEffect,
   useId,
+  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
@@ -29,8 +30,10 @@ import { SharedLayoutBg } from "@/components/motion/shared-layout-bg"
 import { EASE_DRAWER, EASE_OUT, SPRING_LAYOUT, SPRING_PRESS } from "@/lib/ease"
 import { cn } from "@/lib/utils"
 
-type SidebarState = "expanded" | "collapsed"
-type SidebarSide = "left" | "right"
+export type SidebarSide = "left" | "right"
+/** Open flags keyed by side. Sides left out stay uncontrolled / at their
+ * default — there is no per-side prop, the record IS the API. */
+export type SidebarOpenState = Partial<Record<SidebarSide, boolean>>
 type SidebarVariant = "sidebar" | "floating" | "inset"
 type SidebarCollapsible = "offcanvas" | "icon" | "none"
 
@@ -144,20 +147,16 @@ function useIsMobile() {
 interface AnimatedSidebarContextValue {
   isMobile: boolean
   layoutId: string
-  open: boolean
-  openMobile: boolean
-  /** The right panel is a single hidden/shown state — no icon rail, no
-   * separate mobile state. */
-  openRight: boolean
+  /** Desktop open state, keyed by side. */
+  open: Record<SidebarSide, boolean>
+  /** Mobile overlay open state, keyed by side. */
+  openMobile: Record<SidebarSide, boolean>
   reduce: boolean
-  setOpen: (open: boolean) => void
-  setOpenMobile: (open: boolean) => void
-  setOpenRight: (open: boolean) => void
-  state: SidebarState
-  toggleSidebar: () => void
-  toggleRightSidebar: () => void
-  triggerRef: React.RefObject<HTMLButtonElement | null>
-  rightTriggerRef: React.RefObject<HTMLButtonElement | null>
+  setOpen: (open: boolean, side: SidebarSide) => void
+  setOpenMobile: (open: boolean, side: SidebarSide) => void
+  /** Mobile-aware: toggles the overlay below md, the docked panel above. */
+  toggleSidebar: (side: SidebarSide) => void
+  triggerRefs: Record<SidebarSide, React.RefObject<HTMLButtonElement | null>>
 }
 
 const AnimatedSidebarContext =
@@ -199,78 +198,111 @@ type SidebarProviderStyle = CSSProperties & {
 }
 
 export interface AnimatedSidebarProviderProps extends HTMLAttributes<HTMLDivElement> {
-  open?: boolean
-  defaultOpen?: boolean
-  onOpenChange?: (open: boolean) => void
-  openMobile?: boolean
-  defaultOpenMobile?: boolean
-  onOpenMobileChange?: (open: boolean) => void
-  openRight?: boolean
-  defaultOpenRight?: boolean
-  onOpenRightChange?: (open: boolean) => void
+  /** Controlled desktop open state, keyed by side. A side left undefined
+   * stays uncontrolled. */
+  open?: SidebarOpenState
+  /** Initial desktop open state, merged over `{ left: true, right: false }`. */
+  defaultOpen?: SidebarOpenState
+  onOpenChange?: (open: boolean, side: SidebarSide) => void
+  /** Controlled mobile overlay state, keyed by side. */
+  openMobile?: SidebarOpenState
+  /** Initial mobile overlay state — every side starts closed. */
+  defaultOpenMobile?: SidebarOpenState
+  onOpenMobileChange?: (open: boolean, side: SidebarSide) => void
   style?: SidebarProviderStyle
 }
 
 export function AnimatedSidebarProvider({
   children,
   open,
-  defaultOpen = true,
+  defaultOpen,
   onOpenChange,
   openMobile,
-  defaultOpenMobile = false,
+  defaultOpenMobile,
   onOpenMobileChange,
-  openRight,
-  defaultOpenRight = false,
-  onOpenRightChange,
   className,
   style,
   ...props
 }: AnimatedSidebarProviderProps) {
-  const [internalOpen, setInternalOpen] = useState(defaultOpen)
-  const [internalOpenMobile, setInternalOpenMobile] =
-    useState(defaultOpenMobile)
-  const [internalOpenRight, setInternalOpenRight] = useState(defaultOpenRight)
+  const [internalOpen, setInternalOpen] = useState<
+    Record<SidebarSide, boolean>
+  >(() => ({
+    left: defaultOpen?.left ?? true,
+    right: defaultOpen?.right ?? false,
+  }))
+  const [internalOpenMobile, setInternalOpenMobile] = useState<
+    Record<SidebarSide, boolean>
+  >(() => ({
+    left: defaultOpenMobile?.left ?? false,
+    right: defaultOpenMobile?.right ?? false,
+  }))
   const isMobile = useIsMobile()
   const reduce = useReducedMotion() ?? false
   const generatedId = useId()
-  const triggerRef = useRef<HTMLButtonElement>(null)
+  const leftTriggerRef = useRef<HTMLButtonElement>(null)
   const rightTriggerRef = useRef<HTMLButtonElement>(null)
-  const desktopOpen = open ?? internalOpen
-  const mobileOpen = openMobile ?? internalOpenMobile
-  const rightOpen = openRight ?? internalOpenRight
+
+  // Per-side controlled/uncontrolled merge — a side is controlled exactly
+  // when its key is present on the controlled record.
+  const controlledLeft = open?.left
+  const controlledRight = open?.right
+  const controlledMobileLeft = openMobile?.left
+  const controlledMobileRight = openMobile?.right
+
+  const openState = useMemo<Record<SidebarSide, boolean>>(
+    () => ({
+      left: controlledLeft ?? internalOpen.left,
+      right: controlledRight ?? internalOpen.right,
+    }),
+    [controlledLeft, controlledRight, internalOpen]
+  )
+  const openMobileState = useMemo<Record<SidebarSide, boolean>>(
+    () => ({
+      left: controlledMobileLeft ?? internalOpenMobile.left,
+      right: controlledMobileRight ?? internalOpenMobile.right,
+    }),
+    [controlledMobileLeft, controlledMobileRight, internalOpenMobile]
+  )
 
   const setOpen = useCallback(
-    (nextOpen: boolean) => {
-      if (open === undefined) setInternalOpen(nextOpen)
-      onOpenChange?.(nextOpen)
+    (nextOpen: boolean, side: SidebarSide) => {
+      const controlled = side === "left" ? controlledLeft : controlledRight
+      if (controlled === undefined) {
+        setInternalOpen((prev) =>
+          prev[side] === nextOpen ? prev : { ...prev, [side]: nextOpen }
+        )
+      }
+      onOpenChange?.(nextOpen, side)
     },
-    [onOpenChange, open]
+    [controlledLeft, controlledRight, onOpenChange]
   )
 
   const setOpenMobile = useCallback(
-    (nextOpen: boolean) => {
-      if (openMobile === undefined) setInternalOpenMobile(nextOpen)
-      onOpenMobileChange?.(nextOpen)
+    (nextOpen: boolean, side: SidebarSide) => {
+      const controlled =
+        side === "left" ? controlledMobileLeft : controlledMobileRight
+      if (controlled === undefined) {
+        setInternalOpenMobile((prev) =>
+          prev[side] === nextOpen ? prev : { ...prev, [side]: nextOpen }
+        )
+      }
+      onOpenMobileChange?.(nextOpen, side)
     },
-    [onOpenMobileChange, openMobile]
+    [controlledMobileLeft, controlledMobileRight, onOpenMobileChange]
   )
 
-  const setOpenRight = useCallback(
-    (nextOpen: boolean) => {
-      if (openRight === undefined) setInternalOpenRight(nextOpen)
-      onOpenRightChange?.(nextOpen)
+  const toggleSidebar = useCallback(
+    (side: SidebarSide) => {
+      if (isMobile) setOpenMobile(!openMobileState[side], side)
+      else setOpen(!openState[side], side)
     },
-    [onOpenRightChange, openRight]
+    [isMobile, openMobileState, openState, setOpen, setOpenMobile]
   )
 
-  const toggleSidebar = useCallback(() => {
-    if (isMobile) setOpenMobile(!mobileOpen)
-    else setOpen(!desktopOpen)
-  }, [desktopOpen, isMobile, mobileOpen, setOpen, setOpenMobile])
-
-  const toggleRightSidebar = useCallback(() => {
-    setOpenRight(!rightOpen)
-  }, [rightOpen, setOpenRight])
+  const triggerRefs = useMemo(
+    () => ({ left: leftTriggerRef, right: rightTriggerRef }),
+    []
+  )
 
   useEffect(() => {
     const handleShortcut = (event: KeyboardEvent) => {
@@ -279,7 +311,7 @@ export function AnimatedSidebarProvider({
         (event.metaKey || event.ctrlKey)
       ) {
         event.preventDefault()
-        toggleSidebar()
+        toggleSidebar("left")
       }
     }
 
@@ -292,25 +324,20 @@ export function AnimatedSidebarProvider({
       value={{
         isMobile,
         layoutId: `${generatedId}-active`,
-        open: desktopOpen,
-        openMobile: mobileOpen,
-        openRight: rightOpen,
+        open: openState,
+        openMobile: openMobileState,
         reduce,
         setOpen,
         setOpenMobile,
-        setOpenRight,
-        state: desktopOpen ? "expanded" : "collapsed",
         toggleSidebar,
-        toggleRightSidebar,
-        triggerRef,
-        rightTriggerRef,
+        triggerRefs,
       }}
     >
       <div
         {...props}
         data-slot="sidebar-wrapper"
-        data-state={desktopOpen ? "expanded" : "collapsed"}
-        data-right-state={rightOpen ? "expanded" : "collapsed"}
+        data-state-left={openState.left ? "expanded" : "collapsed"}
+        data-state-right={openState.right ? "expanded" : "collapsed"}
         style={{
           "--sidebar-width": "19rem",
           "--sidebar-width-icon": "4.25rem",
@@ -340,10 +367,9 @@ function MobileSidebar({
   side: SidebarSide
 }) {
   const context = useAnimatedSidebar()
-  const isRight = side === "right"
-  const open = isRight ? context.openRight : context.openMobile
-  const setOpen = isRight ? context.setOpenRight : context.setOpenMobile
-  const triggerRef = isRight ? context.rightTriggerRef : context.triggerRef
+  const open = context.openMobile[side]
+  const setOpen = (nextOpen: boolean) => context.setOpenMobile(nextOpen, side)
+  const triggerRef = context.triggerRefs[side]
   const panelRef = useRef<HTMLDivElement>(null)
   const [mounted, setMounted] = useState(false)
 
@@ -512,7 +538,7 @@ export const AnimatedSidebar = forwardRef<HTMLElement, AnimatedSidebarProps>(
     forwardedRef
   ) {
     const context = useAnimatedSidebar()
-    const sideOpen = side === "right" ? context.openRight : context.open
+    const sideOpen = context.open[side]
     const collapsed = collapsible !== "none" && !sideOpen
     const offcanvas = collapsed && collapsible === "offcanvas"
     const width = offcanvas
@@ -598,13 +624,10 @@ export const AnimatedSidebarTrigger = forwardRef<
   forwardedRef
 ) {
   const context = useAnimatedSidebar()
-  const isRight = side === "right"
-  const expanded = isRight
-    ? context.openRight
-    : context.isMobile
-      ? context.openMobile
-      : context.open
-  const triggerRef = isRight ? context.rightTriggerRef : context.triggerRef
+  const expanded = context.isMobile
+    ? context.openMobile[side]
+    : context.open[side]
+  const triggerRef = context.triggerRefs[side]
 
   return (
     <button
@@ -623,8 +646,7 @@ export const AnimatedSidebarTrigger = forwardRef<
       onClick={(event) => {
         onClick?.(event)
         if (event.defaultPrevented) return
-        if (isRight) context.toggleRightSidebar()
-        else context.toggleSidebar()
+        context.toggleSidebar(side)
       }}
       className={cn(
         "inline-flex size-10 shrink-0 items-center justify-center rounded-xl outline-none",
@@ -658,9 +680,8 @@ export const AnimatedSidebarClose = forwardRef<
       onClick={(event) => {
         onClick?.(event)
         if (event.defaultPrevented) return
-        if (side === "right") context.setOpenRight(false)
-        else if (context.isMobile) context.setOpenMobile(false)
-        else context.setOpen(false)
+        if (context.isMobile) context.setOpenMobile(false, side)
+        else context.setOpen(false, side)
       }}
       className={cn(
         "inline-flex size-10 shrink-0 items-center justify-center rounded-xl outline-none",
@@ -695,8 +716,7 @@ export const AnimatedSidebarRail = forwardRef<
       onClick={(event) => {
         onClick?.(event)
         if (event.defaultPrevented) return
-        if (panel.side === "right") context.toggleRightSidebar()
-        else context.toggleSidebar()
+        context.toggleSidebar(panel.side)
       }}
       className={cn(
         "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 outline-none md:block",
@@ -956,6 +976,7 @@ export function AnimatedSidebarMenuSubButton({
   className,
 }: AnimatedSidebarMenuSubButtonProps) {
   const context = useAnimatedSidebar()
+  const panel = useAnimatedSidebarPanel()
 
   const select = (
     event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>
@@ -965,7 +986,9 @@ export function AnimatedSidebarMenuSubButton({
       return
     }
     onSelect?.()
-    if (context.isMobile && closeOnSelect) context.setOpenMobile(false)
+    if (context.isMobile && closeOnSelect) {
+      context.setOpenMobile(false, panel.side)
+    }
   }
 
   const content = (
@@ -1062,7 +1085,7 @@ export function AnimatedSidebarMenuButton({
     onSelect?.()
     const shouldCloseOnSelect = closeOnSelect ?? ariaExpanded === undefined
     if (context.isMobile && shouldCloseOnSelect) {
-      context.setOpenMobile(false)
+      context.setOpenMobile(false, panel.side)
     }
   }
 
