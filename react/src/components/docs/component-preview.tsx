@@ -1,5 +1,6 @@
 import * as React from "react"
 
+import { BrowserFrame } from "@/components/beste/piece/browser-frame"
 import type { RegistryEntry } from "@/registry"
 
 /**
@@ -11,18 +12,18 @@ export function ComponentPreview({ entry }: { entry: RegistryEntry }) {
   const Demo = entry.preview
 
   return (
-    <div className="flex min-h-48 items-center justify-center rounded-lg border p-8">
+    <BrowserFrame title={entry.name} titleStyle="hidden">
       {Demo ? (
-        <React.Suspense
-          fallback={<p className="text-sm text-muted-foreground">Loading…</p>}
-        >
-          <Demo />
-        </React.Suspense>
-      ) : (
-        <p className="text-sm text-muted-foreground">
-          Preview coming soon ({entry.status}).
-        </p>
-      )}
-    </div>
+          <React.Suspense
+            fallback={<p className="text-sm text-muted-foreground">Loading…</p>}
+          >
+            <Demo />
+          </React.Suspense>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Preview coming soon ({entry.status}).
+          </p>
+        )}
+    </BrowserFrame>
   )
 }

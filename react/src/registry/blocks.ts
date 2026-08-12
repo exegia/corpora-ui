@@ -486,6 +486,13 @@ export const blocks: RegistryEntry[] = [
         description: "Menu placement relative to the card.",
       },
       {
+        name: "menuWidth",
+        type: '"content" | "card"',
+        default: '"content"',
+        description:
+          "“content” sizes the menu to its items; “card” locks it to the trigger's width.",
+      },
+      {
         name: "open / defaultOpen / onOpenChange",
         type: "boolean / boolean / (open, details) => void",
         description: "Control the menu, or observe it.",
@@ -556,7 +563,8 @@ export const blocks: RegistryEntry[] = [
         name: "collapsible / variant / side",
         type: '"icon" | "offcanvas" | "none" / "sidebar" | "floating" | "inset" / "left" | "right"',
         default: '"icon" / "sidebar" / "left"',
-        description: "How the rail collapses, how the panel is framed, and which edge it sits on.",
+        description:
+          "How the rail collapses, how the panel is framed, and which edge it sits on.",
       },
       {
         name: "open / defaultOpen / onOpenChange",
@@ -602,5 +610,55 @@ export const blocks: RegistryEntry[] = [
   onNavigate={(item) => navigate(item.id)}
   footer={<ProfileCardBlock user={user} side="top" />}
 />`,
+  },
+  {
+    slug: "shell",
+    name: "Shell",
+    description:
+      "Inset application shell with a collapsible sidebar, workspace header, command-style search affordance, top actions, and scrollable content area.",
+    category: "blocks",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/shell-demo")),
+    registryDependencies: ["animated-sidebar", "sidebar"],
+    props: [
+      {
+        name: "children",
+        type: "React.ReactNode",
+        description: "Main scrollable content rendered inside the inset panel.",
+      },
+      {
+        name: "variant",
+        type: '"web" | "desktop"',
+        description:
+          "Desktop reserves room at the top for a native title bar; web does not.",
+      },
+      {
+        name: "open / defaultOpen / onOpenChange",
+        type: "boolean / boolean / (open) => void",
+        description:
+          "Control or observe the left rail, which collapses to icons. ⌘B toggles it.",
+      },
+      {
+        name: "rightDrawer",
+        type: "React.ReactNode",
+        description:
+          "Content of the right drawer. Unlike the left rail it has no icon state — it is either fully shown or fully hidden.",
+      },
+      {
+        name: "rightOpen / defaultRightOpen / onRightOpenChange",
+        type: "boolean / boolean / (open) => void",
+        description:
+          "Control or observe the right drawer. The header trigger toggles it.",
+      },
+    ],
+    usage: `import { ShellLayout } from "@corpora/ui"
+
+<ShellLayout
+  variant="web"
+  defaultRightOpen
+  rightDrawer={<Inspector />}
+>
+  <Dashboard />
+</ShellLayout>`,
   },
 ]

@@ -40,6 +40,7 @@ export * from "./components/blocks/auth/passkey-sign-in-block"
 export * from "./components/blocks/auth/signup-block"
 export * from "./components/blocks/auth/update-password-block"
 export * from "./components/blocks/nav/sidebar-block"
+export * from "./components/blocks/shell/shell-layout"
 export * from "./components/blocks/profile/profile-card-block"
 
 // motion primitives

@@ -1,8 +1,17 @@
 import type * as React from "react"
 
+import {
+  Select,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+ SelectContent} from "@/components/ui/select"
+import { Field, FieldLabel } from "@/components/ui/field"
+import { Card , CardContent} from "@/components/ui/card";
+
 /**
- * Lightweight playground controls for registry demos. Plain native elements
- * on purpose — docs-only, never part of the published library.
+ * Lightweight playground controls for registry demos — docs-only, never
+ * part of the published library.
  */
 
 export function DemoSelect<T extends string>({
@@ -11,26 +20,33 @@ export function DemoSelect<T extends string>({
   options,
   onChange,
 }: {
-  label: string
+  label?: string
   value: T
   options: readonly T[]
   onChange: (value: T) => void
 }) {
+  const items = options.map((option) => ({ label: option, value: option }))
+
   return (
-    <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-      {label}
-      <select
+    <Field className="flex flex-col gap-1 text-xs text-muted-foreground">
+      {label && <FieldLabel>{label}</FieldLabel>}
+      <Select
+        items={items}
+        onValueChange={(next) => onChange(next as T)}
         value={value}
-        onChange={(event) => onChange(event.target.value as T)}
-        className="h-7 rounded-md border bg-background px-2 text-xs text-foreground"
       >
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </label>
+        <SelectTrigger className="h-7 min-w-0 text-xs capitalize rounded-sm " size="sm">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+            {items.map((item) => (
+              <SelectItem key={item.value} value={item.value}>
+                {item.label}
+              </SelectItem>
+            ))}
+        </SelectContent>
+      </Select>
+    </Field>
   )
 }
 
@@ -96,22 +112,22 @@ export function DemoStage({
   children,
   canvasClassName,
 }: {
-  controls: React.ReactNode
+  controls?: React.ReactNode
   children: React.ReactNode
   canvasClassName?: string
 }) {
   return (
-    <div className="flex w-full flex-col items-center gap-6">
+    <div className="relative flex w-full flex-col items-center">
+      {controls && <Card className="absolute top-3 right-3 z-20 rounded-xl shadow-lg">
+        <CardContent className="flex flex-row items-center gap-x-2">{controls}</CardContent>
+      </Card>}
       <div
         className={
           canvasClassName ??
-          "flex min-h-28 w-full items-center justify-center rounded-lg"
+          "flex min-h-32 w-full items-center justify-center rounded-lg"
         }
       >
         {children}
-      </div>
-      <div className="flex flex-wrap items-end justify-center gap-x-4 gap-y-3">
-        {controls}
       </div>
     </div>
   )

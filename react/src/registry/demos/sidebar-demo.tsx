@@ -1,72 +1,40 @@
-import {
-  BookOpenIcon,
-  FileTextIcon,
-  LibraryIcon,
-  SearchIcon,
-  SettingsIcon,
-  SparklesIcon,
-  TagsIcon,
-} from "lucide-react"
 import * as React from "react"
 
-import { ProfileCardBlock } from "@/components/blocks/profile/profile-card-block"
 import {
-  SidebarBlock,
-  type SidebarNavSection,
-} from "@/components/blocks/nav/sidebar-block"
-import {
-  DemoBrandMark,
   DemoSelect,
   DemoStage,
 } from "@/components/docs/demo-controls"
+import { Badge } from "@/components/ui/badge";
+import { Sidebar, type SidebarResource } from "@/components/agents";
 
-const SECTIONS: SidebarNavSection[] = [
+const RESOURCES: SidebarResource[] = [
   {
-    id: "work",
-    label: "Research",
-    items: [
-      { id: "search", label: "Search", icon: <SearchIcon /> },
+    id: "corpora",
+    label: "Corpora",
+    kind: "project",
+    children: [
       {
-        id: "reading",
-        label: "Reading list",
-        icon: <BookOpenIcon />,
-        badge: "12",
-      },
-      {
-        id: "library",
-        label: "Library",
-        icon: <LibraryIcon />,
-        items: [
-          { id: "library-manuscripts", label: "Manuscripts" },
-          { id: "library-codices", label: "Codices" },
-          { id: "library-fragments", label: "Fragments" },
+        id: "manuscripts",
+        label: "Manuscripts",
+        kind: "folder",
+        children: [
+          { id: "codex-a", label: "Codex Askewianus", kind: "file" },
+          { id: "codex-b", label: "Codex Brucianus", kind: "file" },
         ],
       },
+      { id: "fragments", label: "Fragments", kind: "folder" },
+      { id: "readme", label: "Field notes", kind: "file" },
     ],
   },
-  {
-    id: "workspace",
-    label: "Workspace",
-    items: [
-      { id: "notes", label: "Notes", icon: <FileTextIcon /> },
-      { id: "tags", label: "Tags", icon: <TagsIcon /> },
-      { id: "settings", label: "Settings", icon: <SettingsIcon /> },
-      {
-        id: "whats-new",
-        label: "What's new",
-        icon: <SparklesIcon />,
-        href: "https://example.com/changelog",
-        target: "_blank",
-      },
-    ],
-  },
+  { id: "reading-list", label: "Reading list", kind: "bookmark" },
+  { id: "archive", label: "Archive", kind: "folder", disabled: true },
 ]
 
 const COLLAPSIBLE = ["icon", "offcanvas", "none"] as const
 const VARIANTS = ["sidebar", "floating", "inset"] as const
 
 export default function SidebarDemo() {
-  const [activeId, setActiveId] = React.useState("reading")
+  const [activeId, setActiveId] = React.useState("codex-a")
   const [collapsible, setCollapsible] =
     React.useState<(typeof COLLAPSIBLE)[number]>("icon")
   const [variant, setVariant] =
@@ -77,47 +45,30 @@ export default function SidebarDemo() {
       controls={
         <>
           <DemoSelect
-            label="collapsible"
             value={collapsible}
             options={COLLAPSIBLE}
             onChange={setCollapsible}
           />
           <DemoSelect
-            label="variant"
             value={variant}
             options={VARIANTS}
             onChange={setVariant}
           />
-          <span className="text-xs text-muted-foreground">
-            active: {activeId}
-          </span>
+          <Badge className="capitalize" variant="outline">{activeId}</Badge>
         </>
       }
-      canvasClassName="flex w-full justify-center"
+      canvasClassName="flex w-full"
     >
-      {/* The block claims no page layout, so the demo supplies the frame. */}
-      <div className="flex h-[26rem] w-full max-w-2xl overflow-hidden rounded-lg border">
-        <SidebarBlock
-          activeId={activeId}
-          collapsible={collapsible}
-          footer={
-            <ProfileCardBlock
-              side="top"
-              user={{ name: "Jenny Hamilton", username: "@jennycodes" }}
-            />
-          }
-          header={
-            <span className="flex items-center gap-2 px-1">
-              <span className="size-6 shrink-0">
-                <DemoBrandMark />
-              </span>
-              <span className="truncate text-sm font-medium">Corpora</span>
-            </span>
-          }
-          onNavigate={(item) => setActiveId(item.id)}
-          sections={SECTIONS}
-          variant={variant}
-        />
+      {/* The tree claims no page layout, so the demo supplies the frame. */}
+      <div className="flex h-150 w-full overflow-hidden rounded-lg border pt-12">
+        <div className="w-64 shrink-0 overflow-y-auto border-r p-2">
+          <Sidebar.Wrapper
+            defaultItems={RESOURCES}
+            defaultExpandedIds={["corpora", "manuscripts"]}
+            defaultActiveId="codex-a"
+            onActiveChange={setActiveId}
+          />
+        </div>
         <div className="grid flex-1 place-items-center p-6 text-center text-sm text-muted-foreground">
           Your page content sits here — the block is the panel only.
         </div>

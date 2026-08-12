@@ -38,19 +38,19 @@ export interface SignupBlockProps {
   termsComponent?: React.ReactNode;
   /** Brand mark rendered above the title. Omit for no logo row at all. */
   logo?: React.ReactNode;
-  /** Brand accent for the primary action. Omit to keep the default primary. */
+  /** Brand accent for the primary action. Omit keeping the default primary. */
   accent?: AuthAccent;
   providers?: SocialProvider[];
   showNameField?: boolean;
-  /** Require the terms checkbox before submitting. */
+  /** Require the term checkbox before submitting. */
   showTerms?: boolean;
   /**
-   * Controls the terms checkbox. Pass it with `onTermsCheckedChange` when
+   * Controls the term checkbox. Pass it with `onTermsCheckedChange` when
    * something outside the block has to tick the box — an "I agree" action in
-   * your own terms dialog, say. Omit to let the block own the state.
+   * your own terms dialog, say. Omit letting the block own the state.
    */
   termsChecked?: boolean;
-  /** Starting state of the terms checkbox while it is uncontrolled. */
+  /** Starting state of the term checkbox while it is uncontrolled. */
   defaultTermsChecked?: boolean;
   /** Fires on every change, controlled or not. */
   onTermsCheckedChange?: (checked: boolean) => void;
@@ -122,7 +122,7 @@ export function SignupBlock({
   const emailPathComplete =
     (!showNameField || nameValid) && emailValid && passwordValid;
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
     if (!strongEnough) {

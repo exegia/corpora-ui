@@ -40,12 +40,12 @@ export function EntryDetailPage({ category }: { category: CategoryDef }) {
         <ComponentPreview entry={entry} />
       </section>
 
-      {entry.props && entry.props.length > 0 ? (
+      {entry.props && entry.props.length > 0 && (
         <section className="flex flex-col gap-3">
           <h2 className="text-lg font-medium">Props</h2>
           <PropsTable props={entry.props} />
         </section>
-      ) : null}
+      )}
 
       {entry.usage ? (
         <section className="flex flex-col gap-3">

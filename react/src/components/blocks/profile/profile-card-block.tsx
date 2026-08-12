@@ -110,6 +110,11 @@ export interface ProfileCardBlockProps {
   defaultOpen?: boolean
   onOpenChange?: MenuPrimitive.Root.Props["onOpenChange"]
   /**
+   * "content" sizes the menu to its items; "card" locks it to the trigger's
+   * width, so `align` stops mattering horizontally.
+   */
+  menuWidth?: "content" | "card"
+  /**
    * Emit cuelume press/release on the card and play the open/close cues.
    * Inert unless the app opts into interaction sound via `bindSounds()`.
    */
@@ -158,6 +163,7 @@ export function ProfileCardBlock({
   align = "center",
   side = "bottom",
   sideOffset = 8,
+  menuWidth = "content",
   open,
   defaultOpen,
   onOpenChange,
@@ -212,13 +218,15 @@ export function ProfileCardBlock({
             // avatar sits inside the button and the handle is a second line.
             aria-label={`${user.name}${user.username ? ` ${user.username}` : ""}, account menu`}
             className={cn(
-              "h-auto w-full justify-between py-1.5 pl-1.5 sm:h-auto",
+              // Quiet at rest — the background only surfaces on hover or
+              // while the menu is open.
+              "h-auto w-full justify-between py-1.5 pl-1.5 data-popup-open:bg-accent sm:h-auto",
               className
             )}
             data-slot="profile-card"
             loading={busy}
             sound={sound}
-            variant="outline"
+            variant="ghost"
           >
             <span className="flex w-full min-w-0 items-center justify-start gap-2">
               <UserAvatar
@@ -243,11 +251,14 @@ export function ProfileCardBlock({
       />
       <DropdownMenuContent
         align={align}
-        // Content-width menu (not the card's width) so `align` reads: a popup
-        // locked to `--anchor-width` lands in the same place for every value.
-        // `!` because the popup's own `not-[class*='w-']:min-w-32` compiles to
+        // Content-width by default so `align` reads: a popup locked to
+        // `--anchor-width` lands in the same place for every value. `!`
+        // because the popup's own `not-[class*='w-']:min-w-32` compiles to
         // a higher-specificity `:not(:is())` that would otherwise win.
-        className="min-w-44! origin-(--transform-origin) transition-[opacity,scale,translate] duration-150 ease-smooth-out data-ending-style:scale-98 data-ending-style:opacity-0 data-ending-style:duration-100 data-starting-style:scale-98 data-starting-style:opacity-0 data-[side=bottom]:data-ending-style:-translate-y-1 data-[side=bottom]:data-starting-style:-translate-y-1 data-[side=top]:data-ending-style:translate-y-1 data-[side=top]:data-starting-style:translate-y-1 motion-reduce:transition-none"
+        className={cn(
+          menuWidth === "card" ? "w-(--anchor-width)" : "min-w-44!",
+          "origin-(--transform-origin) transition-[opacity,scale,translate] duration-150 ease-smooth-out data-ending-style:scale-98 data-ending-style:opacity-0 data-ending-style:duration-100 data-starting-style:scale-98 data-starting-style:opacity-0 data-[side=bottom]:data-ending-style:-translate-y-1 data-[side=bottom]:data-starting-style:-translate-y-1 data-[side=top]:data-ending-style:translate-y-1 data-[side=top]:data-starting-style:translate-y-1 motion-reduce:transition-none"
+        )}
         side={side}
         sideOffset={sideOffset}
       >
