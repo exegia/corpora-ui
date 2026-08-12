@@ -68,6 +68,11 @@ export function ShellLayout({
               <MotionIcon name="PanelLeft" size={24} animation="press" />
             </AnimatedSidebarTrigger>
           </div>
+          <div className="flex shrink-0 items-center gap-3">
+            <AnimatedSidebarTrigger aria-label="Toggle panel" side="right">
+              <MotionIcon name="PanelRight" size={24} animation="press" />
+            </AnimatedSidebarTrigger>
+          </div>
         </header>
         <div className="min-h-24 flex-1 overflow-auto">
           {children ?? <ShellLayoutPlaceholder />}
