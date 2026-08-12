@@ -3,6 +3,7 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/figtree";
+@import "motion-icons-react/style.css";
 
 @custom-variant dark (&:is(.dark *));
 

@@ -62,14 +62,22 @@ export function SidebarBlock({
   return (
     <AnimatedSidebarProvider
       // The provider ships a full-page flex shell; this block is just the
-      // panel, so the shell is flattened back to the panel's own box.
+      // panel, so the shell is flattened back to the panel's own box. The
+      // block is a single panel, so its scalar open props map onto the
+      // provider's side-keyed records under the block's own `side`.
       className="h-full min-h-0 w-auto"
-      defaultOpen={defaultOpen}
-      defaultOpenMobile={defaultOpenMobile}
-      onOpenChange={onOpenChange}
-      onOpenMobileChange={onOpenMobileChange}
-      open={open}
-      openMobile={openMobile}
+      defaultOpen={{ [side]: defaultOpen ?? true }}
+      defaultOpenMobile={
+        defaultOpenMobile === undefined ? undefined : { [side]: defaultOpenMobile }
+      }
+      onOpenChange={(nextOpen, changedSide) => {
+        if (changedSide === side) onOpenChange?.(nextOpen)
+      }}
+      onOpenMobileChange={(nextOpen, changedSide) => {
+        if (changedSide === side) onOpenMobileChange?.(nextOpen)
+      }}
+      open={open === undefined ? undefined : { [side]: open }}
+      openMobile={openMobile === undefined ? undefined : { [side]: openMobile }}
       style={{
         ...(width ? { "--sidebar-width": width } : null),
         ...(iconWidth ? { "--sidebar-width-icon": iconWidth } : null),
