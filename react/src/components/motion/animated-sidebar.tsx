@@ -583,7 +583,9 @@ export const AnimatedSidebar = forwardRef<HTMLElement, AnimatedSidebarProps>(
         )}
       >
         {side === "right" && !collapsed && (
-          <motion.div className="h-full p-0.5 flex flex-1  bg-radial/decreasing from-amber-400 to-0% hover:to-50% ease-smooth-out to-amber-500/0 cursor-col-resize transition-colors duration-1000 animate-in" />
+          <motion.div className="flex h-full cursor-col-resize justify-center p-1 group relative">
+            <motion.div className="h-full w-full scale-y-0 animate-in bg-radial/decreasing from-amber-300/70 to-amber-500/0 to-40% transition-[colors,scale] duration-200 ease-smooth-out  group-hover:scale-y-100 absolute" />
+          </motion.div>
         )}
         <motion.div
           initial={false}
@@ -594,10 +596,19 @@ export const AnimatedSidebar = forwardRef<HTMLElement, AnimatedSidebarProps>(
           transition={context.reduce ? REDUCED_TRANSITION : PANEL_TRANSITION}
           className={cn(
             "sticky top-0 flex h-svh w-full flex-col overflow-hidden",
+            "bg-neutral-50 dark:bg-neutral-900",
+            "outline-offset-0.5 border-t-3 border-white outline-neutral-100 dark:border-neutral-800 dark:inset-ring-black",
+            "rounded-lg shadow-md shadow-neutral-200 dark:shadow-neutral-950",
             collapsible === "offcanvas" && "w-(--sidebar-width)",
 
             variant === "floating" && "m-2 h-[calc(100svh-1rem)]",
-            variant === "inset" && "m-2 h-[calc(100svh-1rem)]",
+            variant === "inset" && "my-2 h-[calc(100svh-1rem)]",
+            variant === "inset" &&
+              side === "right" &&
+              "w-[calc(var(--sidebar-width)-0.5rem)]",
+            variant === "inset" &&
+              side === "left" &&
+              "border-transparent! bg-transparent! shadow-none!",
             panelClassName
           )}
         >
