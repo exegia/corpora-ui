@@ -68,12 +68,6 @@ export function ShellLayout({
         {panels?.left?.component}
       </AnimatedSidebar>
 
-      <AnimatedSidebarInset
-        className={cn(
-          "min-w-24 overflow-hidden border-t border-neutral-200 dark:border-neutral-700 inset-ring-1 inset-ring-neutral-50 dark:inset-ring-black bg-white dark:bg-card rounded-lg!",
-          `mx-0!`
-        )}
-      >
       <AnimatedSidebarInset className="min-w-24">
         <header className="flex h-12 items-center justify-between gap-2 px-2">
           <div className="flex min-w-0 items-center gap-2">
