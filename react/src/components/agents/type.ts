@@ -1,4 +1,4 @@
-import type { ReactNode, DragEvent, KeyboardEvent } from "react"
+import type { ReactElement, ReactNode, DragEvent, KeyboardEvent } from "react"
 
 export type SidebarResourceKind = "folder" | "project" | "file" | "bookmark"
 
@@ -40,6 +40,11 @@ export interface AISidebarProps {
     item: SidebarResource,
     controls: SidebarResourceMenuControls
   ) => ReactNode
+  /**
+   * Replaces the default "…" actions button. Must return a single element —
+   * the popover clones it to attach its trigger ref and click handler.
+   */
+  renderActionsTrigger?: (item: SidebarResource) => ReactElement
   ariaLabel?: string
   className?: string
 }
@@ -85,5 +90,6 @@ export interface ResourceRowProps {
   onHoverChange?: (hovered: boolean) => void
   renderIcon?: (item: SidebarResource) => ReactNode
   renderMenu?: AISidebarProps["renderMenu"]
+  renderActionsTrigger?: AISidebarProps["renderActionsTrigger"]
   setRef: (node: HTMLDivElement | null) => void
 }
