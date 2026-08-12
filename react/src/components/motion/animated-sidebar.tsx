@@ -29,6 +29,7 @@ import { createPortal } from "react-dom"
 import { SharedLayoutBg } from "@/components/motion/shared-layout-bg"
 import { EASE_DRAWER, EASE_OUT, SPRING_LAYOUT, SPRING_PRESS } from "@/lib/ease"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button";
 
 export type SidebarSide = "left" | "right"
 /** Open flags keyed by the side. Sides left out stay uncontrolled / at their
@@ -631,7 +632,7 @@ export const AnimatedSidebarTrigger = forwardRef<
   HTMLButtonElement,
   AnimatedSidebarTriggerProps
 >(function AnimatedSidebarTrigger(
-  { className, onClick, side = "left", type = "button", ...props },
+  { onClick, side = "left", type = "button", ...props },
   forwardedRef
 ) {
   const context = useAnimatedSidebar()
@@ -641,7 +642,7 @@ export const AnimatedSidebarTrigger = forwardRef<
   const triggerRef = context.triggerRefs[side]
 
   return (
-    <button
+    <Button
       {...props}
       ref={(node) => {
         triggerRef.current = node
@@ -649,6 +650,8 @@ export const AnimatedSidebarTrigger = forwardRef<
         else if (forwardedRef) forwardedRef.current = node
       }}
       type={type}
+      variant="ghost"
+      size="icon-xl"
       aria-label={props["aria-label"] ?? "Toggle sidebar"}
       aria-expanded={expanded}
       data-slot="sidebar-trigger"
@@ -659,11 +662,6 @@ export const AnimatedSidebarTrigger = forwardRef<
         if (event.defaultPrevented) return
         context.toggleSidebar(side)
       }}
-      className={cn(
-        "inline-flex size-10 shrink-0 items-center justify-center rounded-xl outline-none",
-        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-        className
-      )}
     />
   )
 })
