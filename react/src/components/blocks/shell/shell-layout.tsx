@@ -65,12 +65,16 @@ export function ShellLayout({
         <header className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <AnimatedSidebarTrigger>
-              <MotionIcon name="PanelLeft" size={24} animation="press" />
+              {panels?.left?.trigger ?? (
+                <MotionIcon name="PanelLeft" size={24} animation="press" />
+              )}
             </AnimatedSidebarTrigger>
           </div>
           <div className="flex shrink-0 items-center gap-3">
             <AnimatedSidebarTrigger aria-label="Toggle panel" side="right">
-              <MotionIcon name="PanelRight" size={24} animation="press" />
+              {panels?.right?.trigger ?? (
+                <MotionIcon name="PanelRight" size={24} animation="press" />
+              )}
             </AnimatedSidebarTrigger>
           </div>
         </header>
