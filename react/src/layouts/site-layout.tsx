@@ -31,7 +31,7 @@ export function SiteLayout() {
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">
+      <main className="mx-auto w-full flex-1 px-6 py-10">
         <Outlet />
       </main>
     </div>

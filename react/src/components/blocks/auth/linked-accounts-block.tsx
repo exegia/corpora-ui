@@ -1,55 +1,55 @@
-"use client";
+"use client"
 
-import { AnimatePresence, MotionConfig, motion } from "motion/react";
-import * as React from "react";
+import { AnimatePresence, MotionConfig, motion } from "motion/react"
+import * as React from "react"
 
 import {
   SOCIAL_PROVIDERS,
   type SocialProvider,
-} from "@/components/composed/social-providers";
-import { Button } from "@/components/ui/button";
+} from "@/components/composed/social-providers"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardDescription,
   CardHeader,
   CardPanel,
   CardTitle,
-} from "@/components/ui/card";
-import { Spinner } from "@/components/ui/spinner";
-import { cn } from "@/lib/utils";
-import { AuthError, EASE } from "./auth-shell";
+} from "@/components/ui/card"
+import { Spinner } from "@/components/ui/spinner"
+import { cn } from "@/lib/utils"
+import { AuthError, EASE } from "./auth-shell"
 
 /** One sign-in identity attached to the account. */
 export interface LinkedIdentity {
-  id: string;
-  provider: SocialProvider;
+  id: string
+  provider: SocialProvider
   /** Account address shown under the provider name, when known. */
-  email?: string | null;
+  email?: string | null
 }
 
 export interface LinkedAccountsBlockProps {
-  title?: string;
-  description?: string;
+  title?: string
+  description?: string
   /** Identities already attached to the account. */
-  identities?: LinkedIdentity[];
+  identities?: LinkedIdentity[]
   /** Providers offered as connect candidates; connected ones are filtered out. */
-  providers?: SocialProvider[];
+  providers?: SocialProvider[]
   /** Shows the loading row instead of the list. */
-  loading?: boolean;
+  loading?: boolean
   /**
    * The account can also sign in through a method that has no row in this
    * list — an email/password credential, say. Lifts the last-method guard,
    * which otherwise refuses to disconnect the final listed identity.
    */
-  hasOtherSignInMethods?: boolean;
+  hasOtherSignInMethods?: boolean
   /** Reject (or throw) to show the inline error. */
-  onLink?: (provider: SocialProvider) => Promise<void> | void;
-  onUnlink?: (id: string) => Promise<void> | void;
-  className?: string;
+  onLink?: (provider: SocialProvider) => Promise<void> | void
+  onUnlink?: (id: string) => Promise<void> | void
+  className?: string
 }
 
 const LAST_METHOD_EXPLANATION =
-  "This is your only way to sign in, so it can't be disconnected.";
+  "This is your only way to sign in, so it can't be disconnected."
 
 /**
  * Settings panel for the sign-in identities attached to an account: lists the
@@ -68,48 +68,46 @@ export function LinkedAccountsBlock({
   onUnlink,
   className,
 }: LinkedAccountsBlockProps) {
-  const noteId = React.useId();
-  const [error, setError] = React.useState<string | null>(null);
-  const [linking, setLinking] = React.useState<SocialProvider | null>(null);
-  const [unlinking, setUnlinking] = React.useState<string | null>(null);
+  const noteId = React.useId()
+  const [error, setError] = React.useState<string | null>(null)
+  const [linking, setLinking] = React.useState<SocialProvider | null>(null)
+  const [unlinking, setUnlinking] = React.useState<string | null>(null)
 
-  const connected = new Set(identities.map((identity) => identity.provider));
-  const connectable = providers.filter((provider) => !connected.has(provider));
-  const busy = linking !== null || unlinking !== null;
+  const connected = new Set(identities.map((identity) => identity.provider))
+  const connectable = providers.filter((provider) => !connected.has(provider))
+  const busy = linking !== null || unlinking !== null
   // The backend rule, enforced here so we never fire a request that would
   // remove the account's only way in. An off-list method (a password) keeps
   // the account reachable, so it lifts the guard.
-  const lastMethod = !hasOtherSignInMethods && identities.length <= 1;
+  const lastMethod = !hasOtherSignInMethods && identities.length <= 1
 
   async function connect(provider: SocialProvider) {
-    if (busy) return;
-    setError(null);
-    setLinking(provider);
+    if (busy) return
+    setError(null)
+    setLinking(provider)
     try {
-      await onLink?.(provider);
+      await onLink?.(provider)
     } catch (cause) {
       setError(
-        cause instanceof Error ? cause.message : "Unable to connect account.",
-      );
+        cause instanceof Error ? cause.message : "Unable to connect account."
+      )
     } finally {
-      setLinking(null);
+      setLinking(null)
     }
   }
 
   async function disconnect(id: string) {
-    if (busy || lastMethod) return;
-    setError(null);
-    setUnlinking(id);
+    if (busy || lastMethod) return
+    setError(null)
+    setUnlinking(id)
     try {
-      await onUnlink?.(id);
+      await onUnlink?.(id)
     } catch (cause) {
       setError(
-        cause instanceof Error
-          ? cause.message
-          : "Unable to disconnect account.",
-      );
+        cause instanceof Error ? cause.message : "Unable to disconnect account."
+      )
     } finally {
-      setUnlinking(null);
+      setUnlinking(null)
     }
   }
 
@@ -141,9 +139,8 @@ export function LinkedAccountsBlock({
                 >
                   <AnimatePresence initial={false}>
                     {identities.map((identity, index) => {
-                      const { label, Icon } = SOCIAL_PROVIDERS[
-                        identity.provider
-                      ];
+                      const { label, BrandIcon, brandClassName } =
+                        SOCIAL_PROVIDERS[identity.provider]
                       return (
                         <motion.li
                           key={identity.id}
@@ -161,12 +158,12 @@ export function LinkedAccountsBlock({
                           }}
                         >
                           <div className="flex min-w-0 items-center gap-2.5">
-                            <Icon
+                            <BrandIcon
                               aria-hidden="true"
-                              className="size-4 text-muted-foreground"
+                              className={cn("size-4", brandClassName)}
                             />
                             <div className="flex min-w-0 flex-col">
-                              <span className="font-medium text-sm">
+                              <span className="text-sm font-medium">
                                 {label}
                               </span>
                               {identity.email && (
@@ -189,7 +186,7 @@ export function LinkedAccountsBlock({
                             Disconnect
                           </Button>
                         </motion.li>
-                      );
+                      )
                     })}
                   </AnimatePresence>
                 </ul>
@@ -206,7 +203,8 @@ export function LinkedAccountsBlock({
               )}
 
               {connectable.map((provider) => {
-                const { label, Icon } = SOCIAL_PROVIDERS[provider];
+                const { label, BrandIcon, brandClassName } =
+                  SOCIAL_PROVIDERS[provider]
                 return (
                   <Button
                     key={provider}
@@ -217,15 +215,15 @@ export function LinkedAccountsBlock({
                     loading={linking === provider}
                     onClick={() => void connect(provider)}
                   >
-                    <Icon aria-hidden="true" />
+                    <BrandIcon aria-hidden="true" className={brandClassName} />
                     <span className="flex-1">Connect {label}</span>
                   </Button>
-                );
+                )
               })}
             </motion.div>
           )}
         </CardPanel>
       </Card>
     </MotionConfig>
-  );
+  )
 }
