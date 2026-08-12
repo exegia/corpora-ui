@@ -16,7 +16,7 @@ import type {
   FlatResource,
   SidebarResource,
   SidebarResourceMove,
-} from "@/components/agents/type.ts"
+} from "./type.ts"
 import {
   canContain,
   containsResource,
@@ -24,7 +24,7 @@ import {
   flattenResources,
   moveResource,
   renameResource,
-} from "@/components/agents/utils.ts"
+} from "./utils.ts"
 
 export type UseAISidebarOptions = Pick<
   AISidebarProps,
