@@ -2,9 +2,9 @@
 
 import { AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
-import type { AISidebarProps } from "@/components/agents/type.ts"
-import { useAISidebar } from "@/components/agents/use-ai-sidebar.ts"
-import { ResourceRow } from "@/components/agents/sidebar-row.tsx"
+import type { AISidebarProps, FlatResource } from "./type"
+import { useAISidebar, type UseAISidebarOptions } from "./use-ai-sidebar"
+import { ResourceRow } from "./sidebar-row"
 
 export function AISidebar({
   renderIcon,
@@ -41,7 +41,7 @@ export function AISidebar({
     commitRename,
     handleMenuOpenChange,
     setRowRef,
-  } = useAISidebar(options);
+  } = useAISidebar(options as UseAISidebarOptions);
 
   return (
     <>
@@ -53,13 +53,13 @@ export function AISidebar({
         onDrop={handleDrop}
         onMouseLeave={clearHover}
         className={cn(
-          "relative flex min-w-0 flex-col gap-0.5 [overflow-anchor:none] group-data-[state=collapsed]/sidebar:hidden",
-          draggingId && "select-none pb-9",
-          className,
+          "relative min-w-0 flex-col gap-0.5 [overflow-anchor:none] group-data-[state=collapsed]/sidebar:hidden",
+          draggingId && "pb-9 select-none",
+          className
         )}
       >
         <AnimatePresence initial={false}>
-          {flat.map((row) => (
+          {flat.map((row: FlatResource) => (
             <ResourceRow
               key={row.item.id}
               row={row}
@@ -72,14 +72,10 @@ export function AISidebar({
               renaming={renamingId === row.item.id}
               hoverActive={hoveredId !== null && !draggingId}
               hoverPill={
-                hoveredId === row.item.id &&
-                !draggingId &&
-                !row.item.disabled
+                hoveredId === row.item.id && !draggingId && !row.item.disabled
               }
               hoverLayoutId={hoverLayoutId}
-              onHoverChange={(hovered) =>
-                handleRowHover(row.item.id, hovered)
-              }
+              onHoverChange={(hovered) => handleRowHover(row.item.id, hovered)}
               onFocus={() => setFocusedId(row.item.id)}
               onSelect={() => select(row.item.id)}
               onToggle={() => toggle(row.item.id)}
@@ -100,7 +96,7 @@ export function AISidebar({
           ))}
         </AnimatePresence>
 
-        {draggingId ? (
+        {draggingId && (
           <div
             aria-hidden="true"
             data-active={dropTarget?.id === null || undefined}
@@ -108,11 +104,11 @@ export function AISidebar({
           >
             Move to top level
           </div>
-        ) : null}
+        )}
       </div>
       <span className="sr-only" aria-live="polite">
         {announcement}
       </span>
     </>
-  );
+  )
 }

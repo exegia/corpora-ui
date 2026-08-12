@@ -5,7 +5,7 @@ import {
   DemoStage,
 } from "@/components/docs/demo-controls"
 import { Badge } from "@/components/ui/badge";
-import { Sidebar, type SidebarResource } from "@/components/agents";
+import { Sidebar, type SidebarResource } from "@/components/blocks/nav/sidebar";
 
 const RESOURCES: SidebarResource[] = [
   {

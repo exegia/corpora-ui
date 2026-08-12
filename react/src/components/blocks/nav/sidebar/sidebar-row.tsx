@@ -5,7 +5,7 @@ import {
   useState,
   type MouseEvent,
 } from "react"
-import type { ResourceRowProps } from "@/components/agents/type.ts"
+import type { ResourceRowProps } from "./type"
 import {
   AnimatePresence,
   motion,
@@ -15,9 +15,9 @@ import {
 import { ChevronRight, MoreHorizontal, Pencil } from "lucide-react"
 import { SPRING_LAYOUT } from "@/lib/ease.ts"
 import { cn } from "@/lib/utils.ts"
-import { canContain } from "@/components/agents/utils.ts"
-import { SidebarIcon } from "@/components/agents/sidebar-icon.tsx"
-import { MarqueeLabel } from "@/components/agents/marquee-label.tsx"
+import { canContain } from "./utils"
+import { SidebarIcon } from "./sidebar-icon"
+import { MarqueeLabel } from "./marquee-label"
 import {
   MorphPopover,
   MorphPopoverContent,
