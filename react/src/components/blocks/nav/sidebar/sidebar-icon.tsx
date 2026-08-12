@@ -1,4 +1,4 @@
-import type { SidebarResource } from "@/components/agents/type.ts"
+import type { SidebarResource } from "./type.ts"
 import { Bookmark, FileText, Folder, FolderOpen } from "lucide-react"
 
 export function SidebarIcon(item: SidebarResource, expanded: boolean) {

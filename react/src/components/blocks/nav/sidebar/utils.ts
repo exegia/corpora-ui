@@ -1,5 +1,5 @@
 import { EASE_OUT } from "@/lib/ease.ts"
-import type { FlatResource, SidebarResource, SidebarResourceDropPosition, SidebarResourceMove } from "@/components/agents/type.ts"
+import type { FlatResource, SidebarResource, SidebarResourceDropPosition, SidebarResourceMove } from "./type.ts"
 
 export const ROW_REVEAL = {
   duration: 0.16,

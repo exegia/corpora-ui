@@ -1,6 +1,6 @@
 import { motion, useReducedMotion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
-import { ROW_REVEAL } from "@/components/agents/utils.ts"
+import { ROW_REVEAL } from "./utils.ts"
 
 export function MarqueeLabel({
   active,

@@ -1,9 +1,4 @@
-// import type {
-//   ISidebarNavItem,
-//   ISidebarNavSection,
-//   ISidebarNavSubItem,
-// } from "@/components/blocks/nav/types"
-
+import React from "react"
 
 export interface ShellAction {
   id: string
@@ -21,16 +16,6 @@ export interface ShellWorkspace {
 
 export interface ShellLayoutProps {
   children?: React.ReactNode
- // sections?: ISidebarNavSection[]
-  //activeId?: string
-//  onNavigate?: (item: ISidebarNavItem | ISidebarNavSubItem) => void
-//  workspace?: ShellWorkspace
-  //sidebarFooter?: React.ReactNode
- // topActions?: ShellAction[]
-  //title?: React.ReactNode
-  //eyebrow?: React.ReactNode
-  //searchPlaceholder?: string
-  //searchShortcut?: React.ReactNode
   open?: boolean
   defaultOpen?: boolean
   onOpenChange?: (open: boolean) => void
@@ -40,11 +25,6 @@ export interface ShellLayoutProps {
   rightOpen?: boolean
   defaultRightOpen?: boolean
   onRightOpenChange?: (open: boolean) => void
- // openMobile?: boolean
-  //defaultOpenMobile?: boolean
-  //onOpenMobileChange?: (open: boolean) => void
   className?: string
-   variant: 'web' | 'desktop'
-  //sidebarClassName?: string
-  //contentClassName?: string
+  variant: 'web' | 'desktop'
 }
