@@ -13,7 +13,6 @@ import { cn } from "@/lib/utils"
 import type { ShellLayoutProps, ShellPanelControlProps } from "./type"
 import { TITLE_BAR_HEIGHT } from "./utils"
 import type { ClassNameValue } from "tailwind-merge"
-import { useMemo } from "react"
 
 export function ShellLayout({
   children,
@@ -31,29 +30,24 @@ export function ShellLayout({
   // an explicit `defaultOpen` record — usually from useShellPanels — wins
   // per side.
   const initialOpen: ShellPanelControlProps["defaultOpen"] = {
-    ...(panels?.left && {
-      left: panels.left.defaultOpen ?? true,
-    }),
-    ...(panels?.right && {
-      right: panels.right.defaultOpen ?? false,
-    }),
-    ...(defaultOpen)
-  }
+      ...(panels?.left && {
+        left: panels.left.defaultOpen ?? true,
+      }),
+      ...(panels?.right && {
+        right: panels.right.defaultOpen ?? false,
+      }),
+      ...defaultOpen,
+    }
 
-  const isInspectorOpen = useMemo(() => {
-    if (!initialOpen.right || !panels || !panels.right) return false
-    return initialOpen.right || panels.right.open
-  }, [initialOpen, panels])
 
   return (
     <AnimatedSidebarProvider
       {...panelControlProps}
       defaultOpen={initialOpen}
       className={cn(
-        "relative block-full",
+        "relative block-full pr-2",
         className,
-        background,
-        isInspectorOpen ? "pr-2" : "pr-2"
+        background
       )}
       style={{
         paddingTop: variant === "desktop" ? TITLE_BAR_HEIGHT : 0,
@@ -77,11 +71,11 @@ export function ShellLayout({
               )}
             </AnimatedSidebarTrigger>
           </div>
-          {!header && <div className="flex flex-1 items-center">{header}</div>}
+          {header && <div className="flex flex-1 items-center">{header}</div>}
           <div className="flex shrink-0 items-center gap-2">
             <AnimatedSidebarTrigger aria-label="Toggle panel" side="right">
               {panels?.right?.trigger ?? (
-                <MotionIcon name="PanelRight" size={24} animation="press" />
+                <MotionIcon className="opacity-70" name="PanelRight" size={24}  />
               )}
             </AnimatedSidebarTrigger>
           </div>
@@ -99,12 +93,6 @@ export function ShellLayout({
           "max-md:border-l max-md:border-neutral-200 max-md:bg-white dark:max-md:border-neutral-700 dark:max-md:bg-card"
         )}
         collapsible="offcanvas"
-        panelClassName={cn(
-          // The off canvas panel keeps a fixed width so it can slide out of the
-          // zero-width rail, so the inset gutter has to come out of that width
-          // rather than from a left margin.
-        //  "top-2 h-[calc(100%-1rem)] min-w-[calc(var(--sidebar-width))]"
-        )}
         role="complementary"
         side="right"
         variant="inset"
