@@ -91,6 +91,7 @@ export interface ShellLayoutProps extends ShellPanelControlProps {
   /** Content for the shell's panels, keyed by the side. The shell renders
    * the `left` rail and the `right` drawer; other sides are reserved. */
   panels?: TPanelMap
+  header?: ReactNode
   className?: string
   variant?: "web" | "desktop"
 }

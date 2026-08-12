@@ -19,6 +19,7 @@ export function ShellLayout({
   variant = "desktop",
   panels,
   className,
+  header,
   defaultOpen,
   ...panelControlProps
 }: ShellLayoutProps): React.ReactElement {
@@ -29,22 +30,27 @@ export function ShellLayout({
   // an explicit `defaultOpen` record — usually from useShellPanels — wins
   // per side.
   const initialOpen: ShellPanelControlProps["defaultOpen"] = {
-    ...(panels?.left && {
-      left: panels.left.defaultOpen ?? panels.left.open,
-    }),
-    ...(panels?.right && {
-      right: panels.right.defaultOpen ?? panels.right.open,
-    }),
-    ...(defaultOpen)
-  }
+      ...(panels?.left && {
+        left: panels.left.defaultOpen ?? true,
+      }),
+      ...(panels?.right && {
+        right: panels.right.defaultOpen ?? false,
+      }),
+      ...defaultOpen,
+    }
+
 
   return (
     <AnimatedSidebarProvider
       {...panelControlProps}
       defaultOpen={initialOpen}
-      className={cn("block-full", className, background, "relative pr-2")}
+      className={cn(
+        "relative block-full pr-2",
+        className,
+        background
+      )}
       style={{
-        paddingTop: variant === "desktop" ? TITLE_BAR_HEIGHT : 0
+        paddingTop: variant === "desktop" ? TITLE_BAR_HEIGHT : 0,
       }}
     >
       <AnimatedSidebar
@@ -56,24 +62,20 @@ export function ShellLayout({
         {panels?.left?.component}
       </AnimatedSidebar>
 
-      <AnimatedSidebarInset
-        className={cn(
-          "min-w-24 overflow-hidden border-t border-neutral-200 dark:border-neutral-700 inset-ring-1 inset-ring-neutral-50 dark:inset-ring-black bg-white dark:bg-card rounded-lg!",
-          `mx-0!`
-        )}
-      >
-        <header className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6">
-          <div className="flex min-w-0 items-center gap-3">
+      <AnimatedSidebarInset className="min-w-24">
+        <header className="flex h-12 items-center justify-between gap-2 px-2">
+          <div className="flex min-w-0 items-center gap-2">
             <AnimatedSidebarTrigger>
               {panels?.left?.trigger ?? (
                 <MotionIcon name="PanelLeft" size={24} animation="press" />
               )}
             </AnimatedSidebarTrigger>
           </div>
-          <div className="flex shrink-0 items-center gap-3">
+          {header && <div className="flex flex-1 items-center">{header}</div>}
+          <div className="flex shrink-0 items-center gap-2">
             <AnimatedSidebarTrigger aria-label="Toggle panel" side="right">
               {panels?.right?.trigger ?? (
-                <MotionIcon name="PanelRight" size={24} animation="press" />
+                <MotionIcon className="opacity-70" name="PanelRight" size={24}  />
               )}
             </AnimatedSidebarTrigger>
           </div>
@@ -87,16 +89,10 @@ export function ShellLayout({
         ariaLabel={panels?.right?.name ?? "Secondary panel"}
         // Below md the panel is portal led over the page, so it carries the
         // surface itself; the desktop rail keeps it on the inner panel.
-        className={cn("max-md:border-l max-md:border-neutral-200 max-md:bg-white dark:max-md:border-neutral-700 dark:max-md:bg-card")}
-        collapsible="offcanvas"
-        panelClassName={cn(
-          // The off canvas panel keeps a fixed width so it can slide out of the
-          // zero-width rail, so the inset gutter has to come out of that width
-          // rather than from a left margin.
-          "top-2 ml-0 h-[calc(100%-1rem)] min-w-[calc(var(--sidebar-width))]",
-          "rounded-lg border-t border-neutral-200 bg-white shadow-md inset-ring-1 inset-ring-neutral-50",
-          "dark:border-neutral-700 dark:bg-card dark:inset-ring-black"
+        className={cn(
+          "max-md:border-l max-md:border-neutral-200 max-md:bg-white dark:max-md:border-neutral-700 dark:max-md:bg-card"
         )}
+        collapsible="offcanvas"
         role="complementary"
         side="right"
         variant="inset"
@@ -109,16 +105,8 @@ export function ShellLayout({
 
 function ShellLayoutPlaceholder() {
   return (
-    <div className="grid gap-5">
-      <div className="grid gap-5 lg:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, index) => (
-          <div
-            className="h-32 border border-border bg-background/60"
-            key={index}
-          />
-        ))}
-      </div>
-      <div className="h-72 border border-border bg-background/60" />
+    <div className="flex flex-col flex-1  p-4">
+      <div className="h-96 border border-border bg-muted-foreground/10 rounded-lg" />
     </div>
   )
 }

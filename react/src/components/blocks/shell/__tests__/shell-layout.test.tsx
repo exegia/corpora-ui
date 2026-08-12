@@ -92,12 +92,12 @@ describe("ShellLayout", () => {
     expect(rightDrawer().getAttribute("data-state")).toBe("expanded")
   })
 
-  test("a panel's own open flag seeds its side's initial state", () => {
+  test("a panel's own defaultOpen flag seeds its side's initial state", () => {
     render(
       <ShellLayout
         panels={{
           ...PANELS,
-          right: { ...PANELS.right!, open: true },
+          right: { ...PANELS.right!, defaultOpen: true },
         }}
         variant="web"
       />
@@ -112,7 +112,7 @@ describe("ShellLayout", () => {
         defaultOpen={{ left: false, right: false }}
         panels={{
           ...PANELS,
-          right: { ...PANELS.right!, open: true },
+          right: { ...PANELS.right!, defaultOpen: true },
         }}
         variant="web"
       />

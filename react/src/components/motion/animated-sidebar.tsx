@@ -29,6 +29,7 @@ import { createPortal } from "react-dom"
 import { SharedLayoutBg } from "@/components/motion/shared-layout-bg"
 import { EASE_DRAWER, EASE_OUT, SPRING_LAYOUT, SPRING_PRESS } from "@/lib/ease"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button";
 
 export type SidebarSide = "left" | "right"
 /** Open flags keyed by the side. Sides left out stay uncontrolled / at their
@@ -583,7 +584,9 @@ export const AnimatedSidebar = forwardRef<HTMLElement, AnimatedSidebarProps>(
         )}
       >
         {side === "right" && !collapsed && (
-          <motion.div className="h-full p-0.5 flex flex-1  bg-radial/decreasing from-amber-400 to-0% hover:to-50% ease-smooth-out to-amber-500/0 cursor-col-resize transition-colors duration-1000 animate-in" />
+          <motion.div className="flex h-full cursor-col-resize justify-center p-1 group relative">
+            <motion.div className="h-full w-full scale-y-0 animate-in bg-radial/decreasing from-amber-300/70 to-amber-500/0 to-40% transition-[colors,scale] duration-200 ease-smooth-out  group-hover:scale-y-100 absolute" />
+          </motion.div>
         )}
         <motion.div
           initial={false}
@@ -594,10 +597,19 @@ export const AnimatedSidebar = forwardRef<HTMLElement, AnimatedSidebarProps>(
           transition={context.reduce ? REDUCED_TRANSITION : PANEL_TRANSITION}
           className={cn(
             "sticky top-0 flex h-svh w-full flex-col overflow-hidden",
+            "bg-neutral-50 dark:bg-neutral-900",
+            "outline-offset-0.5 border-t-3 border-white outline-neutral-100 dark:border-neutral-800 dark:inset-ring-black",
+            "rounded-lg shadow-md shadow-neutral-200 dark:shadow-neutral-950",
             collapsible === "offcanvas" && "w-(--sidebar-width)",
 
             variant === "floating" && "m-2 h-[calc(100svh-1rem)]",
-            variant === "inset" && "m-2 h-[calc(100svh-1rem)]",
+            variant === "inset" && "my-2 h-[calc(100svh-1rem)]",
+            variant === "inset" &&
+              side === "right" &&
+              "w-[calc(var(--sidebar-width)-0.5rem)]",
+            variant === "inset" &&
+              side === "left" &&
+              "border-transparent! bg-transparent! shadow-none!",
             panelClassName
           )}
         >
@@ -620,7 +632,7 @@ export const AnimatedSidebarTrigger = forwardRef<
   HTMLButtonElement,
   AnimatedSidebarTriggerProps
 >(function AnimatedSidebarTrigger(
-  { className, onClick, side = "left", type = "button", ...props },
+  { onClick, side = "left", type = "button", ...props },
   forwardedRef
 ) {
   const context = useAnimatedSidebar()
@@ -630,7 +642,7 @@ export const AnimatedSidebarTrigger = forwardRef<
   const triggerRef = context.triggerRefs[side]
 
   return (
-    <button
+    <Button
       {...props}
       ref={(node) => {
         triggerRef.current = node
@@ -638,6 +650,8 @@ export const AnimatedSidebarTrigger = forwardRef<
         else if (forwardedRef) forwardedRef.current = node
       }}
       type={type}
+      variant="ghost"
+      size="icon-xl"
       aria-label={props["aria-label"] ?? "Toggle sidebar"}
       aria-expanded={expanded}
       data-slot="sidebar-trigger"
@@ -648,11 +662,6 @@ export const AnimatedSidebarTrigger = forwardRef<
         if (event.defaultPrevented) return
         context.toggleSidebar(side)
       }}
-      className={cn(
-        "inline-flex size-10 shrink-0 items-center justify-center rounded-xl outline-none",
-        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-        className
-      )}
     />
   )
 })
@@ -692,41 +701,6 @@ export const AnimatedSidebarClose = forwardRef<
   )
 })
 
-export interface AnimatedSidebarRailProps extends ButtonHTMLAttributes<HTMLButtonElement> {}
-
-export const AnimatedSidebarRail = forwardRef<
-  HTMLButtonElement,
-  AnimatedSidebarRailProps
->(function AnimatedSidebarRail(
-  { className, onClick, type = "button", ...props },
-  forwardedRef
-) {
-  const context = useAnimatedSidebar()
-  const panel = useAnimatedSidebarPanel()
-
-  return (
-    <button
-      {...props}
-      ref={forwardedRef}
-      type={type}
-      data-side={panel.side}
-      aria-label={props["aria-label"] ?? "Toggle sidebar"}
-      title="Toggle sidebar"
-      tabIndex={-1}
-      onClick={(event) => {
-        onClick?.(event)
-        if (event.defaultPrevented) return
-        context.toggleSidebar(panel.side)
-      }}
-      className={cn(
-        "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 outline-none md:block",
-        "after:absolute after:inset-y-0 after:left-1/2 after:w-px after:bg-transparent after:transition-colors hover:after:bg-border",
-        "data-[side=left]:left-full data-[side=right]:right-0 data-[side=right]:translate-x-1/2",
-        className
-      )}
-    />
-  )
-})
 
 export interface AnimatedSidebarInsetProps extends HTMLMotionProps<"main"> {}
 
@@ -740,8 +714,9 @@ export const AnimatedSidebarInset = forwardRef<
       ref={forwardedRef}
       data-slot="sidebar-inset"
       className={cn(
-        "relative flex min-w-0 flex-1 flex-col bg-background",
-        "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:mr-1.5 md:peer-data-[variant=inset]:rounded-md md:peer-data-[variant=inset]:shadow-md",
+        "relative flex min-w-0 flex-1 flex-col bg-neutral-50 dark:bg-neutral-900",
+        "outline-offset-0.5 overflow-hidden border-t-3 border-white outline-neutral-100 dark:border-neutral-800 dark:inset-ring-black",
+        "m-2 mx-0 rounded-lg shadow-md shadow-neutral-200 dark:shadow-neutral-950",
         className
       )}
     />
