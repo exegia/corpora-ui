@@ -40,8 +40,11 @@ export * from "./components/blocks/auth/passkey-sign-in-block"
 export * from "./components/blocks/auth/signup-block"
 export * from "./components/blocks/auth/update-password-block"
 export * from "./components/blocks/nav/sidebar-block"
-export * from "./components/blocks/shell/shell-layout"
+export * from "./components/blocks/shell"
 export * from "./components/blocks/profile/profile-card-block"
+
+// agents
+export * from "./components/agents"
 
 // motion primitives
 export * from "./components/motion/animated-sidebar"
