@@ -31,6 +31,7 @@ type MorphContextValue = {
   triggerId: string;
   contentId: string;
   triggerRef: React.MutableRefObject<HTMLElement | null>;
+  setContentRef: (node: HTMLDivElement | null) => void;
   contentRef: React.MutableRefObject<HTMLDivElement | null>;
 };
 
@@ -109,6 +110,9 @@ export function MorphPopover({
       triggerId: `${baseId}-trigger`,
       contentId: `${baseId}-content`,
       triggerRef,
+      setContentRef: (node) => {
+        contentRef.current = node;
+      },
       contentRef,
     }),
     [open, setOpen, toggle, baseId],
@@ -201,6 +205,7 @@ export function MorphPopoverContent({
   className,
 }: MorphPopoverContentProps) {
   const ctx = useMorphContext("MorphPopoverContent");
+  const { contentId, setContentRef, triggerId } = ctx;
   const reduce = useReducedMotion() ?? false;
   const [portalReady, setPortalReady] = useState(false);
   const layout = usePopoverPortalPosition(
@@ -266,10 +271,10 @@ export function MorphPopoverContent({
           className="fixed z-[9999] [filter:drop-shadow(0_10px_18px_rgba(0,0,0,0.14))]"
         >
           <motion.div
-            ref={ctx.contentRef}
-            id={ctx.contentId}
+            ref={setContentRef}
+            id={contentId}
             role="dialog"
-            aria-labelledby={ctx.triggerId}
+            aria-labelledby={triggerId}
             variants={clip}
             style={{ borderRadius: radius }}
             className={cn(
