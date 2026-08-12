@@ -633,32 +633,38 @@ export const blocks: RegistryEntry[] = [
           "Desktop reserves room at the top for a native title bar; web does not.",
       },
       {
+        name: "panels",
+        type: "TPanelMap",
+        description:
+          "Panel content keyed by side. `left` fills the collapsible icon rail, `right` fills the offcanvas drawer — it has no icon state, it is either fully shown or fully hidden. Each panel's own `open`/`defaultOpen` seeds its side's initial state.",
+      },
+      {
         name: "open / defaultOpen / onOpenChange",
-        type: "boolean / boolean / (open) => void",
+        type: "Partial<Record<Side, boolean>> ×2 / (open, side) => void",
         description:
-          "Control or observe the left rail, which collapses to icons. ⌘B toggles it.",
-      },
-      {
-        name: "rightDrawer",
-        type: "React.ReactNode",
-        description:
-          "Content of the right drawer. Unlike the left rail it has no icon state — it is either fully shown or fully hidden.",
-      },
-      {
-        name: "rightOpen / defaultRightOpen / onRightOpenChange",
-        type: "boolean / boolean / (open) => void",
-        description:
-          "Control or observe the right drawer. The header trigger toggles it.",
+          "Side-keyed control of the panels — no per-side props. ⌘B toggles the left rail. The `openMobile` family has the same shape for the mobile overlays. Spread `useShellPanels().providerProps` instead of wiring them by hand.",
       },
     ],
-    usage: `import { ShellLayout } from "@corpora/ui"
+    usage: `import { ShellLayout, useShellPanels } from "@corpora/ui"
 
-<ShellLayout
-  variant="web"
-  defaultRightOpen
-  rightDrawer={<Inspector />}
->
-  <Dashboard />
-</ShellLayout>`,
+function App() {
+  const panels = useShellPanels({
+    onPanelChange: (open, side) => console.log(side, open ? "expanded" : "collapsed"),
+  })
+
+  return (
+    <ShellLayout
+      {...panels.providerProps}
+      variant="web"
+      panels={{
+        right: { id: "inspector", name: "Inspector", side: "right", open: false, component: <Inspector /> },
+      }}
+    >
+      <Dashboard />
+    </ShellLayout>
+  )
+}
+
+// panels.toggle("right") from anywhere — a title-bar button, a shortcut.`,
   },
 ]

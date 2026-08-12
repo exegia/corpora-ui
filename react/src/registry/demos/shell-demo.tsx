@@ -1,16 +1,28 @@
 import { SparklesIcon, XIcon } from "lucide-react"
 
 import { ShellLayout } from "@/components/blocks/shell/shell-layout"
+import { useShellPanels } from "@/components/blocks/shell/use-shell-panels"
 import { AnimatedSidebarClose } from "@/components/motion/animated-sidebar"
 import { DemoStage } from "@/components/docs/demo-controls"
 
 export default function ShellDemo() {
+  const panels = useShellPanels()
+
   return (
     <DemoStage controls={null} canvasClassName="w-full p-0">
       <div className="h-[42rem] w-full overflow-hidden rounded-lg border bg-background">
         <ShellLayout
+          {...panels.providerProps}
           className="min-h-full"
-          rightDrawer={<ShellDemoInspector />}
+          panels={{
+            right: {
+              id: "inspector",
+              name: "Inspector",
+              component: <ShellDemoInspector />,
+              open: false,
+              side: "right",
+            },
+          }}
           variant="web"
         >
           <div className="grid gap-5">
