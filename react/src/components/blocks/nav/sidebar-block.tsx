@@ -5,20 +5,22 @@ import * as React from "react"
 
 import {
   AnimatedSidebar,
-  AnimatedSidebarContent,
-  AnimatedSidebarFooter,
-  AnimatedSidebarGroup,
-  AnimatedSidebarGroupContent,
-  AnimatedSidebarGroupLabel,
   AnimatedSidebarHeader,
-  AnimatedSidebarMenu,
-  AnimatedSidebarProvider,
-  AnimatedSidebarTrigger,
+
+
 } from "@/components/motion/animated-sidebar"
 import { cn } from "@/lib/utils"
 import { SidebarNavRow } from "@/components/blocks/nav/sidebar-nav-row"
 
 import type { ISidebarBlockProps } from "@/components/blocks/nav/types"
+import { AnimatedSidebarProvider } from "@/components/motion/animated-panel-provider.tsx"
+import { AnimatedSidebarTrigger } from "@/components/motion/animated-panel-trigger.tsx"
+import { AnimatedSidebarContent } from "@/components/motion/animated-sidebar-content.tsx"
+import { AnimatedSidebarFooter } from "@/components/motion/animated-sidebar-footer.tsx"
+import { AnimatedSidebarGroup } from "@/components/motion/animated-sidebar-group.tsx"
+import { AnimatedSidebarGroupLabel } from "@/components/motion/animated-sidebar-group-label.tsx"
+import { AnimatedSidebarGroupContent } from "@/components/motion/animated-sidebar-group-content.tsx"
+import { AnimatedSidebarMenu } from "@/components/motion/animated-sidebar-menu.tsx"
 
 export type {
   ISidebarBlockProps as SidebarBlockProps,
@@ -34,7 +36,7 @@ export type {
  * beside your own content. It owns its own sidebar context (⌘B toggles it);
  * pass `open`/`onOpenChange` to drive the rail, and `openMobile`/
  * `onOpenMobileChange` to open the drawer from a header button of your own.
- * Compose the underlying `AnimatedSidebar*` parts directly when a screen
+ * Compose the underlying `AnimatedPanel*` parts directly when a screen
  * needs something this API does not cover.
  */
 export function SidebarBlock({
