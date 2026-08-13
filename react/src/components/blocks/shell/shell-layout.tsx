@@ -4,15 +4,15 @@ import { MotionIcon } from "motion-icons-react"
 import * as React from "react"
 
 import {
-  AnimatedSidebar,
-  AnimatedSidebarInset,
-  AnimatedSidebarProvider,
-  AnimatedSidebarTrigger,
-} from "@/components/motion/animated-sidebar"
+  AnimatedPanel
+} from "./animated-panel.tsx"
 import { cn } from "@/lib/utils"
 import type { ShellLayoutProps, ShellPanelControlProps } from "./type"
 import { TITLE_BAR_HEIGHT } from "./utils"
 import type { ClassNameValue } from "tailwind-merge"
+import { AnimatedPanelProvider } from "./animated-panel-provider.tsx"
+import { AnimatedPanelTrigger } from "./animated-panel-trigger.tsx"
+import { AnimatedPanelInset } from "./animated-panel-inset.tsx"
 
 export function ShellLayout({
   children,
@@ -41,56 +41,56 @@ export function ShellLayout({
 
 
   return (
-    <AnimatedSidebarProvider
+    <AnimatedPanelProvider
       {...panelControlProps}
       defaultOpen={initialOpen}
-      className={cn(
-        "relative block-full pr-2",
-        className,
-        background
-      )}
+      className={cn("relative", className, background)}
       style={{
         paddingTop: variant === "desktop" ? TITLE_BAR_HEIGHT : 0,
       }}
     >
-      <AnimatedSidebar
+      <AnimatedPanel
         ariaLabel="Primary navigation"
         collapsible="icon"
         role="navigation"
         variant="inset"
       >
         {panels?.left?.component}
-      </AnimatedSidebar>
+      </AnimatedPanel>
 
-      <AnimatedSidebarInset className="min-w-24">
-        <header className="flex h-12 items-center justify-between gap-2 px-2">
+      <AnimatedPanelInset className="min-w-24">
+        <header className="flex h-12 items-center justify-between gap-2 border-b px-2">
           <div className="flex min-w-0 items-center gap-2">
-            <AnimatedSidebarTrigger>
+            <AnimatedPanelTrigger>
               {panels?.left?.trigger ?? (
                 <MotionIcon name="PanelLeft" size={24} animation="press" />
               )}
-            </AnimatedSidebarTrigger>
+            </AnimatedPanelTrigger>
           </div>
           {header && <div className="flex flex-1 items-center">{header}</div>}
           <div className="flex shrink-0 items-center gap-2">
-            <AnimatedSidebarTrigger aria-label="Toggle panel" side="right">
+            <AnimatedPanelTrigger aria-label="Toggle panel" side="right">
               {panels?.right?.trigger ?? (
-                <MotionIcon className="opacity-70" name="PanelRight" size={24}  />
+                <MotionIcon
+                  className="opacity-70"
+                  name="PanelRight"
+                  size={24}
+                />
               )}
-            </AnimatedSidebarTrigger>
+            </AnimatedPanelTrigger>
           </div>
         </header>
-        <div className="min-h-24 flex-1 overflow-auto">
-          {children ?? <ShellLayoutPlaceholder />}
-        </div>
-      </AnimatedSidebarInset>
+        <div className="min-h-24 flex-1 overflow-auto">{children}</div>
+      </AnimatedPanelInset>
 
-      <AnimatedSidebar
+      <AnimatedPanel
         ariaLabel={panels?.right?.name ?? "Secondary panel"}
         // Below md the panel is portal led over the page, so it carries the
         // surface itself; the desktop rail keeps it on the inner panel.
         className={cn(
-          "max-md:border-l max-md:border-neutral-200 max-md:bg-white dark:max-md:border-neutral-700 dark:max-md:bg-card"
+          "mr-1 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900",
+          "outline-offset-0.5 border-t-3 border-white outline-neutral-100 dark:inset-ring-black",
+          "rounded-lg shadow-md shadow-neutral-200 dark:shadow-neutral-950"
         )}
         collapsible="offcanvas"
         role="complementary"
@@ -98,15 +98,7 @@ export function ShellLayout({
         variant="inset"
       >
         {panels?.right?.component}
-      </AnimatedSidebar>
-    </AnimatedSidebarProvider>
-  )
-}
-
-function ShellLayoutPlaceholder() {
-  return (
-    <div className="flex flex-col flex-1  p-4">
-      <div className="h-96 border border-border bg-muted-foreground/10 rounded-lg" />
-    </div>
+      </AnimatedPanel>
+    </AnimatedPanelProvider>
   )
 }
