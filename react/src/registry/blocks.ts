@@ -776,10 +776,10 @@ function App() {
           "`secondary` renders the utility strip as its own card below the primary surface. `onClose` and `onSwap` reveal the floating buttons on hover (swap needs a secondary). `width` fixes the panel in px; omitted it flexes. Key each panel — closes animate out.",
       },
       {
-        name: "Actions · onAdd / count / onBrowse",
+        name: "Actions · onAdd / overflowCount / onBrowse",
         type: "() => void / number / () => void",
         description:
-          "The pill cluster in the top-right (the design's panel context menu). `onAdd` powers the Add segment; `count`/`onBrowse` reveal the browse segment with its badge. Extra segments pass as children.",
+          "The pill cluster in the top-right (the design's panel context menu). `onAdd` powers the Add segment. `overflowCount` is the number of non-visible panels — it reveals the overflow segment, whose badge shows when > 0; the dropdown menu itself is a later design iteration. Extra segments pass as children.",
       },
       {
         name: "Inspector · name / children",
@@ -797,7 +797,7 @@ function App() {
     <Scaffold.Root {...scaffold.providerProps} className="h-svh">
       <Scaffold.Sidebar>{/* icon buttons */}</Scaffold.Sidebar>
       <Scaffold.Main>
-        <Scaffold.Actions count={2} onAdd={addPanel} onBrowse={openPanelMenu} />
+        <Scaffold.Actions overflowCount={2} onAdd={addPanel} onBrowse={openPanelMenu} />
         <Scaffold.Canvas>
           <Scaffold.Panel key="draft" secondary={<PromptBar />} onClose={close} onSwap={swap}>
             <Editor />
