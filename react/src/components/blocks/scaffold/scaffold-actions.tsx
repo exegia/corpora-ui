@@ -12,14 +12,15 @@ import { actionSegmentClass } from "./utils"
 
 /**
  * The floating pill cluster in the main region's top-right corner — the
- * design's "Panel Context Menu": an Add segment plus a browse segment for
- * the open panels. Slides left in step with the inspector opening.
+ * design's "Panel Context Menu": an Add segment plus an overflow segment
+ * whose badge counts the non-visible panels. Slides left in step with the
+ * inspector opening.
  */
 export function ScaffoldActions({
   onAdd,
   addLabel = "Add",
   addIcon,
-  count,
+  overflowCount,
   onBrowse,
   browseLabel = "Browse panels",
   sound = true,
@@ -34,7 +35,7 @@ export function ScaffoldActions({
     "data-cuelume-press": sound ? "" : undefined,
     "data-cuelume-release": sound ? "" : undefined,
   }
-  const showBrowse = count !== undefined || onBrowse !== undefined
+  const showBrowse = overflowCount !== undefined || onBrowse !== undefined
 
   return (
     <motion.div
@@ -78,9 +79,9 @@ export function ScaffoldActions({
           >
             <span className="relative">
               <RiCheckboxMultipleBlankLine aria-hidden className="size-4" />
-              {count !== undefined && count > 0 && (
+              {overflowCount !== undefined && overflowCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 flex size-3.5 items-center justify-center rounded-full bg-neutral-700 text-[9px] font-semibold text-white dark:bg-neutral-200 dark:text-neutral-900">
-                  {count}
+                  {overflowCount}
                 </span>
               )}
             </span>
