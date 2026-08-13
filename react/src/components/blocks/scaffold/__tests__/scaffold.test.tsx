@@ -8,13 +8,13 @@ function Workspace({
   onClose,
   onSwap,
   onAdd,
-  count,
+  overflowCount,
   secondary = <span>Strip</span>,
 }: {
   onClose?: () => void
   onSwap?: () => void
   onAdd?: () => void
-  count?: number
+  overflowCount?: number
   secondary?: React.ReactNode
 }) {
   const scaffold = useScaffold()
@@ -27,7 +27,7 @@ function Workspace({
         </button>
       </Scaffold.Sidebar>
       <Scaffold.Main>
-        <Scaffold.Actions count={count} onAdd={onAdd} />
+        <Scaffold.Actions onAdd={onAdd} overflowCount={overflowCount} />
         <Scaffold.Canvas>
           <Scaffold.Panel
             key="alpha"
@@ -83,7 +83,7 @@ describe("Scaffold", () => {
     ).toBeNull()
   })
 
-  test("actions cluster: Add fires, browse segment follows count", async () => {
+  test("actions cluster: Add fires, overflow segment follows the count", async () => {
     const user = userEvent.setup()
     const onAdd = mock(() => {})
 
@@ -93,7 +93,13 @@ describe("Scaffold", () => {
     await user.click(screen.getByRole("button", { name: "Add" }))
     expect(onAdd).toHaveBeenCalledTimes(1)
 
-    rerender(<Workspace count={2} onAdd={onAdd} />)
+    // Zero overflowed panels: the segment shows without a badge.
+    rerender(<Workspace overflowCount={0} onAdd={onAdd} />)
+    expect(
+      screen.getByRole("button", { name: "Browse panels" }).textContent
+    ).toBe("")
+
+    rerender(<Workspace overflowCount={2} onAdd={onAdd} />)
     const browse = screen.getByRole("button", { name: "Browse panels" })
     expect(browse.textContent).toContain("2")
   })

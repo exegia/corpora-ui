@@ -17,38 +17,70 @@ interface DemoPanel {
   swapped: boolean
 }
 
-const PANEL_TITLES = ["Transcription", "Collation", "Apparatus"]
+const PANEL_TITLES = [
+  "Transcription",
+  "Collation",
+  "Apparatus",
+  "Translation",
+  "Commentary",
+]
+
+/** Visible-panel capacity — the design allows 3 (viewport-dependent). */
+const PANEL_CAPACITY = 3
 
 export default function ScaffoldDemo() {
   const scaffold = useScaffold()
   const nextId = React.useRef(2)
-  const [panels, setPanels] = React.useState<DemoPanel[]>([
-    { id: 1, title: PANEL_TITLES[0], swapped: false },
-  ])
+  // Visible panels plus the non-visible ones (newest first) that the
+  // actions cluster counts as its overflow badge.
+  const [board, setBoard] = React.useState<{
+    visible: DemoPanel[]
+    hidden: DemoPanel[]
+  }>({
+    visible: [{ id: 1, title: PANEL_TITLES[0], swapped: false }],
+    hidden: [],
+  })
 
-  const addPanel = () =>
-    setPanels((prev) =>
-      prev.length >= 3
-        ? prev
-        : [
-            ...prev,
-            {
-              id: nextId.current++,
-              title: PANEL_TITLES[prev.length] ?? "Panel",
-              swapped: false,
-            },
-          ]
+  // Per the design comments: at capacity the new panel is prepended and
+  // the last visible panel is pushed into the overflow dropdown.
+  const addPanel = () => {
+    const id = nextId.current++
+    const panel: DemoPanel = {
+      id,
+      title: PANEL_TITLES[(id - 1) % PANEL_TITLES.length],
+      swapped: false,
+    }
+    setBoard(({ visible, hidden }) =>
+      visible.length < PANEL_CAPACITY
+        ? { visible: [...visible, panel], hidden }
+        : {
+            visible: [panel, ...visible.slice(0, -1)],
+            hidden: [visible[visible.length - 1], ...hidden],
+          }
     )
+  }
 
+  // Closing a panel frees capacity — the newest overflowed panel returns.
   const closePanel = (id: number) =>
-    setPanels((prev) => prev.filter((panel) => panel.id !== id))
+    setBoard(({ visible, hidden }) => {
+      const next = visible.filter((panel) => panel.id !== id)
+      if (next.length === visible.length) return { visible, hidden }
+      const [restored, ...rest] = hidden
+      return restored
+        ? { visible: [...next, restored], hidden: rest }
+        : { visible: next, hidden }
+    })
 
   const swapPanel = (id: number) =>
-    setPanels((prev) =>
-      prev.map((panel) =>
+    setBoard(({ visible, hidden }) => ({
+      visible: visible.map((panel) =>
         panel.id === id ? { ...panel, swapped: !panel.swapped } : panel
-      )
-    )
+      ),
+      hidden,
+    }))
+
+  const panels = board.visible
+  const overflow = board.hidden
 
   return (
     <DemoStage canvasClassName="w-full p-0" controls={null}>
@@ -69,8 +101,12 @@ export default function ScaffoldDemo() {
 
           <Scaffold.Main>
             <Scaffold.Actions
-              count={panels.length > 1 ? panels.length : undefined}
               onAdd={addPanel}
+              overflowCount={
+                panels.length + overflow.length > 1
+                  ? overflow.length
+                  : undefined
+              }
             />
 
             <Scaffold.Canvas>

@@ -47,12 +47,15 @@ export interface ScaffoldActionsProps
   addLabel?: ReactNode
   /** Replaces the default add icon. */
   addIcon?: ReactNode
-  /** Badge on the browse segment. The segment renders when `count` or
-   * `onBrowse` is present; the badge only when `count` > 0. */
-  count?: number
-  /** Called when the browse (stacked-panels) segment is pressed. */
+  /** Number of non-visible panels tucked into the overflow dropdown —
+   * the badge on the browse segment. The segment renders when this or
+   * `onBrowse` is present; the badge only when > 0. Per the design
+   * comments the dropdown menu itself is a later iteration; for now the
+   * segment just keeps the count. */
+  overflowCount?: number
+  /** Called when the overflow (stacked-panels) segment is pressed. */
   onBrowse?: () => void
-  /** Accessible name of the browse segment. */
+  /** Accessible name of the overflow segment. */
   browseLabel?: string
   /** Extra segments appended after the built-in ones. */
   children?: ReactNode
