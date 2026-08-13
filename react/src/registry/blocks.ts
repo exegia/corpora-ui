@@ -753,4 +753,64 @@ function App() {
 
 // panels.toggle("right") from anywhere — a title-bar button, a shortcut.`,
   },
+  {
+    slug: "scaffold",
+    name: "Scaffold",
+    description:
+      "Composable desktop workspace: an icon rail on a soft gradient backdrop, a canvas of closable/swappable panels, a floating actions cluster, and an inspector drawer that slides in over the canvas.",
+    category: "blocks",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/scaffold-demo")),
+    registryDependencies: [],
+    props: [
+      {
+        name: "Root · inspectorOpen / defaultInspectorOpen / onInspectorOpenChange",
+        type: "boolean / boolean / (open) => void",
+        description:
+          "Inspector drawer state, controlled or uncontrolled. Spread `useScaffold().providerProps` to drive it from outside (title-bar buttons, shortcuts). `inspectorWidth` (px, default 272) sizes the drawer and how far Actions slides aside.",
+      },
+      {
+        name: "Panel · secondary / onClose / onSwap / width",
+        type: "ReactNode / () => void / () => void / number",
+        description:
+          "`secondary` renders the utility strip as its own card below the primary surface. `onClose` and `onSwap` reveal the floating buttons on hover (swap needs a secondary). `width` fixes the panel in px; omitted it flexes. Key each panel — closes animate out.",
+      },
+      {
+        name: "Actions · onAdd / count / onBrowse",
+        type: "() => void / number / () => void",
+        description:
+          "The pill cluster in the top-right (the design's panel context menu). `onAdd` powers the Add segment; `count`/`onBrowse` reveal the browse segment with its badge. Extra segments pass as children.",
+      },
+      {
+        name: "Inspector · name / children",
+        type: "string / ReactNode",
+        description:
+          "Drawer content. Stays mounted and inert while closed so it can slide back out; opening also slides the Actions cluster leftward in step.",
+      },
+    ],
+    usage: `import { Scaffold, useScaffold } from "@corpora/ui"
+
+function App() {
+  const scaffold = useScaffold()
+
+  return (
+    <Scaffold.Root {...scaffold.providerProps} className="h-svh">
+      <Scaffold.Sidebar>{/* icon buttons */}</Scaffold.Sidebar>
+      <Scaffold.Main>
+        <Scaffold.Actions count={2} onAdd={addPanel} onBrowse={openPanelMenu} />
+        <Scaffold.Canvas>
+          <Scaffold.Panel key="draft" secondary={<PromptBar />} onClose={close} onSwap={swap}>
+            <Editor />
+          </Scaffold.Panel>
+        </Scaffold.Canvas>
+        <Scaffold.Inspector>
+          <Details />
+        </Scaffold.Inspector>
+      </Scaffold.Main>
+    </Scaffold.Root>
+  )
+}
+
+// scaffold.toggleInspector() from anywhere — a rail icon, a shortcut.`,
+  },
 ]

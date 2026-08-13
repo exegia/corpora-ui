@@ -43,6 +43,7 @@ export * from "./components/blocks/nav/sidebar-block"
 export * from "./components/blocks/nav/sidebar"
 export * from "./components/blocks/shell"
 export { default as ShellLayout } from "./components/blocks/shell"
+export * from "./components/blocks/scaffold"
 export { default as Layout } from "./components/blocks/layout"
 export * from "./components/blocks/profile/profile-card-block"
 
