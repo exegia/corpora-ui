@@ -155,7 +155,7 @@ export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(function
 ) {
   const rawId = useId();
   const filterId = useMemo(() => `liquid-glass-${rawId.replace(/:/g, "")}`, [rawId]);
-  console.log(_mapSize)
+
   // -------------------------------------------------------------------------
   // Ref merge — we need the DOM node to measure geometry while still
   // forwarding the ref to the consumer.
