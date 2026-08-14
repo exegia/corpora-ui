@@ -770,10 +770,10 @@ function App() {
           "Inspector drawer state, controlled or uncontrolled. Spread `useScaffold().providerProps` to drive it from outside (title-bar buttons, shortcuts). `inspectorWidth` (px, default 272) sizes the drawer and how far Actions slides aside.",
       },
       {
-        name: "Panel · SecondaryPanel / onClose / onSwap / swapped / width",
+        name: "Panel · SecondaryPanel / onSwap / onCloseSecondary / swapped / width",
         type: "ReactNode / () => void / () => void / boolean / number",
         description:
-          "`SecondaryPanel` renders the utility strip as its own card below the primary surface. `onClose` and `onSwap` reveal the floating buttons on hover (swap needs a secondary). Swapping trades the two cards with a layout morph — the strip glides up into the primary slot; control it with `swapped` (uncontrolled otherwise, `defaultSwapped`) and flip the slot content in `onSwap`. `width` fixes the panel in px; omitted it flexes. Key each panel — closes animate out.",
+          "`SecondaryPanel` renders the utility strip as its own card below the primary surface, with the seam menu between the two — a ⋯ toggle that morphs into Expand | Swap | Close. `onSwap` powers Swap: a layout morph trades the two cards; flip the slot content in the callback (control with `swapped`, uncontrolled otherwise). `onCloseSecondary` powers Close — remove `SecondaryPanel` there. Panels themselves close from the Actions tabs. `width` fixes the panel in px; omitted it flexes.",
       },
       {
         name: "Actions · onAdd / children",
@@ -807,7 +807,7 @@ function App() {
           <Scaffold.Tab key="draft" onClose={panels.length > 1 ? close : undefined}>Draft</Scaffold.Tab>
         </Scaffold.Actions>
         <Scaffold.Canvas>
-          <Scaffold.Panel key="draft" SecondaryPanel={<PromptBar />} onClose={close} onSwap={swap}>
+          <Scaffold.Panel key="draft" SecondaryPanel={<PromptBar />} onSwap={swap} onCloseSecondary={hidePromptBar}>
             <Editor />
           </Scaffold.Panel>
         </Scaffold.Canvas>
