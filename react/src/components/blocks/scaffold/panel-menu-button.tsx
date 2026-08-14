@@ -2,21 +2,16 @@
 
 import * as React from "react"
 
-import {
-  AnimatePresence,
-  motion,
-  useReducedMotion,
-  type Variants,
-} from "motion/react"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { More } from "iconsax-reactjs"
 import { LucideArrowUpDown, LucideChevronDown } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import type { PanelMenuButtonProps } from "./type"
-import { floatingButtonClass, revealOnPanelHoverClass } from "./utils"
-import { Button } from "@/components/ui/button";
+import { floatingButtonClass, revealOnPanelHoverClass, segmentVariants, } from "./utils"
+import { Button } from "@/components/ui/button"
 import { GlassButtonGroup } from "@/components/ui/glasscn/glass-button-group.tsx"
-import { EASE_OUT, SPRING_LAYOUT } from "@/lib/ease.ts"
+import { SPRING_LAYOUT } from "@/lib/ease.ts"
 import { useHoverCapable } from "@/lib/hooks/use-hover-capable"
 import { SCAFFOLD_MENU_COLLAPSE_DELAY } from "./constants"
 
