@@ -2,6 +2,7 @@
 // beui.dev/components/motion/animated-sidebar
 
 import { motion } from "motion/react"
+import { EASE_OUT } from "@/lib/ease.ts"
 import { cn } from "@/lib/utils"
 import type { AnimatedSidebarProps } from "./type"
 import {
@@ -66,8 +67,23 @@ export function AnimatedPanel({
       )}
     >
       {side === "right" && !collapsed && (
-        <motion.div className="group relative flex max-h-full cursor-col-resize justify-center p-1">
-          <motion.div className="absolute h-full w-full scale-y-0 animate-in bg-radial/decreasing from-amber-300/70 to-amber-500/0 to-40% transition-[colors,scale] duration-200 ease-smooth-out group-hover:scale-y-100" />
+        // The handle occupies the shell's gap-x-2 column gap. It must stay
+        // outside the clipping mask below or the gap would never receive
+        // hover — clipping cuts hit-testing, not just painting.
+        <motion.div
+          className="absolute inset-y-0 -left-2 z-10 w-2 cursor-col-resize"
+          initial="idle"
+          whileHover="hover"
+        >
+          <motion.div
+            variants={{ idle: { scaleY: 0 }, hover: { scaleY: 1 } }}
+            transition={
+              context.reduce
+                ? { duration: 0 }
+                : { duration: 0.2, ease: EASE_OUT }
+            }
+            className="h-full w-full bg-radial/decreasing from-amber-300/70 to-amber-500/0 to-40%"
+          />
         </motion.div>
       )}
       {/* The off canvas panel keeps its full width and slides out of the
