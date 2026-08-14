@@ -116,9 +116,7 @@ export function PanelMenuButton({
 
   // Click open — the touch and keyboard path.
   const handleOnExpand = () => {
-    if (document.activeElement === document.querySelector(
-      "#scaffold-panel-menu-toggle-button"
-    )) {
+    if (groupRef.current?.contains(document.activeElement)) {
       focusActionsOnOpenRef.current = true
     }
     setExpanded(true)
@@ -181,7 +179,6 @@ export function PanelMenuButton({
           >
             <Button
               id="scaffold-panel-menu-expand"
-              aria-label={label}
               size="sm"
               variant="ghost"
               sound={sound}
@@ -200,7 +197,6 @@ export function PanelMenuButton({
             </Button>
             <Button
               id="scaffold-panel-menu-swap"
-              aria-label={label}
               size="sm"
               variant="ghost"
               sound={sound}

@@ -40,11 +40,8 @@ export function ScaffoldPanel({
   const [subPanelPosition, setSubPanelPosition] = useState<TSubPanelPosition>("top")
   const [isSwapped, setIsSwapped] = useState<boolean>(false)
   const handleSwap = () => {
-    //setSubPanelPosition((prevPosition) => (prevPosition === "top" ? "bottom" : "top"));
-    // if (onSwap) {
-    //   onSwap();
-    // }
     setIsSwapped((prev) => !prev);
+    onSwap?.();
   };
 
   // Trades which sub-panel holds the flexible slot — the collapsed card grows
@@ -60,12 +57,11 @@ export function ScaffoldPanel({
       aria-label={name}
       className={cn(
         "group/panel relative flex min-w-80 flex-1 flex-col",
-        //  isSwapped ? "flex-col-reverse" : "flex-col",
         className
       )}
       layout
       data-slot="scaffold-panel"
-      // data-swapped={isSwapped ? "" : undefined}
+      data-swapped={isSwapped ? "" : undefined}
       transition={transition}
     >
       <ScaffoldSubPanel
@@ -75,7 +71,7 @@ export function ScaffoldPanel({
       >
         {children}
       </ScaffoldSubPanel>
-      {onSwap && (
+      {onSwap && SecondaryPanel && (
         <div className="relative flex items-center justify-center h-2">
           <PanelMenuButton
             label={swapLabel}

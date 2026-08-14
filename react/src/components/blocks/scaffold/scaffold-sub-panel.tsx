@@ -7,13 +7,13 @@ import { subPanelVariant } from "@/components/blocks/scaffold/utils.ts"
 import { SCAFFOLD_EASE, SCAFFOLD_MORPH_DURATION } from "./constants"
 
 export function ScaffoldSubPanel({
-  className,
-  children,
-  variant = 'card',
-  primary = false,
-  expanded,
-  ...rest
-}: ScaffoldSubPanelProps): React.ReactElement {
+                                   className,
+                                   children,
+                                   variant = 'card',
+                                   primary = false,
+                                   expanded,
+                                   ...rest
+                                 }: ScaffoldSubPanelProps): React.ReactElement {
   const reduce = useReducedMotion()
   // The primary card holds the flexible slot unless the panel says otherwise.
   const isExpanded = expanded ?? primary
@@ -42,6 +42,7 @@ export function ScaffoldSubPanel({
         className
       )}
       data-slot={`scaffold-sub-panel-${variant}`}
+      data-expanded={isExpanded ? "" : undefined}
       {...rest}
     >
       {children}
