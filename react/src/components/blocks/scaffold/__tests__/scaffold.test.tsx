@@ -168,6 +168,32 @@ describe("Scaffold", () => {
     expect(bottom.getAttribute("data-expanded")).toBeNull()
   })
 
+  test("expand chevron mirrors when the panel is swapped", async () => {
+    const user = userEvent.setup()
+    render(<Workspace onSwap={() => {}} />)
+
+    // Swap first — column-reverse puts the strip visually on top.
+    await user.click(menuToggle() as HTMLElement)
+    await user.click(await screen.findByRole("button", { name: "Swap" }))
+
+    // Primary still holds the flexible slot, but the strip that grows
+    // next now sits on top — the chevron points up.
+    await user.click(
+      await screen.findByRole("button", { name: "Swap panel content" })
+    )
+    const expandButton = await screen.findByRole("button", { name: "Expand" })
+    const chevron = () => expandButton.querySelector("svg.lucide-chevron-down")
+    expect(chevron()?.classList.contains("rotate-180")).toBe(true)
+
+    // After expanding, the primary — now visually at the bottom — grows
+    // next: the chevron points down again.
+    await user.click(expandButton)
+    await user.click(
+      await screen.findByRole("button", { name: "Swap panel content" })
+    )
+    expect(chevron()?.classList.contains("rotate-180")).toBe(false)
+  })
+
   test("seam menu needs a secondary strip", () => {
     render(<Workspace onSwap={() => {}} SecondaryPanel={null} />)
 
