@@ -20,20 +20,6 @@ import { EASE_OUT, SPRING_LAYOUT } from "@/lib/ease.ts"
 import { useHoverCapable } from "@/lib/hooks/use-hover-capable"
 import { SCAFFOLD_MENU_COLLAPSE_DELAY } from "./constants"
 
-/** Menu segments blur/fade in place while the track morphs around them. The
- * exit is a fast tween, not the layout spring — the track stays
- * overflow-visible, so the popped-out buttons must be gone before the
- * collapsing pill leaves them behind as a ghost. */
-const MENU_SEGMENT_VARIANTS: Variants = {
-  hidden: { opacity: 0, filter: "blur(4px)" },
-  visible: { opacity: 1, filter: "blur(0px)" },
-  exit: {
-    opacity: 0,
-    filter: "blur(4px)",
-    transition: { duration: 0.18, ease: EASE_OUT },
-  },
-}
-
 /**
  * Floating swap affordance centered on the seam between a panel's primary
  * surface and its secondary strip.
@@ -170,7 +156,7 @@ export function PanelMenuButton({
             ref={actionsRef}
             id={actionsId}
             layout
-            variants={MENU_SEGMENT_VARIANTS}
+            variants={segmentVariants}
             initial={reduce ? { opacity: 0 } : "hidden"}
             animate={reduce ? { opacity: 1 } : "visible"}
             exit={reduce ? { opacity: 0 } : "exit"}
@@ -212,7 +198,7 @@ export function PanelMenuButton({
           <motion.div
             key="menu-toggle"
             layout
-            variants={MENU_SEGMENT_VARIANTS}
+            variants={segmentVariants}
             initial={reduce ? { opacity: 0 } : "hidden"}
             animate={reduce ? { opacity: 1 } : "visible"}
             exit={reduce ? { opacity: 0 } : "exit"}

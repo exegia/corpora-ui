@@ -4,6 +4,10 @@ export const SCAFFOLD_SIDEBAR_WIDTH = 64
 /** Inspector drawer width in px. */
 export const SCAFFOLD_INSPECTOR_WIDTH = 272
 
+/** Most panels the canvas holds at once — omit Actions' `onAdd` when the
+ * count reaches it so the Add segment hides. */
+export const SCAFFOLD_PANEL_CAPACITY = 3
+
 /** Gap in px between the drawer/actions and the viewport edges. */
 export const SCAFFOLD_EDGE_GUTTER = 10
 

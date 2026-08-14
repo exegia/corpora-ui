@@ -7,6 +7,7 @@ import { ScaffoldMain } from "./scaffold-main"
 import { ScaffoldPanel } from "./scaffold-panel"
 import { ScaffoldRoot } from "./scaffold-root"
 import { ScaffoldSidebar } from "./scaffold-sidebar"
+import { ScaffoldTab } from "./scaffold-tab"
 import { ScaffoldSubPanel } from "@/components/blocks/scaffold/scaffold-sub-panel.tsx"
 
 export { useScaffoldContext } from "./scaffold-context"
@@ -24,6 +25,7 @@ export {
   ScaffoldPanel,
   ScaffoldRoot,
   ScaffoldSidebar,
+  ScaffoldTab,
 }
 
 export const Scaffold = {
@@ -33,6 +35,7 @@ export const Scaffold = {
   Actions: ScaffoldActions,
   Canvas: ScaffoldCanvas,
   Panel: ScaffoldPanel,
+  Tab: ScaffoldTab,
   Inspector: ScaffoldInspector,
-  SubPanel: ScaffoldSubPanel
+  SubPanel: ScaffoldSubPanel,
 }

@@ -770,16 +770,22 @@ function App() {
           "Inspector drawer state, controlled or uncontrolled. Spread `useScaffold().providerProps` to drive it from outside (title-bar buttons, shortcuts). `inspectorWidth` (px, default 272) sizes the drawer and how far Actions slides aside.",
       },
       {
-        name: "Panel · secondary / onClose / onSwap / swapped / width",
+        name: "Panel · SecondaryPanel / onClose / onSwap / swapped / width",
         type: "ReactNode / () => void / () => void / boolean / number",
         description:
-          "`secondary` renders the utility strip as its own card below the primary surface. `onClose` and `onSwap` reveal the floating buttons on hover (swap needs a secondary). Swapping trades the two cards with a layout morph — the strip glides up into the primary slot; control it with `swapped` (uncontrolled otherwise, `defaultSwapped`) and flip the slot content in `onSwap`. `width` fixes the panel in px; omitted it flexes. Key each panel — closes animate out.",
+          "`SecondaryPanel` renders the utility strip as its own card below the primary surface. `onClose` and `onSwap` reveal the floating buttons on hover (swap needs a secondary). Swapping trades the two cards with a layout morph — the strip glides up into the primary slot; control it with `swapped` (uncontrolled otherwise, `defaultSwapped`) and flip the slot content in `onSwap`. `width` fixes the panel in px; omitted it flexes. Key each panel — closes animate out.",
       },
       {
-        name: "Actions · onAdd / overflowCount / onBrowse",
-        type: "() => void / number / () => void",
+        name: "Actions · onAdd / children",
+        type: "() => void / ReactNode",
         description:
-          "The pill cluster in the top-right (the design's panel context menu). `onAdd` powers the Add segment. `overflowCount` is the number of non-visible panels — it reveals the overflow segment, whose badge shows when > 0; the dropdown menu itself is a later design iteration. Extra segments pass as children.",
+          "The pill cluster in the top-right (the design's panel context menu). `onAdd` powers the Add segment, which renders only while present — omit it once the canvas holds `SCAFFOLD_PANEL_CAPACITY` (3) panels. Children render before Add: one `Scaffold.Tab` per open panel, plus any extra segments.",
+      },
+      {
+        name: "Tab · children / onClose / closeLabel",
+        type: "ReactNode / () => void / string",
+        description:
+          "A panel's tab inside the Actions pill — its label plus a close button. The button renders only while `onClose` is present; omit it on the last remaining panel's tab so at least one panel stays open. Key each tab — closes animate out of the pill.",
       },
       {
         name: "Inspector · name / children",
@@ -788,7 +794,7 @@ function App() {
           "Drawer content. Stays mounted and inert while closed so it can slide back out; opening also slides the Actions cluster leftward in step.",
       },
     ],
-    usage: `import { Scaffold, useScaffold } from "@corpora/ui"
+    usage: `import { Scaffold, SCAFFOLD_PANEL_CAPACITY, useScaffold } from "@corpora/ui"
 
 function App() {
   const scaffold = useScaffold()
@@ -797,9 +803,11 @@ function App() {
     <Scaffold.Root {...scaffold.providerProps} className="h-svh">
       <Scaffold.Sidebar>{/* icon buttons */}</Scaffold.Sidebar>
       <Scaffold.Main>
-        <Scaffold.Actions overflowCount={2} onAdd={addPanel} onBrowse={openPanelMenu} />
+        <Scaffold.Actions onAdd={panels.length < SCAFFOLD_PANEL_CAPACITY ? addPanel : undefined}>
+          <Scaffold.Tab key="draft" onClose={panels.length > 1 ? close : undefined}>Draft</Scaffold.Tab>
+        </Scaffold.Actions>
         <Scaffold.Canvas>
-          <Scaffold.Panel key="draft" secondary={<PromptBar />} onClose={close} onSwap={swap}>
+          <Scaffold.Panel key="draft" SecondaryPanel={<PromptBar />} onClose={close} onSwap={swap}>
             <Editor />
           </Scaffold.Panel>
         </Scaffold.Canvas>

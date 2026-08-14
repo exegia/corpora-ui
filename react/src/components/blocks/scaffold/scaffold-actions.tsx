@@ -1,31 +1,28 @@
 "use client"
 
-import { motion, useReducedMotion } from "motion/react"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 import { SCAFFOLD_EASE, SCAFFOLD_EDGE_GUTTER, SCAFFOLD_MORPH_DURATION } from "./constants"
 import { useScaffoldContext } from "./scaffold-context"
 import type { ScaffoldActionsProps } from "./type"
-import { actionSegmentClass } from "./utils"
-import { GroupSeparator } from "@/components/ui/group"
-import { GlassButtonGroup } from "@/components/ui/glasscn/glass-button-group"
-import { Button } from "@/components/ui/button";
+import { segmentVariants } from "./utils"
+import { Button } from "@/components/ui/button"
+import { SPRING_LAYOUT } from "@/lib/ease.ts"
 import { LucidePlus } from "lucide-react"
 
 /**
  * The floating pill cluster in the main region's top-right corner — the
- * design's "Panel Context Menu": an Add segment plus an overflow segment
- * whose badge counts the non-visible panels. Slides left in step with the
- * inspector opening.
+ * design's "Panel Context Menu": one tab per open panel (`Scaffold.Tab`
+ * children) plus an Add segment. Add renders only while `onAdd` is
+ * present — omit it once the canvas holds `SCAFFOLD_PANEL_CAPACITY`
+ * panels. Slides left in step with the inspector opening.
  */
 export function ScaffoldActions({
   onAdd,
   addLabel = "Panel",
   addIcon,
-  overflowCount,
-  onBrowse,
-  browseLabel = "Browse panels",
   sound = true,
   className,
   children,
@@ -33,12 +30,7 @@ export function ScaffoldActions({
 }: ScaffoldActionsProps): React.ReactElement {
   const { inspectorOpen, inspectorWidth } = useScaffoldContext()
   const reducedMotion = useReducedMotion()
-
-  const soundProps = {
-    "data-cuelume-press": sound ? "" : undefined,
-    "data-cuelume-release": sound ? "" : undefined,
-  }
-  const showBrowse = overflowCount !== undefined || onBrowse !== undefined
+  const transition = reducedMotion ? { duration: 0 } : SPRING_LAYOUT
 
   return (
     <motion.div
@@ -47,7 +39,7 @@ export function ScaffoldActions({
         x: inspectorOpen ? -(inspectorWidth + SCAFFOLD_EDGE_GUTTER) : 0,
       }}
       className={cn(
-        "sticky inline-flex items-center gap-0.5 h-12",
+        "sticky inline-flex h-12 items-center gap-0.5",
         "justify-end",
         className
       )}
@@ -59,39 +51,38 @@ export function ScaffoldActions({
       }}
       {...rest}
     >
-      {children}
-      <GlassButtonGroup glassVariant="liquid-refract" className="rounded-md">
-        <Button
-          onClick={onAdd}
-          size="sm"
-          variant="ghost"
-        >
-          {addIcon ?? <LucidePlus className="stroke-3" />}
-          {addLabel}
-        </Button>
-        {!showBrowse && <GroupSeparator />}
-        {showBrowse && (
-            <button
-              aria-label={browseLabel}
-              className={cn(actionSegmentClass, "gap-0.5 px-2")}
-              onClick={onBrowse}
-              type="button"
-              {...soundProps}
+      <motion.div
+        layout
+        transition={transition}
+        className="flex items-center gap-1.5"
+      >
+        <AnimatePresence mode="popLayout" initial={false}>
+          {onAdd && (
+            <motion.div
+              key="scaffold-add"
+              layout
+              animate={reducedMotion ? { opacity: 1 } : "visible"}
+              className="flex shrink-0"
+              exit={reducedMotion ? { opacity: 0 } : "exit"}
+              initial={reducedMotion ? { opacity: 0 } : "hidden"}
+              transition={transition}
+              variants={segmentVariants}
             >
-              <span className="relative">
-
-                {overflowCount !== undefined && overflowCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 flex size-3.5 items-center justify-center rounded-full bg-neutral-700 text-[9px] font-semibold text-white dark:bg-neutral-200 dark:text-neutral-900">
-                    {overflowCount}
-                  </span>
-                )}
-              </span>
-
-            </button>
-        )}
-
-        {children}
-      </GlassButtonGroup>
+              <Button
+                onClick={onAdd}
+                size="sm"
+                sound={sound}
+                variant="ghost"
+                className="h-full gap-2 rounded-sm py-1.5 pr-3 pl-2"
+              >
+                {addIcon ?? <LucidePlus className="stroke-2" />}
+                {addLabel}
+              </Button>
+            </motion.div>
+          )}
+          {children}
+        </AnimatePresence>
+      </motion.div>
     </motion.div>
   )
 }
