@@ -17,7 +17,8 @@ export function ScaffoldMain({
 }: ScaffoldMainProps): React.ReactElement {
   return (
     <div
-      className={cn("relative min-w-0 flex-1", className)}
+      id="scaffold-main"
+      className={cn("relative flex h-full min-w-0 flex-1 flex-col", className)}
       data-slot="scaffold-main"
       {...rest}
     >

@@ -19,6 +19,7 @@ export function PanelSwapButton({
 }: PanelFloatingButtonProps): React.ReactElement {
   return (
     <button
+      id="scaffold-panel-swap-button"
       aria-label={label}
       className={cn(
         floatingButtonClass,

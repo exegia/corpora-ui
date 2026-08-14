@@ -16,9 +16,10 @@ export function ScaffoldSidebar({
 }: ScaffoldSidebarProps): React.ReactElement {
   return (
     <nav
+      id="scaffold-sidebar"
       aria-label="Primary"
       className={cn(
-        "flex w-16 shrink-0 flex-col items-center gap-1 py-3",
+        "flex min-w-20 shrink-0 flex-col items-center gap-1 pt-8 pb-2",
         className
       )}
       data-slot="scaffold-sidebar"

@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import type { ScaffoldCanvasProps } from "./type"
 
 /**
- * The panel row below the actions cluster: 8px gutters, 8px gaps, panels
+ * The panel row below the action cluster: 8px gutters, 8px gaps, panels
  * side by side. Key each `Scaffold.Panel` child so closes animate out.
  */
 export function ScaffoldCanvas({
@@ -17,10 +17,7 @@ export function ScaffoldCanvas({
 }: ScaffoldCanvasProps): React.ReactElement {
   return (
     <div
-      className={cn(
-        "flex h-full w-full gap-2 overflow-x-auto p-2 pt-[52px]",
-        className
-      )}
+      className={cn("relative flex w-full flex-1 gap-2", className)}
       data-slot="scaffold-canvas"
       {...rest}
     >
