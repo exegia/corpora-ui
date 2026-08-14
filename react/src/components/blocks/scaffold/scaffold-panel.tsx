@@ -2,14 +2,13 @@
 
 import { motion, useReducedMotion } from "motion/react"
 import * as React from "react"
+import { useState } from "react"
 
 import { cn } from "@/lib/utils"
 import { SCAFFOLD_EASE, SCAFFOLD_MORPH_DURATION } from "./constants"
-import { PanelCloseButton } from "./panel-close-button"
 import { PanelMenuButton } from "./panel-menu-button.tsx"
 import type { ScaffoldPanelProps, TSubPanelPosition } from "./type"
 import { ScaffoldSubPanel } from "@/components/blocks/scaffold/scaffold-sub-panel.tsx"
-import { useState } from "react"
 
 /**
  * A canvas panel: a primary card plus an optional secondary strip below it,
