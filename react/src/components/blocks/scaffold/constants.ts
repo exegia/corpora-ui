@@ -16,6 +16,11 @@ export const SCAFFOLD_SECONDARY_HEIGHT = 52
 /** Gap in px between a panel's primary surface and its secondary strip. */
 export const SCAFFOLD_PANEL_GAP = 10
 
+/** How long the seam menu lingers expanded after the pointer leaves it (ms)
+ * before it collapses back to the compact toggle. The timer keeps counting
+ * even when the pointer leaves the window entirely. */
+export const SCAFFOLD_MENU_COLLAPSE_DELAY = 4000
+
 /** Morph duration in seconds for drawer slides and panel layout shifts. */
 export const SCAFFOLD_MORPH_DURATION = 0.3
 
