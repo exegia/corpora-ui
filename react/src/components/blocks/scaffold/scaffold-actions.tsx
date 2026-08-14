@@ -62,7 +62,6 @@ export function ScaffoldActions({
       {children}
       <GlassButtonGroup glassVariant="liquid-refract" className="rounded-md">
         <Button
-          aria-label={"add-panel-button"}
           onClick={onAdd}
           size="sm"
           variant="ghost"
