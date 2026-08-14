@@ -58,7 +58,7 @@ export function ScaffoldTab({
           variant="ghost"
           className="rounded-none!"
         >
-          <LucideX size="sm" />
+          <LucideX size={16} />
         </Button>
       )}
     </GlassButtonGroup>
