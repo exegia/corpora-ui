@@ -1,6 +1,5 @@
 "use client"
 
-import { RiAddBoxLine, RiArrowDownSLine, RiCheckboxMultipleBlankLine } from "@remixicon/react"
 import { motion, useReducedMotion } from "motion/react"
 import * as React from "react"
 
@@ -9,6 +8,10 @@ import { SCAFFOLD_EASE, SCAFFOLD_EDGE_GUTTER, SCAFFOLD_MORPH_DURATION } from "./
 import { useScaffoldContext } from "./scaffold-context"
 import type { ScaffoldActionsProps } from "./type"
 import { actionSegmentClass } from "./utils"
+import { GroupSeparator } from "@/components/ui/group"
+import { GlassButtonGroup } from "@/components/ui/glasscn/glass-button-group"
+import { Button } from "@/components/ui/button";
+import { LucidePlus } from "lucide-react"
 
 /**
  * The floating pill cluster in the main region's top-right corner — the
@@ -39,11 +42,13 @@ export function ScaffoldActions({
 
   return (
     <motion.div
+      id="scaffold-actions"
       animate={{
         x: inspectorOpen ? -(inspectorWidth + SCAFFOLD_EDGE_GUTTER) : 0,
       }}
       className={cn(
-        "absolute top-2 right-2 z-10 flex items-center gap-0.5 rounded-full bg-neutral-200 p-1.5 shadow-[-3px_9px_10px_rgba(139,139,139,0.16)] dark:bg-neutral-800 dark:shadow-[-3px_9px_10px_rgba(0,0,0,0.35)]",
+        "sticky flex flex-1 items-center gap-0.5",
+        "justify-end",
         className
       )}
       data-slot="scaffold-actions"
@@ -54,43 +59,40 @@ export function ScaffoldActions({
       }}
       {...rest}
     >
-      <button
-        className={cn(actionSegmentClass, "gap-1.5 px-2.5 text-sm font-medium")}
-        onClick={onAdd}
-        type="button"
-        {...soundProps}
-      >
-        {addIcon ?? <RiAddBoxLine aria-hidden className="size-4" />}
-        {addLabel}
-      </button>
-
-      {showBrowse && (
-        <>
-          <span
-            aria-hidden
-            className="mx-0.5 w-px self-stretch bg-neutral-300 dark:bg-neutral-700"
-          />
-          <button
-            aria-label={browseLabel}
-            className={cn(actionSegmentClass, "gap-0.5 px-2")}
-            onClick={onBrowse}
-            type="button"
-            {...soundProps}
-          >
-            <span className="relative">
-              <RiCheckboxMultipleBlankLine aria-hidden className="size-4" />
-              {overflowCount !== undefined && overflowCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex size-3.5 items-center justify-center rounded-full bg-neutral-700 text-[9px] font-semibold text-white dark:bg-neutral-200 dark:text-neutral-900">
-                  {overflowCount}
-                </span>
-              )}
-            </span>
-            <RiArrowDownSLine aria-hidden className="size-3.5 opacity-60" />
-          </button>
-        </>
-      )}
-
       {children}
+      <GlassButtonGroup glassVariant="liquid-refract" className="rounded-md">
+        <Button
+          aria-label={"add-panel-button"}
+          onClick={onAdd}
+          size="sm"
+          variant="ghost"
+        >
+          {addIcon ?? <LucidePlus className="stroke-3" />}
+          {addLabel}
+        </Button>
+        {!showBrowse && <GroupSeparator />}
+        {showBrowse && (
+            <button
+              aria-label={browseLabel}
+              className={cn(actionSegmentClass, "gap-0.5 px-2")}
+              onClick={onBrowse}
+              type="button"
+              {...soundProps}
+            >
+              <span className="relative">
+
+                {overflowCount !== undefined && overflowCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 flex size-3.5 items-center justify-center rounded-full bg-neutral-700 text-[9px] font-semibold text-white dark:bg-neutral-200 dark:text-neutral-900">
+                    {overflowCount}
+                  </span>
+                )}
+              </span>
+
+            </button>
+        )}
+
+        {children}
+      </GlassButtonGroup>
     </motion.div>
   )
 }
