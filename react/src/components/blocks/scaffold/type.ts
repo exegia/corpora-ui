@@ -66,13 +66,13 @@ export interface ScaffoldPanelProps {
   children: ReactNode
   /** The panel's content, rendered in a card with a drop shadow. */
   SecondaryPanel?: TScaffoldPanelChild
-  /** Renders the floating close button in the panel's top-right corner. */
-  onClose?: () => void
-  /** Renders the floating swap button over the primary/secondary gap.
-   * Only shown when `secondary` is present. Clicking it trades the two
-   * cards with a layout morph — flip the slot content here so each card
-   * carries its subject to its new home. */
+  /** Reveals the Swap action in the seam menu (needs `SecondaryPanel`).
+   * Swapping trades the two cards with a layout morph — flip the slot
+   * content here so each card carries its subject to its new home. */
   onSwap?: () => void
+  /** Reveals the Close action in the seam menu — remove `SecondaryPanel`
+   * here; the strip and the menu leave together. */
+  onCloseSecondary?: () => void
   /** Controlled swap state — while true the strip's card sits in the
    * primary slot. Omit letting the panel toggle it on swap clicks. */
   swapped?: boolean
@@ -84,9 +84,7 @@ export interface ScaffoldPanelProps {
   name?: string
   /** Emit interaction-sound attributes on the floating buttons. */
   sound?: boolean
-  /** Accessible name of the close button. */
-  closeLabel?: string
-  /** Accessible name of the swap button. */
+  /** Accessible name of the seam-menu toggle. */
   swapLabel?: string
   /** Extra class names for the panel's root element. */
   className?: string
@@ -151,6 +149,9 @@ export interface PanelMenuButtonProps extends PanelFloatingButtonProps {
   /** Called when the Expand action is pressed — the panel trades which
    * sub-panel holds the flexible slot. */
   onExpand?: () => void
+  /** Renders the Close action; called when it is pressed — the consumer
+   * removes the secondary strip. */
+  onCloseSecondary?: () => void
   /** Whether the secondary strip currently holds the flexible slot —
    * flips the Expand chevron between down and up. */
   secondaryExpanded?: boolean
