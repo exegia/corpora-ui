@@ -67,11 +67,13 @@ export interface ScaffoldActionsProps
   sound?: boolean
 }
 
+export type TScaffoldPanelChild<T extends ScaffoldSubPanelProps = ScaffoldSubPanelProps> = ReactElement<T, React.JSXElementConstructor<T>>
+
 export interface ScaffoldPanelProps {
-  children?: ReactNode
-  /** Utility strip rendered as its own card below the primary surface,
-   * separated by a slice of the desktop background. */
-  secondary?: ReactNode
+  /** The panel's content, rendered in a card with a drop shadow. */
+  children: ReactNode
+  /** The panel's content, rendered in a card with a drop shadow. */
+  SecondaryPanel?: TScaffoldPanelChild
   /** Renders the floating close button in the panel's top-right corner. */
   onClose?: () => void
   /** Renders the floating swap button over the primary/secondary gap.
@@ -80,7 +82,7 @@ export interface ScaffoldPanelProps {
    * carries its subject to its new home. */
   onSwap?: () => void
   /** Controlled swap state — while true the strip's card sits in the
-   * primary slot. Omit to let the panel toggle it on swap clicks. */
+   * primary slot. Omit letting the panel toggle it on swap clicks. */
   swapped?: boolean
   /** Initial swap state when uncontrolled. */
   defaultSwapped?: boolean
@@ -113,9 +115,8 @@ export interface ScaffoldSubPanelProps extends MotionSafe<Omit<ComponentProps<"d
   width?: number
   /** Emit interaction-sound attributes on the floating buttons. */
   sound?: boolean
+  /** Extra class names for the sub-panel's root element. */
   className?: string
-  primaryClassName?: string
-  secondaryClassName?: string
 }
 
 export interface ScaffoldInspectorProps

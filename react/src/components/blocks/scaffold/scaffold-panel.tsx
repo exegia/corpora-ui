@@ -8,7 +8,7 @@ import { SCAFFOLD_EASE, SCAFFOLD_MORPH_DURATION } from "./constants"
 import { PanelCloseButton } from "./panel-close-button"
 import { PanelSwapButton } from "./panel-swap-button"
 import type { ScaffoldPanelProps } from "./type"
-import { panelSurfaceClass } from "./utils"
+import { ScaffoldSubPanel } from "@/components/blocks/scaffold/scaffold-sub-panel.tsx"
 
 /**
  * A canvas panel: a primary card plus an optional secondary strip below it,
@@ -19,7 +19,7 @@ import { panelSurfaceClass } from "./utils"
  */
 export function ScaffoldPanel({
   children,
-  secondary,
+  SecondaryPanel,
   onClose,
   onSwap,
   swapped: swappedProp,
@@ -30,8 +30,6 @@ export function ScaffoldPanel({
   swapLabel = "Swap panel content",
   sound = true,
   className,
-  primaryClassName,
-  secondaryClassName,
 }: ScaffoldPanelProps): React.ReactElement {
   const reducedMotion = useReducedMotion()
   const [innerSwapped, setInnerSwapped] = React.useState(defaultSwapped)
@@ -47,18 +45,13 @@ export function ScaffoldPanel({
     onSwap?.()
   }
 
-  // Two persistent cards; which slot each occupies derives from `swapped`,
-  // so a swap reorders them and `layout` animates the trade. Content stays
-  // slot-bound — a card picks it up from whichever slot it lands in.
-  const cards = swapped ? (["b", "a"] as const) : (["a", "b"] as const)
-
   return (
     <motion.section
       id="scaffold-panel"
       animate={{ opacity: 1, scale: 1 }}
       aria-label={name}
       className={cn(
-        "group/panel relative flex min-w-0 flex-col gap-2.5",
+        "group/panel relative flex min-w-80 flex-col gap-2",
         width === undefined ? "flex-1" : "flex-none",
         className
       )}
@@ -70,45 +63,14 @@ export function ScaffoldPanel({
       style={width === undefined ? undefined : { width }}
       transition={transition}
     >
-      {cards.map((card, slot) => {
-        const isPrimary = slot === 0
-        if (!isPrimary && secondary == null) return null
-        return (
-          <motion.div
-            key={card}
-            className={cn(
-              panelSurfaceClass,
-              "overflow-hidden",
-              isPrimary ? "min-h-0 flex-1" : "h-13 shrink-0",
-              isPrimary ? primaryClassName : secondaryClassName
-            )}
-            data-slot={
-              isPrimary ? "scaffold-panel-primary" : "scaffold-panel-secondary"
-            }
-            layout
-            // motion only corrects corner distortion while the cards scale
-            // when the radius is set via style, not class.
-            style={{ borderRadius: 16 }}
-            transition={transition}
-          >
-            <motion.div
-              key={isPrimary ? "primary" : "secondary"}
-              animate={{ opacity: 1 }}
-              className="h-full"
-              initial={{ opacity: 0 }}
-              layout="position"
-              transition={transition}
-            >
-              {isPrimary ? children : secondary}
-            </motion.div>
-          </motion.div>
-        )
-      })}
-
+      <ScaffoldSubPanel prominence="primary">{children}</ScaffoldSubPanel>
+      {SecondaryPanel && (
+        <ScaffoldSubPanel prominence="secondary">{SecondaryPanel}</ScaffoldSubPanel>
+      )}
       {onClose && (
         <PanelCloseButton label={closeLabel} onClick={onClose} sound={sound} />
       )}
-      {onSwap && secondary != null && (
+      {onSwap && (
         <PanelSwapButton label={swapLabel} onClick={handleSwap} sound={sound} />
       )}
     </motion.section>
