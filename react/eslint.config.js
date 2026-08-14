@@ -18,6 +18,18 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      // An `_` prefix marks a deliberately unused binding — e.g. a deprecated
+      // prop destructured out of a rest spread so it never reaches the DOM.
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+    },
   },
   {
     // Library files export variants, helpers and hooks alongside components
