@@ -43,8 +43,9 @@ type MotionSafe<T> = Omit<
   | "onAnimationIteration"
 >
 
-export interface ScaffoldActionsProps
-  extends MotionSafe<Omit<ComponentProps<"div">, "children">> {
+export interface ScaffoldActionsProps extends MotionSafe<
+  Omit<ComponentProps<"div">, "children">
+> {
   /** Called when the Add segment is pressed. */
   onAdd?: () => void
   /** Label of the Add segment. */
@@ -67,7 +68,9 @@ export interface ScaffoldActionsProps
   sound?: boolean
 }
 
-export type TScaffoldPanelChild<T extends ScaffoldSubPanelProps = ScaffoldSubPanelProps> = ReactElement<T, React.JSXElementConstructor<T>>
+export type TScaffoldPanelChild<
+  T extends ScaffoldSubPanelProps = ScaffoldSubPanelProps,
+> = ReactElement<T, React.JSXElementConstructor<T>>
 
 export interface ScaffoldPanelProps {
   /** The panel's content, rendered in a card with a drop shadow. */
@@ -103,7 +106,9 @@ export interface ScaffoldPanelProps {
 export type TSubPanelPosition = "bottom" | "top"
 export type TSubPanelVariant = "card" | "subtle" | "inset"
 
-export interface ScaffoldSubPanelProps extends MotionSafe<Omit<ComponentProps<"div">, "children">> {
+export interface ScaffoldSubPanelProps extends MotionSafe<
+  Omit<ComponentProps<"div">, "children">
+> {
   children?: ReactNode
   /** Accessible name of the sub-panel region. */
   name?: string
@@ -122,8 +127,9 @@ export interface ScaffoldSubPanelProps extends MotionSafe<Omit<ComponentProps<"d
   className?: string
 }
 
-export interface ScaffoldInspectorProps
-  extends MotionSafe<Omit<ComponentProps<"aside">, "children">> {
+export interface ScaffoldInspectorProps extends MotionSafe<
+  Omit<ComponentProps<"aside">, "children">
+> {
   children?: ReactNode
   /** Accessible name of the drawer region. */
   name?: string
