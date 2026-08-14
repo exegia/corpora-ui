@@ -73,6 +73,7 @@ export function ScaffoldPanel({
             onExpand={handleExpand}
             onCloseSecondary={onCloseSecondary}
             secondaryExpanded={subPanelPosition === "bottom"}
+            swapped={isSwapped}
             sound={sound}
           />
         </div>

@@ -148,6 +148,9 @@ export interface PanelMenuButtonProps extends PanelFloatingButtonProps {
   /** Whether the secondary strip currently holds the flexible slot —
    * flips the Expand chevron between down and up. */
   secondaryExpanded?: boolean
+  /** Whether the panel is swapped (column-reverse). Mirrors the Expand
+   * chevron so it keeps pointing at the sub-panel that grows next. */
+  swapped?: boolean
 }
 
 export interface UseScaffoldOptions {

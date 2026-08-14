@@ -30,6 +30,7 @@ export function PanelMenuButton({
   onExpand,
   onCloseSecondary,
   secondaryExpanded = false,
+  swapped = false,
   label,
   sound = true,
   className,
@@ -172,10 +173,12 @@ export function PanelMenuButton({
             className="rounded-r-none"
             onClick={() => handleAction(onExpand)}
           >
-            {/* Button's [&_svg]:transition-transform eases the flip. */}
+            {/* Points at the sub-panel that grows next, in VISUAL space —
+                a swapped panel is column-reverse, so the direction mirrors.
+                Button's [&_svg]:transition-transform eases the flip. */}
             <LucideChevronDown
               size={16}
-              className={cn(secondaryExpanded && "rotate-180")}
+              className={cn(secondaryExpanded !== swapped && "rotate-180")}
             />
             Expand
           </Button>
