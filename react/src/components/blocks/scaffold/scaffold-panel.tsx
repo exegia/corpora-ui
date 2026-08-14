@@ -20,10 +20,8 @@ import { ScaffoldSubPanel } from "@/components/blocks/scaffold/scaffold-sub-pane
 export function ScaffoldPanel({
   children,
   SecondaryPanel,
-  onClose,
   onSwap,
   name,
-  closeLabel = "Close panel",
   swapLabel = "Swap panel content",
   sound = true,
   className,
