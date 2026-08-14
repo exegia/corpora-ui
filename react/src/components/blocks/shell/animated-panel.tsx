@@ -47,7 +47,15 @@ export function AnimatedPanel({
       data-collapsible={collapsible}
       data-variant={variant}
       data-side={side}
-      animate={{ width }}
+      animate={{
+        width,
+        // Swallow the shell's gap-x-2 column gap while off canvas so the
+        // shell edge keeps a constant spacing-2 inset whether the panel is
+        // open (gap + panel + margin) or collapsed (gap + this).
+        ...(side === "right"
+          ? { marginLeft: offcanvas ? "-0.5rem" : "0rem" }
+          : { marginRight: offcanvas ? "-0.5rem" : "0rem" }),
+      }}
       transition={context.reduce ? { duration: 0 } : SIDEBAR_MORPH_TRANSITION}
       style={style}
       className={cn(
