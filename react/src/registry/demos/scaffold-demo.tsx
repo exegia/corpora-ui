@@ -118,6 +118,7 @@ export default function ScaffoldDemo() {
                     panels.length > 1 ? () => closePanel(panel.id) : undefined
                   }
                   onSwap={() => swapPanel(panel.id)}
+                  swapped={panel.swapped}
                   secondary={
                     <StripContent
                       label={panel.swapped ? panel.title : "Notes"}
