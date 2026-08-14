@@ -1,23 +1,27 @@
 import { describe, expect, mock, test } from "bun:test"
-import { render, screen } from "@testing-library/react"
+import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 
 import { Scaffold, useScaffold } from "../index"
+import type { TScaffoldPanelChild } from "../type"
+
+function Strip() {
+  return <span>Strip</span>
+}
 
 function Workspace({
   onClose,
   onSwap,
   onAdd,
   overflowCount,
-  swapped,
-  secondary = <span>Strip</span>,
+  SecondaryPanel = <Strip />,
 }: {
   onClose?: () => void
   onSwap?: () => void
   onAdd?: () => void
   overflowCount?: number
-  swapped?: boolean
-  secondary?: React.ReactNode
+  /** Pass null to render the panel without a secondary strip. */
+  SecondaryPanel?: TScaffoldPanelChild | null
 }) {
   const scaffold = useScaffold()
 
@@ -36,8 +40,7 @@ function Workspace({
             name="Alpha"
             onClose={onClose}
             onSwap={onSwap}
-            secondary={secondary}
-            swapped={swapped}
+            SecondaryPanel={SecondaryPanel ?? undefined}
           >
             <span>Primary body</span>
           </Scaffold.Panel>
@@ -50,6 +53,10 @@ function Workspace({
   )
 }
 
+/** The seam menu's compact toggle (icon-only, named by `swapLabel`). */
+const menuToggle = () =>
+  screen.queryByRole("button", { name: "Swap panel content" })
+
 describe("Scaffold", () => {
   test("renders rail, panel surfaces and secondary strip", () => {
     render(<Workspace />)
@@ -60,74 +67,83 @@ describe("Scaffold", () => {
     expect(panel.textContent).toContain("Strip")
   })
 
-  test("close and swap buttons render only with their callbacks and fire them", async () => {
+  test("close and menu buttons render only with their callbacks", async () => {
     const user = userEvent.setup()
     const onClose = mock(() => {})
-    const onSwap = mock(() => {})
 
     const { rerender } = render(<Workspace />)
     expect(screen.queryByRole("button", { name: "Close panel" })).toBeNull()
-    expect(
-      screen.queryByRole("button", { name: "Swap panel content" })
-    ).toBeNull()
+    expect(menuToggle()).toBeNull()
 
-    rerender(<Workspace onClose={onClose} onSwap={onSwap} />)
+    rerender(<Workspace onClose={onClose} onSwap={() => {}} />)
     await user.click(screen.getByRole("button", { name: "Close panel" }))
-    await user.click(screen.getByRole("button", { name: "Swap panel content" }))
     expect(onClose).toHaveBeenCalledTimes(1)
-    expect(onSwap).toHaveBeenCalledTimes(1)
+    expect(menuToggle()).toBeDefined()
   })
 
-  test("clicking swap trades the surface cards; content stays slot-bound", async () => {
+  test("seam menu opens; Swap fires onSwap, flips the panel and collapses the menu", async () => {
+    const user = userEvent.setup()
+    const onSwap = mock(() => {})
+    render(<Workspace onSwap={onSwap} />)
+
+    const panel = screen.getByRole("region", { name: "Alpha" })
+    expect(panel.getAttribute("data-swapped")).toBeNull()
+
+    // The compact toggle trades places with the Expand | Swap actions.
+    await user.click(menuToggle() as HTMLElement)
+    await user.click(await screen.findByRole("button", { name: "Swap" }))
+
+    expect(onSwap).toHaveBeenCalledTimes(1)
+    expect(panel.getAttribute("data-swapped")).toBe("")
+
+    // Acting collapses the menu back to the compact toggle; the actions
+    // leave with their exit animation.
+    expect(
+      await screen.findByRole("button", { name: "Swap panel content" })
+    ).toBeDefined()
+    await waitFor(() =>
+      expect(screen.queryByRole("button", { name: "Swap" })).toBeNull()
+    )
+  })
+
+  test("expand trades the flexible slot and flips the chevron", async () => {
     const user = userEvent.setup()
     render(<Workspace onSwap={() => {}} />)
 
     const panel = screen.getByRole("region", { name: "Alpha" })
-    const primaryCard = panel.querySelector(
-      '[data-slot="scaffold-panel-primary"]'
-    ) as HTMLElement
+    const [top, bottom] = Array.from(
+      panel.querySelectorAll('[data-slot^="scaffold-sub-panel"]')
+    )
+    expect(top.getAttribute("data-expanded")).toBe("")
+    expect(bottom.getAttribute("data-expanded")).toBeNull()
 
-    await user.click(screen.getByRole("button", { name: "Swap panel content" }))
+    await user.click(menuToggle() as HTMLElement)
+    await user.click(await screen.findByRole("button", { name: "Expand" }))
 
-    // The same DOM node traded slots — that identity move is what the
-    // layout morph animates.
+    expect(top.getAttribute("data-expanded")).toBeNull()
+    expect(bottom.getAttribute("data-expanded")).toBe("")
+
+    // Reopen: the chevron reflects the flipped state.
+    await user.click(
+      await screen.findByRole("button", { name: "Swap panel content" })
+    )
+    const expandButton = await screen.findByRole("button", { name: "Expand" })
     expect(
-      panel.querySelector('[data-slot="scaffold-panel-secondary"]')
-    ).toBe(primaryCard)
-    expect(panel.getAttribute("data-swapped")).toBe("")
-    // Content follows the slot, not the card.
-    expect(
-      panel.querySelector('[data-slot="scaffold-panel-primary"]')?.textContent
-    ).toContain("Primary body")
+      expandButton
+        .querySelector("svg.lucide-chevron-down")
+        ?.classList.contains("rotate-180")
+    ).toBe(true)
+
+    // Expanding again restores the primary slot.
+    await user.click(expandButton)
+    expect(top.getAttribute("data-expanded")).toBe("")
+    expect(bottom.getAttribute("data-expanded")).toBeNull()
   })
 
-  test("swap state can be controlled from outside", async () => {
-    const user = userEvent.setup()
-    const { rerender } = render(<Workspace onSwap={() => {}} swapped={false} />)
+  test("seam menu needs a secondary strip", () => {
+    render(<Workspace onSwap={() => {}} SecondaryPanel={null} />)
 
-    const panel = screen.getByRole("region", { name: "Alpha" })
-    const primaryCard = panel.querySelector(
-      '[data-slot="scaffold-panel-primary"]'
-    ) as HTMLElement
-
-    // Controlled: a click alone doesn't trade the cards.
-    await user.click(screen.getByRole("button", { name: "Swap panel content" }))
-    expect(
-      panel.querySelector('[data-slot="scaffold-panel-primary"]')
-    ).toBe(primaryCard)
-
-    rerender(<Workspace onSwap={() => {}} swapped />)
-    expect(
-      panel.querySelector('[data-slot="scaffold-panel-secondary"]')
-    ).toBe(primaryCard)
-  })
-
-  test("swap button needs a secondary strip", () => {
-    render(<Workspace onSwap={() => {}} secondary={null} />)
-
-    expect(
-      screen.queryByRole("button", { name: "Swap panel content" })
-    ).toBeNull()
+    expect(menuToggle()).toBeNull()
   })
 
   test("actions cluster: Add fires, overflow segment follows the count", async () => {
@@ -137,7 +153,7 @@ describe("Scaffold", () => {
     const { rerender } = render(<Workspace onAdd={onAdd} />)
     expect(screen.queryByRole("button", { name: "Browse panels" })).toBeNull()
 
-    await user.click(screen.getByRole("button", { name: "Add" }))
+    await user.click(screen.getByRole("button", { name: "Panel" }))
     expect(onAdd).toHaveBeenCalledTimes(1)
 
     // Zero overflowed panels: the segment shows without a badge.
