@@ -1,5 +1,5 @@
 import { PanelCloseButton } from "./panel-close-button"
-import { PanelSwapButton } from "./panel-swap-button"
+import { PanelMenuButton } from "./panel-menu-button.tsx"
 import { ScaffoldActions } from "./scaffold-actions"
 import { ScaffoldCanvas } from "./scaffold-canvas"
 import { ScaffoldInspector } from "./scaffold-inspector"
@@ -16,7 +16,7 @@ export * from "./constants"
 
 export {
   PanelCloseButton,
-  PanelSwapButton,
+  PanelMenuButton,
   ScaffoldActions,
   ScaffoldCanvas,
   ScaffoldInspector,

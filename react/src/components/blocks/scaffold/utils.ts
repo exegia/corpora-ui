@@ -11,7 +11,7 @@ export const panelSurfaceClass: ClassNameValue =
 
 /** Floating icon button hovering over a panel (close, swap). */
 export const floatingButtonClass: ClassNameValue =
-  "flex h-8 w-9 items-center justify-center rounded-xl bg-white/95 text-neutral-600 shadow-sm inset-ring-1 inset-ring-black/[0.04] transition-[opacity,scale,box-shadow] duration-200 ease-smooth-out hover:text-neutral-900 hover:shadow-md active:scale-97 dark:bg-neutral-800/95 dark:text-neutral-300 dark:inset-ring-white/10 dark:hover:text-white motion-reduce:transition-none motion-reduce:active:scale-100"
+  "transition-[opacity,scale,box-shadow] duration-200 ease-smooth-out hover:text-neutral-900 hover:shadow-md active:scale-97 dark:bg-neutral-800/95 dark:text-neutral-300 dark:inset-ring-white/10 dark:hover:text-white motion-reduce:transition-none motion-reduce:active:scale-100 z-20"
 
 /** Hidden until the pointer rests on the panel (always shown for touch and
  * while focused) — the affordances stay quiet until the panel is engaged. */
@@ -24,7 +24,7 @@ export const actionSegmentClass: ClassNameValue =
 
 /** Map of sub-panel variants to their corresponding side. */
 export const subPanelVariant: Record<TSubPanelVariant, ClassNameValue> = {
-  card: "bg-neutral-50 dark:bg-neutral-900 rounded-md border-t-2 border-t-white dark:border-t-neutral-700/50 border-l-linear dark:border-b-black/70 shadow-sm shadow-neutral-900/10 dark:shadow-black/50 inset-shadow-sm inset-shadow-white dark:inset-shadow-neutral-800",
+  card: "bg-neutral-50 dark:bg-neutral-900 rounded-md border-t border-b border-t-white dark:border-t-neutral-700/50 border-b-neutral-900/10 dark:border-b-black/70 shadow-sm shadow-neutral-900/10 dark:shadow-black/50 inset-shadow-sm inset-shadow-white dark:inset-shadow-neutral-800",
   subtle: "bg-neutral-100 dark:bg-neutral-800",
   inset: "bg-neutral-200 dark:bg-neutral-700",
 } as const
