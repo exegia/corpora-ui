@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import { SCAFFOLD_INSPECTOR_WIDTH } from "./constants"
 import { ScaffoldContext } from "./scaffold-context"
 import type { ScaffoldContextValue, ScaffoldRootProps } from "./type"
-import { scaffoldBackgroundClass } from "./utils"
+import type { ClassNameValue } from "tailwind-merge"
 
 /**
  * The scaffold's viewport: desktop backdrop + horizontal row of rail and
@@ -26,6 +26,7 @@ export function ScaffoldRoot({
     defaultInspectorOpen ?? false
   )
   const inspectorOpen = inspectorOpenProp ?? uncontrolledOpen
+  const background: ClassNameValue = `bg-linear-to-tr/increasing from-neutral-200 via-neutral-100 to-stone-200 dark:from-neutral-900 dark:via-neutral-950 dark:to-stone-950`
 
   const setInspectorOpen = React.useCallback(
     (open: boolean) => {
@@ -48,12 +49,13 @@ export function ScaffoldRoot({
   return (
     <ScaffoldContext.Provider value={value}>
       <div
+        id={"scaffold-root"}
         className={cn(
-          // `clip`, not `hidden`: the offcanvas inspector extends the
+          // `clip`, not `hidden`: the off canvas inspector extends the
           // scrollable overflow, and focus/scrollIntoView would scroll a
           // hidden-overflow root sideways to reveal it.
-          "relative isolate flex h-full w-full overflow-clip",
-          scaffoldBackgroundClass,
+          "relative isolate flex h-full w-full flex-1 overflow-clip pr-2",
+          background,
           className
         )}
         data-slot="scaffold"
