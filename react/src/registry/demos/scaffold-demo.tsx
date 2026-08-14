@@ -7,14 +7,17 @@ import {
 } from "@remixicon/react"
 import * as React from "react"
 
-import { Scaffold, useScaffold } from "@/components/blocks/scaffold"
+import {
+  Scaffold,
+  type ScaffoldPanelProps,
+  useScaffold,
+} from "@/components/blocks/scaffold"
 import { DemoStage } from "@/components/docs/demo-controls"
 import { cn } from "@/lib/utils"
 
-interface DemoPanel {
+interface DemoPanel extends ScaffoldPanelProps {
+  title: string | undefined
   id: number
-  title: string
-  swapped: boolean
 }
 
 const PANEL_TITLES = [
@@ -32,23 +35,30 @@ export default function ScaffoldDemo() {
   const scaffold = useScaffold()
   const nextId = React.useRef(2)
   // Visible panels plus the non-visible ones (newest first) that the
-  // actions cluster counts as its overflow badge.
+  // action cluster counts as its overflow badge.
   const [board, setBoard] = React.useState<{
     visible: DemoPanel[]
     hidden: DemoPanel[]
   }>({
-    visible: [{ id: 1, title: PANEL_TITLES[0], swapped: false }],
+    visible: [{
+      id: 1,
+      children: <PanelContent label={PANEL_TITLES[0]} />,
+      SecondaryPanel: <StripContent label={PANEL_TITLES[0]} />,
+      title: undefined,
+    }],
     hidden: [],
   })
 
-  // Per the design comments: at capacity the new panel is prepended and
+  // Per the design comments: at capacity the new panel is prepended, and
   // the last visible panel is pushed into the overflow dropdown.
   const addPanel = () => {
     const id = nextId.current++
     const panel: DemoPanel = {
+      children: <PanelContent label={PANEL_TITLES[(id - 1) % PANEL_TITLES.length]} />,
+      SecondaryPanel: <StripContent label={PANEL_TITLES[(id - 1) % PANEL_TITLES.length]} />,
       id,
-      title: PANEL_TITLES[(id - 1) % PANEL_TITLES.length],
-      swapped: false,
+      title: PANEL_TITLES[(id - 1) % PANEL_TITLES.length]
+
     }
     setBoard(({ visible, hidden }) =>
       visible.length < PANEL_CAPACITY
@@ -84,7 +94,7 @@ export default function ScaffoldDemo() {
 
   return (
     <DemoStage canvasClassName="w-full p-0" controls={null}>
-      <div className="h-[520px] w-full overflow-hidden rounded-lg border">
+      <div className="h-130 w-full overflow-hidden rounded-lg border">
         <Scaffold.Root {...scaffold.providerProps}>
           <Scaffold.Sidebar>
             <RailButton icon={<RiCompass3Line className="size-5" />} label="Explore" />
@@ -113,21 +123,14 @@ export default function ScaffoldDemo() {
               {panels.map((panel) => (
                 <Scaffold.Panel
                   key={panel.id}
+                  SecondaryPanel={panel.SecondaryPanel}
                   name={panel.title}
                   onClose={
                     panels.length > 1 ? () => closePanel(panel.id) : undefined
                   }
                   onSwap={() => swapPanel(panel.id)}
-                  swapped={panel.swapped}
-                  secondary={
-                    <StripContent
-                      label={panel.swapped ? panel.title : "Notes"}
-                    />
-                  }
                 >
-                  <PanelContent
-                    label={panel.swapped ? "Notes" : panel.title}
-                  />
+                  {panel.children}
                 </Scaffold.Panel>
               ))}
             </Scaffold.Canvas>
