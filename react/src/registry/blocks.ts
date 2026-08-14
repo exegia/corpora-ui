@@ -770,10 +770,10 @@ function App() {
           "Inspector drawer state, controlled or uncontrolled. Spread `useScaffold().providerProps` to drive it from outside (title-bar buttons, shortcuts). `inspectorWidth` (px, default 272) sizes the drawer and how far Actions slides aside.",
       },
       {
-        name: "Panel · secondary / onClose / onSwap / width",
-        type: "ReactNode / () => void / () => void / number",
+        name: "Panel · secondary / onClose / onSwap / swapped / width",
+        type: "ReactNode / () => void / () => void / boolean / number",
         description:
-          "`secondary` renders the utility strip as its own card below the primary surface. `onClose` and `onSwap` reveal the floating buttons on hover (swap needs a secondary). `width` fixes the panel in px; omitted it flexes. Key each panel — closes animate out.",
+          "`secondary` renders the utility strip as its own card below the primary surface. `onClose` and `onSwap` reveal the floating buttons on hover (swap needs a secondary). Swapping trades the two cards with a layout morph — the strip glides up into the primary slot; control it with `swapped` (uncontrolled otherwise, `defaultSwapped`) and flip the slot content in `onSwap`. `width` fixes the panel in px; omitted it flexes. Key each panel — closes animate out.",
       },
       {
         name: "Actions · onAdd / overflowCount / onBrowse",

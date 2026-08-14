@@ -71,8 +71,15 @@ export interface ScaffoldPanelProps {
   /** Renders the floating close button in the panel's top-right corner. */
   onClose?: () => void
   /** Renders the floating swap button over the primary/secondary gap.
-   * Only shown when `secondary` is present. */
+   * Only shown when `secondary` is present. Clicking it trades the two
+   * cards with a layout morph — flip the slot content here so each card
+   * carries its subject to its new home. */
   onSwap?: () => void
+  /** Controlled swap state — while true the strip's card sits in the
+   * primary slot. Omit to let the panel toggle it on swap clicks. */
+  swapped?: boolean
+  /** Initial swap state when uncontrolled. */
+  defaultSwapped?: boolean
   /** Fixed width in px; omitted, the panel flexes to share the canvas. */
   width?: number
   /** Accessible name of the panel region. */
