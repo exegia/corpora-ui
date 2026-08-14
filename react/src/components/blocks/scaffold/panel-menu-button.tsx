@@ -2,41 +2,43 @@
 
 import * as React from "react"
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { More } from "iconsax-reactjs"
-import { LucideArrowUpDown, LucideChevronDown } from "lucide-react"
+import { LucideArrowUpDown, LucideChevronDown, LucideX } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import type { PanelMenuButtonProps } from "./type"
-import { floatingButtonClass, revealOnPanelHoverClass, segmentVariants, } from "./utils"
+import { floatingButtonClass, revealOnPanelHoverClass } from "./utils"
 import { Button } from "@/components/ui/button"
 import { GlassButtonGroup } from "@/components/ui/glasscn/glass-button-group.tsx"
-import { SPRING_LAYOUT } from "@/lib/ease.ts"
 import { useHoverCapable } from "@/lib/hooks/use-hover-capable"
 import { SCAFFOLD_MENU_COLLAPSE_DELAY } from "./constants"
 
+/** One side of the seam menu. Both sides stay mounted; the pill morphs by
+ * collapsing one side's grid column to 0fr while the other grows — pure
+ * CSS, driven by `data-expanded` on the group. The hidden side is inert
+ * and aria-hidden so it can't be clicked, focused or found by queries. */
+const menuCellClass =
+  "grid transition-[grid-template-columns,opacity] duration-300 ease-smooth-out motion-reduce:transition-none"
+
 /**
- * Floating swap affordance centered on the seam between a panel's primary
- * surface and its secondary strip.
+ * Floating menu affordance centered on the seam between a panel's primary
+ * surface and its secondary strip: a compact ⋯ toggle that morphs into the
+ * Expand | Swap (| Close) actions.
  */
 export function PanelMenuButton({
   onClick,
   onExpand,
+  onCloseSecondary,
   secondaryExpanded = false,
   label,
   sound = true,
   className,
 }: PanelMenuButtonProps): React.ReactElement {
-
-  const reduce = useReducedMotion()
   const canHover = useHoverCapable()
   const actionsId = React.useId()
   const groupRef = React.useRef<HTMLDivElement>(null)
   const actionsRef = React.useRef<HTMLDivElement>(null)
-  const actionsLeftRef = React.useRef(0)
   const [expanded, setExpanded] = React.useState(false);
-
-  const transition = reduce ? { duration: 0 } : SPRING_LAYOUT
 
   const collapseTimerRef = React.useRef<ReturnType<typeof setTimeout>>(undefined)
   const suppressHoverOpenUntilRef = React.useRef(0)
@@ -75,7 +77,7 @@ export function PanelMenuButton({
   }, [expanded, canHover, armCollapse])
 
   // Click-opens replace the toggle with the actions — hand focus over so
-  // keyboard users aren't dropped onto <body>.
+  // keyboard users aren't dropped onto an inert control.
   React.useEffect(() => {
     if (!expanded || !focusActionsOnOpenRef.current) return
     focusActionsOnOpenRef.current = false
@@ -111,111 +113,103 @@ export function PanelMenuButton({
     setExpanded(true)
   }
 
-  // popLayout pops the exiting actions group out of the flow — pin it back to
-  // where it sat so it stays visually attached to the toggle while leaving.
-  React.useLayoutEffect(() => {
-    const actionsNode = actionsRef.current
-    if (!actionsNode) return
-
-    if (!expanded) {
-      actionsNode.style.left = `${
-        actionsLeftRef.current - actionsNode.getBoundingClientRect().left
-      }px`
-      return
-    }
-
-    actionsNode.style.left = ""
-    actionsLeftRef.current = actionsNode.getBoundingClientRect().left
-  }, [expanded])
-
   return (
     <GlassButtonGroup
       ref={groupRef}
-      layout
-      transition={transition}
       onPointerEnter={cancelCollapse}
       onPointerLeave={armCollapse}
       glassVariant="subtle"
+      data-expanded={expanded ? "" : undefined}
       className={cn(
         floatingButtonClass,
         revealOnPanelHoverClass,
-        // Centered on the seam: secondary height (52px) + half the 10px gap.
-        "absolute top-1/2 z-10 -translate-y-1/2 overflow-visible!",
+        "group/menu absolute top-1/2 z-10 -translate-y-1/2",
         className
       )}
     >
-      <AnimatePresence mode="popLayout" initial={false}>
-        {expanded ? (
-          <motion.div
-            key="menu-actions"
-            ref={actionsRef}
-            id={actionsId}
-            layout
-            variants={segmentVariants}
-            initial={reduce ? { opacity: 0 } : "hidden"}
-            animate={reduce ? { opacity: 1 } : "visible"}
-            exit={reduce ? { opacity: 0 } : "exit"}
-            transition={transition}
-            className="relative flex w-max items-stretch"
-          >
-            <Button
-              id="scaffold-panel-menu-expand"
-              size="sm"
-              variant="ghost"
-              sound={sound}
-              data-slot="scaffold-panel-menu-swap"
-              // The motion wrapper hides these from the group's corner
-              // selectors — restore what ButtonGroup would have applied.
-              className="rounded-r-none"
-              onClick={() => handleAction(onExpand)}
-            >
-              {/* Button's [&_svg]:transition-transform eases the flip. */}
-              <LucideChevronDown
-                size={16}
-                className={cn(secondaryExpanded && "rotate-180")}
-              />
-              Expand
-            </Button>
-            <Button
-              id="scaffold-panel-menu-swap"
-              size="sm"
-              variant="ghost"
-              sound={sound}
-              data-slot="scaffold-panel-menu-swap"
-              className="rounded-l-none border-l-0"
-              onClick={() => handleAction(onClick)}
-            >
-              <LucideArrowUpDown size={16} />
-              Swap
-            </Button>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="menu-toggle"
-            layout
-            variants={segmentVariants}
-            initial={reduce ? { opacity: 0 } : "hidden"}
-            animate={reduce ? { opacity: 1 } : "visible"}
-            exit={reduce ? { opacity: 0 } : "exit"}
-            transition={transition}
-            className="flex shrink-0"
-          >
-            <Button
-              id="scaffold-panel-menu-toggle-button"
-              aria-label={label}
-              aria-expanded={expanded}
-              size="icon-sm"
-              variant="ghost"
-              sound={sound}
-              data-slot="scaffold-panel-menu-toggle"
-              onClick={handleOnExpand}
-              onPointerEnter={handleToggleHover}
-            >
-              <More size={16} />
-            </Button>
-          </motion.div>
+      <div
+        aria-hidden={expanded || undefined}
+        inert={expanded || undefined}
+        className={cn(
+          menuCellClass,
+          "grid-cols-[1fr] opacity-100 group-data-expanded/menu:grid-cols-[0fr] group-data-expanded/menu:opacity-0"
         )}
-      </AnimatePresence>
+      >
+        <div className="flex min-w-0 overflow-hidden">
+          <Button
+            id="scaffold-panel-menu-toggle-button"
+            aria-label={label}
+            aria-expanded={expanded}
+            aria-controls={actionsId}
+            size="icon-sm"
+            variant="ghost"
+            sound={sound}
+            data-slot="scaffold-panel-menu-toggle"
+            onClick={handleOnExpand}
+            onPointerEnter={handleToggleHover}
+          >
+            <More size={16} />
+          </Button>
+        </div>
+      </div>
+      <div
+        id={actionsId}
+        ref={actionsRef}
+        aria-hidden={!expanded || undefined}
+        inert={!expanded || undefined}
+        className={cn(
+          menuCellClass,
+          "grid-cols-[0fr] opacity-0 group-data-expanded/menu:grid-cols-[1fr] group-data-expanded/menu:opacity-100"
+        )}
+      >
+        <div className="flex min-w-0 overflow-hidden">
+          <Button
+            id="scaffold-panel-menu-expand"
+            size="sm"
+            variant="ghost"
+            sound={sound}
+            data-slot="scaffold-panel-menu-expand"
+            className="rounded-r-none"
+            onClick={() => handleAction(onExpand)}
+          >
+            {/* Button's [&_svg]:transition-transform eases the flip. */}
+            <LucideChevronDown
+              size={16}
+              className={cn(secondaryExpanded && "rotate-180")}
+            />
+            Expand
+          </Button>
+          <Button
+            id="scaffold-panel-menu-swap"
+            size="sm"
+            variant="ghost"
+            sound={sound}
+            data-slot="scaffold-panel-menu-swap"
+            className={cn(
+              "border-l-0",
+              onCloseSecondary ? "rounded-none" : "rounded-l-none"
+            )}
+            onClick={() => handleAction(onClick)}
+          >
+            <LucideArrowUpDown size={16} />
+            Swap
+          </Button>
+          {onCloseSecondary && (
+            <Button
+              id="scaffold-panel-menu-close"
+              size="sm"
+              variant="ghost"
+              sound={sound}
+              data-slot="scaffold-panel-menu-close"
+              className="rounded-l-none border-l-0"
+              onClick={() => handleAction(onCloseSecondary)}
+            >
+              <LucideX size={16} />
+              Close
+            </Button>
+          )}
+        </div>
+      </div>
     </GlassButtonGroup>
   )
 }

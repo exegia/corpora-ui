@@ -21,12 +21,12 @@ export function ScaffoldPanel({
   children,
   SecondaryPanel,
   onSwap,
+  onCloseSecondary,
   name,
   swapLabel = "Swap panel content",
   sound = true,
   className,
 }: ScaffoldPanelProps): React.ReactElement {
-
   const reducedMotion = useReducedMotion()
 
   const transition = {
@@ -34,18 +34,19 @@ export function ScaffoldPanel({
     ease: SCAFFOLD_EASE,
   }
 
-  const [subPanelPosition, setSubPanelPosition] = useState<TSubPanelPosition>("top")
+  const [subPanelPosition, setSubPanelPosition] =
+    useState<TSubPanelPosition>("top")
   const [isSwapped, setIsSwapped] = useState<boolean>(false)
   const handleSwap = () => {
-    setIsSwapped((prev) => !prev);
-    onSwap?.();
-  };
+    setIsSwapped((prev) => !prev)
+    onSwap?.()
+  }
 
   // Trades which sub-panel holds the flexible slot — the collapsed card grows
   // into `flex-1` while the expanded one shrinks to the `min-h-14` strip.
   const handleExpand = () => {
-    setSubPanelPosition((prev) => (prev === "top" ? "bottom" : "top"));
-  };
+    setSubPanelPosition((prev) => (prev === "top" ? "bottom" : "top"))
+  }
 
   return (
     <motion.section
@@ -61,29 +62,23 @@ export function ScaffoldPanel({
       data-swapped={isSwapped ? "" : undefined}
       transition={transition}
     >
-      <ScaffoldSubPanel
-        id="top"
-        expanded={subPanelPosition === "top"}
-        primary
-      >
+      <ScaffoldSubPanel id="top" expanded={subPanelPosition === "top"} primary>
         {children}
       </ScaffoldSubPanel>
-      {onSwap && SecondaryPanel && (
-        <div className="relative flex items-center justify-center h-2">
+      {(onSwap || onCloseSecondary) && SecondaryPanel && (
+        <div className="relative flex h-2 items-center justify-center">
           <PanelMenuButton
             label={swapLabel}
             onClick={handleSwap}
             onExpand={handleExpand}
+            onCloseSecondary={onCloseSecondary}
             secondaryExpanded={subPanelPosition === "bottom"}
             sound={sound}
           />
         </div>
       )}
       {SecondaryPanel && (
-        <ScaffoldSubPanel
-          id="bottom"
-          expanded={subPanelPosition === "bottom"}
-        >
+        <ScaffoldSubPanel id="bottom" expanded={subPanelPosition === "bottom"}>
           {SecondaryPanel}
         </ScaffoldSubPanel>
       )}
