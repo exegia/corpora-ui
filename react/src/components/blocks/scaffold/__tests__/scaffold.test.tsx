@@ -11,14 +11,14 @@ function Strip() {
 }
 
 function Workspace({
-  onClose,
   onSwap,
+  onCloseSecondary,
   onAdd,
   tabs,
   SecondaryPanel = <Strip />,
 }: {
-  onClose?: () => void
   onSwap?: () => void
+  onCloseSecondary?: () => void
   onAdd?: () => void
   /** Rendered as Actions children — the panel tabs. */
   tabs?: ReactNode
@@ -40,7 +40,7 @@ function Workspace({
           <Scaffold.Panel
             key="alpha"
             name="Alpha"
-            onClose={onClose}
+            onCloseSecondary={onCloseSecondary}
             onSwap={onSwap}
             SecondaryPanel={SecondaryPanel ?? undefined}
           >
@@ -75,18 +75,38 @@ describe("Scaffold", () => {
     expect(panel.textContent).toContain("Strip")
   })
 
-  test("close and menu buttons render only with their callbacks", async () => {
-    const user = userEvent.setup()
-    const onClose = mock(() => {})
-
+  test("seam menu renders only with a callback; actions stay hidden until opened", () => {
     const { rerender } = render(<Workspace />)
-    expect(screen.queryByRole("button", { name: "Close panel" })).toBeNull()
     expect(menuToggle()).toBeNull()
 
-    rerender(<Workspace onClose={onClose} onSwap={() => {}} />)
-    await user.click(screen.getByRole("button", { name: "Close panel" }))
-    expect(onClose).toHaveBeenCalledTimes(1)
+    rerender(<Workspace onSwap={() => {}} />)
     expect(menuToggle()).toBeDefined()
+    // Collapsed: the action segment is aria-hidden and inert.
+    expect(screen.queryByRole("button", { name: "Swap" })).toBeNull()
+
+    // The Close action alone also earns the menu.
+    rerender(<Workspace onCloseSecondary={() => {}} />)
+    expect(menuToggle()).toBeDefined()
+  })
+
+  test("seam menu Close renders only with onCloseSecondary, fires and collapses", async () => {
+    const user = userEvent.setup()
+    const onCloseSecondary = mock(() => {})
+
+    const { rerender } = render(<Workspace onSwap={() => {}} />)
+    await user.click(menuToggle() as HTMLElement)
+    expect(await screen.findByRole("button", { name: "Swap" })).toBeDefined()
+    expect(screen.queryByRole("button", { name: "Close" })).toBeNull()
+
+    rerender(
+      <Workspace onCloseSecondary={onCloseSecondary} onSwap={() => {}} />
+    )
+    await user.click(screen.getByRole("button", { name: "Close" }))
+    expect(onCloseSecondary).toHaveBeenCalledTimes(1)
+
+    // Acting collapses the menu back to the compact toggle.
+    expect(menuToggle()).toBeDefined()
+    expect(screen.queryByRole("button", { name: "Close" })).toBeNull()
   })
 
   test("seam menu opens; Swap fires onSwap, flips the panel and collapses the menu", async () => {
