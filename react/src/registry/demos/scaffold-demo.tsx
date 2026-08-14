@@ -10,15 +10,18 @@ import * as React from "react"
 import {
   Scaffold,
   SCAFFOLD_PANEL_CAPACITY,
-  type ScaffoldPanelProps,
   useScaffold,
 } from "@/components/blocks/scaffold"
 import { DemoStage } from "@/components/docs/demo-controls"
 import { cn } from "@/lib/utils"
 
-interface DemoPanel extends ScaffoldPanelProps {
-  title: string
+interface DemoPanel {
   id: number
+  title: string
+  swapped?: boolean
+  /** The seam menu's Close action hides the strip; the panel body offers
+   * a link to bring it back. */
+  stripHidden?: boolean
 }
 
 const PANEL_TITLES = [
@@ -33,12 +36,7 @@ export default function ScaffoldDemo() {
   const scaffold = useScaffold()
   const nextId = React.useRef(2)
   const [panels, setPanels] = React.useState<DemoPanel[]>([
-    {
-      id: 1,
-      title: PANEL_TITLES[0],
-      children: <PanelContent label={PANEL_TITLES[0]} />,
-      SecondaryPanel: <StripContent label={PANEL_TITLES[0]} />,
-    },
+    { id: 1, title: PANEL_TITLES[0] },
   ])
 
   // The canvas caps at SCAFFOLD_PANEL_CAPACITY — Actions hides its Add
@@ -48,15 +46,7 @@ export default function ScaffoldDemo() {
     const title = PANEL_TITLES[(id - 1) % PANEL_TITLES.length]
     setPanels((panels) =>
       panels.length < SCAFFOLD_PANEL_CAPACITY
-        ? [
-            ...panels,
-            {
-              id,
-              title,
-              children: <PanelContent label={title} />,
-              SecondaryPanel: <StripContent label={title} />,
-            },
-          ]
+        ? [...panels, { id, title }]
         : panels
     )
   }
@@ -72,6 +62,13 @@ export default function ScaffoldDemo() {
     setPanels((panels) =>
       panels.map((panel) =>
         panel.id === id ? { ...panel, swapped: !panel.swapped } : panel
+      )
+    )
+
+  const setStripHidden = (id: number, stripHidden: boolean) =>
+    setPanels((panels) =>
+      panels.map((panel) =>
+        panel.id === id ? { ...panel, stripHidden } : panel
       )
     )
 
@@ -124,14 +121,23 @@ export default function ScaffoldDemo() {
               {panels.map((panel) => (
                 <Scaffold.Panel
                   key={panel.id}
-                  SecondaryPanel={panel.SecondaryPanel}
-                  name={panel.title}
-                  onClose={
-                    panels.length > 1 ? () => closePanel(panel.id) : undefined
+                  SecondaryPanel={
+                    panel.stripHidden ? undefined : (
+                      <StripContent label={panel.title} />
+                    )
                   }
+                  name={panel.title}
+                  onCloseSecondary={() => setStripHidden(panel.id, true)}
                   onSwap={() => swapPanel(panel.id)}
                 >
-                  {panel.children}
+                  <PanelContent
+                    label={panel.title}
+                    onShowSubPanel={
+                      panel.stripHidden
+                        ? () => setStripHidden(panel.id, false)
+                        : undefined
+                    }
+                  />
                 </Scaffold.Panel>
               ))}
             </Scaffold.Canvas>
@@ -198,7 +204,14 @@ function RailButton({
   )
 }
 
-function PanelContent({ label }: { label: string }) {
+function PanelContent({
+  label,
+  onShowSubPanel,
+}: {
+  label: string
+  /** Present while the strip is hidden — renders the restore link. */
+  onShowSubPanel?: () => void
+}) {
   return (
     <div className="flex h-full flex-col p-4">
       <div className="text-sm font-semibold">{label}</div>
@@ -212,6 +225,15 @@ function PanelContent({ label }: { label: string }) {
           </div>
         ))}
       </div>
+      {onShowSubPanel && (
+        <button
+          className="mt-auto self-start pt-3 text-xs text-neutral-500 underline underline-offset-2 transition-colors duration-150 ease-smooth-out hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
+          onClick={onShowSubPanel}
+          type="button"
+        >
+          Show subpanel
+        </button>
+      )}
     </div>
   )
 }
