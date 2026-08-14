@@ -9,12 +9,14 @@ function Workspace({
   onSwap,
   onAdd,
   overflowCount,
+  swapped,
   secondary = <span>Strip</span>,
 }: {
   onClose?: () => void
   onSwap?: () => void
   onAdd?: () => void
   overflowCount?: number
+  swapped?: boolean
   secondary?: React.ReactNode
 }) {
   const scaffold = useScaffold()
@@ -35,6 +37,7 @@ function Workspace({
             onClose={onClose}
             onSwap={onSwap}
             secondary={secondary}
+            swapped={swapped}
           >
             <span>Primary body</span>
           </Scaffold.Panel>
@@ -73,6 +76,50 @@ describe("Scaffold", () => {
     await user.click(screen.getByRole("button", { name: "Swap panel content" }))
     expect(onClose).toHaveBeenCalledTimes(1)
     expect(onSwap).toHaveBeenCalledTimes(1)
+  })
+
+  test("clicking swap trades the surface cards; content stays slot-bound", async () => {
+    const user = userEvent.setup()
+    render(<Workspace onSwap={() => {}} />)
+
+    const panel = screen.getByRole("region", { name: "Alpha" })
+    const primaryCard = panel.querySelector(
+      '[data-slot="scaffold-panel-primary"]'
+    ) as HTMLElement
+
+    await user.click(screen.getByRole("button", { name: "Swap panel content" }))
+
+    // The same DOM node traded slots — that identity move is what the
+    // layout morph animates.
+    expect(
+      panel.querySelector('[data-slot="scaffold-panel-secondary"]')
+    ).toBe(primaryCard)
+    expect(panel.getAttribute("data-swapped")).toBe("")
+    // Content follows the slot, not the card.
+    expect(
+      panel.querySelector('[data-slot="scaffold-panel-primary"]')?.textContent
+    ).toContain("Primary body")
+  })
+
+  test("swap state can be controlled from outside", async () => {
+    const user = userEvent.setup()
+    const { rerender } = render(<Workspace onSwap={() => {}} swapped={false} />)
+
+    const panel = screen.getByRole("region", { name: "Alpha" })
+    const primaryCard = panel.querySelector(
+      '[data-slot="scaffold-panel-primary"]'
+    ) as HTMLElement
+
+    // Controlled: a click alone doesn't trade the cards.
+    await user.click(screen.getByRole("button", { name: "Swap panel content" }))
+    expect(
+      panel.querySelector('[data-slot="scaffold-panel-primary"]')
+    ).toBe(primaryCard)
+
+    rerender(<Workspace onSwap={() => {}} swapped />)
+    expect(
+      panel.querySelector('[data-slot="scaffold-panel-secondary"]')
+    ).toBe(primaryCard)
   })
 
   test("swap button needs a secondary strip", () => {
