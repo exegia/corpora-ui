@@ -16,6 +16,7 @@ export function PanelCloseButton({
 }: PanelFloatingButtonProps): React.ReactElement {
   return (
     <button
+      id="scaffold-panel-close-button"
       aria-label={label}
       className={cn(
         floatingButtonClass,
