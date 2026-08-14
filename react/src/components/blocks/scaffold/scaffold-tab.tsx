@@ -51,8 +51,10 @@ export function ScaffoldTab({
       </Button>
       {onClose && (
         <Button
+          aria-label={closeLabel}
           onClick={onClose}
           size="icon-sm"
+          sound={sound}
           variant="ghost"
           className="rounded-none!"
         >
