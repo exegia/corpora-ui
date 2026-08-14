@@ -770,10 +770,10 @@ function App() {
           "Inspector drawer state, controlled or uncontrolled. Spread `useScaffold().providerProps` to drive it from outside (title-bar buttons, shortcuts). `inspectorWidth` (px, default 272) sizes the drawer and how far Actions slides aside.",
       },
       {
-        name: "Panel · SecondaryPanel / onSwap / onCloseSecondary / swapped / width",
-        type: "ReactNode / () => void / () => void / boolean / number",
+        name: "Panel · SecondaryPanel / onSwap / onCloseSecondary",
+        type: "ReactNode / () => void / () => void",
         description:
-          "`SecondaryPanel` renders the utility strip as its own card below the primary surface, with the seam menu between the two — a ⋯ toggle that morphs into Expand | Swap | Close. `onSwap` powers Swap: a layout morph trades the two cards; flip the slot content in the callback (control with `swapped`, uncontrolled otherwise). `onCloseSecondary` powers Close — remove `SecondaryPanel` there. Panels themselves close from the Actions tabs. `width` fixes the panel in px; omitted it flexes.",
+          "`SecondaryPanel` renders the utility strip as its own card below the primary surface, with the seam menu between the two — a ⋯ toggle that morphs into Expand | Swap | Close. `onSwap` powers Swap: a layout morph trades the two cards; flip the slot content in the callback. `onCloseSecondary` powers Close — remove `SecondaryPanel` there. Panels themselves close from the Actions tabs, and flex to share the canvas.",
       },
       {
         name: "Actions · onAdd / children",

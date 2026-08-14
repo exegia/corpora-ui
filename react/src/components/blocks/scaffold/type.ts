@@ -73,13 +73,6 @@ export interface ScaffoldPanelProps {
   /** Reveals the Close action in the seam menu — remove `SecondaryPanel`
    * here; the strip and the menu leave together. */
   onCloseSecondary?: () => void
-  /** Controlled swap state — while true the strip's card sits in the
-   * primary slot. Omit letting the panel toggle it on swap clicks. */
-  swapped?: boolean
-  /** Initial swap state when uncontrolled. */
-  defaultSwapped?: boolean
-  /** Fixed width in px; omitted, the panel flexes to share the canvas. */
-  width?: number
   /** Accessible name of the panel region. */
   name?: string
   /** Emit interaction-sound attributes on the floating buttons. */
