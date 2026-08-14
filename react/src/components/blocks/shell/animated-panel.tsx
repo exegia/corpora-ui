@@ -59,15 +59,9 @@ export function AnimatedPanel({
       transition={context.reduce ? { duration: 0 } : SIDEBAR_MORPH_TRANSITION}
       style={style}
       className={cn(
-        "group/sidebar relative hidden h-auto shrink-0 will-change-[width] md:block",
+        "group/sidebar relative hidden h-full shrink-0 will-change-[width] md:block",
         "peer flex!",
-        // The off canvas panel keeps its full width and slides out of the
-        // zero-width rail, so clip it rather than letting it bleed past the
-        // shell edge. The clip margin lets the panel's own shadow escape
-        // without letting the slid-out panel escape with it
-        collapsible === "offcanvas" &&
-          "overflow-x-visible [overflow-clip-margin:1rem]",
-        side === "right" && "order-las",
+        side === "right" && "order-last",
         className
       )}
     >
@@ -76,16 +70,22 @@ export function AnimatedPanel({
           <motion.div className="absolute h-full w-full scale-y-0 animate-in bg-radial/decreasing from-amber-300/70 to-amber-500/0 to-40% transition-[colors,scale] duration-200 ease-smooth-out group-hover:scale-y-100" />
         </motion.div>
       )}
-      <motion.div
-        initial={false}
-        animate={{
-          opacity: offcanvas ? 0 : 1,
-          x: offcanvas ? (side === "left" ? "-100%" : "100%") : "0%",
-        }}
-        transition={context.reduce ? REDUCED_TRANSITION : PANEL_TRANSITION}
-        className={cn(
-          "sticky top-0 flex flex-col overflow-hidden",
-          collapsible === "offcanvas" && "w-(--sidebar-width)",
+      {/* The off canvas panel keeps its full width and slides out of the
+          zero-width rail, so mask it to the aside's box here instead of
+          clipping the aside itself — the aside must stay unclipped for the
+          gap handle above to be hoverable. */}
+      <div
+        className={
+          collapsible === "offcanvas"
+            ? "absolute inset-0 overflow-hidden rounded-[inherit]"
+            : "contents"
+        }
+      >
+         //   collapsible === "offcanvas" && "w-(--sidebar-width)",
+            // Pin the right panel to the aside's trailing edge so the width
+            // animation expands the panel out of it instead of revealing a
+            // detached strip.
+            side === "right" && "ml-auto",
 
           variant === "floating" && "m-2 h-[calc(100svh-1rem)]",
           variant === "inset" && "my-2 h-[calc(100svh-1rem)]",
@@ -95,13 +95,16 @@ export function AnimatedPanel({
 
           panelClassName
         )}
-      >
-        <AnimatedSidebarPanelContext.Provider
-          value={{ collapsed, collapsible, side }}
+            panelClassName
+          )}
         >
-          {children}
-        </AnimatedSidebarPanelContext.Provider>
-      </motion.div>
+          <AnimatedSidebarPanelContext.Provider
+            value={{ collapsed, collapsible, side }}
+          >
+            {children}
+          </AnimatedSidebarPanelContext.Provider>
+        </motion.div>
+      </div>
     </motion.aside>
   )
 }
