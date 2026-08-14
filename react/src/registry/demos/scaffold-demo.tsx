@@ -9,6 +9,7 @@ import * as React from "react"
 
 import {
   Scaffold,
+  SCAFFOLD_PANEL_CAPACITY,
   type ScaffoldPanelProps,
   useScaffold,
 } from "@/components/blocks/scaffold"
@@ -16,7 +17,7 @@ import { DemoStage } from "@/components/docs/demo-controls"
 import { cn } from "@/lib/utils"
 
 interface DemoPanel extends ScaffoldPanelProps {
-  title: string | undefined
+  title: string
   id: number
 }
 
@@ -28,78 +29,69 @@ const PANEL_TITLES = [
   "Commentary",
 ]
 
-/** Visible-panel capacity — the design allows 3 (viewport-dependent). */
-const PANEL_CAPACITY = 3
-
 export default function ScaffoldDemo() {
   const scaffold = useScaffold()
   const nextId = React.useRef(2)
-  // Visible panels plus the non-visible ones (newest first) that the
-  // action cluster counts as its overflow badge.
-  const [board, setBoard] = React.useState<{
-    visible: DemoPanel[]
-    hidden: DemoPanel[]
-  }>({
-    visible: [{
+  const [panels, setPanels] = React.useState<DemoPanel[]>([
+    {
       id: 1,
+      title: PANEL_TITLES[0],
       children: <PanelContent label={PANEL_TITLES[0]} />,
       SecondaryPanel: <StripContent label={PANEL_TITLES[0]} />,
-      title: undefined,
-    }],
-    hidden: [],
-  })
+    },
+  ])
 
-  // Per the design comments: at capacity the new panel is prepended, and
-  // the last visible panel is pushed into the overflow dropdown.
+  // The canvas caps at SCAFFOLD_PANEL_CAPACITY — Actions hides its Add
+  // segment at that point, so this guard only backstops it.
   const addPanel = () => {
     const id = nextId.current++
-    const panel: DemoPanel = {
-      children: <PanelContent label={PANEL_TITLES[(id - 1) % PANEL_TITLES.length]} />,
-      SecondaryPanel: <StripContent label={PANEL_TITLES[(id - 1) % PANEL_TITLES.length]} />,
-      id,
-      title: PANEL_TITLES[(id - 1) % PANEL_TITLES.length]
-
-    }
-    setBoard(({ visible, hidden }) =>
-      visible.length < PANEL_CAPACITY
-        ? { visible: [...visible, panel], hidden }
-        : {
-            visible: [panel, ...visible.slice(0, -1)],
-            hidden: [visible[visible.length - 1], ...hidden],
-          }
+    const title = PANEL_TITLES[(id - 1) % PANEL_TITLES.length]
+    setPanels((panels) =>
+      panels.length < SCAFFOLD_PANEL_CAPACITY
+        ? [
+            ...panels,
+            {
+              id,
+              title,
+              children: <PanelContent label={title} />,
+              SecondaryPanel: <StripContent label={title} />,
+            },
+          ]
+        : panels
     )
   }
 
-  // Closing a panel frees capacity — the newest overflowed panel returns.
+  // The last panel never closes — its tab and panel drop their close
+  // affordances, so this guard only backstops them.
   const closePanel = (id: number) =>
-    setBoard(({ visible, hidden }) => {
-      const next = visible.filter((panel) => panel.id !== id)
-      if (next.length === visible.length) return { visible, hidden }
-      const [restored, ...rest] = hidden
-      return restored
-        ? { visible: [...next, restored], hidden: rest }
-        : { visible: next, hidden }
-    })
+    setPanels((panels) =>
+      panels.length > 1 ? panels.filter((panel) => panel.id !== id) : panels
+    )
 
   const swapPanel = (id: number) =>
-    setBoard(({ visible, hidden }) => ({
-      visible: visible.map((panel) =>
+    setPanels((panels) =>
+      panels.map((panel) =>
         panel.id === id ? { ...panel, swapped: !panel.swapped } : panel
-      ),
-      hidden,
-    }))
-
-  const panels = board.visible
-  const overflow = board.hidden
+      )
+    )
 
   return (
     <DemoStage canvasClassName="w-full p-0" controls={null}>
       <div className="h-130 w-full overflow-hidden rounded-lg border">
         <Scaffold.Root {...scaffold.providerProps}>
           <Scaffold.Sidebar>
-            <RailButton icon={<RiCompass3Line className="size-5" />} label="Explore" />
-            <RailButton icon={<RiBook2Line className="size-5" />} label="Manuscripts" />
-            <RailButton icon={<RiSearchLine className="size-5" />} label="Search" />
+            <RailButton
+              icon={<RiCompass3Line className="size-5" />}
+              label="Explore"
+            />
+            <RailButton
+              icon={<RiBook2Line className="size-5" />}
+              label="Manuscripts"
+            />
+            <RailButton
+              icon={<RiSearchLine className="size-5" />}
+              label="Search"
+            />
             <div className="flex-1" />
             <RailButton
               active={scaffold.inspectorOpen}
@@ -111,13 +103,22 @@ export default function ScaffoldDemo() {
 
           <Scaffold.Main>
             <Scaffold.Actions
-              onAdd={addPanel}
-              overflowCount={
-                panels.length + overflow.length > 1
-                  ? overflow.length
-                  : undefined
+              onAdd={
+                panels.length < SCAFFOLD_PANEL_CAPACITY ? addPanel : undefined
               }
-            />
+            >
+              {panels.map((panel) => (
+                <Scaffold.Tab
+                  key={panel.id}
+                  closeLabel={`Close ${panel.title}`}
+                  onClose={
+                    panels.length > 1 ? () => closePanel(panel.id) : undefined
+                  }
+                >
+                  {panel.title}
+                </Scaffold.Tab>
+              ))}
+            </Scaffold.Actions>
 
             <Scaffold.Canvas>
               {panels.map((panel) => (
@@ -185,7 +186,7 @@ function RailButton({
     <button
       aria-label={label}
       className={cn(
-        "flex size-10 items-center justify-center rounded-xl text-neutral-600 transition-[background-color,color,scale] duration-150 ease-smooth-out hover:bg-white/60 hover:text-neutral-900 active:scale-97 dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-white motion-reduce:transition-none motion-reduce:active:scale-100",
+        "flex size-10 items-center justify-center rounded-xl text-neutral-600 transition-[background-color,color,scale] duration-150 ease-smooth-out hover:bg-white/60 hover:text-neutral-900 active:scale-97 motion-reduce:transition-none motion-reduce:active:scale-100 dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-white",
         active &&
           "bg-white/80 text-neutral-900 shadow-xs dark:bg-white/15 dark:text-white"
       )}

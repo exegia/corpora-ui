@@ -1,6 +1,7 @@
 import { describe, expect, mock, test } from "bun:test"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import type { ReactNode } from "react"
 
 import { Scaffold, useScaffold } from "../index"
 import type { TScaffoldPanelChild } from "../type"
@@ -13,13 +14,14 @@ function Workspace({
   onClose,
   onSwap,
   onAdd,
-  overflowCount,
+  tabs,
   SecondaryPanel = <Strip />,
 }: {
   onClose?: () => void
   onSwap?: () => void
   onAdd?: () => void
-  overflowCount?: number
+  /** Rendered as Actions children — the panel tabs. */
+  tabs?: ReactNode
   /** Pass null to render the panel without a secondary strip. */
   SecondaryPanel?: TScaffoldPanelChild | null
 }) {
@@ -33,7 +35,7 @@ function Workspace({
         </button>
       </Scaffold.Sidebar>
       <Scaffold.Main>
-        <Scaffold.Actions onAdd={onAdd} overflowCount={overflowCount} />
+        <Scaffold.Actions onAdd={onAdd}>{tabs}</Scaffold.Actions>
         <Scaffold.Canvas>
           <Scaffold.Panel
             key="alpha"
@@ -56,6 +58,12 @@ function Workspace({
 /** The seam menu's compact toggle (icon-only, named by `swapLabel`). */
 const menuToggle = () =>
   screen.queryByRole("button", { name: "Swap panel content" })
+
+/** Under the id'd `#scaffold-actions` ancestor, happy-dom serves stale
+ * selector-cache results to `waitFor` queries that start while an
+ * AnimatePresence exit is still running — let the exit settle on real
+ * timers, then query once. */
+const settleExit = () => new Promise((resolve) => setTimeout(resolve, 400))
 
 describe("Scaffold", () => {
   test("renders rail, panel surfaces and secondary strip", () => {
@@ -146,25 +154,54 @@ describe("Scaffold", () => {
     expect(menuToggle()).toBeNull()
   })
 
-  test("actions cluster: Add fires, overflow segment follows the count", async () => {
+  test("actions cluster: Add renders only with onAdd and fires", async () => {
     const user = userEvent.setup()
     const onAdd = mock(() => {})
 
-    const { rerender } = render(<Workspace onAdd={onAdd} />)
-    expect(screen.queryByRole("button", { name: "Browse panels" })).toBeNull()
+    // Consumers omit onAdd at SCAFFOLD_PANEL_CAPACITY — the segment hides.
+    const { rerender } = render(<Workspace />)
+    expect(screen.queryByRole("button", { name: "Panel" })).toBeNull()
 
+    rerender(<Workspace onAdd={onAdd} />)
     await user.click(screen.getByRole("button", { name: "Panel" }))
     expect(onAdd).toHaveBeenCalledTimes(1)
 
-    // Zero overflowed panels: the segment shows without a badge.
-    rerender(<Workspace overflowCount={0} onAdd={onAdd} />)
-    expect(
-      screen.getByRole("button", { name: "Browse panels" }).textContent
-    ).toBe("")
+    rerender(<Workspace />)
+    await settleExit()
+    expect(screen.queryByRole("button", { name: "Panel" })).toBeNull()
+  })
 
-    rerender(<Workspace overflowCount={2} onAdd={onAdd} />)
-    const browse = screen.getByRole("button", { name: "Browse panels" })
-    expect(browse.textContent).toContain("2")
+  test("panel tabs show their label; close renders only with onClose and fires", async () => {
+    const user = userEvent.setup()
+    const onCloseTab = mock(() => {})
+
+    // Consumers omit onClose on the last remaining panel's tab.
+    const { rerender } = render(
+      <Workspace tabs={<Scaffold.Tab key="alpha">Alpha</Scaffold.Tab>} />
+    )
+    expect(screen.getByText("Alpha")).toBeDefined()
+    expect(screen.queryByRole("button", { name: "Close Alpha" })).toBeNull()
+
+    rerender(
+      <Workspace
+        tabs={
+          <Scaffold.Tab
+            key="alpha"
+            closeLabel="Close Alpha"
+            onClose={onCloseTab}
+          >
+            Alpha
+          </Scaffold.Tab>
+        }
+      />
+    )
+    await user.click(screen.getByRole("button", { name: "Close Alpha" }))
+    expect(onCloseTab).toHaveBeenCalledTimes(1)
+
+    // Closing removes the tab — it animates out of the pill.
+    rerender(<Workspace tabs={null} />)
+    await settleExit()
+    expect(screen.queryByText("Alpha")).toBeNull()
   })
 
   test("inspector opens from outside state and hides again", async () => {

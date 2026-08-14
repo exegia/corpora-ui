@@ -1,5 +1,7 @@
+import type { Variants } from "motion/react"
 import type { ClassNameValue } from "tailwind-merge"
 import type { TSubPanelVariant } from "@/components/blocks/scaffold/type.ts"
+import { EASE_OUT } from "@/lib/ease.ts"
 
 /** Desktop backdrop the whole scaffold sits on — a soft warm-gray wash. */
 export const scaffoldBackgroundClass: ClassNameValue =
@@ -21,6 +23,20 @@ export const revealOnPanelHoverClass: ClassNameValue =
 /** Pill segment inside the actions cluster (Add, browse). */
 export const actionSegmentClass: ClassNameValue =
   "flex h-[30px] items-center rounded-full text-neutral-700 transition-[background-color,color,scale,box-shadow] duration-150 ease-smooth-out hover:bg-white hover:text-neutral-900 hover:shadow-xs active:scale-97 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-white motion-reduce:transition-none motion-reduce:active:scale-100"
+
+/** Pill segments (seam-menu actions, tabs, Add) blur/fade in place while
+ * the track morphs around them. The exit is a fast tween, not the layout
+ * spring — the track stays overflow-visible, so popped-out segments must be
+ * gone before the shrinking pill leaves them behind as a ghost. */
+export const segmentVariants: Variants = {
+  hidden: { opacity: 0, filter: "blur(4px)" },
+  visible: { opacity: 1, filter: "blur(0px)" },
+  exit: {
+    opacity: 0,
+    filter: "blur(4px)",
+    transition: { duration: 0.18, ease: EASE_OUT },
+  },
+}
 
 /** Map of sub-panel variants to their corresponding side. */
 export const subPanelVariant: Record<TSubPanelVariant, ClassNameValue> = {

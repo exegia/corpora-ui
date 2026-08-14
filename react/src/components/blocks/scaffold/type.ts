@@ -1,8 +1,4 @@
-import React, {
-  type ComponentProps,
-  type ReactElement,
-  type ReactNode,
-} from "react"
+import React, { type ComponentProps, type ReactElement, type ReactNode, } from "react"
 
 /** Inspector state shared by every scaffold part through ScaffoldContext. */
 export interface ScaffoldContextValue {
@@ -46,23 +42,16 @@ type MotionSafe<T> = Omit<
 export interface ScaffoldActionsProps extends MotionSafe<
   Omit<ComponentProps<"div">, "children">
 > {
-  /** Called when the Add segment is pressed. */
+  /** Called when the Add segment is pressed. The segment renders only
+   * while this is present — omit it to hide Add, e.g. once the canvas
+   * holds `SCAFFOLD_PANEL_CAPACITY` panels. */
   onAdd?: () => void
   /** Label of the Add segment. */
   addLabel?: ReactNode
   /** Replaces the default add icon. */
   addIcon?: ReactNode
-  /** Number of non-visible panels tucked into the overflow dropdown —
-   * the badge on the browse segment. The segment renders when this or
-   * `onBrowse` is present; the badge only when > 0. Per the design
-   * comments the dropdown menu itself is a later iteration; for now the
-   * segment just keeps the count. */
-  overflowCount?: number
-  /** Called when the overflow (stacked-panels) segment is pressed. */
-  onBrowse?: () => void
-  /** Accessible name of the overflow segment. */
-  browseLabel?: string
-  /** Extra segments appended after the built-in ones. */
+  /** The panel tabs (`Scaffold.Tab`, one per open panel) and any extra
+   * segments, rendered before Add. Key each tab — closes animate out. */
   children?: ReactNode
   /** Emit interaction-sound attributes (inert until an app binds cuelume). */
   sound?: boolean
@@ -101,6 +90,21 @@ export interface ScaffoldPanelProps {
   swapLabel?: string
   /** Extra class names for the panel's root element. */
   className?: string
+}
+
+export interface ScaffoldTabProps extends MotionSafe<
+  Omit<ComponentProps<"div">, "children">
+> {
+  /** The tab's label. */
+  children?: ReactNode
+  /** Renders the tab's close button. The button renders only while this
+   * is present — omit it to pin the tab, e.g. on the last remaining
+   * panel (the canvas keeps at least one open). */
+  onClose?: () => void
+  /** Accessible name of the close button. */
+  closeLabel?: string
+  /** Emit interaction-sound attributes on the close button. */
+  sound?: boolean
 }
 
 export type TSubPanelPosition = "bottom" | "top"

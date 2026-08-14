@@ -90,9 +90,6 @@ export function ScaffoldPanel({
           {SecondaryPanel}
         </ScaffoldSubPanel>
       )}
-      {onClose && (
-        <PanelCloseButton label={closeLabel} onClick={onClose} sound={sound} />
-      )}
     </motion.section>
   )
 }
