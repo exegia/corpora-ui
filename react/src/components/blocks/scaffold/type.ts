@@ -1,4 +1,8 @@
-import type { ComponentProps, ReactNode } from "react"
+import React, {
+  type ComponentProps,
+  type ReactElement,
+  type ReactNode,
+} from "react"
 
 /** Inspector state shared by every scaffold part through ScaffoldContext. */
 export interface ScaffoldContextValue {
@@ -84,8 +88,29 @@ export interface ScaffoldPanelProps {
   width?: number
   /** Accessible name of the panel region. */
   name?: string
+  /** Emit interaction-sound attributes on the floating buttons. */
+  sound?: boolean
+  /** Accessible name of the close button. */
   closeLabel?: string
+  /** Accessible name of the swap button. */
   swapLabel?: string
+  /** Extra class names for the panel's root element. */
+  className?: string
+}
+
+export type TSubPanelProminence = "primary" | "secondary"
+export type TSubPanelVariant = "card" | "subtle" | "inset"
+
+export interface ScaffoldSubPanelProps extends MotionSafe<Omit<ComponentProps<"div">, "children">> {
+  children?: ReactNode
+  /** Accessible name of the sub-panel region. */
+  name?: string
+  /** Whether this is the primary or secondary sub-panel. */
+  prominence?: TSubPanelProminence
+  /** Visual style of the sub-panel. */
+  variant?: TSubPanelVariant
+  /** Fixed width in px; omitted, the sub-panel flexes to share the canvas. */
+  width?: number
   /** Emit interaction-sound attributes on the floating buttons. */
   sound?: boolean
   className?: string

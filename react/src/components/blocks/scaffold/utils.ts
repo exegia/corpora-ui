@@ -1,4 +1,5 @@
 import type { ClassNameValue } from "tailwind-merge"
+import type { TSubPanelVariant } from "@/components/blocks/scaffold/type.ts"
 
 /** Desktop backdrop the whole scaffold sits on — a soft warm-gray wash. */
 export const scaffoldBackgroundClass: ClassNameValue =
@@ -20,3 +21,10 @@ export const revealOnPanelHoverClass: ClassNameValue =
 /** Pill segment inside the actions cluster (Add, browse). */
 export const actionSegmentClass: ClassNameValue =
   "flex h-[30px] items-center rounded-full text-neutral-700 transition-[background-color,color,scale,box-shadow] duration-150 ease-smooth-out hover:bg-white hover:text-neutral-900 hover:shadow-xs active:scale-97 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-white motion-reduce:transition-none motion-reduce:active:scale-100"
+
+/** Map of sub-panel variants to their corresponding side. */
+export const subPanelVariant: Record<TSubPanelVariant, ClassNameValue> = {
+  card: "bg-neutral-50 dark:bg-neutral-900 rounded-md border-t-2 border-t-white dark:border-t-neutral-700/50 border-l-linear dark:border-b-black/70 shadow-sm shadow-neutral-900/10 dark:shadow-black/50 inset-shadow-sm inset-shadow-white dark:inset-shadow-neutral-800",
+  subtle: "bg-neutral-100 dark:bg-neutral-800",
+  inset: "bg-neutral-200 dark:bg-neutral-700",
+} as const
