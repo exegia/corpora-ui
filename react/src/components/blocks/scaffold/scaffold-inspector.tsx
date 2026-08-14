@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { SCAFFOLD_EASE, SCAFFOLD_EDGE_GUTTER, SCAFFOLD_MORPH_DURATION } from "./constants"
 import { useScaffoldContext } from "./scaffold-context"
 import type { ScaffoldInspectorProps } from "./type"
+import { GlassContainer } from "@/components/ui/glasscn/glass-container.tsx"
 
 /**
  * The right-hand drawer: a brighter card that slides in over the canvas,
@@ -24,16 +25,16 @@ export function ScaffoldInspector({
   const reducedMotion = useReducedMotion()
 
   // Slide fully past the edge gutter and the drop shadow's blur radius.
-  const offcanvasX = inspectorWidth + SCAFFOLD_EDGE_GUTTER + 24
+  const offcanvasX = inspectorWidth + SCAFFOLD_EDGE_GUTTER + 12
 
   return (
     <motion.aside
+      id="scaffold-inspector"
       animate={{ x: inspectorOpen ? 0 : offcanvasX }}
       aria-hidden={inspectorOpen ? undefined : true}
       aria-label={name}
       className={cn(
-        "absolute inset-y-2.5 right-2.5 z-20 flex flex-col overflow-hidden rounded-2xl border border-neutral-300 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.06)]",
-        "dark:border-neutral-700 dark:bg-neutral-800 dark:shadow-[0_4px_24px_rgba(0,0,0,0.4)]",
+        "absolute right-0 w-80 z-20 my-2 flex h-full max-h-[calc(100%-1rem)] flex-col",
         !inspectorOpen && "pointer-events-none",
         className
       )}
@@ -48,7 +49,9 @@ export function ScaffoldInspector({
       }}
       {...rest}
     >
-      {children}
+      <GlassContainer className="flex flex-col shadow-inner shadow-md rounded-md flex-1 border-t border-white dark:border-neutral-900 bg-neutral-50/10 dark:bg-black/10" glassVariant="subtle">
+        {children}
+      </GlassContainer>
     </motion.aside>
   )
 }
