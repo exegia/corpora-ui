@@ -44,7 +44,7 @@ export function ShellLayout({
     <AnimatedPanelProvider
       {...panelControlProps}
       defaultOpen={initialOpen}
-      className={cn("relative", className, background)}
+      className={cn("relative h-full min-h-0 pb-2", className, background)}
       style={{
         paddingTop: variant === "desktop" ? TITLE_BAR_HEIGHT : 0,
       }}
@@ -88,7 +88,7 @@ export function ShellLayout({
         // Below md the panel is portal led over the page, so it carries the
         // surface itself; the desktop rail keeps it on the inner panel.
         className={cn(
-          "mr-1 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900",
+          "mr-2 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900",
           "outline-offset-0.5 border-t-3 border-white outline-neutral-100 dark:inset-ring-black",
           "rounded-lg shadow-md shadow-neutral-200 dark:shadow-neutral-950"
         )}

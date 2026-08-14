@@ -97,20 +97,29 @@ export function AnimatedPanel({
             : "contents"
         }
       >
+        <motion.div
+          initial={false}
+          animate={{
+            opacity: offcanvas ? 0 : 1,
+            x: offcanvas ? (side === "left" ? "-100%" : "100%") : "0%",
+          }}
+          transition={context.reduce ? REDUCED_TRANSITION : PANEL_TRANSITION}
+          className={cn(
+            "sticky top-0 flex flex-col overflow-hidden",
          //   collapsible === "offcanvas" && "w-(--sidebar-width)",
             // Pin the right panel to the aside's trailing edge so the width
             // animation expands the panel out of it instead of revealing a
             // detached strip.
             side === "right" && "ml-auto",
 
-          variant === "floating" && "m-2 h-[calc(100svh-1rem)]",
-          variant === "inset" && "my-2 h-[calc(100svh-1rem)]",
-          variant === "inset" &&
-            side === "right" &&
-            "w-[calc(var(--sidebar-width)-0.7rem)]",
+            // Panels fill the shell's container, not the viewport — the shell
+            // owns its own scrolling, so a bounded host (docs demo, split
+            // view) must bound the panels too. Full-page apps size the shell
+            // itself (e.g., h-svh). The bottom gap comes from the shell
+            // container's padding, so panels only carry their top offset.
+            variant === "floating" && "mx-2 mt-2 h-[calc(100%-0.5rem)]",
+            variant === "inset" && "mt-2 h-[calc(100%-0.5rem)]",
 
-          panelClassName
-        )}
             panelClassName
           )}
         >
