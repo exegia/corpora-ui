@@ -100,7 +100,7 @@ export interface ScaffoldPanelProps {
   className?: string
 }
 
-export type TSubPanelProminence = "primary" | "secondary"
+export type TSubPanelPosition = "bottom" | "top"
 export type TSubPanelVariant = "card" | "subtle" | "inset"
 
 export interface ScaffoldSubPanelProps extends MotionSafe<Omit<ComponentProps<"div">, "children">> {
@@ -108,7 +108,10 @@ export interface ScaffoldSubPanelProps extends MotionSafe<Omit<ComponentProps<"d
   /** Accessible name of the sub-panel region. */
   name?: string
   /** Whether this is the primary or secondary sub-panel. */
-  prominence?: TSubPanelProminence
+  primary?: boolean
+  /** Whether this sub-panel holds the flexible slot. Defaults to `primary` —
+   * the panel flips it when the Expand action trades the slots. */
+  expanded?: boolean
   /** Visual style of the sub-panel. */
   variant?: TSubPanelVariant
   /** Fixed width in px; omitted, the sub-panel flexes to share the canvas. */
@@ -132,6 +135,15 @@ export interface PanelFloatingButtonProps {
   label: string
   sound?: boolean
   className?: string
+}
+
+export interface PanelMenuButtonProps extends PanelFloatingButtonProps {
+  /** Called when the Expand action is pressed — the panel trades which
+   * sub-panel holds the flexible slot. */
+  onExpand?: () => void
+  /** Whether the secondary strip currently holds the flexible slot —
+   * flips the Expand chevron between down and up. */
+  secondaryExpanded?: boolean
 }
 
 export interface UseScaffoldOptions {

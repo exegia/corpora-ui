@@ -6,9 +6,10 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { SCAFFOLD_EASE, SCAFFOLD_MORPH_DURATION } from "./constants"
 import { PanelCloseButton } from "./panel-close-button"
-import { PanelSwapButton } from "./panel-swap-button"
-import type { ScaffoldPanelProps } from "./type"
+import { PanelMenuButton } from "./panel-menu-button.tsx"
+import type { ScaffoldPanelProps, TSubPanelPosition } from "./type"
 import { ScaffoldSubPanel } from "@/components/blocks/scaffold/scaffold-sub-panel.tsx"
+import { useState } from "react"
 
 /**
  * A canvas panel: a primary card plus an optional secondary strip below it,
@@ -22,56 +23,79 @@ export function ScaffoldPanel({
   SecondaryPanel,
   onClose,
   onSwap,
-  swapped: swappedProp,
-  defaultSwapped = false,
-  width,
   name,
   closeLabel = "Close panel",
   swapLabel = "Swap panel content",
   sound = true,
   className,
 }: ScaffoldPanelProps): React.ReactElement {
+
   const reducedMotion = useReducedMotion()
-  const [innerSwapped, setInnerSwapped] = React.useState(defaultSwapped)
-  const swapped = swappedProp ?? innerSwapped
 
   const transition = {
     duration: reducedMotion ? 0 : SCAFFOLD_MORPH_DURATION,
     ease: SCAFFOLD_EASE,
   }
 
+  const [subPanelPosition, setSubPanelPosition] = useState<TSubPanelPosition>("top")
+  const [isSwapped, setIsSwapped] = useState<boolean>(false)
   const handleSwap = () => {
-    if (swappedProp === undefined) setInnerSwapped((prev) => !prev)
-    onSwap?.()
-  }
+    //setSubPanelPosition((prevPosition) => (prevPosition === "top" ? "bottom" : "top"));
+    // if (onSwap) {
+    //   onSwap();
+    // }
+    setIsSwapped((prev) => !prev);
+  };
+
+  // Trades which sub-panel holds the flexible slot — the collapsed card grows
+  // into `flex-1` while the expanded one shrinks to the `min-h-14` strip.
+  const handleExpand = () => {
+    setSubPanelPosition((prev) => (prev === "top" ? "bottom" : "top"));
+  };
 
   return (
     <motion.section
       id="scaffold-panel"
-      animate={{ opacity: 1, scale: 1 }}
+      animate={{ flexDirection: isSwapped ? "column-reverse" : "column" }}
       aria-label={name}
       className={cn(
-        "group/panel relative flex min-w-80 flex-col gap-2",
-        width === undefined ? "flex-1" : "flex-none",
+        "group/panel relative flex min-w-80 flex-1 flex-col",
+        //  isSwapped ? "flex-col-reverse" : "flex-col",
         className
       )}
-      data-slot="scaffold-panel"
-      data-swapped={swapped ? "" : undefined}
-      exit={{ opacity: 0, scale: 0.96 }}
-      initial={{ opacity: 0, scale: 0.98 }}
       layout
-      style={width === undefined ? undefined : { width }}
+      data-slot="scaffold-panel"
+      // data-swapped={isSwapped ? "" : undefined}
       transition={transition}
     >
-      <ScaffoldSubPanel prominence="primary">{children}</ScaffoldSubPanel>
+      <ScaffoldSubPanel
+        id="top"
+        expanded={subPanelPosition === "top"}
+        primary
+      >
+        {children}
+      </ScaffoldSubPanel>
+      {onSwap && (
+        <div className="relative flex items-center justify-center h-2">
+          <PanelMenuButton
+            label={swapLabel}
+            onClick={handleSwap}
+            onExpand={handleExpand}
+            secondaryExpanded={subPanelPosition === "bottom"}
+            sound={sound}
+          />
+        </div>
+      )}
       {SecondaryPanel && (
-        <ScaffoldSubPanel prominence="secondary">{SecondaryPanel}</ScaffoldSubPanel>
+        <ScaffoldSubPanel
+          id="bottom"
+          expanded={subPanelPosition === "bottom"}
+        >
+          {SecondaryPanel}
+        </ScaffoldSubPanel>
       )}
       {onClose && (
         <PanelCloseButton label={closeLabel} onClick={onClose} sound={sound} />
-      )}
-      {onSwap && (
-        <PanelSwapButton label={swapLabel} onClick={handleSwap} sound={sound} />
       )}
     </motion.section>
   )

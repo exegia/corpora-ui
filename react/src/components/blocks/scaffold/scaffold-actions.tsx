@@ -21,7 +21,7 @@ import { LucidePlus } from "lucide-react"
  */
 export function ScaffoldActions({
   onAdd,
-  addLabel = "Add",
+  addLabel = "Panel",
   addIcon,
   overflowCount,
   onBrowse,
@@ -47,7 +47,7 @@ export function ScaffoldActions({
         x: inspectorOpen ? -(inspectorWidth + SCAFFOLD_EDGE_GUTTER) : 0,
       }}
       className={cn(
-        "sticky flex flex-1 items-center gap-0.5",
+        "sticky inline-flex items-center gap-0.5 h-12",
         "justify-end",
         className
       )}

@@ -54,7 +54,7 @@ export function ScaffoldRoot({
           // `clip`, not `hidden`: the off canvas inspector extends the
           // scrollable overflow, and focus/scrollIntoView would scroll a
           // hidden-overflow root sideways to reveal it.
-          "relative isolate flex h-full w-full flex-1 overflow-clip pr-2",
+          "relative isolate flex h-full w-full flex-1 overflow-clip pr-2 pb-2",
           background,
           className
         )}
