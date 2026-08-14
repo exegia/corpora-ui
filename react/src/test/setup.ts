@@ -9,10 +9,10 @@
  * Never call `bindSounds()` here — sound stays opt-in for the consumer, and
  * the `data-cuelume-*` attributes are inert until an app binds them.
  */
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
+import { GlobalRegistrator } from "@happy-dom/global-registrator"
 
 if (!globalThis.document) {
-  GlobalRegistrator.register({ url: "https://localhost" });
+  GlobalRegistrator.register({ url: "https://localhost" })
 }
 
 if (!window.matchMedia) {
@@ -28,22 +28,32 @@ if (!window.matchMedia) {
   })) as typeof window.matchMedia;
 }
 
-// happy-dom ships no Web Animations API. motion falls back to its own
-// timer-driven path when `animate` is missing, so a no-op stub is enough to
-// keep AnimatePresence exits from throwing.
+// happy-dom ships no Web Animations API. Defining `animate` makes motion take
+// its WAAPI path, so the stub must also COMPLETE: exits that never fire
+// `onfinish` leave AnimatePresence holding removed children forever (the
+// element only unmounted when an entering sibling happened to flush it).
+// Finishing on a macrotask lets exit animations resolve instantly.
 if (!Element.prototype.animate) {
-  Element.prototype.animate = (() => ({
-    cancel: () => {},
-    finish: () => {},
-    play: () => {},
-    pause: () => {},
-    reverse: () => {},
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    finished: Promise.resolve(),
-    onfinish: null,
-    playState: "finished",
-  })) as unknown as typeof Element.prototype.animate;
+  Element.prototype.animate = (() => {
+    const animation = {
+      cancel: () => {},
+      finish: () => {},
+      play: () => {},
+      pause: () => {},
+      reverse: () => {},
+      commitStyles: () => {},
+      persist: () => {},
+      addEventListener: (type: string, listener: () => void) => {
+        if (type === "finish") setTimeout(listener, 0)
+      },
+      removeEventListener: () => {},
+      finished: Promise.resolve(),
+      onfinish: null as (() => void) | null,
+      playState: "finished",
+    }
+    setTimeout(() => animation.onfinish?.(), 0)
+    return animation
+  }) as unknown as typeof Element.prototype.animate
 }
 
 const { afterEach } = await import("bun:test");
