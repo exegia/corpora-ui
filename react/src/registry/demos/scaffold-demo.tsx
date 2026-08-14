@@ -18,7 +18,6 @@ import { cn } from "@/lib/utils"
 interface DemoPanel {
   id: number
   title: string
-  swapped?: boolean
   /** The seam menu's Close action hides the strip; the panel body offers
    * a link to bring it back. */
   stripHidden?: boolean
@@ -58,12 +57,9 @@ export default function ScaffoldDemo() {
       panels.length > 1 ? panels.filter((panel) => panel.id !== id) : panels
     )
 
-  const swapPanel = (id: number) =>
-    setPanels((panels) =>
-      panels.map((panel) =>
-        panel.id === id ? { ...panel, swapped: !panel.swapped } : panel
-      )
-    )
+  // The panel trades the two cards itself — a real app would flip the
+  // slot content here so each card carries its subject to its new home.
+  const swapPanel = () => {}
 
   const setStripHidden = (id: number, stripHidden: boolean) =>
     setPanels((panels) =>
@@ -128,7 +124,7 @@ export default function ScaffoldDemo() {
                   }
                   name={panel.title}
                   onCloseSecondary={() => setStripHidden(panel.id, true)}
-                  onSwap={() => swapPanel(panel.id)}
+                  onSwap={swapPanel}
                 >
                   <PanelContent
                     label={panel.title}
