@@ -58,12 +58,18 @@ jobs:
       # stack (<type>/<slug> -> release/vX.Y.Z -> main), so on every stacked
       # feature PR `github.base_ref` reads 'main' and the guard rejects it for
       # not being a release branch. The payload's PR object is authoritative.
-      # A <type>/<slug> base is a link in a stack exactly when that branch is
-      # itself an open PR. Without this, any well-formed branch name passes as
-      # a base — including a stale branch left behind by a merged stack, whose
-      # PR would then never reach a release branch. Resolved here rather than
-      # inside the Makefile so `make pr-guard` needs no token and stays
-      # runnable locally.
+      # A <type>/<slug> base is a link in a stack exactly when that branch
+      # carries a PR of its own. Without this, any well-formed branch name
+      # passes as a base — including a stale branch left behind by a merged
+      # stack, whose PR would then never reach a release branch.
+      #
+      # `--state all`, not `--state open`: a partial stack merge leaves the PRs
+      # above it based on a branch that has already landed, which is a real
+      # state to be in until `gh stack sync` retargets them. The guard warns
+      # there rather than failing; see the Makefile for the full rule.
+      #
+      # Resolved here rather than inside the Makefile so `make pr-guard` needs
+      # no token and stays runnable locally.
       - name: Resolve the base branch's own PR
         id: base_pr
         env:
@@ -71,9 +77,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          number=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BASE" \
-            --state open --limit 1 --json number --jq '.[0].number // ""')
-          echo "number=$number" >> "$GITHUB_OUTPUT"
+          pr=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BASE" \
+            --state all --limit 1 --json number,state)
+          {
+            echo "number=$(jq -r '.[0].number // ""' <<<"$pr")"
+            echo "state=$(jq -r '.[0].state // ""' <<<"$pr")"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Check base, branch name and title
         env:
@@ -81,6 +90,7 @@ jobs:
           HEAD: ${{ github.head_ref }}
           TITLE: ${{ github.event.pull_request.title }}
           BASE_PR: ${{ steps.base_pr.outputs.number }}
+          BASE_PR_STATE: ${{ steps.base_pr.outputs.state }}
         run: make pr-guard
 
   check:
