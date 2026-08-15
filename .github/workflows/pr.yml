@@ -73,6 +73,11 @@ jobs:
       # stack (<type>/<slug> -> release/vX.Y.Z -> main), so on every stacked
       # feature PR `github.base_ref` reads 'main' and the guard rejects it for
       # not being a release branch. The payload's PR object is authoritative.
+      # Guards the trigger above: a base prefix missing from `branches` runs no
+      # workflow at all rather than failing, so nothing else would notice.
+      - name: Check pr.yml accepts every branch type
+        run: make pr-types-sync
+
       # A <type>/<slug> base is a link in a stack exactly when that branch
       # carries a PR of its own. Without this, any well-formed branch name
       # passes as a base — including a stale branch left behind by a merged
