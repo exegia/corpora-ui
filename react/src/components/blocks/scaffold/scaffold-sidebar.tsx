@@ -19,7 +19,7 @@ export function ScaffoldSidebar({
       id="scaffold-sidebar"
       aria-label="Primary"
       className={cn(
-        "flex min-w-20 shrink-0 flex-col items-center gap-1 pt-8 pb-2",
+        "flex min-w-12 shrink-0 flex-col items-center gap-1 pt-10 pb-2",
         className
       )}
       data-slot="scaffold-sidebar"

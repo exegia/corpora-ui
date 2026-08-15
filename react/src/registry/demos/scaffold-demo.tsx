@@ -9,15 +9,18 @@ import * as React from "react"
 
 import {
   Scaffold,
-  type ScaffoldPanelProps,
+  SCAFFOLD_PANEL_CAPACITY,
   useScaffold,
 } from "@/components/blocks/scaffold"
 import { DemoStage } from "@/components/docs/demo-controls"
 import { cn } from "@/lib/utils"
 
-interface DemoPanel extends ScaffoldPanelProps {
-  title: string | undefined
+interface DemoPanel {
   id: number
+  title: string
+  /** The seam menu's Close action hides the strip; the panel body offers
+   * a link to bring it back. */
+  stripHidden?: boolean
 }
 
 const PANEL_TITLES = [
@@ -28,78 +31,60 @@ const PANEL_TITLES = [
   "Commentary",
 ]
 
-/** Visible-panel capacity — the design allows 3 (viewport-dependent). */
-const PANEL_CAPACITY = 3
-
 export default function ScaffoldDemo() {
   const scaffold = useScaffold()
   const nextId = React.useRef(2)
-  // Visible panels plus the non-visible ones (newest first) that the
-  // action cluster counts as its overflow badge.
-  const [board, setBoard] = React.useState<{
-    visible: DemoPanel[]
-    hidden: DemoPanel[]
-  }>({
-    visible: [{
-      id: 1,
-      children: <PanelContent label={PANEL_TITLES[0]} />,
-      SecondaryPanel: <StripContent label={PANEL_TITLES[0]} />,
-      title: undefined,
-    }],
-    hidden: [],
-  })
+  const [panels, setPanels] = React.useState<DemoPanel[]>([
+    { id: 1, title: PANEL_TITLES[0] },
+  ])
 
-  // Per the design comments: at capacity the new panel is prepended, and
-  // the last visible panel is pushed into the overflow dropdown.
+  // The canvas caps at SCAFFOLD_PANEL_CAPACITY — Actions hides its Add
+  // segment at that point, so this guard only backstops it.
   const addPanel = () => {
     const id = nextId.current++
-    const panel: DemoPanel = {
-      children: <PanelContent label={PANEL_TITLES[(id - 1) % PANEL_TITLES.length]} />,
-      SecondaryPanel: <StripContent label={PANEL_TITLES[(id - 1) % PANEL_TITLES.length]} />,
-      id,
-      title: PANEL_TITLES[(id - 1) % PANEL_TITLES.length]
-
-    }
-    setBoard(({ visible, hidden }) =>
-      visible.length < PANEL_CAPACITY
-        ? { visible: [...visible, panel], hidden }
-        : {
-            visible: [panel, ...visible.slice(0, -1)],
-            hidden: [visible[visible.length - 1], ...hidden],
-          }
+    const title = PANEL_TITLES[(id - 1) % PANEL_TITLES.length]
+    setPanels((panels) =>
+      panels.length < SCAFFOLD_PANEL_CAPACITY
+        ? [...panels, { id, title }]
+        : panels
     )
   }
 
-  // Closing a panel frees capacity — the newest overflowed panel returns.
+  // The last panel never closes — its tab and panel drop their close
+  // affordances, so this guard only backstops them.
   const closePanel = (id: number) =>
-    setBoard(({ visible, hidden }) => {
-      const next = visible.filter((panel) => panel.id !== id)
-      if (next.length === visible.length) return { visible, hidden }
-      const [restored, ...rest] = hidden
-      return restored
-        ? { visible: [...next, restored], hidden: rest }
-        : { visible: next, hidden }
-    })
+    setPanels((panels) =>
+      panels.length > 1 ? panels.filter((panel) => panel.id !== id) : panels
+    )
 
-  const swapPanel = (id: number) =>
-    setBoard(({ visible, hidden }) => ({
-      visible: visible.map((panel) =>
-        panel.id === id ? { ...panel, swapped: !panel.swapped } : panel
-      ),
-      hidden,
-    }))
+  // The panel trades the two cards itself — a real app would flip the
+  // slot content here so each card carries its subject to its new home.
+  const swapPanel = () => {}
 
-  const panels = board.visible
-  const overflow = board.hidden
+  const setStripHidden = (id: number, stripHidden: boolean) =>
+    setPanels((panels) =>
+      panels.map((panel) =>
+        panel.id === id ? { ...panel, stripHidden } : panel
+      )
+    )
 
   return (
     <DemoStage canvasClassName="w-full p-0" controls={null}>
       <div className="h-130 w-full overflow-hidden rounded-lg border">
         <Scaffold.Root {...scaffold.providerProps}>
           <Scaffold.Sidebar>
-            <RailButton icon={<RiCompass3Line className="size-5" />} label="Explore" />
-            <RailButton icon={<RiBook2Line className="size-5" />} label="Manuscripts" />
-            <RailButton icon={<RiSearchLine className="size-5" />} label="Search" />
+            <RailButton
+              icon={<RiCompass3Line className="size-5" />}
+              label="Explore"
+            />
+            <RailButton
+              icon={<RiBook2Line className="size-5" />}
+              label="Manuscripts"
+            />
+            <RailButton
+              icon={<RiSearchLine className="size-5" />}
+              label="Search"
+            />
             <div className="flex-1" />
             <RailButton
               active={scaffold.inspectorOpen}
@@ -111,26 +96,44 @@ export default function ScaffoldDemo() {
 
           <Scaffold.Main>
             <Scaffold.Actions
-              onAdd={addPanel}
-              overflowCount={
-                panels.length + overflow.length > 1
-                  ? overflow.length
-                  : undefined
+              onAdd={
+                panels.length < SCAFFOLD_PANEL_CAPACITY ? addPanel : undefined
               }
-            />
+            >
+              {panels.map((panel) => (
+                <Scaffold.Tab
+                  key={panel.id}
+                  closeLabel={`Close ${panel.title}`}
+                  onClose={
+                    panels.length > 1 ? () => closePanel(panel.id) : undefined
+                  }
+                >
+                  {panel.title}
+                </Scaffold.Tab>
+              ))}
+            </Scaffold.Actions>
 
             <Scaffold.Canvas>
               {panels.map((panel) => (
                 <Scaffold.Panel
                   key={panel.id}
-                  SecondaryPanel={panel.SecondaryPanel}
-                  name={panel.title}
-                  onClose={
-                    panels.length > 1 ? () => closePanel(panel.id) : undefined
+                  SecondaryPanel={
+                    panel.stripHidden ? undefined : (
+                      <StripContent label={panel.title} />
+                    )
                   }
-                  onSwap={() => swapPanel(panel.id)}
+                  name={panel.title}
+                  onCloseSecondary={() => setStripHidden(panel.id, true)}
+                  onSwap={swapPanel}
                 >
-                  {panel.children}
+                  <PanelContent
+                    label={panel.title}
+                    onShowSubPanel={
+                      panel.stripHidden
+                        ? () => setStripHidden(panel.id, false)
+                        : undefined
+                    }
+                  />
                 </Scaffold.Panel>
               ))}
             </Scaffold.Canvas>
@@ -185,7 +188,7 @@ function RailButton({
     <button
       aria-label={label}
       className={cn(
-        "flex size-10 items-center justify-center rounded-xl text-neutral-600 transition-[background-color,color,scale] duration-150 ease-smooth-out hover:bg-white/60 hover:text-neutral-900 active:scale-97 dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-white motion-reduce:transition-none motion-reduce:active:scale-100",
+        "flex size-10 items-center justify-center rounded-xl text-neutral-600 transition-[background-color,color,scale] duration-150 ease-smooth-out hover:bg-white/60 hover:text-neutral-900 active:scale-97 motion-reduce:transition-none motion-reduce:active:scale-100 dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-white",
         active &&
           "bg-white/80 text-neutral-900 shadow-xs dark:bg-white/15 dark:text-white"
       )}
@@ -197,7 +200,14 @@ function RailButton({
   )
 }
 
-function PanelContent({ label }: { label: string }) {
+function PanelContent({
+  label,
+  onShowSubPanel,
+}: {
+  label: string
+  /** Present while the strip is hidden — renders the restore link. */
+  onShowSubPanel?: () => void
+}) {
   return (
     <div className="flex h-full flex-col p-4">
       <div className="text-sm font-semibold">{label}</div>
@@ -211,6 +221,15 @@ function PanelContent({ label }: { label: string }) {
           </div>
         ))}
       </div>
+      {onShowSubPanel && (
+        <button
+          className="mt-auto self-start pt-3 text-xs text-neutral-500 underline underline-offset-2 transition-colors duration-150 ease-smooth-out hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
+          onClick={onShowSubPanel}
+          type="button"
+        >
+          Show subpanel
+        </button>
+      )}
     </div>
   )
 }

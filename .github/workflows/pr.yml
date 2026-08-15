@@ -1,18 +1,49 @@
 # Everything that runs *before* a merge.
 #
+#   <type>/<slug>  ->  <type>/<slug>     guard + check               (stacked)
 #   <type>/<slug>  ->  release/vX.Y.Z    guard + check + AI review
 #   release/vX.Y.Z ->  main              guard + check + packaged tarball
 #
 # Draft PRs only get the guard. The full suite starts at `ready_for_review`
 # and re-runs on every push after that.
+#
+# `edited` is in the trigger list because a PR's base can change after the
+# checks have already run — GitHub silently retargets an open PR onto the
+# trunk when its base branch is deleted, which is routine when a stack merges
+# and leaves a PR behind. Without `edited`, the verdicts computed against the
+# old base stay pinned to the PR forever: re-running the job replays the
+# original event payload, so it recomputes the same stale answer. The guard is
+# cheap and its inputs (base, title) are exactly what an edit changes, so it
+# re-runs on every edit; the expensive jobs re-run only when the base itself
+# moved (see `github.event.changes.base` below), not on a title or body tweak.
+#
+# Every <type>/ prefix is listed as a base, because a stacked PR's base *is* a
+# feature branch. How GitHub resolves `github.base_ref` for a stacked PR is not
+# something to rely on here: with only `main` and `release/v*` listed, a stack
+# trunked on release/v0.19.0 ran the workflow for its first two layers and
+# silently ran nothing at all for the third — no failure, no skip, no checks.
+# A PR with no checks is a PR that can be merged without the guard, so the
+# filter must name the bases this repo actually uses rather than depend on that
+# resolution. Keep this list in sync with TYPES in the Makefile.
 name: PR
 
 on:
   pull_request:
-    types: [opened, reopened, ready_for_review, synchronize]
+    types: [opened, reopened, ready_for_review, synchronize, edited]
     branches:
       - main
       - "release/v*"
+      - "feat/*"
+      - "fix/*"
+      - "chore/*"
+      - "docs/*"
+      - "ci/*"
+      - "refactor/*"
+      - "test/*"
+      - "perf/*"
+      - "build/*"
+      - "style/*"
+      - "revert/*"
 
 concurrency:
   group: pr-${{ github.event.pull_request.number }}
@@ -20,6 +51,8 @@ concurrency:
 
 permissions:
   contents: read
+  # The guard resolves whether a stacked PR's base is itself an open PR.
+  pull-requests: read
 
 env:
   INSTALL_FLAGS: --frozen-lockfile
@@ -40,16 +73,51 @@ jobs:
       # stack (<type>/<slug> -> release/vX.Y.Z -> main), so on every stacked
       # feature PR `github.base_ref` reads 'main' and the guard rejects it for
       # not being a release branch. The payload's PR object is authoritative.
+      # Guards the trigger above: a base prefix missing from `branches` runs no
+      # workflow at all rather than failing, so nothing else would notice.
+      - name: Check pr.yml accepts every branch type
+        run: make pr-types-sync
+
+      # A <type>/<slug> base is a link in a stack exactly when that branch
+      # carries a PR of its own. Without this, any well-formed branch name
+      # passes as a base — including a stale branch left behind by a merged
+      # stack, whose PR would then never reach a release branch.
+      #
+      # `--state all`, not `--state open`: a partial stack merge leaves the PRs
+      # above it based on a branch that has already landed, which is a real
+      # state to be in until `gh stack sync` retargets them. The guard warns
+      # there rather than failing; see the Makefile for the full rule.
+      #
+      # Resolved here rather than inside the Makefile so `make pr-guard` needs
+      # no token and stays runnable locally.
+      - name: Resolve the base branch's own PR
+        id: base_pr
+        env:
+          BASE: ${{ github.event.pull_request.base.ref }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          pr=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BASE" \
+            --state all --limit 1 --json number,state)
+          {
+            echo "number=$(jq -r '.[0].number // ""' <<<"$pr")"
+            echo "state=$(jq -r '.[0].state // ""' <<<"$pr")"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Check base, branch name and title
         env:
           BASE: ${{ github.event.pull_request.base.ref }}
           HEAD: ${{ github.head_ref }}
           TITLE: ${{ github.event.pull_request.title }}
+          BASE_PR: ${{ steps.base_pr.outputs.number }}
+          BASE_PR_STATE: ${{ steps.base_pr.outputs.state }}
         run: make pr-guard
 
   check:
     name: check
-    if: ${{ !github.event.pull_request.draft }}
+    # On `edited`, only a base change can alter this job's verdict — skip the
+    # title and body edits that also raise that event.
+    if: ${{ !github.event.pull_request.draft && (github.event.action != 'edited' || github.event.changes.base.ref.from != '') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -59,7 +127,7 @@ jobs:
   package:
     name: package
     # See the guard job for why this is not `github.base_ref`.
-    if: ${{ !github.event.pull_request.draft && github.event.pull_request.base.ref == 'main' }}
+    if: ${{ !github.event.pull_request.draft && github.event.pull_request.base.ref == 'main' && (github.event.action != 'edited' || github.event.changes.base.ref.from != '') }}
     needs: check
     runs-on: ubuntu-latest
     steps:
@@ -75,7 +143,7 @@ jobs:
   review:
     name: review
     # See the guard job for why this is not `github.base_ref`.
-    if: ${{ !github.event.pull_request.draft && startsWith(github.event.pull_request.base.ref, 'release/') }}
+    if: ${{ !github.event.pull_request.draft && startsWith(github.event.pull_request.base.ref, 'release/') && (github.event.action != 'edited' || github.event.changes.base.ref.from != '') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read

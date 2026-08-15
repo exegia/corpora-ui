@@ -30,7 +30,7 @@ pkg_name = node -p "require('./$(REACT_DIR)/package.json').name"
 
 .PHONY: help install serve build preview test typecheck lint format check ci pack \
         clean distclean pkg-version next-version version-set release-notes \
-        pr-guard release-pr release-branch delete-branch publish publish-github \
+        pr-guard pr-types-sync release-pr release-branch delete-branch publish publish-github \
         tag-release rulesets-apply rulesets-diff
 
 help: ## List available targets
@@ -97,7 +97,21 @@ release-notes: ## Print a markdown changelog for RANGE (default origin/main..HEA
 
 # --- pull requests ----------------------------------------------------------
 
-pr-guard: ## Validate a PR's base, branch name and title (env: BASE, HEAD, TITLE)
+# BASE_PR / BASE_PR_STATE describe the PR whose head is BASE — number and
+# OPEN|MERGED|CLOSED, or empty when the branch has never had one. They are only
+# consulted for a <type>/<slug> base, which is a link in a stack exactly when it
+# carries a PR of its own; that is what separates a real stack parent from a
+# stale or unrelated branch that merely happens to be named correctly.
+#
+# MERGED counts as valid. `gh stack merge` is atomic, so a healthy stack never
+# sits half-merged, but a partial merge leaves the PRs above it pointing at a
+# branch whose PR has landed until `gh stack sync` retargets them. That window
+# is a legitimate state to be in, not a misconfigured base, so it warns instead
+# of failing. CLOSED does fail: an abandoned branch is not a stack parent.
+#
+# Resolving this needs an API call, so the caller passes it in and this target
+# stays hermetic — leave BASE_PR unset to skip the check locally.
+pr-guard: ## Validate a PR's base, branch name and title (env: BASE, HEAD, TITLE, BASE_PR, BASE_PR_STATE)
 	@set -eu; \
 	: "$${BASE:?BASE is required}" "$${HEAD:?HEAD is required}"; \
 	case "$$BASE" in \
@@ -117,6 +131,20 @@ pr-guard: ## Validate a PR's base, branch name and title (env: BASE, HEAD, TITLE
 	*) \
 	  echo "$$BASE" | grep -Eq '^($(TYPES))/[a-z0-9][a-z0-9._-]*$$' \
 	    || { echo "::error::$$BASE is not a valid base — target main, release/vX.Y.Z, or another <type>/<slug> branch when stacking"; exit 1; }; \
+	  if [ "$${BASE_PR+set}" = set ]; then \
+	    [ -n "$$BASE_PR" ] \
+	      || { echo "::error::$$BASE has never had a PR, so it is not a link in a stack — retarget onto release/vX.Y.Z"; exit 1; }; \
+	    case "$${BASE_PR_STATE-}" in \
+	    OPEN) \
+	      echo "stacked on $$BASE (PR #$$BASE_PR)";; \
+	    MERGED) \
+	      echo "::warning::$$BASE has landed (PR #$$BASE_PR) — run 'gh stack sync' to retarget this PR onto the trunk";; \
+	    *) \
+	      echo "::error::$$BASE's PR #$$BASE_PR is $${BASE_PR_STATE:-in an unknown state}, not open or merged — retarget onto release/vX.Y.Z"; exit 1;; \
+	    esac; \
+	  else \
+	    echo "note: BASE_PR unset — skipping the stack-membership check"; \
+	  fi; \
 	  echo "$$HEAD" | grep -Eq '^($(TYPES))/[a-z0-9][a-z0-9._-]*$$' \
 	    || { echo "::error::branch must be <type>/<slug> — one of $(TYPES) (got '$$HEAD')"; exit 1; }; \
 	  printf '%s' "$${TITLE-}" | grep -Eq '^($(TYPES))(\([a-z0-9._/-]+\))?!?: .+' \
@@ -124,6 +152,25 @@ pr-guard: ## Validate a PR's base, branch name and title (env: BASE, HEAD, TITLE
 	  ;; \
 	esac; \
 	echo "guard passed: $$HEAD -> $$BASE"
+
+# A base missing from pr.yml's filter does not fail — it runs no workflow at
+# all, so the PR reports no checks and can be merged with the guard never
+# having run. That is silent, so the two lists are compared here instead of
+# being left to whoever edits TYPES next.
+pr-types-sync: ## Verify pr.yml's base filter lists every TYPES prefix
+	@set -eu; \
+	wf=.github/workflows/pr.yml; \
+	rc=0; \
+	for t in $$(printf '%s' '$(TYPES)' | tr '|' ' '); do \
+	  grep -q "^ *- \"$$t/\*\"" "$$wf" \
+	    || { echo "::error::$$wf does not accept \"$$t/*\" as a base, so stacked PRs from $$t/ branches would run no checks at all"; rc=1; }; \
+	done; \
+	for p in $$(sed -n 's/^ *- "\([a-z]*\)\/\*"$$/\1/p' "$$wf" | sort -u); do \
+	  printf '%s' '$(TYPES)' | tr '|' '\n' | grep -qx "$$p" \
+	    || { echo "::error::$$wf accepts \"$$p/*\" as a base but TYPES does not list $$p — the guard would reject what CI let through"; rc=1; }; \
+	done; \
+	[ "$$rc" = 0 ] || exit 1; \
+	echo "pr.yml base filter matches TYPES"
 
 release-pr: ## Open or refresh the draft release PR into main (env: BRANCH)
 	@set -eu; \
