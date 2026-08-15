@@ -3,6 +3,7 @@ export const TITLE_BAR_HEIGHT = 48
 // critically damped so it cannot overshoot, pause against that boundary, and
 // then snap back during the final frame.
 import { EASE_OUT, EASE_DRAWER } from "@/lib/ease.ts"
+import type { Variants } from "motion/react"
 import { createContext, useContext, useSyncExternalStore } from "react"
 import type {
   AnimatedSidebarContextValue,
@@ -36,6 +37,48 @@ export const REDUCED_TRANSITION = {
   duration: 0.16,
   ease: EASE_OUT,
 } as const
+
+const SUBMENU_TRANSITION = {
+  duration: 0.18,
+  ease: EASE_OUT,
+} as const
+
+export const SUBMENU_VARIANTS: Variants = {
+  closed: {
+    opacity: 0,
+    clipPath: "inset(0 0 100% 0 round 8px)",
+    transition: {
+      duration: 0.14,
+      ease: EASE_OUT,
+      staggerChildren: 0.025,
+      staggerDirection: -1,
+    },
+  },
+  open: {
+    opacity: 1,
+    clipPath: "inset(0 0 0% 0 round 8px)",
+    transition: {
+      duration: 0.2,
+      delayChildren: 0.035,
+      ease: EASE_OUT,
+      staggerChildren: 0.045,
+    },
+  },
+}
+
+export const SUBMENU_ITEM_VARIANTS: Variants = {
+  closed: {
+    opacity: 0,
+    y: -6,
+    filter: "blur(3px)",
+  },
+  open: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: SUBMENU_TRANSITION,
+  },
+}
 
 export const FOCUSABLE_SELECTOR = [
   "a[href]",

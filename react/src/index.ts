@@ -47,26 +47,22 @@ export { default as Layout } from "./components/blocks/layout"
 export * from "./components/blocks/profile/profile-card-block"
 
 // motion primitives
-export * from "./components/motion/animated-sidebar"
 export * from "./components/motion/shared-layout-bg"
+
+// The v0.17 sidebar monolith became the shell block's AnimatedPanel parts.
+// `blocks/shell` above already exports every part under its new name; these
+// aliases keep the published AnimatedSidebar* names working for consumers.
+// `MobileSidebar` is intentionally absent — AnimatedPanel carries a TODO for
+// the replacement mobile experience.
+export {
+  AnimatedPanel as AnimatedSidebar,
+  AnimatedPanelProvider as AnimatedSidebarProvider,
+  AnimatedPanelTrigger as AnimatedSidebarTrigger,
+  AnimatedPanelInset as AnimatedSidebarInset,
+} from "./components/blocks/shell"
 
 // lib
 export * from "./lib/auth-accent"
 export * from "./lib/ease"
 export * from "./lib/sound"
 export * from "./lib/utils"
-export { MobileSidebar } from "@/components/motion/mobile-sidebar.tsx"
-export { AnimatedSidebarProvider } from "@/components/motion/animated-panel-provider.tsx"
-export { AnimatedSidebarTrigger } from "@/components/motion/animated-panel-trigger.tsx"
-export { AnimatedSidebarInset } from "@/components/motion/animated-panel-inset.tsx"
-export { AnimatedSidebarContent } from "@/components/motion/animated-sidebar-content.tsx"
-export { AnimatedSidebarFooter } from "@/components/motion/animated-sidebar-footer.tsx"
-export { AnimatedSidebarGroup } from "@/components/motion/animated-sidebar-group.tsx"
-export { AnimatedSidebarGroupLabel } from "@/components/motion/animated-sidebar-group-label.tsx"
-export { AnimatedSidebarGroupContent } from "@/components/motion/animated-sidebar-group-content.tsx"
-export { AnimatedSidebarMenu } from "@/components/motion/animated-sidebar-menu.tsx"
-export { AnimatedSidebarMenuItem } from "@/components/motion/animated-sidebar-menu-item.tsx"
-export { AnimatedSidebarMenuSub } from "@/components/motion/animated-sidebar-menu-sub.tsx"
-export { AnimatedSidebarMenuSubItem } from "@/components/motion/animated-sidebar-menu-sub-item.tsx"
-export { AnimatedSidebarMenuSubButton } from "@/components/motion/animated-sidebar-menu-sub-button.tsx"
-export { AnimatedSidebarMenuButton } from "@/components/motion/animated-sidebar-menu-button.tsx"
