@@ -7,7 +7,7 @@ export default function ShellDemo() {
   const panels = useShellPanels()
 
   return (
-    <DemoStage controls={null} canvasClassName="w-full p-0">
+    <DemoStage controls={null} canvasClassName="h-[480px] w-full p-0">
         <ShellLayout
           {...panels.providerProps}
           panels={{

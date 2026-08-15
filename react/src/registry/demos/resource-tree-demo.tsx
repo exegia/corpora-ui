@@ -33,7 +33,7 @@ const RESOURCES: SidebarResource[] = [
 const COLLAPSIBLE = ["icon", "offcanvas", "none"] as const
 const VARIANTS = ["sidebar", "floating", "inset"] as const
 
-export default function SidebarDemo() {
+export default function ResourceTreeDemo() {
   const [activeId, setActiveId] = React.useState("codex-a")
   const [collapsible, setCollapsible] =
     React.useState<(typeof COLLAPSIBLE)[number]>("icon")

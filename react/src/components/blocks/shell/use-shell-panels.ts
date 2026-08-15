@@ -2,10 +2,10 @@
 
 import { useCallback, useMemo, useState } from "react"
 
-import type { SidebarSide } from "@/components/motion/animated-sidebar"
 import type {
   ShellPanelControlProps,
   ShellPanelControls,
+  SidebarSide,
   UseShellPanelsOptions,
 } from "./type"
 

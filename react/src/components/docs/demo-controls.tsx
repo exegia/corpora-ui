@@ -124,7 +124,7 @@ export function DemoStage({
       <div
         className={
           canvasClassName ??
-          "flex min-h-32 w-full items-center justify-center rounded-lg"
+          "flex min-h-24 max-h-32 w-full items-center justify-center rounded-lg"
         }
       >
         {children}

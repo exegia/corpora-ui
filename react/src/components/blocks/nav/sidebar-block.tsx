@@ -4,7 +4,9 @@ import { PanelLeftIcon } from "lucide-react"
 import * as React from "react"
 
 import {
-  AnimatedSidebar,
+  AnimatedPanel as AnimatedSidebar,
+  AnimatedPanelProvider as AnimatedSidebarProvider,
+  AnimatedPanelTrigger as AnimatedSidebarTrigger,
   AnimatedSidebarContent,
   AnimatedSidebarFooter,
   AnimatedSidebarGroup,
@@ -12,9 +14,7 @@ import {
   AnimatedSidebarGroupLabel,
   AnimatedSidebarHeader,
   AnimatedSidebarMenu,
-  AnimatedSidebarProvider,
-  AnimatedSidebarTrigger,
-} from "@/components/motion/animated-sidebar"
+} from "@/components/blocks/shell"
 import { cn } from "@/lib/utils"
 import { SidebarNavRow } from "@/components/blocks/nav/sidebar-nav-row"
 
@@ -34,7 +34,7 @@ export type {
  * beside your own content. It owns its own sidebar context (⌘B toggles it);
  * pass `open`/`onOpenChange` to drive the rail, and `openMobile`/
  * `onOpenMobileChange` to open the drawer from a header button of your own.
- * Compose the underlying `AnimatedSidebar*` parts directly when a screen
+ * Compose the underlying `AnimatedPanel*` parts directly when a screen
  * needs something this API does not cover.
  */
 export function SidebarBlock({
