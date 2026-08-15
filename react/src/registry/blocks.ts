@@ -528,10 +528,96 @@ export const blocks: RegistryEntry[] = [
     slug: "sidebar",
     name: "Sidebar",
     description:
+      "Nested tree of projects, folders, files and bookmarks for a workspace rail. Rows drag to reorder or reparent, rename in place, and carry a per-row actions menu. Optimistic moves roll back when the handler rejects.",
+    category: "blocks",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/resource-tree-demo")),
+    registryDependencies: ["button", "menu"],
+    props: [
+      {
+        name: "items / defaultItems",
+        type: "SidebarResource[]",
+        description:
+          "The tree. A resource is { id, label, kind, children?, disabled? } where kind is \"project\" | \"folder\" | \"file\" | \"bookmark\". Pass `items` to control the tree, `defaultItems` to let it own its own state.",
+      },
+      {
+        name: "onItemsChange",
+        type: "(items) => void",
+        description:
+          "Fires with the whole tree after any structural change — a move, a rename. This is the uncontrolled escape hatch; use it to persist.",
+      },
+      {
+        name: "onMove",
+        type: "(move) => void | Promise<void>",
+        description:
+          "A drag landed: { itemId, targetId, position } where position is \"before\" | \"inside\" | \"after\" and targetId is null at the root. The move is applied optimistically — reject the promise to roll it back.",
+      },
+      {
+        name: "onMoveError",
+        type: "(error, move) => void",
+        description:
+          "Fires after a rejected `onMove` has been rolled back, so you can surface the failure.",
+      },
+      {
+        name: "onRename",
+        type: "(item, label) => void | Promise<void>",
+        description:
+          "A row committed an in-place rename with the new label.",
+      },
+      {
+        name: "activeId / defaultActiveId / onActiveChange",
+        type: "string | null / string | null / (id) => void",
+        description:
+          "The selected row. Controlled via `activeId`, uncontrolled via `defaultActiveId`.",
+      },
+      {
+        name: "defaultExpandedIds",
+        type: "string[]",
+        description:
+          "Ids expanded on first render. Expansion is owned by the tree thereafter.",
+      },
+      {
+        name: "renderIcon",
+        type: "(item) => ReactNode",
+        description:
+          "Replaces the default per-kind icon.",
+      },
+      {
+        name: "renderMenu",
+        type: "(item, controls) => ReactNode",
+        description:
+          "Contents of a row's actions popover. `controls` carries { close, rename } so a custom item can start an in-place rename.",
+      },
+      {
+        name: "renderActionsTrigger",
+        type: "(item) => ReactElement",
+        description:
+          "Replaces the default \"…\" actions button. Must return a single element — the popover clones it to attach its trigger ref and click handler.",
+      },
+      {
+        name: "ariaLabel",
+        type: "string",
+        description: "Accessible name for the tree.",
+      },
+    ],
+    usage: `import { Sidebar, type SidebarResource } from "@corpora/ui"
+
+<Sidebar.Wrapper
+  defaultItems={resources}
+  defaultExpandedIds={["corpora"]}
+  defaultActiveId="codex-a"
+  onActiveChange={setActiveId}
+  onMove={(move) => persistMove(move)}
+/>`,
+  },
+  {
+    slug: "sidebar-block",
+    name: "Sidebar Block",
+    description:
       "Collapsible application sidebar navigation, driven by section/item data. The navigation panel only — it claims no page layout. Collapses to an icon rail (⌘B), becomes a drawer under 768px, and animates the active pill between entries.",
     category: "blocks",
     status: "in-progress",
-    preview: React.lazy(() => import("./demos/sidebar-demo")),
+    preview: React.lazy(() => import("./demos/sidebar-block-demo")),
     registryDependencies: ["animated-sidebar"],
     props: [
       {
