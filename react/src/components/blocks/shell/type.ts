@@ -142,7 +142,7 @@ export type SidebarProviderStyle = CSSProperties & {
   "--sidebar-width-mobile"?: string
 }
 
-export interface AnimatedSidebarInsetProps extends HTMLMotionProps<"main"> {}
+export type AnimatedSidebarInsetProps = HTMLMotionProps<"main">
 
 export interface AnimatedSidebarTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   side?: SidebarSide
@@ -164,4 +164,40 @@ export interface AnimatedSidebarProps extends Omit<
   collapsible?: SidebarCollapsible
   ariaLabel?: string
   panelClassName?: string
+}
+
+export interface AnimatedSidebarMenuSubProps extends Omit<
+  HTMLMotionProps<"ul">,
+  "children"
+> {
+  open: boolean
+  children?: ReactNode
+}
+
+export interface AnimatedSidebarMenuSubButtonProps {
+  children: ReactNode
+  icon?: ReactNode
+  href?: string
+  isActive?: boolean
+  disabled?: boolean
+  closeOnSelect?: boolean
+  target?: "_blank" | "_self" | "_parent" | "_top"
+  rel?: string
+  onSelect?: () => void
+  className?: string
+}
+
+export interface AnimatedSidebarMenuButtonProps {
+  children: ReactNode
+  icon?: ReactNode
+  badge?: ReactNode
+  href?: string
+  isActive?: boolean
+  ariaExpanded?: boolean
+  disabled?: boolean
+  closeOnSelect?: boolean
+  target?: "_blank" | "_self" | "_parent" | "_top"
+  rel?: string
+  onSelect?: () => void
+  className?: string
 }

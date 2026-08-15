@@ -4,23 +4,21 @@ import { PanelLeftIcon } from "lucide-react"
 import * as React from "react"
 
 import {
-  AnimatedSidebar,
+  AnimatedPanel as AnimatedSidebar,
+  AnimatedPanelProvider as AnimatedSidebarProvider,
+  AnimatedPanelTrigger as AnimatedSidebarTrigger,
+  AnimatedSidebarContent,
+  AnimatedSidebarFooter,
+  AnimatedSidebarGroup,
+  AnimatedSidebarGroupContent,
+  AnimatedSidebarGroupLabel,
   AnimatedSidebarHeader,
-
-
-} from "@/components/motion/animated-sidebar"
+  AnimatedSidebarMenu,
+} from "@/components/blocks/shell"
 import { cn } from "@/lib/utils"
 import { SidebarNavRow } from "@/components/blocks/nav/sidebar-nav-row"
 
 import type { ISidebarBlockProps } from "@/components/blocks/nav/types"
-import { AnimatedSidebarProvider } from "@/components/motion/animated-panel-provider.tsx"
-import { AnimatedSidebarTrigger } from "@/components/motion/animated-panel-trigger.tsx"
-import { AnimatedSidebarContent } from "@/components/motion/animated-sidebar-content.tsx"
-import { AnimatedSidebarFooter } from "@/components/motion/animated-sidebar-footer.tsx"
-import { AnimatedSidebarGroup } from "@/components/motion/animated-sidebar-group.tsx"
-import { AnimatedSidebarGroupLabel } from "@/components/motion/animated-sidebar-group-label.tsx"
-import { AnimatedSidebarGroupContent } from "@/components/motion/animated-sidebar-group-content.tsx"
-import { AnimatedSidebarMenu } from "@/components/motion/animated-sidebar-menu.tsx"
 
 export type {
   ISidebarBlockProps as SidebarBlockProps,
