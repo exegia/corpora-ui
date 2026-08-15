@@ -1,6 +1,7 @@
 import { describe, expect, mock, test } from "bun:test"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import type { ReactNode } from "react"
 
 import { Scaffold, useScaffold } from "../index"
 import type { TScaffoldPanelChild } from "../type"
@@ -10,16 +11,17 @@ function Strip() {
 }
 
 function Workspace({
-  onClose,
   onSwap,
+  onCloseSecondary,
   onAdd,
-  overflowCount,
+  tabs,
   SecondaryPanel = <Strip />,
 }: {
-  onClose?: () => void
   onSwap?: () => void
+  onCloseSecondary?: () => void
   onAdd?: () => void
-  overflowCount?: number
+  /** Rendered as Actions children — the panel tabs. */
+  tabs?: ReactNode
   /** Pass null to render the panel without a secondary strip. */
   SecondaryPanel?: TScaffoldPanelChild | null
 }) {
@@ -33,12 +35,12 @@ function Workspace({
         </button>
       </Scaffold.Sidebar>
       <Scaffold.Main>
-        <Scaffold.Actions onAdd={onAdd} overflowCount={overflowCount} />
+        <Scaffold.Actions onAdd={onAdd}>{tabs}</Scaffold.Actions>
         <Scaffold.Canvas>
           <Scaffold.Panel
             key="alpha"
             name="Alpha"
-            onClose={onClose}
+            onCloseSecondary={onCloseSecondary}
             onSwap={onSwap}
             SecondaryPanel={SecondaryPanel ?? undefined}
           >
@@ -57,6 +59,12 @@ function Workspace({
 const menuToggle = () =>
   screen.queryByRole("button", { name: "Swap panel content" })
 
+/** Under the id'd `#scaffold-actions` ancestor, happy-dom serves stale
+ * selector-cache results to `waitFor` queries that start while an
+ * AnimatePresence exit is still running — let the exit settle on real
+ * timers, then query once. */
+const settleExit = () => new Promise((resolve) => setTimeout(resolve, 400))
+
 describe("Scaffold", () => {
   test("renders rail, panel surfaces and secondary strip", () => {
     render(<Workspace />)
@@ -67,18 +75,38 @@ describe("Scaffold", () => {
     expect(panel.textContent).toContain("Strip")
   })
 
-  test("close and menu buttons render only with their callbacks", async () => {
-    const user = userEvent.setup()
-    const onClose = mock(() => {})
-
+  test("seam menu renders only with a callback; actions stay hidden until opened", () => {
     const { rerender } = render(<Workspace />)
-    expect(screen.queryByRole("button", { name: "Close panel" })).toBeNull()
     expect(menuToggle()).toBeNull()
 
-    rerender(<Workspace onClose={onClose} onSwap={() => {}} />)
-    await user.click(screen.getByRole("button", { name: "Close panel" }))
-    expect(onClose).toHaveBeenCalledTimes(1)
+    rerender(<Workspace onSwap={() => {}} />)
     expect(menuToggle()).toBeDefined()
+    // Collapsed: the action segment is aria-hidden and inert.
+    expect(screen.queryByRole("button", { name: "Swap" })).toBeNull()
+
+    // The Close action alone also earns the menu.
+    rerender(<Workspace onCloseSecondary={() => {}} />)
+    expect(menuToggle()).toBeDefined()
+  })
+
+  test("seam menu Close renders only with onCloseSecondary, fires and collapses", async () => {
+    const user = userEvent.setup()
+    const onCloseSecondary = mock(() => {})
+
+    const { rerender } = render(<Workspace onSwap={() => {}} />)
+    await user.click(menuToggle() as HTMLElement)
+    expect(await screen.findByRole("button", { name: "Swap" })).toBeDefined()
+    expect(screen.queryByRole("button", { name: "Close" })).toBeNull()
+
+    rerender(
+      <Workspace onCloseSecondary={onCloseSecondary} onSwap={() => {}} />
+    )
+    await user.click(screen.getByRole("button", { name: "Close" }))
+    expect(onCloseSecondary).toHaveBeenCalledTimes(1)
+
+    // Acting collapses the menu back to the compact toggle.
+    expect(menuToggle()).toBeDefined()
+    expect(screen.queryByRole("button", { name: "Close" })).toBeNull()
   })
 
   test("seam menu opens; Swap fires onSwap, flips the panel and collapses the menu", async () => {
@@ -140,31 +168,86 @@ describe("Scaffold", () => {
     expect(bottom.getAttribute("data-expanded")).toBeNull()
   })
 
+  test("expand chevron mirrors when the panel is swapped", async () => {
+    const user = userEvent.setup()
+    render(<Workspace onSwap={() => {}} />)
+
+    // Swap first — column-reverse puts the strip visually on top.
+    await user.click(menuToggle() as HTMLElement)
+    await user.click(await screen.findByRole("button", { name: "Swap" }))
+
+    // Primary still holds the flexible slot, but the strip that grows
+    // next now sits on top — the chevron points up.
+    await user.click(
+      await screen.findByRole("button", { name: "Swap panel content" })
+    )
+    const expandButton = await screen.findByRole("button", { name: "Expand" })
+    const chevron = () => expandButton.querySelector("svg.lucide-chevron-down")
+    expect(chevron()?.classList.contains("rotate-180")).toBe(true)
+
+    // After expanding, the primary — now visually at the bottom — grows
+    // next: the chevron points down again.
+    await user.click(expandButton)
+    await user.click(
+      await screen.findByRole("button", { name: "Swap panel content" })
+    )
+    expect(chevron()?.classList.contains("rotate-180")).toBe(false)
+  })
+
   test("seam menu needs a secondary strip", () => {
     render(<Workspace onSwap={() => {}} SecondaryPanel={null} />)
 
     expect(menuToggle()).toBeNull()
   })
 
-  test("actions cluster: Add fires, overflow segment follows the count", async () => {
+  test("actions cluster: Add renders only with onAdd and fires", async () => {
     const user = userEvent.setup()
     const onAdd = mock(() => {})
 
-    const { rerender } = render(<Workspace onAdd={onAdd} />)
-    expect(screen.queryByRole("button", { name: "Browse panels" })).toBeNull()
+    // Consumers omit onAdd at SCAFFOLD_PANEL_CAPACITY — the segment hides.
+    const { rerender } = render(<Workspace />)
+    expect(screen.queryByRole("button", { name: "Panel" })).toBeNull()
 
+    rerender(<Workspace onAdd={onAdd} />)
     await user.click(screen.getByRole("button", { name: "Panel" }))
     expect(onAdd).toHaveBeenCalledTimes(1)
 
-    // Zero overflowed panels: the segment shows without a badge.
-    rerender(<Workspace overflowCount={0} onAdd={onAdd} />)
-    expect(
-      screen.getByRole("button", { name: "Browse panels" }).textContent
-    ).toBe("")
+    rerender(<Workspace />)
+    await settleExit()
+    expect(screen.queryByRole("button", { name: "Panel" })).toBeNull()
+  })
 
-    rerender(<Workspace overflowCount={2} onAdd={onAdd} />)
-    const browse = screen.getByRole("button", { name: "Browse panels" })
-    expect(browse.textContent).toContain("2")
+  test("panel tabs show their label; close renders only with onClose and fires", async () => {
+    const user = userEvent.setup()
+    const onCloseTab = mock(() => {})
+
+    // Consumers omit onClose on the last remaining panel's tab.
+    const { rerender } = render(
+      <Workspace tabs={<Scaffold.Tab key="alpha">Alpha</Scaffold.Tab>} />
+    )
+    expect(screen.getByText("Alpha")).toBeDefined()
+    expect(screen.queryByRole("button", { name: "Close Alpha" })).toBeNull()
+
+    rerender(
+      <Workspace
+        tabs={
+          <Scaffold.Tab
+            key="alpha"
+            closeLabel="Close Alpha"
+            onClose={onCloseTab}
+          >
+            Alpha
+          </Scaffold.Tab>
+        }
+      />
+    )
+    await user.click(screen.getByRole("button", { name: "Close Alpha" }))
+    expect(onCloseTab).toHaveBeenCalledTimes(1)
+
+    // Closing removes the tab — it animates out of the pill.
+    rerender(<Workspace tabs={null} />)
+    await settleExit()
+    expect(screen.queryByText("Alpha")).toBeNull()
   })
 
   test("inspector opens from outside state and hides again", async () => {

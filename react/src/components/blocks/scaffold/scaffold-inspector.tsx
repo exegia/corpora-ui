@@ -8,6 +8,8 @@ import { SCAFFOLD_EASE, SCAFFOLD_EDGE_GUTTER, SCAFFOLD_MORPH_DURATION } from "./
 import { useScaffoldContext } from "./scaffold-context"
 import type { ScaffoldInspectorProps } from "./type"
 import { GlassContainer } from "@/components/ui/glasscn/glass-container.tsx"
+import { Button } from "@/components/ui/button"
+import { LucideX } from "lucide-react"
 
 /**
  * The right-hand drawer: a brighter card that slides in over the canvas,
@@ -21,7 +23,8 @@ export function ScaffoldInspector({
   className,
   ...rest
 }: ScaffoldInspectorProps): React.ReactElement {
-  const { inspectorOpen, inspectorWidth } = useScaffoldContext()
+  const { inspectorOpen, inspectorWidth, toggleInspector } =
+    useScaffoldContext()
   const reducedMotion = useReducedMotion()
 
   // Slide fully past the edge gutter and the drop shadow's blur radius.
@@ -34,7 +37,7 @@ export function ScaffoldInspector({
       aria-hidden={inspectorOpen ? undefined : true}
       aria-label={name}
       className={cn(
-        "absolute right-0 w-80 z-20 my-2 flex h-full max-h-[calc(100%-1rem)] flex-col",
+        "absolute right-0 z-20 my-2 flex h-full max-h-[calc(100%-0.5rem)] w-96 flex-col",
         !inspectorOpen && "pointer-events-none",
         className
       )}
@@ -49,7 +52,27 @@ export function ScaffoldInspector({
       }}
       {...rest}
     >
-      <GlassContainer className="flex flex-col shadow-inner shadow-md rounded-md flex-1 border-t border-white dark:border-neutral-900 bg-neutral-50/10 dark:bg-black/10" glassVariant="subtle">
+      <GlassContainer
+        className="flex flex-1 flex-col rounded-md border-t border-white bg-neutral-50/10 shadow-inner shadow-md dark:border-neutral-800 dark:bg-black/5"
+        glassVariant="subtle"
+      >
+        <div
+          id="scaffold-inspector-header"
+          className="flex h-12 items-center justify-between gap-2 border-b pr-3 pl-4"
+        >
+          <span className="text-base font-normal text-card-foreground/70">
+            {name}
+          </span>
+          <Button
+            size="icon-xs"
+            variant="secondary"
+            className="scale-85"
+            aria-label="Close inspector"
+            onClick={toggleInspector}
+          >
+            <LucideX className="stroke-3" />
+          </Button>
+        </div>
         {children}
       </GlassContainer>
     </motion.aside>
