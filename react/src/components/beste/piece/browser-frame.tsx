@@ -12,9 +12,6 @@ export function BrowserFrame({
   titleStyle,
   children,
 }: IBrowserProps) {
-
-
-
   return (
     <div
       className={cn(
@@ -22,8 +19,14 @@ export function BrowserFrame({
         className
       )}
     >
-      <div className="flex min-h-32 w-full max-h-[500px] flex-col overflow-hidden rounded-lg border border-border bg-neutral-50 shadow-lg dark:bg-neutral-900 relative">
-        <div id="title-bar" className={cn("flex flex-1 w-full items-center gap-2 px-4 py-3 z-20", titleBarStyle(titleStyle, 'title'))}>
+      <div className="relative flex max-h-[500px] min-h-32 w-full flex-col overflow-hidden rounded-lg border border-border bg-neutral-50 shadow-lg dark:bg-neutral-900">
+        <div
+          id="title-bar"
+          className={cn(
+            "z-20 flex flex-1 items-center gap-2 px-4 py-3",
+            titleBarStyle(titleStyle, "title")
+          )}
+        >
           <div className="flex items-center gap-2" aria-hidden="true">
             <span className="size-3 cursor-pointer rounded-full bg-rose-500 shadow-md outline outline-rose-800" />
             <span className="size-3 cursor-pointer rounded-full bg-amber-500 shadow-md outline outline-amber-800" />
@@ -42,7 +45,7 @@ export function BrowserFrame({
           )}
           {title && !url && (
             <div className="flex w-full flex-1 justify-center select-none">
-              <span className="text-sm text-foreground ml-2">{title}</span>
+              <span className="ml-2 text-sm text-foreground">{title}</span>
             </div>
           )}
         </div>
