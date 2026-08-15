@@ -36,6 +36,8 @@ concurrency:
 
 permissions:
   contents: read
+  # The guard resolves whether a stacked PR's base is itself an open PR.
+  pull-requests: read
 
 env:
   INSTALL_FLAGS: --frozen-lockfile
@@ -56,11 +58,29 @@ jobs:
       # stack (<type>/<slug> -> release/vX.Y.Z -> main), so on every stacked
       # feature PR `github.base_ref` reads 'main' and the guard rejects it for
       # not being a release branch. The payload's PR object is authoritative.
+      # A <type>/<slug> base is a link in a stack exactly when that branch is
+      # itself an open PR. Without this, any well-formed branch name passes as
+      # a base — including a stale branch left behind by a merged stack, whose
+      # PR would then never reach a release branch. Resolved here rather than
+      # inside the Makefile so `make pr-guard` needs no token and stays
+      # runnable locally.
+      - name: Resolve the base branch's own PR
+        id: base_pr
+        env:
+          BASE: ${{ github.event.pull_request.base.ref }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          number=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BASE" \
+            --state open --limit 1 --json number --jq '.[0].number // ""')
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+
       - name: Check base, branch name and title
         env:
           BASE: ${{ github.event.pull_request.base.ref }}
           HEAD: ${{ github.head_ref }}
           TITLE: ${{ github.event.pull_request.title }}
+          BASE_PR: ${{ steps.base_pr.outputs.number }}
         run: make pr-guard
 
   check:

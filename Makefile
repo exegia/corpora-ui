@@ -97,7 +97,13 @@ release-notes: ## Print a markdown changelog for RANGE (default origin/main..HEA
 
 # --- pull requests ----------------------------------------------------------
 
-pr-guard: ## Validate a PR's base, branch name and title (env: BASE, HEAD, TITLE)
+# BASE_PR is the number of the open PR whose head is BASE, or empty when there
+# is none. It is only consulted for a <type>/<slug> base: such a base is a link
+# in a stack exactly when it is itself an open PR, which is what separates a
+# real stack parent from a stale or unrelated branch that merely happens to be
+# named correctly. Resolving it needs an API call, so the caller passes it in
+# and this target stays hermetic — leave it unset to skip the check locally.
+pr-guard: ## Validate a PR's base, branch name and title (env: BASE, HEAD, TITLE, BASE_PR)
 	@set -eu; \
 	: "$${BASE:?BASE is required}" "$${HEAD:?HEAD is required}"; \
 	case "$$BASE" in \
@@ -117,6 +123,13 @@ pr-guard: ## Validate a PR's base, branch name and title (env: BASE, HEAD, TITLE
 	*) \
 	  echo "$$BASE" | grep -Eq '^($(TYPES))/[a-z0-9][a-z0-9._-]*$$' \
 	    || { echo "::error::$$BASE is not a valid base — target main, release/vX.Y.Z, or another <type>/<slug> branch when stacking"; exit 1; }; \
+	  if [ "$${BASE_PR+set}" = set ]; then \
+	    [ -n "$$BASE_PR" ] \
+	      || { echo "::error::$$BASE has no open PR, so it is not a link in a stack — retarget onto release/vX.Y.Z"; exit 1; }; \
+	    echo "stacked on $$BASE (PR #$$BASE_PR)"; \
+	  else \
+	    echo "note: BASE_PR unset — skipping the stack-membership check"; \
+	  fi; \
 	  echo "$$HEAD" | grep -Eq '^($(TYPES))/[a-z0-9][a-z0-9._-]*$$' \
 	    || { echo "::error::branch must be <type>/<slug> — one of $(TYPES) (got '$$HEAD')"; exit 1; }; \
 	  printf '%s' "$${TITLE-}" | grep -Eq '^($(TYPES))(\([a-z0-9._/-]+\))?!?: .+' \
