@@ -17,10 +17,14 @@
 # re-runs on every edit; the expensive jobs re-run only when the base itself
 # moved (see `github.event.changes.base` below), not on a title or body tweak.
 #
-# The `branches` filter matches on `github.base_ref`, which reports a stacked
-# PR's *ultimate* base rather than its immediate parent — so stacked feature
-# PRs pass this filter via `main` and do not need their own entry here. The
-# jobs below read the true parent from the event payload instead.
+# Every <type>/ prefix is listed as a base, because a stacked PR's base *is* a
+# feature branch. How GitHub resolves `github.base_ref` for a stacked PR is not
+# something to rely on here: with only `main` and `release/v*` listed, a stack
+# trunked on release/v0.19.0 ran the workflow for its first two layers and
+# silently ran nothing at all for the third — no failure, no skip, no checks.
+# A PR with no checks is a PR that can be merged without the guard, so the
+# filter must name the bases this repo actually uses rather than depend on that
+# resolution. Keep this list in sync with TYPES in the Makefile.
 name: PR
 
 on:
@@ -29,6 +33,17 @@ on:
     branches:
       - main
       - "release/v*"
+      - "feat/*"
+      - "fix/*"
+      - "chore/*"
+      - "docs/*"
+      - "ci/*"
+      - "refactor/*"
+      - "test/*"
+      - "perf/*"
+      - "build/*"
+      - "style/*"
+      - "revert/*"
 
 concurrency:
   group: pr-${{ github.event.pull_request.number }}
