@@ -97,13 +97,21 @@ release-notes: ## Print a markdown changelog for RANGE (default origin/main..HEA
 
 # --- pull requests ----------------------------------------------------------
 
-# BASE_PR is the number of the open PR whose head is BASE, or empty when there
-# is none. It is only consulted for a <type>/<slug> base: such a base is a link
-# in a stack exactly when it is itself an open PR, which is what separates a
-# real stack parent from a stale or unrelated branch that merely happens to be
-# named correctly. Resolving it needs an API call, so the caller passes it in
-# and this target stays hermetic — leave it unset to skip the check locally.
-pr-guard: ## Validate a PR's base, branch name and title (env: BASE, HEAD, TITLE, BASE_PR)
+# BASE_PR / BASE_PR_STATE describe the PR whose head is BASE — number and
+# OPEN|MERGED|CLOSED, or empty when the branch has never had one. They are only
+# consulted for a <type>/<slug> base, which is a link in a stack exactly when it
+# carries a PR of its own; that is what separates a real stack parent from a
+# stale or unrelated branch that merely happens to be named correctly.
+#
+# MERGED counts as valid. `gh stack merge` is atomic, so a healthy stack never
+# sits half-merged, but a partial merge leaves the PRs above it pointing at a
+# branch whose PR has landed until `gh stack sync` retargets them. That window
+# is a legitimate state to be in, not a misconfigured base, so it warns instead
+# of failing. CLOSED does fail: an abandoned branch is not a stack parent.
+#
+# Resolving this needs an API call, so the caller passes it in and this target
+# stays hermetic — leave BASE_PR unset to skip the check locally.
+pr-guard: ## Validate a PR's base, branch name and title (env: BASE, HEAD, TITLE, BASE_PR, BASE_PR_STATE)
 	@set -eu; \
 	: "$${BASE:?BASE is required}" "$${HEAD:?HEAD is required}"; \
 	case "$$BASE" in \
@@ -125,8 +133,15 @@ pr-guard: ## Validate a PR's base, branch name and title (env: BASE, HEAD, TITLE
 	    || { echo "::error::$$BASE is not a valid base — target main, release/vX.Y.Z, or another <type>/<slug> branch when stacking"; exit 1; }; \
 	  if [ "$${BASE_PR+set}" = set ]; then \
 	    [ -n "$$BASE_PR" ] \
-	      || { echo "::error::$$BASE has no open PR, so it is not a link in a stack — retarget onto release/vX.Y.Z"; exit 1; }; \
-	    echo "stacked on $$BASE (PR #$$BASE_PR)"; \
+	      || { echo "::error::$$BASE has never had a PR, so it is not a link in a stack — retarget onto release/vX.Y.Z"; exit 1; }; \
+	    case "$${BASE_PR_STATE-}" in \
+	    OPEN) \
+	      echo "stacked on $$BASE (PR #$$BASE_PR)";; \
+	    MERGED) \
+	      echo "::warning::$$BASE has landed (PR #$$BASE_PR) — run 'gh stack sync' to retarget this PR onto the trunk";; \
+	    *) \
+	      echo "::error::$$BASE's PR #$$BASE_PR is $${BASE_PR_STATE:-in an unknown state}, not open or merged — retarget onto release/vX.Y.Z"; exit 1;; \
+	    esac; \
 	  else \
 	    echo "note: BASE_PR unset — skipping the stack-membership check"; \
 	  fi; \
