@@ -4,8 +4,9 @@
     {
       "name": "corpora-ui-docs",
       "runtimeExecutable": "bash",
-      "runtimeArgs": ["-c", "cd react && bun run dev"],
-      "port": 3000
+      "runtimeArgs": ["-c", "cd react && bun run dev -- --port \"$PORT\" --strictPort"],
+      "port": 3000,
+      "autoPort": true
     }
   ]
 }

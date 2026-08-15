@@ -528,10 +528,96 @@ export const blocks: RegistryEntry[] = [
     slug: "sidebar",
     name: "Sidebar",
     description:
+      "Nested tree of projects, folders, files and bookmarks for a workspace rail. Rows drag to reorder or reparent, rename in place, and carry a per-row actions menu. Optimistic moves roll back when the handler rejects.",
+    category: "blocks",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/resource-tree-demo")),
+    registryDependencies: ["button", "menu"],
+    props: [
+      {
+        name: "items / defaultItems",
+        type: "SidebarResource[]",
+        description:
+          "The tree. A resource is { id, label, kind, children?, disabled? } where kind is \"project\" | \"folder\" | \"file\" | \"bookmark\". Pass `items` to control the tree, `defaultItems` to let it own its own state.",
+      },
+      {
+        name: "onItemsChange",
+        type: "(items) => void",
+        description:
+          "Fires with the whole tree after any structural change — a move, a rename. This is the uncontrolled escape hatch; use it to persist.",
+      },
+      {
+        name: "onMove",
+        type: "(move) => void | Promise<void>",
+        description:
+          "A drag landed: { itemId, targetId, position } where position is \"before\" | \"inside\" | \"after\" and targetId is null at the root. The move is applied optimistically — reject the promise to roll it back.",
+      },
+      {
+        name: "onMoveError",
+        type: "(error, move) => void",
+        description:
+          "Fires after a rejected `onMove` has been rolled back, so you can surface the failure.",
+      },
+      {
+        name: "onRename",
+        type: "(item, label) => void | Promise<void>",
+        description:
+          "A row committed an in-place rename with the new label.",
+      },
+      {
+        name: "activeId / defaultActiveId / onActiveChange",
+        type: "string | null / string | null / (id) => void",
+        description:
+          "The selected row. Controlled via `activeId`, uncontrolled via `defaultActiveId`.",
+      },
+      {
+        name: "defaultExpandedIds",
+        type: "string[]",
+        description:
+          "Ids expanded on first render. Expansion is owned by the tree thereafter.",
+      },
+      {
+        name: "renderIcon",
+        type: "(item) => ReactNode",
+        description:
+          "Replaces the default per-kind icon.",
+      },
+      {
+        name: "renderMenu",
+        type: "(item, controls) => ReactNode",
+        description:
+          "Contents of a row's actions popover. `controls` carries { close, rename } so a custom item can start an in-place rename.",
+      },
+      {
+        name: "renderActionsTrigger",
+        type: "(item) => ReactElement",
+        description:
+          "Replaces the default \"…\" actions button. Must return a single element — the popover clones it to attach its trigger ref and click handler.",
+      },
+      {
+        name: "ariaLabel",
+        type: "string",
+        description: "Accessible name for the tree.",
+      },
+    ],
+    usage: `import { Sidebar, type SidebarResource } from "@corpora/ui"
+
+<Sidebar.Wrapper
+  defaultItems={resources}
+  defaultExpandedIds={["corpora"]}
+  defaultActiveId="codex-a"
+  onActiveChange={setActiveId}
+  onMove={(move) => persistMove(move)}
+/>`,
+  },
+  {
+    slug: "sidebar-block",
+    name: "Sidebar Block",
+    description:
       "Collapsible application sidebar navigation, driven by section/item data. The navigation panel only — it claims no page layout. Collapses to an icon rail (⌘B), becomes a drawer under 768px, and animates the active pill between entries.",
     category: "blocks",
     status: "in-progress",
-    preview: React.lazy(() => import("./demos/sidebar-demo")),
+    preview: React.lazy(() => import("./demos/sidebar-block-demo")),
     registryDependencies: ["animated-sidebar"],
     props: [
       {
@@ -666,5 +752,65 @@ function App() {
 }
 
 // panels.toggle("right") from anywhere — a title-bar button, a shortcut.`,
+  },
+  {
+    slug: "scaffold",
+    name: "Scaffold",
+    description:
+      "Composable desktop workspace: an icon rail on a soft gradient backdrop, a canvas of closable/swappable panels, a floating actions cluster, and an inspector drawer that slides in over the canvas.",
+    category: "blocks",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/scaffold-demo")),
+    registryDependencies: [],
+    props: [
+      {
+        name: "Root · inspectorOpen / defaultInspectorOpen / onInspectorOpenChange",
+        type: "boolean / boolean / (open) => void",
+        description:
+          "Inspector drawer state, controlled or uncontrolled. Spread `useScaffold().providerProps` to drive it from outside (title-bar buttons, shortcuts). `inspectorWidth` (px, default 272) sizes the drawer and how far Actions slides aside.",
+      },
+      {
+        name: "Panel · secondary / onClose / onSwap / swapped / width",
+        type: "ReactNode / () => void / () => void / boolean / number",
+        description:
+          "`secondary` renders the utility strip as its own card below the primary surface. `onClose` and `onSwap` reveal the floating buttons on hover (swap needs a secondary). Swapping trades the two cards with a layout morph — the strip glides up into the primary slot; control it with `swapped` (uncontrolled otherwise, `defaultSwapped`) and flip the slot content in `onSwap`. `width` fixes the panel in px; omitted it flexes. Key each panel — closes animate out.",
+      },
+      {
+        name: "Actions · onAdd / overflowCount / onBrowse",
+        type: "() => void / number / () => void",
+        description:
+          "The pill cluster in the top-right (the design's panel context menu). `onAdd` powers the Add segment. `overflowCount` is the number of non-visible panels — it reveals the overflow segment, whose badge shows when > 0; the dropdown menu itself is a later design iteration. Extra segments pass as children.",
+      },
+      {
+        name: "Inspector · name / children",
+        type: "string / ReactNode",
+        description:
+          "Drawer content. Stays mounted and inert while closed so it can slide back out; opening also slides the Actions cluster leftward in step.",
+      },
+    ],
+    usage: `import { Scaffold, useScaffold } from "@corpora/ui"
+
+function App() {
+  const scaffold = useScaffold()
+
+  return (
+    <Scaffold.Root {...scaffold.providerProps} className="h-svh">
+      <Scaffold.Sidebar>{/* icon buttons */}</Scaffold.Sidebar>
+      <Scaffold.Main>
+        <Scaffold.Actions overflowCount={2} onAdd={addPanel} onBrowse={openPanelMenu} />
+        <Scaffold.Canvas>
+          <Scaffold.Panel key="draft" secondary={<PromptBar />} onClose={close} onSwap={swap}>
+            <Editor />
+          </Scaffold.Panel>
+        </Scaffold.Canvas>
+        <Scaffold.Inspector>
+          <Details />
+        </Scaffold.Inspector>
+      </Scaffold.Main>
+    </Scaffold.Root>
+  )
+}
+
+// scaffold.toggleInspector() from anywhere — a rail icon, a shortcut.`,
   },
 ]

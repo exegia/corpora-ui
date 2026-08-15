@@ -43,12 +43,24 @@ export * from "./components/blocks/nav/sidebar-block"
 export * from "./components/blocks/nav/sidebar"
 export * from "./components/blocks/shell"
 export { default as ShellLayout } from "./components/blocks/shell"
+export * from "./components/blocks/scaffold"
 export { default as Layout } from "./components/blocks/layout"
 export * from "./components/blocks/profile/profile-card-block"
 
 // motion primitives
-export * from "./components/motion/animated-sidebar"
 export * from "./components/motion/shared-layout-bg"
+
+// The v0.17 sidebar monolith became the shell block's AnimatedPanel parts.
+// `blocks/shell` above already exports every part under its new name; these
+// aliases keep the published AnimatedSidebar* names working for consumers.
+// `MobileSidebar` is intentionally absent — AnimatedPanel carries a TODO for
+// the replacement mobile experience.
+export {
+  AnimatedPanel as AnimatedSidebar,
+  AnimatedPanelProvider as AnimatedSidebarProvider,
+  AnimatedPanelTrigger as AnimatedSidebarTrigger,
+  AnimatedPanelInset as AnimatedSidebarInset,
+} from "./components/blocks/shell"
 
 // lib
 export * from "./lib/auth-accent"

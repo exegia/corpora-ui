@@ -1,9 +1,11 @@
 import type { ReactNode } from "react"
 
-import type {
-  AnimatedSidebarProviderProps,
-  SidebarSide,
-} from "@/components/motion/animated-sidebar"
+import {
+  type ButtonHTMLAttributes,
+  type CSSProperties,
+  type HTMLAttributes,
+} from "react"
+import type { HTMLMotionProps } from "motion/react"
 
 export interface ShellAction {
   id: string
@@ -47,7 +49,7 @@ export type TPanelMap<Side extends TPanelSide = TPanelSide> = Partial<
 >
 
 /** The open/close surface of the shell's panels, lifted straight from
- * AnimatedSidebarProvider — every prop is keyed by side, there are no
+ * AnimatedPanelProvider — every prop is keyed by side, there are no
  * explicit per-side props. `useShellPanels` produces the controlled subset
  * of these as `providerProps`. */
 export type ShellPanelControlProps = Pick<
@@ -82,7 +84,7 @@ export interface ShellPanelControls {
   /** Desktop-only convenience — the in-shell triggers already pick the
    * mobile state themselves when the viewport is narrow. */
   toggle: (side: SidebarSide) => void
-  /** Spread onto ShellLayout (or AnimatedSidebarProvider directly). */
+  /** Spread onto ShellLayout (or AnimatedPanelProvider directly). */
   providerProps: ShellPanelControlProps
 }
 
@@ -94,4 +96,108 @@ export interface ShellLayoutProps extends ShellPanelControlProps {
   header?: ReactNode
   className?: string
   variant?: "web" | "desktop"
+}
+
+
+export type SidebarSide = "left" | "right"
+/** Open flags keyed by the side. Sides left out stay uncontrolled / at their
+ * default — there is no per-side prop, the record IS the API. */
+export type SidebarOpenState = Partial<Record<SidebarSide, boolean>>
+export type SidebarVariant = "sidebar" | "floating" | "inset"
+export type SidebarCollapsible = "offcanvas" | "icon" | "none"
+
+export interface AnimatedSidebarContextValue {
+  isMobile: boolean
+  layoutId: string
+  /** Desktop open state, keyed by side. */
+  open: Record<SidebarSide, boolean>
+  /** Mobile overlay open state, keyed by side. */
+  openMobile: Record<SidebarSide, boolean>
+  reduce: boolean
+  setOpen: (open: boolean, side: SidebarSide) => void
+  setOpenMobile: (open: boolean, side: SidebarSide) => void
+  /** Mobile-aware: toggles the overlay below md, the docked panel above. */
+  toggleSidebar: (side: SidebarSide) => void
+  triggerRefs: Record<SidebarSide, React.RefObject<HTMLButtonElement | null>>
+}
+
+export interface AnimatedSidebarProviderProps extends HTMLAttributes<HTMLDivElement> {
+  /** Controlled desktop open state, keyed by the side. A side left undefined
+   * stays uncontrolled. */
+  open?: SidebarOpenState
+  /** Initial desktop open state, merged over `{ left: true, right: false }`. */
+  defaultOpen?: SidebarOpenState
+  onOpenChange?: (open: boolean, side: SidebarSide) => void
+  /** Controlled mobile overlay state, keyed by side. */
+  openMobile?: SidebarOpenState
+  /** Initial mobile overlay state — every side starts closed. */
+  defaultOpenMobile?: SidebarOpenState
+  onOpenMobileChange?: (open: boolean, side: SidebarSide) => void
+  style?: SidebarProviderStyle
+}
+
+export type SidebarProviderStyle = CSSProperties & {
+  "--sidebar-width"?: string
+  "--sidebar-width-icon"?: string
+  "--sidebar-width-mobile"?: string
+}
+
+export type AnimatedSidebarInsetProps = HTMLMotionProps<"main">
+
+export interface AnimatedSidebarTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  side?: SidebarSide
+}
+
+export interface AnimatedSidebarPanelContextValue {
+  collapsed: boolean
+  collapsible: SidebarCollapsible
+  side: SidebarSide
+}
+
+export interface AnimatedSidebarProps extends Omit<
+  HTMLMotionProps<"aside">,
+  "children"
+> {
+  children?: ReactNode
+  side?: SidebarSide
+  variant?: SidebarVariant
+  collapsible?: SidebarCollapsible
+  ariaLabel?: string
+  panelClassName?: string
+}
+
+export interface AnimatedSidebarMenuSubProps extends Omit<
+  HTMLMotionProps<"ul">,
+  "children"
+> {
+  open: boolean
+  children?: ReactNode
+}
+
+export interface AnimatedSidebarMenuSubButtonProps {
+  children: ReactNode
+  icon?: ReactNode
+  href?: string
+  isActive?: boolean
+  disabled?: boolean
+  closeOnSelect?: boolean
+  target?: "_blank" | "_self" | "_parent" | "_top"
+  rel?: string
+  onSelect?: () => void
+  className?: string
+}
+
+export interface AnimatedSidebarMenuButtonProps {
+  children: ReactNode
+  icon?: ReactNode
+  badge?: ReactNode
+  href?: string
+  isActive?: boolean
+  ariaExpanded?: boolean
+  disabled?: boolean
+  closeOnSelect?: boolean
+  target?: "_blank" | "_self" | "_parent" | "_top"
+  rel?: string
+  onSelect?: () => void
+  className?: string
 }

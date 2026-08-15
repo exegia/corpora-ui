@@ -2,16 +2,15 @@
 
 import * as React from "react"
 
+import type { IRowProps, ISidebarNavItem, ISidebarNavSubItem } from "@/components/blocks/nav/types"
+import { isActive } from "@/components/blocks/nav/utils"
 import {
   AnimatedSidebarMenuButton,
   AnimatedSidebarMenuItem,
   AnimatedSidebarMenuSub,
   AnimatedSidebarMenuSubButton,
   AnimatedSidebarMenuSubItem,
-} from "@/components/motion/animated-sidebar"
-
-import type { IRowProps, ISidebarNavItem, ISidebarNavSubItem } from "@/components/blocks/nav/types"
-import { isActive } from "@/components/blocks/nav/utils"
+} from "@/components/blocks/shell"
 
 export function SidebarNavRow({ item, activeId, onNavigate }: IRowProps) {
   const children = item.items ?? []
