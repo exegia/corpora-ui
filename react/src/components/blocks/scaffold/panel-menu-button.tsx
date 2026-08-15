@@ -145,6 +145,9 @@ export function PanelMenuButton({
             size="icon-sm"
             variant="ghost"
             sound={sound}
+            // The hidden Expand|Swap|Close side stretches the pill to the sm
+            // button height — match it so the collapsed toggle stays square.
+            className="size-8 sm:size-7"
             data-slot="scaffold-panel-menu-toggle"
             onClick={handleOnExpand}
             onPointerEnter={handleToggleHover}

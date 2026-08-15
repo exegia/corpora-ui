@@ -17,7 +17,7 @@ export function ScaffoldCanvas({
 }: ScaffoldCanvasProps): React.ReactElement {
   return (
     <div
-      className={cn("relative flex w-full flex-1 gap-2", className)}
+      className={cn("relative flex min-h-0 w-full flex-1 gap-2", className)}
       data-slot="scaffold-canvas"
       {...rest}
     >

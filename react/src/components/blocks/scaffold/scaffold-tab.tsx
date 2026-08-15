@@ -56,7 +56,7 @@ export function ScaffoldTab({
           size="icon-sm"
           sound={sound}
           variant="ghost"
-          className="rounded-none!"
+          className="self-center rounded-none!"
         >
           <LucideX size={16} />
         </Button>

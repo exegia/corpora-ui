@@ -54,7 +54,7 @@ export function ScaffoldPanel({
       animate={{ flexDirection: isSwapped ? "column-reverse" : "column" }}
       aria-label={name}
       className={cn(
-        "group/panel relative flex min-w-80 flex-1 flex-col",
+        "group/panel relative flex min-w-0 flex-1 flex-col",
         className
       )}
       layout
