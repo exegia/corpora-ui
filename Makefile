@@ -30,7 +30,7 @@ pkg_name = node -p "require('./$(REACT_DIR)/package.json').name"
 
 .PHONY: help install serve build preview test typecheck lint format check ci pack \
         clean distclean pkg-version next-version version-set release-notes \
-        pr-guard release-pr release-branch delete-branch publish publish-github \
+        pr-guard pr-types-sync release-pr release-branch delete-branch publish publish-github \
         tag-release rulesets-apply rulesets-diff
 
 help: ## List available targets
@@ -152,6 +152,25 @@ pr-guard: ## Validate a PR's base, branch name and title (env: BASE, HEAD, TITLE
 	  ;; \
 	esac; \
 	echo "guard passed: $$HEAD -> $$BASE"
+
+# A base missing from pr.yml's filter does not fail — it runs no workflow at
+# all, so the PR reports no checks and can be merged with the guard never
+# having run. That is silent, so the two lists are compared here instead of
+# being left to whoever edits TYPES next.
+pr-types-sync: ## Verify pr.yml's base filter lists every TYPES prefix
+	@set -eu; \
+	wf=.github/workflows/pr.yml; \
+	rc=0; \
+	for t in $$(printf '%s' '$(TYPES)' | tr '|' ' '); do \
+	  grep -q "^ *- \"$$t/\*\"" "$$wf" \
+	    || { echo "::error::$$wf does not accept \"$$t/*\" as a base, so stacked PRs from $$t/ branches would run no checks at all"; rc=1; }; \
+	done; \
+	for p in $$(sed -n 's/^ *- "\([a-z]*\)\/\*"$$/\1/p' "$$wf" | sort -u); do \
+	  printf '%s' '$(TYPES)' | tr '|' '\n' | grep -qx "$$p" \
+	    || { echo "::error::$$wf accepts \"$$p/*\" as a base but TYPES does not list $$p — the guard would reject what CI let through"; rc=1; }; \
+	done; \
+	[ "$$rc" = 0 ] || exit 1; \
+	echo "pr.yml base filter matches TYPES"
 
 release-pr: ## Open or refresh the draft release PR into main (env: BRANCH)
 	@set -eu; \
