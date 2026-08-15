@@ -53,7 +53,7 @@ export function ScaffoldInspector({
       {...rest}
     >
       <GlassContainer
-        className="flex flex-1 flex-col rounded-md border-t border-white bg-neutral-50/10 shadow-inner shadow-md dark:border-neutral-800 dark:bg-black/5"
+        className="flex flex-1 flex-col rounded-md border-t border-white bg-neutral-50/20 shadow-inner shadow-lg dark:border-neutral-800 dark:bg-black/5"
         glassVariant="subtle"
       >
         <div
@@ -65,7 +65,8 @@ export function ScaffoldInspector({
           </span>
           <Button
             size="icon-xs"
-            variant="secondary"
+            variant="glass"
+            glassVariant="subtle"
             className="scale-85"
             aria-label="Close inspector"
             onClick={toggleInspector}
