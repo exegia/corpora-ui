@@ -64,9 +64,9 @@ export function ScaffoldCanvas({
       ref={ref}
       {...rest}
     >
-      <AnimatePresence initial={false} mode="wait" >
-        {visibleChildren}
-      </AnimatePresence>
+      {/* Sync mode (no `mode="wait"`): an exiting panel shrinks in place
+          while its siblings grow into the freed room in the same beat. */}
+      <AnimatePresence initial={false}>{visibleChildren}</AnimatePresence>
     </div>
   )
 }

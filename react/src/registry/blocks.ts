@@ -785,7 +785,7 @@ function App() {
         name: "Tab · children / panelId / onClose / closeLabel",
         type: "ReactNode / string / () => void / string",
         description:
-          "A panel's tab inside the Actions pill — its label plus a close button. With `panelId` (a `Scaffold.Panel`'s `id`) the tab fronts that panel's visibility: a hidden panel dims its tab behind an eye-off icon, and pressing the label toggles it — showing one past capacity hides the least-recently-activated panel in its place. The close button renders only while `onClose` is present; omit it on the last remaining panel's tab so at least one panel stays open. Key each tab — closes animate out of the pill.",
+          "A panel's tab inside the Actions pill — its label plus a close button. With `panelId` (a `Scaffold.Panel`'s `id`) the tab fronts that panel's visibility: a hidden panel dims its tab behind an eye-off icon, and pressing the label toggles it — showing one past capacity hides the least-recently-activated panel in its place. Hovering the tab spotlights its panel — every other id'd panel fades to 0.35 opacity. The close button renders only while `onClose` is present; omit it on the last remaining panel's tab so at least one panel stays open. Key each tab — closes animate out of the pill.",
       },
       {
         name: "Inspector · name / children",

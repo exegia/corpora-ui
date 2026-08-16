@@ -32,11 +32,19 @@ export function ScaffoldTab({
   className,
   ...rest
 }: ScaffoldTabProps): React.ReactElement {
-  const { isPanelHidden, togglePanelVisibility } = useScaffoldContext()
+  const { isPanelHidden, togglePanelVisibility, setPanelHovered } =
+    useScaffoldContext()
   const reduce = useReducedMotion()
   const transition = reduce ? { duration: 0 } : SPRING_LAYOUT
 
   const hidden = panelId !== undefined && isPanelHidden(panelId)
+
+  // A tab closed mid-hover never fires pointer-leave — release the
+  // spotlight it holds so the canvas doesn't stay dimmed.
+  React.useEffect(() => {
+    if (panelId === undefined) return
+    return () => setPanelHovered(panelId, false)
+  }, [panelId, setPanelHovered])
 
   return (
     <GlassButtonGroup
@@ -44,6 +52,14 @@ export function ScaffoldTab({
       animate={reduce ? { opacity: 1, width: "auto" } : "visible"}
       data-slot="scaffold-tab"
       data-panel-hidden={hidden ? "" : undefined}
+      onPointerEnter={
+        panelId !== undefined ? () => setPanelHovered(panelId, true) : undefined
+      }
+      onPointerLeave={
+        panelId !== undefined
+          ? () => setPanelHovered(panelId, false)
+          : undefined
+      }
       exit={reduce ? { opacity: 0, width: 0 } : "exit"}
       initial={reduce ? { opacity: 0, width: 0 } : "hidden"}
       transition={transition}

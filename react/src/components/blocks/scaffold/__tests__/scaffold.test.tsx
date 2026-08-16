@@ -410,6 +410,21 @@ describe("Scaffold responsive panels", () => {
     expect(panel("three")).toBeNull()
   })
 
+  test("hovering a tab spotlights its panel and dims the others", async () => {
+    const user = userEvent.setup()
+    render(<ResponsiveWorkspace />)
+
+    resizeCanvas(1200)
+    await user.hover(tab("two"))
+    expect(panel("two")?.getAttribute("data-dimmed")).toBeNull()
+    expect(panel("one")?.getAttribute("data-dimmed")).toBe("")
+    expect(panel("three")?.getAttribute("data-dimmed")).toBe("")
+
+    await user.unhover(tab("two"))
+    expect(panel("one")?.getAttribute("data-dimmed")).toBeNull()
+    expect(panel("three")?.getAttribute("data-dimmed")).toBeNull()
+  })
+
   test("user-hidden panels stay hidden when the canvas widens", async () => {
     const user = userEvent.setup()
     render(<ResponsiveWorkspace />)

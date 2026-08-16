@@ -18,6 +18,11 @@ export interface ScaffoldContextValue {
   /** Show/hide an id'd panel. Showing past capacity auto-hides the
    * least-recently-activated visible panel; the last visible one never hides. */
   togglePanelVisibility: (id: string) => void
+  /** Id of the panel whose tab the pointer is resting on — the canvas
+   * spotlights it by fading every other id'd panel to 0.35 opacity. */
+  hoveredPanelId: string | null
+  /** @internal Tabs report pointer enter/leave on their label. */
+  setPanelHovered: (id: string, hovered: boolean) => void
   /** @internal Canvas reports its ordered panel ids. */
   registerPanelIds: (ids: readonly string[]) => void
   /** @internal Canvas reports its measured width. */
