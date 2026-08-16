@@ -5,6 +5,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { SCAFFOLD_INSPECTOR_WIDTH } from "./constants"
 import { ScaffoldContext } from "./scaffold-context"
+import { usePanelVisibility } from "./use-panel-visibility"
 import type { ScaffoldContextValue, ScaffoldRootProps } from "./type"
 import type { ClassNameValue } from "tailwind-merge"
 
@@ -41,9 +42,23 @@ export function ScaffoldRoot({
     [inspectorOpen, setInspectorOpen]
   )
 
+  const panelVisibility = usePanelVisibility()
+
   const value = React.useMemo<ScaffoldContextValue>(
-    () => ({ inspectorOpen, inspectorWidth, setInspectorOpen, toggleInspector }),
-    [inspectorOpen, inspectorWidth, setInspectorOpen, toggleInspector]
+    () => ({
+      inspectorOpen,
+      inspectorWidth,
+      setInspectorOpen,
+      toggleInspector,
+      ...panelVisibility,
+    }),
+    [
+      inspectorOpen,
+      inspectorWidth,
+      setInspectorOpen,
+      toggleInspector,
+      panelVisibility,
+    ]
   )
 
   return (
@@ -54,7 +69,7 @@ export function ScaffoldRoot({
           // `clip`, not `hidden`: the off canvas inspector extends the
           // scrollable overflow, and focus/scrollIntoView would scroll a
           // hidden-overflow root sideways to reveal it.
-          "relative isolate flex h-full w-full flex-1 overflow-clip pr-2 pb-2",
+          "relative isolate flex size-full flex-1 overflow-clip pr-2 pb-2",
           background,
           className
         )}

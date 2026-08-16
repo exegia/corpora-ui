@@ -126,6 +126,79 @@ export const components: RegistryEntry[] = [
 <UserAvatar name="Jenny Hamilton" src={avatarUrl} className="size-10" />`,
   },
   {
+    slug: "tree",
+    name: "Tree",
+    description:
+      "Nested item tree in four shapes: app navigation with collapsible sections, a table of contents with in-page anchors, an icon rail, and an editable file explorer.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/tree-demo")),
+    props: [
+      {
+        name: "variant",
+        type: '"navigation" | "toc" | "sidebar" | "files"',
+        description:
+          "navigation: app nav — 3-level data promotes the top level to collapsible section names. toc: top-level nodes are routes, deeper nodes anchor to #{id}. sidebar: single-level icon rail. files: compact explorer with rename, drag-and-drop and trailing actions.",
+      },
+      {
+        name: "items",
+        type: "TreeNode[]",
+        description:
+          "The tree data — id, label, icon, href, badge, defaultOpen, children.",
+      },
+      {
+        name: "activeId",
+        type: "string",
+        description:
+          "id of the current entry, any depth. Marks the row aria-current and expands its collapsed ancestors.",
+      },
+      {
+        name: "onNavigate",
+        type: "(node: TreeNode) => void",
+        description:
+          "Fires for every selection after the row's anchor default — wire your router's navigate here.",
+      },
+      {
+        name: "collapsed",
+        type: "boolean",
+        default: "false",
+        description:
+          "sidebar only — folds rows to their leading icon; the label moves into aria-label and a hover/focus tooltip.",
+      },
+      {
+        name: "onMove",
+        type: "(id, parentId: string | null, index: number) => void",
+        description:
+          "files only — enables drag-and-drop. Reorder items yourself; the moveNode helper is exported.",
+      },
+      {
+        name: "onRename",
+        type: "(id, label: string) => void",
+        description: "files only — enables inline rename (double-click or F2).",
+      },
+      {
+        name: "renderTrailing",
+        type: "(node: TreeNode) => ReactNode",
+        description:
+          "files only — row actions revealed on hover/focus, e.g. a menu or delete button.",
+      },
+      {
+        name: "sound",
+        type: "boolean",
+        default: "true",
+        description: "Expand/collapse cues. Silent until bindSounds().",
+      },
+    ],
+    usage: `import { Tree } from "@corpora/ui"
+
+<Tree
+  variant="navigation"
+  items={items}
+  activeId={pathnameId}
+  onNavigate={(node) => navigate(node.href!)}
+/>`,
+  },
+  {
     slug: "search-field",
     name: "Search Field",
     description:

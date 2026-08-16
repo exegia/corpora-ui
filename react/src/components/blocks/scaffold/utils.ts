@@ -2,6 +2,25 @@ import type { Variants } from "motion/react"
 import type { ClassNameValue } from "tailwind-merge"
 import type { TSubPanelVariant } from "@/components/blocks/scaffold/type.ts"
 import { EASE_OUT } from "@/lib/ease.ts"
+import {
+  SCAFFOLD_CANVAS_GAP,
+  SCAFFOLD_PANEL_CAPACITY,
+  SCAFFOLD_PANEL_MIN_WIDTH,
+} from "./constants"
+
+/**
+ * How many panels fit on a canvas of `width` px, granting each
+ * `SCAFFOLD_PANEL_MIN_WIDTH` plus the gaps between them. Clamped to
+ * [1, SCAFFOLD_PANEL_CAPACITY]; an unmeasured canvas (`null`) fits the cap.
+ */
+export function getPanelCapacity(width: number | null): number {
+  if (width === null) return SCAFFOLD_PANEL_CAPACITY
+  const fits = Math.floor(
+    (width + SCAFFOLD_CANVAS_GAP) /
+      (SCAFFOLD_PANEL_MIN_WIDTH + SCAFFOLD_CANVAS_GAP)
+  )
+  return Math.max(1, Math.min(SCAFFOLD_PANEL_CAPACITY, fits))
+}
 
 /** Desktop backdrop the whole scaffold sits on — a soft warm-gray wash. */
 export const scaffoldBackgroundClass: ClassNameValue =
