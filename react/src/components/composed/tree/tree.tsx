@@ -10,6 +10,7 @@ import { TreeRow } from "./tree-node"
 import type { TreeContextValue, TreeProps } from "./type"
 import { useTreeDnd } from "./use-tree-dnd"
 import { ancestorIdsOf, hasThreeLevels, initialExpandedIds } from "./utils"
+import { motion } from "motion/react"
 
 const DEFAULT_LABELS: Record<TreeProps["variant"], string> = {
   navigation: "Main",
@@ -192,12 +193,18 @@ export function Tree(props: TreeProps): React.ReactElement {
 
   const label = ariaLabel ?? DEFAULT_LABELS[variant]
   let tree = (
-    <ul
+    <motion.ul
       aria-label={label}
       className={cn(
-        "flex min-w-0 flex-col",
+        "flex min-w-0 flex-col h-full",
+        collapsed ? "w-10 gap-y-2" : "w-full",
         variant === "files" ? "gap-px" : sectioned ? "gap-3" : "gap-0.5"
       )}
+      initial={variant === "sidebar" ? { width: 44 } : undefined}
+      animate={variant === "sidebar" ? {
+        width: collapsed ? 44 : "100%"
+      } : undefined}
+      exit={variant === "sidebar" ? { width: 44 } : undefined}
       data-collapsed={collapsed ? "" : undefined}
       data-slot="tree"
       data-variant={variant}
@@ -208,7 +215,7 @@ export function Tree(props: TreeProps): React.ReactElement {
       {items.map((node) => (
         <TreeRow depth={0} key={node.id} node={node} />
       ))}
-    </ul>
+    </motion.ul>
   )
 
   // The collapsed rail's rows carry tooltips — one provider groups their
@@ -226,7 +233,7 @@ export function Tree(props: TreeProps): React.ReactElement {
       ) : (
         <nav
           aria-label={label}
-          className={cn("min-w-0", className)}
+          className={cn("min-w-0 flex h-full justify-center", className)}
           data-slot="tree-root"
         >
           {tree}

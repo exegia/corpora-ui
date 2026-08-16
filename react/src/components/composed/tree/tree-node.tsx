@@ -14,14 +14,13 @@ import {
   TREE_BRANCH_EXIT,
   TREE_BRANCH_VARIANTS,
   TREE_COLLAPSE_DURATION,
-  TREE_EASE,
   TREE_LABEL_REVEAL_DELAY,
-  TREE_MICRO_DURATION,
   TREE_MICRO_TRANSITION,
   TREE_ROW_VARIANTS,
 } from "./constants"
 import { useTreeContext } from "./tree-context"
 import type { TreeNode } from "./type"
+import { EASE_OUT } from "@/lib/ease.ts"
 
 /** How a row behaves, resolved from variant + depth + shape. */
 type RowKind =
@@ -121,53 +120,63 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
     />
   ) : ctx.variant === "sidebar" ? (
     // The rail label folds away with the rail instead of unmounting rows.
-    <AnimatePresence initial={false}>
-      {!collapsed && (
-        <motion.span
-          // Width and text move separately: mid-grow the clipped label reads
-          // as trimmed garbage, so the text stays hidden while the width
-          // opens and only fades in from the left as the growth lands.
-          animate={{
-            opacity: 1,
-            width: "auto",
-            x: 0,
-            transition: reduce
-              ? { duration: 0 }
-              : {
-                  width: { duration: TREE_COLLAPSE_DURATION, ease: TREE_EASE },
-                  opacity: {
-                    delay: TREE_LABEL_REVEAL_DELAY,
-                    duration: TREE_MICRO_DURATION,
-                    ease: TREE_EASE,
-                  },
-                  x: {
-                    delay: TREE_LABEL_REVEAL_DELAY,
-                    duration: TREE_MICRO_DURATION,
-                    ease: TREE_EASE,
-                  },
+    <AnimatePresence initial={false} mode="wait">
+      <motion.span
+        initial={{ width: 0, opacity: 0, x: -8 }}
+        animate={{
+          width: collapsed ? 0 : "auto",
+          opacity: collapsed ? 0 : 1,
+          x: collapsed ? -8 : 0,
+          display: collapsed ? "none" : "flex",
+          transition: reduce
+            ? { duration: 0 }
+            : {
+                width: {
+                  delay: TREE_LABEL_REVEAL_DELAY,
+                  duration: TREE_COLLAPSE_DURATION,
+                  ease: "easeInOut",
                 },
-          }}
-          className="min-w-0 overflow-clip whitespace-nowrap"
-          // Collapsing inverts the order: the text drops out immediately,
-          // then the empty width folds shut.
-          exit={{
-            opacity: 0,
-            width: 0,
-            x: -8,
-            transition: reduce
-              ? { duration: 0 }
-              : {
-                  width: { duration: TREE_COLLAPSE_DURATION, ease: TREE_EASE },
-                  opacity: { duration: 0.1, ease: TREE_EASE },
-                  x: { duration: TREE_COLLAPSE_DURATION, ease: TREE_EASE },
+                opacity: {
+                  delay: TREE_LABEL_REVEAL_DELAY,
+                  duration: TREE_COLLAPSE_DURATION,
+                  ease: "easeInOut",
                 },
-          }}
-          initial={{ opacity: 0, width: 0, x: -8 }}
-          key="label"
-        >
-          {node.label}
-        </motion.span>
-      )}
+                x: {
+                  duration: TREE_COLLAPSE_DURATION,
+                  ease: "easeInOut",
+                },
+              },
+        }}
+        exit={{
+          width: 0,
+          opacity: 0,
+          display: "none",
+          x: -8,
+          transition: reduce
+            ? { duration: 0 }
+            : {
+                display: {
+                  duration: TREE_COLLAPSE_DURATION,
+                  ease: "easeOut",
+                },
+                width: {
+                  duration: TREE_COLLAPSE_DURATION * 3,
+                  ease: EASE_OUT,
+                },
+                opacity: {
+                  duration: TREE_COLLAPSE_DURATION,
+                  ease: "easeOut",
+                },
+                x: {
+                  duration: TREE_COLLAPSE_DURATION * 3,
+                  ease: EASE_OUT,
+                },
+              },
+        }}
+        className={cn("min-w-0 overflow-clip whitespace-nowrap")}
+      >
+        {node.label}
+      </motion.span>
     </AnimatePresence>
   ) : (
     <span

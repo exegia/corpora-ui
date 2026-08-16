@@ -17,7 +17,7 @@ export const TREE_COLLAPSE_DURATION = 0.2
 
 /** Rail label text fade — starts as the width growth is finishing, so the
  * label never reads as clipped mid-grow. */
-export const TREE_LABEL_REVEAL_DELAY = 0
+export const TREE_LABEL_REVEAL_DELAY = 0.01
 
 /** A branch's children group: grows open with a soft stagger, folds shut
  * faster. Height rides layout ("auto"), paint fades. */
