@@ -188,6 +188,24 @@ describe("Tree · sidebar", () => {
     expect(row.getAttribute("aria-label")).toBe("Search")
   })
 
+  test("collapsed rail rows are tooltip triggers; expanded rows are not", () => {
+    // happy-dom can't drive Base UI's hover/focus-visible open logic, so
+    // assert the wiring: Base UI stamps its trigger attribute on the row.
+    const { rerender } = render(<Tree collapsed items={RAIL} variant="sidebar" />)
+    expect(
+      screen
+        .getByRole("link", { name: "Search" })
+        .hasAttribute("data-base-ui-tooltip-trigger")
+    ).toBe(true)
+
+    rerender(<Tree items={RAIL} variant="sidebar" />)
+    expect(
+      screen
+        .getByRole("link", { name: "Search" })
+        .hasAttribute("data-base-ui-tooltip-trigger")
+    ).toBe(false)
+  })
+
   test("nested children are ignored — the rail is single-level", () => {
     const items: TreeNode[] = [
       {

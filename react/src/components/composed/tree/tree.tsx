@@ -4,6 +4,7 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 import { playCue } from "@/lib/sound"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { TreeContext } from "./tree-context"
 import { TreeRow } from "./tree-node"
 import type { TreeContextValue, TreeProps } from "./type"
@@ -190,7 +191,7 @@ export function Tree(props: TreeProps): React.ReactElement {
   )
 
   const label = ariaLabel ?? DEFAULT_LABELS[variant]
-  const tree = (
+  let tree = (
     <ul
       aria-label={label}
       className={cn(
@@ -209,6 +210,11 @@ export function Tree(props: TreeProps): React.ReactElement {
       ))}
     </ul>
   )
+
+  // The collapsed rail's rows carry tooltips — one provider groups their
+  // open state and drops the hover delay across the rail.
+  if (variant === "sidebar" && collapsed)
+    tree = <TooltipProvider>{tree}</TooltipProvider>
 
   return (
     <TreeContext.Provider value={context}>

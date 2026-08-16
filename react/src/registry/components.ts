@@ -163,7 +163,7 @@ export const components: RegistryEntry[] = [
         type: "boolean",
         default: "false",
         description:
-          "sidebar only — folds rows to their leading icon; the label carries over to aria-label.",
+          "sidebar only — folds rows to their leading icon; the label moves into aria-label and a hover/focus tooltip.",
       },
       {
         name: "onMove",

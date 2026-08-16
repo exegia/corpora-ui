@@ -6,6 +6,11 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import {
   TREE_BRANCH_EXIT,
   TREE_BRANCH_VARIANTS,
   TREE_COLLAPSE_DURATION,
@@ -265,7 +270,6 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
         href={href}
         onClick={handlePress}
         target={node.target}
-        title={ctx.variant === "sidebar" && collapsed ? node.label : undefined}
       >
         {content}
       </a>
@@ -282,11 +286,21 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
         className={rowClassName}
         disabled={node.disabled}
         onClick={handlePress}
-        title={ctx.variant === "sidebar" && collapsed ? node.label : undefined}
         type="button"
       >
         {content}
       </button>
+    )
+  }
+
+  // A collapsed rail row is icon-only — a tooltip names it on hover/focus.
+  // Expanded, the visible label already does, so no tooltip repeats it.
+  if (ctx.variant === "sidebar" && collapsed && !node.disabled) {
+    row = (
+      <Tooltip>
+        <TooltipTrigger render={row} />
+        <TooltipContent side="right">{node.label}</TooltipContent>
+      </Tooltip>
     )
   }
 
