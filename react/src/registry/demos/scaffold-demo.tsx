@@ -102,6 +102,7 @@ export default function ScaffoldDemo() {
               {panels.map((panel) => (
                 <Scaffold.Tab
                   key={panel.id}
+                  panelId={String(panel.id)}
                   closeLabel={`Close ${panel.title}`}
                   onClose={
                     panels.length > 1 ? () => closePanel(panel.id) : undefined
@@ -116,6 +117,7 @@ export default function ScaffoldDemo() {
               {panels.map((panel) => (
                 <Scaffold.Panel
                   key={panel.id}
+                  id={String(panel.id)}
                   SecondaryPanel={
                     panel.stripHidden ? undefined : (
                       <StripContent label={panel.title} />
