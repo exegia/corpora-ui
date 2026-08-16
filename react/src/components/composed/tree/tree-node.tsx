@@ -15,6 +15,8 @@ import {
   TREE_BRANCH_VARIANTS,
   TREE_COLLAPSE_DURATION,
   TREE_EASE,
+  TREE_LABEL_REVEAL_DELAY,
+  TREE_MICRO_DURATION,
   TREE_MICRO_TRANSITION,
   TREE_ROW_VARIANTS,
 } from "./constants"
@@ -122,15 +124,46 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
     <AnimatePresence initial={false}>
       {!collapsed && (
         <motion.span
-          animate={{ opacity: 1, width: "auto" }}
-          className="min-w-0 overflow-clip truncate whitespace-nowrap"
-          exit={{ opacity: 0, width: 0 }}
-          initial={{ opacity: 0, width: 0 }}
-          key="label"
-          transition={{
-            duration: reduce ? 0 : TREE_COLLAPSE_DURATION,
-            ease: TREE_EASE,
+          // Width and text move separately: mid-grow the clipped label reads
+          // as trimmed garbage, so the text stays hidden while the width
+          // opens and only fades in from the left as the growth lands.
+          animate={{
+            opacity: 1,
+            width: "auto",
+            x: 0,
+            transition: reduce
+              ? { duration: 0 }
+              : {
+                  width: { duration: TREE_COLLAPSE_DURATION, ease: TREE_EASE },
+                  opacity: {
+                    delay: TREE_LABEL_REVEAL_DELAY,
+                    duration: TREE_MICRO_DURATION,
+                    ease: TREE_EASE,
+                  },
+                  x: {
+                    delay: TREE_LABEL_REVEAL_DELAY,
+                    duration: TREE_MICRO_DURATION,
+                    ease: TREE_EASE,
+                  },
+                },
           }}
+          className="min-w-0 overflow-clip whitespace-nowrap"
+          // Collapsing inverts the order: the text drops out immediately,
+          // then the empty width folds shut.
+          exit={{
+            opacity: 0,
+            width: 0,
+            x: -8,
+            transition: reduce
+              ? { duration: 0 }
+              : {
+                  width: { duration: TREE_COLLAPSE_DURATION, ease: TREE_EASE },
+                  opacity: { duration: 0.1, ease: TREE_EASE },
+                  x: { duration: TREE_COLLAPSE_DURATION, ease: TREE_EASE },
+                },
+          }}
+          initial={{ opacity: 0, width: 0, x: -8 }}
+          key="label"
         >
           {node.label}
         </motion.span>
@@ -294,10 +327,12 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
   }
 
   // A collapsed rail row is icon-only — a tooltip names it on hover/focus.
-  // Expanded, the visible label already does, so no tooltip repeats it.
-  if (ctx.variant === "sidebar" && collapsed && !node.disabled) {
+  // Expanded, the visible label already does, so the tooltip is disabled
+  // rather than unmounted: swapping the wrapper in and out with `collapsed`
+  // would remount the row and cut the label's fold animation short.
+  if (ctx.variant === "sidebar") {
     row = (
-      <Tooltip>
+      <Tooltip disabled={!collapsed || node.disabled}>
         <TooltipTrigger render={row} />
         <TooltipContent side="right">{node.label}</TooltipContent>
       </Tooltip>

@@ -212,9 +212,10 @@ export function Tree(props: TreeProps): React.ReactElement {
   )
 
   // The collapsed rail's rows carry tooltips — one provider groups their
-  // open state and drops the hover delay across the rail.
-  if (variant === "sidebar" && collapsed)
-    tree = <TooltipProvider>{tree}</TooltipProvider>
+  // open state and drops the hover delay across the rail. Mounted for the
+  // expanded rail too: toggling the wrapper with `collapsed` would remount
+  // every row and skip the label fold animation.
+  if (variant === "sidebar") tree = <TooltipProvider>{tree}</TooltipProvider>
 
   return (
     <TreeContext.Provider value={context}>
