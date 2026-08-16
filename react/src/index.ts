@@ -26,6 +26,7 @@ export * from "./components/ui/textarea"
 // components
 export * from "./components/composed/password-input"
 export * from "./components/composed/social-providers"
+export * from "./components/composed/tree"
 export * from "./components/composed/user-avatar"
 
 // blocks
