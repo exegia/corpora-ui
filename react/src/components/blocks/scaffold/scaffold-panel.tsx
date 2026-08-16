@@ -18,6 +18,7 @@ import { ScaffoldSubPanel } from "@/components/blocks/scaffold/scaffold-sub-pane
  * primary slot while the primary card shrinks down into the strip.
  */
 export function ScaffoldPanel({
+  id,
   children,
   SecondaryPanel,
   onSwap,
@@ -50,14 +51,20 @@ export function ScaffoldPanel({
 
   return (
     <motion.section
-      id="scaffold-panel"
-      animate={{ flexDirection: isSwapped ? "column-reverse" : "column" }}
+      id={id ?? "scaffold-panel"}
+      animate={{ flexDirection: isSwapped ? "column-reverse" : "column", opacity: 1, width: "auto" }}
+      initial={{ opacity: 0, width: 0 }}
+      exit={{ opacity: 0, width: 0 }}
       aria-label={name}
       className={cn(
-        "group/panel relative flex min-w-0 flex-1 flex-col",
+        "group/panel relative flex min-w-0 flex-1 flex-col w-full",
+        // id panels opt into responsive hiding, so each visible one can
+        // hold the 320px floor — the canvas hides siblings before this
+        // floor would overflow it.
+        id !== undefined && "min-w-80",
         className
       )}
-      layout
+      layout={"size"}
       data-slot="scaffold-panel"
       data-swapped={isSwapped ? "" : undefined}
       transition={transition}

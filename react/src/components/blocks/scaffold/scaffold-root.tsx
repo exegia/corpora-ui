@@ -5,6 +5,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { SCAFFOLD_INSPECTOR_WIDTH } from "./constants"
 import { ScaffoldContext } from "./scaffold-context"
+import { usePanelVisibility } from "./use-panel-visibility"
 import type { ScaffoldContextValue, ScaffoldRootProps } from "./type"
 import type { ClassNameValue } from "tailwind-merge"
 
@@ -41,14 +42,23 @@ export function ScaffoldRoot({
     [inspectorOpen, setInspectorOpen]
   )
 
+  const panelVisibility = usePanelVisibility()
+
   const value = React.useMemo<ScaffoldContextValue>(
     () => ({
       inspectorOpen,
       inspectorWidth,
       setInspectorOpen,
       toggleInspector,
+      ...panelVisibility,
     }),
-    [inspectorOpen, inspectorWidth, setInspectorOpen, toggleInspector]
+    [
+      inspectorOpen,
+      inspectorWidth,
+      setInspectorOpen,
+      toggleInspector,
+      panelVisibility,
+    ]
   )
 
   return (

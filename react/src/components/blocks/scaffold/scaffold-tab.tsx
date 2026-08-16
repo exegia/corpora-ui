@@ -5,10 +5,11 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 import { SPRING_LAYOUT } from "@/lib/ease.ts"
+import { useScaffoldContext } from "./scaffold-context"
 import type { ScaffoldTabProps } from "./type"
 import { segmentVariants } from "./utils"
 import { Button } from "@/components/ui/button"
-import { LucideAppWindow, LucideX } from "lucide-react"
+import { LucideAppWindow, LucideEyeOff, LucideX } from "lucide-react"
 import { GlassButtonGroup } from "@/components/ui/glasscn/glass-button-group.tsx"
 
 /**
@@ -16,25 +17,35 @@ import { GlassButtonGroup } from "@/components/ui/glasscn/glass-button-group.tsx
  * affordance. Render one per open panel as Actions children, keyed —
  * closes animate out of the pill. Omit `onClose` on the last remaining
  * panel's tab; the canvas keeps at least one panel open.
+ *
+ * With `panelId` (matching a `Scaffold.Panel`'s `id`), the tab also fronts
+ * that panel's visibility: a hidden panel dims its tab behind an eye-off
+ * icon, and pressing the label toggles the panel — showing one past
+ * capacity hides the least-recently-activated panel in its place.
  */
 export function ScaffoldTab({
   children,
+  panelId,
   onClose,
   closeLabel = "Close panel",
   sound = true,
   className,
   ...rest
 }: ScaffoldTabProps): React.ReactElement {
+  const { isPanelHidden, togglePanelVisibility } = useScaffoldContext()
   const reduce = useReducedMotion()
   const transition = reduce ? { duration: 0 } : SPRING_LAYOUT
+
+  const hidden = panelId !== undefined && isPanelHidden(panelId)
 
   return (
     <GlassButtonGroup
       layout
-      animate={reduce ? { opacity: 1 } : "visible"}
+      animate={reduce ? { opacity: 1, width: "auto" } : "visible"}
       data-slot="scaffold-tab"
-      exit={reduce ? { opacity: 0 } : "exit"}
-      initial={reduce ? { opacity: 0 } : "hidden"}
+      data-panel-hidden={hidden ? "" : undefined}
+      exit={reduce ? { opacity: 0, width: 0 } : "exit"}
+      initial={reduce ? { opacity: 0, width: 0 } : "hidden"}
       transition={transition}
       variants={segmentVariants}
       glassVariant="subtle"
@@ -42,11 +53,22 @@ export function ScaffoldTab({
       {...rest}
     >
       <Button
+        aria-pressed={panelId !== undefined ? !hidden : undefined}
+        onClick={
+          panelId !== undefined
+            ? () => togglePanelVisibility(panelId)
+            : undefined
+        }
         size="sm"
+        sound={sound}
         variant="ghost"
-        className={cn("gap-2.5 rounded-sm pl-2", onClose && "pr-2")}
+        className={cn(
+          "gap-2.5 rounded-sm pl-2",
+          onClose && "pr-2",
+          hidden && "text-muted-foreground/70"
+        )}
       >
-        <LucideAppWindow size={16} />
+        {hidden ? <LucideEyeOff size={16} /> : <LucideAppWindow size={16} />}
         {children}
       </Button>
       {onClose && (

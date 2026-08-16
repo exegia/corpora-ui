@@ -8,6 +8,20 @@ export interface ScaffoldContextValue {
   inspectorWidth: number
   setInspectorOpen: (open: boolean) => void
   toggleInspector: () => void
+  /** How many panels currently fit side by side, from the measured canvas
+   * width at `SCAFFOLD_PANEL_MIN_WIDTH` per panel (1..`SCAFFOLD_PANEL_CAPACITY`). */
+  panelCapacity: number
+  /** Ids of id'd panels the scaffold is currently hiding — auto-hidden by
+   * capacity pressure or toggled away from a tab. */
+  hiddenPanelIds: readonly string[]
+  isPanelHidden: (id: string) => boolean
+  /** Show/hide an id'd panel. Showing past capacity auto-hides the
+   * least-recently-activated visible panel; the last visible one never hides. */
+  togglePanelVisibility: (id: string) => void
+  /** @internal Canvas reports its ordered panel ids. */
+  registerPanelIds: (ids: readonly string[]) => void
+  /** @internal Canvas reports its measured width. */
+  setCanvasWidth: (width: number) => void
 }
 
 export interface ScaffoldRootProps extends ComponentProps<"div"> {
@@ -62,6 +76,11 @@ export type TScaffoldPanelChild<
 > = ReactElement<T, React.JSXElementConstructor<T>>
 
 export interface ScaffoldPanelProps {
+  /** Stable id opting the panel into responsive hiding: the canvas hides
+   * id'd panels when it can't grant each `SCAFFOLD_PANEL_MIN_WIDTH`, and a
+   * `Scaffold.Tab` with the matching `panelId` reflects and toggles it.
+   * Omitted, the panel always renders. */
+  id?: string
   /** The panel's content, rendered in a card with a drop shadow. */
   children: ReactNode
   /** The panel's content, rendered in a card with a drop shadow. */
@@ -88,6 +107,10 @@ export interface ScaffoldTabProps extends MotionSafe<
 > {
   /** The tab's label. */
   children?: ReactNode
+  /** Id of the panel this tab fronts (`Scaffold.Panel`'s `id`). The tab
+   * then shows whether the panel is hidden and pressing its label toggles
+   * visibility — showing past capacity hides another panel in its place. */
+  panelId?: string
   /** Renders the tab's close button. The button renders only while this
    * is present — omit it to pin the tab, e.g. on the last remaining
    * panel (the canvas keeps at least one open). */
