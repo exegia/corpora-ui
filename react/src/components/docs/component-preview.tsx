@@ -12,18 +12,18 @@ export function ComponentPreview({ entry }: { entry: RegistryEntry }) {
   const Demo = entry.preview
 
   return (
-    <BrowserFrame title={entry.name} titleStyle="hidden">
+    <BrowserFrame title={entry.name} titleStyle="hidden" className="min-h-60">
       {Demo ? (
-          <React.Suspense
-            fallback={<p className="text-sm text-muted-foreground">Loading…</p>}
-          >
-            <Demo />
-          </React.Suspense>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            Preview coming soon ({entry.status}).
-          </p>
-        )}
+        <React.Suspense
+          fallback={<p className="text-sm text-muted-foreground">Loading…</p>}
+        >
+          <Demo />
+        </React.Suspense>
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          Preview coming soon ({entry.status}).
+        </p>
+      )}
     </BrowserFrame>
   )
 }

@@ -39,40 +39,20 @@ export default function UserAvatarDemo() {
         </>
       }
     >
-      <div className="flex items-end gap-8">
-        <figure className="flex flex-col items-center gap-2">
-          <UserAvatar
-            className={size}
-            key={nonce}
-            loading={loading || undefined}
-            name="Jenny Hamilton"
-            src={`${AVATAR}&v=${nonce}`}
-          />
-          <figcaption className="text-xs text-muted-foreground">
-            image
-          </figcaption>
-        </figure>
-        <figure className="flex flex-col items-center gap-2">
-          <UserAvatar
-            className={size}
-            loading={loading || undefined}
-            name="Luna Wyen"
-          />
-          <figcaption className="text-xs text-muted-foreground">
-            no image
-          </figcaption>
-        </figure>
-        <figure className="flex flex-col items-center gap-2">
-          <UserAvatar
-            className={size}
-            loading={loading || undefined}
-            name="Paul Smith"
-            src="https://example.com/gone.jpg"
-          />
-          <figcaption className="text-xs text-muted-foreground">
-            failed load
-          </figcaption>
-        </figure>
+      <div className="flex flex-row items-center gap-4">
+        <UserAvatar
+          className={size}
+          key={nonce}
+          loading={loading || undefined}
+          name="Jenny Hamilton"
+          src={`${AVATAR}&v=${nonce}`}
+        />
+        <UserAvatar
+          className={size}
+          loading={loading || undefined}
+          name="Paul Smith"
+          src="https://example.com/gone.jpg"
+        />
       </div>
     </DemoStage>
   )

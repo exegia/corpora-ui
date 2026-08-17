@@ -29,6 +29,8 @@ export type TreeDropPosition = "before" | "after" | "inside"
 
 interface TreeBaseProps {
   items: TreeNode[]
+  /** Never set on the data form — `tree` selects the controller form. */
+  tree?: never
   /** `id` of the current entry — matches any depth. Its ancestors expand. */
   activeId?: string
   /** Fires for every selection (rows and leaves alike), after the row's
@@ -47,9 +49,25 @@ interface TreeReadonlyProps {
   renderTrailing?: never
 }
 
+/** Drive the tree from a `useTree` controller instead of raw props. The
+ * controller carries the variant, the data and every handler; only the
+ * presentational props stay here. */
+export interface TreeControllerProps {
+  tree: TreeController
+  items?: never
+  ariaLabel?: string
+  className?: string
+  /** Row actions revealed on hover/focus (`files` only — ignored by the
+   * other variants, which the controller form cannot type-gate). */
+  renderTrailing?: (node: TreeNode) => React.ReactNode
+}
+
+/** Either form: raw props, or a `useTree` controller via `tree`. */
+export type TreeProps = TreeDataProps | TreeControllerProps
+
 /** The four shapes a Tree takes. Editing props only exist on `files`;
  * `collapsed` only on `sidebar` — the union is the contract. */
-export type TreeProps = TreeBaseProps &
+export type TreeDataProps = TreeBaseProps &
   (
     | ({
         /** Nested app navigation. With 3 levels of nodes the top level
@@ -84,24 +102,99 @@ export type TreeProps = TreeBaseProps &
       }
   )
 
+/** Options for `useTree`. Each of `items`, `activeId` and `collapsed` is
+ * controlled when passed and hook-owned when its `default*` twin is used
+ * instead. */
+export interface UseTreeOptions {
+  /** Which shape the tree takes — gates rename/reorder (`files`) and the
+   * collapsible rail (`sidebar`). */
+  variant: TreeVariant
+  /** Controlled data. With it, `rename`/`move` only report the edit unless
+   * you also pass `onItemsChange`. */
+  items?: TreeNode[]
+  /** Hook-owned data — `rename` and `move` apply the edit themselves. */
+  defaultItems?: TreeNode[]
+  /** Next tree after a `rename`/`move`. Also enables self-applying edits
+   * on top of controlled `items`. */
+  onItemsChange?: (items: TreeNode[]) => void
+  /** Controlled selection. Ancestors of the active node expand. */
+  activeId?: string
+  defaultActiveId?: string
+  /** Fires for every selection (rows and leaves alike), after the node's
+   * own `onSelect` — wire your router's navigate here. */
+  onNavigate?: (node: TreeNode) => void
+  /** Start with these ids expanded instead of the `defaultOpen` set. */
+  defaultExpandedIds?: Iterable<string>
+  onExpandedChange?: (ids: string[]) => void
+  /** Controlled rail fold (`sidebar` only). */
+  collapsed?: boolean
+  defaultCollapsed?: boolean
+  onCollapsedChange?: (collapsed: boolean) => void
+  /** Enables rename (`files`). Not needed when the hook owns the data. */
+  onRename?: (id: string, label: string) => void
+  /** Enables drag-and-drop (`files`). `parentId` `null` means the root
+   * list, `index` is the slot among the new siblings (computed on the list
+   * without the moved node). Not needed when the hook owns the data. */
+  onMove?: (id: string, parentId: string | null, index: number) => void
+  /** Expand/collapse cues. Silent until `bindSounds()`. */
+  sound?: boolean
+}
+
+/** Everything the tree can do, callable from outside the component.
+ * Returned by `useTree` and accepted by `<Tree tree={…} />`. */
+export interface TreeController {
+  variant: TreeVariant
+  items: TreeNode[]
+  /** `navigation` with 3 levels of nodes — depth 0 renders as sections. */
+  sectioned: boolean
+  /** Ids of the section headings, empty unless `sectioned`. Pass one to
+   * `expand`/`collapse`/`toggleExpanded` to work a whole section. */
+  sectionIds: string[]
+  sound: boolean
+  getNode: (id: string) => TreeNode | null
+
+  expandedIds: ReadonlySet<string>
+  isExpanded: (id: string) => boolean
+  expand: (id: string) => void
+  collapse: (id: string) => void
+  toggleExpanded: (id: string) => void
+  expandAll: () => void
+  collapseAll: () => void
+  /** Open every ancestor of `id`, leaving the rest of the tree alone. */
+  reveal: (id: string) => void
+
+  /** Rail folded to icons — always `false` outside `sidebar`. */
+  collapsed: boolean
+  setCollapsed: (collapsed: boolean) => void
+  toggleCollapsed: () => void
+
+  activeId?: string
+  /** Select a node: runs its `onSelect`, then `onNavigate`. Inert on
+   * disabled and unknown nodes. */
+  select: (id: string) => void
+
+  /** Whether rename is wired up at all (`files` + a handler or owned data). */
+  canRename: boolean
+  /** Rename target id, `null` while idle. */
+  renamingId: string | null
+  startRename: (id: string) => void
+  cancelRename: () => void
+  /** Commit a rename and leave rename mode. Blank or unchanged labels are
+   * dropped. */
+  rename: (id: string, label: string) => void
+
+  /** Whether reorder is wired up at all. */
+  canMove: boolean
+  move: (id: string, parentId: string | null, index: number) => void
+
+  dnd: TreeDndContextValue
+}
+
 /** @internal What a row needs from the root, threaded through context so
  * the recursive rows stay prop-light. */
 export interface TreeContextValue {
-  variant: TreeVariant
-  /** `navigation` with 3 levels of nodes — depth 0 renders as sections. */
-  sectioned: boolean
-  activeId?: string
-  collapsed: boolean
-  sound: boolean
-  onNavigate?: (node: TreeNode) => void
-  onRename?: (id: string, label: string) => void
+  tree: TreeController
   renderTrailing?: (node: TreeNode) => React.ReactNode
-  isExpanded: (id: string) => boolean
-  toggleExpanded: (id: string) => void
-  /** Rename target id, `null` while idle. */
-  renamingId: string | null
-  setRenamingId: (id: string | null) => void
-  dnd: TreeDndContextValue
 }
 
 /** @internal Drag state shared by every row (all `null`/no-op outside

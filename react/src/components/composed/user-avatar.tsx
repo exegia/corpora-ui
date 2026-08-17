@@ -69,7 +69,10 @@ export function UserAvatar({
 
   return (
     <Avatar
-      className={cn("size-8", className)}
+      className={cn(
+        "size-8 border-2 border-white bg-neutral-800 text-xl",
+        className
+      )}
       data-loading={loading || undefined}
       data-slot="user-avatar"
       {...props}

@@ -174,6 +174,31 @@ describe("Tree · toc", () => {
 })
 
 describe("Tree · sidebar", () => {
+  test("the rail's width class tracks collapsed in both directions", async () => {
+    // Locks the resting widths to the class, so the rail is right even when
+    // the animation never applies. NB this does NOT reproduce the bug it was
+    // written alongside — that was an inline width pinned at 44px by a
+    // px-against-"100%" motion target, and motion sets no inline styles
+    // under happy-dom. Only a real browser catches that one.
+    const { rerender } = render(<Tree items={RAIL} variant="sidebar" />)
+    const rail = () => document.querySelector('[data-slot="tree"]')
+
+    expect(rail()?.className).toContain("w-full")
+    expect(rail()?.getAttribute("data-collapsed")).toBeNull()
+
+    rerender(<Tree collapsed items={RAIL} variant="sidebar" />)
+    await settleExit()
+    expect(rail()?.className).toContain("w-11")
+    expect(rail()?.getAttribute("data-collapsed")).toBe("")
+
+    // Back open — the direction that was broken.
+    rerender(<Tree items={RAIL} variant="sidebar" />)
+    await settleExit()
+    expect(rail()?.className).toContain("w-full")
+    expect(rail()?.className).not.toContain("w-11")
+    expect(rail()?.getAttribute("data-collapsed")).toBeNull()
+  })
+
   test("collapsed shows icon-only rows that keep an accessible name", async () => {
     const { rerender } = render(<Tree items={RAIL} variant="sidebar" />)
     expect(screen.getByRole("link", { name: "Search" }).textContent).toContain(
@@ -183,27 +208,34 @@ describe("Tree · sidebar", () => {
     rerender(<Tree collapsed items={RAIL} variant="sidebar" />)
     await settleExit()
     const row = screen.getByRole("link", { name: "Search" })
-    // The visible label folded away; aria-label carries the name.
-    expect(row.textContent).not.toContain("Search")
+    // The label folds to nothing rather than unmounting — keeping it in the
+    // DOM is what lets the fold animate — so assert the fold, not absence.
+    const label = row.querySelector('[data-slot="tree-row-label"]')
+    expect(label?.textContent).toBe("Search")
+    expect(label?.getAttribute("style")).toContain("display: none")
+    // With the label hidden, aria-label is what names the row.
     expect(row.getAttribute("aria-label")).toBe("Search")
   })
 
-  test("collapsed rail rows are tooltip triggers; expanded rows are not", () => {
+  test("rail rows are tooltip triggers and keep identity across collapse", async () => {
     // happy-dom can't drive Base UI's hover/focus-visible open logic, so
     // assert the wiring: Base UI stamps its trigger attribute on the row.
     const { rerender } = render(<Tree collapsed items={RAIL} variant="sidebar" />)
-    expect(
-      screen
-        .getByRole("link", { name: "Search" })
-        .hasAttribute("data-base-ui-tooltip-trigger")
-    ).toBe(true)
+    const collapsedRow = screen.getByRole("link", { name: "Search" })
+    expect(collapsedRow.hasAttribute("data-base-ui-tooltip-trigger")).toBe(true)
 
+    // The tooltip wrapper stays mounted when the rail expands (it is only
+    // disabled) — a remounted row would cut the label fold animation short.
+    // Let the label unfold before querying: mid-animation it is still
+    // display:none, and the row has no aria-label once expanded, so it has
+    // no accessible name to match on until the fold-out finishes.
+    // NB this asserts identity, not the fold-out itself — motion settles
+    // instantly under happy-dom, while in a real browser the rail currently
+    // does not reanimate back open. That defect is tracked separately; do
+    // not read this test as covering it.
     rerender(<Tree items={RAIL} variant="sidebar" />)
-    expect(
-      screen
-        .getByRole("link", { name: "Search" })
-        .hasAttribute("data-base-ui-tooltip-trigger")
-    ).toBe(false)
+    await settleExit()
+    expect(screen.getByRole("link", { name: "Search" })).toBe(collapsedRow)
   })
 
   test("nested children are ignored — the rail is single-level", () => {
@@ -238,6 +270,34 @@ describe("Tree · files", () => {
     expect(onNavigate).toHaveBeenCalledTimes(1)
     await settleExit()
     expect(screen.queryByText("index.ts")).toBeNull()
+  })
+
+  test("trailing actions sit beside the row, not inside it", async () => {
+    const user = userEvent.setup()
+    const onDelete = mock(() => {})
+    render(
+      <Tree
+        items={FILES}
+        renderTrailing={(node) => (
+          <button onClick={onDelete} type="button">
+            {`Delete ${node.label}`}
+          </button>
+        )}
+        variant="files"
+      />
+    )
+
+    // A folder row is a <button> and a leaf row an <a> — either one nesting
+    // the trailing button would be invalid markup React warns about.
+    for (const row of document.querySelectorAll('[data-slot="tree-row"]')) {
+      expect(row.querySelector("button, a")).toBeNull()
+    }
+
+    // Still wired: pressing it does not also toggle or navigate the row.
+    const folder = screen.getByRole("button", { name: /^src/ })
+    await user.click(screen.getByRole("button", { name: "Delete src" }))
+    expect(onDelete).toHaveBeenCalledTimes(1)
+    expect(folder.getAttribute("aria-expanded")).toBe("true")
   })
 
   test("double-click renames inline; Enter commits, Escape cancels", async () => {

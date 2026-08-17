@@ -180,7 +180,7 @@ export const components: RegistryEntry[] = [
         name: "renderTrailing",
         type: "(node: TreeNode) => ReactNode",
         description:
-          "files only — row actions revealed on hover/focus, e.g. a menu or delete button.",
+          "files only — row actions revealed on hover/focus, e.g. a menu or delete button. Rendered beside the row, not inside it, so the content may be interactive; the row reserves ~36px for it, and a wider slot overlaps the truncated label.",
       },
       {
         name: "sound",
@@ -188,15 +188,29 @@ export const components: RegistryEntry[] = [
         default: "true",
         description: "Expand/collapse cues. Silent until bindSounds().",
       },
+      {
+        name: "tree",
+        type: "TreeController",
+        description:
+          "A useTree() controller, in place of items and the handler props. Every behaviour — expand, collapse, select, rename, reorder, fold the rail — becomes callable from outside the component.",
+      },
     ],
-    usage: `import { Tree } from "@corpora/ui"
+    usage: `import { Tree, useTree } from "@corpora/ui"
 
+// Props form — the tree owns its state.
 <Tree
   variant="navigation"
   items={items}
   activeId={pathnameId}
   onNavigate={(node) => navigate(node.href!)}
-/>`,
+/>
+
+// Controller form — drive it from anywhere.
+const tree = useTree({ variant: "files", defaultItems: files })
+
+<Tree tree={tree} />
+<Button onClick={tree.collapseAll}>Collapse all</Button>
+<Button onClick={() => tree.startRename(tree.activeId!)}>Rename</Button>`,
   },
   {
     slug: "search-field",

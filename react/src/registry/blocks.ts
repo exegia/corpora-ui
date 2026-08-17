@@ -571,10 +571,16 @@ export const blocks: RegistryEntry[] = [
           "The selected row. Controlled via `activeId`, uncontrolled via `defaultActiveId`.",
       },
       {
-        name: "defaultExpandedIds",
-        type: "string[]",
+        name: "expandedIds / defaultExpandedIds / onExpandedChange",
+        type: "string[] / string[] / (ids) => void",
         description:
-          "Ids expanded on first render. Expansion is owned by the tree thereafter.",
+          "Which rows are open. Controlled via `expandedIds`, uncontrolled via `defaultExpandedIds`.",
+      },
+      {
+        name: "controller",
+        type: "AISidebarController",
+        description:
+          "A useAISidebar() controller, in place of the data and handler props. Every behaviour — select, expand/collapse (one row, all rows, or the ancestors of one), move focus, rename, open a row's menu, reorder — becomes callable from outside the block.",
       },
       {
         name: "renderIcon",
@@ -600,15 +606,23 @@ export const blocks: RegistryEntry[] = [
         description: "Accessible name for the tree.",
       },
     ],
-    usage: `import { Sidebar, type SidebarResource } from "@corpora/ui"
+    usage: `import { Sidebar, useAISidebar, type SidebarResource } from "@corpora/ui"
 
+// Props form — the block owns its state.
 <Sidebar.Wrapper
   defaultItems={resources}
   defaultExpandedIds={["corpora"]}
   defaultActiveId="codex-a"
   onActiveChange={setActiveId}
   onMove={(move) => persistMove(move)}
-/>`,
+/>
+
+// Controller form — drive it from anywhere.
+const sidebar = useAISidebar({ defaultItems: resources })
+
+<Sidebar.Wrapper controller={sidebar} />
+<Button onClick={sidebar.collapseAll}>Collapse all</Button>
+<Button onClick={() => sidebar.startRename(sidebar.selectedId!)}>Rename</Button>`,
   },
   {
     slug: "sidebar-block",

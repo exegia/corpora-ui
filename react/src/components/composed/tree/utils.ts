@@ -45,6 +45,40 @@ export function initialExpandedIds(
   return expanded
 }
 
+/** Ids of every node that can hold children — the set `expandAll` opens.
+ * In `files` an empty `children: []` still counts (it is a folder). */
+export function expandableIdsOf(
+  items: readonly TreeNode[],
+  filesVariant = false
+): string[] {
+  const ids: string[] = []
+  const walk = (nodes: readonly TreeNode[]) => {
+    for (const node of nodes) {
+      const branch = filesVariant
+        ? node.children !== undefined
+        : (node.children?.length ?? 0) > 0
+      if (branch) ids.push(node.id)
+      if (node.children) walk(node.children)
+    }
+  }
+  walk(items)
+  return ids
+}
+
+/** Immutably relabel `id`. Returns the same array reference when absent. */
+export function renameNode(
+  items: readonly TreeNode[],
+  id: string,
+  label: string
+): TreeNode[] {
+  return items.map((node) => {
+    if (node.id === id) return { ...node, label }
+    return node.children
+      ? { ...node, children: renameNode(node.children, id, label) }
+      : node
+  })
+}
+
 /** Whether `candidateId` is `id` itself or nests anywhere under it — the
  * guard that keeps a folder from being dropped into its own subtree. */
 export function containsNode(
