@@ -1,6 +1,10 @@
 "use client"
 
-import { ChevronRightIcon } from "lucide-react"
+import {
+  ChevronRightIcon,
+  LucideChevronLeft,
+  LucideChevronRight,
+} from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import * as React from "react"
 
@@ -56,7 +60,8 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
   // The sidebar rail is single-level by contract — nested children are
   // ignored rather than rendered somewhere misleading.
   const children = ctx.variant === "sidebar" ? [] : (node.children ?? [])
-  const canExpand = kind !== "link" || (ctx.variant === "toc" && children.length > 0)
+  const canExpand =
+    kind !== "link" || (ctx.variant === "toc" && children.length > 0)
   const open = ctx.isExpanded(node.id)
   const active = ctx.activeId === node.id
   const renaming = ctx.renamingId === node.id
@@ -189,18 +194,26 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
 
   const chevron = canExpand ? (
     <motion.span
-      animate={{ rotate: open ? 90 : 0 }}
+      animate={{ rotate: open ? (ctx.variant === "navigation" ? -90 : 90) : 0 }}
       aria-hidden
       className="flex size-4 shrink-0 items-center justify-center text-muted-foreground/70"
       transition={reduce ? { duration: 0 } : TREE_MICRO_TRANSITION}
     >
-      <ChevronRightIcon className="size-3.5" />
+      {ctx.variant === "sidebar" && (
+        <LucideChevronLeft className="size-3.5 stroke-3" />
+      )}
+      {ctx.variant === "toc" && (
+        <LucideChevronRight className="size-3.5 stroke-3" />
+      )}
+      {ctx.variant === "navigation" && (
+        <LucideChevronLeft className="size-3.5 stroke-3" />
+      )}
     </motion.span>
   ) : null
 
   const rowClassName = cn(
     "group/row relative flex w-full min-w-0 items-center gap-2 rounded-md px-2",
-    "text-left text-muted-foreground outline-none transition-colors duration-150",
+    "text-left text-muted-foreground transition-colors duration-150 outline-none",
     "hover:bg-accent hover:text-accent-foreground",
     "focus-visible:ring-2 focus-visible:ring-ring",
     files ? "h-7 text-[0.8125rem]" : "h-8 text-sm",
@@ -248,17 +261,18 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
         </span>
       )}
       {label}
-      {node.badge !== undefined && !(ctx.variant === "sidebar" && collapsed) && (
-        <span className="ml-auto shrink-0 text-xs text-muted-foreground/80">
-          {node.badge}
-        </span>
-      )}
+      {node.badge !== undefined &&
+        !(ctx.variant === "sidebar" && collapsed) && (
+          <span className="ml-auto shrink-0 text-xs text-muted-foreground/80">
+            {node.badge}
+          </span>
+        )}
       {files && ctx.renderTrailing && !renaming && (
         <span
           className={cn(
             node.badge !== undefined ? "ml-1" : "ml-auto",
             "flex shrink-0 items-center opacity-0 transition-opacity duration-150",
-            "group-hover/row:opacity-100 group-focus-within/row:opacity-100"
+            "group-focus-within/row:opacity-100 group-hover/row:opacity-100"
           )}
           data-slot="tree-trailing"
           onClick={(event) => event.stopPropagation()}
@@ -290,7 +304,7 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
         className={cn(
           "group/row flex w-full items-center gap-1 rounded-md px-2 pt-1 pb-1",
           "text-xs font-medium tracking-wide text-muted-foreground/80 uppercase",
-          "outline-none transition-colors duration-150 hover:text-foreground",
+          "transition-colors duration-150 outline-none hover:text-foreground",
           "focus-visible:ring-2 focus-visible:ring-ring"
         )}
         onClick={handlePress}
@@ -389,7 +403,10 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
       variants={reduce ? undefined : TREE_ROW_VARIANTS}
     >
       {drop === "before" && <TreeDropLine side="top" />}
-      <div className="relative">{row}{tocToggle}</div>
+      <div className="relative">
+        {row}
+        {tocToggle}
+      </div>
       {canExpand && children.length > 0 && (
         <AnimatePresence initial={false}>
           {open && (
