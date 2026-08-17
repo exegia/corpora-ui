@@ -199,8 +199,7 @@ export default function TreeDemo() {
             renderTrailing={(node) => (
               <Button
                 aria-label={`Delete ${node.label}`}
-                className="size-5"
-                size="icon"
+                size="icon-xs"
                 variant="ghost"
               >
                 <Trash2Icon className="size-3" />
