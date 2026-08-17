@@ -180,7 +180,7 @@ export const components: RegistryEntry[] = [
         name: "renderTrailing",
         type: "(node: TreeNode) => ReactNode",
         description:
-          "files only — row actions revealed on hover/focus, e.g. a menu or delete button.",
+          "files only — row actions revealed on hover/focus, e.g. a menu or delete button. Rendered beside the row, not inside it, so the content may be interactive; the row reserves ~36px for it, and a wider slot overlaps the truncated label.",
       },
       {
         name: "sound",
