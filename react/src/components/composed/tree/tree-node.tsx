@@ -168,6 +168,7 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
               },
         }}
         className={cn("min-w-0 overflow-clip whitespace-nowrap")}
+        data-slot="tree-row-label"
       >
         {node.label}
       </motion.span>
