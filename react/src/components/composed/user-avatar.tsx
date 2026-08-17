@@ -69,7 +69,10 @@ export function UserAvatar({
 
   return (
     <Avatar
-      className={cn("size-8", className)}
+      className={cn(
+        "size-8 border-t-3 border-l-2 border-white/20 text-xl inset-shadow-sm inset-shadow-black outline-2 outline-offset-3 outline-sidebar-foreground/20",
+        className
+      )}
       data-loading={loading || undefined}
       data-slot="user-avatar"
       {...props}
@@ -90,7 +93,9 @@ export function UserAvatar({
             data-slot="avatar-skeleton"
           />
         ) : (
-          (initials ?? initialsFrom(name))
+          <span className="text-headline">
+            {initials ?? initialsFrom(name)}
+          </span>
         )}
       </AvatarFallback>
     </Avatar>

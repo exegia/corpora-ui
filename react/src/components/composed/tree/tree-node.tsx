@@ -1,10 +1,6 @@
 "use client"
 
-import {
-  ChevronRightIcon,
-  LucideChevronLeft,
-  LucideChevronRight,
-} from "lucide-react"
+import { LucideChevronLeft, LucideChevronRight } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import * as React from "react"
 
@@ -53,7 +49,7 @@ function rowKindOf(
 }
 
 export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
-  const ctx = useTreeContext()
+  const { tree: ctx, renderTrailing } = useTreeContext()
   const reduce = useReducedMotion()
   const kind = rowKindOf(node, depth, ctx.variant, ctx.sectioned)
 
@@ -87,23 +83,16 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
       return
     }
     if (kind === "link") {
-      node.onSelect?.()
-      ctx.onNavigate?.(node)
+      ctx.select(node.id)
       return
     }
     ctx.toggleExpanded(node.id)
   }
 
   function startRename(event: React.MouseEvent) {
-    if (!files || !ctx.onRename || node.disabled) return
+    if (!ctx.canRename || node.disabled) return
     event.preventDefault()
-    ctx.setRenamingId(node.id)
-  }
-
-  function commitRename(value: string) {
-    const label = value.trim()
-    if (label && label !== node.label) ctx.onRename?.(node.id, label)
-    ctx.setRenamingId(null)
+    ctx.startRename(node.id)
   }
 
   const label = renaming ? (
@@ -115,12 +104,12 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
       )}
       data-slot="tree-rename-input"
       defaultValue={node.label}
-      onBlur={(event) => commitRename(event.currentTarget.value)}
+      onBlur={(event) => ctx.rename(node.id, event.currentTarget.value)}
       onClick={(event) => event.stopPropagation()}
       onKeyDown={(event) => {
         event.stopPropagation()
-        if (event.key === "Enter") commitRename(event.currentTarget.value)
-        if (event.key === "Escape") ctx.setRenamingId(null)
+        if (event.key === "Enter") ctx.rename(node.id, event.currentTarget.value)
+        if (event.key === "Escape") ctx.cancelRename()
       }}
     />
   ) : ctx.variant === "sidebar" ? (
@@ -186,7 +175,7 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
   ) : (
     <span
       className="min-w-0 flex-1 truncate"
-      onDoubleClick={files && ctx.onRename ? startRename : undefined}
+      onDoubleClick={ctx.canRename ? startRename : undefined}
     >
       {node.label}
     </span>
@@ -267,7 +256,7 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
             {node.badge}
           </span>
         )}
-      {files && ctx.renderTrailing && !renaming && (
+      {files && renderTrailing && !renaming && (
         <span
           className={cn(
             node.badge !== undefined ? "ml-1" : "ml-auto",
@@ -277,7 +266,7 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
           data-slot="tree-trailing"
           onClick={(event) => event.stopPropagation()}
         >
-          {ctx.renderTrailing(node)}
+          {renderTrailing(node)}
         </span>
       )}
       {/* nav toggle chevrons trail like the sidebar block; files lead;

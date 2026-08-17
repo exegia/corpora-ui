@@ -6,7 +6,7 @@ import type {
   TreeDndContextValue,
   TreeDropPosition,
   TreeNode,
-  TreeProps,
+  UseTreeOptions,
 } from "./type"
 import { containsNode, findNode, locateNode } from "./utils"
 
@@ -21,7 +21,7 @@ const EDGE_RATIO = 0.25
  * webviews). Without `onMove` every handler is inert. */
 export function useTreeDnd(
   items: readonly TreeNode[],
-  onMove: TreeProps["onMove"]
+  onMove: UseTreeOptions["onMove"]
 ): TreeDndContextValue {
   const enabled = onMove !== undefined
   const [draggedId, setDraggedId] = React.useState<string | null>(null)

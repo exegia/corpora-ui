@@ -11,7 +11,7 @@ import {
 } from "lucide-react"
 import * as React from "react"
 
-import { moveNode, Tree, type TreeNode } from "@/components/composed/tree"
+import { Tree, type TreeNode, useTree } from "@/components/composed/tree"
 import { DemoSelect, DemoStage } from "@/components/docs/demo-controls"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -110,7 +110,15 @@ export default function TreeDemo() {
     React.useState<(typeof VARIANTS)[number]>("navigation")
   const [collapsed, setCollapsed] = React.useState(false)
   const [activeId, setActiveId] = React.useState<string | undefined>("reading")
-  const [files, setFiles] = React.useState(FILES)
+  // The `files` shape runs off a controller instead of props: it owns the
+  // data, so rename and drag-and-drop apply themselves, and the buttons
+  // below drive the same tree from outside it.
+  const files = useTree({
+    variant: "files",
+    defaultItems: FILES,
+    activeId,
+    onNavigate: (node) => setActiveId(node.id),
+  })
 
   return (
     <DemoStage
@@ -129,6 +137,24 @@ export default function TreeDemo() {
               options={["expanded", "collapsed"] as const}
               onChange={(value) => setCollapsed(value === "collapsed")}
             />
+          )}
+          {variant === "files" && (
+            <>
+              <Button onClick={files.expandAll} size="sm" variant="outline">
+                Expand all
+              </Button>
+              <Button onClick={files.collapseAll} size="sm" variant="outline">
+                Collapse all
+              </Button>
+              <Button
+                disabled={activeId === undefined}
+                onClick={() => activeId && files.startRename(activeId)}
+                size="sm"
+                variant="outline"
+              >
+                Rename
+              </Button>
+            </>
           )}
           {activeId !== undefined && <Badge variant="outline">{activeId}</Badge>}
         </>
@@ -169,15 +195,7 @@ export default function TreeDemo() {
         )}
         {variant === "files" && (
           <Tree
-            activeId={activeId}
-            items={files}
-            onMove={(id, parentId, index) =>
-              setFiles((prev) => moveNode(prev, id, parentId, index))
-            }
-            onNavigate={(node) => setActiveId(node.id)}
-            onRename={(id, label) =>
-              setFiles((prev) => renameNode(prev, id, label))
-            }
+            tree={files}
             renderTrailing={(node) => (
               <Button
                 aria-label={`Delete ${node.label}`}
@@ -188,20 +206,9 @@ export default function TreeDemo() {
                 <Trash2Icon className="size-3" />
               </Button>
             )}
-            variant="files"
           />
         )}
       </div>
     </DemoStage>
-  )
-}
-
-function renameNode(items: TreeNode[], id: string, label: string): TreeNode[] {
-  return items.map((node) =>
-    node.id === id
-      ? { ...node, label }
-      : node.children
-        ? { ...node, children: renameNode(node.children, id, label) }
-        : node
   )
 }
