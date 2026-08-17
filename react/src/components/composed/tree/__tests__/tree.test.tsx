@@ -174,6 +174,31 @@ describe("Tree · toc", () => {
 })
 
 describe("Tree · sidebar", () => {
+  test("the rail's width class tracks collapsed in both directions", async () => {
+    // Locks the resting widths to the class, so the rail is right even when
+    // the animation never applies. NB this does NOT reproduce the bug it was
+    // written alongside — that was an inline width pinned at 44px by a
+    // px-against-"100%" motion target, and motion sets no inline styles
+    // under happy-dom. Only a real browser catches that one.
+    const { rerender } = render(<Tree items={RAIL} variant="sidebar" />)
+    const rail = () => document.querySelector('[data-slot="tree"]')
+
+    expect(rail()?.className).toContain("w-full")
+    expect(rail()?.getAttribute("data-collapsed")).toBeNull()
+
+    rerender(<Tree collapsed items={RAIL} variant="sidebar" />)
+    await settleExit()
+    expect(rail()?.className).toContain("w-11")
+    expect(rail()?.getAttribute("data-collapsed")).toBe("")
+
+    // Back open — the direction that was broken.
+    rerender(<Tree items={RAIL} variant="sidebar" />)
+    await settleExit()
+    expect(rail()?.className).toContain("w-full")
+    expect(rail()?.className).not.toContain("w-11")
+    expect(rail()?.getAttribute("data-collapsed")).toBeNull()
+  })
+
   test("collapsed shows icon-only rows that keep an accessible name", async () => {
     const { rerender } = render(<Tree items={RAIL} variant="sidebar" />)
     expect(screen.getByRole("link", { name: "Search" }).textContent).toContain(

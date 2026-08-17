@@ -15,6 +15,11 @@ export const TREE_MICRO_DURATION = 0.15
 /** Sidebar rail label reveal/hide when `collapsed` flips. */
 export const TREE_COLLAPSE_DURATION = 0.2
 
+/** The collapsed rail's width in px — an icon row plus its padding. Kept in
+ * sync with the `w-11` resting class the rail falls back to before its
+ * expanded width has been measured. */
+export const RAIL_COLLAPSED_WIDTH = 44
+
 /** Rail label text fade — starts as the width growth is finishing, so the
  * label never reads as clipped mid-grow. */
 export const TREE_LABEL_REVEAL_DELAY = 0.01
