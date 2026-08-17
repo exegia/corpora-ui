@@ -5,7 +5,12 @@ import {
   DemoStage,
 } from "@/components/docs/demo-controls"
 import { Badge } from "@/components/ui/badge";
-import { Sidebar, type SidebarResource } from "@/components/blocks/nav/sidebar";
+import { Button } from "@/components/ui/button";
+import {
+  Sidebar,
+  useAISidebar,
+  type SidebarResource,
+} from "@/components/blocks/nav/sidebar";
 
 const RESOURCES: SidebarResource[] = [
   {
@@ -39,6 +44,14 @@ export default function ResourceTreeDemo() {
     React.useState<(typeof COLLAPSIBLE)[number]>("icon")
   const [variant, setVariant] =
     React.useState<(typeof VARIANTS)[number]>("sidebar")
+  // The block runs off a controller, so the buttons beside it drive the
+  // same tree the rows do.
+  const sidebar = useAISidebar({
+    defaultItems: RESOURCES,
+    defaultExpandedIds: ["corpora", "manuscripts"],
+    defaultActiveId: "codex-a",
+    onActiveChange: setActiveId,
+  })
 
   return (
     <DemoStage
@@ -54,6 +67,21 @@ export default function ResourceTreeDemo() {
             options={VARIANTS}
             onChange={setVariant}
           />
+          <Button onClick={sidebar.expandAll} size="sm" variant="outline">
+            Expand all
+          </Button>
+          <Button onClick={sidebar.collapseAll} size="sm" variant="outline">
+            Collapse all
+          </Button>
+          <Button
+            onClick={() =>
+              sidebar.selectedId && sidebar.startRename(sidebar.selectedId)
+            }
+            size="sm"
+            variant="outline"
+          >
+            Rename
+          </Button>
           <Badge className="capitalize" variant="outline">{activeId}</Badge>
         </>
       }
@@ -62,12 +90,7 @@ export default function ResourceTreeDemo() {
       {/* The tree claims no page layout, so the demo supplies the frame. */}
       <div className="flex h-150 w-full overflow-hidden rounded-lg border pt-12">
         <div className="w-64 shrink-0 overflow-y-auto border-r p-2">
-          <Sidebar.Wrapper
-            defaultItems={RESOURCES}
-            defaultExpandedIds={["corpora", "manuscripts"]}
-            defaultActiveId="codex-a"
-            onActiveChange={setActiveId}
-          />
+          <Sidebar.Wrapper controller={sidebar} />
         </div>
         <div className="grid flex-1 place-items-center p-6 text-center text-sm text-muted-foreground">
           Your page content sits here — the block is the panel only.

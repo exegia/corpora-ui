@@ -11,51 +11,63 @@ import {
   useState,
 } from "react";
 import type {
-  AISidebarProps,
+  AISidebarController,
   DropTarget,
   FlatResource,
   SidebarResource,
   SidebarResourceMove,
+  UseAISidebarOptions,
 } from "./type.ts"
 import {
+  ancestorIdsOf,
   canContain,
   containsResource,
+  expandableIdsOf,
   findResource,
   flattenResources,
   moveResource,
   renameResource,
 } from "./utils.ts"
 
-export type UseAISidebarOptions = Pick<
-  AISidebarProps,
-  | "items"
-  | "defaultItems"
-  | "onItemsChange"
-  | "onMove"
-  | "onMoveError"
-  | "onRename"
-  | "activeId"
-  | "defaultActiveId"
-  | "onActiveChange"
-  | "defaultExpandedIds"
->
+export type { UseAISidebarOptions }
 
-export function useAISidebar({
-  items,
-  defaultItems = [],
-  onItemsChange,
-  onMove,
-  onMoveError,
-  onRename,
-  activeId,
-  defaultActiveId = null,
-  onActiveChange,
-  defaultExpandedIds = [],
-}: UseAISidebarOptions) {
+/**
+ * The AI sidebar's headless controller — every behaviour the block
+ * performs, callable from outside it: select, expand/collapse (one row,
+ * every row, or just the ancestors of one), move focus, rename, open a
+ * row's action menu, reorder.
+ *
+ * `items`, `activeId` and `expandedIds` are each controlled when passed
+ * and hook-owned via their `default*` twin otherwise. Reorder and rename
+ * are applied to the data optimistically either way and rolled back if
+ * `onMove`/`onRename` rejects, so a consumer never reduces the tree
+ * itself — `moveResource` and `renameResource` are exported for the ones
+ * who keep their data elsewhere.
+ *
+ * ```tsx
+ * const sidebar = useAISidebar({ defaultItems: resources })
+ * <AISidebar controller={sidebar} />
+ * <Button onClick={sidebar.collapseAll}>Collapse all</Button>
+ * ```
+ */
+export function useAISidebar(options: UseAISidebarOptions): AISidebarController {
+  const {
+    items,
+    defaultItems = [],
+    onItemsChange,
+    onMove,
+    onMoveError,
+    onRename,
+    activeId,
+    defaultActiveId = null,
+    onActiveChange,
+    onExpandedChange,
+  } = options
+
   const [internalItems, setInternalItems] = useState(items ?? defaultItems);
   const [internalActiveId, setInternalActiveId] = useState(defaultActiveId);
-  const [expandedIds, setExpandedIds] = useState(
-    () => new Set(defaultExpandedIds),
+  const [ownExpandedIds, setOwnExpandedIds] = useState(
+    () => new Set(options.defaultExpandedIds ?? []),
   );
   const [focusedId, setFocusedId] = useState<string | null>(
     activeId ?? defaultActiveId,
@@ -67,10 +79,19 @@ export function useAISidebar({
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const hoverLayoutId = useId();
   const [announcement, setAnnouncement] = useState("");
+  // `movePending` is mirrored in a ref because the guard has to read it
+  // synchronously, before React has committed the state change.
+  const [movePending, setMovePending] = useState(false);
   const rowRefs = useRef(new Map<string, HTMLDivElement>());
   const movePendingRef = useRef(false);
   const renderedItems = internalItems;
   const selectedId = activeId ?? internalActiveId;
+
+  const controlledExpandedIds = options.expandedIds
+  const expandedIds = useMemo(
+    () => (controlledExpandedIds ? new Set(controlledExpandedIds) : ownExpandedIds),
+    [controlledExpandedIds, ownExpandedIds],
+  )
 
   const [prevItems, setPrevItems] = useState(items);
   if (items !== prevItems) {
@@ -112,7 +133,70 @@ export function useAISidebar({
     [onItemsChange],
   );
 
-  const performMove = useCallback(
+  const commitExpanded = useCallback(
+    (next: Set<string>) => {
+      if (controlledExpandedIds === undefined) setOwnExpandedIds(next);
+      onExpandedChange?.([...next]);
+    },
+    [controlledExpandedIds, onExpandedChange],
+  );
+
+  const getItem = useCallback(
+    (id: string) => findResource(renderedItems, id),
+    [renderedItems],
+  );
+
+  const isExpanded = useCallback(
+    (id: string) => expandedIds.has(id),
+    [expandedIds],
+  );
+
+  const expand = useCallback(
+    (id: string) => {
+      if (expandedIds.has(id)) return;
+      commitExpanded(new Set(expandedIds).add(id));
+    },
+    [commitExpanded, expandedIds],
+  );
+
+  const collapse = useCallback(
+    (id: string) => {
+      if (!expandedIds.has(id)) return;
+      const next = new Set(expandedIds);
+      next.delete(id);
+      commitExpanded(next);
+    },
+    [commitExpanded, expandedIds],
+  );
+
+  const toggleExpanded = useCallback(
+    (id: string) => {
+      const next = new Set(expandedIds);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      commitExpanded(next);
+    },
+    [commitExpanded, expandedIds],
+  );
+
+  const expandAll = useCallback(() => {
+    commitExpanded(new Set(expandableIdsOf(renderedItems)));
+  }, [commitExpanded, renderedItems]);
+
+  const collapseAll = useCallback(() => {
+    commitExpanded(new Set());
+  }, [commitExpanded]);
+
+  const reveal = useCallback(
+    (id: string) => {
+      const ancestors = ancestorIdsOf(renderedItems, id);
+      if (!ancestors.some((ancestor) => !expandedIds.has(ancestor))) return;
+      commitExpanded(new Set([...expandedIds, ...ancestors]));
+    },
+    [commitExpanded, expandedIds, renderedItems],
+  );
+
+  const move = useCallback(
     async (move: SidebarResourceMove) => {
       if (movePendingRef.current) {
         setAnnouncement("Wait for the current move to finish.");
@@ -123,6 +207,7 @@ export function useAISidebar({
       if (!next || next === before) return;
 
       movePendingRef.current = true;
+      setMovePending(true);
       updateItems(next);
       setDropTarget(null);
       setDraggingId(null);
@@ -142,12 +227,13 @@ export function useAISidebar({
         onMoveError?.(error, move);
       } finally {
         movePendingRef.current = false;
+        setMovePending(false);
       }
     },
     [onMove, onMoveError, renderedItems, updateItems],
   );
 
-  const focusRow = useCallback((id: string) => {
+  const focus = useCallback((id: string) => {
     setFocusedId(id);
     requestAnimationFrame(() => rowRefs.current.get(id)?.focus());
   }, []);
@@ -160,16 +246,52 @@ export function useAISidebar({
     [activeId, onActiveChange],
   );
 
-  const toggle = useCallback((id: string) => {
-    setExpandedIds((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
+  const startRename = useCallback(
+    (id: string) => {
+      // An id from elsewhere would arm rename mode against a row that
+      // never renders.
+      if (!findResource(renderedItems, id)) return;
+      setRenamingId(id);
+    },
+    [renderedItems],
+  );
 
-  const handleKeyDown = useCallback(
+  const cancelRename = useCallback(() => setRenamingId(null), []);
+
+  const rename = useCallback(
+    (id: string, label: string) => {
+      const trimmed = label.trim();
+      setRenamingId(null);
+      const item = findResource(renderedItems, id);
+      if (!item || !trimmed || trimmed === item.label) return;
+      const before = renderedItems;
+      updateItems(renameResource(before, id, trimmed));
+      void Promise.resolve(onRename?.(item, trimmed)).catch(() => {
+        updateItems(before);
+        setAnnouncement(`Rename failed. ${item.label} was restored.`);
+      });
+    },
+    [onRename, renderedItems, updateItems],
+  );
+
+  const openMenu = useCallback(
+    (id: string) => {
+      if (!findResource(renderedItems, id)) return;
+      setMenuOpenId(id);
+    },
+    [renderedItems],
+  );
+
+  // Closing returns focus to the row that owned the menu — otherwise focus
+  // falls back to the body and the keyboard user loses their place.
+  const closeMenu = useCallback(() => {
+    setMenuOpenId((current) => {
+      if (current) focus(current);
+      return null;
+    });
+  }, [focus]);
+
+  const onRowKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>, row: FlatResource) => {
       const index = flat.findIndex(({ item }) => item.id === row.item.id);
       const previous = flat[index - 1];
@@ -178,29 +300,29 @@ export function useAISidebar({
 
       if (event.key === "ArrowDown" && !moveModifier && next) {
         event.preventDefault();
-        focusRow(next.item.id);
+        focus(next.item.id);
         return;
       }
       if (event.key === "ArrowUp" && !moveModifier && previous) {
         event.preventDefault();
-        focusRow(previous.item.id);
+        focus(previous.item.id);
         return;
       }
       if (event.key === "Home" && flat[0]) {
         event.preventDefault();
-        focusRow(flat[0].item.id);
+        focus(flat[0].item.id);
         return;
       }
       if (event.key === "End" && flat.at(-1)) {
         event.preventDefault();
-        focusRow(flat.at(-1)?.item.id ?? row.item.id);
+        focus(flat.at(-1)?.item.id ?? row.item.id);
         return;
       }
 
       if (row.item.disabled) {
         if (event.key === "ArrowLeft" && row.parentId) {
           event.preventDefault();
-          focusRow(row.parentId);
+          focus(row.parentId);
         } else if (
           moveModifier ||
           ["ArrowRight", "Enter", " ", "F2", "ContextMenu"].includes(
@@ -215,50 +337,61 @@ export function useAISidebar({
 
       if (moveModifier && event.key === "ArrowUp" && previous) {
         event.preventDefault();
-        void performMove({ itemId: row.item.id, targetId: previous.item.id, position: "before" });
+        void move({ itemId: row.item.id, targetId: previous.item.id, position: "before" });
         return;
       }
       if (moveModifier && event.key === "ArrowDown" && next) {
         event.preventDefault();
-        void performMove({ itemId: row.item.id, targetId: next.item.id, position: "after" });
+        void move({ itemId: row.item.id, targetId: next.item.id, position: "after" });
         return;
       }
       if (moveModifier && event.key === "ArrowRight" && previous && canContain(previous.item)) {
         event.preventDefault();
-        setExpandedIds((current) => new Set(current).add(previous.item.id));
-        void performMove({ itemId: row.item.id, targetId: previous.item.id, position: "inside" });
+        expand(previous.item.id);
+        void move({ itemId: row.item.id, targetId: previous.item.id, position: "inside" });
         return;
       }
       if (moveModifier && event.key === "ArrowLeft" && row.parentId) {
         event.preventDefault();
-        void performMove({ itemId: row.item.id, targetId: row.parentId, position: "after" });
+        void move({ itemId: row.item.id, targetId: row.parentId, position: "after" });
         return;
       }
 
       if (event.key === "ArrowRight" && canContain(row.item)) {
         event.preventDefault();
-        if (!expandedIds.has(row.item.id)) toggle(row.item.id);
-        else if (next?.parentId === row.item.id) focusRow(next.item.id);
+        if (!expandedIds.has(row.item.id)) expand(row.item.id);
+        else if (next?.parentId === row.item.id) focus(next.item.id);
       } else if (event.key === "ArrowLeft") {
         event.preventDefault();
-        if (expandedIds.has(row.item.id)) toggle(row.item.id);
-        else if (row.parentId) focusRow(row.parentId);
+        if (expandedIds.has(row.item.id)) collapse(row.item.id);
+        else if (row.parentId) focus(row.parentId);
       } else if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        if (canContain(row.item)) toggle(row.item.id);
+        if (canContain(row.item)) toggleExpanded(row.item.id);
         else select(row.item.id);
       } else if (event.key === "F2") {
         event.preventDefault();
-        setRenamingId(row.item.id);
+        startRename(row.item.id);
       } else if (event.key === "ContextMenu" || (event.shiftKey && event.key === "F10")) {
         event.preventDefault();
-        setMenuOpenId(row.item.id);
+        openMenu(row.item.id);
       }
     },
-    [expandedIds, flat, focusRow, performMove, select, toggle],
+    [
+      collapse,
+      expand,
+      expandedIds,
+      flat,
+      focus,
+      move,
+      openMenu,
+      select,
+      startRename,
+      toggleExpanded,
+    ],
   );
 
-  const handleRootDragOver = useCallback(
+  const onRootDragOver = useCallback(
     (event: DragEvent<HTMLDivElement>) => {
       if (!draggingId || event.target !== event.currentTarget) return;
       event.preventDefault();
@@ -267,22 +400,22 @@ export function useAISidebar({
     [draggingId],
   );
 
-  const handleDrop = useCallback(
+  const onDrop = useCallback(
     (event: DragEvent<HTMLDivElement>) => {
       event.preventDefault();
       event.stopPropagation();
       if (draggingId && dropTarget) {
-        void performMove({
+        void move({
           itemId: draggingId,
           targetId: dropTarget.id,
           position: dropTarget.position,
         });
       }
     },
-    [draggingId, dropTarget, performMove],
+    [draggingId, dropTarget, move],
   );
 
-  const handleRowDragStart = useCallback(
+  const onRowDragStart = useCallback(
     (event: DragEvent<HTMLDivElement>, id: string) => {
       setDraggingId(id);
       event.dataTransfer.effectAllowed = "move";
@@ -291,12 +424,12 @@ export function useAISidebar({
     [],
   );
 
-  const handleRowDragEnd = useCallback(() => {
+  const onRowDragEnd = useCallback(() => {
     setDraggingId(null);
     setDropTarget(null);
   }, []);
 
-  const handleRowDragOver = useCallback(
+  const onRowDragOver = useCallback(
     (event: DragEvent<HTMLDivElement>, targetRow: FlatResource) => {
       if (!draggingId || draggingId === targetRow.item.id) return;
       const source = findResource(renderedItems, draggingId);
@@ -319,30 +452,7 @@ export function useAISidebar({
     [draggingId, renderedItems],
   );
 
-  const commitRename = useCallback(
-    (row: FlatResource, label: string) => {
-      const trimmed = label.trim();
-      setRenamingId(null);
-      if (!trimmed || trimmed === row.item.label) return;
-      const before = renderedItems;
-      updateItems(renameResource(before, row.item.id, trimmed));
-      void Promise.resolve(onRename?.(row.item, trimmed)).catch(() => {
-        updateItems(before);
-        setAnnouncement(`Rename failed. ${row.item.label} was restored.`);
-      });
-    },
-    [onRename, renderedItems, updateItems],
-  );
-
-  const handleMenuOpenChange = useCallback(
-    (row: FlatResource, open: boolean) => {
-      setMenuOpenId(open ? row.item.id : null);
-      if (!open) focusRow(row.item.id);
-    },
-    [focusRow],
-  );
-
-  const handleRowHover = useCallback((id: string, hovered: boolean) => {
+  const onRowHover = useCallback((id: string, hovered: boolean) => {
     setHoveredId((current) =>
       hovered ? id : current === id ? null : current,
     );
@@ -355,32 +465,99 @@ export function useAISidebar({
     else rowRefs.current.delete(id);
   }, []);
 
-  return {
-    flat,
-    selectedId,
-    expandedIds,
-    focusedId,
-    setFocusedId,
-    draggingId,
-    dropTarget,
-    hoveredId,
-    hoverLayoutId,
-    handleRowHover,
-    clearHover,
-    menuOpenId,
-    renamingId,
-    setRenamingId,
-    announcement,
-    select,
-    toggle,
-    handleKeyDown,
-    handleRootDragOver,
-    handleDrop,
-    handleRowDragStart,
-    handleRowDragEnd,
-    handleRowDragOver,
-    commitRename,
-    handleMenuOpenChange,
-    setRowRef,
-  };
+  const dnd = useMemo(
+    () => ({
+      draggingId,
+      dropTarget,
+      onRootDragOver,
+      onDrop,
+      onRowDragStart,
+      onRowDragEnd,
+      onRowDragOver,
+    }),
+    [
+      draggingId,
+      dropTarget,
+      onRootDragOver,
+      onDrop,
+      onRowDragStart,
+      onRowDragEnd,
+      onRowDragOver,
+    ],
+  );
+
+  const hover = useMemo(
+    () => ({
+      hoveredId,
+      layoutId: hoverLayoutId,
+      onRowHover,
+      clear: clearHover,
+    }),
+    [clearHover, hoverLayoutId, hoveredId, onRowHover],
+  );
+
+  return useMemo<AISidebarController>(
+    () => ({
+      items: renderedItems,
+      flat,
+      getItem,
+      selectedId,
+      select,
+      expandedIds,
+      isExpanded,
+      expand,
+      collapse,
+      toggleExpanded,
+      expandAll,
+      collapseAll,
+      reveal,
+      focusedId,
+      focus,
+      renamingId,
+      startRename,
+      cancelRename,
+      rename,
+      menuOpenId,
+      openMenu,
+      closeMenu,
+      move,
+      movePending,
+      announcement,
+      dnd,
+      hover,
+      onRowKeyDown,
+      setRowRef,
+    }),
+    [
+      renderedItems,
+      flat,
+      getItem,
+      selectedId,
+      select,
+      expandedIds,
+      isExpanded,
+      expand,
+      collapse,
+      toggleExpanded,
+      expandAll,
+      collapseAll,
+      reveal,
+      focusedId,
+      focus,
+      renamingId,
+      startRename,
+      cancelRename,
+      rename,
+      menuOpenId,
+      openMenu,
+      closeMenu,
+      move,
+      movePending,
+      announcement,
+      dnd,
+      hover,
+      onRowKeyDown,
+      setRowRef,
+    ],
+  );
 }
