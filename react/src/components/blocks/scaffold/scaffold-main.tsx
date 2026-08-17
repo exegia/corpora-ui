@@ -18,7 +18,7 @@ export function ScaffoldMain({
   return (
     <div
       id="scaffold-main"
-      className={cn("relative flex h-full min-w-0 flex-1 flex-col", className)}
+      className={cn("relative flex min-w-0 flex-1 flex-col", className)}
       data-slot="scaffold-main"
       {...rest}
     >

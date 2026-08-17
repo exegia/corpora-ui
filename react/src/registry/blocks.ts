@@ -571,10 +571,16 @@ export const blocks: RegistryEntry[] = [
           "The selected row. Controlled via `activeId`, uncontrolled via `defaultActiveId`.",
       },
       {
-        name: "defaultExpandedIds",
-        type: "string[]",
+        name: "expandedIds / defaultExpandedIds / onExpandedChange",
+        type: "string[] / string[] / (ids) => void",
         description:
-          "Ids expanded on first render. Expansion is owned by the tree thereafter.",
+          "Which rows are open. Controlled via `expandedIds`, uncontrolled via `defaultExpandedIds`.",
+      },
+      {
+        name: "controller",
+        type: "AISidebarController",
+        description:
+          "A useAISidebar() controller, in place of the data and handler props. Every behaviour — select, expand/collapse (one row, all rows, or the ancestors of one), move focus, rename, open a row's menu, reorder — becomes callable from outside the block.",
       },
       {
         name: "renderIcon",
@@ -600,15 +606,23 @@ export const blocks: RegistryEntry[] = [
         description: "Accessible name for the tree.",
       },
     ],
-    usage: `import { Sidebar, type SidebarResource } from "@corpora/ui"
+    usage: `import { Sidebar, useAISidebar, type SidebarResource } from "@corpora/ui"
 
+// Props form — the block owns its state.
 <Sidebar.Wrapper
   defaultItems={resources}
   defaultExpandedIds={["corpora"]}
   defaultActiveId="codex-a"
   onActiveChange={setActiveId}
   onMove={(move) => persistMove(move)}
-/>`,
+/>
+
+// Controller form — drive it from anywhere.
+const sidebar = useAISidebar({ defaultItems: resources })
+
+<Sidebar.Wrapper controller={sidebar} />
+<Button onClick={sidebar.collapseAll}>Collapse all</Button>
+<Button onClick={() => sidebar.startRename(sidebar.selectedId!)}>Rename</Button>`,
   },
   {
     slug: "sidebar-block",
@@ -770,10 +784,10 @@ function App() {
           "Inspector drawer state, controlled or uncontrolled. Spread `useScaffold().providerProps` to drive it from outside (title-bar buttons, shortcuts). `inspectorWidth` (px, default 272) sizes the drawer and how far Actions slides aside.",
       },
       {
-        name: "Panel · SecondaryPanel / onSwap / onCloseSecondary",
-        type: "ReactNode / () => void / () => void",
+        name: "Panel · id / SecondaryPanel / onSwap / onCloseSecondary",
+        type: "string / ReactNode / () => void / () => void",
         description:
-          "`SecondaryPanel` renders the utility strip as its own card below the primary surface, with the seam menu between the two — a ⋯ toggle that morphs into Expand | Swap | Close. `onSwap` powers Swap: a layout morph trades the two cards; flip the slot content in the callback. `onCloseSecondary` powers Close — remove `SecondaryPanel` there. Panels themselves close from the Actions tabs, and flex to share the canvas.",
+          "`id` opts the panel into responsive hiding: each id'd panel keeps at least `SCAFFOLD_PANEL_MIN_WIDTH` (320px), and when the canvas can't grant every panel that width the scaffold hides panels (least-recently-activated first) until the rest fit — pair with a `Scaffold.Tab` carrying the matching `panelId`. `SecondaryPanel` renders the utility strip as its own card below the primary surface, with the seam menu between the two — a ⋯ toggle that morphs into Expand | Swap | Close. `onSwap` powers Swap: a layout morph trades the two cards; flip the slot content in the callback. `onCloseSecondary` powers Close — remove `SecondaryPanel` there. Panels themselves close from the Actions tabs, and flex to share the canvas.",
       },
       {
         name: "Actions · onAdd / children",
@@ -782,10 +796,10 @@ function App() {
           "The pill cluster in the top-right (the design's panel context menu). `onAdd` powers the Add segment, which renders only while present — omit it once the canvas holds `SCAFFOLD_PANEL_CAPACITY` (3) panels. Children render before Add: one `Scaffold.Tab` per open panel, plus any extra segments.",
       },
       {
-        name: "Tab · children / onClose / closeLabel",
-        type: "ReactNode / () => void / string",
+        name: "Tab · children / panelId / onClose / closeLabel",
+        type: "ReactNode / string / () => void / string",
         description:
-          "A panel's tab inside the Actions pill — its label plus a close button. The button renders only while `onClose` is present; omit it on the last remaining panel's tab so at least one panel stays open. Key each tab — closes animate out of the pill.",
+          "A panel's tab inside the Actions pill — its label plus a close button. With `panelId` (a `Scaffold.Panel`'s `id`) the tab fronts that panel's visibility: a hidden panel dims its tab behind an eye-off icon, and pressing the label toggles it — showing one past capacity hides the least-recently-activated panel in its place. Hovering the tab spotlights its panel — every other id'd panel fades to 0.35 opacity. The close button renders only while `onClose` is present; omit it on the last remaining panel's tab so at least one panel stays open. Key each tab — closes animate out of the pill.",
       },
       {
         name: "Inspector · name / children",

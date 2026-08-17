@@ -1,10 +1,31 @@
 import { describe, expect, mock, test } from "bun:test"
-import { render, screen, waitFor } from "@testing-library/react"
+import { act, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 
 import { Scaffold, useScaffold } from "../index"
 import type { TScaffoldPanelChild } from "../type"
+import { getPanelCapacity } from "../utils"
+
+// The canvas measures itself through ResizeObserver; this stub hands the
+// callback to the test so it can drive the width deterministically.
+let observeCanvas: ResizeObserverCallback | undefined
+globalThis.ResizeObserver = class {
+  constructor(callback: ResizeObserverCallback) {
+    observeCanvas = callback
+  }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+} as unknown as typeof ResizeObserver
+
+const resizeCanvas = (width: number) =>
+  act(() => {
+    observeCanvas?.(
+      [{ contentRect: { width } }] as unknown as ResizeObserverEntry[],
+      undefined as unknown as ResizeObserver
+    )
+  })
 
 function Strip() {
   return <span>Strip</span>
@@ -268,6 +289,16 @@ describe("Scaffold", () => {
     expect(inspector().getAttribute("aria-hidden")).toBe("true")
   })
 
+  test("capacity grants each panel 320px plus the gaps between them", () => {
+    expect(getPanelCapacity(null)).toBe(3)
+    expect(getPanelCapacity(976)).toBe(3) // 3×320 + 2×8
+    expect(getPanelCapacity(975)).toBe(2)
+    expect(getPanelCapacity(648)).toBe(2) // 2×320 + 8
+    expect(getPanelCapacity(647)).toBe(1)
+    expect(getPanelCapacity(100)).toBe(1) // never below one panel
+    expect(getPanelCapacity(5000)).toBe(3) // never above the cap
+  })
+
   test("root manages inspector state itself when uncontrolled", () => {
     render(
       <Scaffold.Root defaultInspectorOpen>
@@ -282,5 +313,133 @@ describe("Scaffold", () => {
     expect(
       screen.getByRole("complementary", { name: "Inspector" })
     ).toBeDefined()
+  })
+})
+
+const PANEL_IDS = ["one", "two", "three"] as const
+
+function ResponsiveWorkspace() {
+  return (
+    <Scaffold.Root>
+      <Scaffold.Main>
+        <Scaffold.Actions>
+          {PANEL_IDS.map((id) => (
+            <Scaffold.Tab key={id} panelId={id}>
+              {`Tab ${id}`}
+            </Scaffold.Tab>
+          ))}
+        </Scaffold.Actions>
+        <Scaffold.Canvas>
+          {PANEL_IDS.map((id) => (
+            <Scaffold.Panel key={id} id={id} name={`Panel ${id}`}>
+              <span>{`Body ${id}`}</span>
+            </Scaffold.Panel>
+          ))}
+        </Scaffold.Canvas>
+      </Scaffold.Main>
+    </Scaffold.Root>
+  )
+}
+
+const panel = (id: string) =>
+  screen.queryByRole("region", { name: `Panel ${id}` })
+
+const tab = (id: string) => screen.getByRole("button", { name: `Tab ${id}` })
+
+describe("Scaffold responsive panels", () => {
+  test("narrowing hides the oldest panel; widening restores it", async () => {
+    render(<ResponsiveWorkspace />)
+
+    resizeCanvas(976)
+    for (const id of PANEL_IDS) expect(panel(id)).not.toBeNull()
+
+    // Two panels' worth of room — the least-recently-activated hides.
+    resizeCanvas(700)
+    await settleExit()
+    expect(panel("one")).toBeNull()
+    expect(panel("two")).not.toBeNull()
+    expect(panel("three")).not.toBeNull()
+    expect(
+      tab("one")
+        .closest('[data-slot="scaffold-tab"]')
+        ?.getAttribute("data-panel-hidden")
+    ).toBe("")
+    expect(tab("one").getAttribute("aria-pressed")).toBe("false")
+
+    // Room returns — the auto-hidden panel comes back by itself.
+    resizeCanvas(1200)
+    expect(await screen.findByRole("region", { name: "Panel one" })).toBeDefined()
+    expect(tab("one").getAttribute("aria-pressed")).toBe("true")
+  })
+
+  test("pressing a hidden tab shows its panel, hiding the oldest visible one", async () => {
+    const user = userEvent.setup()
+    render(<ResponsiveWorkspace />)
+
+    resizeCanvas(700)
+    await settleExit()
+    expect(panel("one")).toBeNull()
+
+    await user.click(tab("one"))
+    await settleExit()
+    expect(panel("one")).not.toBeNull()
+    expect(panel("two")).toBeNull()
+    expect(panel("three")).not.toBeNull()
+  })
+
+  test("pressing a visible tab hides its panel; the last one never hides", async () => {
+    const user = userEvent.setup()
+    render(<ResponsiveWorkspace />)
+
+    resizeCanvas(400)
+    await settleExit()
+    // One panel's worth of room — only the newest activation stays.
+    expect(panel("one")).toBeNull()
+    expect(panel("two")).toBeNull()
+    expect(panel("three")).not.toBeNull()
+
+    // The sole visible panel refuses to hide.
+    await user.click(tab("three"))
+    await settleExit()
+    expect(panel("three")).not.toBeNull()
+
+    // Activating another trades places with it.
+    await user.click(tab("one"))
+    await settleExit()
+    expect(panel("one")).not.toBeNull()
+    expect(panel("three")).toBeNull()
+  })
+
+  test("hovering a tab spotlights its panel and dims the others", async () => {
+    const user = userEvent.setup()
+    render(<ResponsiveWorkspace />)
+
+    resizeCanvas(1200)
+    await user.hover(tab("two"))
+    expect(panel("two")?.getAttribute("data-dimmed")).toBeNull()
+    expect(panel("one")?.getAttribute("data-dimmed")).toBe("")
+    expect(panel("three")?.getAttribute("data-dimmed")).toBe("")
+
+    await user.unhover(tab("two"))
+    expect(panel("one")?.getAttribute("data-dimmed")).toBeNull()
+    expect(panel("three")?.getAttribute("data-dimmed")).toBeNull()
+  })
+
+  test("user-hidden panels stay hidden when the canvas widens", async () => {
+    const user = userEvent.setup()
+    render(<ResponsiveWorkspace />)
+
+    resizeCanvas(1200)
+    await user.click(tab("two"))
+    await settleExit()
+    expect(panel("two")).toBeNull()
+
+    resizeCanvas(1400)
+    await settleExit()
+    expect(panel("two")).toBeNull()
+
+    // Its tab presses back to visible.
+    await user.click(tab("two"))
+    expect(await screen.findByRole("region", { name: "Panel two" })).toBeDefined()
   })
 })

@@ -5,8 +5,13 @@ import * as React from "react"
 import { useState } from "react"
 
 import { cn } from "@/lib/utils"
-import { SCAFFOLD_EASE, SCAFFOLD_MORPH_DURATION } from "./constants"
+import {
+  SCAFFOLD_EASE,
+  SCAFFOLD_MORPH_DURATION,
+  SCAFFOLD_PANEL_MIN_WIDTH,
+} from "./constants"
 import { PanelMenuButton } from "./panel-menu-button.tsx"
+import { useScaffoldContext } from "./scaffold-context"
 import type { ScaffoldPanelProps, TSubPanelPosition } from "./type"
 import { ScaffoldSubPanel } from "@/components/blocks/scaffold/scaffold-sub-panel.tsx"
 
@@ -18,6 +23,7 @@ import { ScaffoldSubPanel } from "@/components/blocks/scaffold/scaffold-sub-pane
  * primary slot while the primary card shrinks down into the strip.
  */
 export function ScaffoldPanel({
+  id,
   children,
   SecondaryPanel,
   onSwap,
@@ -27,7 +33,13 @@ export function ScaffoldPanel({
   sound = true,
   className,
 }: ScaffoldPanelProps): React.ReactElement {
+  const { hoveredPanelId } = useScaffoldContext()
   const reducedMotion = useReducedMotion()
+
+  // A hovered tab spotlights its own panel — every other id'd panel
+  // fades back so the pairing reads at a glance.
+  const dimmed =
+    id !== undefined && hoveredPanelId !== null && hoveredPanelId !== id
 
   const transition = {
     duration: reducedMotion ? 0 : SCAFFOLD_MORPH_DURATION,
@@ -48,17 +60,41 @@ export function ScaffoldPanel({
     setSubPanelPosition((prev) => (prev === "top" ? "bottom" : "top"))
   }
 
+  // Enter/exit grow and shrink the panel's slot in the flex row: flexGrow
+  // carries the width (the panel is basis-0, so `width` itself is inert on
+  // the main axis) and minWidth releases the 320px floor so the slot can
+  // reach zero. scaleX pins the visual anchor to the panel's center —
+  // flexbox collapses a slot toward whichever edge its neighbors grow
+  // from, so without it the panel would wipe from one side.
+  const hidden = { flexGrow: 0, minWidth: 0, scaleX: 0, opacity: 0 }
+
   return (
     <motion.section
-      id="scaffold-panel"
-      animate={{ flexDirection: isSwapped ? "column-reverse" : "column" }}
+      id={id ?? "scaffold-panel"}
+      animate={{
+        flexGrow: 1,
+        // id panels opt into responsive hiding, so each visible one can
+        // hold the 320px floor — the canvas hides siblings before this
+        // floor would overflow it.
+        minWidth: id !== undefined ? SCAFFOLD_PANEL_MIN_WIDTH : 0,
+        scaleX: 1,
+        flexDirection: isSwapped ? "column-reverse" : "column",
+        // The hovered tab's panel keeps full opacity; the rest fade back
+        // so the tab↔panel pairing reads at a glance. Inline (not a
+        // class) because motion owns this element's opacity.
+        opacity: dimmed ? 0.35 : 1,
+      }}
+      initial={hidden}
+      exit={hidden}
+      style={{ originX: 0.5 }}
       aria-label={name}
       className={cn(
-        "group/panel relative flex min-w-80 flex-1 flex-col",
+        "group/panel relative flex min-w-0 flex-1 flex-col w-full",
         className
       )}
-      layout
+      layout={"size"}
       data-slot="scaffold-panel"
+      data-dimmed={dimmed ? "" : undefined}
       data-swapped={isSwapped ? "" : undefined}
       transition={transition}
     >

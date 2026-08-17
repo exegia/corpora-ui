@@ -1,6 +1,5 @@
 import {
   RiBook2Line,
-  RiCloseLine,
   RiCompass3Line,
   RiInformationLine,
   RiSearchLine,
@@ -70,7 +69,7 @@ export default function ScaffoldDemo() {
 
   return (
     <DemoStage canvasClassName="w-full p-0" controls={null}>
-      <div className="h-130 w-full overflow-hidden rounded-lg border">
+      <div className="h-125 w-full overflow-hidden rounded-lg border">
         <Scaffold.Root {...scaffold.providerProps}>
           <Scaffold.Sidebar>
             <RailButton
@@ -103,6 +102,7 @@ export default function ScaffoldDemo() {
               {panels.map((panel) => (
                 <Scaffold.Tab
                   key={panel.id}
+                  panelId={String(panel.id)}
                   closeLabel={`Close ${panel.title}`}
                   onClose={
                     panels.length > 1 ? () => closePanel(panel.id) : undefined
@@ -117,6 +117,7 @@ export default function ScaffoldDemo() {
               {panels.map((panel) => (
                 <Scaffold.Panel
                   key={panel.id}
+                  id={String(panel.id)}
                   SecondaryPanel={
                     panel.stripHidden ? undefined : (
                       <StripContent label={panel.title} />
@@ -139,18 +140,8 @@ export default function ScaffoldDemo() {
             </Scaffold.Canvas>
 
             <Scaffold.Inspector>
-              <div className="flex h-14 shrink-0 items-center justify-between px-4">
-                <span className="text-sm font-semibold">Inspector</span>
-                <button
-                  aria-label="Close inspector"
-                  className="text-muted-foreground transition-colors hover:text-foreground"
-                  onClick={() => scaffold.setInspectorOpen(false)}
-                  type="button"
-                >
-                  <RiCloseLine className="size-4" />
-                </button>
-              </div>
-              <div className="min-h-0 flex-1 space-y-4 overflow-auto px-4 pb-4">
+
+              <div className="min-h-0 flex-1 space-y-4 overflow-auto p-4">
                 {[
                   { label: "Shelfmark", value: "Add. MS 43725" },
                   { label: "Provenance", value: "Saint Catherine's Monastery" },

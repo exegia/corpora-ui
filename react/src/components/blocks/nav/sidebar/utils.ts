@@ -38,6 +38,34 @@ export function findResource(
 }
 
 
+/** Ids of every ancestor of `id` (nearest last); empty when absent. */
+export function ancestorIdsOf(
+  items: SidebarResource[],
+  id: string
+): string[] {
+  const walk = (nodes: SidebarResource[], trail: string[]): string[] | null => {
+    for (const node of nodes) {
+      if (node.id === id) return trail
+      if (node.children) {
+        const found = walk(node.children, [...trail, node.id])
+        if (found) return found
+      }
+    }
+    return null
+  }
+  return walk(items, []) ?? []
+}
+
+/** Ids of every row that can hold children and has some — the set
+ * `expandAll` opens. */
+export function expandableIdsOf(items: SidebarResource[]): string[] {
+  return items.flatMap((item) =>
+    item.children?.length && canContain(item)
+      ? [item.id, ...expandableIdsOf(item.children)]
+      : []
+  )
+}
+
 export function containsResource(item: SidebarResource, id: string): boolean {
   return (
     item.id === id ||

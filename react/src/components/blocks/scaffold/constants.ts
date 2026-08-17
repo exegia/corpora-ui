@@ -8,6 +8,13 @@ export const SCAFFOLD_INSPECTOR_WIDTH = 272
  * count reaches it so the Add segment hides. */
 export const SCAFFOLD_PANEL_CAPACITY = 3
 
+/** Narrowest a panel may render, in px. When the canvas can't grant every
+ * panel this width, the scaffold hides panels until the rest fit. */
+export const SCAFFOLD_PANEL_MIN_WIDTH = 320
+
+/** Gap in px between side-by-side panels on the canvas (`gap-2`). */
+export const SCAFFOLD_CANVAS_GAP = 8
+
 /** Gap in px between the drawer/actions and the viewport edges. */
 export const SCAFFOLD_EDGE_GUTTER = 10
 
