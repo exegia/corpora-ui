@@ -183,12 +183,16 @@ describe("Tree · sidebar", () => {
     rerender(<Tree collapsed items={RAIL} variant="sidebar" />)
     await settleExit()
     const row = screen.getByRole("link", { name: "Search" })
-    // The visible label folded away; aria-label carries the name.
-    expect(row.textContent).not.toContain("Search")
+    // The label folds to nothing rather than unmounting — keeping it in the
+    // DOM is what lets the fold animate — so assert the fold, not absence.
+    const label = row.querySelector('[data-slot="tree-row-label"]')
+    expect(label?.textContent).toBe("Search")
+    expect(label?.getAttribute("style")).toContain("display: none")
+    // With the label hidden, aria-label is what names the row.
     expect(row.getAttribute("aria-label")).toBe("Search")
   })
 
-  test("rail rows are tooltip triggers and keep identity across collapse", () => {
+  test("rail rows are tooltip triggers and keep identity across collapse", async () => {
     // happy-dom can't drive Base UI's hover/focus-visible open logic, so
     // assert the wiring: Base UI stamps its trigger attribute on the row.
     const { rerender } = render(<Tree collapsed items={RAIL} variant="sidebar" />)
@@ -197,7 +201,15 @@ describe("Tree · sidebar", () => {
 
     // The tooltip wrapper stays mounted when the rail expands (it is only
     // disabled) — a remounted row would cut the label fold animation short.
+    // Let the label unfold before querying: mid-animation it is still
+    // display:none, and the row has no aria-label once expanded, so it has
+    // no accessible name to match on until the fold-out finishes.
+    // NB this asserts identity, not the fold-out itself — motion settles
+    // instantly under happy-dom, while in a real browser the rail currently
+    // does not reanimate back open. That defect is tracked separately; do
+    // not read this test as covering it.
     rerender(<Tree items={RAIL} variant="sidebar" />)
+    await settleExit()
     expect(screen.getByRole("link", { name: "Search" })).toBe(collapsedRow)
   })
 
