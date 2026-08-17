@@ -1,3 +1,5 @@
+import { AvatarFallback } from "@/components/ui/avatar"
+import { Skeleton } from "@/components/ui/skeleton"
 import { initialsFrom } from "./utils"
 
 export function Fallback({
@@ -17,7 +19,7 @@ export function Fallback({
           data-slot="avatar-skeleton"
         />
       ) : (
-        (initials ?? initialsFrom(name))
+        (initials ?? initialsFrom(name ?? ""))
       )}
     </AvatarFallback>
   )

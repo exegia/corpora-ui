@@ -2,14 +2,10 @@
 
 import * as React from "react"
 
-import {
-  Avatar,
-  AvatarImage,
-  type AvatarPrimitive,
-} from "@/components/ui/avatar"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { Fallback } from "./fallback"
+import type { ImageStatus, UserAvatarProps } from "./type"
 
 /**
  * Identity avatar: an image when one is given, initials otherwise.

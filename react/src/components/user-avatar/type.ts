@@ -1,3 +1,7 @@
+import type * as React from "react"
+
+import type { AvatarPrimitive } from "@/components/ui/avatar"
+
 export type ImageStatus = Parameters<
   NonNullable<AvatarPrimitive.Image.Props["onLoadingStatusChange"]>
 >[0]

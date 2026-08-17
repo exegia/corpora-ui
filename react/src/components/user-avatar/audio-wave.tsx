@@ -1,8 +1,15 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { cn } from "@/lib/utils"
+import type { IAudioWaveProps } from "./type"
 
-export function AudioWave({ className, volume, children }: IAudioWaveProps) {
+// `volume` is accepted but not yet wired to the ring animation.
+export function AudioWave({ className, volume: _volume, children }: IAudioWaveProps) {
   return (
-    <div className="group/avatar relative flex items-center justify-center">
+    <div
+      className={cn(
+        "group/avatar relative flex items-center justify-center",
+        className
+      )}
+    >
       {/* Animated Story Ring */}
       <div className="absolute -inset-1 animate-[spin_3s_linear_infinite] rounded-full bg-linear-to-tr from-yellow-400 via-fuchsia-500 to-violet-600 opacity-75 blur-xs transition-all duration-500 group-hover/avatar:opacity-100 group-hover/avatar:blur-sm" />
 
