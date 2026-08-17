@@ -235,6 +235,34 @@ describe("Tree · files", () => {
     expect(screen.queryByText("index.ts")).toBeNull()
   })
 
+  test("trailing actions sit beside the row, not inside it", async () => {
+    const user = userEvent.setup()
+    const onDelete = mock(() => {})
+    render(
+      <Tree
+        items={FILES}
+        renderTrailing={(node) => (
+          <button onClick={onDelete} type="button">
+            {`Delete ${node.label}`}
+          </button>
+        )}
+        variant="files"
+      />
+    )
+
+    // A folder row is a <button> and a leaf row an <a> — either one nesting
+    // the trailing button would be invalid markup React warns about.
+    for (const row of document.querySelectorAll('[data-slot="tree-row"]')) {
+      expect(row.querySelector("button, a")).toBeNull()
+    }
+
+    // Still wired: pressing it does not also toggle or navigate the row.
+    const folder = screen.getByRole("button", { name: /^src/ })
+    await user.click(screen.getByRole("button", { name: "Delete src" }))
+    expect(onDelete).toHaveBeenCalledTimes(1)
+    expect(folder.getAttribute("aria-expanded")).toBe("true")
+  })
+
   test("double-click renames inline; Enter commits, Escape cancels", async () => {
     const user = userEvent.setup()
     const onRename = mock(() => {})

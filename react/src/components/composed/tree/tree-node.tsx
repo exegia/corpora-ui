@@ -200,6 +200,12 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
     </motion.span>
   ) : null
 
+  // The trailing slot is consumer-rendered and usually holds buttons, so it
+  // cannot live inside the row — a files folder row is itself a <button>, and
+  // a leaf row an <a>; either one nesting a button is invalid HTML. It sits
+  // beside the row instead, overlaid like the toc toggle.
+  const showTrailing = files && !!renderTrailing && !renaming
+
   const rowClassName = cn(
     "group/row relative flex w-full min-w-0 items-center gap-2 rounded-md px-2",
     "text-left text-muted-foreground transition-colors duration-150 outline-none",
@@ -212,7 +218,11 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
     drop === "inside" && "bg-accent/60 ring-1 ring-primary/50 ring-inset",
     ctx.variant === "sidebar" && collapsed && "justify-center px-0",
     // Room for the overlay expand toggle on toc parent rows.
-    ctx.variant === "toc" && kind === "link" && children.length > 0 && "pr-7"
+    ctx.variant === "toc" && kind === "link" && children.length > 0 && "pr-7",
+    // …and for the overlay trailing actions on files rows. Sized for one
+    // icon button plus its inset; a wider slot clips the truncated label,
+    // which is why the prop is documented as row actions, not free content.
+    showTrailing && "pr-9"
   )
 
   const rowInteractionProps = {
@@ -256,19 +266,6 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
             {node.badge}
           </span>
         )}
-      {files && renderTrailing && !renaming && (
-        <span
-          className={cn(
-            node.badge !== undefined ? "ml-1" : "ml-auto",
-            "flex shrink-0 items-center opacity-0 transition-opacity duration-150",
-            "group-focus-within/row:opacity-100 group-hover/row:opacity-100"
-          )}
-          data-slot="tree-trailing"
-          onClick={(event) => event.stopPropagation()}
-        >
-          {renderTrailing(node)}
-        </span>
-      )}
       {/* nav toggle chevrons trail like the sidebar block; files lead;
           toc link rows get a separate overlay toggle instead. */}
       {kind === "toggle" && !files && (
@@ -373,6 +370,22 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
       </button>
     ) : null
 
+  // Revealed by hovering/focusing anywhere in the row wrapper — the row and
+  // the actions are siblings now, so the trigger group lives on the wrapper.
+  const trailing = showTrailing ? (
+    <span
+      className={cn(
+        "absolute top-1/2 right-1 flex -translate-y-1/2 items-center",
+        "opacity-0 transition-opacity duration-150",
+        "group-focus-within/row-actions:opacity-100 group-hover/row-actions:opacity-100",
+        node.disabled && "pointer-events-none opacity-50"
+      )}
+      data-slot="tree-trailing"
+    >
+      {renderTrailing?.(node)}
+    </span>
+  ) : null
+
   const branchClassName =
     kind === "section"
       ? "flex flex-col gap-0.5 overflow-clip"
@@ -392,9 +405,10 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
       variants={reduce ? undefined : TREE_ROW_VARIANTS}
     >
       {drop === "before" && <TreeDropLine side="top" />}
-      <div className="relative">
+      <div className={cn("relative", showTrailing && "group/row-actions")}>
         {row}
         {tocToggle}
+        {trailing}
       </div>
       {canExpand && children.length > 0 && (
         <AnimatePresence initial={false}>
