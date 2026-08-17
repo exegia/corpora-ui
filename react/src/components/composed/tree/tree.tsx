@@ -110,17 +110,31 @@ function TreeView({
   // The rail animates between two px widths, so the expanded one has to be
   // measured off the container. Watched rather than read once: the rail is
   // as wide as whatever holds it, which can change on resize.
+  //
+  // A container with no width of its own sizes to the list — so it shrinks
+  // around the 44px rail once collapsed and follows the list mid-tween. Both
+  // would feed the list's own width back in as its target and pin it. So:
+  // no observing while collapsed (the last expanded width stands), and each
+  // sample is taken with the list's inline width cleared, so the classes'
+  // resting width — not the tween — is what the container is holding.
   const railRef = React.useRef<HTMLElement>(null)
   const [railWidth, setRailWidth] = React.useState<number | null>(null)
   React.useLayoutEffect(() => {
-    const el = railRef.current
-    if (variant !== "sidebar" || !el) return
-    const measure = () => setRailWidth(el.clientWidth)
+    const container = railRef.current
+    const list = rootRef.current
+    if (variant !== "sidebar" || collapsed || !container || !list) return
+    const measure = () => {
+      const inline = list.style.width
+      list.style.width = ""
+      const width = container.clientWidth
+      list.style.width = inline
+      setRailWidth(width)
+    }
     measure()
     const observer = new ResizeObserver(measure)
-    observer.observe(el)
+    observer.observe(container)
     return () => observer.disconnect()
-  }, [variant])
+  }, [variant, collapsed])
 
   // Until the measurement lands the className carries the width, so the
   // rail is never wrong — just not animated on its very first frame.
