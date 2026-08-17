@@ -13,8 +13,13 @@ import type {
   TreeNode,
   TreeProps,
 } from "./type"
+import {
+  RAIL_COLLAPSED_WIDTH,
+  TREE_COLLAPSE_DURATION,
+  TREE_EASE,
+} from "./constants"
 import { useTree } from "./use-tree"
-import { motion } from "motion/react"
+import { motion, useReducedMotion } from "motion/react"
 
 const DEFAULT_LABELS: Record<TreeController["variant"], string> = {
   navigation: "Main",
@@ -100,6 +105,43 @@ function TreeView({
 }: TreeViewProps): React.ReactElement {
   const { variant, items, sectioned, collapsed } = tree
   const rootRef = React.useRef<HTMLUListElement>(null)
+  const reduce = useReducedMotion()
+
+  // The rail animates between two px widths, so the expanded one has to be
+  // measured off the container. Watched rather than read once: the rail is
+  // as wide as whatever holds it, which can change on resize.
+  //
+  // A container with no width of its own sizes to the list — so it shrinks
+  // around the 44px rail once collapsed and follows the list mid-tween. Both
+  // would feed the list's own width back in as its target and pin it. So:
+  // no observing while collapsed (the last expanded width stands), and each
+  // sample is taken with the list's inline width cleared, so the classes'
+  // resting width — not the tween — is what the container is holding.
+  const railRef = React.useRef<HTMLElement>(null)
+  const [railWidth, setRailWidth] = React.useState<number | null>(null)
+  React.useLayoutEffect(() => {
+    const container = railRef.current
+    const list = rootRef.current
+    if (variant !== "sidebar" || collapsed || !container || !list) return
+    const measure = () => {
+      const inline = list.style.width
+      list.style.width = ""
+      const width = container.clientWidth
+      list.style.width = inline
+      setRailWidth(width)
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [variant, collapsed])
+
+  // Until the measurement lands the className carries the width, so the
+  // rail is never wrong — just not animated on its very first frame.
+  const railTarget =
+    variant === "sidebar" && railWidth !== null
+      ? { width: collapsed ? RAIL_COLLAPSED_WIDTH : railWidth }
+      : undefined
 
   // Roving over the DOM rather than a parallel model: collapsed branches
   // unmount, so a row query is exactly the visible set in order.
@@ -179,14 +221,22 @@ function TreeView({
       aria-label={label}
       className={cn(
         "flex min-w-0 flex-col h-full",
-        collapsed ? "w-10 gap-y-2" : "w-full",
+        // Resting widths, and the fallback until the rail is measured. The
+        // motion target below overrides these with an inline width.
+        collapsed ? "w-11 gap-y-2" : "w-full",
         variant === "files" ? "gap-px" : sectioned ? "gap-3" : "gap-0.5"
       )}
-      initial={variant === "sidebar" ? { width: 44 } : undefined}
-      animate={variant === "sidebar" ? {
-        width: collapsed ? 44 : "100%"
-      } : undefined}
-      exit={variant === "sidebar" ? { width: 44 } : undefined}
+      // Both endpoints must be px: motion cannot interpolate a number
+      // against "100%", and animating 44 -> "100%" pinned the inline width
+      // at 44px, so the rail collapsed once and never reopened. The
+      // expanded target is the rail's own measured width.
+      initial={false}
+      animate={railTarget}
+      transition={
+        reduce
+          ? { duration: 0 }
+          : { duration: TREE_COLLAPSE_DURATION, ease: TREE_EASE }
+      }
       data-collapsed={collapsed ? "" : undefined}
       data-slot="tree"
       data-variant={variant}
@@ -218,6 +268,7 @@ function TreeView({
           aria-label={label}
           className={cn("min-w-0 flex h-full justify-center", className)}
           data-slot="tree-root"
+          ref={railRef}
         >
           {rendered}
         </nav>
