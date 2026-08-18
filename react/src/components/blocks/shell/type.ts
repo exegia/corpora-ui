@@ -1,5 +1,7 @@
 import type { ReactNode } from "react"
 
+import type { PanelFit } from "./use-panel-fit"
+
 import {
   type ButtonHTMLAttributes,
   type CSSProperties,
@@ -60,6 +62,7 @@ export type ShellPanelControlProps = Pick<
   | "openMobile"
   | "defaultOpenMobile"
   | "onOpenMobileChange"
+  | "onNarrowChange"
 >
 
 export interface UseShellPanelsOptions {
@@ -75,14 +78,23 @@ export interface UseShellPanelsOptions {
 }
 
 export interface ShellPanelControls {
+  /** The viewport cannot hold the secondary panel beside the inset's
+   * `--sidebar-width` floor, so the shell has dropped the right panel and
+   * its trigger — UI outside the shell should stand down with them. The
+   * shell measures this itself and reports it back through `providerProps`;
+   * it is only ever `true` once the shell is mounted. */
+  isNarrow: boolean
   /** Live desktop open state, keyed by side. */
   open: Record<SidebarSide, boolean>
   /** Live mobile overlay state, keyed by side. */
   openMobile: Record<SidebarSide, boolean>
+  /** Refuses to OPEN the right panel while `isNarrow` — there is nothing on
+   * screen to open. Closing it always goes through. */
   setOpen: (open: boolean, side: SidebarSide) => void
   setOpenMobile: (open: boolean, side: SidebarSide) => void
   /** Desktop-only convenience — the in-shell triggers already pick the
-   * mobile state themselves when the viewport is narrow. */
+   * mobile state themselves when the viewport is narrow. Carries the same
+   * `isNarrow` refusal as `setOpen`. */
   toggle: (side: SidebarSide) => void
   /** Spread onto ShellLayout (or AnimatedPanelProvider directly). */
   providerProps: ShellPanelControlProps
@@ -98,7 +110,6 @@ export interface ShellLayoutProps extends ShellPanelControlProps {
   variant?: "web" | "desktop"
 }
 
-
 export type SidebarSide = "left" | "right"
 /** Open flags keyed by the side. Sides left out stay uncontrolled / at their
  * default — there is no per-side prop, the record IS the API. */
@@ -108,6 +119,10 @@ export type SidebarCollapsible = "offcanvas" | "icon" | "none"
 
 export interface AnimatedSidebarContextValue {
   isMobile: boolean
+  /** What the shell measured of itself: whether it can hold a secondary panel
+   * at all, how wide that panel is, and the range a resize may land in. The
+   * right panel and its trigger stand down when `fit.fits` is false. */
+  fit: PanelFit
   layoutId: string
   /** Desktop open state, keyed by side. */
   open: Record<SidebarSide, boolean>
@@ -133,13 +148,24 @@ export interface AnimatedSidebarProviderProps extends HTMLAttributes<HTMLDivElem
   /** Initial mobile overlay state — every side starts closed. */
   defaultOpenMobile?: SidebarOpenState
   onOpenMobileChange?: (open: boolean, side: SidebarSide) => void
+  /** Fires when the viewport crosses the two-`--sidebar-width` threshold a
+   * secondary panel needs. The provider owns the measurement because it owns
+   * the variable, so UI above it — a title-bar toggle, a command palette
+   * entry — learns of the crossing here instead of measuring again. */
+  onNarrowChange?: (isNarrow: boolean) => void
   style?: SidebarProviderStyle
 }
 
 export type SidebarProviderStyle = CSSProperties & {
+  /** Left rail, expanded. */
   "--sidebar-width"?: string
+  /** Left rail, folded to icons. */
   "--sidebar-width-icon"?: string
   "--sidebar-width-mobile"?: string
+  /** The secondary panel's floor, and the width it opens at. */
+  "--panel-width"?: string
+  /** The body's floor — the secondary panel may never squeeze it past this. */
+  "--inset-min-width"?: string
 }
 
 export type AnimatedSidebarInsetProps = HTMLMotionProps<"main">

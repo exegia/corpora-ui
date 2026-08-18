@@ -56,7 +56,7 @@ export function ShellLayout({
         </AnimatedPanel>
       )}
 
-      <AnimatedPanelInset className="min-w-24">
+      <AnimatedPanelInset>
         <header className="flex h-12 flex-row! items-center justify-between gap-2 border-b px-2">
           {panels?.left?.component && (
             <div className="flex min-w-0 flex-1 items-center gap-2">

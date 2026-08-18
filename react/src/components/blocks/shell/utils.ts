@@ -92,6 +92,49 @@ export const FOCUSABLE_SELECTOR = [
 export const MOBILE_QUERY = "(max-width: 767px)"
 export const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
+/**
+ * The shell's layout contract, in px. Every entry lands on the provider's
+ * wrapper as a CSS variable, so a consumer overrides a column by restyling it
+ * rather than by passing a prop:
+ *
+ * | variable               | column                                    |
+ * | ---------------------- | ----------------------------------------- |
+ * | `--sidebar-width`      | left rail, expanded                       |
+ * | `--sidebar-width-icon` | left rail, folded to icons                |
+ * | `--panel-width`        | secondary panel: its floor AND its default |
+ * | `--inset-min-width`    | the body's floor                          |
+ *
+ * These are only the defaults. Every measurement resolves the live variable,
+ * so an override wins over the value written here.
+ */
+export const SHELL_WIDTHS = {
+  "--sidebar-width": "256px",
+  "--sidebar-width-icon": "56px",
+  "--sidebar-width-mobile": "18rem",
+  "--panel-width": "320px",
+  "--inset-min-width": "360px",
+} as const
+
+/** The expanded width of a panel docked to `side`: the secondary panel opens
+ * at `--panel-width`, the primary rail at `--sidebar-width`. */
+export function expandedWidthVar(side: "left" | "right") {
+  return side === "right" ? "var(--panel-width)" : "var(--sidebar-width)"
+}
+
+/** Resolve a CSS length — `var()` included — to px inside `host`'s cascade.
+ * Custom properties inherit, so a throwaway probe mounted in `host` reads the
+ * very `--sidebar-width` the shell lays out with, including a value a
+ * consumer overrode on the provider. Returns 0 when `host` has no layout
+ * (server render, `display: none`), so callers must fail open on 0 rather
+ * than treat it as a real measurement. */
+export function resolveLength(host: HTMLElement, value: string) {
+  const probe = document.createElement("div")
+  probe.style.cssText = `position:absolute;visibility:hidden;pointer-events:none;width:${value}`
+  host.appendChild(probe)
+  const px = probe.getBoundingClientRect().width
+  probe.remove()
+  return px
+}
 
 export const AnimatedSidebarContext =
   createContext<AnimatedSidebarContextValue | null>(null)
@@ -131,13 +174,10 @@ export function useIsMobile() {
   )
 }
 
-
 export function useAnimatedSidebarPanel() {
   const context = useContext(AnimatedSidebarPanelContext)
   if (!context) {
-    throw new Error(
-      "Animated Sidebar parts must be used inside AnimatedPanel."
-    )
+    throw new Error("Animated Sidebar parts must be used inside AnimatedPanel.")
   }
   return context
 }

@@ -15,6 +15,11 @@ import type {
  * callback. Spread the returned `providerProps` onto ShellLayout; the
  * setters and `toggle` are for UI that lives outside the shell (title-bar
  * buttons, command palette, shortcuts).
+ *
+ * `providerProps` is also the way back down: the shell measures whether the
+ * viewport can still hold the secondary panel and reports it here as
+ * `isNarrow`, so outside UI stands down with the panel instead of measuring
+ * `--sidebar-width` a second time.
  */
 export function useShellPanels({
   defaultOpen,
@@ -31,25 +36,37 @@ export function useShellPanels({
     left: defaultOpenMobile?.left ?? false,
     right: defaultOpenMobile?.right ?? false,
   }))
+  // Starts false and only ever moves once the shell has measured itself:
+  // this hook renders above the provider, so it cannot read the context and
+  // has no element to resolve `--sidebar-width` against.
+  const [isNarrow, setIsNarrow] = useState(false)
 
+  // The shell drops the right panel when the viewport cannot hold it, so
+  // opening it from out here would only surface later as a panel nobody
+  // asked for. Closing always goes through — that is how state left over
+  // from a wider viewport clears.
   const setOpen = useCallback(
     (nextOpen: boolean, side: SidebarSide) => {
+      if (nextOpen && side === "right" && isNarrow) return
+
       setOpenState((prev) =>
         prev[side] === nextOpen ? prev : { ...prev, [side]: nextOpen }
       )
       onPanelChange?.(nextOpen, side)
     },
-    [onPanelChange]
+    [isNarrow, onPanelChange]
   )
 
   const setOpenMobile = useCallback(
     (nextOpen: boolean, side: SidebarSide) => {
+      if (nextOpen && side === "right" && isNarrow) return
+
       setOpenMobileState((prev) =>
         prev[side] === nextOpen ? prev : { ...prev, [side]: nextOpen }
       )
       onPanelChange?.(nextOpen, side)
     },
-    [onPanelChange]
+    [isNarrow, onPanelChange]
   )
 
   const toggle = useCallback(
@@ -63,11 +80,15 @@ export function useShellPanels({
       onOpenChange: setOpen,
       openMobile,
       onOpenMobileChange: setOpenMobile,
+      // A stable setter, so mirroring the shell's verdict never re-identifies
+      // providerProps.
+      onNarrowChange: setIsNarrow,
     }),
     [open, openMobile, setOpen, setOpenMobile]
   )
 
   return {
+    isNarrow,
     open,
     openMobile,
     setOpen,

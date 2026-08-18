@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils"
 import type { AnimatedSidebarProps } from "./type"
 import {
   AnimatedSidebarPanelContext,
+  expandedWidthVar,
   SIDEBAR_MORPH_TRANSITION,
   PANEL_TRANSITION,
   REDUCED_TRANSITION,
@@ -23,32 +24,6 @@ import {
 /** How far one arrow key moves the panel edge (shift = coarse step). */
 const RESIZE_STEP = 16
 const RESIZE_STEP_COARSE = 64
-
-interface ResizeBounds {
-  /** Panel width in px when the gesture started. */
-  width: number
-  /** `var(--sidebar-width)` in px — the floor the panel may not cross. */
-  min: number
-  /** How far the panel may grow before the inset hits its own min-width. */
-  max: number
-}
-
-/** Resolve a CSS length — `var()` included — to px inside `host`'s cascade.
- * Custom properties inherit, so a throwaway probe mounted in the panel reads
- * the very `--sidebar-width` the panel animates to, including a value a
- * consumer overrode on the provider. */
-function resolveLength(host: HTMLElement, value: string) {
-  const probe = document.createElement("div")
-  probe.style.cssText = `position:absolute;visibility:hidden;pointer-events:none;width:${value}`
-  host.appendChild(probe)
-  const px = probe.getBoundingClientRect().width
-  probe.remove()
-  return px
-}
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max)
-}
 
 export function AnimatedPanel({
   side = "left",
@@ -63,111 +38,66 @@ export function AnimatedPanel({
   ...props
 }: AnimatedSidebarProps) {
   const context = useAnimatedSidebar()
+  const { bounds, panelWidth, resetPanelWidth, resizePanel } = context.fit
   const sideOpen = context.open[side]
   const collapsed = collapsible !== "none" && !sideOpen
   const offcanvas = collapsed && collapsible === "offcanvas"
 
-  // Only an expanded offcanvas panel is resizable: the icon rail is pinned to
-  // --sidebar-width-icon, and a collapsed panel has no edge left to grab.
-  const resizable = collapsible === "offcanvas" && !collapsed
+  // Only the expanded secondary panel is resizable: the rail is pinned to its
+  // own columns, and a collapsed panel has no edge left to grab.
+  const resizable =
+    side === "right" && collapsible === "offcanvas" && !collapsed
 
-  const panelRef = useRef<HTMLElement | null>(null)
-  const boundsRef = useRef<ResizeBounds | null>(null)
-  const [resizedWidth, setResizedWidth] = useState<number | null>(null)
+  const resizeStartRef = useRef(0)
   const [resizing, setResizing] = useState(false)
 
   const baseWidth = offcanvas
     ? 0
     : collapsed
       ? "var(--sidebar-width-icon)"
-      : "var(--sidebar-width)"
-  // A drag overrides the base width only while the panel stays resizable, so
-  // collapsing falls back to the rail widths on its own — and reopening
-  // restores the width the user dragged to.
-  const width = resizable && resizedWidth !== null ? resizedWidth : baseWidth
+      : expandedWidthVar(side)
+  // The secondary panel's width is shell state, not panel state: the shell
+  // measured it, re-clamps it when the room changes, and hands back the same
+  // width after a collapse. Everything else rides the CSS variables, which
+  // also covers the server render, where nothing has been measured yet.
+  const width = resizable && panelWidth !== null ? panelWidth : baseWidth
 
   const setPanelRef = useCallback(
     (node: HTMLElement | null) => {
-      panelRef.current = node
       if (typeof ref === "function") ref(node)
       else if (ref) ref.current = node
     },
     [ref]
   )
 
-  /** Read the gesture's limits off the live DOM rather than off state — the
-   * floor is a CSS variable and the ceiling depends on what the inset can
-   * still give up, and both can change between two drags. */
-  const measureBounds = useCallback((): ResizeBounds | null => {
-    const panel = panelRef.current
-    if (!panel) return null
-
-    const current = panel.getBoundingClientRect().width
-    const min = resolveLength(panel, "var(--sidebar-width)")
-    // Past the inset's own min-width the flex row would overflow instead of
-    // the panel growing, so that slack is the whole resize headroom.
-    const inset = panel.parentElement?.querySelector<HTMLElement>(
-      '[data-slot="sidebar-inset"]'
-    )
-    const slack = inset
-      ? inset.getBoundingClientRect().width -
-        (Number.parseFloat(getComputedStyle(inset).minWidth) || 0)
-      : 0
-
-    return {
-      width: current,
-      min,
-      max: Math.max(min, current + Math.max(0, slack)),
-    }
-  }, [])
-
-  const applyResize = useCallback(
-    (bounds: ResizeBounds, delta: number) => {
-      // The handle rides the panel's inner edge, so a right panel grows as
-      // the pointer travels left, and a left panel as it travels right.
-      const grow = side === "right" ? -delta : delta
-      setResizedWidth(clamp(bounds.width + grow, bounds.min, bounds.max))
-    },
-    [side]
-  )
-
   const handleResizeStart = useCallback(() => {
-    const bounds = measureBounds()
-    if (!bounds) return
-    boundsRef.current = bounds
+    resizeStartRef.current = panelWidth ?? bounds.min
     setResizing(true)
-  }, [measureBounds])
+  }, [bounds.min, panelWidth])
 
   const handleResize = useCallback(
     (_event: PointerEvent, info: PanInfo) => {
-      const bounds = boundsRef.current
-      if (!bounds) return
-      // `offset` is measured from the pointer-down point, so the panel tracks
-      // the pointer 1:1 instead of accumulating rounding per frame.
-      applyResize(bounds, info.offset.x)
+      // The handle rides the panel's inner edge, so the panel grows as the
+      // pointer travels left. `offset` is measured from the pointer-down
+      // point, so the edge tracks it 1:1 instead of accumulating rounding.
+      resizePanel(resizeStartRef.current - info.offset.x)
     },
-    [applyResize]
+    [resizePanel]
   )
 
-  const handleResizeEnd = useCallback(() => {
-    boundsRef.current = null
-    setResizing(false)
-  }, [])
+  const handleResizeEnd = useCallback(() => setResizing(false), [])
 
   const handleResizeKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       const direction =
-        event.key === "ArrowLeft" ? -1 : event.key === "ArrowRight" ? 1 : 0
+        event.key === "ArrowLeft" ? 1 : event.key === "ArrowRight" ? -1 : 0
       if (!direction) return
-
-      const bounds = measureBounds()
-      if (!bounds) return
 
       event.preventDefault()
       const step = event.shiftKey ? RESIZE_STEP_COARSE : RESIZE_STEP
-      applyResize(bounds, direction * step)
+      resizePanel((panelWidth ?? bounds.min) + direction * step)
     },
-    [applyResize, measureBounds]
+    [bounds.min, panelWidth, resizePanel]
   )
 
   // The pointer leaves the 2px handle the moment the drag starts, so the
@@ -186,6 +116,12 @@ export function AnimatedPanel({
       body.style.userSelect = previousUserSelect
     }
   }, [resizing])
+
+  // A secondary panel exists only while the viewport can carry it beside the
+  // rail and the body at their own floors. Below that there is nothing to dock
+  // into, so the panel stands down rather than squeezing the content column —
+  // and its trigger stands down with it.
+  if (side === "right" && !context.fit.fits) return null
 
   if (context.isMobile) return <div>TODO: Create Mobile nav experience</div>
 
@@ -232,10 +168,7 @@ export function AnimatedPanel({
           aria-label={`Resize ${ariaLabel}`}
           aria-orientation="vertical"
           tabIndex={0}
-          className={cn(
-            "absolute inset-y-0 z-10 w-2 cursor-col-resize touch-none",
-            side === "right" ? "-left-2" : "-right-2"
-          )}
+          className="absolute inset-y-0 -left-2 z-10 w-2 cursor-col-resize touch-none"
           initial="idle"
           // Hover alone would drop the glow the instant the drag leaves the
           // handle, so the gesture pins it open for the whole drag.
@@ -246,6 +179,8 @@ export function AnimatedPanel({
           onPan={handleResize}
           onPanEnd={handleResizeEnd}
           onKeyDown={handleResizeKeyDown}
+          // The usual escape hatch out of a width you dragged to.
+          onDoubleClick={resetPanelWidth}
         >
           <motion.div
             variants={{ idle: { scaleY: 0 }, hover: { scaleY: 1 } }}

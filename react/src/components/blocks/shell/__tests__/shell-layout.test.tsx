@@ -1,9 +1,10 @@
 import { describe, expect, mock, test } from "bun:test"
-import { render, screen } from "@testing-library/react"
+import { act, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 
 import { ShellLayout } from "../shell-layout"
 import { useShellPanels } from "../use-shell-panels"
+import { SHELL_WIDTHS } from "../utils"
 import type { TPanelMap, UseShellPanelsOptions } from "../type"
 
 const PANELS: TPanelMap = {
@@ -21,6 +22,64 @@ const PANELS: TPanelMap = {
     open: false,
     side: "right",
   },
+}
+
+/** The shell resolves its columns from CSS variables with hidden probe
+ * elements. happy-dom has no layout engine, so every probe measures 0 and the
+ * fit rule fails open — answer the probes with the real px behind each
+ * variable so the rule works on the numbers it ships with:
+ *
+ *   rail 256 (56 folded) + body 360 + panel 320
+ *
+ * Only probes are intercepted; every other box keeps happy-dom's answer. */
+function stubShellWidths() {
+  const px = Object.fromEntries(
+    Object.entries(SHELL_WIDTHS).map(([name, value]) => [
+      name,
+      Number.parseFloat(value),
+    ])
+  )
+  const original = HTMLElement.prototype.getBoundingClientRect
+  HTMLElement.prototype.getBoundingClientRect = function (this: HTMLElement) {
+    const isProbe =
+      this.style.visibility === "hidden" && this.style.position === "absolute"
+    if (!isProbe) return original.call(this)
+
+    const variable = /var\((--[a-z-]+)\)/.exec(this.style.width)?.[1]
+    return { width: (variable && px[variable]) || 0 } as DOMRect
+  }
+  return () => {
+    HTMLElement.prototype.getBoundingClientRect = original
+  }
+}
+
+interface HappyDOMWindow {
+  happyDOM?: { setViewport: (viewport: { width: number }) => void }
+}
+
+/** Resize the viewport the way the shell hears it: happy-dom's own viewport
+ * plus the `resize` event, inside `act` so the remeasure lands in this tick. */
+function resizeViewport(width: number) {
+  act(() => {
+    ;(globalThis as HappyDOMWindow).happyDOM?.setViewport({ width })
+    window.dispatchEvent(new Event("resize"))
+  })
+}
+
+/** happy-dom's default, restored between viewport tests. */
+const WIDE_VIEWPORT = 1024
+
+/** Mount the shell at `width` px of viewport with real column widths in play.
+ * The returned function puts both back. */
+function shellViewport(width: number) {
+  const restoreWidths = stubShellWidths()
+  ;(globalThis as HappyDOMWindow).happyDOM?.setViewport({ width })
+  return () => {
+    restoreWidths()
+    ;(globalThis as HappyDOMWindow).happyDOM?.setViewport({
+      width: WIDE_VIEWPORT,
+    })
+  }
 }
 
 /** The desktop rail / drawer elements, queried by their landmark roles. */
@@ -73,7 +132,7 @@ describe("ShellLayout", () => {
     expect(leftRail().getAttribute("data-state")).toBe("collapsed")
   })
 
-  test("a panel's trigger node replaces the default icon, keeping the toggle", async () => {
+  test("the shell owns the trigger icon, ignoring a panel's trigger node", async () => {
     const user = userEvent.setup()
     render(
       <ShellLayout
@@ -86,10 +145,17 @@ describe("ShellLayout", () => {
     )
 
     const rightTrigger = screen.getByRole("button", { name: "Toggle panel" })
-    expect(rightTrigger.textContent).toContain("Custom trigger")
+    expect(rightTrigger.textContent).not.toContain("Custom trigger")
 
     await user.click(rightTrigger)
     expect(rightDrawer().getAttribute("data-state")).toBe("expanded")
+  })
+
+  test("a side with no panel gets no header trigger", () => {
+    render(<ShellLayout panels={{ left: PANELS.left! }} variant="web" />)
+
+    expect(screen.getByRole("button", { name: "Toggle sidebar" })).toBeDefined()
+    expect(screen.queryByRole("button", { name: "Toggle panel" })).toBeNull()
   })
 
   test("a panel's own defaultOpen flag seeds its side's initial state", () => {
@@ -122,6 +188,56 @@ describe("ShellLayout", () => {
     expect(rightDrawer().getAttribute("data-state")).toBe("collapsed")
   })
 
+  test("keeps the right panel while every column fits", () => {
+    // 256 + 360 + 320 = 936, inside happy-dom's 1024px viewport.
+    const restore = shellViewport(WIDE_VIEWPORT)
+    try {
+      render(<ShellLayout panels={PANELS} variant="web" />)
+
+      expect(rightDrawer()).toBeDefined()
+      expect(screen.getByRole("button", { name: "Toggle panel" })).toBeDefined()
+    } finally {
+      restore()
+    }
+  })
+
+  test("drops the right panel when the columns no longer fit", () => {
+    // 936 needed, 800 available.
+    const restore = shellViewport(800)
+    try {
+      render(<ShellLayout panels={PANELS} variant="web" />)
+
+      expect(screen.queryByRole("complementary")).toBeNull()
+      // Its trigger goes with it rather than driving nothing.
+      expect(screen.queryByRole("button", { name: "Toggle panel" })).toBeNull()
+      // The rail and the body are untouched — they are never the ones to go.
+      expect(leftRail()).toBeDefined()
+      expect(screen.getByRole("main")).toBeDefined()
+    } finally {
+      restore()
+    }
+  })
+
+  test("folding the left rail hands its column to the right panel", async () => {
+    const user = userEvent.setup()
+    // Expanded: 256 + 360 + 320 = 936 > 800. Folded: 56 + 360 + 320 = 736.
+    const restore = shellViewport(800)
+    try {
+      render(<ShellLayout panels={PANELS} variant="web" />)
+
+      expect(leftRail().getAttribute("data-state")).toBe("expanded")
+      expect(screen.queryByRole("complementary")).toBeNull()
+
+      await user.click(screen.getByRole("button", { name: "Toggle sidebar" }))
+
+      expect(leftRail().getAttribute("data-state")).toBe("collapsed")
+      expect(rightDrawer()).toBeDefined()
+      expect(screen.getByRole("button", { name: "Toggle panel" })).toBeDefined()
+    } finally {
+      restore()
+    }
+  })
+
   test("⌘B toggles the left rail", async () => {
     const user = userEvent.setup()
     render(<ShellLayout panels={PANELS} variant="web" />)
@@ -148,6 +264,7 @@ function HookedShell({
       <button onClick={() => panels.toggle("right")} type="button">
         External toggle
       </button>
+      {panels.isNarrow && <p>No room for the inspector</p>}
     </ShellLayout>
   )
 }
@@ -178,6 +295,74 @@ describe("useShellPanels", () => {
 
     await user.click(screen.getByRole("button", { name: "External toggle" }))
     expect(rightDrawer().getAttribute("data-state")).toBe("collapsed")
+  })
+
+  test("mirrors the shell's too-narrow verdict back into the hook", () => {
+    const restore = shellViewport(800)
+    try {
+      render(<HookedShell />)
+
+      // The shell measures, the hook hears about it, and outside UI stands
+      // down with the panel it would have driven.
+      expect(screen.getByText("No room for the inspector")).toBeDefined()
+      expect(screen.queryByRole("complementary")).toBeNull()
+    } finally {
+      restore()
+    }
+  })
+
+  test("leaves the hook's verdict alone while the panel fits", () => {
+    const restore = shellViewport(WIDE_VIEWPORT)
+    try {
+      render(<HookedShell />)
+
+      expect(screen.queryByText("No room for the inspector")).toBeNull()
+      expect(rightDrawer()).toBeDefined()
+    } finally {
+      restore()
+    }
+  })
+
+  test("refuses to open the right panel while the shell is too narrow", async () => {
+    const user = userEvent.setup()
+    const onPanelChange = mock(() => {})
+    const restore = shellViewport(800)
+    try {
+      render(<HookedShell onPanelChange={onPanelChange} />)
+
+      await user.click(screen.getByRole("button", { name: "External toggle" }))
+
+      // Nothing opened, and nothing was reported — the write never happened,
+      // so widening the viewport later cannot surface a stale panel.
+      expect(screen.queryByRole("complementary")).toBeNull()
+      expect(onPanelChange).not.toHaveBeenCalled()
+    } finally {
+      restore()
+    }
+  })
+
+  test("retires the right panel's state when the shell goes too narrow", async () => {
+    const user = userEvent.setup()
+    const onPanelChange = mock(() => {})
+    const restore = shellViewport(WIDE_VIEWPORT)
+    try {
+      render(<HookedShell onPanelChange={onPanelChange} />)
+
+      await user.click(screen.getByRole("button", { name: "External toggle" }))
+      expect(rightDrawer().getAttribute("data-state")).toBe("expanded")
+
+      resizeViewport(800)
+
+      expect(screen.queryByRole("complementary")).toBeNull()
+      expect(onPanelChange).toHaveBeenLastCalledWith(false, "right")
+
+      // The state went with the panel: coming back does not spring it open.
+      resizeViewport(WIDE_VIEWPORT)
+
+      expect(rightDrawer().getAttribute("data-state")).toBe("collapsed")
+    } finally {
+      restore()
+    }
   })
 
   test("the shell's own triggers round-trip through the hook's state", async () => {
