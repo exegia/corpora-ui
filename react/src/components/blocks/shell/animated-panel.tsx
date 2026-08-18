@@ -193,24 +193,20 @@ export function AnimatedPanel({
           />
         </motion.div>
       )}
-      {/* The off canvas panel keeps its full width and slides out of the
-          zero-width rail, so mask it to the aside's box here instead of
-          clipping the aside itself — the aside must stay unclipped for the
-          gap handle above to be hoverable. */}
+      {/* The aside's own width animation is the whole layout story: the
+          inner panel just fills it and fades, so it is masked to the aside's
+          box here instead of clipping the aside itself — the aside must stay
+          unclipped for the gap handle above to be hoverable. */}
       <div className={"contents"}>
         <motion.div
           initial={false}
-          animate={{
-            opacity: offcanvas ? 0 : 1,
-            width: offcanvas ? "0%" : "100%",
-          }}
+          animate={{ opacity: offcanvas ? 0 : 1 }}
           transition={context.reduce ? REDUCED_TRANSITION : PANEL_TRANSITION}
           className={cn(
-            "sticky top-0 flex flex-col overflow-hidden",
-            //   collapsible === "offcanvas" && "w-(--sidebar-width)",
-            // Pin the right panel to the aside's trailing edge so the width
-            // animation expands the panel out of it instead of revealing a
-            // detached strip.
+            "sticky top-0 flex w-full flex-col overflow-hidden",
+            // Pin the right panel to the aside's trailing edge so the aside's
+            // width animation expands the panel out of it instead of
+            // revealing a detached strip.
             side === "right" && "ml-auto",
 
             // Panels fill the shell's container, not the viewport — the shell

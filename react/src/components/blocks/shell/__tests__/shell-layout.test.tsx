@@ -70,14 +70,18 @@ function resizeViewport(width: number) {
 const WIDE_VIEWPORT = 1024
 
 /** Mount the shell at `width` px of viewport with real column widths in play.
- * The returned function puts both back. */
+ * The returned function puts both back — inside `act`, because happy-dom
+ * fires `resize` on `setViewport` and the shell (still mounted until
+ * cleanup) remeasures on it. */
 function shellViewport(width: number) {
   const restoreWidths = stubShellWidths()
   ;(globalThis as HappyDOMWindow).happyDOM?.setViewport({ width })
   return () => {
     restoreWidths()
-    ;(globalThis as HappyDOMWindow).happyDOM?.setViewport({
-      width: WIDE_VIEWPORT,
+    act(() => {
+      ;(globalThis as HappyDOMWindow).happyDOM?.setViewport({
+        width: WIDE_VIEWPORT,
+      })
     })
   }
 }

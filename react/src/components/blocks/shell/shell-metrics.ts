@@ -3,8 +3,8 @@
  *
  * Nothing here touches React or the DOM. This module IS the contract of who
  * gets which column, which keeps the rule unit-testable on its own and lets
- * the planned Jotai port lift it into a derived atom (`shellFitFitsAtom`)
- * without restating it: `usePanelFit` only supplies the measurements.
+ * the shell-fit atoms (`shellFitFitsAtom`, `shellFitPanelWidthAtom`) call it
+ * without restating it: `useShellFit` only supplies the measurements.
  */
 
 /** The px the shell lays itself out with. Every field is measured from a CSS

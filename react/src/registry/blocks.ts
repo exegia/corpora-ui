@@ -796,11 +796,18 @@ const { selectedId } = useAISidebarState("app-resources") // subscribes to the s
         description:
           "Side-keyed control of the panels — no per-side props. ⌘B toggles the left rail. The `openMobile` family has the same shape for the mobile overlays. Spread `useShellPanels().providerProps` instead of wiring them by hand.",
       },
+      {
+        name: "shellId / defaultPanelWidth",
+        type: "string / number",
+        description:
+          "The shell measures itself (rail + body + panel floors vs. the viewport) and files the verdict in Jotai atoms under `shellId` — whether the secondary panel fits, its px width, its resize bounds. Name the id to read it anywhere below `ExegiaProvider` with `useShellFitState(id)` / drive it with `useShellFitActions(id)`, and to keep a dragged width across a route change. `defaultPanelWidth` seeds the panel's opening width instead of `--panel-width`. Column widths are CSS variables on the provider (`--sidebar-width`, `--panel-width`, `--inset-min-width`) — override them by restyling.",
+      },
     ],
-    usage: `import { ShellLayout, useShellPanels } from "@corpora/ui"
+    usage: `import { ShellLayout, useShellPanels, useShellFitActions } from "@corpora/ui"
 
 function App() {
   const panels = useShellPanels({
+    shellId: "app-shell",
     onPanelChange: (open, side) => console.log(side, open ? "expanded" : "collapsed"),
   })
 
@@ -817,7 +824,11 @@ function App() {
   )
 }
 
-// panels.toggle("right") from anywhere — a title-bar button, a shortcut.`,
+// panels.toggle("right") from anywhere — a title-bar button, a shortcut.
+// panels.isNarrow / panels.panelWidth mirror the shell's own measurement.
+// Or by id, from any component under ExegiaProvider:
+const inspector = useShellFitActions("app-shell")
+inspector.resizePanel(480)`,
   },
   {
     slug: "scaffold",

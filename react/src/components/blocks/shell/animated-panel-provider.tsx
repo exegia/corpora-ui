@@ -2,7 +2,7 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { useIsomorphicLayoutEffect, useReducedMotion } from "motion/react"
 import { cn } from "@/lib/utils.ts"
 import type { AnimatedSidebarProviderProps, SidebarSide } from "./type"
-import { usePanelFit } from "./use-panel-fit"
+import { useShellFit } from "./use-shell-fit"
 import {
   AnimatedSidebarContext,
   SHELL_WIDTHS,
@@ -12,6 +12,8 @@ import {
 
 export function AnimatedPanelProvider({
   children,
+  shellId,
+  defaultPanelWidth,
   open,
   defaultOpen,
   onOpenChange,
@@ -42,7 +44,7 @@ export function AnimatedPanelProvider({
   const rightTriggerRef = useRef<HTMLButtonElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
   // The narrow gate below is consulted by the setters, but the verdict comes
-  // from `usePanelFit` further down — which needs those very setters to retire
+  // from `useShellFit` further down — which needs those very setters to retire
   // the panel. A ref unwinds the cycle: a setter only ever runs from an event,
   // by which time the layout effect has published the current verdict.
   const fitsRef = useRef(true)
@@ -123,7 +125,7 @@ export function AnimatedPanelProvider({
   // for it. Closing is the one write the narrow gate lets through, and the
   // guards keep a repeated verdict from re-reporting a panel already shut.
   //
-  // It rides a ref so `usePanelFit` can call the latest one from a listener
+  // It rides a ref so `useShellFit` can call the latest one from a listener
   // it bound once, and it is a layout effect declared FIRST so the ref is
   // filled before that listener takes its opening measurement.
   const retireRightPanelRef = useRef<() => void>(() => {})
@@ -136,10 +138,16 @@ export function AnimatedPanelProvider({
   const retireRightPanel = useCallback(() => retireRightPanelRef.current(), [])
 
   // Everything about the shell's columns — whether a secondary panel fits,
-  // how wide it is, how far it may be dragged — lives in this one hook. The
-  // rail's fold is an input because its column is part of the room the panel
-  // needs.
-  const fit = usePanelFit(wrapperRef, openState.left, retireRightPanel)
+  // how wide it is, how far it may be dragged — lives in this one hook, and
+  // in the shell-fit atoms it writes to under `shellId`. The rail's fold is an
+  // input because its column is part of the room the panel needs.
+  const fit = useShellFit({
+    shellId,
+    hostRef: wrapperRef,
+    railOpen: openState.left,
+    defaultPanelWidth,
+    onUnfit: retireRightPanel,
+  })
   const isNarrow = !fit.fits
   useIsomorphicLayoutEffect(() => {
     fitsRef.current = fit.fits
