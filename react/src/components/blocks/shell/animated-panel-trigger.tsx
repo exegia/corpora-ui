@@ -16,6 +16,10 @@ export const AnimatedPanelTrigger = forwardRef<
     : context.open[side]
   const triggerRef = context.triggerRefs[side]
 
+  // The right panel drops out of a viewport too narrow to hold it, so its
+  // toggle would otherwise sit in the header driving nothing.
+  if (side === "right" && !context.fit.fits) return null
+
   return (
     <Button
       {...props}
