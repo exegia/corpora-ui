@@ -91,6 +91,19 @@ reads empty while a controlled prop owns the data, so the projection write
 notifies remote readers only, never the hook that produced it. Primitive props
 (`activeId`, `collapsed`) need no guard — the effect deps settle on their own.
 
+### Second implementation: the AI sidebar
+
+`components/blocks/nav/sidebar/` follows the tree pattern (atoms in
+`ai-sidebar-atom.ts` keyed by `sidebarId`, `useAISidebarState`/`Actions`,
+per-row atoms + memoized `ResourceRow`). Its deltas: `expandedIds` is a
+controllable *array* prop, so it gets its own owned-\* loop guard beside
+`items`; `moveAISidebarRowAtom` is an async write atom that applies
+optimistically and rolls back on rejection, reading `movePending` straight
+back out of the store to refuse overlapping moves (no ref needed — store
+writes are synchronous); and the roving-focus `rowRefs` map holds DOM nodes,
+so it stays in `useAISidebar`, never the store — remote `focus`/`closeMenu`
+via `useAISidebarActions` move only the store's roving target.
+
 ## Pulling coss components
 
 `components.json` maps the `@coss` registry (coss.com/ui). Install base

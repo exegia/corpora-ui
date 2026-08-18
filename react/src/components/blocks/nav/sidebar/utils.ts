@@ -12,7 +12,7 @@ export function canContain(item: SidebarResource) {
 
 export function flattenResources(
   items: SidebarResource[],
-  expanded: Set<string>,
+  expanded: ReadonlySet<string>,
   depth = 0,
   parentId: string | null = null
 ): FlatResource[] {

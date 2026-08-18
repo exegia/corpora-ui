@@ -6,30 +6,70 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import type {
-  AISidebarController,
-  DropTarget,
-  FlatResource,
-  SidebarResource,
-  SidebarResourceMove,
-  UseAISidebarOptions,
-} from "./type.ts"
+import { useAtomValue, useSetAtom, useStore } from "jotai";
+
 import {
-  ancestorIdsOf,
+  aiSidebarAnnouncementAtom,
+  aiSidebarDraggingIdAtom,
+  aiSidebarDropTargetAtom,
+  aiSidebarExpandedIdsAtom,
+  aiSidebarFlatAtom,
+  aiSidebarFocusedIdAtom,
+  aiSidebarHoveredIdAtom,
+  aiSidebarItemsAtom,
+  aiSidebarMenuOpenIdAtom,
+  aiSidebarMovePendingAtom,
+  aiSidebarOwnActiveIdAtom,
+  aiSidebarOwnedExpandedIdsAtom,
+  aiSidebarOwnedItemsAtom,
+  aiSidebarRenamingIdAtom,
+  cancelAISidebarRenameAtom,
+  clearAISidebarHoverAtom,
+  closeAISidebarMenuAtom,
+  collapseAISidebarRowAtom,
+  collapseAllAISidebarRowsAtom,
+  endAISidebarDragAtom,
+  expandAISidebarRowAtom,
+  expandAllAISidebarRowsAtom,
+  focusAISidebarRowAtom,
+  mountAISidebarAtom,
+  moveAISidebarRowAtom,
+  normalizeAISidebarFocusAtom,
+  openAISidebarMenuAtom,
+  projectAISidebarActiveIdAtom,
+  projectAISidebarExpandedIdsAtom,
+  projectAISidebarItemsAtom,
+  removeAISidebarInstance,
+  renameAISidebarRowAtom,
+  resetAISidebarAtom,
+  revealAISidebarRowAtom,
+  selectAISidebarRowAtom,
+  setAISidebarHandlersAtom,
+  setAISidebarHoveredAtom,
+  startAISidebarRenameAtom,
+  toggleAISidebarRowAtom,
+} from "./ai-sidebar-atom.ts";
+import type {
+  AISidebarConfig,
+  AISidebarController,
+  AISidebarHandlers,
+  AISidebarSeed,
+  FlatResource,
+  UseAISidebarOptions,
+} from "./type.ts";
+import {
   canContain,
   containsResource,
-  expandableIdsOf,
   findResource,
   flattenResources,
-  moveResource,
-  renameResource,
-} from "./utils.ts"
+} from "./utils.ts";
 
-export type { UseAISidebarOptions }
+export type { UseAISidebarOptions };
 
 /**
  * The AI sidebar's headless controller — every behaviour the block
@@ -39,7 +79,7 @@ export type { UseAISidebarOptions }
  *
  * `items`, `activeId` and `expandedIds` are each controlled when passed
  * and hook-owned via their `default*` twin otherwise. Reorder and rename
- * are applied to the data optimistically either way and rolled back if
+ * are applied to the data optimistically and rolled back if
  * `onMove`/`onRename` rejects, so a consumer never reduces the tree
  * itself — `moveResource` and `renameResource` are exported for the ones
  * who keep their data elsewhere.
@@ -49,8 +89,15 @@ export type { UseAISidebarOptions }
  * <AISidebar controller={sidebar} />
  * <Button onClick={sidebar.collapseAll}>Collapse all</Button>
  * ```
+ *
+ * State lives in Jotai atoms keyed by `sidebarId`, so anything under
+ * `ExegiaProvider` can drive this sidebar without the controller — name it
+ * and reach for `useAISidebarState(sidebarId)` /
+ * `useAISidebarActions(sidebarId)` elsewhere.
  */
-export function useAISidebar(options: UseAISidebarOptions): AISidebarController {
+export function useAISidebar(
+  options: UseAISidebarOptions
+): AISidebarController {
   const {
     items,
     defaultItems = [],
@@ -62,60 +109,138 @@ export function useAISidebar(options: UseAISidebarOptions): AISidebarController 
     defaultActiveId = null,
     onActiveChange,
     onExpandedChange,
-  } = options
+  } = options;
 
-  const [internalItems, setInternalItems] = useState(items ?? defaultItems);
-  const [internalActiveId, setInternalActiveId] = useState(defaultActiveId);
-  const [ownExpandedIds, setOwnExpandedIds] = useState(
-    () => new Set(options.defaultExpandedIds ?? []),
-  );
-  const [focusedId, setFocusedId] = useState<string | null>(
-    activeId ?? defaultActiveId,
-  );
-  const [draggingId, setDraggingId] = useState<string | null>(null);
-  const [dropTarget, setDropTarget] = useState<DropTarget | null>(null);
-  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
-  const [renamingId, setRenamingId] = useState<string | null>(null);
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  // A generated key isolates unnamed sidebars from each other; an explicit
+  // `sidebarId` is the app's handle on this one.
+  const generatedId = useId();
+  const sidebarId = options.sidebarId ?? generatedId;
+  const store = useStore();
   const hoverLayoutId = useId();
-  const [announcement, setAnnouncement] = useState("");
-  // `movePending` is mirrored in a ref because the guard has to read it
-  // synchronously, before React has committed the state change.
-  const [movePending, setMovePending] = useState(false);
-  const rowRefs = useRef(new Map<string, HTMLDivElement>());
-  const movePendingRef = useRef(false);
-  const renderedItems = internalItems;
-  const selectedId = activeId ?? internalActiveId;
 
-  const controlledExpandedIds = options.expandedIds
+  const controlledExpandedIds = options.expandedIds;
+  const controlsItems = items !== undefined;
+  const controlsActiveId = activeId !== undefined;
+  const controlsExpandedIds = controlledExpandedIds !== undefined;
+
+  // Primitives only, so this object is stable and the store write below runs
+  // once per real change rather than once per render.
+  const config = useMemo<AISidebarConfig>(
+    () => ({ controlsItems, controlsActiveId, controlsExpandedIds }),
+    [controlsActiveId, controlsExpandedIds, controlsItems]
+  );
+
+  const handlers = useMemo<AISidebarHandlers>(
+    () => ({
+      onItemsChange,
+      onMove,
+      onMoveError,
+      onRename,
+      onActiveChange,
+      onExpandedChange,
+    }),
+    [
+      onActiveChange,
+      onExpandedChange,
+      onItemsChange,
+      onMove,
+      onMoveError,
+      onRename,
+    ]
+  );
+
+  // Read once: the `default*` options describe the mount, not every render.
+  const [seed] = useState<AISidebarSeed>(() => ({
+    items: items ?? defaultItems,
+    activeId: defaultActiveId,
+    focusedId: activeId ?? defaultActiveId,
+    expandedIds: [
+      ...(controlledExpandedIds ?? options.defaultExpandedIds ?? []),
+    ],
+  }));
+
+  const mount = useSetAtom(mountAISidebarAtom(sidebarId));
+  const publishHandlers = useSetAtom(setAISidebarHandlersAtom(sidebarId));
+  const projectItems = useSetAtom(projectAISidebarItemsAtom(sidebarId));
+  const projectActiveId = useSetAtom(projectAISidebarActiveIdAtom(sidebarId));
+  const projectExpandedIds = useSetAtom(
+    projectAISidebarExpandedIdsAtom(sidebarId)
+  );
+  const normalizeFocus = useSetAtom(normalizeAISidebarFocusAtom(sidebarId));
+
+  // Handlers first — they must be in the store before any action can fire.
+  // Rewritten every commit; no read atom depends on them, so nobody
+  // re-renders for it.
+  useLayoutEffect(() => {
+    publishHandlers(handlers);
+  }, [handlers, publishHandlers]);
+
+  // Before paint, so a seeded row never paints closed for a frame.
+  useLayoutEffect(() => {
+    mount(config, seed);
+  }, [config, mount, seed]);
+
+  // Controlled props stay the source of truth; the store carries a projection
+  // so the action atoms and remote readers see current data.
+  useLayoutEffect(() => {
+    if (items !== undefined) projectItems(items);
+  }, [items, projectItems]);
+
+  useLayoutEffect(() => {
+    if (activeId !== undefined) projectActiveId(activeId);
+  }, [activeId, projectActiveId]);
+
+  useLayoutEffect(() => {
+    if (controlledExpandedIds !== undefined)
+      projectExpandedIds(controlledExpandedIds);
+  }, [controlledExpandedIds, projectExpandedIds]);
+
+  // A sidebar the hook keyed is scrap once its component goes. An explicit
+  // `sidebarId` is the app's key and outlives the mount.
+  useEffect(() => {
+    if (options.sidebarId !== undefined) return;
+    return () => removeAISidebarInstance(sidebarId);
+  }, [options.sidebarId, sidebarId]);
+
+  // Never `aiSidebarItemsAtom` — see the note on `aiSidebarOwnedItemsAtom`.
+  const ownedItems = useAtomValue(aiSidebarOwnedItemsAtom(sidebarId));
+  const renderedItems = items ?? ownedItems;
+  // `activeId ?? own` rather than the projected atom: a controlled `activeId`
+  // of `null` has always fallen through to the hook-owned selection.
+  const ownActiveId = useAtomValue(aiSidebarOwnActiveIdAtom(sidebarId));
+  const selectedId = activeId ?? ownActiveId;
+  const ownExpandedIds = useAtomValue(aiSidebarOwnedExpandedIdsAtom(sidebarId));
   const expandedIds = useMemo(
-    () => (controlledExpandedIds ? new Set(controlledExpandedIds) : ownExpandedIds),
-    [controlledExpandedIds, ownExpandedIds],
-  )
-
-  const [prevItems, setPrevItems] = useState(items);
-  if (items !== prevItems) {
-    setPrevItems(items);
-    if (items) setInternalItems(items);
-  }
+    () =>
+      controlledExpandedIds ? new Set(controlledExpandedIds) : ownExpandedIds,
+    [controlledExpandedIds, ownExpandedIds]
+  );
+  const focusedId = useAtomValue(aiSidebarFocusedIdAtom(sidebarId));
+  const renamingId = useAtomValue(aiSidebarRenamingIdAtom(sidebarId));
+  const menuOpenId = useAtomValue(aiSidebarMenuOpenIdAtom(sidebarId));
+  const draggingId = useAtomValue(aiSidebarDraggingIdAtom(sidebarId));
+  const dropTarget = useAtomValue(aiSidebarDropTargetAtom(sidebarId));
+  const hoveredId = useAtomValue(aiSidebarHoveredIdAtom(sidebarId));
+  const announcement = useAtomValue(aiSidebarAnnouncementAtom(sidebarId));
+  const movePending = useAtomValue(aiSidebarMovePendingAtom(sidebarId));
 
   const flat = useMemo(
     () => flattenResources(renderedItems, expandedIds),
-    [expandedIds, renderedItems],
+    [expandedIds, renderedItems]
   );
 
-  const isFocusedItemStillVisible =
-    focusedId !== null && flat.some((row) => row.item.id === focusedId);
-  if (!isFocusedItemStillVisible) {
-    const firstVisibleItemId = flat[0]?.item.id ?? null;
-    if (focusedId !== firstVisibleItemId) setFocusedId(firstVisibleItemId);
-  }
+  // The roving target must name a row that still renders: one that folds away
+  // hands focus to the first visible row instead of pointing at nothing. Last
+  // of the layout effects, so it reads the projections this commit wrote.
+  useLayoutEffect(() => {
+    normalizeFocus();
+  }, [flat, focusedId, normalizeFocus]);
 
   useEffect(() => {
     if (!menuOpenId) return;
     const frame = requestAnimationFrame(() => {
       const menus = Array.from(
-        document.querySelectorAll<HTMLElement>("[data-sidebar-resource-menu]"),
+        document.querySelectorAll<HTMLElement>("[data-sidebar-resource-menu]")
       );
       menus
         .find((menu) => menu.dataset.sidebarResourceMenu === menuOpenId)
@@ -125,177 +250,81 @@ export function useAISidebar(options: UseAISidebarOptions): AISidebarController 
     return () => cancelAnimationFrame(frame);
   }, [menuOpenId]);
 
-  const updateItems = useCallback(
-    (next: SidebarResource[]) => {
-      setInternalItems(next);
-      onItemsChange?.(next);
-    },
-    [onItemsChange],
-  );
-
-  const commitExpanded = useCallback(
-    (next: Set<string>) => {
-      if (controlledExpandedIds === undefined) setOwnExpandedIds(next);
-      onExpandedChange?.([...next]);
-    },
-    [controlledExpandedIds, onExpandedChange],
-  );
-
   const getItem = useCallback(
     (id: string) => findResource(renderedItems, id),
-    [renderedItems],
+    [renderedItems]
   );
 
   const isExpanded = useCallback(
     (id: string) => expandedIds.has(id),
-    [expandedIds],
+    [expandedIds]
   );
 
-  const expand = useCallback(
-    (id: string) => {
-      if (expandedIds.has(id)) return;
-      commitExpanded(new Set(expandedIds).add(id));
-    },
-    [commitExpanded, expandedIds],
-  );
+  // `useSetAtom` setters are already stable — no useCallback needed.
+  const select = useSetAtom(selectAISidebarRowAtom(sidebarId));
+  const expand = useSetAtom(expandAISidebarRowAtom(sidebarId));
+  const collapse = useSetAtom(collapseAISidebarRowAtom(sidebarId));
+  const toggleExpanded = useSetAtom(toggleAISidebarRowAtom(sidebarId));
+  const expandAll = useSetAtom(expandAllAISidebarRowsAtom(sidebarId));
+  const collapseAll = useSetAtom(collapseAllAISidebarRowsAtom(sidebarId));
+  const reveal = useSetAtom(revealAISidebarRowAtom(sidebarId));
+  const startRename = useSetAtom(startAISidebarRenameAtom(sidebarId));
+  const cancelRename = useSetAtom(cancelAISidebarRenameAtom(sidebarId));
+  const rename = useSetAtom(renameAISidebarRowAtom(sidebarId));
+  const openMenu = useSetAtom(openAISidebarMenuAtom(sidebarId));
+  const closeMenuInStore = useSetAtom(closeAISidebarMenuAtom(sidebarId));
+  const move = useSetAtom(moveAISidebarRowAtom(sidebarId));
+  const reset = useSetAtom(resetAISidebarAtom(sidebarId));
+  const setFocusedRow = useSetAtom(focusAISidebarRowAtom(sidebarId));
+  const onRowHover = useSetAtom(setAISidebarHoveredAtom(sidebarId));
+  const clearHover = useSetAtom(clearAISidebarHoverAtom(sidebarId));
+  const onRowDragEnd = useSetAtom(endAISidebarDragAtom(sidebarId));
+  const setDraggingId = useSetAtom(aiSidebarDraggingIdAtom(sidebarId));
+  const setDropTarget = useSetAtom(aiSidebarDropTargetAtom(sidebarId));
 
-  const collapse = useCallback(
-    (id: string) => {
-      if (!expandedIds.has(id)) return;
-      const next = new Set(expandedIds);
-      next.delete(id);
-      commitExpanded(next);
-    },
-    [commitExpanded, expandedIds],
-  );
+  // The one piece of row state that cannot live in the store: these are DOM
+  // nodes. The block owns them, and every DOM focus move goes through here.
+  const rowRefs = useRef(new Map<string, HTMLDivElement>());
 
-  const toggleExpanded = useCallback(
-    (id: string) => {
-      const next = new Set(expandedIds);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      commitExpanded(next);
-    },
-    [commitExpanded, expandedIds],
-  );
+  const setRowRef = useCallback((id: string, node: HTMLDivElement | null) => {
+    if (node) rowRefs.current.set(id, node);
+    else rowRefs.current.delete(id);
+  }, []);
 
-  const expandAll = useCallback(() => {
-    commitExpanded(new Set(expandableIdsOf(renderedItems)));
-  }, [commitExpanded, renderedItems]);
-
-  const collapseAll = useCallback(() => {
-    commitExpanded(new Set());
-  }, [commitExpanded]);
-
-  const reveal = useCallback(
-    (id: string) => {
-      const ancestors = ancestorIdsOf(renderedItems, id);
-      if (!ancestors.some((ancestor) => !expandedIds.has(ancestor))) return;
-      commitExpanded(new Set([...expandedIds, ...ancestors]));
-    },
-    [commitExpanded, expandedIds, renderedItems],
-  );
-
-  const move = useCallback(
-    async (move: SidebarResourceMove) => {
-      if (movePendingRef.current) {
-        setAnnouncement("Wait for the current move to finish.");
-        return;
-      }
-      const before = renderedItems;
-      const next = moveResource(before, move);
-      if (!next || next === before) return;
-
-      movePendingRef.current = true;
-      setMovePending(true);
-      updateItems(next);
-      setDropTarget(null);
-      setDraggingId(null);
-      const moved = findResource(before, move.itemId);
-      const target = move.targetId ? findResource(before, move.targetId) : null;
-      setAnnouncement(
-        target
-          ? `Moved ${moved?.label ?? "item"} ${move.position} ${target.label}.`
-          : `Moved ${moved?.label ?? "item"} to the top level.`,
-      );
-
-      try {
-        await onMove?.(move);
-      } catch (error) {
-        updateItems(before);
-        setAnnouncement(`Move failed. ${moved?.label ?? "Item"} was restored.`);
-        onMoveError?.(error, move);
-      } finally {
-        movePendingRef.current = false;
-        setMovePending(false);
-      }
-    },
-    [onMove, onMoveError, renderedItems, updateItems],
-  );
-
-  const focus = useCallback((id: string) => {
-    setFocusedId(id);
+  const focusRow = useCallback((id: string) => {
     requestAnimationFrame(() => rowRefs.current.get(id)?.focus());
   }, []);
 
-  const select = useCallback(
+  const focus = useCallback(
     (id: string) => {
-      if (activeId === undefined) setInternalActiveId(id);
-      onActiveChange?.(id);
+      setFocusedRow(id);
+      focusRow(id);
     },
-    [activeId, onActiveChange],
-  );
-
-  const startRename = useCallback(
-    (id: string) => {
-      // An id from elsewhere would arm rename mode against a row that
-      // never renders.
-      if (!findResource(renderedItems, id)) return;
-      setRenamingId(id);
-    },
-    [renderedItems],
-  );
-
-  const cancelRename = useCallback(() => setRenamingId(null), []);
-
-  const rename = useCallback(
-    (id: string, label: string) => {
-      const trimmed = label.trim();
-      setRenamingId(null);
-      const item = findResource(renderedItems, id);
-      if (!item || !trimmed || trimmed === item.label) return;
-      const before = renderedItems;
-      updateItems(renameResource(before, id, trimmed));
-      void Promise.resolve(onRename?.(item, trimmed)).catch(() => {
-        updateItems(before);
-        setAnnouncement(`Rename failed. ${item.label} was restored.`);
-      });
-    },
-    [onRename, renderedItems, updateItems],
-  );
-
-  const openMenu = useCallback(
-    (id: string) => {
-      if (!findResource(renderedItems, id)) return;
-      setMenuOpenId(id);
-    },
-    [renderedItems],
+    [focusRow, setFocusedRow]
   );
 
   // Closing returns focus to the row that owned the menu — otherwise focus
-  // falls back to the body and the keyboard user loses their place.
+  // falls back to the body and the keyboard user loses their place. The atom
+  // hands back the id it closed so only the DOM half happens here.
   const closeMenu = useCallback(() => {
-    setMenuOpenId((current) => {
-      if (current) focus(current);
-      return null;
-    });
-  }, [focus]);
+    const closed = closeMenuInStore();
+    if (closed) focusRow(closed);
+  }, [closeMenuInStore, focusRow]);
+
+  // Roving nav reads the visible rows out of the store when a key lands
+  // rather than closing over them, so one stable handler serves every row.
+  const readFlat = useCallback(
+    () => store.get(aiSidebarFlatAtom(sidebarId)),
+    [sidebarId, store]
+  );
 
   const onRowKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>, row: FlatResource) => {
-      const index = flat.findIndex(({ item }) => item.id === row.item.id);
-      const previous = flat[index - 1];
-      const next = flat[index + 1];
+      const flatRows = readFlat();
+      const expanded = store.get(aiSidebarExpandedIdsAtom(sidebarId));
+      const index = flatRows.findIndex(({ item }) => item.id === row.item.id);
+      const previous = flatRows[index - 1];
+      const next = flatRows[index + 1];
       const moveModifier = event.altKey && event.shiftKey;
 
       if (event.key === "ArrowDown" && !moveModifier && next) {
@@ -308,14 +337,14 @@ export function useAISidebar(options: UseAISidebarOptions): AISidebarController 
         focus(previous.item.id);
         return;
       }
-      if (event.key === "Home" && flat[0]) {
+      if (event.key === "Home" && flatRows[0]) {
         event.preventDefault();
-        focus(flat[0].item.id);
+        focus(flatRows[0].item.id);
         return;
       }
-      if (event.key === "End" && flat.at(-1)) {
+      if (event.key === "End" && flatRows.at(-1)) {
         event.preventDefault();
-        focus(flat.at(-1)?.item.id ?? row.item.id);
+        focus(flatRows.at(-1)?.item.id ?? row.item.id);
         return;
       }
 
@@ -326,7 +355,7 @@ export function useAISidebar(options: UseAISidebarOptions): AISidebarController 
         } else if (
           moveModifier ||
           ["ArrowRight", "Enter", " ", "F2", "ContextMenu"].includes(
-            event.key,
+            event.key
           ) ||
           (event.shiftKey && event.key === "F10")
         ) {
@@ -337,33 +366,54 @@ export function useAISidebar(options: UseAISidebarOptions): AISidebarController 
 
       if (moveModifier && event.key === "ArrowUp" && previous) {
         event.preventDefault();
-        void move({ itemId: row.item.id, targetId: previous.item.id, position: "before" });
+        void move({
+          itemId: row.item.id,
+          targetId: previous.item.id,
+          position: "before",
+        });
         return;
       }
       if (moveModifier && event.key === "ArrowDown" && next) {
         event.preventDefault();
-        void move({ itemId: row.item.id, targetId: next.item.id, position: "after" });
+        void move({
+          itemId: row.item.id,
+          targetId: next.item.id,
+          position: "after",
+        });
         return;
       }
-      if (moveModifier && event.key === "ArrowRight" && previous && canContain(previous.item)) {
+      if (
+        moveModifier &&
+        event.key === "ArrowRight" &&
+        previous &&
+        canContain(previous.item)
+      ) {
         event.preventDefault();
         expand(previous.item.id);
-        void move({ itemId: row.item.id, targetId: previous.item.id, position: "inside" });
+        void move({
+          itemId: row.item.id,
+          targetId: previous.item.id,
+          position: "inside",
+        });
         return;
       }
       if (moveModifier && event.key === "ArrowLeft" && row.parentId) {
         event.preventDefault();
-        void move({ itemId: row.item.id, targetId: row.parentId, position: "after" });
+        void move({
+          itemId: row.item.id,
+          targetId: row.parentId,
+          position: "after",
+        });
         return;
       }
 
       if (event.key === "ArrowRight" && canContain(row.item)) {
         event.preventDefault();
-        if (!expandedIds.has(row.item.id)) expand(row.item.id);
+        if (!expanded.has(row.item.id)) expand(row.item.id);
         else if (next?.parentId === row.item.id) focus(next.item.id);
       } else if (event.key === "ArrowLeft") {
         event.preventDefault();
-        if (expandedIds.has(row.item.id)) collapse(row.item.id);
+        if (expanded.has(row.item.id)) collapse(row.item.id);
         else if (row.parentId) focus(row.parentId);
       } else if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
@@ -372,7 +422,10 @@ export function useAISidebar(options: UseAISidebarOptions): AISidebarController 
       } else if (event.key === "F2") {
         event.preventDefault();
         startRename(row.item.id);
-      } else if (event.key === "ContextMenu" || (event.shiftKey && event.key === "F10")) {
+      } else if (
+        event.key === "ContextMenu" ||
+        (event.shiftKey && event.key === "F10")
+      ) {
         event.preventDefault();
         openMenu(row.item.id);
       }
@@ -380,39 +433,49 @@ export function useAISidebar(options: UseAISidebarOptions): AISidebarController 
     [
       collapse,
       expand,
-      expandedIds,
-      flat,
       focus,
       move,
       openMenu,
+      readFlat,
       select,
+      sidebarId,
       startRename,
+      store,
       toggleExpanded,
-    ],
+    ]
   );
 
+  // The drag handlers read drag state out of the store when they run instead
+  // of closing over it. That is what keeps them stable for the life of the
+  // sidebar, so every row can share one set without re-rendering on a drag.
   const onRootDragOver = useCallback(
     (event: DragEvent<HTMLDivElement>) => {
-      if (!draggingId || event.target !== event.currentTarget) return;
+      if (
+        !store.get(aiSidebarDraggingIdAtom(sidebarId)) ||
+        event.target !== event.currentTarget
+      )
+        return;
       event.preventDefault();
       setDropTarget({ id: null, position: "after" });
     },
-    [draggingId],
+    [setDropTarget, sidebarId, store]
   );
 
   const onDrop = useCallback(
     (event: DragEvent<HTMLDivElement>) => {
       event.preventDefault();
       event.stopPropagation();
-      if (draggingId && dropTarget) {
+      const dragging = store.get(aiSidebarDraggingIdAtom(sidebarId));
+      const target = store.get(aiSidebarDropTargetAtom(sidebarId));
+      if (dragging && target) {
         void move({
-          itemId: draggingId,
-          targetId: dropTarget.id,
-          position: dropTarget.position,
+          itemId: dragging,
+          targetId: target.id,
+          position: target.position,
         });
       }
     },
-    [draggingId, dropTarget, move],
+    [move, sidebarId, store]
   );
 
   const onRowDragStart = useCallback(
@@ -421,18 +484,17 @@ export function useAISidebar(options: UseAISidebarOptions): AISidebarController 
       event.dataTransfer.effectAllowed = "move";
       event.dataTransfer.setData("text/plain", id);
     },
-    [],
+    [setDraggingId]
   );
-
-  const onRowDragEnd = useCallback(() => {
-    setDraggingId(null);
-    setDropTarget(null);
-  }, []);
 
   const onRowDragOver = useCallback(
     (event: DragEvent<HTMLDivElement>, targetRow: FlatResource) => {
-      if (!draggingId || draggingId === targetRow.item.id) return;
-      const source = findResource(renderedItems, draggingId);
+      const dragging = store.get(aiSidebarDraggingIdAtom(sidebarId));
+      if (!dragging || dragging === targetRow.item.id) return;
+      const source = findResource(
+        store.get(aiSidebarItemsAtom(sidebarId)),
+        dragging
+      );
       if (source && containsResource(source, targetRow.item.id)) return;
       event.preventDefault();
       event.stopPropagation();
@@ -449,21 +511,8 @@ export function useAISidebar(options: UseAISidebarOptions): AISidebarController 
             : "after";
       setDropTarget({ id: targetRow.item.id, position });
     },
-    [draggingId, renderedItems],
+    [setDropTarget, sidebarId, store]
   );
-
-  const onRowHover = useCallback((id: string, hovered: boolean) => {
-    setHoveredId((current) =>
-      hovered ? id : current === id ? null : current,
-    );
-  }, []);
-
-  const clearHover = useCallback(() => setHoveredId(null), []);
-
-  const setRowRef = useCallback((id: string, node: HTMLDivElement | null) => {
-    if (node) rowRefs.current.set(id, node);
-    else rowRefs.current.delete(id);
-  }, []);
 
   const dnd = useMemo(
     () => ({
@@ -483,7 +532,7 @@ export function useAISidebar(options: UseAISidebarOptions): AISidebarController 
       onRowDragStart,
       onRowDragEnd,
       onRowDragOver,
-    ],
+    ]
   );
 
   const hover = useMemo(
@@ -493,11 +542,12 @@ export function useAISidebar(options: UseAISidebarOptions): AISidebarController 
       onRowHover,
       clear: clearHover,
     }),
-    [clearHover, hoverLayoutId, hoveredId, onRowHover],
+    [clearHover, hoverLayoutId, hoveredId, onRowHover]
   );
 
   return useMemo<AISidebarController>(
     () => ({
+      sidebarId,
       items: renderedItems,
       flat,
       getItem,
@@ -523,12 +573,14 @@ export function useAISidebar(options: UseAISidebarOptions): AISidebarController 
       move,
       movePending,
       announcement,
+      reset,
       dnd,
       hover,
       onRowKeyDown,
       setRowRef,
     }),
     [
+      sidebarId,
       renderedItems,
       flat,
       getItem,
@@ -554,10 +606,11 @@ export function useAISidebar(options: UseAISidebarOptions): AISidebarController 
       move,
       movePending,
       announcement,
+      reset,
       dnd,
       hover,
       onRowKeyDown,
       setRowRef,
-    ],
+    ]
   );
 }

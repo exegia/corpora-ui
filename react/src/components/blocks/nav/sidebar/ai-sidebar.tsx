@@ -1,15 +1,18 @@
-"use client";
+"use client"
 
-import { AnimatePresence } from "motion/react";
-import { cn } from "@/lib/utils";
+import { useMemo } from "react"
+import { AnimatePresence } from "motion/react"
+import { cn } from "@/lib/utils"
 import type {
   AISidebarComponentProps,
+  AISidebarContextValue,
   AISidebarController,
   AISidebarProps,
   AISidebarViewProps,
   FlatResource,
 } from "./type"
 import { useAISidebar } from "./use-ai-sidebar"
+import { AISidebarContext } from "./sidebar-context"
 import { ResourceRow } from "./sidebar-row"
 
 /**
@@ -69,8 +72,47 @@ function AISidebarView({
   const { dnd, hover } = controller
   const { draggingId, dropTarget } = dnd
 
+  // Rows take the sidebar's id and the stable handlers, never the controller
+  // — so this value keeps its identity and a hover or a toggle re-renders
+  // only the rows whose own atoms changed. Deps name each function because
+  // `dnd` itself carries live drag state and changes identity with it.
+  const context = useMemo<AISidebarContextValue>(
+    () => ({
+      sidebarId: controller.sidebarId,
+      hoverLayoutId: hover.layoutId,
+      renderIcon,
+      renderMenu,
+      renderActionsTrigger,
+      setRowRef: controller.setRowRef,
+      onRowKeyDown: controller.onRowKeyDown,
+      onRowHover: hover.onRowHover,
+      closeMenu: controller.closeMenu,
+      dnd: {
+        onDrop: dnd.onDrop,
+        onRowDragStart: dnd.onRowDragStart,
+        onRowDragEnd: dnd.onRowDragEnd,
+        onRowDragOver: dnd.onRowDragOver,
+      },
+    }),
+    [
+      controller.sidebarId,
+      controller.setRowRef,
+      controller.onRowKeyDown,
+      controller.closeMenu,
+      hover.layoutId,
+      hover.onRowHover,
+      renderIcon,
+      renderMenu,
+      renderActionsTrigger,
+      dnd.onDrop,
+      dnd.onRowDragStart,
+      dnd.onRowDragEnd,
+      dnd.onRowDragOver,
+    ]
+  )
+
   return (
-    <>
+    <AISidebarContext.Provider value={context}>
       <div
         role="tree"
         aria-label={ariaLabel}
@@ -86,43 +128,7 @@ function AISidebarView({
       >
         <AnimatePresence initial={false}>
           {controller.flat.map((row: FlatResource) => (
-            <ResourceRow
-              key={row.item.id}
-              row={row}
-              active={controller.selectedId === row.item.id}
-              expanded={controller.isExpanded(row.item.id)}
-              focused={controller.focusedId === row.item.id}
-              draggingId={draggingId}
-              dropTarget={dropTarget}
-              menuOpen={controller.menuOpenId === row.item.id}
-              renaming={controller.renamingId === row.item.id}
-              hoverActive={hover.hoveredId !== null && !draggingId}
-              hoverPill={
-                hover.hoveredId === row.item.id &&
-                !draggingId &&
-                !row.item.disabled
-              }
-              hoverLayoutId={hover.layoutId}
-              onHoverChange={(hovered) => hover.onRowHover(row.item.id, hovered)}
-              onFocus={() => controller.focus(row.item.id)}
-              onSelect={() => controller.select(row.item.id)}
-              onToggle={() => controller.toggleExpanded(row.item.id)}
-              onKeyDown={(event) => controller.onRowKeyDown(event, row)}
-              onRenameStart={() => controller.startRename(row.item.id)}
-              onRenameCancel={controller.cancelRename}
-              onRenameCommit={(label) => controller.rename(row.item.id, label)}
-              onMenuOpenChange={(open) =>
-                open ? controller.openMenu(row.item.id) : controller.closeMenu()
-              }
-              onDragStart={dnd.onRowDragStart}
-              onDragEnd={dnd.onRowDragEnd}
-              onDragOver={dnd.onRowDragOver}
-              onDrop={dnd.onDrop}
-              renderIcon={renderIcon}
-              renderMenu={renderMenu}
-              renderActionsTrigger={renderActionsTrigger}
-              setRef={(node) => controller.setRowRef(row.item.id, node)}
-            />
+            <ResourceRow key={row.item.id} row={row} />
           ))}
         </AnimatePresence>
 
@@ -139,6 +145,6 @@ function AISidebarView({
       <span className="sr-only" aria-live="polite">
         {controller.announcement}
       </span>
-    </>
+    </AISidebarContext.Provider>
   )
 }

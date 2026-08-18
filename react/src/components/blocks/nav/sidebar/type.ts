@@ -23,10 +23,19 @@ export interface SidebarResourceMenuControls {
   rename: () => void
 }
 
+/** Key for one sidebar's state in the store. Any stable string;
+ * `useAISidebar` generates one when you don't pass it. */
+export type AISidebarInstanceId = string
+
 /** Options for `useAISidebar`. `items`, `activeId` and `expandedIds` are
  * each controlled when passed and hook-owned via their `default*` twin
  * otherwise. */
 export interface UseAISidebarOptions {
+  /** Key this sidebar's state under a name your app can address —
+   * `useAISidebarState("app-resources")` / `useAISidebarActions(...)` reach
+   * it from anywhere under `ExegiaProvider`. Without one the hook generates
+   * a key and the state is dropped when the component unmounts. */
+  sidebarId?: AISidebarInstanceId
   items?: SidebarResource[]
   defaultItems?: SidebarResource[]
   onItemsChange?: (items: SidebarResource[]) => void
@@ -46,6 +55,8 @@ export interface UseAISidebarOptions {
  * toolbar, a command palette, a route change. Returned by `useAISidebar`
  * and accepted by `<AISidebar controller={…} />`. */
 export interface AISidebarController {
+  /** The key this sidebar's state is stored under. */
+  sidebarId: AISidebarInstanceId
   items: SidebarResource[]
   /** Visible rows in order, each with its depth and parent id. */
   flat: FlatResource[]
@@ -89,19 +100,31 @@ export interface AISidebarController {
   /** Live-region text for the last move or rename outcome. */
   announcement: string
 
+  /** Back to the values the sidebar mounted with. */
+  reset: () => void
+
   /** @internal Row wiring the view threads through — drag state, the
    * hover pill and roving keyboard nav all belong to the rendering. */
   dnd: AISidebarDndState
   hover: AISidebarHoverState
-  onRowKeyDown: (event: KeyboardEvent<HTMLDivElement>, row: FlatResource) => void
+  onRowKeyDown: (
+    event: KeyboardEvent<HTMLDivElement>,
+    row: FlatResource
+  ) => void
   setRowRef: (id: string, node: HTMLDivElement | null) => void
 }
 
 /** @internal */
-export interface AISidebarDndState {
+export interface AISidebarDndState extends AISidebarRowDndHandlers {
   draggingId: string | null
   dropTarget: DropTarget | null
   onRootDragOver: (event: DragEvent<HTMLDivElement>) => void
+}
+
+/** @internal The drag handlers a row needs, stable for the life of the
+ * sidebar — they read drag state out of the store when they run instead of
+ * closing over it, so handing them to every row costs no re-renders. */
+export interface AISidebarRowDndHandlers {
   onDrop: (event: DragEvent<HTMLDivElement>) => void
   onRowDragStart: (event: DragEvent<HTMLDivElement>, id: string) => void
   onRowDragEnd: () => void
@@ -164,36 +187,108 @@ export interface DropTarget {
   position: SidebarResourceDropPosition
 }
 
+/** A row takes its place in the tree and nothing else: selection,
+ * expansion, focus, rename, drag and hover state all arrive through its own
+ * atoms, and the rendering options through the sidebar context. */
 export interface ResourceRowProps {
   row: FlatResource
-  active: boolean
-  expanded: boolean
-  focused: boolean
-  draggingId: string | null
-  dropTarget: DropTarget | null
-  menuOpen: boolean
-  renaming: boolean
-  onDragEnd: () => void
-  onDragOver: (event: DragEvent<HTMLDivElement>, row: FlatResource) => void
-  onDragStart: (event: DragEvent<HTMLDivElement>, id: string) => void
-  onDrop: (event: DragEvent<HTMLDivElement>) => void
-  onFocus: () => void
-  onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void
-  onMenuOpenChange: (open: boolean) => void
-  onRenameCancel: () => void
-  onRenameCommit: (label: string) => void
-  onRenameStart: () => void
-  onSelect: () => void
-  onToggle: () => void
-  /** Some row in the tree is hovered — mounts the pill fade wrapper. */
-  hoverActive?: boolean
-  /** This row owns the sliding hover pill. */
-  hoverPill?: boolean
-  /** Shared motion layoutId that lets the pill travel between rows. */
-  hoverLayoutId?: string
-  onHoverChange?: (hovered: boolean) => void
-  renderIcon?: (item: SidebarResource) => ReactNode
+}
+
+/** @internal What a row needs from the block, threaded through context so
+ * the rows stay prop-light.
+ *
+ * Deliberately free of sidebar state and of the controller. Rows read state
+ * from per-row atoms, so this value keeps its identity for the life of the
+ * sidebar and hovering or expanding one row no longer re-renders every row
+ * through context. */
+export interface AISidebarContextValue {
+  sidebarId: AISidebarInstanceId
+  /** Shared motion layoutId that lets the hover pill travel between rows. */
+  hoverLayoutId: string
+  renderIcon?: AISidebarProps["renderIcon"]
   renderMenu?: AISidebarProps["renderMenu"]
   renderActionsTrigger?: AISidebarProps["renderActionsTrigger"]
-  setRef: (node: HTMLDivElement | null) => void
+  /** Registers the row's DOM node with the block, which owns the ref map —
+   * DOM nodes never go in the store. */
+  setRowRef: (id: string, node: HTMLDivElement | null) => void
+  onRowKeyDown: (
+    event: KeyboardEvent<HTMLDivElement>,
+    row: FlatResource
+  ) => void
+  onRowHover: (id: string, hovered: boolean) => void
+  /** Closing returns DOM focus to the row that owned the menu, so it goes
+   * through the block rather than the store. */
+  closeMenu: () => void
+  dnd: AISidebarRowDndHandlers
+}
+
+/** Everything observable about one sidebar, for consumers reading it by id. */
+export interface AISidebarState {
+  items: SidebarResource[]
+  /** Visible rows in order, each with its depth and parent id. */
+  flat: FlatResource[]
+  selectedId: string | null
+  expandedIds: ReadonlySet<string>
+  focusedId: string | null
+  renamingId: string | null
+  menuOpenId: string | null
+  draggingId: string | null
+  dropTarget: DropTarget | null
+  hoveredId: string | null
+  /** A move is in flight — further moves are refused until it settles. */
+  movePending: boolean
+  /** Live-region text for the last move or rename outcome. */
+  announcement: string
+}
+
+/** Everything doable to one sidebar from outside its component. */
+export interface AISidebarActions {
+  select: (id: string) => void
+  expand: (id: string) => void
+  collapse: (id: string) => void
+  toggleExpanded: (id: string) => void
+  expandAll: () => void
+  collapseAll: () => void
+  reveal: (id: string) => void
+  /** Moves the roving-focus target. DOM focus follows only for callers that
+   * hold the controller — the ref map lives in the block, not the store. */
+  focus: (id: string) => void
+  startRename: (id: string) => void
+  cancelRename: () => void
+  rename: (id: string, label: string) => void
+  openMenu: (id: string) => void
+  closeMenu: () => void
+  move: (move: SidebarResourceMove) => Promise<void>
+  setItems: (items: SidebarResource[]) => void
+  reset: () => void
+}
+
+/** @internal Projection of `useAISidebar`'s options — primitives only, so
+ * the store write runs once per real change instead of once per render. */
+export interface AISidebarConfig {
+  controlsItems: boolean
+  controlsActiveId: boolean
+  controlsExpandedIds: boolean
+}
+
+/** @internal Latest option callbacks. Only write atoms read this, so it can
+ * be refreshed every commit without re-rendering anything. */
+export interface AISidebarHandlers {
+  onItemsChange?: (items: SidebarResource[]) => void
+  onMove?: (move: SidebarResourceMove) => void | Promise<void>
+  onMoveError?: (error: unknown, move: SidebarResourceMove) => void
+  onRename?: (item: SidebarResource, label: string) => void | Promise<void>
+  onActiveChange?: (id: string) => void
+  onExpandedChange?: (ids: string[]) => void
+}
+
+/** @internal What an instance starts from, replayed by
+ * `resetAISidebarAtom`. */
+export interface AISidebarSeed {
+  items: SidebarResource[]
+  /** Hook-owned selection — the `defaultActiveId`, never the controlled
+   * `activeId`. */
+  activeId: string | null
+  focusedId: string | null
+  expandedIds: string[]
 }
