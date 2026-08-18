@@ -493,7 +493,7 @@ const { complete } = useAuthFlowActions()
         type: "ProfileCardUser",
         required: true,
         description:
-          "Identity on the card ({ name, username?, avatar?, initials? }). Initials fall back to the name's first and last word.",
+          "Identity on the card ({ name, username?, avatar?, initials?, presence? }). Initials fall back to the name's first and last word.",
       },
       {
         name: "items",
@@ -520,6 +520,31 @@ const { complete } = useAuthFlowActions()
         default: '"content"',
         description:
           "“content” sizes the menu to its items; “card” locks it to the trigger's width.",
+      },
+      {
+        name: "variant",
+        type: '"expanded" | "collapsed"',
+        description:
+          "collapsed folds the card to its avatar for an icon rail — name, handle and chevron animate to zero width, the avatar stays, title names the tile on hover, the accessible name is unchanged. Controlled when passed; unset, it follows the AnimatedPanel it sits in (a SidebarBlock footer folds with ⌘B on its own), else defaultVariant.",
+      },
+      {
+        name: "defaultVariant / onVariantChange",
+        type: '"expanded" | "collapsed" / (variant) => void',
+        default: '"expanded"',
+        description:
+          "Uncontrolled start value, and the change report (fires for store-driven changes too).",
+      },
+      {
+        name: "profileCardId",
+        type: "string",
+        description:
+          "Names this card's slice of the Jotai store: useProfileCardState(id) reads variant / menuOpen / busy, useProfileCardActions(id) folds it or opens its menu from anywhere under ExegiaProvider. Unnamed cards key off useId and are dropped on unmount.",
+      },
+      {
+        name: "presence / avatarId",
+        type: '"online" | "offline" / string',
+        description:
+          "Presence badge on the avatar (presence overrides user.presence). avatarId names the avatar in the store so useUserAvatarActions(id).setPresence() can flip the badge from a socket handler.",
       },
       {
         name: "open / defaultOpen / onOpenChange",

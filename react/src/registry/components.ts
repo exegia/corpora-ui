@@ -84,7 +84,7 @@ export const components: RegistryEntry[] = [
     slug: "user-avatar",
     name: "User Avatar",
     description:
-      "Identity avatar: an image when one is given, initials otherwise. A remote src holds a skeleton until it resolves instead of flashing initials.",
+      "Identity avatar: an image when one is given, initials otherwise, with an online/offline badge and a pointer-lit embossed bezel. A remote src holds a skeleton until it resolves instead of flashing initials. State lives in Jotai atoms keyed by avatarId.",
     category: "components",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/user-avatar-demo")),
@@ -119,6 +119,25 @@ export const components: RegistryEntry[] = [
         type: "boolean",
         description:
           "Forces the skeleton, for when the identity itself is still being fetched. Omitted, it follows the image.",
+      },
+      {
+        name: "presence",
+        type: '"online" | "offline"',
+        description:
+          "Corner badge — a filled green dot for online, a hollow ring for offline, each named for assistive tech. Controlled when passed; omitted, the badge follows the store (see avatarId).",
+      },
+      {
+        name: "bezel",
+        type: "boolean",
+        default: "true",
+        description:
+          "Embossed rim whose highlight follows the pointer's bearing from the avatar (rAF-coalesced, one write per frame at most). Light/dark aware, static under reduced motion. false renders a flat disc.",
+      },
+      {
+        name: "avatarId",
+        type: "string",
+        description:
+          "Names this avatar's slice of the Jotai store: useUserAvatarState(id) reads presence / bezelAngle / imageStatus, useUserAvatarActions(id).setPresence() flips the badge from anywhere under ExegiaProvider. Unnamed avatars key off useId and are dropped on unmount.",
       },
     ],
     usage: `import { UserAvatar } from "@corpora/ui"

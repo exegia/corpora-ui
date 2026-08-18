@@ -8,9 +8,16 @@ import {
   UserPlusIcon,
   UsersIcon,
 } from "lucide-react"
+import { motion, useReducedMotion } from "motion/react"
 import * as React from "react"
 
-import { UserAvatar } from "@/components/composed/user-avatar"
+import {
+  AnimatedSidebarPanelContext,
+  LABEL_ENTER_TRANSITION,
+  LABEL_EXIT_TRANSITION,
+  REDUCED_TRANSITION,
+} from "@/components/blocks/shell/utils"
+import { UserAvatar } from "@/components/user-avatar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -26,48 +33,25 @@ import {
 import { playCue } from "@/lib/sound"
 import { cn } from "@/lib/utils"
 
-/** The identity shown on the card. */
-export interface ProfileCardUser {
-  name: string
-  /** Secondary line under the name — a handle, an email, a role. */
-  username?: string
-  /** Avatar image URL. Falls back to the initials when absent or broken. */
-  avatar?: string
-  /** Fallback initials. Derived from `name` when omitted. */
-  initials?: string
-}
+import { useProfileCard } from "./use-profile-card"
+import type {
+  ProfileCardAction,
+  ProfileCardItem,
+  ProfileCardUser,
+  ProfileCardVariant,
+} from "./type"
 
-/** An actionable row of the menu. */
-export interface ProfileCardAction {
-  type?: "item"
-  id: string
-  label: string
-  icon?: React.ReactNode
-  /** Right-aligned hint, e.g. "⌘K". Purely decorative — bind the key yourself. */
-  shortcut?: string
-  disabled?: boolean
-  variant?: "default" | "destructive"
-  /** Returning a promise puts the card in its loading state until it settles. */
-  onSelect?: () => void | Promise<void>
-}
-
-/** A heading over the rows that follow it, up to the next separator. */
-export interface ProfileCardLabel {
-  type: "label"
-  label: string
-}
-
-/** A rule between two sections. */
-export interface ProfileCardSeparator {
-  type: "separator"
-}
-
-/**
- * One entry of `items`. Authored flat; the block renders each run between
- * separators as its own menu group so a label actually names its section.
- */
-export type ProfileCardItem =
-  ProfileCardAction | ProfileCardLabel | ProfileCardSeparator
+export type {
+  ProfileCardAction,
+  ProfileCardActions,
+  ProfileCardInstanceId,
+  ProfileCardItem,
+  ProfileCardLabel,
+  ProfileCardSeparator,
+  ProfileCardState,
+  ProfileCardUser,
+  ProfileCardVariant,
+} from "./type"
 
 /**
  * The menu the card ships with. Spread it to keep the shape and attach your
@@ -114,6 +98,31 @@ export interface ProfileCardBlockProps {
    * width, so `align` stops mattering horizontally.
    */
   menuWidth?: "content" | "card"
+  /**
+   * `expanded` shows avatar, name and handle; `collapsed` folds the card to
+   * its avatar — for an icon-collapsed sidebar rail. The fold animates: the
+   * identity lines and chevron slide to zero width, the avatar stays put.
+   * Controlled when passed. Left unset, the card follows the `AnimatedPanel`
+   * it sits in (a `SidebarBlock` footer folds with the rail on its own), and
+   * outside a panel starts from `defaultVariant`.
+   */
+  variant?: ProfileCardVariant
+  defaultVariant?: ProfileCardVariant
+  onVariantChange?: (variant: ProfileCardVariant) => void
+  /**
+   * Name this card's slice of the store so `useProfileCardState(id)` /
+   * `useProfileCardActions(id)` can read or drive it (fold it, open its
+   * menu) from anywhere under `ExegiaProvider`. Unnamed cards key off
+   * `useId` and are dropped on unmount.
+   */
+  profileCardId?: string
+  /**
+   * Presence badge on the avatar — overrides `user.presence`. Name the avatar
+   * with `avatarId` and `useUserAvatarActions(id).setPresence()` can flip it
+   * from a socket handler instead.
+   */
+  presence?: ProfileCardUser["presence"]
+  avatarId?: string
   /**
    * Emit cuelume press/release on the card and play the open/close cues.
    * Inert unless the app opts into interaction sound via `bindSounds()`.
@@ -164,6 +173,12 @@ export function ProfileCardBlock({
   side = "bottom",
   sideOffset = 8,
   menuWidth = "content",
+  variant: variantProp,
+  defaultVariant,
+  onVariantChange,
+  profileCardId,
+  presence,
+  avatarId,
   open,
   defaultOpen,
   onOpenChange,
@@ -171,81 +186,145 @@ export function ProfileCardBlock({
   onError,
   className,
 }: ProfileCardBlockProps): React.ReactElement {
-  const [pending, setPending] = React.useState<string | null>(null)
-  // Actions can outlive the card (sign-out unmounts it, typically).
-  const mounted = React.useRef(true)
-  React.useEffect(() => {
-    mounted.current = true
-    return () => {
-      mounted.current = false
-    }
-  }, [])
-
   const groups = React.useMemo(() => toGroups(items), [items])
 
-  function select(action: ProfileCardAction) {
-    const result = action.onSelect?.()
-    if (!(result instanceof Promise)) return
-    setPending(action.id)
-    result
-      .catch((cause: unknown) => onError?.(cause))
-      .finally(() => {
-        if (mounted.current) setPending(null)
-      })
-  }
-
-  const busy = pending !== null
+  // Optional, not required: the card is a standalone block that also lands
+  // in sidebar footers, so it reads the panel context when there is one and
+  // does not throw when there is not. Inside a panel the rail is the truth
+  // for the fold, so it is projected as a controlled variant.
+  const panel = React.useContext(AnimatedSidebarPanelContext)
+  const card = useProfileCard({
+    profileCardId,
+    variant:
+      variantProp ??
+      (panel ? (panel.collapsed ? "collapsed" : "expanded") : undefined),
+    defaultVariant,
+    onVariantChange,
+    open,
+    defaultOpen,
+    onError,
+  })
+  const { collapsed, busy, menuOpen, setMenuOpen, select } = card
+  const reduce = useReducedMotion()
+  const identity = `${user.name}${user.username ? ` ${user.username}` : ""}`
 
   const handleOpenChange: MenuPrimitive.Root.Props["onOpenChange"] = (
     nextOpen,
     details
   ) => {
     if (sound) playCue(nextOpen ? "bloom" : "droplet")
+    setMenuOpen(nextOpen)
     onOpenChange?.(nextOpen, details)
   }
 
   return (
-    <DropdownMenu
-      defaultOpen={defaultOpen}
-      onOpenChange={handleOpenChange}
-      open={open}
-    >
+    // The store mirrors the menu: `open` (when passed) is projected into it,
+    // and this always renders from it, so `useProfileCardActions(id).openMenu()`
+    // works the same whether or not the consumer controls the prop.
+    <DropdownMenu onOpenChange={handleOpenChange} open={menuOpen}>
       <DropdownMenuTrigger
         disabled={busy}
         render={
           <Button
             // Spelled out rather than left to the name-from-contents rule: the
             // avatar sits inside the button and the handle is a second line.
-            aria-label={`${user.name}${user.username ? ` ${user.username}` : ""}, account menu`}
+            aria-label={`${identity}, account menu`}
             className={cn(
               // Quiet at rest — the background only surfaces on hover or
               // while the menu is open.
               "h-auto w-full justify-between py-1.5 pl-1.5 data-popup-open:bg-accent sm:h-auto",
+              // Folded: a 40px avatar tile, the size the tree rail uses. It
+              // is 8px wider than a footer's 32px inner box on purpose — the
+              // -mx-1 lets it borrow the footer padding so the 32px avatar
+              // clears the 1px border and sits dead centre. The label spans
+              // below fold to zero width rather than unmounting so the change
+              // animates. Button's own gap-2 stays: its always-mounted loading
+              // slot carries a -ms-2 that cancels it, so zeroing the gap would
+              // pull the avatar 8px left; the folded chevron cancels its own
+              // gap instead (see below). `sm:size-10` because the base carries
+              // an `sm:h-auto` that an unprefixed size would not beat.
+              collapsed &&
+                "-mx-1 size-10 shrink-0 justify-center rounded-xl p-0 sm:size-10",
               className
             )}
+            data-collapsed={collapsed ? "" : undefined}
             data-slot="profile-card"
+            data-variant={collapsed ? "collapsed" : "expanded"}
             loading={busy}
             sound={sound}
+            // The visible name is gone while folded — name the tile on hover
+            // the way the rail's menu buttons do.
+            title={collapsed ? identity : undefined}
             variant="ghost"
           >
-            <span className="flex w-full min-w-0 items-center justify-start gap-2">
+            <span
+              className={cn(
+                "flex min-w-0 items-center justify-start",
+                collapsed ? "w-auto gap-0" : "w-full gap-2"
+              )}
+            >
               <UserAvatar
                 // Decorative: the name beside it already labels the card.
                 alt=""
+                avatarId={avatarId}
                 initials={user.initials}
                 name={user.name}
+                presence={presence ?? user.presence}
                 src={user.avatar}
               />
-              <span className="flex min-w-0 flex-col text-left">
+              <motion.span
+                animate={{
+                  width: collapsed ? 0 : "auto",
+                  opacity: collapsed ? 0 : 1,
+                  x: collapsed ? -4 : 0,
+                }}
+                aria-hidden={collapsed || undefined}
+                className={cn(
+                  "flex min-w-0 flex-col overflow-hidden text-left whitespace-nowrap",
+                  collapsed && "pointer-events-none"
+                )}
+                data-slot="profile-card-identity"
+                initial={false}
+                transition={
+                  reduce
+                    ? REDUCED_TRANSITION
+                    : collapsed
+                      ? LABEL_EXIT_TRANSITION
+                      : LABEL_ENTER_TRANSITION
+                }
+              >
                 <span className="truncate font-medium">{user.name}</span>
                 {user.username ? (
                   <span className="truncate text-xs font-normal text-muted-foreground">
                     {user.username}
                   </span>
                 ) : null}
-              </span>
+              </motion.span>
             </span>
-            <ChevronsUpDownIcon aria-hidden="true" className="size-3.5" />
+            <motion.span
+              animate={{
+                width: collapsed ? 0 : "auto",
+                opacity: collapsed ? 0 : 1,
+                x: collapsed ? 4 : 0,
+              }}
+              aria-hidden="true"
+              className={cn(
+                "flex shrink-0 items-center overflow-hidden",
+                // 0px wide while folded, but the flex gap before it would
+                // still offset the avatar — pull it back by that gap.
+                collapsed && "-ml-2"
+              )}
+              initial={false}
+              transition={
+                reduce
+                  ? REDUCED_TRANSITION
+                  : collapsed
+                    ? LABEL_EXIT_TRANSITION
+                    : LABEL_ENTER_TRANSITION
+              }
+            >
+              <ChevronsUpDownIcon aria-hidden="true" className="size-3.5" />
+            </motion.span>
           </Button>
         }
       />
