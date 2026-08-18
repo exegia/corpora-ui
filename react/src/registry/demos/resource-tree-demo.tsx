@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   useAISidebar,
+  useAISidebarActions,
   type SidebarResource,
 } from "@/components/blocks/nav/sidebar";
 
@@ -45,13 +46,17 @@ export default function ResourceTreeDemo() {
   const [variant, setVariant] =
     React.useState<(typeof VARIANTS)[number]>("sidebar")
   // The block runs off a controller, so the buttons beside it drive the
-  // same tree the rows do.
+  // same tree the rows do. `sidebarId` also registers it in the shared store,
+  // so Expand/Collapse all reach it by id — the way a command palette would,
+  // with no controller in hand and no re-render when the tree changes.
   const sidebar = useAISidebar({
+    sidebarId: "demo-resources",
     defaultItems: RESOURCES,
     defaultExpandedIds: ["corpora", "manuscripts"],
     defaultActiveId: "codex-a",
     onActiveChange: setActiveId,
   })
+  const resources = useAISidebarActions("demo-resources")
 
   return (
     <DemoStage
@@ -67,10 +72,10 @@ export default function ResourceTreeDemo() {
             options={VARIANTS}
             onChange={setVariant}
           />
-          <Button onClick={sidebar.expandAll} size="sm" variant="outline">
+          <Button onClick={resources.expandAll} size="sm" variant="outline">
             Expand all
           </Button>
-          <Button onClick={sidebar.collapseAll} size="sm" variant="outline">
+          <Button onClick={resources.collapseAll} size="sm" variant="outline">
             Collapse all
           </Button>
           <Button

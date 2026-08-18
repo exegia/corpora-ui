@@ -538,7 +538,7 @@ export const blocks: RegistryEntry[] = [
         name: "items / defaultItems",
         type: "SidebarResource[]",
         description:
-          "The tree. A resource is { id, label, kind, children?, disabled? } where kind is \"project\" | \"folder\" | \"file\" | \"bookmark\". Pass `items` to control the tree, `defaultItems` to let it own its own state.",
+          'The tree. A resource is { id, label, kind, children?, disabled? } where kind is "project" | "folder" | "file" | "bookmark". Pass `items` to control the tree, `defaultItems` to let it own its own state.',
       },
       {
         name: "onItemsChange",
@@ -550,7 +550,7 @@ export const blocks: RegistryEntry[] = [
         name: "onMove",
         type: "(move) => void | Promise<void>",
         description:
-          "A drag landed: { itemId, targetId, position } where position is \"before\" | \"inside\" | \"after\" and targetId is null at the root. The move is applied optimistically — reject the promise to roll it back.",
+          'A drag landed: { itemId, targetId, position } where position is "before" | "inside" | "after" and targetId is null at the root. The move is applied optimistically — reject the promise to roll it back.',
       },
       {
         name: "onMoveError",
@@ -561,8 +561,7 @@ export const blocks: RegistryEntry[] = [
       {
         name: "onRename",
         type: "(item, label) => void | Promise<void>",
-        description:
-          "A row committed an in-place rename with the new label.",
+        description: "A row committed an in-place rename with the new label.",
       },
       {
         name: "activeId / defaultActiveId / onActiveChange",
@@ -585,8 +584,7 @@ export const blocks: RegistryEntry[] = [
       {
         name: "renderIcon",
         type: "(item) => ReactNode",
-        description:
-          "Replaces the default per-kind icon.",
+        description: "Replaces the default per-kind icon.",
       },
       {
         name: "renderMenu",
@@ -598,15 +596,27 @@ export const blocks: RegistryEntry[] = [
         name: "renderActionsTrigger",
         type: "(item) => ReactElement",
         description:
-          "Replaces the default \"…\" actions button. Must return a single element — the popover clones it to attach its trigger ref and click handler.",
+          'Replaces the default "…" actions button. Must return a single element — the popover clones it to attach its trigger ref and click handler.',
       },
       {
         name: "ariaLabel",
         type: "string",
         description: "Accessible name for the tree.",
       },
+      {
+        name: "sidebarId",
+        type: "string",
+        description:
+          "Names this instance in the shared store so useAISidebarState(id) / useAISidebarActions(id) can reach it from anywhere under ExegiaProvider. A named sidebar keeps its state across unmounts — call removeAISidebarInstance(id) on teardown. Unnamed sidebars are dropped on unmount.",
+      },
     ],
-    usage: `import { Sidebar, useAISidebar, type SidebarResource } from "@corpora/ui"
+    usage: `import {
+  Sidebar,
+  useAISidebar,
+  useAISidebarActions,
+  useAISidebarState,
+  type SidebarResource,
+} from "@corpora/ui"
 
 // Props form — the block owns its state.
 <Sidebar.Wrapper
@@ -622,7 +632,15 @@ const sidebar = useAISidebar({ defaultItems: resources })
 
 <Sidebar.Wrapper controller={sidebar} />
 <Button onClick={sidebar.collapseAll}>Collapse all</Button>
-<Button onClick={() => sidebar.startRename(sidebar.selectedId!)}>Rename</Button>`,
+<Button onClick={() => sidebar.startRename(sidebar.selectedId!)}>Rename</Button>
+
+// By id — no controller to pass around. Needs <ExegiaProvider> at the root.
+<Sidebar.Wrapper sidebarId="app-resources" defaultItems={resources} />
+
+// …anywhere else in the app:
+const resources = useAISidebarActions("app-resources") // writes only, never re-renders
+const { selectedId } = useAISidebarState("app-resources") // subscribes to the sidebar
+<Button onClick={() => selectedId && resources.reveal(selectedId)}>Reveal</Button>`,
   },
   {
     slug: "sidebar-block",
