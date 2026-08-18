@@ -131,8 +131,8 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
     <input
       autoFocus
       className={cn(
-        "h-5 min-w-0 flex-1 rounded-sm border border-input bg-background px-1",
-        "text-[length:inherit] text-foreground outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        "h-5 min-w-0 flex-1 rounded-sm border-none bg-transparent px-1",
+        "text-[length:inherit] text-foreground outline-none focus-visible:ring-0"
       )}
       data-slot="tree-rename-input"
       defaultValue={node.label}
@@ -240,7 +240,7 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
   const showTrailing = files && !!renderTrailing && !renaming
 
   const rowClassName = cn(
-    "group/row relative flex w-full min-w-0 items-center gap-2 rounded-md px-2",
+    "group/row relative flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-md px-2",
     "text-left text-muted-foreground transition-colors duration-150 outline-none",
     "hover:bg-accent hover:text-accent-foreground",
     "focus-visible:ring-2 focus-visible:ring-ring",
@@ -293,12 +293,11 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
         </span>
       )}
       {label}
-      {node.badge !== undefined &&
-        !(variant === "sidebar" && collapsed) && (
-          <span className="ml-auto shrink-0 text-xs text-muted-foreground/80">
-            {node.badge}
-          </span>
-        )}
+      {node.badge !== undefined && !(variant === "sidebar" && collapsed) && (
+        <span className="ml-auto shrink-0 text-xs text-muted-foreground/80">
+          {node.badge}
+        </span>
+      )}
       {/* nav toggle chevrons trail like the sidebar block; files lead;
           toc link rows get a separate overlay toggle instead. */}
       {kind === "toggle" && !files && (
@@ -321,10 +320,10 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
         {...rowInteractionProps}
         aria-expanded={open}
         className={cn(
-          "group/row flex w-full items-center gap-1 rounded-md px-2 pt-1 pb-1",
+          "group/row flex w-full items-center gap-1 rounded-md px-2 py-1",
           "text-xs font-medium tracking-wide text-muted-foreground/80 uppercase",
           "transition-colors duration-150 outline-none hover:text-foreground",
-          "focus-visible:ring-2 focus-visible:ring-ring"
+          "focus-visible:ring-0 focus-visible:ring-ring"
         )}
         onClick={handlePress}
         type="button"
@@ -338,9 +337,7 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
       <a
         {...rowInteractionProps}
         aria-current={active ? "page" : undefined}
-        aria-label={
-          variant === "sidebar" && collapsed ? node.label : undefined
-        }
+        aria-label={variant === "sidebar" && collapsed ? node.label : undefined}
         className={rowClassName}
         href={href}
         onClick={handlePress}
@@ -355,9 +352,7 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
         {...rowInteractionProps}
         aria-current={active ? "page" : undefined}
         aria-expanded={kind === "toggle" ? open : undefined}
-        aria-label={
-          variant === "sidebar" && collapsed ? node.label : undefined
-        }
+        aria-label={variant === "sidebar" && collapsed ? node.label : undefined}
         className={rowClassName}
         disabled={node.disabled}
         onClick={handlePress}
