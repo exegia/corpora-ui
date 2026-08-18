@@ -102,6 +102,20 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
 
   const files = variant === "files"
 
+  // toc rows below the route level are in-page anchors: they scroll to the
+  // heading sharing their id (an explicit `#hash` href wins). Rows are
+  // buttons, so the anchor default is reproduced by setting location.hash
+  // after `select` — the same order the old <a> gave (handlers first, then
+  // the browser's jump), with the same :target/history semantics.
+  const anchorHash =
+    variant === "toc" && kind === "link" && !node.disabled
+      ? node.href?.startsWith("#")
+        ? node.href
+        : depth > 0 && !node.href
+          ? `#${node.id}`
+          : undefined
+      : undefined
+
   function handlePress(event: React.MouseEvent) {
     if (node.disabled) {
       event.preventDefault()
@@ -109,6 +123,9 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
     }
     if (kind === "link") {
       select(node.id)
+      if (anchorHash !== undefined && typeof window !== "undefined") {
+        window.location.hash = anchorHash
+      }
       return
     }
     toggleExpanded(node.id)

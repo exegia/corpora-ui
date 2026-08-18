@@ -9,8 +9,10 @@ export interface TreeNode {
    * remains of a row while the rail is collapsed. */
   icon?: React.ReactNode
   /** Route metadata for the consumer's `onNavigate` — every row renders as
-   * a button, so this is never turned into an anchor by the tree itself.
-   * Read it (with `target`) off the node your handler receives. */
+   * a button, so this is never turned into an anchor element. Read it (with
+   * `target`) off the node your handler receives. One native behaviour is
+   * kept: `toc` rows below the route level jump to `#{id}` after select
+   * (a `#hash` href overrides the id; a non-hash href disables the jump). */
   href?: string
   target?: "_blank" | "_self" | "_parent" | "_top"
   disabled?: boolean
@@ -50,8 +52,9 @@ interface TreeBaseProps {
   /** `id` of the current entry — matches any depth. Its ancestors expand. */
   activeId?: string
   /** Fires for every selection (rows and leaves alike), after the node's
-   * own `onSelect`. Rows are buttons, so this is the only navigation path —
-   * wire your router's navigate (or a `#{id}` scroll for `toc`) here. */
+   * own `onSelect`. Rows are buttons, so this is the routing path — wire
+   * your router's navigate here. `toc` rows below the route level still jump
+   * to `#{id}` natively, after this fires. */
   onNavigate?: (node: TreeNode) => void
   /** Expand/collapse cues. Silent until `bindSounds()`. */
   sound?: boolean
@@ -93,9 +96,10 @@ export type TreeDataProps = TreeBaseProps &
         variant: "navigation"
       } & TreeReadonlyProps)
     | ({
-        /** Table of contents: parents select on the row and expand from a
-         * separate overlay chevron. Every row is a button — scroll to the
-         * matching heading from `onNavigate`. */
+        /** Table of contents: top-level nodes are routes (handled in
+         * `onNavigate`); rows below jump to `#{id}` after select, like an
+         * anchor would. Parents select on the row and expand from a
+         * separate overlay chevron. */
         variant: "toc"
       } & TreeReadonlyProps)
     | ({

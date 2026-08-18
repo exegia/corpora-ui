@@ -138,13 +138,13 @@ export const components: RegistryEntry[] = [
         name: "variant",
         type: '"navigation" | "toc" | "sidebar" | "files"',
         description:
-          "navigation: app nav — 3-level data promotes the top level to collapsible section names. toc: parents select on the row and expand from an overlay chevron. sidebar: single-level icon rail (40px collapsed). files: compact explorer with rename, drag-and-drop and trailing actions.",
+          "navigation: app nav — 3-level data promotes the top level to collapsible section names. toc: top-level nodes are routes, deeper rows jump to #{id} after select; parents expand from an overlay chevron. sidebar: single-level icon rail (40px collapsed). files: compact explorer with rename, drag-and-drop and trailing actions.",
       },
       {
         name: "items",
         type: "TreeNode[]",
         description:
-          "The tree data — id, label, icon, href (metadata for onNavigate; rows never render anchors), badge, defaultOpen, children.",
+          "The tree data — id, label, icon, href (metadata for onNavigate; rows never render anchors, though toc rows below the route level still jump to #{id} or a #hash href), badge, defaultOpen, children.",
       },
       {
         name: "activeId",
@@ -156,7 +156,7 @@ export const components: RegistryEntry[] = [
         name: "onNavigate",
         type: "(node: TreeNode) => void",
         description:
-          "Fires for every selection after the node's own onSelect. Rows are buttons, so this is the only navigation path — wire your router's navigate here.",
+          "Fires for every selection after the node's own onSelect. Rows are buttons, so this is the routing path — wire your router's navigate here. toc rows below the route level additionally jump to #{id} after it fires.",
       },
       {
         name: "collapsed",

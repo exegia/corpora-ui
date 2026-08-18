@@ -217,9 +217,56 @@ describe("Tree · toc", () => {
     expect(await screen.findByRole("button", { name: "Install" })).toBeDefined()
     expect(screen.queryByRole("button", { name: "Expand Install" })).toBeNull()
 
-    // Nothing in a toc renders as an anchor any more — `#{id}` scrolling is
-    // the consumer's job in onNavigate.
+    // Nothing in a toc renders as an anchor any more.
     expect(document.querySelector("a")).toBeNull()
+  })
+
+  test("rows below the route level keep the native #{id} jump after select", async () => {
+    const user = userEvent.setup()
+    const order: string[] = []
+    window.location.hash = ""
+    render(
+      <Tree
+        items={TOC}
+        onNavigate={(node) => order.push(`navigate:${node.id}:${window.location.hash}`)}
+        variant="toc"
+      />
+    )
+
+    // Depth 0 is a route (href "/guide"): no hash is written — routing is
+    // the consumer's job in onNavigate.
+    await user.click(screen.getByRole("button", { name: "Guide" }))
+    expect(window.location.hash).toBe("")
+
+    await user.click(screen.getByRole("button", { name: "Expand Guide" }))
+    await user.click(await screen.findByRole("button", { name: "Setup" }))
+    // onNavigate ran first (hash still empty inside it), then the jump —
+    // the order the old anchor default gave.
+    expect(order).toEqual(["navigate:guide:", "navigate:setup:"])
+    expect(window.location.hash).toBe("#setup")
+
+    await user.click(screen.getByRole("button", { name: "Expand Setup" }))
+    await user.click(await screen.findByRole("button", { name: "Install" }))
+    expect(window.location.hash).toBe("#install")
+
+    // An explicit hash href wins over the id.
+    window.location.hash = ""
+    render(
+      <Tree
+        items={[
+          {
+            id: "top",
+            label: "Top",
+            children: [{ id: "leaf", label: "Leaf", href: "#custom" }],
+          },
+        ]}
+        variant="toc"
+      />
+    )
+    await user.click(screen.getByRole("button", { name: "Expand Top" }))
+    await user.click(await screen.findByRole("button", { name: "Leaf" }))
+    expect(window.location.hash).toBe("#custom")
+    window.location.hash = ""
   })
 })
 

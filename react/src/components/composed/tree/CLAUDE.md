@@ -28,10 +28,16 @@ first; this file only holds what is specific to the tree.
   or `"secondary"` for the active sidebar row). Section headings in a 3-level
   `navigation` tree stay a plain `<button>`. **Nothing renders an `<a>` any
   more.**
-- `TreeNode.href` / `target` are **metadata only** — they ride along on the
-  node handed to `onNavigate`. Navigation has exactly one path:
+- `TreeNode.href` / `target` are **metadata** — they ride along on the node
+  handed to `onNavigate`. Routing has exactly one path:
   `selectTreeNodeAtom` → `node.onSelect?.()` → `handlers.onNavigate?.(node)`.
-  A `toc` consumer that wants `#{id}` scrolling does it in `onNavigate`.
+  One native behaviour survives the anchor removal: `toc` rows below the
+  route level (depth > 0, or any toc row with a `#hash` href) set
+  `window.location.hash` **after** `select` in `handlePress` — same order the
+  old `<a>` default gave, same `:target`/history semantics. A non-hash href
+  on a toc row disables the jump (it is a route). Controller `select()` from
+  outside does NOT jump — the hash write lives in the row, not the atom,
+  because it is a DOM concern.
 - Row-level `data-*` (`data-slot="tree-row"`, `data-id`, `data-branch`,
   `data-expanded`, `data-active`, `data-cuelume-press`) come from
   `rowInteractionProps`, spread onto the Button; Base UI's `mergeProps` lets
@@ -76,7 +82,9 @@ first; this file only holds what is specific to the tree.
    `href` documentation flipped from "renders an anchor" to "metadata for
    `onNavigate`", `RAIL_COLLAPSED_WIDTH` 44 → 40 to match `w-10`, `sound`
    forwarded to Button, and the toc `#{id}` anchor test was rewritten as
-   "row selects, overlay toggle expands".
+   "row selects, overlay toggle expands". The native `#{id}` jump for toc
+   rows was then restored via `location.hash` in `handlePress` (see "Row
+   anatomy") — dropping it silently was a regression, not a simplification.
 8. **`settleExit()` must run inside `act`.** AnimatePresence exits finishing
    during a bare `setTimeout` wait produce "not wrapped in act" warnings;
    `act(() => new Promise(r => setTimeout(r, 400)))` keeps them tracked. Query
@@ -112,7 +120,9 @@ first; this file only holds what is specific to the tree.
     and `toc` docs describe button rows + `onNavigate`-only navigation.
   - `__tests__/tree.test.tsx`: link → button queries; new tests for `href`
     passthrough, `sound={false}`, `RAIL_COLLAPSED_WIDTH` ↔ `w-10`, collapsed
-    tile classes, active-row `secondary` variant, toc row-vs-toggle split.
+    tile classes, active-row `secondary` variant, toc row-vs-toggle split,
+    toc `#{id}` / `#hash` jump after `onNavigate` (route rows leave the hash
+    alone).
   - `__tests__/*.test.tsx`: `settleExit` wrapped in `act`.
 - **2026-08-17** — Jotai migration (`ExegiaProvider`, atom families,
   `useTree`/`useTreeState`/`useTreeActions`), rail reopen + measurement fixes,
