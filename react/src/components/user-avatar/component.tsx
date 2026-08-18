@@ -58,11 +58,11 @@ export function UserAvatar({
     >
       <Avatar
         className={cn(
-          "size-8 border-2 border-white bg-neutral-800 text-xl",
+          "size-8 border-1 border-white bg-neutral-800! text-xl dark:border-neutral-900",
           // The emboss itself: an inset drop toward the light's opposite side
           // is what the ring below is rotated against.
           bezel &&
-            "shadow-[inset_0_1px_1px_--theme(--color-white/40%),inset_0_-1px_2px_--theme(--color-black/25%)] dark:shadow-[inset_0_1px_1px_--theme(--color-white/12%),inset_0_-1px_2px_--theme(--color-black/60%)]",
+            "shadow-[inset_0_3px_3px_--theme(--color-white/80%),inset_0_-1px_2px_--theme(--color-black/15%)] dark:shadow-[inset_0_1px_1px_--theme(--color-white/5%),inset_0_-8px_2px_--theme(--color-black/20%)]",
           className
         )}
         data-avatar-id={avatar.avatarId}
@@ -94,17 +94,17 @@ export function UserAvatar({
           aria-hidden="true"
           className={cn(
             "pointer-events-none absolute inset-0 rounded-full",
-            "[--bezel-hi:--theme(--color-white/85%)] [--bezel-lo:--theme(--color-black/28%)]",
-            "dark:[--bezel-hi:--theme(--color-white/38%)] dark:[--bezel-lo:--theme(--color-black/70%)]",
+            "[--bezel-hi:--theme(--color-white)] [--bezel-lo:--theme(--color-black/20%)]",
+            "dark:[--bezel-hi:--theme(--color-white/18%)] dark:[--bezel-lo:--theme(--color-black/40%)]",
             // Starts at 6 o'clock: shadow there, highlight peaking at 12 (50%),
             // symmetric either side — so rotate(angle) puts the highlight at
             // exactly `bezelAngle` clockwise from 12.
             "bg-[conic-gradient(from_180deg,var(--bezel-lo)_0%,transparent_24%,transparent_28%,var(--bezel-hi)_50%,transparent_72%,transparent_76%,var(--bezel-lo)_100%)]",
-            "[mask-image:radial-gradient(farthest-side,transparent_calc(100%-3px),#000_calc(100%-2px))]",
+            "[mask-image:radial-gradient(farthest-side,transparent_calc(95%-4px),#000_calc(100%-2px))]",
             "mix-blend-normal transition-transform duration-150 ease-smooth-out motion-reduce:transition-none"
           )}
           data-slot="user-avatar-bezel"
-          style={{ transform: `rotate(${bezelAngle}deg)` }}
+          style={{ transform: `rotate(${bezelAngle * 0.8}deg)` }}
         />
       ) : null}
       {presence ? <PresenceBadge presence={presence} /> : null}
