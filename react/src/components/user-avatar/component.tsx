@@ -21,6 +21,10 @@ import { useUserAvatar } from "./use-user-avatar"
  * `avatarId` — name the avatar and `useUserAvatarActions(id).setPresence()`
  * flips its badge from anywhere under `ExegiaProvider`.
  */
+/** The rim (and the badge sheen) trail the pointer's bearing slightly rather
+ * than pointing dead at it — a touch of lag reads as weight. */
+const BEZEL_DAMPING = 0.8
+
 export function UserAvatar({
   src,
   name = "",
@@ -122,10 +126,15 @@ export function UserAvatar({
             "mix-blend-normal transition-transform duration-150 ease-smooth-out motion-reduce:transition-none"
           )}
           data-slot="user-avatar-bezel"
-          style={{ transform: `rotate(${bezelAngle * 0.8}deg)` }}
+          style={{ transform: `rotate(${bezelAngle * BEZEL_DAMPING}deg)` }}
         />
       ) : null}
-      {presence ? <PresenceBadge presence={presence} /> : null}
+      {presence ? (
+        <PresenceBadge
+          lightAngle={bezel ? bezelAngle * BEZEL_DAMPING : undefined}
+          presence={presence}
+        />
+      ) : null}
     </span>
   )
 }

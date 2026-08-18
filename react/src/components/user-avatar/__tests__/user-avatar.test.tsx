@@ -67,6 +67,33 @@ describe("UserAvatar · presence badge", () => {
     expect(reflection()).toBeNull()
   })
 
+  test("the badge carries a sheen lit from the bezel angle; none without a bezel", async () => {
+    const sheen = () =>
+      document.querySelector('[data-slot="user-avatar-presence-sheen"]')
+    const { rerender } = render(
+      <UserAvatar avatarId="sheen" name="Jenny Hamilton" presence="online" />
+    )
+    expect(sheen()).not.toBeNull()
+    const rot = () =>
+      Number(/rotate\((-?[\d.]+)deg\)/.exec(sheen()?.getAttribute("style") ?? "")?.[1])
+    expect(rot()).toBeCloseTo(DEFAULT_BEZEL_ANGLE * BEZEL_DAMPING, 5)
+
+    // Same light as the rim: a pointer move rotates both together.
+    const host = frame() as HTMLElement
+    host.getBoundingClientRect = () =>
+      ({ left: 100, top: 100, width: 40, height: 40, right: 140, bottom: 140 }) as DOMRect
+    await act(async () => {
+      fireEvent.pointerMove(window, { clientX: 200, clientY: 120 })
+      await new Promise((r) => requestAnimationFrame(() => r(null)))
+    })
+    expect(rot()).toBeCloseTo(90 * BEZEL_DAMPING, 5)
+    expect(rot()).toBeCloseTo(rimRotation(), 5)
+
+    rerender(<UserAvatar bezel={false} name="Jenny Hamilton" presence="online" />)
+    expect(sheen()).toBeNull()
+    removeUserAvatarInstance("sheen")
+  })
+
   test("the root carries data-presence for styling hooks", () => {
     render(<UserAvatar name="Jenny Hamilton" presence="online" />)
     expect(
