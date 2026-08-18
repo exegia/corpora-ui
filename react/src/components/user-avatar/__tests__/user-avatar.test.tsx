@@ -53,7 +53,7 @@ describe("UserAvatar · presence badge", () => {
     expect(badge()).toBeNull()
   })
 
-  test("online reflects the badge colour onto the disc; offline does not", () => {
+  test("online reflects the badge colour onto the disc; offline does not", async () => {
     const reflection = () =>
       document.querySelector('[data-slot="user-avatar-reflection"]')
     const { rerender } = render(
@@ -63,6 +63,39 @@ describe("UserAvatar · presence badge", () => {
     // Static — no transform, unlike the bezel rim.
     expect(reflection()?.getAttribute("style")).toBeNull()
     expect(reflection()?.className).toContain("radial-gradient")
+    // Initials disc: the smaller, fainter pool.
+    expect(reflection()?.hasAttribute("data-image")).toBe(false)
+    expect(reflection()?.className).toContain("[--reflect-peak:16%]")
+    // A requested-but-not-loaded src still shows initials — still the small
+    // pool; only a loaded photo gets the larger one.
+    // happy-dom's Image reports naturalWidth 0 (Base UI reads that as a
+    // failed preload) — a broken src keeps the initials and the small pool.
+    rerender(
+      <UserAvatar name="Jenny Hamilton" presence="online" src="/broken.jpg" />
+    )
+    expect(reflection()?.hasAttribute("data-image")).toBe(false)
+
+    // Stand in a preload that succeeds: now a photo is on screen.
+    const RealImage = window.Image
+    window.Image = class {
+      complete = true
+      naturalWidth = 72
+      onload: (() => void) | null = null
+      onerror: (() => void) | null = null
+      src = ""
+    } as unknown as typeof window.Image
+    try {
+      rerender(
+        <UserAvatar name="Jenny Hamilton" presence="online" src="/ok.jpg" />
+      )
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0))
+      })
+      expect(reflection()?.hasAttribute("data-image")).toBe(true)
+      expect(reflection()?.className).toContain("[--reflect-peak:30%]")
+    } finally {
+      window.Image = RealImage
+    }
     rerender(<UserAvatar name="Jenny Hamilton" presence="offline" />)
     expect(reflection()).toBeNull()
   })

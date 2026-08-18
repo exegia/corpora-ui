@@ -50,6 +50,10 @@ export function UserAvatar({
   const loading =
     loadingProp ??
     (hasImage && (imageStatus === "idle" || imageStatus === "loading"))
+  // A photo is actually on screen — not merely requested. A broken or
+  // still-loading `src` shows initials/skeleton and should be treated as
+  // the flat disc it is.
+  const showsImage = hasImage && loadingProp !== true && imageStatus === "loaded"
 
   return (
     // The frame is what the badge and bezel hang off: the Avatar root clips
@@ -98,11 +102,19 @@ export function UserAvatar({
           aria-hidden="true"
           className={cn(
             "pointer-events-none absolute inset-0 rounded-full",
+            // One gradient, four knobs: colour, peak alpha, mid alpha, reach.
+            // Light mode is quieter than dark (a green wash on a pale disc
+            // reads as a stain, on a dark one as a glow), and an initials
+            // disc — flat, no photo to sit on — takes a smaller, fainter
+            // pool than an image does.
             "[--reflect:--theme(--color-emerald-500)] dark:[--reflect:--theme(--color-emerald-400)]",
-            "bg-[radial-gradient(circle_at_88%_88%,color-mix(in_oklab,var(--reflect)_48%,transparent)_0%,color-mix(in_oklab,var(--reflect)_22%,transparent)_20%,color-mix(in_oklab,var(--reflect)_6%,transparent)_42%,transparent_60%)]",
-            "dark:bg-[radial-gradient(circle_at_88%_88%,color-mix(in_oklab,var(--reflect)_40%,transparent)_0%,color-mix(in_oklab,var(--reflect)_16%,transparent)_20%,color-mix(in_oklab,var(--reflect)_4%,transparent)_42%,transparent_60%)]",
+            showsImage
+              ? "[--reflect-peak:30%] [--reflect-mid:12%] [--reflect-reach:56%] dark:[--reflect-peak:40%] dark:[--reflect-mid:16%] dark:[--reflect-reach:60%]"
+              : "[--reflect-peak:16%] [--reflect-mid:6%] [--reflect-reach:40%] dark:[--reflect-peak:26%] dark:[--reflect-mid:9%] dark:[--reflect-reach:46%]",
+            "bg-[radial-gradient(circle_at_88%_88%,color-mix(in_oklab,var(--reflect)_var(--reflect-peak),transparent)_0%,color-mix(in_oklab,var(--reflect)_var(--reflect-mid),transparent)_22%,transparent_var(--reflect-reach))]",
             "transition-opacity duration-150 ease-smooth-out"
           )}
+          data-image={showsImage ? "" : undefined}
           data-slot="user-avatar-reflection"
         />
       ) : null}
