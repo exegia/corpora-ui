@@ -84,7 +84,7 @@ export const components: RegistryEntry[] = [
     slug: "user-avatar",
     name: "User Avatar",
     description:
-      "Identity avatar: an image when one is given, initials otherwise. A remote src holds a skeleton until it resolves instead of flashing initials.",
+      "Identity avatar: an image when one is given, initials otherwise, with an online/offline badge and a pointer-lit embossed bezel. A remote src holds a skeleton until it resolves instead of flashing initials. State lives in Jotai atoms keyed by avatarId.",
     category: "components",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/user-avatar-demo")),
@@ -120,6 +120,25 @@ export const components: RegistryEntry[] = [
         description:
           "Forces the skeleton, for when the identity itself is still being fetched. Omitted, it follows the image.",
       },
+      {
+        name: "presence",
+        type: '"online" | "offline"',
+        description:
+          "Corner badge — a filled green dot for online, a hollow ring for offline, each named for assistive tech. Controlled when passed; omitted, the badge follows the store (see avatarId).",
+      },
+      {
+        name: "bezel",
+        type: "boolean",
+        default: "true",
+        description:
+          "Embossed rim whose highlight follows the pointer's bearing from the avatar (rAF-coalesced, one write per frame at most). Light/dark aware, static under reduced motion. false renders a flat disc.",
+      },
+      {
+        name: "avatarId",
+        type: "string",
+        description:
+          "Names this avatar's slice of the Jotai store: useUserAvatarState(id) reads presence / bezelAngle / imageStatus, useUserAvatarActions(id).setPresence() flips the badge from anywhere under ExegiaProvider. Unnamed avatars key off useId and are dropped on unmount.",
+      },
     ],
     usage: `import { UserAvatar } from "@corpora/ui"
 
@@ -129,7 +148,7 @@ export const components: RegistryEntry[] = [
     slug: "tree",
     name: "Tree",
     description:
-      "Nested item tree in four shapes: app navigation with collapsible sections, a table of contents with in-page anchors, an icon rail, and an editable file explorer.",
+      "Nested item tree in four shapes: app navigation with collapsible sections, a table of contents, an icon rail, and an editable file explorer. Every row is a Button; navigation flows through onNavigate.",
     category: "components",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/tree-demo")),
@@ -138,13 +157,13 @@ export const components: RegistryEntry[] = [
         name: "variant",
         type: '"navigation" | "toc" | "sidebar" | "files"',
         description:
-          "navigation: app nav — 3-level data promotes the top level to collapsible section names. toc: top-level nodes are routes, deeper nodes anchor to #{id}. sidebar: single-level icon rail. files: compact explorer with rename, drag-and-drop and trailing actions.",
+          "navigation: app nav — 3-level data promotes the top level to collapsible section names. toc: top-level nodes are routes, deeper rows jump to #{id} after select; parents expand from an overlay chevron. sidebar: single-level icon rail (40px collapsed). files: compact explorer with rename, drag-and-drop and trailing actions.",
       },
       {
         name: "items",
         type: "TreeNode[]",
         description:
-          "The tree data — id, label, icon, href, badge, defaultOpen, children.",
+          "The tree data — id, label, icon, href (metadata for onNavigate; rows never render anchors, though toc rows below the route level still jump to #{id} or a #hash href), badge, defaultOpen, children.",
       },
       {
         name: "activeId",
@@ -156,7 +175,7 @@ export const components: RegistryEntry[] = [
         name: "onNavigate",
         type: "(node: TreeNode) => void",
         description:
-          "Fires for every selection after the row's anchor default — wire your router's navigate here.",
+          "Fires for every selection after the node's own onSelect. Rows are buttons, so this is the routing path — wire your router's navigate here. toc rows below the route level additionally jump to #{id} after it fires.",
       },
       {
         name: "collapsed",
@@ -194,8 +213,14 @@ export const components: RegistryEntry[] = [
         description:
           "A useTree() controller, in place of items and the handler props. Every behaviour — expand, collapse, select, rename, reorder, fold the rail — becomes callable from outside the component.",
       },
+      {
+        name: "treeId",
+        type: "string",
+        description:
+          "Names this instance in the shared store so useTreeState(id) / useTreeActions(id) can reach it from anywhere under ExegiaProvider. A named tree keeps its state across unmounts (a rail's fold survives a route change) — call removeTreeInstance(id) on teardown. Unnamed trees are dropped on unmount.",
+      },
     ],
-    usage: `import { Tree, useTree } from "@corpora/ui"
+    usage: `import { Tree, useTree, useTreeActions, useTreeState } from "@corpora/ui"
 
 // Props form — the tree owns its state.
 <Tree
@@ -210,7 +235,15 @@ const tree = useTree({ variant: "files", defaultItems: files })
 
 <Tree tree={tree} />
 <Button onClick={tree.collapseAll}>Collapse all</Button>
-<Button onClick={() => tree.startRename(tree.activeId!)}>Rename</Button>`,
+<Button onClick={() => tree.startRename(tree.activeId!)}>Rename</Button>
+
+// By id — no controller to pass around. Needs <ExegiaProvider> at the root.
+<Tree variant="sidebar" treeId="app-nav" items={items} />
+
+// …anywhere else in the app:
+const nav = useTreeActions("app-nav")          // writes only, never re-renders
+const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
+<Button onClick={nav.toggleCollapsed}>{collapsed ? "Expand" : "Fold"} rail</Button>`,
   },
   {
     slug: "search-field",

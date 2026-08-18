@@ -55,9 +55,25 @@ export const blocks: RegistryEntry[] = [
           "Reject (or throw) to show the shaking error state with the error message.",
       },
     ],
-    usage: `import { LoginBlock } from "@corpora/ui"
+    usage: `import { LoginBlock, useAuthFlow, useAuthFlowActions } from "@corpora/ui"
 
-<LoginBlock onSubmit={async ({ email, password }) => login(email, password)} />`,
+<LoginBlock onSubmit={async ({ email, password }) => login(email, password)} />
+
+// Wired into the shared auth flow (needs <ExegiaProvider> at the root):
+// the block keeps the password local; the flow tracks which step shows and
+// what identifier is in flight, so CodeAuthBlock can pick it up masked.
+const flow = useAuthFlow()
+const { beginVerification, complete } = useAuthFlowActions()
+
+{flow.step === "login" && (
+  <LoginBlock
+    onSubmit={async ({ email, password }) => {
+      const result = await login(email, password)
+      if (result.needsCode) beginVerification({ identifier: email })
+      else complete(result.user) // signs the session in — see useAuthSession()
+    }}
+  />
+)}`,
   },
   {
     slug: "signup",
@@ -211,9 +227,22 @@ export const blocks: RegistryEntry[] = [
         description: "Reject to shake, clear the code and show the error.",
       },
     ],
-    usage: `import { CodeAuthBlock } from "@corpora/ui"
+    usage: `import { CodeAuthBlock, useAuthFlow, useAuthFlowActions } from "@corpora/ui"
 
-<CodeAuthBlock channel="sms" destination="•••-1234" onVerify={verifyCode} />`,
+<CodeAuthBlock channel="sms" destination="•••-1234" onVerify={verifyCode} />
+
+// From the shared auth flow: after beginVerification({ identifier, channel })
+// the flow exposes the identifier already masked (y•••@example.com, •••4567).
+const flow = useAuthFlow()
+const { complete } = useAuthFlowActions()
+
+{flow.step === "verify-code" && (
+  <CodeAuthBlock
+    channel={flow.channel}
+    destination={flow.maskedIdentifier ?? undefined}
+    onVerify={async (code) => complete(await api.verify(code))}
+  />
+)}`,
   },
   {
     slug: "update-password",
@@ -464,7 +493,7 @@ export const blocks: RegistryEntry[] = [
         type: "ProfileCardUser",
         required: true,
         description:
-          "Identity on the card ({ name, username?, avatar?, initials? }). Initials fall back to the name's first and last word.",
+          "Identity on the card ({ name, username?, avatar?, initials?, presence? }). Initials fall back to the name's first and last word.",
       },
       {
         name: "items",
@@ -493,6 +522,31 @@ export const blocks: RegistryEntry[] = [
           "“content” sizes the menu to its items; “card” locks it to the trigger's width.",
       },
       {
+        name: "variant",
+        type: '"expanded" | "collapsed"',
+        description:
+          "collapsed folds the card to its avatar for an icon rail — name, handle and chevron animate to zero width, the avatar stays, title names the tile on hover, the accessible name is unchanged. Controlled when passed; unset, it follows the AnimatedPanel it sits in (a SidebarBlock footer folds with ⌘B on its own), else defaultVariant.",
+      },
+      {
+        name: "defaultVariant / onVariantChange",
+        type: '"expanded" | "collapsed" / (variant) => void',
+        default: '"expanded"',
+        description:
+          "Uncontrolled start value, and the change report (fires for store-driven changes too).",
+      },
+      {
+        name: "profileCardId",
+        type: "string",
+        description:
+          "Names this card's slice of the Jotai store: useProfileCardState(id) reads variant / menuOpen / busy, useProfileCardActions(id) folds it or opens its menu from anywhere under ExegiaProvider. Unnamed cards key off useId and are dropped on unmount.",
+      },
+      {
+        name: "presence / avatarId",
+        type: '"online" | "offline" / string',
+        description:
+          "Presence badge on the avatar (presence overrides user.presence). avatarId names the avatar in the store so useUserAvatarActions(id).setPresence() can flip the badge from a socket handler.",
+      },
+      {
         name: "open / defaultOpen / onOpenChange",
         type: "boolean / boolean / (open, details) => void",
         description: "Control the menu, or observe it.",
@@ -505,10 +559,15 @@ export const blocks: RegistryEntry[] = [
           "Press/release cues on the card plus open/close cues on the menu. Inert until the app calls bindSounds().",
       },
     ],
-    usage: `import { ProfileCardBlock } from "@corpora/ui"
+    usage: `import { ProfileCardBlock, useAuthSession, useAuthSessionActions } from "@corpora/ui"
+
+// The signed-in AuthUser from the shared session drops straight in, and
+// signOut clears the session and returns the auth flow to the login step.
+const { user } = useAuthSession()
+const { signOut } = useAuthSessionActions()
 
 <ProfileCardBlock
-  user={{ name: "Jenny Hamilton", username: "@jennycodes", avatar: src }}
+  user={user ?? { name: "Jenny Hamilton", username: "@jennycodes", avatar: src }}
   items={[
     { type: "label", label: "Management" },
     { id: "profile", label: "Profile", icon: <UserIcon />, onSelect: () => navigate("/profile") },
@@ -538,7 +597,7 @@ export const blocks: RegistryEntry[] = [
         name: "items / defaultItems",
         type: "SidebarResource[]",
         description:
-          "The tree. A resource is { id, label, kind, children?, disabled? } where kind is \"project\" | \"folder\" | \"file\" | \"bookmark\". Pass `items` to control the tree, `defaultItems` to let it own its own state.",
+          'The tree. A resource is { id, label, kind, children?, disabled? } where kind is "project" | "folder" | "file" | "bookmark". Pass `items` to control the tree, `defaultItems` to let it own its own state.',
       },
       {
         name: "onItemsChange",
@@ -550,7 +609,7 @@ export const blocks: RegistryEntry[] = [
         name: "onMove",
         type: "(move) => void | Promise<void>",
         description:
-          "A drag landed: { itemId, targetId, position } where position is \"before\" | \"inside\" | \"after\" and targetId is null at the root. The move is applied optimistically — reject the promise to roll it back.",
+          'A drag landed: { itemId, targetId, position } where position is "before" | "inside" | "after" and targetId is null at the root. The move is applied optimistically — reject the promise to roll it back.',
       },
       {
         name: "onMoveError",
@@ -561,8 +620,7 @@ export const blocks: RegistryEntry[] = [
       {
         name: "onRename",
         type: "(item, label) => void | Promise<void>",
-        description:
-          "A row committed an in-place rename with the new label.",
+        description: "A row committed an in-place rename with the new label.",
       },
       {
         name: "activeId / defaultActiveId / onActiveChange",
@@ -585,8 +643,7 @@ export const blocks: RegistryEntry[] = [
       {
         name: "renderIcon",
         type: "(item) => ReactNode",
-        description:
-          "Replaces the default per-kind icon.",
+        description: "Replaces the default per-kind icon.",
       },
       {
         name: "renderMenu",
@@ -598,15 +655,27 @@ export const blocks: RegistryEntry[] = [
         name: "renderActionsTrigger",
         type: "(item) => ReactElement",
         description:
-          "Replaces the default \"…\" actions button. Must return a single element — the popover clones it to attach its trigger ref and click handler.",
+          'Replaces the default "…" actions button. Must return a single element — the popover clones it to attach its trigger ref and click handler.',
       },
       {
         name: "ariaLabel",
         type: "string",
         description: "Accessible name for the tree.",
       },
+      {
+        name: "sidebarId",
+        type: "string",
+        description:
+          "Names this instance in the shared store so useAISidebarState(id) / useAISidebarActions(id) can reach it from anywhere under ExegiaProvider. A named sidebar keeps its state across unmounts — call removeAISidebarInstance(id) on teardown. Unnamed sidebars are dropped on unmount.",
+      },
     ],
-    usage: `import { Sidebar, useAISidebar, type SidebarResource } from "@corpora/ui"
+    usage: `import {
+  Sidebar,
+  useAISidebar,
+  useAISidebarActions,
+  useAISidebarState,
+  type SidebarResource,
+} from "@corpora/ui"
 
 // Props form — the block owns its state.
 <Sidebar.Wrapper
@@ -622,7 +691,15 @@ const sidebar = useAISidebar({ defaultItems: resources })
 
 <Sidebar.Wrapper controller={sidebar} />
 <Button onClick={sidebar.collapseAll}>Collapse all</Button>
-<Button onClick={() => sidebar.startRename(sidebar.selectedId!)}>Rename</Button>`,
+<Button onClick={() => sidebar.startRename(sidebar.selectedId!)}>Rename</Button>
+
+// By id — no controller to pass around. Needs <ExegiaProvider> at the root.
+<Sidebar.Wrapper sidebarId="app-resources" defaultItems={resources} />
+
+// …anywhere else in the app:
+const resources = useAISidebarActions("app-resources") // writes only, never re-renders
+const { selectedId } = useAISidebarState("app-resources") // subscribes to the sidebar
+<Button onClick={() => selectedId && resources.reveal(selectedId)}>Reveal</Button>`,
   },
   {
     slug: "sidebar-block",
@@ -744,11 +821,18 @@ const sidebar = useAISidebar({ defaultItems: resources })
         description:
           "Side-keyed control of the panels — no per-side props. ⌘B toggles the left rail. The `openMobile` family has the same shape for the mobile overlays. Spread `useShellPanels().providerProps` instead of wiring them by hand.",
       },
+      {
+        name: "shellId / defaultPanelWidth",
+        type: "string / number",
+        description:
+          "The shell measures itself (rail + body + panel floors vs. the viewport) and files the verdict in Jotai atoms under `shellId` — whether the secondary panel fits, its px width, its resize bounds. Name the id to read it anywhere below `ExegiaProvider` with `useShellFitState(id)` / drive it with `useShellFitActions(id)`, and to keep a dragged width across a route change. `defaultPanelWidth` seeds the panel's opening width instead of `--panel-width`. Column widths are CSS variables on the provider (`--sidebar-width`, `--panel-width`, `--inset-min-width`) — override them by restyling.",
+      },
     ],
-    usage: `import { ShellLayout, useShellPanels } from "@corpora/ui"
+    usage: `import { ShellLayout, useShellPanels, useShellFitActions } from "@corpora/ui"
 
 function App() {
   const panels = useShellPanels({
+    shellId: "app-shell",
     onPanelChange: (open, side) => console.log(side, open ? "expanded" : "collapsed"),
   })
 
@@ -765,7 +849,11 @@ function App() {
   )
 }
 
-// panels.toggle("right") from anywhere — a title-bar button, a shortcut.`,
+// panels.toggle("right") from anywhere — a title-bar button, a shortcut.
+// panels.isNarrow / panels.panelWidth mirror the shell's own measurement.
+// Or by id, from any component under ExegiaProvider:
+const inspector = useShellFitActions("app-shell")
+inspector.resizePanel(480)`,
   },
   {
     slug: "scaffold",

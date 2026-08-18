@@ -15,6 +15,8 @@ const USER = {
 }
 
 const ALIGNMENTS = ["center", "start", "end"] as const
+const VARIANTS = ["expanded", "collapsed"] as const
+const PRESENCE = ["online", "offline", "none"] as const
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -23,6 +25,10 @@ export default function ProfileCardDemo() {
   const [withAvatar, setWithAvatar] = React.useState(true)
   const [withUsername, setWithUsername] = React.useState(true)
   const [action, setAction] = React.useState<string | null>(null)
+  const [variant, setVariant] =
+    React.useState<(typeof VARIANTS)[number]>("expanded")
+  const [presence, setPresence] =
+    React.useState<(typeof PRESENCE)[number]>("online")
 
   const items: ProfileCardItem[] = [
     { type: "label", label: "Management" },
@@ -86,6 +92,18 @@ export default function ProfileCardDemo() {
             checked={withUsername}
             onChange={setWithUsername}
           />
+          <DemoSelect
+            label="variant"
+            value={variant}
+            options={VARIANTS}
+            onChange={setVariant}
+          />
+          <DemoSelect
+            label="presence"
+            value={presence}
+            options={PRESENCE}
+            onChange={setPresence}
+          />
           <span className="text-xs text-muted-foreground">
             {action ? `selected: ${action}` : "no selection yet"}
           </span>
@@ -100,7 +118,9 @@ export default function ProfileCardDemo() {
             name: USER.name,
             username: withUsername ? USER.username : undefined,
             avatar: withAvatar ? USER.avatar : undefined,
+            presence: presence === "none" ? undefined : presence,
           }}
+          variant={variant}
         />
       </div>
     </DemoStage>

@@ -19,6 +19,7 @@ import {
   TREE_EASE,
 } from "./constants"
 import { useTree } from "./use-tree"
+import { useTreeDndHandlers } from "./use-tree-dnd"
 import { motion, useReducedMotion } from "motion/react"
 
 const DEFAULT_LABELS: Record<TreeController["variant"], string> = {
@@ -48,14 +49,16 @@ export function Tree(props: TreeProps): React.ReactElement {
   // Two components rather than one: hooks may not be called conditionally,
   // and the controller form has no props to build a fallback controller
   // from. Nobody switches a tree between the two forms at runtime.
-  return props.tree
-    ? <TreeView
-        ariaLabel={props.ariaLabel}
-        className={props.className}
-        renderTrailing={props.renderTrailing}
-        tree={props.tree}
-      />
-    : <UncontrolledTree {...props} />
+  return props.tree ? (
+    <TreeView
+      ariaLabel={props.ariaLabel}
+      className={props.className}
+      renderTrailing={props.renderTrailing}
+      tree={props.tree}
+    />
+  ) : (
+    <UncontrolledTree {...props} />
+  )
 }
 
 /** The props form: builds its own controller and renders through it. */
@@ -70,6 +73,7 @@ function UncontrolledTree(props: TreeDataProps): React.ReactElement {
     className,
   } = props
   const tree = useTree({
+    treeId: props.treeId,
     variant,
     items,
     activeId,
@@ -112,7 +116,7 @@ function TreeView({
   // as wide as whatever holds it, which can change on resize.
   //
   // A container with no width of its own sizes to the list — so it shrinks
-  // around the 44px rail once collapsed and follows the list mid-tween. Both
+  // around the 40px rail once collapsed and follows the list mid-tween. Both
   // would feed the list's own width back in as its target and pin it. So:
   // no observing while collapsed (the last expanded width stands), and each
   // sample is taken with the list's inline width cleared, so the classes'
@@ -210,9 +214,13 @@ function TreeView({
     }
   }
 
+  // Rows take the tree's id and the stable drag handlers, never the
+  // controller — so this value keeps its identity and a toggle re-renders only
+  // the rows whose own atoms changed.
+  const dnd = useTreeDndHandlers(tree.treeId)
   const context = React.useMemo<TreeContextValue>(
-    () => ({ tree, renderTrailing }),
-    [tree, renderTrailing]
+    () => ({ treeId: tree.treeId, renderTrailing, dnd }),
+    [tree.treeId, renderTrailing, dnd]
   )
 
   const label = ariaLabel ?? DEFAULT_LABELS[variant]
@@ -220,15 +228,15 @@ function TreeView({
     <motion.ul
       aria-label={label}
       className={cn(
-        "flex min-w-0 flex-col h-full",
+        "flex h-full min-w-0 flex-col",
         // Resting widths, and the fallback until the rail is measured. The
         // motion target below overrides these with an inline width.
-        collapsed ? "w-11 gap-y-2" : "w-full",
+        collapsed ? "w-10 gap-y-2!" : "w-full",
         variant === "files" ? "gap-px" : sectioned ? "gap-3" : "gap-0.5"
       )}
       // Both endpoints must be px: motion cannot interpolate a number
-      // against "100%", and animating 44 -> "100%" pinned the inline width
-      // at 44px, so the rail collapsed once and never reopened. The
+      // against "100%", and animating 40 -> "100%" pinned the inline width
+      // at 40px, so the rail collapsed once and never reopened. The
       // expanded target is the rail's own measured width.
       initial={false}
       animate={railTarget}
@@ -266,7 +274,7 @@ function TreeView({
       ) : (
         <nav
           aria-label={label}
-          className={cn("min-w-0 flex h-full justify-center", className)}
+          className={cn("flex h-full min-w-0 justify-center", className)}
           data-slot="tree-root"
           ref={railRef}
         >

@@ -23,6 +23,10 @@ GH_REPO ?= $(shell git config --get remote.origin.url 2>/dev/null | sed -E 's,.*
 # Branch and commit-title types accepted by `pr-guard`.
 TYPES := feat|fix|chore|docs|ci|refactor|test|perf|build|style|revert
 
+# Command strings, NOT $(shell …) values: every consumer runs them inside a
+# recipe as `$$($(pkg_version))`. Turning them into make-time expansions makes
+# that `$(0.21.0)` in sh — "0.21.0: not found" — and breaks pr-guard, publish
+# and tag-release. (Regressed once per release so far; keep them as commands.)
 pkg_version = node -p "require('./$(REACT_DIR)/package.json').version"
 pkg_name = node -p "require('./$(REACT_DIR)/package.json').name"
 

@@ -27,10 +27,39 @@ export * from "./components/ui/textarea"
 export * from "./components/composed/password-input"
 export * from "./components/composed/social-providers"
 export * from "./components/composed/tree"
-export * from "./components/composed/user-avatar"
+// user-avatar: named, not `export *` — its barrel also exports an `Avatar`
+// namespace object that would collide with ui/avatar's component above.
+export {
+  DEFAULT_BEZEL_ANGLE,
+  PresenceBadge,
+  UserAvatar,
+  initialsFrom,
+  removeUserAvatarInstance,
+  resetUserAvatarAtom,
+  setUserAvatarBezelAngleAtom,
+  setUserAvatarPresenceAtom,
+  toggleUserAvatarPresenceAtom,
+  useUserAvatar,
+  useUserAvatarActions,
+  useUserAvatarState,
+  userAvatarBezelAngleAtom,
+  userAvatarIsOnlineAtom,
+  userAvatarPresenceAtom,
+  userAvatarStateAtom,
+} from "./components/user-avatar"
+export type {
+  UseUserAvatarOptions,
+  UserAvatarActions,
+  UserAvatarBinding,
+  UserAvatarInstanceId,
+  UserAvatarProps,
+  UserAvatarState,
+  UserPresence,
+} from "./components/user-avatar"
 
 // blocks
 export * from "./components/blocks/auth/auth-shell"
+export * from "./components/blocks/auth/auth-state"
 export * from "./components/blocks/auth/code-auth-block"
 export * from "./components/blocks/auth/forgot-password-block"
 export * from "./components/blocks/auth/linked-accounts-block"
@@ -46,10 +75,13 @@ export * from "./components/blocks/shell"
 export { default as ShellLayout } from "./components/blocks/shell"
 export * from "./components/blocks/scaffold"
 export { default as Layout } from "./components/blocks/layout"
-export * from "./components/blocks/profile/profile-card-block"
+export * from "./components/blocks/profile"
 
 // motion primitives
 export * from "./components/motion/shared-layout-bg"
+
+// state
+export * from "./state"
 
 // The v0.17 sidebar monolith became the shell block's AnimatedPanel parts.
 // `blocks/shell` above already exports every part under its new name; these
