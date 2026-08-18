@@ -522,6 +522,12 @@ const { complete } = useAuthFlowActions()
           "“content” sizes the menu to its items; “card” locks it to the trigger's width.",
       },
       {
+        name: "collapsed",
+        type: "boolean",
+        description:
+          "Fold the card to its avatar for an icon rail — name and handle animate away, title names the tile on hover, the accessible name is unchanged. Unset, it follows the AnimatedPanel it sits in (a SidebarBlock footer collapses with ⌘B on its own).",
+      },
+      {
         name: "open / defaultOpen / onOpenChange",
         type: "boolean / boolean / (open, details) => void",
         description: "Control the menu, or observe it.",

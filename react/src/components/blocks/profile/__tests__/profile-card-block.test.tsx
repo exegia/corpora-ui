@@ -2,6 +2,7 @@ import { describe, expect, mock, test } from "bun:test";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+import { AnimatedSidebarPanelContext } from "@/components/blocks/shell/utils";
 import { ProfileCardBlock } from "../profile-card-block";
 
 const USER = { name: "Jenny Hamilton", username: "@jennycodes" };
@@ -130,5 +131,60 @@ describe("ProfileCardBlock", () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(onError).toHaveBeenCalled();
+  });
+  test("collapsed folds to the avatar but keeps the accessible name", () => {
+    const { rerender } = render(<ProfileCardBlock collapsed user={USER} />);
+
+    const trigger = screen.getByRole("button", {
+      name: "Jenny Hamilton @jennycodes, account menu",
+    });
+    expect(trigger.hasAttribute("data-collapsed")).toBe(true);
+    // Hover names the tile the way the rail's menu buttons do.
+    expect(trigger.getAttribute("title")).toBe("Jenny Hamilton @jennycodes");
+    // The avatar stays; the identity lines fold (hidden, not removed — that
+    // is what lets the fold animate back open).
+    expect(screen.getByText("JH")).toBeDefined();
+    const identity = trigger.querySelector('[data-slot="profile-card-identity"]');
+    expect(identity?.getAttribute("aria-hidden")).toBe("true");
+    expect(identity?.textContent).toContain("Jenny Hamilton");
+    // 40px tile, like the tree rail: no inset, avatar centred.
+    expect(trigger.className).toContain("justify-center");
+    expect(trigger.className).toContain("size-10");
+    expect(trigger.className).toContain("p-0");
+
+    rerender(<ProfileCardBlock user={USER} />);
+    expect(trigger.hasAttribute("data-collapsed")).toBe(false);
+    expect(trigger.getAttribute("title")).toBeNull();
+    expect(identity?.getAttribute("aria-hidden")).toBeNull();
+  });
+
+  test("collapsed still opens the menu", async () => {
+    const user = userEvent.setup();
+    render(<ProfileCardBlock collapsed user={USER} />);
+    await user.click(screen.getByRole("button"));
+    expect(await screen.findByRole("menuitem", { name: "Log out" })).toBeDefined();
+  });
+
+  test("follows the enclosing AnimatedPanel unless collapsed is set", () => {
+    const panel = { collapsed: true, collapsible: "icon", side: "left" } as const;
+    const { rerender } = render(
+      <AnimatedSidebarPanelContext.Provider value={panel}>
+        <ProfileCardBlock user={USER} />
+      </AnimatedSidebarPanelContext.Provider>,
+    );
+    const trigger = screen.getByRole("button");
+    expect(trigger.hasAttribute("data-collapsed")).toBe(true);
+
+    // An explicit prop wins over the panel.
+    rerender(
+      <AnimatedSidebarPanelContext.Provider value={panel}>
+        <ProfileCardBlock collapsed={false} user={USER} />
+      </AnimatedSidebarPanelContext.Provider>,
+    );
+    expect(trigger.hasAttribute("data-collapsed")).toBe(false);
+
+    // Outside any panel it is simply expanded.
+    rerender(<ProfileCardBlock user={USER} />);
+    expect(trigger.hasAttribute("data-collapsed")).toBe(false);
   });
 });

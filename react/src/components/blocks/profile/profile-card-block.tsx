@@ -8,8 +8,15 @@ import {
   UserPlusIcon,
   UsersIcon,
 } from "lucide-react"
+import { motion, useReducedMotion } from "motion/react"
 import * as React from "react"
 
+import {
+  AnimatedSidebarPanelContext,
+  LABEL_ENTER_TRANSITION,
+  LABEL_EXIT_TRANSITION,
+  REDUCED_TRANSITION,
+} from "@/components/blocks/shell/utils"
 import { UserAvatar } from "@/components/composed/user-avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -115,6 +122,14 @@ export interface ProfileCardBlockProps {
    */
   menuWidth?: "content" | "card"
   /**
+   * Fold the card to its avatar — for an icon-collapsed sidebar rail. Left
+   * unset, the card follows the `AnimatedPanel` it sits in (a `SidebarBlock`
+   * footer collapses with the rail on its own); outside a panel it stays
+   * expanded. The name and handle fold away and `title` names the tile on
+   * hover; the accessible name is unchanged.
+   */
+  collapsed?: boolean
+  /**
    * Emit cuelume press/release on the card and play the open/close cues.
    * Inert unless the app opts into interaction sound via `bindSounds()`.
    */
@@ -164,6 +179,7 @@ export function ProfileCardBlock({
   side = "bottom",
   sideOffset = 8,
   menuWidth = "content",
+  collapsed: collapsedProp,
   open,
   defaultOpen,
   onOpenChange,
@@ -182,6 +198,14 @@ export function ProfileCardBlock({
   }, [])
 
   const groups = React.useMemo(() => toGroups(items), [items])
+
+  // Optional, not required: the card is a standalone block that also lands
+  // in sidebar footers, so it reads the panel context when there is one and
+  // does not throw when there is not.
+  const panel = React.useContext(AnimatedSidebarPanelContext)
+  const collapsed = collapsedProp ?? panel?.collapsed ?? false
+  const reduce = useReducedMotion()
+  const identity = `${user.name}${user.username ? ` ${user.username}` : ""}`
 
   function select(action: ProfileCardAction) {
     const result = action.onSelect?.()
@@ -216,19 +240,40 @@ export function ProfileCardBlock({
           <Button
             // Spelled out rather than left to the name-from-contents rule: the
             // avatar sits inside the button and the handle is a second line.
-            aria-label={`${user.name}${user.username ? ` ${user.username}` : ""}, account menu`}
+            aria-label={`${identity}, account menu`}
             className={cn(
               // Quiet at rest — the background only surfaces on hover or
               // while the menu is open.
               "h-auto w-full justify-between py-1.5 pl-1.5 data-popup-open:bg-accent sm:h-auto",
+              // Folded: a 40px avatar tile, the size the tree rail uses. It
+              // is 8px wider than a footer's 32px inner box on purpose — the
+              // -mx-1 lets it borrow the footer padding so the 32px avatar
+              // clears the 1px border and sits dead centre. The label spans
+              // below fold to zero width rather than unmounting so the change
+              // animates. Button's own gap-2 stays: its always-mounted loading
+              // slot carries a -ms-2 that cancels it, so zeroing the gap would
+              // pull the avatar 8px left; the folded chevron cancels its own
+              // gap instead (see below). `sm:size-10` because the base carries
+              // an `sm:h-auto` that an unprefixed size would not beat.
+              collapsed &&
+                "-mx-1 size-10 shrink-0 justify-center rounded-xl p-0 sm:size-10",
               className
             )}
+            data-collapsed={collapsed ? "" : undefined}
             data-slot="profile-card"
             loading={busy}
             sound={sound}
+            // The visible name is gone while folded — name the tile on hover
+            // the way the rail's menu buttons do.
+            title={collapsed ? identity : undefined}
             variant="ghost"
           >
-            <span className="flex w-full min-w-0 items-center justify-start gap-2">
+            <span
+              className={cn(
+                "flex min-w-0 items-center justify-start",
+                collapsed ? "w-auto gap-0" : "w-full gap-2"
+              )}
+            >
               <UserAvatar
                 // Decorative: the name beside it already labels the card.
                 alt=""
@@ -236,16 +281,59 @@ export function ProfileCardBlock({
                 name={user.name}
                 src={user.avatar}
               />
-              <span className="flex min-w-0 flex-col text-left">
+              <motion.span
+                animate={{
+                  width: collapsed ? 0 : "auto",
+                  opacity: collapsed ? 0 : 1,
+                  x: collapsed ? -4 : 0,
+                }}
+                aria-hidden={collapsed || undefined}
+                className={cn(
+                  "flex min-w-0 flex-col overflow-hidden text-left whitespace-nowrap",
+                  collapsed && "pointer-events-none"
+                )}
+                data-slot="profile-card-identity"
+                initial={false}
+                transition={
+                  reduce
+                    ? REDUCED_TRANSITION
+                    : collapsed
+                      ? LABEL_EXIT_TRANSITION
+                      : LABEL_ENTER_TRANSITION
+                }
+              >
                 <span className="truncate font-medium">{user.name}</span>
                 {user.username ? (
                   <span className="truncate text-xs font-normal text-muted-foreground">
                     {user.username}
                   </span>
                 ) : null}
-              </span>
+              </motion.span>
             </span>
-            <ChevronsUpDownIcon aria-hidden="true" className="size-3.5" />
+            <motion.span
+              animate={{
+                width: collapsed ? 0 : "auto",
+                opacity: collapsed ? 0 : 1,
+                x: collapsed ? 4 : 0,
+              }}
+              aria-hidden="true"
+              className={cn(
+                "flex shrink-0 items-center overflow-hidden",
+                // 0px wide while folded, but the flex gap before it would
+                // still offset the avatar — pull it back by that gap.
+                collapsed && "-ml-2"
+              )}
+              initial={false}
+              transition={
+                reduce
+                  ? REDUCED_TRANSITION
+                  : collapsed
+                    ? LABEL_EXIT_TRANSITION
+                    : LABEL_ENTER_TRANSITION
+              }
+            >
+              <ChevronsUpDownIcon aria-hidden="true" className="size-3.5" />
+            </motion.span>
           </Button>
         }
       />
