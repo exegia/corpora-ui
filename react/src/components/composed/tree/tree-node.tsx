@@ -227,9 +227,9 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
   ) : null
 
   // The trailing slot is consumer-rendered and usually holds buttons, so it
-  // cannot live inside the row — a files folder row is itself a <button>, and
-  // a leaf row an <a>; either one nesting a button is invalid HTML. It sits
-  // beside the row instead, overlaid like the toc toggle.
+  // cannot live inside the row — every row is itself a <button>, and a
+  // button nesting a button is invalid HTML. It sits beside the row
+  // instead, overlaid like the toc toggle.
   const showTrailing = files && !!renderTrailing && !renaming
 
   const rowClassName = cn(
@@ -326,6 +326,11 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
       </button>
     )
   } else {
+    // Every non-section row is the shared Button — link rows included. An
+    // `href` no longer renders an anchor: navigation runs through
+    // `selectTreeNodeAtom` (onSelect → onNavigate), and the consumer routes
+    // from the node it receives. `sound` is forwarded so Button's own
+    // press/release cues follow the tree's setting rather than its default.
     row = (
       <Button
         {...rowInteractionProps}
@@ -340,6 +345,7 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
         )}
         disabled={node.disabled}
         onClick={handlePress}
+        sound={sound}
       >
         {content}
       </Button>

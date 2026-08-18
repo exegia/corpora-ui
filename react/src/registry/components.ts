@@ -129,7 +129,7 @@ export const components: RegistryEntry[] = [
     slug: "tree",
     name: "Tree",
     description:
-      "Nested item tree in four shapes: app navigation with collapsible sections, a table of contents with in-page anchors, an icon rail, and an editable file explorer.",
+      "Nested item tree in four shapes: app navigation with collapsible sections, a table of contents, an icon rail, and an editable file explorer. Every row is a Button; navigation flows through onNavigate.",
     category: "components",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/tree-demo")),
@@ -138,13 +138,13 @@ export const components: RegistryEntry[] = [
         name: "variant",
         type: '"navigation" | "toc" | "sidebar" | "files"',
         description:
-          "navigation: app nav — 3-level data promotes the top level to collapsible section names. toc: top-level nodes are routes, deeper nodes anchor to #{id}. sidebar: single-level icon rail. files: compact explorer with rename, drag-and-drop and trailing actions.",
+          "navigation: app nav — 3-level data promotes the top level to collapsible section names. toc: parents select on the row and expand from an overlay chevron. sidebar: single-level icon rail (40px collapsed). files: compact explorer with rename, drag-and-drop and trailing actions.",
       },
       {
         name: "items",
         type: "TreeNode[]",
         description:
-          "The tree data — id, label, icon, href, badge, defaultOpen, children.",
+          "The tree data — id, label, icon, href (metadata for onNavigate; rows never render anchors), badge, defaultOpen, children.",
       },
       {
         name: "activeId",
@@ -156,7 +156,7 @@ export const components: RegistryEntry[] = [
         name: "onNavigate",
         type: "(node: TreeNode) => void",
         description:
-          "Fires for every selection after the row's anchor default — wire your router's navigate here.",
+          "Fires for every selection after the node's own onSelect. Rows are buttons, so this is the only navigation path — wire your router's navigate here.",
       },
       {
         name: "collapsed",

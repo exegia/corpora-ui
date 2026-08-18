@@ -1,8 +1,9 @@
 import { describe, expect, mock, test } from "bun:test"
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { FileTextIcon, FolderIcon, SearchIcon } from "lucide-react"
 
+import { RAIL_COLLAPSED_WIDTH } from "../constants"
 import { Tree } from "../index"
 import type { TreeNode } from "../type"
 import { moveNode } from "../utils"
@@ -78,36 +79,45 @@ const FILES: TreeNode[] = [
 
 /** Branch exits run through AnimatePresence — let them settle on real
  * timers, then query once (happy-dom serves stale waitFor queries while
- * an exit is in flight). */
-const settleExit = () => new Promise((resolve) => setTimeout(resolve, 400))
+ * an exit is in flight). Wrapped in act so the presence teardown that lands
+ * during the wait is a tracked React update, not an "outside act" warning. */
+const settleExit = () =>
+  act(() => new Promise<void>((resolve) => setTimeout(resolve, 400)))
 
 describe("Tree · navigation", () => {
-  test("3-level data renders top level as collapsible sections, not links", async () => {
+  test("3-level data renders top level as collapsible sections above button rows", async () => {
     const user = userEvent.setup()
     render(<Tree items={SECTIONED} variant="navigation" />)
 
     const section = screen.getByRole("button", { name: "Research" })
     expect(section.getAttribute("aria-expanded")).toBe("true")
-    // Sections are buttons — no anchor wraps them.
-    expect(section.closest("a")).toBeNull()
-    expect(screen.getByRole("link", { name: "Search" })).toBeDefined()
+    // Sections are plain heading buttons; item rows are the shared Button.
+    // Neither is an anchor — `href` is metadata for onNavigate now.
+    expect(document.querySelector("a")).toBeNull()
+    const search = screen.getByRole("button", { name: "Search" })
+    expect(search.getAttribute("data-slot")).toBe("tree-row")
+    expect(search.getAttribute("type")).toBe("button")
 
     // Collapsing the section folds its items away.
     await user.click(section)
     await settleExit()
-    expect(screen.queryByRole("link", { name: "Search" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "Search" })).toBeNull()
   })
 
-  test("2-level data keeps top level as links and parents as toggles", async () => {
+  test("2-level data keeps top level as leaf rows and parents as toggles", async () => {
     const user = userEvent.setup()
     render(<Tree items={FLAT_NAV} variant="navigation" />)
 
-    expect(screen.getByRole("link", { name: "Search" })).toBeDefined()
+    // A leaf row carries no aria-expanded; a parent row does.
+    const search = screen.getByRole("button", { name: "Search" })
+    expect(search.getAttribute("aria-expanded")).toBeNull()
     const parent = screen.getByRole("button", { name: "Library" })
     expect(parent.getAttribute("aria-expanded")).toBe("false")
 
     await user.click(parent)
-    expect(await screen.findByRole("link", { name: "Manuscripts" })).toBeDefined()
+    expect(
+      await screen.findByRole("button", { name: "Manuscripts" })
+    ).toBeDefined()
   })
 
   test("read-only variants render no drag or rename affordances", () => {
@@ -122,14 +132,15 @@ describe("Tree · navigation", () => {
       <Tree items={SECTIONED} variant="navigation" />
     )
     // Library starts collapsed — its children are absent.
-    expect(screen.queryByRole("link", { name: "Codices" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "Codices" })).toBeNull()
 
     rerender(<Tree activeId="codices" items={SECTIONED} variant="navigation" />)
-    const active = await screen.findByRole("link", { name: "Codices" })
+    const active = await screen.findByRole("button", { name: "Codices" })
     expect(active.getAttribute("aria-current")).toBe("page")
+    expect(active.hasAttribute("data-active")).toBe(true)
   })
 
-  test("onNavigate fires for link rows after the node's own onSelect", async () => {
+  test("onNavigate fires for leaf rows after the node's own onSelect", async () => {
     const user = userEvent.setup()
     const order: string[] = []
     const items: TreeNode[] = [
@@ -147,29 +158,68 @@ describe("Tree · navigation", () => {
         variant="navigation"
       />
     )
-    await user.click(screen.getByRole("link", { name: "Alpha" }))
+    await user.click(screen.getByRole("button", { name: "Alpha" }))
     expect(order).toEqual(["onSelect", "onNavigate"])
+  })
+
+  test("href is passed through to onNavigate, never rendered as an anchor", async () => {
+    const user = userEvent.setup()
+    const onNavigate = mock((_node: TreeNode) => {})
+    render(<Tree items={FLAT_NAV} onNavigate={onNavigate} variant="navigation" />)
+
+    const search = screen.getByRole("button", { name: "Search" })
+    expect(search.tagName).toBe("BUTTON")
+    expect(search.getAttribute("href")).toBeNull()
+
+    await user.click(search)
+    expect(onNavigate).toHaveBeenCalledTimes(1)
+    expect(onNavigate.mock.calls[0]?.[0]?.href).toBe("/search")
+  })
+
+  test("sound=false strips the cuelume attributes from every row", () => {
+    render(<Tree items={FLAT_NAV} sound={false} variant="navigation" />)
+    for (const row of document.querySelectorAll('[data-slot="tree-row"]')) {
+      expect(row.hasAttribute("data-cuelume-press")).toBe(false)
+      expect(row.hasAttribute("data-cuelume-release")).toBe(false)
+    }
   })
 })
 
 describe("Tree · toc", () => {
-  test("leaves anchor to #{id}; explicit hrefs win; parents keep their route", async () => {
+  test("parents select on the row and expand from the overlay toggle", async () => {
     const user = userEvent.setup()
-    render(<Tree items={TOC} variant="toc" />)
+    const onNavigate = mock((_node: TreeNode) => {})
+    render(<Tree items={TOC} onNavigate={onNavigate} variant="toc" />)
 
-    const guide = screen.getByRole("link", { name: "Guide" })
-    expect(guide.getAttribute("href")).toBe("/guide")
+    // Guide is a parent, but toc parents are selectable rows — the row
+    // itself carries no aria-expanded; the overlay chevron does.
+    const guide = screen.getByRole("button", { name: "Guide" })
+    expect(guide.getAttribute("aria-expanded")).toBeNull()
+    expect(guide.tagName).toBe("BUTTON")
+    const toggle = screen.getByRole("button", { name: "Expand Guide" })
+    expect(toggle.getAttribute("aria-expanded")).toBe("false")
 
-    // Guide navigates on the row; its expansion is the overlay toggle.
-    await user.click(screen.getByRole("button", { name: "Expand Guide" }))
-    // Below the route level every node is an in-page anchor, parents
-    // included — only depth 0 carries routes.
-    const setup = await screen.findByRole("link", { name: "Setup" })
-    expect(setup.getAttribute("href")).toBe("#setup")
+    // Pressing the row selects (and reports the node with its href) without
+    // expanding it.
+    await user.click(guide)
+    expect(onNavigate).toHaveBeenCalledTimes(1)
+    expect(onNavigate.mock.calls[0]?.[0]?.href).toBe("/guide")
+    expect(screen.queryByRole("button", { name: "Setup" })).toBeNull()
 
+    // The overlay toggle expands without selecting.
+    await user.click(toggle)
+    expect(await screen.findByRole("button", { name: "Setup" })).toBeDefined()
+    expect(onNavigate).toHaveBeenCalledTimes(1)
+    expect(toggle.getAttribute("aria-expanded")).toBe("true")
+
+    // Nested parents get their own overlay toggle; leaves get none.
     await user.click(screen.getByRole("button", { name: "Expand Setup" }))
-    const install = await screen.findByRole("link", { name: "Install" })
-    expect(install.getAttribute("href")).toBe("#install")
+    expect(await screen.findByRole("button", { name: "Install" })).toBeDefined()
+    expect(screen.queryByRole("button", { name: "Expand Install" })).toBeNull()
+
+    // Nothing in a toc renders as an anchor any more — `#{id}` scrolling is
+    // the consumer's job in onNavigate.
+    expect(document.querySelector("a")).toBeNull()
   })
 })
 
@@ -188,26 +238,41 @@ describe("Tree · sidebar", () => {
 
     rerender(<Tree collapsed items={RAIL} variant="sidebar" />)
     await settleExit()
-    expect(rail()?.className).toContain("w-11")
+    expect(rail()?.className).toContain("w-10")
     expect(rail()?.getAttribute("data-collapsed")).toBe("")
+    // Collapsed rows are square-ish tiles that fill the 40px rail.
+    const row = screen.getByRole("button", { name: "Search" })
+    expect(row.className).toContain("h-10!")
+    expect(row.className).toContain("rounded-xl!")
+    expect(row.className).toContain("justify-center")
 
     // Back open — the direction that was broken.
     rerender(<Tree items={RAIL} variant="sidebar" />)
     await settleExit()
     expect(rail()?.className).toContain("w-full")
-    expect(rail()?.className).not.toContain("w-11")
+    expect(rail()?.className).not.toContain("w-10")
     expect(rail()?.getAttribute("data-collapsed")).toBeNull()
+    expect(screen.getByRole("button", { name: "Search" }).className).not.toContain(
+      "h-10!"
+    )
+  })
+
+  test("the collapsed px target matches the resting width class", () => {
+    // tree.tsx animates the rail to RAIL_COLLAPSED_WIDTH once measured, and
+    // falls back to the class before that. Tailwind's w-10 is 2.5rem = 40px;
+    // the two must agree or the rail jumps on its first collapse.
+    expect(RAIL_COLLAPSED_WIDTH).toBe(40)
   })
 
   test("collapsed shows icon-only rows that keep an accessible name", async () => {
     const { rerender } = render(<Tree items={RAIL} variant="sidebar" />)
-    expect(screen.getByRole("link", { name: "Search" }).textContent).toContain(
+    expect(screen.getByRole("button", { name: "Search" }).textContent).toContain(
       "Search"
     )
 
     rerender(<Tree collapsed items={RAIL} variant="sidebar" />)
     await settleExit()
-    const row = screen.getByRole("link", { name: "Search" })
+    const row = screen.getByRole("button", { name: "Search" })
     // The label folds to nothing rather than unmounting — keeping it in the
     // DOM is what lets the fold animate — so assert the fold, not absence.
     const label = row.querySelector('[data-slot="tree-row-label"]')
@@ -221,7 +286,7 @@ describe("Tree · sidebar", () => {
     // happy-dom can't drive Base UI's hover/focus-visible open logic, so
     // assert the wiring: Base UI stamps its trigger attribute on the row.
     const { rerender } = render(<Tree collapsed items={RAIL} variant="sidebar" />)
-    const collapsedRow = screen.getByRole("link", { name: "Search" })
+    const collapsedRow = screen.getByRole("button", { name: "Search" })
     expect(collapsedRow.hasAttribute("data-base-ui-tooltip-trigger")).toBe(true)
 
     // The tooltip wrapper stays mounted when the rail expands (it is only
@@ -235,7 +300,18 @@ describe("Tree · sidebar", () => {
     // not read this test as covering it.
     rerender(<Tree items={RAIL} variant="sidebar" />)
     await settleExit()
-    expect(screen.getByRole("link", { name: "Search" })).toBe(collapsedRow)
+    expect(screen.getByRole("button", { name: "Search" })).toBe(collapsedRow)
+  })
+
+  test("the active rail row swaps to the secondary Button variant", () => {
+    render(<Tree activeId="search" items={RAIL} variant="sidebar" />)
+    const active = screen.getByRole("button", { name: "Search" })
+    const idle = screen.getByRole("button", { name: "Notes" })
+    expect(active.getAttribute("aria-current")).toBe("page")
+    // Button's cva emits bg-secondary for "secondary" and nothing of the
+    // sort for "ghost" — the cheapest observable proxy for the variant.
+    expect(active.className).toContain("bg-secondary")
+    expect(idle.className).not.toContain("bg-secondary")
   })
 
   test("nested children are ignored — the rail is single-level", () => {
@@ -287,8 +363,8 @@ describe("Tree · files", () => {
       />
     )
 
-    // A folder row is a <button> and a leaf row an <a> — either one nesting
-    // the trailing button would be invalid markup React warns about.
+    // Every row is a <button> — one nesting the trailing button would be
+    // invalid markup React warns about.
     for (const row of document.querySelectorAll('[data-slot="tree-row"]')) {
       expect(row.querySelector("button, a")).toBeNull()
     }
@@ -370,21 +446,23 @@ describe("Tree · keyboard", () => {
     const user = userEvent.setup()
     render(<Tree items={FLAT_NAV} variant="navigation" />)
 
-    const search = screen.getByRole("link", { name: "Search" })
+    const search = screen.getByRole("button", { name: "Search" })
     search.focus()
     await user.keyboard("{ArrowDown}")
     const library = screen.getByRole("button", { name: "Library" })
     expect(document.activeElement).toBe(library)
 
     await user.keyboard("{ArrowRight}")
-    expect(await screen.findByRole("link", { name: "Manuscripts" })).toBeDefined()
+    expect(
+      await screen.findByRole("button", { name: "Manuscripts" })
+    ).toBeDefined()
     await waitFor(() =>
       expect(library.getAttribute("aria-expanded")).toBe("true")
     )
 
     await user.keyboard("{ArrowLeft}")
     await settleExit()
-    expect(screen.queryByRole("link", { name: "Manuscripts" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "Manuscripts" })).toBeNull()
     expect(document.activeElement).toBe(library)
   })
 

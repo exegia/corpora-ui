@@ -116,7 +116,7 @@ function TreeView({
   // as wide as whatever holds it, which can change on resize.
   //
   // A container with no width of its own sizes to the list — so it shrinks
-  // around the 44px rail once collapsed and follows the list mid-tween. Both
+  // around the 40px rail once collapsed and follows the list mid-tween. Both
   // would feed the list's own width back in as its target and pin it. So:
   // no observing while collapsed (the last expanded width stands), and each
   // sample is taken with the list's inline width cleared, so the classes'
@@ -235,8 +235,8 @@ function TreeView({
         variant === "files" ? "gap-px" : sectioned ? "gap-3" : "gap-0.5"
       )}
       // Both endpoints must be px: motion cannot interpolate a number
-      // against "100%", and animating 44 -> "100%" pinned the inline width
-      // at 44px, so the rail collapsed once and never reopened. The
+      // against "100%", and animating 40 -> "100%" pinned the inline width
+      // at 40px, so the rail collapsed once and never reopened. The
       // expanded target is the rail's own measured width.
       initial={false}
       animate={railTarget}
