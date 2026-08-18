@@ -55,9 +55,25 @@ export const blocks: RegistryEntry[] = [
           "Reject (or throw) to show the shaking error state with the error message.",
       },
     ],
-    usage: `import { LoginBlock } from "@corpora/ui"
+    usage: `import { LoginBlock, useAuthFlow, useAuthFlowActions } from "@corpora/ui"
 
-<LoginBlock onSubmit={async ({ email, password }) => login(email, password)} />`,
+<LoginBlock onSubmit={async ({ email, password }) => login(email, password)} />
+
+// Wired into the shared auth flow (needs <ExegiaProvider> at the root):
+// the block keeps the password local; the flow tracks which step shows and
+// what identifier is in flight, so CodeAuthBlock can pick it up masked.
+const flow = useAuthFlow()
+const { beginVerification, complete } = useAuthFlowActions()
+
+{flow.step === "login" && (
+  <LoginBlock
+    onSubmit={async ({ email, password }) => {
+      const result = await login(email, password)
+      if (result.needsCode) beginVerification({ identifier: email })
+      else complete(result.user) // signs the session in — see useAuthSession()
+    }}
+  />
+)}`,
   },
   {
     slug: "signup",
@@ -211,9 +227,22 @@ export const blocks: RegistryEntry[] = [
         description: "Reject to shake, clear the code and show the error.",
       },
     ],
-    usage: `import { CodeAuthBlock } from "@corpora/ui"
+    usage: `import { CodeAuthBlock, useAuthFlow, useAuthFlowActions } from "@corpora/ui"
 
-<CodeAuthBlock channel="sms" destination="•••-1234" onVerify={verifyCode} />`,
+<CodeAuthBlock channel="sms" destination="•••-1234" onVerify={verifyCode} />
+
+// From the shared auth flow: after beginVerification({ identifier, channel })
+// the flow exposes the identifier already masked (y•••@example.com, •••4567).
+const flow = useAuthFlow()
+const { complete } = useAuthFlowActions()
+
+{flow.step === "verify-code" && (
+  <CodeAuthBlock
+    channel={flow.channel}
+    destination={flow.maskedIdentifier ?? undefined}
+    onVerify={async (code) => complete(await api.verify(code))}
+  />
+)}`,
   },
   {
     slug: "update-password",
@@ -505,10 +534,15 @@ export const blocks: RegistryEntry[] = [
           "Press/release cues on the card plus open/close cues on the menu. Inert until the app calls bindSounds().",
       },
     ],
-    usage: `import { ProfileCardBlock } from "@corpora/ui"
+    usage: `import { ProfileCardBlock, useAuthSession, useAuthSessionActions } from "@corpora/ui"
+
+// The signed-in AuthUser from the shared session drops straight in, and
+// signOut clears the session and returns the auth flow to the login step.
+const { user } = useAuthSession()
+const { signOut } = useAuthSessionActions()
 
 <ProfileCardBlock
-  user={{ name: "Jenny Hamilton", username: "@jennycodes", avatar: src }}
+  user={user ?? { name: "Jenny Hamilton", username: "@jennycodes", avatar: src }}
   items={[
     { type: "label", label: "Management" },
     { id: "profile", label: "Profile", icon: <UserIcon />, onSelect: () => navigate("/profile") },
