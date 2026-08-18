@@ -194,8 +194,14 @@ export const components: RegistryEntry[] = [
         description:
           "A useTree() controller, in place of items and the handler props. Every behaviour — expand, collapse, select, rename, reorder, fold the rail — becomes callable from outside the component.",
       },
+      {
+        name: "treeId",
+        type: "string",
+        description:
+          "Names this instance in the shared store so useTreeState(id) / useTreeActions(id) can reach it from anywhere under ExegiaProvider. A named tree keeps its state across unmounts (a rail's fold survives a route change) — call removeTreeInstance(id) on teardown. Unnamed trees are dropped on unmount.",
+      },
     ],
-    usage: `import { Tree, useTree } from "@corpora/ui"
+    usage: `import { Tree, useTree, useTreeActions, useTreeState } from "@corpora/ui"
 
 // Props form — the tree owns its state.
 <Tree
@@ -210,7 +216,15 @@ const tree = useTree({ variant: "files", defaultItems: files })
 
 <Tree tree={tree} />
 <Button onClick={tree.collapseAll}>Collapse all</Button>
-<Button onClick={() => tree.startRename(tree.activeId!)}>Rename</Button>`,
+<Button onClick={() => tree.startRename(tree.activeId!)}>Rename</Button>
+
+// By id — no controller to pass around. Needs <ExegiaProvider> at the root.
+<Tree variant="sidebar" treeId="app-nav" items={items} />
+
+// …anywhere else in the app:
+const nav = useTreeActions("app-nav")          // writes only, never re-renders
+const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
+<Button onClick={nav.toggleCollapsed}>{collapsed ? "Expand" : "Fold"} rail</Button>`,
   },
   {
     slug: "search-field",
