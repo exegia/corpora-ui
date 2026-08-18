@@ -8,8 +8,11 @@ export interface TreeNode {
   /** Leading icon. Required in practice for `sidebar` — it is all that
    * remains of a row while the rail is collapsed. */
   icon?: React.ReactNode
-  /** Renders an anchor. Without one the row is a button; `toc` leaves
-   * default to `#{id}` so they scroll to the matching heading. */
+  /** Route metadata for the consumer's `onNavigate` — every row renders as
+   * a button, so this is never turned into an anchor element. Read it (with
+   * `target`) off the node your handler receives. One native behaviour is
+   * kept: `toc` rows below the route level jump to `#{id}` after select
+   * (a `#hash` href overrides the id; a non-hash href disables the jump). */
   href?: string
   target?: "_blank" | "_self" | "_parent" | "_top"
   disabled?: boolean
@@ -48,8 +51,10 @@ interface TreeBaseProps {
   tree?: never
   /** `id` of the current entry — matches any depth. Its ancestors expand. */
   activeId?: string
-  /** Fires for every selection (rows and leaves alike), after the row's
-   * anchor default — wire your router's navigate here. */
+  /** Fires for every selection (rows and leaves alike), after the node's
+   * own `onSelect`. Rows are buttons, so this is the routing path — wire
+   * your router's navigate here. `toc` rows below the route level still jump
+   * to `#{id}` natively, after this fires. */
   onNavigate?: (node: TreeNode) => void
   /** Expand/collapse cues. Silent until `bindSounds()`. */
   sound?: boolean
@@ -87,12 +92,14 @@ export type TreeDataProps = TreeBaseProps &
     | ({
         /** Nested app navigation. With 3 levels of nodes the top level
          * becomes collapsible section names (styled as headings, not
-         * links); with 2 it renders plain link rows. */
+         * rows); with 2 it renders plain selectable rows. */
         variant: "navigation"
       } & TreeReadonlyProps)
     | ({
-        /** Table of contents: top-level nodes are routes, leaf nodes are
-         * in-page anchors (`#{id}` unless the node carries an `href`). */
+        /** Table of contents: top-level nodes are routes (handled in
+         * `onNavigate`); rows below jump to `#{id}` after select, like an
+         * anchor would. Parents select on the row and expand from a
+         * separate overlay chevron. */
         variant: "toc"
       } & TreeReadonlyProps)
     | ({

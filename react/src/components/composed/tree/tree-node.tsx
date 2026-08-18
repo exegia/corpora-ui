@@ -39,6 +39,7 @@ import {
 import { useTreeContext } from "./tree-context"
 import type { TreeNode } from "./type"
 import { EASE_OUT } from "@/lib/ease.ts"
+import { Button } from "@/components/ui/button"
 
 /** How a row behaves, resolved from variant + depth + shape. */
 type RowKind =
@@ -99,15 +100,21 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
   const canExpand =
     kind !== "link" || (variant === "toc" && children.length > 0)
 
-  // toc rows below the route level scroll — they anchor to the heading
-  // that shares their id (an explicit href always wins).
-  const href =
-    kind === "link" && !node.disabled
-      ? (node.href ??
-        (variant === "toc" && depth > 0 ? `#${node.id}` : undefined))
-      : undefined
-
   const files = variant === "files"
+
+  // toc rows below the route level are in-page anchors: they scroll to the
+  // heading sharing their id (an explicit `#hash` href wins). Rows are
+  // buttons, so the anchor default is reproduced by setting location.hash
+  // after `select` — the same order the old <a> gave (handlers first, then
+  // the browser's jump), with the same :target/history semantics.
+  const anchorHash =
+    variant === "toc" && kind === "link" && !node.disabled
+      ? node.href?.startsWith("#")
+        ? node.href
+        : depth > 0 && !node.href
+          ? `#${node.id}`
+          : undefined
+      : undefined
 
   function handlePress(event: React.MouseEvent) {
     if (node.disabled) {
@@ -116,6 +123,9 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
     }
     if (kind === "link") {
       select(node.id)
+      if (anchorHash !== undefined && typeof window !== "undefined") {
+        window.location.hash = anchorHash
+      }
       return
     }
     toggleExpanded(node.id)
@@ -131,8 +141,8 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
     <input
       autoFocus
       className={cn(
-        "h-5 min-w-0 flex-1 rounded-sm border border-input bg-background px-1",
-        "text-[length:inherit] text-foreground outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        "h-5 min-w-0 flex-1 rounded-sm border-none bg-transparent px-1",
+        "text-[length:inherit] text-foreground outline-none focus-visible:ring-0"
       )}
       data-slot="tree-rename-input"
       defaultValue={node.label}
@@ -234,13 +244,13 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
   ) : null
 
   // The trailing slot is consumer-rendered and usually holds buttons, so it
-  // cannot live inside the row — a files folder row is itself a <button>, and
-  // a leaf row an <a>; either one nesting a button is invalid HTML. It sits
-  // beside the row instead, overlaid like the toc toggle.
+  // cannot live inside the row — every row is itself a <button>, and a
+  // button nesting a button is invalid HTML. It sits beside the row
+  // instead, overlaid like the toc toggle.
   const showTrailing = files && !!renderTrailing && !renaming
 
   const rowClassName = cn(
-    "group/row relative flex w-full min-w-0 items-center gap-2 rounded-md px-2",
+    "group/row relative flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-md px-2",
     "text-left text-muted-foreground transition-colors duration-150 outline-none",
     "hover:bg-accent hover:text-accent-foreground",
     "focus-visible:ring-2 focus-visible:ring-ring",
@@ -293,12 +303,11 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
         </span>
       )}
       {label}
-      {node.badge !== undefined &&
-        !(variant === "sidebar" && collapsed) && (
-          <span className="ml-auto shrink-0 text-xs text-muted-foreground/80">
-            {node.badge}
-          </span>
-        )}
+      {node.badge !== undefined && !(variant === "sidebar" && collapsed) && (
+        <span className="ml-auto shrink-0 text-xs text-muted-foreground/80">
+          {node.badge}
+        </span>
+      )}
       {/* nav toggle chevrons trail like the sidebar block; files lead;
           toc link rows get a separate overlay toggle instead. */}
       {kind === "toggle" && !files && (
@@ -321,10 +330,10 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
         {...rowInteractionProps}
         aria-expanded={open}
         className={cn(
-          "group/row flex w-full items-center gap-1 rounded-md px-2 pt-1 pb-1",
+          "group/row flex w-full cursor-pointer items-center gap-1 rounded-md px-2 py-1",
           "text-xs font-medium tracking-wide text-muted-foreground/80 uppercase",
           "transition-colors duration-150 outline-none hover:text-foreground",
-          "focus-visible:ring-2 focus-visible:ring-ring"
+          "focus-visible:ring-0 focus-visible:ring-ring"
         )}
         onClick={handlePress}
         type="button"
@@ -333,38 +342,30 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
         {chevron}
       </button>
     )
-  } else if (href !== undefined) {
-    row = (
-      <a
-        {...rowInteractionProps}
-        aria-current={active ? "page" : undefined}
-        aria-label={
-          variant === "sidebar" && collapsed ? node.label : undefined
-        }
-        className={rowClassName}
-        href={href}
-        onClick={handlePress}
-        target={node.target}
-      >
-        {content}
-      </a>
-    )
   } else {
+    // Every non-section row is the shared Button — link rows included. An
+    // `href` no longer renders an anchor: navigation runs through
+    // `selectTreeNodeAtom` (onSelect → onNavigate), and the consumer routes
+    // from the node it receives. `sound` is forwarded so Button's own
+    // press/release cues follow the tree's setting rather than its default.
     row = (
-      <button
+      <Button
         {...rowInteractionProps}
+        variant={variant === "sidebar" && active ? "secondary" : "ghost"}
         aria-current={active ? "page" : undefined}
         aria-expanded={kind === "toggle" ? open : undefined}
-        aria-label={
-          variant === "sidebar" && collapsed ? node.label : undefined
-        }
-        className={rowClassName}
+        aria-label={variant === "sidebar" && collapsed ? node.label : undefined}
+        className={cn(
+          "transform cursor-pointer! justify-start transition-transform ease-smooth-out",
+          variant === "sidebar" && collapsed ? "h-10! rounded-xl!" : undefined,
+          rowClassName
+        )}
         disabled={node.disabled}
         onClick={handlePress}
-        type="button"
+        sound={sound}
       >
         {content}
-      </button>
+      </Button>
     )
   }
 
@@ -389,7 +390,7 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
         aria-expanded={open}
         aria-label={`${open ? "Collapse" : "Expand"} ${node.label}`}
         className={cn(
-          "absolute top-1/2 right-1 flex size-5 -translate-y-1/2 items-center",
+          "absolute top-1/2 right-1 flex size-5 -translate-y-1/2 cursor-pointer items-center",
           "justify-center rounded-sm text-muted-foreground/70 outline-none",
           "hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
         )}

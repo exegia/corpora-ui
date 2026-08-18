@@ -35,7 +35,8 @@ const FILES: TreeNode[] = [
 
 /** Branch exits run through AnimatePresence — let them settle before
  * querying (happy-dom serves stale results while an exit is in flight). */
-const settleExit = () => new Promise((resolve) => setTimeout(resolve, 400))
+const settleExit = () =>
+  act(() => new Promise<void>((resolve) => setTimeout(resolve, 400)))
 
 describe("useTree · expansion", () => {
   test("expand, collapse and toggle drive a single node", () => {
