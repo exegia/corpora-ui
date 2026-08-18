@@ -84,6 +84,24 @@ export function UserAvatar({
         )}
         <Fallback name={name} initials={initials} loading={loading} />
       </Avatar>
+      {presence === "online" ? (
+        // The badge's green "reflected" onto the disc: a static radial wash
+        // anchored at the badge corner that fades inward, so the dot reads
+        // as a light source sitting on the avatar rather than a sticker on
+        // it. Does not move with the bezel — it belongs to the badge, not
+        // the pointer. Sits above the image, below the bezel and the badge.
+        <span
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute inset-0 rounded-full",
+            "[--reflect:--theme(--color-emerald-500)] dark:[--reflect:--theme(--color-emerald-400)]",
+            "bg-[radial-gradient(circle_at_88%_88%,color-mix(in_oklab,var(--reflect)_48%,transparent)_0%,color-mix(in_oklab,var(--reflect)_22%,transparent)_20%,color-mix(in_oklab,var(--reflect)_6%,transparent)_42%,transparent_60%)]",
+            "dark:bg-[radial-gradient(circle_at_88%_88%,color-mix(in_oklab,var(--reflect)_40%,transparent)_0%,color-mix(in_oklab,var(--reflect)_16%,transparent)_20%,color-mix(in_oklab,var(--reflect)_4%,transparent)_42%,transparent_60%)]",
+            "transition-opacity duration-150 ease-smooth-out"
+          )}
+          data-slot="user-avatar-reflection"
+        />
+      ) : null}
       {bezel ? (
         // A conic highlight → shadow sweep, masked to a thin rim and rotated
         // so the highlight faces the pointer. Rotation (not the gradient

@@ -22,6 +22,13 @@ const badge = () => document.querySelector('[data-slot="user-avatar-presence"]')
 const bezel = () => document.querySelector('[data-slot="user-avatar-bezel"]')
 const frame = () =>
   document.querySelector<HTMLElement>('[data-slot="user-avatar-frame"]')
+/** The rim's rotation, parsed. The component damps the stored bearing
+ * (`bezelAngle * 0.8`) so the highlight trails the pointer slightly. */
+const BEZEL_DAMPING = 0.8
+const rimRotation = () => {
+  const match = /rotate\((-?[\d.]+)deg\)/.exec(bezel()?.getAttribute("style") ?? "")
+  return match ? Number(match[1]) : Number.NaN
+}
 
 describe("UserAvatar · presence badge", () => {
   test("no presence, no badge", () => {
@@ -46,6 +53,20 @@ describe("UserAvatar · presence badge", () => {
     expect(badge()).toBeNull()
   })
 
+  test("online reflects the badge colour onto the disc; offline does not", () => {
+    const reflection = () =>
+      document.querySelector('[data-slot="user-avatar-reflection"]')
+    const { rerender } = render(
+      <UserAvatar name="Jenny Hamilton" presence="online" />
+    )
+    expect(reflection()).not.toBeNull()
+    // Static — no transform, unlike the bezel rim.
+    expect(reflection()?.getAttribute("style")).toBeNull()
+    expect(reflection()?.className).toContain("radial-gradient")
+    rerender(<UserAvatar name="Jenny Hamilton" presence="offline" />)
+    expect(reflection()).toBeNull()
+  })
+
   test("the root carries data-presence for styling hooks", () => {
     render(<UserAvatar name="Jenny Hamilton" presence="online" />)
     expect(
@@ -63,9 +84,7 @@ describe("UserAvatar · bezel", () => {
     expect(root?.hasAttribute("data-bezel")).toBe(true)
     expect(root?.className).toContain("shadow-[inset")
     // Rests at the classic top-left light until a pointer moves.
-    expect(bezel()?.getAttribute("style")).toContain(
-      `rotate(${DEFAULT_BEZEL_ANGLE}deg)`
-    )
+    expect(rimRotation()).toBeCloseTo(DEFAULT_BEZEL_ANGLE * BEZEL_DAMPING, 5)
   })
 
   test("bezel={false} renders a flat disc", () => {
@@ -88,14 +107,14 @@ describe("UserAvatar · bezel", () => {
       fireEvent.pointerMove(window, { clientX: 200, clientY: 120 })
       await new Promise((r) => requestAnimationFrame(() => r(null)))
     })
-    expect(bezel()?.getAttribute("style")).toContain("rotate(90deg)")
+    expect(rimRotation()).toBeCloseTo(90 * BEZEL_DAMPING, 5)
 
     // Straight below → 6 o'clock → 180°.
     await act(async () => {
       fireEvent.pointerMove(window, { clientX: 120, clientY: 300 })
       await new Promise((r) => requestAnimationFrame(() => r(null)))
     })
-    expect(bezel()?.getAttribute("style")).toContain("rotate(180deg)")
+    expect(rimRotation()).toBeCloseTo(180 * BEZEL_DAMPING, 5)
     removeUserAvatarInstance("lit")
   })
 })
