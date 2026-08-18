@@ -27,8 +27,23 @@ export type TreeVariant = "navigation" | "toc" | "sidebar" | "files"
 /** Where a dragged row lands relative to its drop target. */
 export type TreeDropPosition = "before" | "after" | "inside"
 
+/** Key for one tree’s state in the store. Any stable string; `useTree`
+ * generates one when you don't pass it. */
+export type TreeInstanceId = string
+
+/** Row a drag hovers, and where the drop would land. */
+export interface TreeDropTarget {
+  id: string
+  position: TreeDropPosition
+}
+
 interface TreeBaseProps {
   items: TreeNode[]
+  /** Key this tree's state under a name your app can address —
+   * `useTreeState("app-nav")` / `useTreeActions("app-nav")` reach it from
+   * anywhere under `ExegiaProvider`. Without one the tree generates a key
+   * and its state is dropped when it unmounts. */
+  treeId?: TreeInstanceId
   /** Never set on the data form — `tree` selects the controller form. */
   tree?: never
   /** `id` of the current entry — matches any depth. Its ancestors expand. */
@@ -106,6 +121,11 @@ export type TreeDataProps = TreeBaseProps &
  * controlled when passed and hook-owned when its `default*` twin is used
  * instead. */
 export interface UseTreeOptions {
+  /** Key this tree's state under a name your app can address —
+   * `useTreeState("app-nav")` / `useTreeActions("app-nav")` reach it from
+   * anywhere under `ExegiaProvider`. Without one the hook generates a key
+   * and the state is dropped when the component unmounts. */
+  treeId?: TreeInstanceId
   /** Which shape the tree takes — gates rename/reorder (`files`) and the
    * collapsible rail (`sidebar`). */
   variant: TreeVariant
@@ -143,6 +163,8 @@ export interface UseTreeOptions {
 /** Everything the tree can do, callable from outside the component.
  * Returned by `useTree` and accepted by `<Tree tree={…} />`. */
 export interface TreeController {
+  /** The key this tree's state is stored under. */
+  treeId: TreeInstanceId
   variant: TreeVariant
   items: TreeNode[]
   /** `navigation` with 3 levels of nodes — depth 0 renders as sections. */
@@ -187,26 +209,107 @@ export interface TreeController {
   canMove: boolean
   move: (id: string, parentId: string | null, index: number) => void
 
+  /** Back to the values the tree mounted with. */
+  reset: () => void
+
   dnd: TreeDndContextValue
 }
 
 /** @internal What a row needs from the root, threaded through context so
- * the recursive rows stay prop-light. */
+ * the recursive rows stay prop-light.
+ *
+ * Deliberately free of tree state. Rows read state from per-node atoms, so
+ * this value keeps its identity for the life of the tree and expanding one
+ * branch no longer re-renders every row through context. */
 export interface TreeContextValue {
-  tree: TreeController
+  treeId: TreeInstanceId
   renderTrailing?: (node: TreeNode) => React.ReactNode
+  dnd: TreeDndHandlers
 }
 
-/** @internal Drag state shared by every row (all `null`/no-op outside
- * `files`). */
-export interface TreeDndContextValue {
+/** @internal The drag event handlers, stable for the life of the tree —
+ * they read drag state out of the store instead of closing over it, so
+ * handing them to every row costs no re-renders. */
+export interface TreeDndHandlers {
   enabled: boolean
-  draggedId: string | null
-  /** Row the pointer is over and where the drop would land. */
-  dropTarget: { id: string; position: TreeDropPosition } | null
   onRowDragStart: (event: React.DragEvent, id: string) => void
   onRowDragOver: (event: React.DragEvent, node: TreeNode) => void
   onRowDragLeave: (event: React.DragEvent) => void
   onRowDrop: (event: React.DragEvent, node: TreeNode) => void
   onRowDragEnd: () => void
+}
+
+/** @internal Handlers plus live drag state — what `TreeController.dnd`
+ * exposes (all `null`/no-op outside `files`). */
+export interface TreeDndContextValue extends TreeDndHandlers {
+  draggedId: string | null
+  /** Row the pointer is over and where the drop would land. */
+  dropTarget: TreeDropTarget | null
+}
+
+/** Everything observable about one tree, for consumers reading it by id. */
+export interface TreeState {
+  variant: TreeVariant
+  items: TreeNode[]
+  activeId?: string
+  expandedIds: ReadonlySet<string>
+  collapsed: boolean
+  renamingId: string | null
+  sectioned: boolean
+  sectionIds: string[]
+  canRename: boolean
+  canMove: boolean
+  draggedId: string | null
+  dropTarget: TreeDropTarget | null
+}
+
+/** Everything doable to one tree from outside its component. */
+export interface TreeActions {
+  expand: (id: string) => void
+  collapse: (id: string) => void
+  toggleExpanded: (id: string) => void
+  expandAll: () => void
+  collapseAll: () => void
+  reveal: (id: string) => void
+  setCollapsed: (collapsed: boolean) => void
+  toggleCollapsed: () => void
+  select: (id: string) => void
+  startRename: (id: string) => void
+  cancelRename: () => void
+  rename: (id: string, label: string) => void
+  move: (id: string, parentId: string | null, index: number) => void
+  setItems: (items: TreeNode[]) => void
+  reset: () => void
+}
+
+/** @internal Projection of `useTree`'s options — primitives only, so the
+ * store write runs once per real change instead of once per render. */
+export interface TreeConfig {
+  variant: TreeVariant
+  sound: boolean
+  controlsItems: boolean
+  controlsActiveId: boolean
+  controlsCollapsed: boolean
+  managesItems: boolean
+  hasRenameHandler: boolean
+  hasMoveHandler: boolean
+}
+
+/** @internal Latest option callbacks. Only write atoms read this, so it
+ * can be refreshed every commit without re-rendering anything. */
+export interface TreeHandlers {
+  onNavigate?: (node: TreeNode) => void
+  onItemsChange?: (items: TreeNode[]) => void
+  onExpandedChange?: (ids: string[]) => void
+  onCollapsedChange?: (collapsed: boolean) => void
+  onRename?: (id: string, label: string) => void
+  onMove?: (id: string, parentId: string | null, index: number) => void
+}
+
+/** @internal What an instance starts from, replayed by `resetTreeAtom`. */
+export interface TreeSeed {
+  items: TreeNode[]
+  activeId?: string
+  collapsed: boolean
+  expandedIds?: string[]
 }

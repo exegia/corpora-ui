@@ -51,6 +51,9 @@ export * from "./components/blocks/profile/profile-card-block"
 // motion primitives
 export * from "./components/motion/shared-layout-bg"
 
+// state
+export * from "./state"
+
 // The v0.17 sidebar monolith became the shell block's AnimatedPanel parts.
 // `blocks/shell` above already exports every part under its new name; these
 // aliases keep the published AnimatedSidebar* names working for consumers.

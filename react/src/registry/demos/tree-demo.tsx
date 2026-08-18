@@ -11,7 +11,12 @@ import {
 } from "lucide-react"
 import * as React from "react"
 
-import { Tree, type TreeNode, useTree } from "@/components/composed/tree"
+import {
+  Tree,
+  type TreeNode,
+  useTree,
+  useTreeActions,
+} from "@/components/composed/tree"
 import { DemoSelect, DemoStage } from "@/components/docs/demo-controls"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -119,6 +124,10 @@ export default function TreeDemo() {
     activeId,
     onNavigate: (node) => setActiveId(node.id),
   })
+  // The `navigation` shape is named instead: `treeId="demo-nav"` registers it
+  // in the shared store, so these actions reach it by id — no controller in
+  // hand, and this component never re-renders when the tree changes.
+  const nav = useTreeActions("demo-nav")
 
   return (
     <DemoStage
@@ -130,6 +139,16 @@ export default function TreeDemo() {
             options={VARIANTS}
             onChange={setVariant}
           />
+          {variant === "navigation" && (
+            <>
+              <Button onClick={nav.expandAll} size="sm" variant="outline">
+                Expand all
+              </Button>
+              <Button onClick={nav.collapseAll} size="sm" variant="outline">
+                Collapse all
+              </Button>
+            </>
+          )}
           {variant === "sidebar" && (
             <DemoSelect
               label="rail"
@@ -156,7 +175,9 @@ export default function TreeDemo() {
               </Button>
             </>
           )}
-          {activeId !== undefined && <Badge variant="outline">{activeId}</Badge>}
+          {activeId !== undefined && (
+            <Badge variant="outline">{activeId}</Badge>
+          )}
         </>
       }
       canvasClassName="flex w-full justify-center"
@@ -173,6 +194,7 @@ export default function TreeDemo() {
             activeId={activeId}
             items={NAVIGATION}
             onNavigate={(node) => setActiveId(node.id)}
+            treeId="demo-nav"
             variant="navigation"
           />
         )}
