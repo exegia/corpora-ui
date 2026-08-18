@@ -17,6 +17,80 @@ animation frame, so assert with `findBy*`, not `getBy*`. Base UI renders a
 hidden native input beside its Checkbox root, so query checkboxes by role
 rather than by label — `getByLabelText` matches both.
 
+## State (one provider, Jotai atom families)
+
+Stateful components keep state in module-level Jotai atom families keyed by an
+instance id, NOT in a per-component React context. Consumers mount
+`ExegiaProvider` once and every state hook works anywhere below it. Never add
+a second provider to the public surface — that is the whole point of this
+layer.
+
+- `src/state/store.ts` — `exegiaStore` (module-level default) + `ExegiaStore`.
+- `src/state/exegia-provider.tsx` — `ExegiaProvider` (jotai `Provider`, plus
+  opt-in `sound` and `theme`) and `useExegiaStore`.
+- `jotai` is a **peerDependency**: the library owns a store, so a consumer app
+  that also uses Jotai must resolve the same module instance.
+- Without the provider, hooks fall back to Jotai's implicit default store,
+  which is not `exegiaStore` — imperative access would then read a different
+  store than the components render from.
+
+### Pattern for adding state to a component
+
+`components/composed/tree/` is the reference implementation.
+
+1. Types in `type.ts` — `<Feature>State`, `<Feature>Actions`, and `@internal`
+   `<Feature>Config` / `<Feature>Handlers` / `<Feature>Seed`. No atom imports:
+   `type.ts` stays dependency-free.
+2. Atoms in `<feature>-atom.ts`. Use the in-house `keyed()` family, NOT
+   `jotai/utils`' `atomFamily` (deprecated for Jotai v3), then the
+   `stateFamily` / `readFamily` / `actionFamily` wrappers. Every atom carries
+   a `debugLabel` of `<feature>/<id>/<name>`.
+3. Mutations are write-only action atoms, never exported setters, so the app
+   can drive a component by id without holding its controller.
+4. `use-<feature>.ts` binds the atoms for the mounting component;
+   `use-<feature>-state.ts` exposes `use<Feature>State(id)` (reads) and
+   `use<Feature>Actions(id)` (writes only, so the caller never re-renders when
+   the component changes).
+5. The barrel exports public atoms explicitly. Never `export *` from the atom
+   module — `@internal` atoms would become a breaking-change surface.
+6. Unnamed instances key off `React.useId()` and are dropped on unmount; an
+   explicit id outlives its component, so a rail's fold survives a route
+   change. Call `remove<Feature>Instance(id)` on logout/teardown.
+
+### Rows read per-node atoms, not the controller
+
+A recursive component must not pull its state off a context value that carries
+the whole controller — every row then re-renders on every toggle. Instead:
+
+- `nodeFamily()` in `<feature>-atom.ts` builds atoms keyed by tree **and** node
+  (`treeNodeExpandedAtom(treeId, nodeId)`, `treeNodeActiveAtom`, …). A row
+  subscribes to its own booleans and sits still when a sibling's change.
+- The context value carries only `treeId`, render props and the **stable** drag
+  handlers (`useTreeDndHandlers`), so it never changes identity. Drag handlers
+  read `draggedId`/`dropTarget` out of the store when they run rather than
+  closing over them — that is what keeps them stable.
+- The row component is wrapped in `React.memo`, so a root re-render (a rail
+  measurement, a new `renderTrailing`) does not walk the tree.
+
+`tree-atom.test.tsx` guards this by counting `renderTrailing` calls per node:
+expanding one branch must leave its sibling's count unchanged. That test fails
+if the memo or the per-node subscriptions are removed.
+
+### The controlled-prop rule that bites
+
+Controlled props stay the source of truth. The hook projects them into the
+atoms in a layout effect so action atoms and remote readers see current data —
+a one-way projection, not a second source of truth, with write gates
+(`controlsItems`, `controlsActiveId`, …) keeping the store from overwriting a
+prop.
+
+A hook must NEVER subscribe to an atom it also writes from a prop of unstable
+identity. An inline `items={[…]}` array is a new reference every render, so
+that round-trip is an infinite loop. `treeOwnedItemsAtom` is the guard: it
+reads empty while a controlled prop owns the data, so the projection write
+notifies remote readers only, never the hook that produced it. Primitive props
+(`activeId`, `collapsed`) need no guard — the effect deps settle on their own.
+
 ## Pulling coss components
 
 `components.json` maps the `@coss` registry (coss.com/ui). Install base

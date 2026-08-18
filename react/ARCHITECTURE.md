@@ -26,6 +26,11 @@ src/
 │   │                         #   code block) — NOT exported to npm
 │   └── theme-provider.tsx    # Shared theme context
 │
+├── state/                    # ── SHARED STATE ──
+│   ├── store.ts              # exegiaStore (module-level Jotai store)
+│   ├── exegia-provider.tsx   # ExegiaProvider — the app's ONE provider
+│   └── index.ts
+│
 ├── registry/                 # ── SINGLE SOURCE OF TRUTH for the docs ──
 │   ├── schema.ts             # RegistryEntry / CategoryDef / PropDef types
 │   ├── atoms.ts              # one metadata entry per atom
@@ -66,6 +71,9 @@ categories — adding a category never touches the router by hand.
 ## Adding a new component (the workflow)
 
 1. Implement it in `src/components/ui|composed|blocks/<name>.tsx`.
+1b. If it holds state, put it in Jotai atom families in
+   `<name>-atom.ts` keyed by an instance id — never a new provider. See
+   the State section of `CLAUDE.md`.
 2. Export it from `src/index.ts` (npm surface).
 3. Add a demo in `src/registry/demos/<name>-demo.tsx`.
 4. Register it in `src/registry/{atoms,components,blocks}.ts` with slug, name,

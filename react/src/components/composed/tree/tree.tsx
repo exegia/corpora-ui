@@ -19,6 +19,7 @@ import {
   TREE_EASE,
 } from "./constants"
 import { useTree } from "./use-tree"
+import { useTreeDndHandlers } from "./use-tree-dnd"
 import { motion, useReducedMotion } from "motion/react"
 
 const DEFAULT_LABELS: Record<TreeController["variant"], string> = {
@@ -70,6 +71,7 @@ function UncontrolledTree(props: TreeDataProps): React.ReactElement {
     className,
   } = props
   const tree = useTree({
+    treeId: props.treeId,
     variant,
     items,
     activeId,
@@ -210,9 +212,13 @@ function TreeView({
     }
   }
 
+  // Rows take the tree's id and the stable drag handlers, never the
+  // controller — so this value keeps its identity and a toggle re-renders only
+  // the rows whose own atoms changed.
+  const dnd = useTreeDndHandlers(tree.treeId)
   const context = React.useMemo<TreeContextValue>(
-    () => ({ tree, renderTrailing }),
-    [tree, renderTrailing]
+    () => ({ treeId: tree.treeId, renderTrailing, dnd }),
+    [tree.treeId, renderTrailing, dnd]
   )
 
   const label = ariaLabel ?? DEFAULT_LABELS[variant]

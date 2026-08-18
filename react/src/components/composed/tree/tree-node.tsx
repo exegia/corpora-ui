@@ -3,6 +3,7 @@
 import { LucideChevronLeft, LucideChevronRight } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import * as React from "react"
+import { useAtomValue, useSetAtom } from "jotai"
 
 import { cn } from "@/lib/utils"
 import {
@@ -18,6 +19,23 @@ import {
   TREE_MICRO_TRANSITION,
   TREE_ROW_VARIANTS,
 } from "./constants"
+import {
+  cancelTreeRenameAtom,
+  renameTreeNodeAtom,
+  selectTreeNodeAtom,
+  startTreeRenameAtom,
+  toggleTreeNodeAtom,
+  treeCanRenameAtom,
+  treeCollapsedAtom,
+  treeNodeActiveAtom,
+  treeNodeDraggingAtom,
+  treeNodeDropAtom,
+  treeNodeExpandedAtom,
+  treeNodeRenamingAtom,
+  treeSectionedAtom,
+  treeSoundAtom,
+  treeVariantAtom,
+} from "./tree-atom"
 import { useTreeContext } from "./tree-context"
 import type { TreeNode } from "./type"
 import { EASE_OUT } from "@/lib/ease.ts"
@@ -48,34 +66,48 @@ function rowKindOf(
   return variant === "toc" ? "link" : "toggle"
 }
 
-export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
-  const { tree: ctx, renderTrailing } = useTreeContext()
+function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
+  const { treeId, renderTrailing, dnd } = useTreeContext()
   const reduce = useReducedMotion()
-  const kind = rowKindOf(node, depth, ctx.variant, ctx.sectioned)
+
+  // One subscription per field, per node. A row re-renders when its own
+  // branch, selection, rename or drag state changes and sits still while a
+  // sibling's does — reading the whole controller off context instead
+  // re-rendered every row in the tree on every toggle.
+  const variant = useAtomValue(treeVariantAtom(treeId))
+  const sectioned = useAtomValue(treeSectionedAtom(treeId))
+  const collapsed = useAtomValue(treeCollapsedAtom(treeId))
+  const canRename = useAtomValue(treeCanRenameAtom(treeId))
+  const sound = useAtomValue(treeSoundAtom(treeId))
+  const open = useAtomValue(treeNodeExpandedAtom(treeId, node.id))
+  const active = useAtomValue(treeNodeActiveAtom(treeId, node.id))
+  const renaming = useAtomValue(treeNodeRenamingAtom(treeId, node.id))
+  const dragging = useAtomValue(treeNodeDraggingAtom(treeId, node.id))
+  const drop = useAtomValue(treeNodeDropAtom(treeId, node.id))
+
+  const select = useSetAtom(selectTreeNodeAtom(treeId))
+  const toggleExpanded = useSetAtom(toggleTreeNodeAtom(treeId))
+  const startRename = useSetAtom(startTreeRenameAtom(treeId))
+  const cancelRename = useSetAtom(cancelTreeRenameAtom(treeId))
+  const rename = useSetAtom(renameTreeNodeAtom(treeId))
+
+  const kind = rowKindOf(node, depth, variant, sectioned)
 
   // The sidebar rail is single-level by contract — nested children are
   // ignored rather than rendered somewhere misleading.
-  const children = ctx.variant === "sidebar" ? [] : (node.children ?? [])
+  const children = variant === "sidebar" ? [] : (node.children ?? [])
   const canExpand =
-    kind !== "link" || (ctx.variant === "toc" && children.length > 0)
-  const open = ctx.isExpanded(node.id)
-  const active = ctx.activeId === node.id
-  const renaming = ctx.renamingId === node.id
-
-  const { dnd } = ctx
-  const dragging = dnd.draggedId === node.id
-  const drop = dnd.dropTarget?.id === node.id ? dnd.dropTarget.position : null
+    kind !== "link" || (variant === "toc" && children.length > 0)
 
   // toc rows below the route level scroll — they anchor to the heading
   // that shares their id (an explicit href always wins).
   const href =
     kind === "link" && !node.disabled
       ? (node.href ??
-        (ctx.variant === "toc" && depth > 0 ? `#${node.id}` : undefined))
+        (variant === "toc" && depth > 0 ? `#${node.id}` : undefined))
       : undefined
 
-  const files = ctx.variant === "files"
-  const collapsed = ctx.collapsed
+  const files = variant === "files"
 
   function handlePress(event: React.MouseEvent) {
     if (node.disabled) {
@@ -83,16 +115,16 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
       return
     }
     if (kind === "link") {
-      ctx.select(node.id)
+      select(node.id)
       return
     }
-    ctx.toggleExpanded(node.id)
+    toggleExpanded(node.id)
   }
 
-  function startRename(event: React.MouseEvent) {
-    if (!ctx.canRename || node.disabled) return
+  function handleStartRename(event: React.MouseEvent) {
+    if (!canRename || node.disabled) return
     event.preventDefault()
-    ctx.startRename(node.id)
+    startRename(node.id)
   }
 
   const label = renaming ? (
@@ -104,15 +136,15 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
       )}
       data-slot="tree-rename-input"
       defaultValue={node.label}
-      onBlur={(event) => ctx.rename(node.id, event.currentTarget.value)}
+      onBlur={(event) => rename(node.id, event.currentTarget.value)}
       onClick={(event) => event.stopPropagation()}
       onKeyDown={(event) => {
         event.stopPropagation()
-        if (event.key === "Enter") ctx.rename(node.id, event.currentTarget.value)
-        if (event.key === "Escape") ctx.cancelRename()
+        if (event.key === "Enter") rename(node.id, event.currentTarget.value)
+        if (event.key === "Escape") cancelRename()
       }}
     />
-  ) : ctx.variant === "sidebar" ? (
+  ) : variant === "sidebar" ? (
     // The rail label folds away with the rail instead of unmounting rows.
     <AnimatePresence initial={false} mode="wait">
       <motion.span
@@ -176,7 +208,7 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
   ) : (
     <span
       className="min-w-0 flex-1 truncate"
-      onDoubleClick={ctx.canRename ? startRename : undefined}
+      onDoubleClick={canRename ? handleStartRename : undefined}
     >
       {node.label}
     </span>
@@ -184,18 +216,18 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
 
   const chevron = canExpand ? (
     <motion.span
-      animate={{ rotate: open ? (ctx.variant === "navigation" ? -90 : 90) : 0 }}
+      animate={{ rotate: open ? (variant === "navigation" ? -90 : 90) : 0 }}
       aria-hidden
       className="flex size-4 shrink-0 items-center justify-center text-muted-foreground/70"
       transition={reduce ? { duration: 0 } : TREE_MICRO_TRANSITION}
     >
-      {ctx.variant === "sidebar" && (
+      {variant === "sidebar" && (
         <LucideChevronLeft className="size-3.5 stroke-3" />
       )}
-      {ctx.variant === "toc" && (
+      {variant === "toc" && (
         <LucideChevronRight className="size-3.5 stroke-3" />
       )}
-      {ctx.variant === "navigation" && (
+      {variant === "navigation" && (
         <LucideChevronLeft className="size-3.5 stroke-3" />
       )}
     </motion.span>
@@ -217,9 +249,9 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
     active && "bg-accent font-medium text-accent-foreground",
     dragging && "opacity-50",
     drop === "inside" && "bg-accent/60 ring-1 ring-primary/50 ring-inset",
-    ctx.variant === "sidebar" && collapsed && "justify-center px-0",
+    variant === "sidebar" && collapsed && "justify-center px-0",
     // Room for the overlay expand toggle on toc parent rows.
-    ctx.variant === "toc" && kind === "link" && children.length > 0 && "pr-7",
+    variant === "toc" && kind === "link" && children.length > 0 && "pr-7",
     // …and for the overlay trailing actions on files rows. Sized for one
     // icon button plus its inset; a wider slot clips the truncated label,
     // which is why the prop is documented as row actions, not free content.
@@ -232,7 +264,7 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
     "data-branch": canExpand ? "" : undefined,
     "data-expanded": canExpand && open ? "" : undefined,
     "data-active": active ? "" : undefined,
-    "data-cuelume-press": ctx.sound ? "" : undefined,
+    "data-cuelume-press": sound ? "" : undefined,
     draggable: dnd.enabled && !renaming ? true : undefined,
     onDragStart: dnd.enabled
       ? (event: React.DragEvent) => dnd.onRowDragStart(event, node.id)
@@ -262,7 +294,7 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
       )}
       {label}
       {node.badge !== undefined &&
-        !(ctx.variant === "sidebar" && collapsed) && (
+        !(variant === "sidebar" && collapsed) && (
           <span className="ml-auto shrink-0 text-xs text-muted-foreground/80">
             {node.badge}
           </span>
@@ -307,7 +339,7 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
         {...rowInteractionProps}
         aria-current={active ? "page" : undefined}
         aria-label={
-          ctx.variant === "sidebar" && collapsed ? node.label : undefined
+          variant === "sidebar" && collapsed ? node.label : undefined
         }
         className={rowClassName}
         href={href}
@@ -324,7 +356,7 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
         aria-current={active ? "page" : undefined}
         aria-expanded={kind === "toggle" ? open : undefined}
         aria-label={
-          ctx.variant === "sidebar" && collapsed ? node.label : undefined
+          variant === "sidebar" && collapsed ? node.label : undefined
         }
         className={rowClassName}
         disabled={node.disabled}
@@ -340,7 +372,7 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
   // Expanded, the visible label already does, so the tooltip is disabled
   // rather than unmounted: swapping the wrapper in and out with `collapsed`
   // would remount the row and cut the label's fold animation short.
-  if (ctx.variant === "sidebar") {
+  if (variant === "sidebar") {
     row = (
       <Tooltip disabled={!collapsed || node.disabled}>
         <TooltipTrigger render={row} />
@@ -352,7 +384,7 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
   // toc parents navigate on the row itself, so their chevron lives beside
   // the row as its own toggle.
   const tocToggle =
-    ctx.variant === "toc" && kind === "link" && children.length > 0 ? (
+    variant === "toc" && kind === "link" && children.length > 0 ? (
       <button
         aria-expanded={open}
         aria-label={`${open ? "Collapse" : "Expand"} ${node.label}`}
@@ -363,7 +395,7 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
         )}
         onClick={(event) => {
           event.stopPropagation()
-          ctx.toggleExpanded(node.id)
+          toggleExpanded(node.id)
         }}
         type="button"
       >
@@ -435,6 +467,12 @@ export function TreeRow({ node, depth }: TreeRowProps): React.ReactElement {
     </motion.li>
   )
 }
+
+/** Rows are memoized so a re-render of the root — a rail measurement, a new
+ * `renderTrailing` — does not walk the whole tree. Each row's own state
+ * reaches it through its atoms instead. */
+export const TreeRow = React.memo(TreeRowImpl)
+TreeRow.displayName = "TreeRow"
 
 /** Insertion indicator above or below a row while a drag hovers it. */
 function TreeDropLine({ side }: { side: "top" | "bottom" }) {

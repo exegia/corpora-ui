@@ -23,6 +23,7 @@
     "dist-lib",
     "src/components",
     "src/lib",
+    "src/state",
     "src/index.css",
     "src/index.ts"
   ],
@@ -37,6 +38,7 @@
     "preview": "vite preview"
   },
   "peerDependencies": {
+    "jotai": "^2.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -71,6 +73,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17",
+    "jotai": "^2.20.2",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "react": "^19.2.6",

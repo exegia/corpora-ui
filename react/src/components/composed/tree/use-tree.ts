@@ -1,19 +1,47 @@
 "use client"
 
 import * as React from "react"
+import { useAtomValue, useSetAtom } from "jotai"
 
-import { playCue } from "@/lib/sound"
-import type { TreeController, TreeNode, UseTreeOptions } from "./type"
-import { useTreeDnd } from "./use-tree-dnd"
 import {
-  ancestorIdsOf,
-  expandableIdsOf,
-  findNode,
-  hasThreeLevels,
-  initialExpandedIds,
-  moveNode,
-  renameNode,
-} from "./utils"
+  cancelTreeRenameAtom,
+  collapseAllTreeNodesAtom,
+  collapseTreeNodeAtom,
+  expandAllTreeNodesAtom,
+  expandTreeNodeAtom,
+  mountTreeAtom,
+  moveTreeNodeAtom,
+  projectTreeActiveIdAtom,
+  projectTreeCollapsedAtom,
+  projectTreeItemsAtom,
+  removeTreeInstance,
+  renameTreeNodeAtom,
+  resetTreeAtom,
+  revealTreeAncestorsAtom,
+  revealTreeNodeAtom,
+  selectTreeNodeAtom,
+  setTreeCollapsedAtom,
+  setTreeHandlersAtom,
+  startTreeRenameAtom,
+  toggleTreeCollapsedAtom,
+  toggleTreeNodeAtom,
+  treeActiveIdAtom,
+  treeCanMoveAtom,
+  treeCanRenameAtom,
+  treeCollapsedAtom,
+  treeExpandedIdsAtom,
+  treeOwnedItemsAtom,
+  treeRenamingIdAtom,
+} from "./tree-atom"
+import type {
+  TreeConfig,
+  TreeController,
+  TreeHandlers,
+  TreeSeed,
+  UseTreeOptions,
+} from "./type"
+import { useTreeDnd } from "./use-tree-dnd"
+import { findNode, hasThreeLevels } from "./utils"
 
 /**
  * The tree's headless controller — every behaviour the component exposes,
@@ -32,6 +60,10 @@ import {
  * <Tree tree={tree} />
  * <Button onClick={tree.collapseAll}>Collapse all</Button>
  * ```
+ *
+ * State lives in Jotai atoms keyed by `treeId`, so anything under
+ * `ExegiaProvider` can drive this tree without the controller — name it and
+ * reach for `useTreeState(treeId)` / `useTreeActions(treeId)` elsewhere.
  */
 export function useTree(options: UseTreeOptions): TreeController {
   const {
@@ -45,206 +77,172 @@ export function useTree(options: UseTreeOptions): TreeController {
     sound = true,
   } = options
 
-  // Data: controlled through `items`, otherwise owned here.
-  const [ownItems, setOwnItems] = React.useState<TreeNode[]>(
-    () => options.defaultItems ?? []
-  )
-  const items = options.items ?? ownItems
-  // The hook may only rewrite the data when it owns it, or when the
-  // consumer asked for the next tree through `onItemsChange`.
-  const managesItems =
-    options.items === undefined || onItemsChange !== undefined
+  // A generated key isolates unnamed trees from each other; an explicit
+  // `treeId` is the app's handle on this one.
+  const generatedId = React.useId()
+  const treeId = options.treeId ?? generatedId
 
-  const setItems = React.useCallback(
-    (next: TreeNode[]) => {
-      if (options.items === undefined) setOwnItems(next)
-      onItemsChange?.(next)
-    },
-    [options.items, onItemsChange]
-  )
+  const controlsItems = options.items !== undefined
+  const controlsActiveId = options.activeId !== undefined
+  const controlsCollapsed = options.collapsed !== undefined
+  // The hook may only rewrite the data when it owns it, or when the consumer
+  // asked for the next tree through `onItemsChange`.
+  const managesItems = !controlsItems || onItemsChange !== undefined
+  const hasRenameHandler = onRename !== undefined
+  const hasMoveHandler = onMove !== undefined
 
-  const sectioned = variant === "navigation" && hasThreeLevels(items)
-
-  // Selection: controlled through `activeId`, otherwise owned here.
-  const [ownActiveId, setOwnActiveId] = React.useState(options.defaultActiveId)
-  const activeId = options.activeId ?? ownActiveId
-
-  const [expandedIds, setExpandedIds] = React.useState<Set<string>>(() => {
-    const expanded = options.defaultExpandedIds
-      ? new Set(options.defaultExpandedIds)
-      : initialExpandedIds(items, activeId)
-    // Section names default open — they are headings over their run of
-    // items, not drawers; `defaultOpen: false` still starts one closed.
-    if (sectioned && !options.defaultExpandedIds)
-      for (const node of items)
-        if (node.defaultOpen !== false) expanded.add(node.id)
-    return expanded
-  })
-
-  const commitExpanded = React.useCallback(
-    (next: Set<string>) => {
-      setExpandedIds(next)
-      onExpandedChange?.([...next])
-    },
-    [onExpandedChange]
+  // Primitives only, so this object is stable and the store write below runs
+  // once per real change rather than once per render.
+  const config = React.useMemo<TreeConfig>(
+    () => ({
+      variant,
+      sound,
+      controlsItems,
+      controlsActiveId,
+      controlsCollapsed,
+      managesItems,
+      hasRenameHandler,
+      hasMoveHandler,
+    }),
+    [
+      variant,
+      sound,
+      controlsItems,
+      controlsActiveId,
+      controlsCollapsed,
+      managesItems,
+      hasRenameHandler,
+      hasMoveHandler,
+    ]
   )
 
-  // Navigating into a nested entry from elsewhere reveals its ancestors,
-  // even ones the reader had collapsed. Adjusted during render so the
-  // branch never paints closed for a frame first.
-  const [prevActiveId, setPrevActiveId] = React.useState(activeId)
-  if (activeId !== prevActiveId) {
-    setPrevActiveId(activeId)
-    if (activeId !== undefined) {
-      const ancestors = ancestorIdsOf(items, activeId)
-      if (ancestors.some((id) => !expandedIds.has(id)))
-        setExpandedIds(new Set([...expandedIds, ...ancestors]))
-    }
-  }
-
-  // Rail fold: controlled through `collapsed`, otherwise owned here. Only
-  // `sidebar` has a rail — every other variant reads as expanded.
-  const [ownCollapsed, setOwnCollapsed] = React.useState(
-    options.defaultCollapsed ?? false
+  const handlers = React.useMemo<TreeHandlers>(
+    () => ({
+      onNavigate,
+      onItemsChange,
+      onExpandedChange,
+      onCollapsedChange,
+      onRename,
+      onMove,
+    }),
+    [
+      onNavigate,
+      onItemsChange,
+      onExpandedChange,
+      onCollapsedChange,
+      onRename,
+      onMove,
+    ]
   )
-  const collapsed =
-    variant === "sidebar" ? (options.collapsed ?? ownCollapsed) : false
 
-  const [renamingId, setRenamingId] = React.useState<string | null>(null)
+  // Read once: the `default*` options describe the mount, not every render.
+  const [seed] = React.useState<TreeSeed>(() => ({
+    items: options.items ?? options.defaultItems ?? [],
+    activeId: options.activeId ?? options.defaultActiveId,
+    collapsed: options.collapsed ?? options.defaultCollapsed ?? false,
+    expandedIds: options.defaultExpandedIds
+      ? [...options.defaultExpandedIds]
+      : undefined,
+  }))
 
-  const canRename =
-    variant === "files" && (onRename !== undefined || managesItems)
-  const canMove = variant === "files" && (onMove !== undefined || managesItems)
+  const mount = useSetAtom(mountTreeAtom(treeId))
+  const publishHandlers = useSetAtom(setTreeHandlersAtom(treeId))
+  const projectItems = useSetAtom(projectTreeItemsAtom(treeId))
+  const projectActiveId = useSetAtom(projectTreeActiveIdAtom(treeId))
+  const projectCollapsed = useSetAtom(projectTreeCollapsedAtom(treeId))
+  const revealAncestors = useSetAtom(revealTreeAncestorsAtom(treeId))
 
+  // Handlers first — they must be in the store before any action can fire.
+  // Rewritten every commit; no read atom depends on them, so nobody
+  // re-renders for it.
+  React.useLayoutEffect(() => {
+    publishHandlers(handlers)
+  }, [publishHandlers, handlers])
+
+  // Before paint, so a seeded branch never paints closed for a frame.
+  React.useLayoutEffect(() => {
+    mount(config, seed)
+  }, [mount, config, seed])
+
+  // Controlled props stay the source of truth; the store carries a projection
+  // so the action atoms and remote readers see current data.
+  React.useLayoutEffect(() => {
+    if (options.items !== undefined) projectItems(options.items)
+  }, [options.items, projectItems])
+
+  React.useLayoutEffect(() => {
+    if (options.activeId !== undefined) projectActiveId(options.activeId)
+  }, [options.activeId, projectActiveId])
+
+  React.useLayoutEffect(() => {
+    if (options.collapsed !== undefined) projectCollapsed(options.collapsed)
+  }, [options.collapsed, projectCollapsed])
+
+  // A tree the hook keyed is scrap once its component goes. An explicit
+  // `treeId` is the app's key and outlives the mount.
+  React.useEffect(() => {
+    if (options.treeId !== undefined) return
+    return () => removeTreeInstance(treeId)
+  }, [treeId, options.treeId])
+
+  // Never `treeItemsAtom` — see the note on `treeOwnedItemsAtom`.
+  const ownedItems = useAtomValue(treeOwnedItemsAtom(treeId))
+  const items = options.items ?? ownedItems
+  const activeId = useAtomValue(treeActiveIdAtom(treeId))
+  const expandedIds = useAtomValue(treeExpandedIdsAtom(treeId))
+  const collapsed = useAtomValue(treeCollapsedAtom(treeId))
+  const renamingId = useAtomValue(treeRenamingIdAtom(treeId))
+  const canRename = useAtomValue(treeCanRenameAtom(treeId))
+  const canMove = useAtomValue(treeCanMoveAtom(treeId))
+
+  // Navigating into a nested entry from elsewhere reveals its ancestors, even
+  // ones the reader had collapsed. In a layout effect, so the branch is open
+  // before the frame paints.
+  const lastActiveId = React.useRef(activeId)
+  React.useLayoutEffect(() => {
+    if (lastActiveId.current === activeId) return
+    lastActiveId.current = activeId
+    if (activeId !== undefined) revealAncestors(activeId)
+  }, [activeId, revealAncestors])
+
+  const sectioned = React.useMemo(
+    () => variant === "navigation" && hasThreeLevels(items),
+    [variant, items]
+  )
+  const sectionIds = React.useMemo(
+    () => (sectioned ? items.map((node) => node.id) : []),
+    [items, sectioned]
+  )
+  const getNode = React.useCallback(
+    (id: string) => findNode(items, id),
+    [items]
+  )
   const isExpanded = React.useCallback(
     (id: string) => expandedIds.has(id),
     [expandedIds]
   )
 
-  const expand = React.useCallback(
-    (id: string) => {
-      if (expandedIds.has(id)) return
-      commitExpanded(new Set([...expandedIds, id]))
-      if (sound) playCue("toggle")
-    },
-    [commitExpanded, expandedIds, sound]
-  )
+  // `useSetAtom` setters are already stable — no useCallback needed.
+  const expand = useSetAtom(expandTreeNodeAtom(treeId))
+  const collapse = useSetAtom(collapseTreeNodeAtom(treeId))
+  const toggleExpanded = useSetAtom(toggleTreeNodeAtom(treeId))
+  const expandAll = useSetAtom(expandAllTreeNodesAtom(treeId))
+  const collapseAll = useSetAtom(collapseAllTreeNodesAtom(treeId))
+  const reveal = useSetAtom(revealTreeNodeAtom(treeId))
+  const setCollapsed = useSetAtom(setTreeCollapsedAtom(treeId))
+  const toggleCollapsed = useSetAtom(toggleTreeCollapsedAtom(treeId))
+  const select = useSetAtom(selectTreeNodeAtom(treeId))
+  const startRename = useSetAtom(startTreeRenameAtom(treeId))
+  const cancelRename = useSetAtom(cancelTreeRenameAtom(treeId))
+  const rename = useSetAtom(renameTreeNodeAtom(treeId))
+  const move = useSetAtom(moveTreeNodeAtom(treeId))
+  const reset = useSetAtom(resetTreeAtom(treeId))
 
-  const collapse = React.useCallback(
-    (id: string) => {
-      if (!expandedIds.has(id)) return
-      const next = new Set(expandedIds)
-      next.delete(id)
-      commitExpanded(next)
-      if (sound) playCue("toggle")
-    },
-    [commitExpanded, expandedIds, sound]
-  )
-
-  const toggleExpanded = React.useCallback(
-    (id: string) => {
-      const next = new Set(expandedIds)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      commitExpanded(next)
-      if (sound) playCue("toggle")
-    },
-    [commitExpanded, expandedIds, sound]
-  )
-
-  const expandAll = React.useCallback(() => {
-    commitExpanded(new Set(expandableIdsOf(items, variant === "files")))
-  }, [commitExpanded, items, variant])
-
-  const collapseAll = React.useCallback(() => {
-    commitExpanded(new Set())
-  }, [commitExpanded])
-
-  /** Open every ancestor of `id` without touching the rest of the tree. */
-  const reveal = React.useCallback(
-    (id: string) => {
-      const ancestors = ancestorIdsOf(items, id)
-      if (!ancestors.some((ancestor) => !expandedIds.has(ancestor))) return
-      commitExpanded(new Set([...expandedIds, ...ancestors]))
-    },
-    [commitExpanded, expandedIds, items]
-  )
-
-  const setCollapsed = React.useCallback(
-    (next: boolean) => {
-      if (options.collapsed === undefined) setOwnCollapsed(next)
-      onCollapsedChange?.(next)
-      if (sound) playCue("toggle")
-    },
-    [options.collapsed, onCollapsedChange, sound]
-  )
-
-  const toggleCollapsed = React.useCallback(
-    () => setCollapsed(!collapsed),
-    [collapsed, setCollapsed]
-  )
-
-  const getNode = React.useCallback(
-    (id: string) => findNode(items, id),
-    [items]
-  )
-
-  /** Selecting runs the node's own `onSelect` first, then `onNavigate` —
-   * the same order a row press follows. Disabled nodes are inert. */
-  const select = React.useCallback(
-    (id: string) => {
-      const node = findNode(items, id)
-      if (!node || node.disabled) return
-      if (options.activeId === undefined) setOwnActiveId(id)
-      node.onSelect?.()
-      onNavigate?.(node)
-    },
-    [items, options.activeId, onNavigate]
-  )
-
-  const startRename = React.useCallback(
-    (id: string) => {
-      // An id from elsewhere (a stale selection, another tree) would arm
-      // rename mode against a row that never renders.
-      if (!canRename || !findNode(items, id)) return
-      setRenamingId(id)
-    },
-    [canRename, items]
-  )
-
-  const cancelRename = React.useCallback(() => setRenamingId(null), [])
-
-  const rename = React.useCallback(
-    (id: string, label: string) => {
-      setRenamingId(null)
-      const next = label.trim()
-      if (!canRename || !next) return
-      const node = findNode(items, id)
-      if (!node || node.label === next) return
-      onRename?.(id, next)
-      if (managesItems) setItems(renameNode(items, id, next))
-    },
-    [canRename, items, managesItems, onRename, setItems]
-  )
-
-  const move = React.useCallback(
-    (id: string, parentId: string | null, index: number) => {
-      if (!canMove) return
-      onMove?.(id, parentId, index)
-      if (managesItems) setItems(moveNode(items, id, parentId, index))
-    },
-    [canMove, items, managesItems, onMove, setItems]
-  )
-
-  const dnd = useTreeDnd(items, canMove ? move : undefined)
-
-  const sectionIds = React.useMemo(
-    () => (sectioned ? items.map((node) => node.id) : []),
-    [items, sectioned]
-  )
+  const dnd = useTreeDnd(treeId)
 
   return React.useMemo<TreeController>(
     () => ({
+      treeId,
       variant,
       items,
       sectioned,
@@ -271,9 +269,11 @@ export function useTree(options: UseTreeOptions): TreeController {
       rename,
       canMove,
       move,
+      reset,
       dnd,
     }),
     [
+      treeId,
       variant,
       items,
       sectioned,
@@ -300,6 +300,7 @@ export function useTree(options: UseTreeOptions): TreeController {
       rename,
       canMove,
       move,
+      reset,
       dnd,
     ]
   )
