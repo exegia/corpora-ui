@@ -17,7 +17,7 @@ import {
   LABEL_EXIT_TRANSITION,
   REDUCED_TRANSITION,
 } from "@/components/blocks/shell/utils"
-import { UserAvatar } from "@/components/composed/user-avatar"
+import { UserAvatar } from "@/components/user-avatar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -33,48 +33,25 @@ import {
 import { playCue } from "@/lib/sound"
 import { cn } from "@/lib/utils"
 
-/** The identity shown on the card. */
-export interface ProfileCardUser {
-  name: string
-  /** Secondary line under the name — a handle, an email, a role. */
-  username?: string
-  /** Avatar image URL. Falls back to the initials when absent or broken. */
-  avatar?: string
-  /** Fallback initials. Derived from `name` when omitted. */
-  initials?: string
-}
+import { useProfileCard } from "./use-profile-card"
+import type {
+  ProfileCardAction,
+  ProfileCardItem,
+  ProfileCardUser,
+  ProfileCardVariant,
+} from "./type"
 
-/** An actionable row of the menu. */
-export interface ProfileCardAction {
-  type?: "item"
-  id: string
-  label: string
-  icon?: React.ReactNode
-  /** Right-aligned hint, e.g. "⌘K". Purely decorative — bind the key yourself. */
-  shortcut?: string
-  disabled?: boolean
-  variant?: "default" | "destructive"
-  /** Returning a promise puts the card in its loading state until it settles. */
-  onSelect?: () => void | Promise<void>
-}
-
-/** A heading over the rows that follow it, up to the next separator. */
-export interface ProfileCardLabel {
-  type: "label"
-  label: string
-}
-
-/** A rule between two sections. */
-export interface ProfileCardSeparator {
-  type: "separator"
-}
-
-/**
- * One entry of `items`. Authored flat; the block renders each run between
- * separators as its own menu group so a label actually names its section.
- */
-export type ProfileCardItem =
-  ProfileCardAction | ProfileCardLabel | ProfileCardSeparator
+export type {
+  ProfileCardAction,
+  ProfileCardActions,
+  ProfileCardInstanceId,
+  ProfileCardItem,
+  ProfileCardLabel,
+  ProfileCardSeparator,
+  ProfileCardState,
+  ProfileCardUser,
+  ProfileCardVariant,
+} from "./type"
 
 /**
  * The menu the card ships with. Spread it to keep the shape and attach your
@@ -122,13 +99,30 @@ export interface ProfileCardBlockProps {
    */
   menuWidth?: "content" | "card"
   /**
-   * Fold the card to its avatar — for an icon-collapsed sidebar rail. Left
-   * unset, the card follows the `AnimatedPanel` it sits in (a `SidebarBlock`
-   * footer collapses with the rail on its own); outside a panel it stays
-   * expanded. The name and handle fold away and `title` names the tile on
-   * hover; the accessible name is unchanged.
+   * `expanded` shows avatar, name and handle; `collapsed` folds the card to
+   * its avatar — for an icon-collapsed sidebar rail. The fold animates: the
+   * identity lines and chevron slide to zero width, the avatar stays put.
+   * Controlled when passed. Left unset, the card follows the `AnimatedPanel`
+   * it sits in (a `SidebarBlock` footer folds with the rail on its own), and
+   * outside a panel starts from `defaultVariant`.
    */
-  collapsed?: boolean
+  variant?: ProfileCardVariant
+  defaultVariant?: ProfileCardVariant
+  onVariantChange?: (variant: ProfileCardVariant) => void
+  /**
+   * Name this card's slice of the store so `useProfileCardState(id)` /
+   * `useProfileCardActions(id)` can read or drive it (fold it, open its
+   * menu) from anywhere under `ExegiaProvider`. Unnamed cards key off
+   * `useId` and are dropped on unmount.
+   */
+  profileCardId?: string
+  /**
+   * Presence badge on the avatar — overrides `user.presence`. Name the avatar
+   * with `avatarId` and `useUserAvatarActions(id).setPresence()` can flip it
+   * from a socket handler instead.
+   */
+  presence?: ProfileCardUser["presence"]
+  avatarId?: string
   /**
    * Emit cuelume press/release on the card and play the open/close cues.
    * Inert unless the app opts into interaction sound via `bindSounds()`.
@@ -179,7 +173,12 @@ export function ProfileCardBlock({
   side = "bottom",
   sideOffset = 8,
   menuWidth = "content",
-  collapsed: collapsedProp,
+  variant: variantProp,
+  defaultVariant,
+  onVariantChange,
+  profileCardId,
+  presence,
+  avatarId,
   open,
   defaultOpen,
   onOpenChange,
@@ -187,53 +186,42 @@ export function ProfileCardBlock({
   onError,
   className,
 }: ProfileCardBlockProps): React.ReactElement {
-  const [pending, setPending] = React.useState<string | null>(null)
-  // Actions can outlive the card (sign-out unmounts it, typically).
-  const mounted = React.useRef(true)
-  React.useEffect(() => {
-    mounted.current = true
-    return () => {
-      mounted.current = false
-    }
-  }, [])
-
   const groups = React.useMemo(() => toGroups(items), [items])
 
   // Optional, not required: the card is a standalone block that also lands
   // in sidebar footers, so it reads the panel context when there is one and
-  // does not throw when there is not.
+  // does not throw when there is not. Inside a panel the rail is the truth
+  // for the fold, so it is projected as a controlled variant.
   const panel = React.useContext(AnimatedSidebarPanelContext)
-  const collapsed = collapsedProp ?? panel?.collapsed ?? false
+  const card = useProfileCard({
+    profileCardId,
+    variant:
+      variantProp ??
+      (panel ? (panel.collapsed ? "collapsed" : "expanded") : undefined),
+    defaultVariant,
+    onVariantChange,
+    open,
+    defaultOpen,
+    onError,
+  })
+  const { collapsed, busy, menuOpen, setMenuOpen, select } = card
   const reduce = useReducedMotion()
   const identity = `${user.name}${user.username ? ` ${user.username}` : ""}`
-
-  function select(action: ProfileCardAction) {
-    const result = action.onSelect?.()
-    if (!(result instanceof Promise)) return
-    setPending(action.id)
-    result
-      .catch((cause: unknown) => onError?.(cause))
-      .finally(() => {
-        if (mounted.current) setPending(null)
-      })
-  }
-
-  const busy = pending !== null
 
   const handleOpenChange: MenuPrimitive.Root.Props["onOpenChange"] = (
     nextOpen,
     details
   ) => {
     if (sound) playCue(nextOpen ? "bloom" : "droplet")
+    setMenuOpen(nextOpen)
     onOpenChange?.(nextOpen, details)
   }
 
   return (
-    <DropdownMenu
-      defaultOpen={defaultOpen}
-      onOpenChange={handleOpenChange}
-      open={open}
-    >
+    // The store mirrors the menu: `open` (when passed) is projected into it,
+    // and this always renders from it, so `useProfileCardActions(id).openMenu()`
+    // works the same whether or not the consumer controls the prop.
+    <DropdownMenu onOpenChange={handleOpenChange} open={menuOpen}>
       <DropdownMenuTrigger
         disabled={busy}
         render={
@@ -261,6 +249,7 @@ export function ProfileCardBlock({
             )}
             data-collapsed={collapsed ? "" : undefined}
             data-slot="profile-card"
+            data-variant={collapsed ? "collapsed" : "expanded"}
             loading={busy}
             sound={sound}
             // The visible name is gone while folded — name the tile on hover
@@ -277,8 +266,10 @@ export function ProfileCardBlock({
               <UserAvatar
                 // Decorative: the name beside it already labels the card.
                 alt=""
+                avatarId={avatarId}
                 initials={user.initials}
                 name={user.name}
+                presence={presence ?? user.presence}
                 src={user.avatar}
               />
               <motion.span

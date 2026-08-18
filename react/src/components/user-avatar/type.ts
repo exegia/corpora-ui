@@ -6,6 +6,13 @@ export type ImageStatus = Parameters<
   NonNullable<AvatarPrimitive.Image.Props["onLoadingStatusChange"]>
 >[0]
 
+/** Whether the person is reachable right now — drawn as the corner badge. */
+export type UserPresence = "online" | "offline"
+
+/** Key for one avatar's state in the store. Any stable string; `useUserAvatar`
+ * generates one when the component does not name itself. */
+export type UserAvatarInstanceId = string
+
 export interface UserAvatarProps extends Omit<
   AvatarPrimitive.Root.Props,
   "children"
@@ -26,6 +33,49 @@ export interface UserAvatarProps extends Omit<
    * Omitted, it follows the image: a passed `src` skeletons until it resolves.
    */
   loading?: boolean
+  /**
+   * Corner badge: a green dot for `online`, a hollow grey ring for `offline`.
+   * Omitted, no badge — unless the avatar is driven by id and something set
+   * its presence in the store. Controlled when passed.
+   */
+  presence?: UserPresence
+  /**
+   * Embossed rim whose highlight follows the pointer, so the avatar reads as
+   * a lit bezel rather than a flat disc. Light and dark aware; static under
+   * reduced motion. On by default — pass `false` for a flat disc.
+   */
+  bezel?: boolean
+  /**
+   * Name this avatar's slice of the store so `useUserAvatarState(id)` /
+   * `useUserAvatarActions(id)` can read or drive it from anywhere under
+   * `ExegiaProvider`. Unnamed avatars key off `useId` and are dropped on
+   * unmount.
+   */
+  avatarId?: UserAvatarInstanceId
+}
+
+/** Everything the store knows about one avatar. */
+export interface UserAvatarState {
+  presence: UserPresence | null
+  /** Bezel light direction in degrees, clockwise from 12 o'clock. Continuous
+   * (may leave [0, 360)) so the rim's CSS rotation never spins the long way;
+   * `((a % 360) + 360) % 360` if you need it normalised. */
+  bezelAngle: number
+  imageStatus: ImageStatus
+}
+
+/** Write-only handles onto one avatar. Nothing here re-renders the caller. */
+export interface UserAvatarActions {
+  setPresence: (presence: UserPresence | null) => void
+  togglePresence: () => void
+  setBezelAngle: (angle: number) => void
+  reset: () => void
+}
+
+/** @internal Which fields the mounted component controls from props. The
+ * store must never overwrite a controlled value. */
+export interface UserAvatarConfig {
+  controlsPresence: boolean
 }
 
 export interface IAudioWaveProps {
