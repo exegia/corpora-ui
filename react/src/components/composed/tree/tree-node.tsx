@@ -39,6 +39,7 @@ import {
 import { useTreeContext } from "./tree-context"
 import type { TreeNode } from "./type"
 import { EASE_OUT } from "@/lib/ease.ts"
+import { Button } from "@/components/ui/button"
 
 /** How a row behaves, resolved from variant + depth + shape. */
 type RowKind =
@@ -98,14 +99,6 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
   const children = variant === "sidebar" ? [] : (node.children ?? [])
   const canExpand =
     kind !== "link" || (variant === "toc" && children.length > 0)
-
-  // toc rows below the route level scroll — they anchor to the heading
-  // that shares their id (an explicit href always wins).
-  const href =
-    kind === "link" && !node.disabled
-      ? (node.href ??
-        (variant === "toc" && depth > 0 ? `#${node.id}` : undefined))
-      : undefined
 
   const files = variant === "files"
 
@@ -320,7 +313,7 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
         {...rowInteractionProps}
         aria-expanded={open}
         className={cn(
-          "group/row flex w-full items-center gap-1 rounded-md px-2 py-1",
+          "group/row flex w-full cursor-pointer items-center gap-1 rounded-md px-2 py-1",
           "text-xs font-medium tracking-wide text-muted-foreground/80 uppercase",
           "transition-colors duration-150 outline-none hover:text-foreground",
           "focus-visible:ring-0 focus-visible:ring-ring"
@@ -332,34 +325,24 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
         {chevron}
       </button>
     )
-  } else if (href !== undefined) {
-    row = (
-      <a
-        {...rowInteractionProps}
-        aria-current={active ? "page" : undefined}
-        aria-label={variant === "sidebar" && collapsed ? node.label : undefined}
-        className={rowClassName}
-        href={href}
-        onClick={handlePress}
-        target={node.target}
-      >
-        {content}
-      </a>
-    )
   } else {
     row = (
-      <button
+      <Button
         {...rowInteractionProps}
+        variant={variant === "sidebar" && active ? "secondary" : "ghost"}
         aria-current={active ? "page" : undefined}
         aria-expanded={kind === "toggle" ? open : undefined}
         aria-label={variant === "sidebar" && collapsed ? node.label : undefined}
-        className={rowClassName}
+        className={cn(
+          "transform cursor-pointer! justify-start transition-transform ease-smooth-out",
+          variant === "sidebar" && collapsed ? "h-10! rounded-xl!" : undefined,
+          rowClassName
+        )}
         disabled={node.disabled}
         onClick={handlePress}
-        type="button"
       >
         {content}
-      </button>
+      </Button>
     )
   }
 
@@ -384,7 +367,7 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
         aria-expanded={open}
         aria-label={`${open ? "Collapse" : "Expand"} ${node.label}`}
         className={cn(
-          "absolute top-1/2 right-1 flex size-5 -translate-y-1/2 items-center",
+          "absolute top-1/2 right-1 flex size-5 -translate-y-1/2 cursor-pointer items-center",
           "justify-center rounded-sm text-muted-foreground/70 outline-none",
           "hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
         )}

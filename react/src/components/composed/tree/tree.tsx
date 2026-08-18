@@ -49,14 +49,16 @@ export function Tree(props: TreeProps): React.ReactElement {
   // Two components rather than one: hooks may not be called conditionally,
   // and the controller form has no props to build a fallback controller
   // from. Nobody switches a tree between the two forms at runtime.
-  return props.tree
-    ? <TreeView
-        ariaLabel={props.ariaLabel}
-        className={props.className}
-        renderTrailing={props.renderTrailing}
-        tree={props.tree}
-      />
-    : <UncontrolledTree {...props} />
+  return props.tree ? (
+    <TreeView
+      ariaLabel={props.ariaLabel}
+      className={props.className}
+      renderTrailing={props.renderTrailing}
+      tree={props.tree}
+    />
+  ) : (
+    <UncontrolledTree {...props} />
+  )
 }
 
 /** The props form: builds its own controller and renders through it. */
@@ -226,10 +228,10 @@ function TreeView({
     <motion.ul
       aria-label={label}
       className={cn(
-        "flex min-w-0 flex-col h-full",
+        "flex h-full min-w-0 flex-col",
         // Resting widths, and the fallback until the rail is measured. The
         // motion target below overrides these with an inline width.
-        collapsed ? "w-11 gap-y-2" : "w-full",
+        collapsed ? "w-10 gap-y-2!" : "w-full",
         variant === "files" ? "gap-px" : sectioned ? "gap-3" : "gap-0.5"
       )}
       // Both endpoints must be px: motion cannot interpolate a number
@@ -272,7 +274,7 @@ function TreeView({
       ) : (
         <nav
           aria-label={label}
-          className={cn("min-w-0 flex h-full justify-center", className)}
+          className={cn("flex h-full min-w-0 justify-center", className)}
           data-slot="tree-root"
           ref={railRef}
         >
