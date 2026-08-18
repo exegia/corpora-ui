@@ -96,13 +96,27 @@ notifies remote readers only, never the hook that produced it. Primitive props
 `components/blocks/nav/sidebar/` follows the tree pattern (atoms in
 `ai-sidebar-atom.ts` keyed by `sidebarId`, `useAISidebarState`/`Actions`,
 per-row atoms + memoized `ResourceRow`). Its deltas: `expandedIds` is a
-controllable *array* prop, so it gets its own owned-\* loop guard beside
+controllable _array_ prop, so it gets its own owned-\* loop guard beside
 `items`; `moveAISidebarRowAtom` is an async write atom that applies
 optimistically and rolls back on rejection, reading `movePending` straight
 back out of the store to refuse overlapping moves (no ref needed — store
 writes are synchronous); and the roving-focus `rowRefs` map holds DOM nodes,
 so it stays in `useAISidebar`, never the store — remote `focus`/`closeMenu`
 via `useAISidebarActions` move only the store's roving target.
+
+### Third implementation: auth
+
+`components/blocks/auth/auth-state.ts` is a pure coordination layer — no
+controlled props, so no config/handlers/seed projection and no loop guard.
+Flow atoms (`auth-flow-atom.ts`: step, identifier, status) are
+instance-keyed by `flowId` (default `"default"`); session atoms
+(`auth-session-atom.ts`, the import leaf) are singletons on purpose — a
+session is one user per store, and a family would imply several concurrent
+users. Hooks: `useAuthFlow`/`useAuthFlowActions(flowId?)`,
+`useAuthSession`/`useAuthSessionActions` (`signOut` = `endAuthSessionAtom`,
+which also resets the default flow). Never store passwords, codes or field
+values in the store — the auth blocks keep those in local `useState` on
+purpose.
 
 ## Pulling coss components
 
@@ -155,7 +169,7 @@ Follow `ui/button.tsx` exactly:
      (
        | { variant: "glass"; glassVariant?: FrostGlassVariant }
        | { variant?: Exclude<Variant, "glass">; glassVariant?: never }
-     );
+     )
    ```
 3. Default finish is `"liquid-refract"`. Resolve it only when
    `variant === "glass"`; otherwise it stays `undefined`.
