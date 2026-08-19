@@ -246,6 +246,58 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
 <Button onClick={nav.toggleCollapsed}>{collapsed ? "Expand" : "Fold"} rail</Button>`,
   },
   {
+    slug: "logo",
+    name: "Logo",
+    description:
+      "Brand lockup: a mark beside a wordmark. The mark is an SVG, an image, or a monogram tile derived from the name; variant=\"mark\" folds the wordmark away with the same motion a collapsing rail uses. With href the whole lockup is a home link.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/logo-demo")),
+    props: [
+      {
+        name: "name",
+        type: "string",
+        required: true,
+        description:
+          "Brand name. Labels the logo for AT (and the link, when href renders one), drives the default wordmark, and the monogram tile when no mark is given.",
+      },
+      {
+        name: "mark",
+        type: "ReactNode",
+        description:
+          "Custom mark — an inline SVG sized to fill its box. Wins over src.",
+      },
+      {
+        name: "src",
+        type: "string",
+        description:
+          "Image URL for the mark. Decorative — name labels the logo. Without mark or src, a monogram tile derived from name renders instead.",
+      },
+      {
+        name: "wordmark",
+        type: "ReactNode",
+        description: "Wordmark content. Defaults to name.",
+      },
+      {
+        name: "variant",
+        type: '"full" | "mark"',
+        default: '"full"',
+        description:
+          "mark folds the wordmark away (width, opacity, slight x) and hides it from AT; the root keeps the accessible name. Reduced-motion aware.",
+      },
+      {
+        name: "href",
+        type: "string",
+        description:
+          "Renders the lockup as an anchor named by name — the usual \"mark goes home\" affordance.",
+      },
+    ],
+    usage: `import { Logo } from "@corpora/ui"
+
+<Logo name="Corpora" href="/" mark={<BrandMark />} />
+<Logo name="Corpora" variant="mark" />  // icon rail: mark only`,
+  },
+  {
     slug: "search-field",
     name: "Search Field",
     description:
