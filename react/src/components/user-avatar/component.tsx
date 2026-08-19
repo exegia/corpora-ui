@@ -66,7 +66,11 @@ export function UserAvatar({
     >
       <Avatar
         className={cn(
-          "size-8 border-1 border-white bg-neutral-800! text-xl dark:border-neutral-900",
+          // `@container` lets the fallback size its initials in cqw — a
+          // fraction of whatever `size-*` the caller put on this element —
+          // instead of a fixed text step. `text-xl` stays as the fallback for
+          // engines without container units.
+          "@container size-8 border-1 border-white bg-neutral-800! text-xl dark:border-neutral-900",
           // The emboss itself: an inset drop toward the light's opposite side
           // is what the ring below is rotated against.
           bezel &&
@@ -134,7 +138,10 @@ export function UserAvatar({
             // symmetric either side — so rotate(angle) puts the highlight at
             // exactly `bezelAngle` clockwise from 12.
             "bg-[conic-gradient(from_180deg,var(--bezel-lo)_0%,transparent_24%,transparent_28%,var(--bezel-hi)_50%,transparent_72%,transparent_76%,var(--bezel-lo)_100%)]",
-            "[mask-image:radial-gradient(farthest-side,transparent_calc(95%-4px),#000_calc(100%-2px))]",
+            // Rim width is a share of the radius, not a px count, so the
+            // bezel reads the same at size-8 and size-16: solid over the outer
+            // 8%, feathering in over the 14% inside that.
+            "[mask-image:radial-gradient(farthest-side,transparent_78%,#000_92%)]",
             "mix-blend-normal transition-transform duration-150 ease-smooth-out motion-reduce:transition-none"
           )}
           data-slot="user-avatar-bezel"
