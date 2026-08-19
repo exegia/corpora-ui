@@ -24,6 +24,7 @@ export * from "./components/ui/spinner"
 export * from "./components/ui/textarea"
 
 // components
+export * from "./components/composed/logo"
 export * from "./components/composed/password-input"
 export * from "./components/composed/social-providers"
 export * from "./components/composed/tree"
