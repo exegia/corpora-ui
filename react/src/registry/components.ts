@@ -131,13 +131,13 @@ export const components: RegistryEntry[] = [
         type: "boolean",
         default: "true",
         description:
-          "Embossed rim whose highlight follows the pointer's bearing from the avatar (rAF-coalesced, one write per frame at most). Light/dark aware, static under reduced motion. false renders a flat disc.",
+          "Embossed rim whose highlight follows the pointer's bearing from the avatar (rAF-coalesced, one write per frame at most). Light/dark aware, and with a photo it samples the image's rim lightness (CORS permitting) to weight highlight against shadow — a softer white over a dark portrait, a lighter shadow over a pale one. Static under reduced motion. false renders a flat disc.",
       },
       {
         name: "avatarId",
         type: "string",
         description:
-          "Names this avatar's slice of the Jotai store: useUserAvatarState(id) reads presence / bezelAngle / imageStatus, useUserAvatarActions(id).setPresence() flips the badge from anywhere under ExegiaProvider. Unnamed avatars key off useId and are dropped on unmount.",
+          "Names this avatar's slice of the Jotai store: useUserAvatarState(id) reads presence / bezelAngle / imageStatus / imageTone, useUserAvatarActions(id).setPresence() flips the badge from anywhere under ExegiaProvider. Unnamed avatars key off useId and are dropped on unmount.",
       },
     ],
     usage: `import { UserAvatar } from "@corpora/ui"

@@ -105,6 +105,12 @@ export const userAvatarImageStatusAtom = stateFamily<ImageStatus>(
   "idle"
 )
 
+/** Rim lightness of the loaded image, `null` until sampled (or unsampleable). */
+export const userAvatarImageToneAtom = stateFamily<number | null>(
+  "imageTone",
+  null
+)
+
 /** @internal Which fields the mounted component controls from props. */
 export const userAvatarConfigAtom = stateFamily<UserAvatarConfig>(
   "config",
@@ -126,6 +132,7 @@ export const userAvatarStateAtom = readFamily<UserAvatarState>(
     presence: get(userAvatarPresenceAtom(id)),
     bezelAngle: get(userAvatarBezelAngleAtom(id)),
     imageStatus: get(userAvatarImageStatusAtom(id)),
+    imageTone: get(userAvatarImageToneAtom(id)),
   })
 )
 
@@ -168,6 +175,18 @@ export const setUserAvatarImageStatusAtom = actionFamily<[status: ImageStatus]>(
   }
 )
 
+/** @internal Written by the hook once the loaded image has been sampled;
+ * cleared (null) when the image changes or goes away. Clamped to [0, 1]. */
+export const setUserAvatarImageToneAtom = actionFamily<[tone: number | null]>(
+  "setImageTone",
+  (_get, set, id, tone) => {
+    set(
+      userAvatarImageToneAtom(id),
+      tone === null || !Number.isFinite(tone) ? null : Math.min(1, Math.max(0, tone))
+    )
+  }
+)
+
 /** @internal Projection of the mounted component's controlled props. */
 export const projectUserAvatarPropsAtom = actionFamily<
   [config: UserAvatarConfig, presence: UserPresence | null | undefined]
@@ -187,6 +206,7 @@ export const resetUserAvatarAtom = actionFamily<[]>(
     set(userAvatarPresenceAtom(id), null)
     set(userAvatarBezelAngleAtom(id), DEFAULT_BEZEL_ANGLE)
     set(userAvatarImageStatusAtom(id), "idle")
+    set(userAvatarImageToneAtom(id), null)
     set(userAvatarConfigAtom(id), DEFAULT_CONFIG)
   }
 )

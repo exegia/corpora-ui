@@ -41,8 +41,11 @@ export interface UserAvatarProps extends Omit<
   presence?: UserPresence
   /**
    * Embossed rim whose highlight follows the pointer, so the avatar reads as
-   * a lit bezel rather than a flat disc. Light and dark aware; static under
-   * reduced motion. On by default — pass `false` for a flat disc.
+   * a lit bezel rather than a flat disc. Light and dark aware, and with a
+   * photo it samples the image's rim lightness (CORS permitting) to weight
+   * highlight against shadow, so the emboss reads on a dark portrait and a
+   * pale one alike. Static under reduced motion. On by default — pass
+   * `false` for a flat disc.
    */
   bezel?: boolean
   /**
@@ -62,6 +65,11 @@ export interface UserAvatarState {
    * `((a % 360) + 360) % 360` if you need it normalised. */
   bezelAngle: number
   imageStatus: ImageStatus
+  /** Perceived lightness of the loaded image's rim, 0 (black) → 1 (white),
+   * or `null` while unknown — no image yet, or one that could not be sampled
+   * (non-CORS host, no canvas). The bezel's highlight/shadow alphas follow
+   * it so the emboss reads on a dark photo and a pale one alike. */
+  imageTone: number | null
 }
 
 /** Write-only handles onto one avatar. Nothing here re-renders the caller. */
