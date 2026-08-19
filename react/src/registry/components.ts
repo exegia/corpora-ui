@@ -131,13 +131,13 @@ export const components: RegistryEntry[] = [
         type: "boolean",
         default: "true",
         description:
-          "Embossed rim whose highlight follows the pointer's bearing from the avatar (rAF-coalesced, one write per frame at most). Light/dark aware, static under reduced motion. false renders a flat disc.",
+          "Embossed rim whose highlight follows the pointer's bearing from the avatar (rAF-coalesced, one write per frame at most). Light/dark aware, and with a photo it samples the image's rim lightness (CORS permitting) to weight highlight against shadow — a softer white over a dark portrait, a lighter shadow over a pale one. Static under reduced motion. false renders a flat disc.",
       },
       {
         name: "avatarId",
         type: "string",
         description:
-          "Names this avatar's slice of the Jotai store: useUserAvatarState(id) reads presence / bezelAngle / imageStatus, useUserAvatarActions(id).setPresence() flips the badge from anywhere under ExegiaProvider. Unnamed avatars key off useId and are dropped on unmount.",
+          "Names this avatar's slice of the Jotai store: useUserAvatarState(id) reads presence / bezelAngle / imageStatus / imageTone, useUserAvatarActions(id).setPresence() flips the badge from anywhere under ExegiaProvider. Unnamed avatars key off useId and are dropped on unmount.",
       },
     ],
     usage: `import { UserAvatar } from "@corpora/ui"
@@ -244,6 +244,58 @@ const tree = useTree({ variant: "files", defaultItems: files })
 const nav = useTreeActions("app-nav")          // writes only, never re-renders
 const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
 <Button onClick={nav.toggleCollapsed}>{collapsed ? "Expand" : "Fold"} rail</Button>`,
+  },
+  {
+    slug: "logo",
+    name: "Logo",
+    description:
+      "Brand lockup: a mark beside a wordmark. The mark is an SVG, an image, or a monogram tile derived from the name; variant=\"mark\" folds the wordmark away with the same motion a collapsing rail uses. With href the whole lockup is a home link.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/logo-demo")),
+    props: [
+      {
+        name: "name",
+        type: "string",
+        required: true,
+        description:
+          "Brand name. Labels the logo for AT (and the link, when href renders one), drives the default wordmark, and the monogram tile when no mark is given.",
+      },
+      {
+        name: "mark",
+        type: "ReactNode",
+        description:
+          "Custom mark — an inline SVG sized to fill its box. Wins over src.",
+      },
+      {
+        name: "src",
+        type: "string",
+        description:
+          "Image URL for the mark. Decorative — name labels the logo. Without mark or src, a monogram tile derived from name renders instead.",
+      },
+      {
+        name: "wordmark",
+        type: "ReactNode",
+        description: "Wordmark content. Defaults to name.",
+      },
+      {
+        name: "variant",
+        type: '"full" | "mark"',
+        default: '"full"',
+        description:
+          "mark folds the wordmark away (width, opacity, slight x) and hides it from AT; the root keeps the accessible name. Reduced-motion aware.",
+      },
+      {
+        name: "href",
+        type: "string",
+        description:
+          "Renders the lockup as an anchor named by name — the usual \"mark goes home\" affordance.",
+      },
+    ],
+    usage: `import { Logo } from "@corpora/ui"
+
+<Logo name="Corpora" href="/" mark={<BrandMark />} />
+<Logo name="Corpora" variant="mark" />  // icon rail: mark only`,
   },
   {
     slug: "search-field",

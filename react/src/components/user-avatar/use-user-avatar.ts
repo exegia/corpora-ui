@@ -15,10 +15,13 @@ import {
   removeUserAvatarInstance,
   setUserAvatarBezelAngleAtom,
   setUserAvatarImageStatusAtom,
+  setUserAvatarImageToneAtom,
   userAvatarBezelAngleAtom,
   userAvatarImageStatusAtom,
+  userAvatarImageToneAtom,
   userAvatarPresenceAtom,
 } from "./user-avatar-atom"
+import { measureRimTone } from "./utils"
 
 export interface UseUserAvatarOptions {
   avatarId?: UserAvatarInstanceId
@@ -28,6 +31,9 @@ export interface UseUserAvatarOptions {
   bezel: boolean
   /** Only meaningful with an image — no image, no status to track. */
   hasImage: boolean
+  /** The image URL, sampled for its rim lightness once it has loaded so the
+   * bezel can pick alphas that read against it. Omit to skip sampling. */
+  src?: string
 }
 
 export interface UserAvatarBinding {
@@ -35,6 +41,8 @@ export interface UserAvatarBinding {
   presence: UserPresence | null
   bezelAngle: number
   imageStatus: ImageStatus
+  /** Rim lightness of the loaded image, 0–1, or `null` while unknown. */
+  imageTone: number | null
   /** Hand to the image's `onLoadingStatusChange`. Stable. */
   setImageStatus: (status: ImageStatus) => void
   /** Attach to the avatar root — the bezel is lit relative to its centre. */
@@ -56,7 +64,7 @@ const ANGLE_EPSILON = 1.5
  * survives a remount.
  */
 export function useUserAvatar(options: UseUserAvatarOptions): UserAvatarBinding {
-  const { presence: presenceProp, bezel, hasImage } = options
+  const { presence: presenceProp, bezel, hasImage, src } = options
   const generatedId = React.useId()
   const avatarId = options.avatarId ?? generatedId
   const controlsPresence = presenceProp !== undefined
@@ -69,6 +77,7 @@ export function useUserAvatar(options: UseUserAvatarOptions): UserAvatarBinding 
   const project = useSetAtom(projectUserAvatarPropsAtom(avatarId))
   const setBezelAngle = useSetAtom(setUserAvatarBezelAngleAtom(avatarId))
   const setImageStatus = useSetAtom(setUserAvatarImageStatusAtom(avatarId))
+  const setImageTone = useSetAtom(setUserAvatarImageToneAtom(avatarId))
 
   // Layout effect: the projection must land before children read the store
   // in the same commit. Primitive deps, so no loop guard is needed here.
@@ -86,6 +95,7 @@ export function useUserAvatar(options: UseUserAvatarOptions): UserAvatarBinding 
   const presence = useAtomValue(userAvatarPresenceAtom(avatarId))
   const bezelAngle = useAtomValue(userAvatarBezelAngleAtom(avatarId))
   const imageStatus = useAtomValue(userAvatarImageStatusAtom(avatarId))
+  const imageTone = useAtomValue(userAvatarImageToneAtom(avatarId))
 
   const ref = React.useRef<HTMLElement | null>(null)
   const reduce = useReducedMotion()
@@ -140,5 +150,31 @@ export function useUserAvatar(options: UseUserAvatarOptions): UserAvatarBinding 
     if (!hasImage) setImageStatus("idle")
   }, [hasImage, setImageStatus])
 
-  return { avatarId, presence, bezelAngle, imageStatus, setImageStatus, ref }
+  // Once the image is on screen, read how light its rim is so the bezel's
+  // highlight and shadow can be weighted against it. Cleared whenever the
+  // image changes or goes away — a stale tone from the previous photo would
+  // light the new one wrong for a frame. Sampling is async (a second, CORS
+  // clean decode of the same URL, memoised per src); the cancelled flag
+  // keeps a slow sample from landing on a later src.
+  React.useEffect(() => {
+    setImageTone(null)
+    if (!bezel || !hasImage || !src || imageStatus !== "loaded") return
+    let cancelled = false
+    void measureRimTone(src).then((tone) => {
+      if (!cancelled) setImageTone(tone)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [bezel, hasImage, src, imageStatus, setImageTone])
+
+  return {
+    avatarId,
+    presence,
+    bezelAngle,
+    imageStatus,
+    imageTone,
+    setImageStatus,
+    ref,
+  }
 }

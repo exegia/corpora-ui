@@ -103,7 +103,7 @@ export interface ProfileCardBlockProps {
    * its avatar — for an icon-collapsed sidebar rail. The fold animates: the
    * identity lines and chevron slide to zero width, the avatar stays put.
    * Controlled when passed. Left unset, the card follows the `AnimatedPanel`
-   * it sits in (a `SidebarBlock` footer folds with the rail on its own), and
+   * it sits in (a panel footer folds with the rail on its own), and
    * outside a panel starts from `defaultVariant`.
    */
   variant?: ProfileCardVariant
