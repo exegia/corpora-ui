@@ -8,13 +8,16 @@ import {
   removeUserAvatarInstance,
   resetUserAvatarAtom,
   setUserAvatarBezelAngleAtom,
+  setUserAvatarImageToneAtom,
   setUserAvatarPresenceAtom,
   toggleUserAvatarPresenceAtom,
   userAvatarBezelAngleAtom,
+  userAvatarImageToneAtom,
   userAvatarIsOnlineAtom,
   userAvatarPresenceAtom,
   userAvatarStateAtom,
 } from "../user-avatar-atom"
+import { bezelAlphasForTone } from "../utils"
 import { useUserAvatarActions, useUserAvatarState } from "../use-user-avatar-state"
 import type { UserAvatarActions, UserAvatarState } from "../type"
 
@@ -179,6 +182,43 @@ describe("UserAvatar · bezel", () => {
   })
 })
 
+describe("UserAvatar · bezel tone", () => {
+  test("alphas lean on the shadow over a pale rim and ease the highlight over a dark one", () => {
+    const dark = bezelAlphasForTone(0)
+    const light = bezelAlphasForTone(1)
+    expect(dark.hi).toBeLessThan(light.hi)
+    expect(dark.lo).toBeGreaterThan(light.lo)
+    // Out-of-range input clamps rather than extrapolating past [0, 1].
+    expect(bezelAlphasForTone(-3)).toEqual(dark)
+    expect(bezelAlphasForTone(7)).toEqual(light)
+  })
+
+  test("without a sampled tone the rim carries no inline alphas — the theme's defaults apply", () => {
+    render(<UserAvatar name="Jenny Hamilton" />)
+    const rim = bezel()
+    expect(rim?.hasAttribute("data-tone")).toBe(false)
+    expect(rim?.getAttribute("style")).not.toContain("--bezel-hi-a")
+    // The defaults live in classes, per theme, so a photo-less disc is lit
+    // for the page it sits on.
+    expect(rim?.className).toContain("[--bezel-hi-a:1]")
+    expect(rim?.className).toContain("dark:[--bezel-hi-a:0.18]")
+  })
+
+  test("the tone atom clamps and clears", () => {
+    const store = createStore()
+    store.set(setUserAvatarImageToneAtom("t"), 1.7)
+    expect(store.get(userAvatarImageToneAtom("t"))).toBe(1)
+    store.set(setUserAvatarImageToneAtom("t"), 0.3)
+    expect(store.get(userAvatarImageToneAtom("t"))).toBe(0.3)
+    store.set(setUserAvatarImageToneAtom("t"), Number.NaN)
+    expect(store.get(userAvatarImageToneAtom("t"))).toBeNull()
+    store.set(setUserAvatarImageToneAtom("t"), 0.5)
+    store.set(resetUserAvatarAtom("t"))
+    expect(store.get(userAvatarImageToneAtom("t"))).toBeNull()
+    removeUserAvatarInstance("t")
+  })
+})
+
 describe("UserAvatar · store", () => {
   test("presence, toggle, isOnline and reset on an isolated store", () => {
     const store = createStore()
@@ -203,6 +243,7 @@ describe("UserAvatar · store", () => {
       presence: null,
       bezelAngle: DEFAULT_BEZEL_ANGLE,
       imageStatus: "idle",
+      imageTone: null,
     })
     removeUserAvatarInstance("a")
   })
