@@ -35,8 +35,8 @@ export interface LogoProps
 /** Wordmark fold/unfold — the same envelope the profile card's identity
  * lines use, so a logo and a profile card folding in the same rail move as
  * one. Kept local: composed components do not reach into blocks. Expressed
- * as variants, not a plain `animate` object — motion 13 does not pick up
- * object-target changes on this span, while named variants animate. */
+ * as named variants for consistency with the profile card's fold envelope —
+ * house style for multi-property fold states, not a motion requirement. */
 const WORDMARK_VARIANTS: Variants = {
   open: {
     width: "auto",
