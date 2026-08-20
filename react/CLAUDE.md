@@ -118,6 +118,22 @@ which also resets the default flow). Never store passwords, codes or field
 values in the store — the auth blocks keep those in local `useState` on
 purpose.
 
+### Fourth implementation: the scaffold
+
+`components/blocks/scaffold/` keys everything by `scaffoldId`. Its deltas:
+the visibility bookkeeping (`visibleOrder`/`autoHidden`/`userHidden`) is ONE
+atom because `reconcileVisibility` (in `utils.ts`) always settles the three
+lists together — every action that moves an input (register ids, measure
+capacity, toggle a panel) re-settles before returning, replacing the old
+hook's render-time settling. Tabs and panels read double-keyed
+`panelFamily` atoms (`scaffoldPanelHiddenAtom(scaffoldId, panelId)`,
+`scaffoldPanelDimmedAtom`) so a hover moving between two tabs re-renders
+only the panels whose boolean flips; the empty-key sentinel (`panelId ??
+""`) reads false for un-id'd parts. `ScaffoldContext` carries only
+`{ scaffoldId, inspectorWidth }`; `useScaffold().providerProps` carries a
+`scaffoldId` (not callbacks), and the controlled `inspectorOpen` follows
+the profile card's config/handlers projection.
+
 ## Pulling coss components
 
 `components.json` maps the `@coss` registry (coss.com/ui). Install base

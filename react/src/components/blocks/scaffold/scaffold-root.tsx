@@ -1,20 +1,41 @@
 "use client"
 
 import * as React from "react"
+import { useSetAtom } from "jotai"
 
 import { cn } from "@/lib/utils"
 import { SCAFFOLD_INSPECTOR_WIDTH } from "./constants"
+import {
+  projectScaffoldPropsAtom,
+  removeScaffoldInstance,
+  seedScaffoldInspectorAtom,
+  setScaffoldHandlersAtom,
+} from "./scaffold-atom"
 import { ScaffoldContext } from "./scaffold-context"
-import { usePanelVisibility } from "./use-panel-visibility"
-import type { ScaffoldContextValue, ScaffoldRootProps } from "./type"
+import type {
+  ScaffoldConfig,
+  ScaffoldContextValue,
+  ScaffoldHandlers,
+  ScaffoldRootProps,
+} from "./type"
 import type { ClassNameValue } from "tailwind-merge"
 
 /**
  * The scaffold's viewport: desktop backdrop + horizontal row of rail and
- * main region, and the provider for the shared inspector state. Fills its
- * container — size it from the outside (e.g. `h-svh` for a full page).
+ * main region, and the binding between this instance's props and its slice
+ * of the store. Fills its container — size it from the outside (e.g.
+ * `h-svh` for a full page).
+ *
+ * State lives in the store under `scaffoldId`; the context carries only the
+ * id and the drawer width, so its value never changes while the scaffold is
+ * mounted and parts subscribe to exactly the atoms they render from. A
+ * controlled `inspectorOpen` stays the source of truth: it is projected
+ * one-way into the store (so remote readers see current data), and the
+ * inspector actions report through `onInspectorOpenChange` instead of
+ * writing.
  */
 export function ScaffoldRoot({
+  scaffoldId: scaffoldIdProp,
   inspectorOpen: inspectorOpenProp,
   defaultInspectorOpen,
   onInspectorOpenChange,
@@ -23,42 +44,53 @@ export function ScaffoldRoot({
   children,
   ...rest
 }: ScaffoldRootProps): React.ReactElement {
-  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(
-    defaultInspectorOpen ?? false
-  )
-  const inspectorOpen = inspectorOpenProp ?? uncontrolledOpen
+  const generatedId = React.useId()
+  const scaffoldId = scaffoldIdProp ?? generatedId
   const background: ClassNameValue = `bg-linear-to-tr/increasing from-neutral-200 via-neutral-100 to-stone-200 dark:from-neutral-900 dark:via-neutral-950 dark:to-stone-950`
 
-  const setInspectorOpen = React.useCallback(
-    (open: boolean) => {
-      if (inspectorOpenProp === undefined) setUncontrolledOpen(open)
-      onInspectorOpenChange?.(open)
-    },
-    [inspectorOpenProp, onInspectorOpenChange]
+  const controlsInspector = inspectorOpenProp !== undefined
+  const config = React.useMemo<ScaffoldConfig>(
+    () => ({ controlsInspector }),
+    [controlsInspector]
+  )
+  const handlers = React.useMemo<ScaffoldHandlers>(
+    () => ({ onInspectorOpenChange }),
+    [onInspectorOpenChange]
   )
 
-  const toggleInspector = React.useCallback(
-    () => setInspectorOpen(!inspectorOpen),
-    [inspectorOpen, setInspectorOpen]
-  )
+  const project = useSetAtom(projectScaffoldPropsAtom(scaffoldId))
+  const publishHandlers = useSetAtom(setScaffoldHandlersAtom(scaffoldId))
+  const seedInspector = useSetAtom(seedScaffoldInspectorAtom(scaffoldId))
 
-  const panelVisibility = usePanelVisibility()
+  // Seed the uncontrolled inspector once per mount, before the projection —
+  // `defaultInspectorOpen` describes the mount, not every render. Layout
+  // effects so children read settled values in the same commit; primitive
+  // deps, so no loop guard is needed.
+  const [seed] = React.useState(
+    () => inspectorOpenProp ?? defaultInspectorOpen ?? false
+  )
+  React.useLayoutEffect(() => {
+    if (!controlsInspector) seedInspector(seed)
+    // Mount-time seed only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  // Handlers before the projection — they must be in the store before any
+  // action can fire.
+  React.useLayoutEffect(() => {
+    publishHandlers(handlers)
+  }, [publishHandlers, handlers])
+  React.useLayoutEffect(() => {
+    project(config, inspectorOpenProp)
+  }, [project, config, inspectorOpenProp])
+
+  React.useEffect(() => {
+    if (scaffoldIdProp !== undefined) return
+    return () => removeScaffoldInstance(scaffoldId)
+  }, [scaffoldIdProp, scaffoldId])
 
   const value = React.useMemo<ScaffoldContextValue>(
-    () => ({
-      inspectorOpen,
-      inspectorWidth,
-      setInspectorOpen,
-      toggleInspector,
-      ...panelVisibility,
-    }),
-    [
-      inspectorOpen,
-      inspectorWidth,
-      setInspectorOpen,
-      toggleInspector,
-      panelVisibility,
-    ]
+    () => ({ scaffoldId, inspectorWidth }),
+    [scaffoldId, inspectorWidth]
   )
 
   return (

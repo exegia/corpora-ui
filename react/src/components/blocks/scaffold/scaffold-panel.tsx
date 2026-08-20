@@ -10,7 +10,10 @@ import {
   SCAFFOLD_MORPH_DURATION,
   SCAFFOLD_PANEL_MIN_WIDTH,
 } from "./constants"
+import { useAtomValue } from "jotai"
+
 import { PanelMenuButton } from "./panel-menu-button.tsx"
+import { scaffoldPanelDimmedAtom } from "./scaffold-atom"
 import { useScaffoldContext } from "./scaffold-context"
 import type { ScaffoldPanelProps, TSubPanelPosition } from "./type"
 import { ScaffoldSubPanel } from "@/components/blocks/scaffold/scaffold-sub-panel.tsx"
@@ -33,13 +36,14 @@ export function ScaffoldPanel({
   sound = true,
   className,
 }: ScaffoldPanelProps): React.ReactElement {
-  const { hoveredPanelId } = useScaffoldContext()
+  const { scaffoldId } = useScaffoldContext()
   const reducedMotion = useReducedMotion()
 
-  // A hovered tab spotlights its own panel — every other id'd panel
-  // fades back so the pairing reads at a glance.
-  const dimmed =
-    id !== undefined && hoveredPanelId !== null && hoveredPanelId !== id
+  // A hovered tab spotlights its own panel — every other id'd panel fades
+  // back so the pairing reads at a glance. The per-panel atom keeps a hover
+  // moving between two tabs from re-rendering the panels that stay dimmed;
+  // the empty-key sentinel reads false for a panel without an `id`.
+  const dimmed = useAtomValue(scaffoldPanelDimmedAtom(scaffoldId, id ?? ""))
 
   const transition = {
     duration: reducedMotion ? 0 : SCAFFOLD_MORPH_DURATION,

@@ -779,10 +779,10 @@ inspector.resizePanel(480)`,
     registryDependencies: [],
     props: [
       {
-        name: "Root · inspectorOpen / defaultInspectorOpen / onInspectorOpenChange",
-        type: "boolean / boolean / (open) => void",
+        name: "Root · scaffoldId / inspectorOpen / defaultInspectorOpen / onInspectorOpenChange",
+        type: "string / boolean / boolean / (open) => void",
         description:
-          "Inspector drawer state, controlled or uncontrolled. Spread `useScaffold().providerProps` to drive it from outside (title-bar buttons, shortcuts). `inspectorWidth` (px, default 272) sizes the drawer and how far Actions slides aside.",
+          "State lives in Jotai atom families keyed by `scaffoldId` — omit it and the root keys off `useId`, dropping its state on unmount; name it and the state outlives the component, with `useScaffoldState(id)` / `useScaffoldActions(id)` reading and driving it from anywhere (title-bar buttons, a command palette, shortcuts). `useScaffold().providerProps` carries an id for you. A controlled `inspectorOpen` stays the source of truth: store writes are gated off and actions report through `onInspectorOpenChange`. `inspectorWidth` (px, default 272) sizes the drawer and how far Actions slides aside.",
       },
       {
         name: "Panel · id / SecondaryPanel / onSwap / onCloseSecondary",
@@ -834,6 +834,10 @@ function App() {
   )
 }
 
-// scaffold.toggleInspector() from anywhere — a rail icon, a shortcut.`,
+// scaffold.toggleInspector() from anywhere — a rail icon, a shortcut.
+// Or skip the hook: name the instance and drive it by id, no controller held.
+//   <Scaffold.Root scaffoldId="workspace" />
+//   useScaffoldActions("workspace").toggleInspector()
+//   useScaffoldState("workspace").hiddenPanelIds`,
   },
 ]

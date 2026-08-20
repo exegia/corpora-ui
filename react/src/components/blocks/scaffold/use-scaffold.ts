@@ -1,7 +1,14 @@
 "use client"
 
-import { useCallback, useMemo, useState } from "react"
+import { useEffect, useId, useMemo } from "react"
+import { useAtomValue, useSetAtom } from "jotai"
 
+import {
+  removeScaffoldInstance,
+  scaffoldInspectorOpenAtom,
+  setScaffoldInspectorOpenAtom,
+  toggleScaffoldInspectorAtom,
+} from "./scaffold-atom"
 import type { ScaffoldControls, UseScaffoldOptions } from "./type"
 
 /**
@@ -9,37 +16,41 @@ import type { ScaffoldControls, UseScaffoldOptions } from "./type"
  * (title-bar buttons, command palette, shortcuts). Spread the returned
  * `providerProps` onto `Scaffold.Root`; without this hook the root manages
  * the same state internally via `defaultInspectorOpen`.
+ *
+ * The hook and the root meet in the store: `providerProps` carries a
+ * `scaffoldId`, both sides read and write that instance's atoms, and
+ * `useScaffoldState` / `useScaffoldActions` reach the same slice from
+ * anywhere else by id. Unnamed scaffolds key off `useId` and are dropped on
+ * unmount; an explicit `scaffoldId` outlives its component.
  */
 export function useScaffold({
+  scaffoldId: scaffoldIdProp,
   defaultInspectorOpen,
   onInspectorChange,
 }: UseScaffoldOptions = {}): ScaffoldControls {
-  const [inspectorOpen, setOpenState] = useState(defaultInspectorOpen ?? false)
+  const generatedId = useId()
+  const scaffoldId = scaffoldIdProp ?? generatedId
 
-  const setInspectorOpen = useCallback(
-    (open: boolean) => {
-      setOpenState((prev) => {
-        if (prev !== open) onInspectorChange?.(open)
-        return open
-      })
-    },
-    [onInspectorChange]
-  )
+  const inspectorOpen = useAtomValue(scaffoldInspectorOpenAtom(scaffoldId))
+  const setInspectorOpen = useSetAtom(setScaffoldInspectorOpenAtom(scaffoldId))
+  const toggleInspector = useSetAtom(toggleScaffoldInspectorAtom(scaffoldId))
 
-  const toggleInspector = useCallback(
-    () => setInspectorOpen(!inspectorOpen),
-    [inspectorOpen, setInspectorOpen]
-  )
+  useEffect(() => {
+    if (scaffoldIdProp !== undefined) return
+    return () => removeScaffoldInstance(scaffoldId)
+  }, [scaffoldIdProp, scaffoldId])
 
-  const providerProps = useMemo(
+  const providerProps = useMemo<ScaffoldControls["providerProps"]>(
     () => ({
-      inspectorOpen,
-      onInspectorOpenChange: setInspectorOpen,
+      scaffoldId,
+      defaultInspectorOpen,
+      onInspectorOpenChange: onInspectorChange,
     }),
-    [inspectorOpen, setInspectorOpen]
+    [scaffoldId, defaultInspectorOpen, onInspectorChange]
   )
 
   return {
+    scaffoldId,
     inspectorOpen,
     setInspectorOpen,
     toggleInspector,
