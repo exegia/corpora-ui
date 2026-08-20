@@ -116,7 +116,28 @@ users. Hooks: `useAuthFlow`/`useAuthFlowActions(flowId?)`,
 `useAuthSession`/`useAuthSessionActions` (`signOut` = `endAuthSessionAtom`,
 which also resets the default flow). Never store passwords, codes or field
 values in the store — the auth blocks keep those in local `useState` on
-purpose.
+purpose. `AuthFlowBlock` (`auth-flow-block.tsx`) is the optional orchestrator
+over this layer: it renders the block for the current step with `goToStep`
+navigation pre-wired, and each submit handler returns an `AuthFlowDirective`
+(`{ user }` / `{ verify }` / `{ step }` / void) that it applies to the store.
+Rejections propagate into the block — the orchestrator never mirrors
+transient status/error into the flow atoms.
+
+### Fourth implementation: the scaffold
+
+`components/blocks/scaffold/` keys everything by `scaffoldId`. Its deltas:
+the visibility bookkeeping (`visibleOrder`/`autoHidden`/`userHidden`) is ONE
+atom because `reconcileVisibility` (in `utils.ts`) always settles the three
+lists together — every action that moves an input (register ids, measure
+capacity, toggle a panel) re-settles before returning, replacing the old
+hook's render-time settling. Tabs and panels read double-keyed
+`panelFamily` atoms (`scaffoldPanelHiddenAtom(scaffoldId, panelId)`,
+`scaffoldPanelDimmedAtom`) so a hover moving between two tabs re-renders
+only the panels whose boolean flips; the empty-key sentinel (`panelId ??
+""`) reads false for un-id'd parts. `ScaffoldContext` carries only
+`{ scaffoldId, inspectorWidth }`; `useScaffold().providerProps` carries a
+`scaffoldId` (not callbacks), and the controlled `inspectorOpen` follows
+the profile card's config/handlers projection.
 
 ## Pulling coss components
 

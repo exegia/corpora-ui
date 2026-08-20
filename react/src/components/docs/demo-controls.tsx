@@ -5,9 +5,11 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
- SelectContent} from "@/components/ui/select"
+  SelectContent,
+} from "@/components/ui/select"
 import { Field, FieldLabel } from "@/components/ui/field"
-import { Card , CardContent} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card"
+import { Switch } from "../ui/switch"
 
 /**
  * Lightweight playground controls for registry demos — docs-only, never
@@ -28,22 +30,25 @@ export function DemoSelect<T extends string>({
   const items = options.map((option) => ({ label: option, value: option }))
 
   return (
-    <Field className="flex flex-col gap-1 text-xs text-muted-foreground">
-      {label && <FieldLabel>{label}</FieldLabel>}
+    <Field className="ml-0 flex w-full flex-1 flex-row items-center justify-between text-muted-foreground">
+      {label && <FieldLabel className="ml-0 capitalize">{label}</FieldLabel>}
       <Select
         items={items}
         onValueChange={(next) => onChange(next as T)}
         value={value}
       >
-        <SelectTrigger className="h-7 min-w-0 text-xs capitalize rounded-sm " size="sm">
+        <SelectTrigger
+          className="h-7 min-w-0 rounded-sm text-xs capitalize"
+          size="sm"
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-            {items.map((item) => (
-              <SelectItem key={item.value} value={item.value}>
-                {item.label}
-              </SelectItem>
-            ))}
+          {items.map((item) => (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     </Field>
@@ -95,14 +100,15 @@ export function DemoToggle({
   onChange: (checked: boolean) => void
 }) {
   return (
-    <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-      />
-      {label}
-    </label>
+    <Field className="ml-0 w-full">
+      <FieldLabel className="ml-0 w-full justify-between capitalize">
+        {label}
+        <Switch
+          checked={checked}
+          onCheckedChange={(value) => onChange(value)}
+        />
+      </FieldLabel>
+    </Field>
   )
 }
 
@@ -118,13 +124,16 @@ export function DemoStage({
 }) {
   return (
     <div className="relative flex w-full flex-col items-center">
-      {controls && <Card className="absolute top-3 right-3 z-20 rounded-xl shadow-lg">
-        <CardContent className="flex flex-row items-center gap-x-2">{controls}</CardContent>
-      </Card>}
+      {controls && (
+        <Card className="absolute top-3 right-3 z-20 min-w-48 rounded-lg shadow-lg">
+          <CardContent className="flex flex-col items-start gap-2">
+            {controls}
+          </CardContent>
+        </Card>
+      )}
       <div
         className={
-          canvasClassName ??
-          "flex min-h-24 max-h-32 w-full items-center justify-center rounded-lg"
+          canvasClassName ?? "flex min-h-24 w-full items-center justify-center"
         }
       >
         {children}

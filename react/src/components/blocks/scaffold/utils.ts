@@ -1,6 +1,9 @@
 import type { Variants } from "motion/react"
 import type { ClassNameValue } from "tailwind-merge"
-import type { TSubPanelVariant } from "@/components/blocks/scaffold/type.ts"
+import type {
+  ScaffoldPanelVisibility,
+  TSubPanelVariant,
+} from "@/components/blocks/scaffold/type.ts"
 import { EASE_OUT } from "@/lib/ease.ts"
 import {
   SCAFFOLD_CANVAS_GAP,
@@ -20,6 +23,47 @@ export function getPanelCapacity(width: number | null): number {
       (SCAFFOLD_PANEL_MIN_WIDTH + SCAFFOLD_CANVAS_GAP)
   )
   return Math.max(1, Math.min(SCAFFOLD_PANEL_CAPACITY, fits))
+}
+
+/** @internal An untracked scaffold: nothing registered, nothing hidden. */
+export const EMPTY_SCAFFOLD_VISIBILITY: ScaffoldPanelVisibility = {
+  visibleOrder: [],
+  autoHidden: [],
+  userHidden: [],
+}
+
+/**
+ * @internal Fold the registered ids and current capacity into a settled
+ * visibility: prune departed panels, admit new ones, evict the
+ * least-recently-activated visible panels past capacity, and restore
+ * auto-hidden ones when room returns. Returns `prev` untouched when nothing
+ * changes, so callers can compare identities instead of contents.
+ */
+export function reconcileVisibility(
+  prev: ScaffoldPanelVisibility,
+  ids: readonly string[],
+  capacity: number
+): ScaffoldPanelVisibility {
+  const known = new Set(ids)
+  const visibleOrder = prev.visibleOrder.filter((id) => known.has(id))
+  const autoHidden = prev.autoHidden.filter((id) => known.has(id))
+  const userHidden = prev.userHidden.filter((id) => known.has(id))
+
+  const tracked = new Set([...visibleOrder, ...autoHidden, ...userHidden])
+  for (const id of ids) if (!tracked.has(id)) visibleOrder.push(id)
+
+  while (visibleOrder.length > capacity && visibleOrder.length > 1) {
+    autoHidden.push(visibleOrder.shift() as string)
+  }
+  while (visibleOrder.length < capacity && autoHidden.length > 0) {
+    visibleOrder.push(autoHidden.pop() as string)
+  }
+
+  const unchanged =
+    visibleOrder.join(" ") === prev.visibleOrder.join(" ") &&
+    autoHidden.join(" ") === prev.autoHidden.join(" ") &&
+    userHidden.join(" ") === prev.userHidden.join(" ")
+  return unchanged ? prev : { visibleOrder, autoHidden, userHidden }
 }
 
 /** Desktop backdrop the whole scaffold sits on — a soft warm-gray wash. */

@@ -3,8 +3,14 @@
 import { motion, useReducedMotion } from "motion/react"
 import * as React from "react"
 
+import { useAtomValue, useSetAtom } from "jotai"
+
 import { cn } from "@/lib/utils"
 import { SCAFFOLD_EASE, SCAFFOLD_EDGE_GUTTER, SCAFFOLD_MORPH_DURATION } from "./constants"
+import {
+  scaffoldInspectorOpenAtom,
+  toggleScaffoldInspectorAtom,
+} from "./scaffold-atom"
 import { useScaffoldContext } from "./scaffold-context"
 import type { ScaffoldInspectorProps } from "./type"
 import { GlassContainer } from "@/components/ui/glasscn/glass-container.tsx"
@@ -23,8 +29,9 @@ export function ScaffoldInspector({
   className,
   ...rest
 }: ScaffoldInspectorProps): React.ReactElement {
-  const { inspectorOpen, inspectorWidth, toggleInspector } =
-    useScaffoldContext()
+  const { scaffoldId, inspectorWidth } = useScaffoldContext()
+  const inspectorOpen = useAtomValue(scaffoldInspectorOpenAtom(scaffoldId))
+  const toggleInspector = useSetAtom(toggleScaffoldInspectorAtom(scaffoldId))
   const reducedMotion = useReducedMotion()
 
   // Slide fully past the edge gutter and the drop shadow's blur radius.

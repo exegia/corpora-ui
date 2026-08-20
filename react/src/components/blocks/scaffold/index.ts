@@ -12,6 +12,21 @@ import { ScaffoldSubPanel } from "@/components/blocks/scaffold/scaffold-sub-pane
 
 export { useScaffoldContext } from "./scaffold-context"
 export { useScaffold } from "./use-scaffold"
+export { useScaffoldActions, useScaffoldState } from "./use-scaffold-state"
+export {
+  removeScaffoldInstance,
+  resetScaffoldAtom,
+  scaffoldHiddenPanelIdsAtom,
+  scaffoldHoveredPanelIdAtom,
+  scaffoldInspectorOpenAtom,
+  scaffoldPanelCapacityAtom,
+  scaffoldPanelDimmedAtom,
+  scaffoldPanelHiddenAtom,
+  scaffoldStateAtom,
+  setScaffoldInspectorOpenAtom,
+  toggleScaffoldInspectorAtom,
+  toggleScaffoldPanelAtom,
+} from "./scaffold-atom"
 export type * from "./type"
 export * from "./constants"
 

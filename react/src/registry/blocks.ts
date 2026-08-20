@@ -10,6 +10,7 @@ export const blocks: RegistryEntry[] = [
   {
     slug: "login",
     name: "Login",
+    titleStyle: "titlebar",
     description:
       "Progressive login form: a valid email reveals the password field, a non-empty password reveals the submit button. Social providers, remember-me and animated success/error states.",
     category: "blocks",
@@ -78,6 +79,7 @@ const { beginVerification, complete } = useAuthFlowActions()
   {
     slug: "signup",
     name: "Signup",
+    titleStyle: "titlebar",
     description:
       "Account creation with a progressively revealed password field, password strength, terms consent and social providers.",
     category: "blocks",
@@ -141,6 +143,7 @@ const { beginVerification, complete } = useAuthFlowActions()
   {
     slug: "forgot-password",
     name: "Forgot Password",
+    titleStyle: "titlebar",
     description:
       "Password reset request that morphs into a check-your-inbox confirmation.",
     category: "blocks",
@@ -178,6 +181,7 @@ const { beginVerification, complete } = useAuthFlowActions()
   {
     slug: "code-auth",
     name: "Code Authentication",
+    titleStyle: "titlebar",
     description:
       "SMS/email one-time-code verification with auto-submit, resend countdown and error shake.",
     category: "blocks",
@@ -247,6 +251,7 @@ const { complete } = useAuthFlowActions()
   {
     slug: "update-password",
     name: "Update password",
+    titleStyle: "titlebar",
     description:
       "Password change for a signed-in user: a strength-metered new password reveals the confirm field, which reveals the submit button. Mismatches are caught before submit.",
     category: "blocks",
@@ -293,6 +298,7 @@ const { complete } = useAuthFlowActions()
   {
     slug: "passkey-sign-in",
     name: "Passkey sign-in",
+    titleStyle: "titlebar",
     description:
       "Passkey entry point sized to sit inside a login card: one button plus its error state. Renders nothing when the device cannot use passkeys, and treats a cancelled OS prompt as a silent return to idle.",
     category: "blocks",
@@ -333,6 +339,7 @@ const { complete } = useAuthFlowActions()
   {
     slug: "passkey-manager",
     name: "Passkey manager",
+    titleStyle: "titlebar",
     description:
       "Settings panel for the passkeys on an account: register, inline rename with validation, and delete behind a confirmation that warns when the last passkey is about to go.",
     category: "blocks",
@@ -380,6 +387,7 @@ const { complete } = useAuthFlowActions()
   {
     slug: "linked-accounts",
     name: "Linked accounts",
+    titleStyle: "titlebar",
     description:
       "Settings panel for the sign-in identities on an account: lists the connected ones, offers connect buttons for the rest, and guards the last remaining method from being disconnected.",
     category: "blocks",
@@ -421,6 +429,7 @@ const { complete } = useAuthFlowActions()
   {
     slug: "onboarding",
     name: "Onboarding",
+    titleStyle: "titlebar",
     description:
       "Multi-step profile onboarding driven by a declared steps config: progress-tracked forms with back/forward navigation, per-step validation, draft restore and a single completion signal.",
     category: "blocks",
@@ -479,8 +488,60 @@ const { complete } = useAuthFlowActions()
 <OnboardingBlock steps={steps} onComplete={saveProfile} />`,
   },
   {
+    slug: "auth-flow",
+    name: "Auth flow",
+    description:
+      "Orchestrator over the auth blocks: renders the right block for the flow's current step (login, signup, verify-code, forgot-password, update-password, onboarding, success) with the store wiring built in — the switchboard every host app was hand-rolling around `useAuthFlow`.",
+    category: "blocks",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/auth-flow-demo")),
+    registryDependencies: [],
+    props: [
+      {
+        name: "flowId",
+        type: "string",
+        default: `"default"`,
+        description:
+          "Which flow instance to orchestrate. A re-auth modal passes its own id and coexists with the main flow; `useAuthFlowActions(flowId)` drives the same instance from anywhere.",
+      },
+      {
+        name: "onLogin / onSignup / onVerifyCode / onRequestReset / onUpdatePassword / onProviderSelect / onOnboardingComplete / onResendCode",
+        type: "(data) => AuthFlowDirective | Promise<AuthFlowDirective>",
+        description:
+          "The API boundary, one handler per step submit. Resolve with a directive to move the flow: `{ user }` completes it AND signs the session in (one atomic write), `{ verify: { identifier } }` records the destination and moves to the code step, `{ step }` navigates, and `void` stays put (the block shows its own success). Reject to render the block's own error state — the orchestrator never mirrors transients into the store.",
+      },
+      {
+        name: "logo / accent / providers",
+        type: "ReactNode / AuthAccent / SocialProvider[]",
+        description:
+          "Branding handed to every step's card; `providers` feeds the login and signup steps.",
+      },
+      {
+        name: "steps / renderStep / success",
+        type: "AuthFlowStepOverrides / (step, flow) => ReactNode | undefined / ReactNode",
+        description:
+          "Escape hatches, in escalating order: `steps` merges prop overrides over the wiring of one block (`{ login: { onSignup: undefined } }` unhooks a default navigation link), `renderStep` replaces a whole step's UI (return undefined to keep the default), and `success` swaps the built-in completion card (`successTitle` / `successDescription` retitle it instead). Navigation between steps (login ↔ signup, forgot password, back from verification) is pre-wired to `goToStep`.",
+      },
+    ],
+    usage: `import { AuthFlowBlock } from "@corpora/ui"
+
+<AuthFlowBlock
+  onLogin={async ({ email, password }) => {
+    const outcome = await api.signIn(email, password)
+    return outcome.mfa ? { verify: { identifier: email } } : { user: outcome.user }
+  }}
+  onVerifyCode={async (code) => ({ user: await api.verify(code) })}
+  onRequestReset={({ email }) => api.sendResetLink(email)}
+/>
+
+// The flow lives in the store — drive or observe it from anywhere:
+//   useAuthFlowActions().goToStep("signup")
+//   useAuthSession().user`,
+  },
+  {
     slug: "profile-card",
     name: "Profile card",
+    titleStyle: "titlebar",
     description:
       "Account card that opens an action menu: the trigger is a rich identity chip (avatar over name and handle), the popup a grouped menu ending in a destructive sign-out.",
     category: "blocks",
@@ -579,6 +640,7 @@ const { signOut } = useAuthSessionActions()
   {
     slug: "navbar",
     name: "Navbar",
+    titleStyle: "titlebar",
     description: "Application top navigation with branding and user menu.",
     category: "blocks",
     status: "planned",
@@ -586,6 +648,7 @@ const { signOut } = useAuthSessionActions()
   {
     slug: "sidebar",
     name: "Sidebar",
+    titleStyle: "titlebar",
     description:
       "Nested tree of projects, folders, files and bookmarks for a workspace rail. Rows drag to reorder or reparent, rename in place, and carry a per-row actions menu. Optimistic moves roll back when the handler rejects.",
     category: "blocks",
@@ -704,6 +767,7 @@ const { selectedId } = useAISidebarState("app-resources") // subscribes to the s
   {
     slug: "shell",
     name: "Shell",
+    titleStyle: "hidden",
     description:
       "Inset application shell with a collapsible sidebar, workspace header, command-style search affordance, top actions, and scrollable content area.",
     category: "blocks",
@@ -771,6 +835,7 @@ inspector.resizePanel(480)`,
   {
     slug: "scaffold",
     name: "Scaffold",
+    titleStyle: "hidden",
     description:
       "Composable desktop workspace: an icon rail on a soft gradient backdrop, a canvas of closable/swappable panels, a floating actions cluster, and an inspector drawer that slides in over the canvas.",
     category: "blocks",
@@ -779,10 +844,10 @@ inspector.resizePanel(480)`,
     registryDependencies: [],
     props: [
       {
-        name: "Root · inspectorOpen / defaultInspectorOpen / onInspectorOpenChange",
-        type: "boolean / boolean / (open) => void",
+        name: "Root · scaffoldId / inspectorOpen / defaultInspectorOpen / onInspectorOpenChange",
+        type: "string / boolean / boolean / (open) => void",
         description:
-          "Inspector drawer state, controlled or uncontrolled. Spread `useScaffold().providerProps` to drive it from outside (title-bar buttons, shortcuts). `inspectorWidth` (px, default 272) sizes the drawer and how far Actions slides aside.",
+          "State lives in Jotai atom families keyed by `scaffoldId` — omit it and the root keys off `useId`, dropping its state on unmount; name it and the state outlives the component, with `useScaffoldState(id)` / `useScaffoldActions(id)` reading and driving it from anywhere (title-bar buttons, a command palette, shortcuts). `useScaffold().providerProps` carries an id for you. A controlled `inspectorOpen` stays the source of truth: store writes are gated off and actions report through `onInspectorOpenChange`. `inspectorWidth` (px, default 272) sizes the drawer and how far Actions slides aside.",
       },
       {
         name: "Panel · id / SecondaryPanel / onSwap / onCloseSecondary",
@@ -834,6 +899,10 @@ function App() {
   )
 }
 
-// scaffold.toggleInspector() from anywhere — a rail icon, a shortcut.`,
+// scaffold.toggleInspector() from anywhere — a rail icon, a shortcut.
+// Or skip the hook: name the instance and drive it by id, no controller held.
+//   <Scaffold.Root scaffoldId="workspace" />
+//   useScaffoldActions("workspace").toggleInspector()
+//   useScaffoldState("workspace").hiddenPanelIds`,
   },
 ]

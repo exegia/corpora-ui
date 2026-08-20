@@ -8,7 +8,9 @@ export const ScaffoldContext = React.createContext<ScaffoldContextValue | null>(
   null
 )
 
-/** Read the scaffold's shared state; must run under `Scaffold.Root`. */
+/** Read the scaffold's identity (`scaffoldId`, `inspectorWidth`); must run
+ * under `Scaffold.Root`. State itself lives in the store — subscribe to the
+ * atoms, or reach them by id through `useScaffoldState` / `useScaffoldActions`. */
 export function useScaffoldContext(): ScaffoldContextValue {
   const context = React.useContext(ScaffoldContext)
   if (!context) {

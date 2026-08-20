@@ -3,8 +3,11 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import * as React from "react"
 
+import { useAtomValue } from "jotai"
+
 import { cn } from "@/lib/utils"
 import { SCAFFOLD_EASE, SCAFFOLD_EDGE_GUTTER, SCAFFOLD_MORPH_DURATION } from "./constants"
+import { scaffoldInspectorOpenAtom } from "./scaffold-atom"
 import { useScaffoldContext } from "./scaffold-context"
 import type { ScaffoldActionsProps } from "./type"
 import { segmentVariants } from "./utils"
@@ -28,7 +31,8 @@ export function ScaffoldActions({
   children,
   ...rest
 }: ScaffoldActionsProps): React.ReactElement {
-  const { inspectorOpen, inspectorWidth } = useScaffoldContext()
+  const { scaffoldId, inspectorWidth } = useScaffoldContext()
+  const inspectorOpen = useAtomValue(scaffoldInspectorOpenAtom(scaffoldId))
   const reducedMotion = useReducedMotion()
   const transition = reducedMotion ? { duration: 0 } : SPRING_LAYOUT
 

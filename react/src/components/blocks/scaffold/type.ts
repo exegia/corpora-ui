@@ -1,37 +1,77 @@
 import React, { type ComponentProps, type ReactElement, type ReactNode, } from "react"
 
-/** Inspector state shared by every scaffold part through ScaffoldContext. */
+/** Key of one scaffold's slice of the store. */
+export type ScaffoldInstanceId = string
+
+/** The identity every scaffold part shares through ScaffoldContext. State
+ * itself lives in the store — parts subscribe to the atoms they render from,
+ * so this value never changes identity while the scaffold is mounted. */
 export interface ScaffoldContextValue {
-  /** Whether the inspector drawer is currently shown. */
-  inspectorOpen: boolean
+  scaffoldId: ScaffoldInstanceId
   /** Drawer width in px — Actions reads it to slide out of the drawer's way. */
   inspectorWidth: number
-  setInspectorOpen: (open: boolean) => void
-  toggleInspector: () => void
+}
+
+/** One scaffold's whole state, as `useScaffoldState` returns it. A component
+ * that watches one field should subscribe to that field's atom instead. */
+export interface ScaffoldState {
+  /** Whether the inspector drawer is currently shown. */
+  inspectorOpen: boolean
   /** How many panels currently fit side by side, from the measured canvas
    * width at `SCAFFOLD_PANEL_MIN_WIDTH` per panel (1..`SCAFFOLD_PANEL_CAPACITY`). */
   panelCapacity: number
   /** Ids of id'd panels the scaffold is currently hiding — auto-hidden by
    * capacity pressure or toggled away from a tab. */
   hiddenPanelIds: readonly string[]
-  isPanelHidden: (id: string) => boolean
-  /** Show/hide an id'd panel. Showing past capacity auto-hides the
-   * least-recently-activated visible panel; the last visible one never hides. */
-  togglePanelVisibility: (id: string) => void
   /** Id of the panel whose tab the pointer is resting on — the canvas
    * spotlights it by fading every other id'd panel to 0.35 opacity. */
   hoveredPanelId: string | null
-  /** @internal Tabs report pointer enter/leave on their label. */
-  setPanelHovered: (id: string, hovered: boolean) => void
-  /** @internal Canvas reports its ordered panel ids. */
-  registerPanelIds: (ids: readonly string[]) => void
-  /** @internal Canvas reports its measured width. */
-  setCanvasWidth: (width: number) => void
+}
+
+/** Drive a scaffold by id from anywhere, as `useScaffoldActions` returns it. */
+export interface ScaffoldStateActions {
+  setInspectorOpen: (open: boolean) => void
+  toggleInspector: () => void
+  /** Show/hide an id'd panel. Showing past capacity auto-hides the
+   * least-recently-activated visible panel; the last visible one never hides. */
+  togglePanel: (panelId: string) => void
+  reset: () => void
+}
+
+/** @internal Which props currently control the scaffold — write gates for
+ * the action atoms, so the store never overwrites a prop. */
+export interface ScaffoldConfig {
+  controlsInspector: boolean
+}
+
+/** @internal The mounted root's callbacks, published into the store so
+ * action atoms can report changes wherever they were fired from. */
+export interface ScaffoldHandlers {
+  onInspectorOpenChange?: (open: boolean) => void
+}
+
+/** @internal Bookkeeping for responsive panel hiding.
+ * - `visibleOrder`: visible panel ids, least-recently-activated first — the
+ *   front is what capacity pressure evicts next.
+ * - `autoHidden`: panels the scaffold hid because the canvas shrank, most
+ *   recent last. They return on their own when room comes back.
+ * - `userHidden`: panels hidden by a tab press. They stay hidden until the
+ *   tab is pressed again, however wide the canvas grows. */
+export interface ScaffoldPanelVisibility {
+  visibleOrder: string[]
+  autoHidden: string[]
+  userHidden: string[]
 }
 
 export interface ScaffoldRootProps extends ComponentProps<"div"> {
-  /** Controlled inspector state — pair with `onInspectorOpenChange`, or
-   * spread `useScaffold().providerProps` instead of wiring by hand. */
+  /** Names this scaffold's slice of the store, so `useScaffoldState` /
+   * `useScaffoldActions` can drive it by id and its state outlives the
+   * component. Omitted, the root keys off `useId` and drops its state on
+   * unmount. `useScaffold().providerProps` carries one. */
+  scaffoldId?: ScaffoldInstanceId
+  /** Controlled inspector state — pair with `onInspectorOpenChange`. The
+   * prop stays the source of truth: store writes are gated off, and actions
+   * report through the callback instead. */
   inspectorOpen?: boolean
   /** Initial inspector state when uncontrolled. Closed by default. */
   defaultInspectorOpen?: boolean
@@ -182,6 +222,9 @@ export interface PanelMenuButtonProps extends PanelFloatingButtonProps {
 }
 
 export interface UseScaffoldOptions {
+  /** Names the scaffold's slice of the store. Omitted, the hook generates
+   * one and drops its state on unmount. */
+  scaffoldId?: ScaffoldInstanceId
   /** Initial inspector state. Closed by default. */
   defaultInspectorOpen?: boolean
   /** Fires on every inspector open/close. */
@@ -189,12 +232,15 @@ export interface UseScaffoldOptions {
 }
 
 export interface ScaffoldControls {
+  /** The id the hook and the root share — hand it to `useScaffoldState` /
+   * `useScaffoldActions` to drive the scaffold from elsewhere. */
+  scaffoldId: ScaffoldInstanceId
   inspectorOpen: boolean
   setInspectorOpen: (open: boolean) => void
   toggleInspector: () => void
   /** Spread onto Scaffold.Root. */
   providerProps: Pick<
     ScaffoldRootProps,
-    "inspectorOpen" | "onInspectorOpenChange"
+    "scaffoldId" | "defaultInspectorOpen" | "onInspectorOpenChange"
   >
 }

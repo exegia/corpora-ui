@@ -6,15 +6,15 @@ export const titleBarStyle = (
   component: "title" | "frame"
 ): ClassNameValue => {
   const titleBarClassName: Record<TitleStyleType, ClassNameValue> = {
-    titlebar: "",
+    titlebar: "relative",
     hidden: "top-0 left-0 absolute",
-    expanded: "",
+    expanded: "relative",
   }
 
   const bodyClassName: Record<TitleStyleType, ClassNameValue> = {
-    titlebar: "",
+    titlebar: "relative",
     hidden: "",
-    expanded: "",
+    expanded: "relative",
   }
 
   return component == "title" ? titleBarClassName[style] : bodyClassName[style]
