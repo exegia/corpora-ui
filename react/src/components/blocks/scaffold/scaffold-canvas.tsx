@@ -2,8 +2,14 @@
 
 import { AnimatePresence } from "motion/react"
 import * as React from "react"
+import { useAtomValue, useSetAtom } from "jotai"
 
 import { cn } from "@/lib/utils"
+import {
+  measureScaffoldCanvasAtom,
+  registerScaffoldPanelIdsAtom,
+  scaffoldHiddenPanelIdsAtom,
+} from "./scaffold-atom"
 import { useScaffoldContext } from "./scaffold-context"
 import type { ScaffoldCanvasProps, ScaffoldPanelProps } from "./type"
 
@@ -26,19 +32,21 @@ export function ScaffoldCanvas({
   children,
   ...rest
 }: ScaffoldCanvasProps): React.ReactElement {
-  const { hiddenPanelIds, registerPanelIds, setCanvasWidth } =
-    useScaffoldContext()
+  const { scaffoldId } = useScaffoldContext()
+  const hiddenPanelIds = useAtomValue(scaffoldHiddenPanelIdsAtom(scaffoldId))
+  const registerPanelIds = useSetAtom(registerScaffoldPanelIdsAtom(scaffoldId))
+  const measureCanvas = useSetAtom(measureScaffoldCanvasAtom(scaffoldId))
   const ref = React.useRef<HTMLDivElement>(null)
 
   React.useLayoutEffect(() => {
     const element = ref.current
     if (!element || typeof ResizeObserver === "undefined") return
     const observer = new ResizeObserver(([entry]) =>
-      setCanvasWidth(entry.contentRect.width)
+      measureCanvas(entry.contentRect.width)
     )
     observer.observe(element)
     return () => observer.disconnect()
-  }, [setCanvasWidth])
+  }, [measureCanvas])
 
   const childArray = React.Children.toArray(children)
   const panelIds = childArray

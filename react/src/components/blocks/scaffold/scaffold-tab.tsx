@@ -2,9 +2,15 @@
 
 import { useReducedMotion } from "motion/react"
 import * as React from "react"
+import { useAtomValue, useSetAtom } from "jotai"
 
 import { cn } from "@/lib/utils"
 import { SPRING_LAYOUT } from "@/lib/ease.ts"
+import {
+  scaffoldPanelHiddenAtom,
+  setScaffoldPanelHoveredAtom,
+  toggleScaffoldPanelAtom,
+} from "./scaffold-atom"
 import { useScaffoldContext } from "./scaffold-context"
 import type { ScaffoldTabProps } from "./type"
 import { segmentVariants } from "./utils"
@@ -32,12 +38,14 @@ export function ScaffoldTab({
   className,
   ...rest
 }: ScaffoldTabProps): React.ReactElement {
-  const { isPanelHidden, togglePanelVisibility, setPanelHovered } =
-    useScaffoldContext()
+  const { scaffoldId } = useScaffoldContext()
+  // The per-panel atom keeps this tab still while its siblings toggle; the
+  // empty-key sentinel reads false for a tab without a `panelId`.
+  const hidden = useAtomValue(scaffoldPanelHiddenAtom(scaffoldId, panelId ?? ""))
+  const togglePanel = useSetAtom(toggleScaffoldPanelAtom(scaffoldId))
+  const setPanelHovered = useSetAtom(setScaffoldPanelHoveredAtom(scaffoldId))
   const reduce = useReducedMotion()
   const transition = reduce ? { duration: 0 } : SPRING_LAYOUT
-
-  const hidden = panelId !== undefined && isPanelHidden(panelId)
 
   // A tab closed mid-hover never fires pointer-leave — release the
   // spotlight it holds so the canvas doesn't stay dimmed.
@@ -70,11 +78,7 @@ export function ScaffoldTab({
     >
       <Button
         aria-pressed={panelId !== undefined ? !hidden : undefined}
-        onClick={
-          panelId !== undefined
-            ? () => togglePanelVisibility(panelId)
-            : undefined
-        }
+        onClick={panelId !== undefined ? () => togglePanel(panelId) : undefined}
         size="sm"
         sound={sound}
         variant="ghost"
