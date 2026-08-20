@@ -1,26 +1,28 @@
-
 import * as React from "react"
-import { motion, useReducedMotion } from "framer-motion"
+import { motion, useReducedMotion } from "motion/react"
 import { cn } from "@/lib/utils"
 import type { ScaffoldSubPanelProps } from "./type"
 import { subPanelVariant } from "@/components/blocks/scaffold/utils.ts"
 import { SCAFFOLD_EASE, SCAFFOLD_MORPH_DURATION } from "./constants"
 
 export function ScaffoldSubPanel({
-                                   className,
-                                   children,
-                                   variant = 'card',
-                                   primary = false,
-                                   expanded,
-                                   ...rest
-                                 }: ScaffoldSubPanelProps): React.ReactElement {
+  className,
+  children,
+  variant = "card",
+  primary = false,
+  expanded,
+  ...rest
+}: ScaffoldSubPanelProps): React.ReactElement {
   const reduce = useReducedMotion()
   // The primary card holds the flexible slot unless the panel says otherwise.
   const isExpanded = expanded ?? primary
 
   return (
     <motion.div
-      layout={"size"}
+      // Full `layout` (position + size), not `layout="size"`: a swap flips
+      // the panel's flex direction in a single commit, and only a position
+      // FLIP makes the two cards glide past each other instead of teleport.
+      layout
       id={`scaffold-sub-panel-${variant}`}
       // Grow is animated as a style, not a class flip — a class flip rides the
       // layout FLIP, which scales both cards into a swap-like morph. Animating
