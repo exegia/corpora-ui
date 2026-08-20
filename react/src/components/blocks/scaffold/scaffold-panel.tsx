@@ -92,7 +92,6 @@ export function ScaffoldPanel({
       style={{ originX: 0.5 }}
       aria-label={name}
       className={cn(
-<<<<<<< Updated upstream
         "group/panel relative flex w-full min-w-0 flex-1",
         // Swap flips the direction as a class, NOT an animate target:
         // flex-direction is discrete, so motion would apply it instantly —
