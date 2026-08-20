@@ -40,7 +40,12 @@ export function ShellLayout({
     <AnimatedPanelProvider
       {...panelControlProps}
       defaultOpen={initialOpen}
-      className={cn("relative h-full min-h-0 px-2 pb-2", className, background)}
+      className={cn(
+        "relative h-full min-h-0 px-2 pb-2",
+        variant === "web" && "pt-2",
+        className,
+        background
+      )}
       style={{
         paddingTop: variant === "desktop" ? TITLE_BAR_HEIGHT : 0,
       }}
@@ -59,7 +64,7 @@ export function ShellLayout({
       <AnimatedPanelInset>
         <header className="flex h-12 flex-row! items-center justify-between gap-2 border-b px-2">
           {panels?.left?.component && (
-            <div className="flex min-w-0 flex-1 items-center gap-2">
+            <div className="flex min-w-0 shrink-0 items-center justify-start gap-2">
               <AnimatedPanelTrigger side="left">
                 <MotionIcon name="PanelLeft" size={24} animation="press" />
               </AnimatedPanelTrigger>
@@ -69,7 +74,7 @@ export function ShellLayout({
             <div className="flex w-full flex-1 items-center">{header}</div>
           )}
           {panels?.right?.component && (
-            <div className="flex flex-1 items-center justify-end gap-2">
+            <div className="flex w-full shrink items-center justify-end gap-2">
               <AnimatedPanelTrigger aria-label="Toggle panel" side="right">
                 <MotionIcon
                   className="opacity-70"
