@@ -10,6 +10,7 @@ export const blocks: RegistryEntry[] = [
   {
     slug: "login",
     name: "Login",
+    titleStyle: "titlebar",
     description:
       "Progressive login form: a valid email reveals the password field, a non-empty password reveals the submit button. Social providers, remember-me and animated success/error states.",
     category: "blocks",
@@ -78,6 +79,7 @@ const { beginVerification, complete } = useAuthFlowActions()
   {
     slug: "signup",
     name: "Signup",
+    titleStyle: "titlebar",
     description:
       "Account creation with a progressively revealed password field, password strength, terms consent and social providers.",
     category: "blocks",
@@ -141,6 +143,7 @@ const { beginVerification, complete } = useAuthFlowActions()
   {
     slug: "forgot-password",
     name: "Forgot Password",
+    titleStyle: "titlebar",
     description:
       "Password reset request that morphs into a check-your-inbox confirmation.",
     category: "blocks",
@@ -178,6 +181,7 @@ const { beginVerification, complete } = useAuthFlowActions()
   {
     slug: "code-auth",
     name: "Code Authentication",
+    titleStyle: "titlebar",
     description:
       "SMS/email one-time-code verification with auto-submit, resend countdown and error shake.",
     category: "blocks",
@@ -247,6 +251,7 @@ const { complete } = useAuthFlowActions()
   {
     slug: "update-password",
     name: "Update password",
+    titleStyle: "titlebar",
     description:
       "Password change for a signed-in user: a strength-metered new password reveals the confirm field, which reveals the submit button. Mismatches are caught before submit.",
     category: "blocks",
@@ -293,6 +298,7 @@ const { complete } = useAuthFlowActions()
   {
     slug: "passkey-sign-in",
     name: "Passkey sign-in",
+    titleStyle: "titlebar",
     description:
       "Passkey entry point sized to sit inside a login card: one button plus its error state. Renders nothing when the device cannot use passkeys, and treats a cancelled OS prompt as a silent return to idle.",
     category: "blocks",
@@ -333,6 +339,7 @@ const { complete } = useAuthFlowActions()
   {
     slug: "passkey-manager",
     name: "Passkey manager",
+    titleStyle: "titlebar",
     description:
       "Settings panel for the passkeys on an account: register, inline rename with validation, and delete behind a confirmation that warns when the last passkey is about to go.",
     category: "blocks",
@@ -380,6 +387,7 @@ const { complete } = useAuthFlowActions()
   {
     slug: "linked-accounts",
     name: "Linked accounts",
+    titleStyle: "titlebar",
     description:
       "Settings panel for the sign-in identities on an account: lists the connected ones, offers connect buttons for the rest, and guards the last remaining method from being disconnected.",
     category: "blocks",
@@ -421,6 +429,7 @@ const { complete } = useAuthFlowActions()
   {
     slug: "onboarding",
     name: "Onboarding",
+    titleStyle: "titlebar",
     description:
       "Multi-step profile onboarding driven by a declared steps config: progress-tracked forms with back/forward navigation, per-step validation, draft restore and a single completion signal.",
     category: "blocks",
@@ -532,6 +541,7 @@ const { complete } = useAuthFlowActions()
   {
     slug: "profile-card",
     name: "Profile card",
+    titleStyle: "titlebar",
     description:
       "Account card that opens an action menu: the trigger is a rich identity chip (avatar over name and handle), the popup a grouped menu ending in a destructive sign-out.",
     category: "blocks",
@@ -630,6 +640,7 @@ const { signOut } = useAuthSessionActions()
   {
     slug: "navbar",
     name: "Navbar",
+    titleStyle: "titlebar",
     description: "Application top navigation with branding and user menu.",
     category: "blocks",
     status: "planned",
@@ -637,6 +648,7 @@ const { signOut } = useAuthSessionActions()
   {
     slug: "sidebar",
     name: "Sidebar",
+    titleStyle: "titlebar",
     description:
       "Nested tree of projects, folders, files and bookmarks for a workspace rail. Rows drag to reorder or reparent, rename in place, and carry a per-row actions menu. Optimistic moves roll back when the handler rejects.",
     category: "blocks",
@@ -755,6 +767,7 @@ const { selectedId } = useAISidebarState("app-resources") // subscribes to the s
   {
     slug: "shell",
     name: "Shell",
+    titleStyle: "hidden",
     description:
       "Inset application shell with a collapsible sidebar, workspace header, command-style search affordance, top actions, and scrollable content area.",
     category: "blocks",
@@ -822,6 +835,7 @@ inspector.resizePanel(480)`,
   {
     slug: "scaffold",
     name: "Scaffold",
+    titleStyle: "hidden",
     description:
       "Composable desktop workspace: an icon rail on a soft gradient backdrop, a canvas of closable/swappable panels, a floating actions cluster, and an inspector drawer that slides in over the canvas.",
     category: "blocks",

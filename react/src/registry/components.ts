@@ -10,6 +10,7 @@ export const components: RegistryEntry[] = [
   {
     slug: "password-input",
     name: "Password Input",
+    titleStyle: "titlebar",
     description:
       "Password field with visibility toggle and animated strength meter.",
     category: "components",
@@ -44,6 +45,7 @@ export const components: RegistryEntry[] = [
   {
     slug: "social-providers",
     name: "Social Providers",
+    titleStyle: "titlebar",
     description:
       "Social auth buttons (Google, Apple, GitHub, X) in stacked or icon-row layout.",
     category: "components",
@@ -83,6 +85,7 @@ export const components: RegistryEntry[] = [
   {
     slug: "user-avatar",
     name: "User Avatar",
+    titleStyle: "titlebar",
     description:
       "Identity avatar: an image when one is given, initials otherwise, with an online/offline badge and a pointer-lit embossed bezel. A remote src holds a skeleton until it resolves instead of flashing initials. State lives in Jotai atoms keyed by avatarId.",
     category: "components",
@@ -147,6 +150,7 @@ export const components: RegistryEntry[] = [
   {
     slug: "tree",
     name: "Tree",
+    titleStyle: "titlebar",
     description:
       "Nested item tree in four shapes: app navigation with collapsible sections, a table of contents, an icon rail, and an editable file explorer. Every row is a Button; navigation flows through onNavigate.",
     category: "components",
@@ -300,6 +304,7 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
   {
     slug: "search-field",
     name: "Search Field",
+    titleStyle: "titlebar",
     description:
       "Input with a prefixed search icon and a trailing clear button.",
     category: "components",

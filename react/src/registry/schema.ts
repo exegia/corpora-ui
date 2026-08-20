@@ -1,3 +1,4 @@
+import type { TitleStyleType } from "@/components/beste/piece/type"
 import type * as React from "react"
 
 /**
@@ -45,6 +46,8 @@ export interface RegistryEntry {
   usage?: string
   /** Slugs of other registry entries this one is built from. */
   registryDependencies?: string[]
+  /** Set the title type of the preview */
+  titleStyle?: TitleStyleType
 }
 
 export interface CategoryDef {

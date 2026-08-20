@@ -19,7 +19,7 @@ export function BrowserFrame({
         className
       )}
     >
-      <div className="relative flex max-h-[500px] min-h-32 w-full flex-col overflow-hidden rounded-lg border border-border bg-neutral-50 shadow-lg dark:bg-neutral-900">
+      <div className="relative flex min-h-32 w-full flex-col overflow-hidden rounded-lg border border-border bg-neutral-50 shadow-lg dark:bg-neutral-900">
         <div
           id="title-bar"
           className={cn(
