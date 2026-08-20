@@ -82,7 +82,6 @@ export function ScaffoldPanel({
         // floor would overflow it.
         minWidth: id !== undefined ? SCAFFOLD_PANEL_MIN_WIDTH : 0,
         scaleX: 1,
-        flexDirection: isSwapped ? "column-reverse" : "column",
         // The hovered tab's panel keeps full opacity; the rest fade back
         // so the tab↔panel pairing reads at a glance. Inline (not a
         // class) because motion owns this element's opacity.
@@ -93,10 +92,15 @@ export function ScaffoldPanel({
       style={{ originX: 0.5 }}
       aria-label={name}
       className={cn(
-        "group/panel relative flex min-w-0 flex-1 flex-col w-full",
+        "group/panel relative flex w-full min-w-0 flex-1",
+        // Swap flips the direction as a class, NOT an animate target:
+        // flex-direction is discrete, so motion would apply it instantly —
+        // the flip lands in one commit and the children's `layout` FLIP is
+        // what glides the cards past each other.
+        isSwapped ? "flex-col-reverse" : "flex-col",
         className
       )}
-      layout={"size"}
+      layout
       data-slot="scaffold-panel"
       data-dimmed={dimmed ? "" : undefined}
       data-swapped={isSwapped ? "" : undefined}
@@ -106,7 +110,13 @@ export function ScaffoldPanel({
         {children}
       </ScaffoldSubPanel>
       {(onSwap || onCloseSecondary) && SecondaryPanel && (
-        <div className="relative flex h-2 items-center justify-center">
+        // `layout` keeps the seam glued to the moving boundary while the
+        // cards trade places around it.
+        <motion.div
+          layout
+          transition={transition}
+          className="relative flex h-2 items-center justify-center"
+        >
           <PanelMenuButton
             label={swapLabel}
             onClick={handleSwap}
@@ -116,7 +126,7 @@ export function ScaffoldPanel({
             swapped={isSwapped}
             sound={sound}
           />
-        </div>
+        </motion.div>
       )}
       {SecondaryPanel && (
         <ScaffoldSubPanel id="bottom" expanded={subPanelPosition === "bottom"}>
