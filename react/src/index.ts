@@ -60,6 +60,7 @@ export type {
 
 // blocks
 export * from "./components/blocks/auth/auth-shell"
+export * from "./components/blocks/auth/auth-flow-block"
 export * from "./components/blocks/auth/auth-state"
 export * from "./components/blocks/auth/code-auth-block"
 export * from "./components/blocks/auth/forgot-password-block"

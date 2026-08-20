@@ -479,6 +479,57 @@ const { complete } = useAuthFlowActions()
 <OnboardingBlock steps={steps} onComplete={saveProfile} />`,
   },
   {
+    slug: "auth-flow",
+    name: "Auth flow",
+    description:
+      "Orchestrator over the auth blocks: renders the right block for the flow's current step (login, signup, verify-code, forgot-password, update-password, onboarding, success) with the store wiring built in — the switchboard every host app was hand-rolling around `useAuthFlow`.",
+    category: "blocks",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/auth-flow-demo")),
+    registryDependencies: [],
+    props: [
+      {
+        name: "flowId",
+        type: "string",
+        default: `"default"`,
+        description:
+          "Which flow instance to orchestrate. A re-auth modal passes its own id and coexists with the main flow; `useAuthFlowActions(flowId)` drives the same instance from anywhere.",
+      },
+      {
+        name: "onLogin / onSignup / onVerifyCode / onRequestReset / onUpdatePassword / onProviderSelect / onOnboardingComplete / onResendCode",
+        type: "(data) => AuthFlowDirective | Promise<AuthFlowDirective>",
+        description:
+          "The API boundary, one handler per step submit. Resolve with a directive to move the flow: `{ user }` completes it AND signs the session in (one atomic write), `{ verify: { identifier } }` records the destination and moves to the code step, `{ step }` navigates, and `void` stays put (the block shows its own success). Reject to render the block's own error state — the orchestrator never mirrors transients into the store.",
+      },
+      {
+        name: "logo / accent / providers",
+        type: "ReactNode / AuthAccent / SocialProvider[]",
+        description:
+          "Branding handed to every step's card; `providers` feeds the login and signup steps.",
+      },
+      {
+        name: "steps / renderStep / success",
+        type: "AuthFlowStepOverrides / (step, flow) => ReactNode | undefined / ReactNode",
+        description:
+          "Escape hatches, in escalating order: `steps` merges prop overrides over the wiring of one block (`{ login: { onSignup: undefined } }` unhooks a default navigation link), `renderStep` replaces a whole step's UI (return undefined to keep the default), and `success` swaps the built-in completion card (`successTitle` / `successDescription` retitle it instead). Navigation between steps (login ↔ signup, forgot password, back from verification) is pre-wired to `goToStep`.",
+      },
+    ],
+    usage: `import { AuthFlowBlock } from "@corpora/ui"
+
+<AuthFlowBlock
+  onLogin={async ({ email, password }) => {
+    const outcome = await api.signIn(email, password)
+    return outcome.mfa ? { verify: { identifier: email } } : { user: outcome.user }
+  }}
+  onVerifyCode={async (code) => ({ user: await api.verify(code) })}
+  onRequestReset={({ email }) => api.sendResetLink(email)}
+/>
+
+// The flow lives in the store — drive or observe it from anywhere:
+//   useAuthFlowActions().goToStep("signup")
+//   useAuthSession().user`,
+  },
+  {
     slug: "profile-card",
     name: "Profile card",
     description:

@@ -116,7 +116,12 @@ users. Hooks: `useAuthFlow`/`useAuthFlowActions(flowId?)`,
 `useAuthSession`/`useAuthSessionActions` (`signOut` = `endAuthSessionAtom`,
 which also resets the default flow). Never store passwords, codes or field
 values in the store — the auth blocks keep those in local `useState` on
-purpose.
+purpose. `AuthFlowBlock` (`auth-flow-block.tsx`) is the optional orchestrator
+over this layer: it renders the block for the current step with `goToStep`
+navigation pre-wired, and each submit handler returns an `AuthFlowDirective`
+(`{ user }` / `{ verify }` / `{ step }` / void) that it applies to the store.
+Rejections propagate into the block — the orchestrator never mirrors
+transient status/error into the flow atoms.
 
 ### Fourth implementation: the scaffold
 
