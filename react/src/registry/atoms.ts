@@ -13,6 +13,7 @@ export const atoms: RegistryEntry[] = [
     description: "Displays a button or a component that looks like a button.",
     category: "atoms",
     status: "in-progress",
+    titleStyle: "titlebar",
     preview: React.lazy(() => import("./demos/button-demo")),
     props: [
       {
@@ -55,6 +56,7 @@ export const atoms: RegistryEntry[] = [
   {
     slug: "input",
     name: "Input",
+    titleStyle: "titlebar",
     description: "Displays a form input field.",
     category: "atoms",
     status: "in-progress",
@@ -79,6 +81,7 @@ export const atoms: RegistryEntry[] = [
   },
   {
     slug: "label",
+    titleStyle: "titlebar",
     name: "Label",
     description: "Accessible label paired with a form control.",
     category: "atoms",
@@ -100,6 +103,7 @@ export const atoms: RegistryEntry[] = [
   {
     slug: "field",
     name: "Field",
+    titleStyle: "titlebar",
     description:
       "Form field wrapper wiring label, control, description and error together.",
     category: "atoms",
@@ -116,6 +120,7 @@ export const atoms: RegistryEntry[] = [
   },
   {
     slug: "checkbox",
+    titleStyle: "titlebar",
     name: "Checkbox",
     description: "Control for toggling a boolean, with indeterminate support.",
     category: "atoms",
@@ -143,6 +148,7 @@ export const atoms: RegistryEntry[] = [
   {
     slug: "separator",
     name: "Separator",
+    titleStyle: "titlebar",
     description: "Visually separates content horizontally or vertically.",
     category: "atoms",
     status: "in-progress",
@@ -161,6 +167,7 @@ export const atoms: RegistryEntry[] = [
   },
   {
     slug: "card",
+    titleStyle: "titlebar",
     name: "Card",
     description: "Surface with header, panel and footer sections.",
     category: "atoms",
@@ -176,6 +183,7 @@ export const atoms: RegistryEntry[] = [
   {
     slug: "frame",
     name: "Frame",
+    titleStyle: "titlebar",
     description:
       "Muted wrapper that raises cards into framed panels, with header/footer strips.",
     category: "atoms",
@@ -192,6 +200,7 @@ export const atoms: RegistryEntry[] = [
   {
     slug: "textarea",
     name: "Textarea",
+    titleStyle: "titlebar",
     description: "Multi-line text input.",
     category: "atoms",
     status: "in-progress",
@@ -203,6 +212,7 @@ export const atoms: RegistryEntry[] = [
   {
     slug: "otp-field",
     name: "OTP Field",
+    titleStyle: "titlebar",
     description: "One-time-passcode input with per-character slots.",
     category: "atoms",
     status: "in-progress",
@@ -235,6 +245,7 @@ export const atoms: RegistryEntry[] = [
   {
     slug: "input-group",
     name: "Input Group",
+    titleStyle: "titlebar",
     description: "Input with leading/trailing addons (icons, text, buttons).",
     category: "atoms",
     status: "in-progress",
@@ -250,6 +261,7 @@ export const atoms: RegistryEntry[] = [
   {
     slug: "text",
     name: "Text",
+    titleStyle: "titlebar",
     description: "Typography primitive for body copy, labels and captions.",
     category: "atoms",
     status: "planned",
