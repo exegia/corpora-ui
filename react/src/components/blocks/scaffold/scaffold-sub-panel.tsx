@@ -40,7 +40,7 @@ export function ScaffoldSubPanel({
         subPanelVariant[variant],
         // basis-14 + clip let the primary squeeze down to the strip height;
         // the strip keeps its natural (basis-auto) height when collapsed.
-        primary ? "basis-14 min-h-14 overflow-clip" : "basis-auto min-h-14",
+        primary ? "min-h-14 basis-14 overflow-clip" : "min-h-14 basis-auto",
         className
       )}
       data-slot={`scaffold-sub-panel-${variant}`}
