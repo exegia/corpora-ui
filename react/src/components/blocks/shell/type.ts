@@ -125,6 +125,11 @@ export type TPanelMap<Side extends TPanelSide = TPanelSide> = Partial<
   Record<Side, IPanel>
 >
 
+/** Dynamic panel content keyed by side — filled by
+ * `useShellPanels().openPanel(side, component)` and read by ShellLayout,
+ * where a side's entry wins over the static `panels` map's `component`. */
+export type SidebarComponentMap = Partial<Record<SidebarSide, ReactNode>>
+
 /** The open/close surface of the shell's panels, lifted straight from
  * AnimatedPanelProvider — every prop is keyed by side, there are no
  * explicit per-side props. `useShellPanels` produces the controlled subset
@@ -139,6 +144,7 @@ export type ShellPanelControlProps = Pick<
   | "onOpenMobileChange"
   | "shellId"
   | "defaultPanelWidth"
+  | "panelComponents"
 >
 
 export interface UseShellPanelsOptions {
@@ -189,6 +195,13 @@ export interface ShellPanelControls {
    * mobile state themselves when the viewport is narrow. Carries the same
    * `isNarrow` refusal as `setOpen`. */
   toggle: (side: SidebarSide) => void
+  /** Open a side's panel and, when given, swap in the content it shows.
+   * The component travels through `providerProps.panelComponents` into
+   * ShellLayout, where it wins over the static `panels` entry for that
+   * side, and sticks until the next `openPanel(side, component)` replaces
+   * it — closing the panel leaves it in place for the exit animation and
+   * the next open. Carries the same `isNarrow` refusal as `setOpen`. */
+  openPanel: (side: SidebarSide, component?: ReactNode) => void
   /** Spread onto ShellLayout (or AnimatedPanelProvider directly). */
   providerProps: ShellPanelControlProps
 }
@@ -199,6 +212,10 @@ export interface ShellLayoutProps extends ShellPanelControlProps {
    * the `left` rail and the `right` drawer; other sides are reserved. */
   panels?: TPanelMap
   header?: ReactNode
+  /** Actions pinned to the header's right edge, rendered just before the
+   * right panel's trigger. The cluster hugs the trailing edge no matter
+   * which of `header` / the left rail / the right panel are present. */
+  trailing?: ReactNode
   className?: string
   variant?: "web" | "desktop"
 }
@@ -249,6 +266,11 @@ export interface AnimatedSidebarProviderProps extends HTMLAttributes<HTMLDivElem
   /** Initial mobile overlay state — every side starts closed. */
   defaultOpenMobile?: SidebarOpenState
   onOpenMobileChange?: (open: boolean, side: SidebarSide) => void
+  /** Content pushed into a side's panel by `useShellPanels().openPanel`. It
+   * rides along in `providerProps` so the record can be spread on either
+   * surface: ShellLayout renders it in that side's panel; the bare provider
+   * renders no panels, so it only swallows the prop to keep it off the DOM. */
+  panelComponents?: SidebarComponentMap
   /** Fires when the shell crosses the width a secondary panel needs (rail +
    * body + panel at their floors). An imperative escape hatch for a consumer
    * that mounts the provider on its own; anything under `ExegiaProvider` can
