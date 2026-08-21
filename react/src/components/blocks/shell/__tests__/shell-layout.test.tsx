@@ -114,6 +114,46 @@ describe("ShellLayout", () => {
     expect(rightDrawer("Inspector")).toBeDefined()
   })
 
+  test("trailing actions stay in the right cluster without a header", () => {
+    render(
+      <ShellLayout
+        panels={PANELS}
+        trailing={<button type="button">Upload</button>}
+        variant="web"
+      />
+    )
+
+    const upload = screen.getByRole("button", { name: "Upload" })
+    const cluster = upload.parentElement
+    // Pinned by margin, not by flex-filling: the cluster hugs the right edge
+    // even with nothing beside it to push against.
+    expect(cluster?.className).toContain("ml-auto")
+    // The right panel's trigger sits after the actions, at the far edge.
+    expect(
+      cluster?.contains(screen.getByRole("button", { name: "Toggle panel" }))
+    ).toBe(true)
+  })
+
+  test("trailing renders the cluster even with no right panel", () => {
+    render(
+      <ShellLayout trailing={<button type="button">Upload</button>} variant="web" />
+    )
+
+    expect(screen.getByRole("button", { name: "Upload" })).toBeDefined()
+    expect(screen.queryByRole("button", { name: "Toggle panel" })).toBeNull()
+  })
+
+  test("panelComponents renders a side with no static panels entry", () => {
+    render(
+      <ShellLayout
+        panelComponents={{ right: <div>Dynamic body</div> }}
+        variant="web"
+      />
+    )
+
+    expect(rightDrawer("Secondary panel").textContent).toContain("Dynamic body")
+  })
+
   test("the header triggers toggle their own side", async () => {
     const user = userEvent.setup()
     render(<ShellLayout panels={PANELS} variant="web" />)
@@ -268,6 +308,12 @@ function HookedShell({
       <button onClick={() => panels.toggle("right")} type="button">
         External toggle
       </button>
+      <button
+        onClick={() => panels.openPanel("right", <div>Details body</div>)}
+        type="button"
+      >
+        Open details
+      </button>
       {panels.isNarrow && <p>No room for the inspector</p>}
     </ShellLayout>
   )
@@ -299,6 +345,25 @@ describe("useShellPanels", () => {
 
     await user.click(screen.getByRole("button", { name: "External toggle" }))
     expect(rightDrawer().getAttribute("data-state")).toBe("collapsed")
+  })
+
+  test("openPanel opens the side with the content it was handed", async () => {
+    const user = userEvent.setup()
+    render(<HookedShell />)
+
+    expect(rightDrawer().getAttribute("data-state")).toBe("collapsed")
+
+    await user.click(screen.getByRole("button", { name: "Open details" }))
+    expect(rightDrawer().getAttribute("data-state")).toBe("expanded")
+    // The dynamic content replaces the static panels entry for that side…
+    expect(rightDrawer().textContent).toContain("Details body")
+    expect(rightDrawer().textContent).not.toContain("Inspector body")
+
+    // …and sticks across a close/reopen instead of reverting.
+    await user.click(screen.getByRole("button", { name: "External toggle" }))
+    await user.click(screen.getByRole("button", { name: "External toggle" }))
+    expect(rightDrawer().getAttribute("data-state")).toBe("expanded")
+    expect(rightDrawer().textContent).toContain("Details body")
   })
 
   test("mirrors the shell's too-narrow verdict back into the hook", () => {

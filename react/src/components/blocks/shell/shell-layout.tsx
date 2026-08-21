@@ -18,10 +18,17 @@ export function ShellLayout({
   panels,
   className,
   header,
+  trailing,
   defaultOpen,
+  panelComponents,
   ...panelControlProps
 }: ShellLayoutProps): React.ReactElement {
   const background: ClassNameValue = `bg-linear-to-tr/increasing from-neutral-200 via-neutral-100 to-stone-200 dark:from-neutral-900 dark:via-neutral-950 dark:to-stone-950`
+
+  // Content pushed through `openPanel(side, component)` wins over the static
+  // `panels` entry; a side renders its panel when either supplies content.
+  const leftContent = panelComponents?.left ?? panels?.left?.component
+  const rightContent = panelComponents?.right ?? panels?.right?.component
 
   // Each panel seeds its own side's initial state (`defaultOpen ?? open`);
   // an explicit `defaultOpen` record — usually from useShellPanels — wins
@@ -50,20 +57,20 @@ export function ShellLayout({
         paddingTop: variant === "desktop" ? TITLE_BAR_HEIGHT : 0,
       }}
     >
-      {panels?.left?.component && (
+      {leftContent && (
         <AnimatedPanel
           ariaLabel="Primary navigation"
           collapsible="icon"
           role="navigation"
           variant="inset"
         >
-          {panels?.left?.component}
+          {leftContent}
         </AnimatedPanel>
       )}
 
       <AnimatedPanelInset>
         <header className="flex h-12 flex-row! items-center justify-between gap-2 border-b px-2">
-          {panels?.left?.component && (
+          {leftContent && (
             <div className="flex min-w-0 shrink-0 items-center justify-start gap-2">
               <AnimatedPanelTrigger side="left">
                 <MotionIcon name="PanelLeft" size={24} animation="press" />
@@ -71,26 +78,31 @@ export function ShellLayout({
             </div>
           )}
           {header && (
-            <div className="flex w-full flex-1 items-center">{header}</div>
+            <div className="flex min-w-0 flex-1 items-center">{header}</div>
           )}
-          {panels?.right?.component && (
-            <div className="flex w-full shrink items-center justify-end gap-2">
-              <AnimatedPanelTrigger aria-label="Toggle panel" side="right">
-                <MotionIcon
-                  className="opacity-70"
-                  name="PanelRight"
-                  size={24}
-                />
-              </AnimatedPanelTrigger>
+          {(trailing || rightContent) && (
+            // ml-auto, not flex-fill: the cluster hugs the trailing edge even
+            // when there is no header (or left trigger) to push against.
+            <div className="ml-auto flex shrink-0 items-center justify-end gap-2">
+              {trailing}
+              {rightContent && (
+                <AnimatedPanelTrigger aria-label="Toggle panel" side="right">
+                  <MotionIcon
+                    className="opacity-70"
+                    name="PanelRight"
+                    size={24}
+                  />
+                </AnimatedPanelTrigger>
+              )}
             </div>
           )}
         </header>
         <div className="min-h-24 flex-1 overflow-auto">{children}</div>
       </AnimatedPanelInset>
 
-      {panels?.right?.component && (
+      {rightContent && (
         <AnimatedPanel
-          ariaLabel={panels.right.name ?? "Secondary panel"}
+          ariaLabel={panels?.right?.name ?? "Secondary panel"}
           // Below md the panel is portal led over the page, so it carries the
           // surface itself; the desktop rail keeps it on the inner panel.
           className={cn(
@@ -103,7 +115,7 @@ export function ShellLayout({
           side="right"
           variant="inset"
         >
-          {panels.right.component}
+          {rightContent}
         </AnimatedPanel>
       )}
     </AnimatedPanelProvider>
