@@ -38,7 +38,31 @@ export function FileBadgeCorpus({
             d="M332,12 L557.393952,12 C613.901876,12 642.155838,12 664.135334,22.0470049 C686.11483,32.0940098 704.602278,53.4598851 741.577175,96.1916357 L853.580372,225.633315 C884.253388,261.082006 899.589896,278.806351 906.574274,297.524519 C913.558651,316.242686 913.581362,339.681124 913.626783,386.558 L914.017631,789.931634 C914.119069,894.620332 914.169788,946.964682 881.683622,979.482341 C849.197455,1012 796.853082,1012 692.164334,1012 L332,1012 C227.348196,1012 175.022295,1012 142.511147,979.488853 C110,946.977705 110,894.651804 110,790 L110,234 C110,129.348196 110,77.0222946 142.511147,44.5111473 C175.022295,12 227.348196,12 332,12 Z"
             id="corpus-badge-l-path-3"
           ></path>
-
+          <filter
+            x="-50%"
+            y="-50%"
+            width="200%"
+            height="200%"
+            filterUnits="objectBoundingBox"
+            id="corpus-badge-l-filter-4"
+          >
+            <feOffset
+              dx="12"
+              dy="-3"
+              in="SourceAlpha"
+              result="shadowOffsetOuter1"
+            ></feOffset>
+            <feGaussianBlur
+              stdDeviation="19.5"
+              in="shadowOffsetOuter1"
+              result="shadowBlurOuter1"
+            ></feGaussianBlur>
+            <feColorMatrix
+              values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.825750613 0"
+              type="matrix"
+              in="shadowBlurOuter1"
+            ></feColorMatrix>
+          </filter>
           <filter
             x="-50%"
             y="-50%"
