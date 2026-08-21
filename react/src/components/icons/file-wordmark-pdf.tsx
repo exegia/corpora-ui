@@ -1,0 +1,217 @@
+import { FILE_ICON_CLASS, FILE_ICON_THEME_CSS } from './theme';
+import type { FileIconProps } from './types';
+
+/**
+ * PDF file icon — wordmark variant.
+ * Switches between light and dark artwork automatically. See `./theme.ts`.
+ */
+export function FileWordmarkPdf({ size = 64, title = 'PDF file', className, ...props }: FileIconProps) {
+  return (
+    <svg
+      viewBox="0 -48 1024 1114"
+      width={size}
+      height={size}
+      role={title ? 'img' : 'presentation'}
+      aria-label={title ?? undefined}
+      aria-hidden={title ? undefined : true}
+      className={className ? `${FILE_ICON_CLASS} ${className}` : FILE_ICON_CLASS}
+      xmlns="http://www.w3.org/2000/svg"
+      xmlnsXlink="http://www.w3.org/1999/xlink"
+      {...props}
+    >
+      <style>{FILE_ICON_THEME_CSS}</style>
+      <g data-theme-layer="light">
+    <defs>
+        <path d="M664.135334,22.0470049 C686.11483,32.0940098 704.602278,53.4598851 741.577175,96.1916357 L853.580372,225.633315 C884.253388,261.082006 899.589896,278.806351 906.574274,297.524519 C913.558651,316.242686 913.581362,339.681124 913.626783,386.558 L914.017631,789.931634 C914.119069,894.620332 914.169788,946.964682 881.683622,979.482341 C849.197455,1012 796.853082,1012 692.164334,1012 L332,1012 C227.348196,1012 175.022295,1012 142.511147,979.488853 C110,946.977705 110,894.651804 110,790 L110,234 C110,129.348196 110,77.0222946 142.511147,44.5111473 C175.022295,12 227.348196,12 332,12 L557.393952,12 C613.901876,12 642.155838,12 664.135334,22.0470049 Z" id="pdf-wordmark-l-path-1"></path>
+        <linearGradient x1="17.6604798%" y1="0%" x2="49.177195%" y2="97.4557292%" id="pdf-wordmark-l-linearGradient-2">
+            <stop stopColor="#FBFAFF" offset="0%"></stop>
+            <stop stopColor="#E8E7F0" offset="100%"></stop>
+        </linearGradient>
+        <path d="M332,12 L557.393952,12 C613.901876,12 642.155838,12 664.135334,22.0470049 C664.135334,22.0470049 664.135334,22.0470049 664.135334,22.0470049 C686.11483,32.0940098 704.602278,53.4598851 741.577175,96.1916357 L853.580372,225.633315 C884.253388,261.082006 899.589896,278.806351 906.574274,297.524519 C906.574274,297.524519 906.574274,297.524519 906.574274,297.524519 C913.558651,316.242686 913.581362,339.681124 913.626783,386.558 L914.017631,789.931634 C914.119069,894.620332 914.169788,946.964682 881.683622,979.482341 C881.683622,979.482341 881.683622,979.482341 881.683622,979.482341 C849.197455,1012 796.853082,1012 692.164334,1012 L332,1012 C227.348196,1012 175.022295,1012 142.511147,979.488853 C142.511147,979.488853 142.511147,979.488853 142.511147,979.488853 C110,946.977705 110,894.651804 110,790 L110,234 C110,129.348196 110,77.0222946 142.511147,44.5111473 C142.511147,44.5111473 142.511147,44.5111473 142.511147,44.5111473 C175.022295,12 227.348196,12 332,12 Z" id="pdf-wordmark-l-path-3"></path>
+        <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="pdf-wordmark-l-filter-4">
+            <feOffset dx="12" dy="-3" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="28.5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="pdf-wordmark-l-filter-5">
+            <feGaussianBlur stdDeviation="4" in="SourceAlpha" result="shadowBlurInner1"></feGaussianBlur>
+            <feOffset dx="-10" dy="14" in="shadowBlurInner1" result="shadowOffsetInner1"></feOffset>
+            <feComposite in="shadowOffsetInner1" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowInnerInner1"></feComposite>
+            <feColorMatrix values="0 0 0 0 1   0 0 0 0 1   0 0 0 0 1  0 0 0 1 0" type="matrix" in="shadowInnerInner1" result="shadowMatrixInner1"></feColorMatrix>
+            <feGaussianBlur stdDeviation="4" in="SourceAlpha" result="shadowBlurInner2"></feGaussianBlur>
+            <feOffset dx="4" dy="-10" in="shadowBlurInner2" result="shadowOffsetInner2"></feOffset>
+            <feComposite in="shadowOffsetInner2" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowInnerInner2"></feComposite>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.03 0" type="matrix" in="shadowInnerInner2" result="shadowMatrixInner2"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixInner1"></feMergeNode>
+                <feMergeNode in="shadowMatrixInner2"></feMergeNode>
+            </feMerge>
+        </filter>
+        <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="pdf-wordmark-l-filter-6">
+            <feOffset dx="0" dy="5" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="3.5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0.0889199747   0 0 0 0 0.0889199747   0 0 0 0 0.0889199747  0 0 0 0.03 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="pdf-wordmark-l-linearGradient-7">
+            <stop stopColor="#4B008F" offset="0%"></stop>
+            <stop stopColor="#080043" offset="61.8567708%"></stop>
+        </linearGradient>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="pdf-wordmark-l-linearGradient-8">
+            <stop stopColor="#4B008F" offset="0%"></stop>
+            <stop stopColor="#080043" offset="61.8567708%"></stop>
+        </linearGradient>
+        <g id="pdf-wordmark-l-text-9"><g transform="translate(333, 721.762)">
+<defs>
+<g>
+<g id="pdf-wordmark-l-pdf-wordmark-l-lbl-glyph0-0">
+<path d="M 0 35.59375 L 106.796875 35.59375 L 106.796875 -125.484375 L 0 -125.484375 Z M 12.640625 -118.375 L 94.15625 -118.375 L 53.40625 -51.96875 Z M 7.125 -113.390625 L 49.125 -45.03125 L 7.125 23.5 Z M 57.671875 -45.03125 L 99.6875 -113.390625 L 99.6875 23.5 Z M 12.640625 28.484375 L 53.40625 -37.90625 L 94.15625 28.484375 Z M 12.640625 28.484375 "/>
+</g>
+<g id="pdf-wordmark-l-pdf-wordmark-l-lbl-glyph0-1">
+<path d="M 25.453125 0.890625 C 34.890625 0.890625 41.46875 -6.234375 41.46875 -15.125 C 41.46875 -23.859375 34.890625 -30.96875 25.453125 -30.96875 C 15.84375 -30.96875 9.25 -23.859375 9.25 -15.125 C 9.25 -6.234375 15.84375 0.890625 25.453125 0.890625 Z M 25.453125 0.890625 "/>
+</g>
+<g id="pdf-wordmark-l-pdf-wordmark-l-lbl-glyph0-2">
+<path d="M 10.328125 0 L 38.09375 0 L 38.09375 -50.734375 L 64.265625 -50.734375 C 92.921875 -50.734375 109.109375 -65.140625 109.109375 -88.109375 C 109.109375 -111.25 92.921875 -125.484375 64.265625 -125.484375 L 10.328125 -125.484375 Z M 63.1875 -103.0625 C 74.9375 -103.0625 81.875 -98.078125 81.875 -88.109375 C 81.875 -78.140625 74.9375 -73.15625 63.1875 -73.15625 L 38.09375 -73.15625 L 38.09375 -103.0625 Z M 63.1875 -103.0625 "/>
+</g>
+<g id="pdf-wordmark-l-pdf-wordmark-l-lbl-glyph0-3">
+<path d="M 10.328125 0 L 52.6875 0 C 93.09375 0 118.1875 -23.140625 118.1875 -62.65625 C 118.1875 -102.171875 93.265625 -125.484375 52.859375 -125.484375 L 10.328125 -125.484375 Z M 51.09375 -101.640625 C 75.828125 -101.640625 88.46875 -87.390625 88.46875 -62.65625 C 88.46875 -37.90625 76 -23.859375 51.09375 -23.859375 L 38.09375 -23.859375 L 38.09375 -101.640625 Z M 51.09375 -101.640625 "/>
+</g>
+<g id="pdf-wordmark-l-pdf-wordmark-l-lbl-glyph0-4">
+<path d="M 10.328125 0 L 38.09375 0 L 38.09375 -53.40625 L 78.671875 -53.40625 L 78.671875 -77.078125 L 38.09375 -77.078125 L 38.09375 -101.8125 L 88.828125 -101.8125 L 88.828125 -125.484375 L 10.328125 -125.484375 Z M 10.328125 0 "/>
+</g>
+</g>
+</defs>
+<g id="pdf-wordmark-l-pdf-wordmark-l-lbl-surface1">
+<g>
+  <use xlinkHref="#pdf-wordmark-l-pdf-wordmark-l-lbl-glyph0-1" x="0.238066" y="162"/>
+  <use xlinkHref="#pdf-wordmark-l-pdf-wordmark-l-lbl-glyph0-2" x="42.139266" y="162"/>
+</g>
+<g>
+  <use xlinkHref="#pdf-wordmark-l-pdf-wordmark-l-lbl-glyph0-3" x="150.434466" y="162"/>
+</g>
+<g>
+  <use xlinkHref="#pdf-wordmark-l-pdf-wordmark-l-lbl-glyph0-4" x="269.587666" y="162"/>
+</g>
+</g>
+</g></g>
+        <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="pdf-wordmark-l-filter-10">
+            <feMorphology radius="0.5" operator="dilate" in="SourceAlpha" result="shadowSpreadOuter1"></feMorphology>
+            <feOffset dx="-3" dy="3" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.0501685049 0" type="matrix" in="shadowOffsetOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="pdf-wordmark-l-icon/file/pdf/wordmark-light" stroke="none" fill="none" xlinkHref="#pdf-wordmark-l-path-1">
+        <g id="pdf-wordmark-l-Sheet">
+            <use fill="black" fillOpacity="1" filter="url(#pdf-wordmark-l-filter-4)" xlinkHref="#pdf-wordmark-l-path-3"></use>
+            <use fill="url(#pdf-wordmark-l-linearGradient-2)" fillRule="evenodd" xlinkHref="#pdf-wordmark-l-path-3"></use>
+            <use fill="black" fillOpacity="1" filter="url(#pdf-wordmark-l-filter-5)" xlinkHref="#pdf-wordmark-l-path-3"></use>
+        </g>
+        <g id="pdf-wordmark-l-Lines" filter="url(#pdf-wordmark-l-filter-6)" opacity="0.13" strokeWidth="1" fillRule="evenodd" transform="translate(256.5027, 305.518)">
+            <path d="M304.544551,0.447520067 C319.125735,0.47109626 330.927008,12.3105936 330.903467,26.8917774 C330.879856,41.4729613 319.040358,53.2742341 304.459175,53.2506931 L27.7029447,52.8031731 C13.1217608,52.7795969 1.32048809,40.9400996 1.34402902,26.3589157 C1.36764048,11.7777318 13.2071378,-0.0235409293 27.7883217,1.01746264e-13 L304.544551,0.447520067 Z" id="pdf-wordmark-l-Line-1" fill="url(#pdf-wordmark-l-linearGradient-7)" fillRule="nonzero"></path>
+            <path d="M509,164.674408 C509,179.255611 497.1796,191.076012 482.598397,191.076012 L27.296573,191.076012 C12.7153701,191.076012 0.894969607,179.255611 0.894969607,164.674408 C0.894969607,150.093206 12.7153701,138.272805 27.296573,138.272805 L482.598397,138.272805 C497.1796,138.272805 509,150.093206 509,164.674408 Z" id="pdf-wordmark-l-Line-2" fill="url(#pdf-wordmark-l-linearGradient-8)" fillRule="nonzero"></path>
+            <path d="M508.552515,304.737062 C508.552515,319.318265 496.732115,331.138666 482.150912,331.138666 L26.8490882,331.138666 C12.2678853,331.138666 0.447484804,319.318265 0.447484804,304.737062 C0.447484804,290.15586 12.2678853,278.335459 26.8490882,278.335459 L482.150912,278.335459 C496.732115,278.335459 508.552515,290.15586 508.552515,304.737062 Z" id="pdf-wordmark-l-Line-3" fill="url(#pdf-wordmark-l-linearGradient-8)" fillRule="nonzero"></path>
+        </g>
+        <g id="pdf-wordmark-l-Label" fill="#C41010" fillOpacity="1">
+            <use filter="url(#pdf-wordmark-l-filter-10)" xlinkHref="#pdf-wordmark-l-text-9"></use>
+            <use xlinkHref="#pdf-wordmark-l-text-9"></use>
+        </g>
+    </g>
+</g>
+      <g data-theme-layer="dark">
+    <defs>
+        <path d="M664.135334,22.0470049 C686.11483,32.0940098 704.602278,53.4598851 741.577175,96.1916357 L853.580372,225.633315 C884.253388,261.082006 899.589896,278.806351 906.574274,297.524519 C913.558651,316.242686 913.581362,339.681124 913.626783,386.558 L914.017631,789.931634 C914.119069,894.620332 914.169788,946.964682 881.683622,979.482341 C849.197455,1012 796.853082,1012 692.164334,1012 L332,1012 C227.348196,1012 175.022295,1012 142.511147,979.488853 C110,946.977705 110,894.651804 110,790 L110,234 C110,129.348196 110,77.0222946 142.511147,44.5111473 C175.022295,12 227.348196,12 332,12 L557.393952,12 C613.901876,12 642.155838,12 664.135334,22.0470049 Z" id="pdf-wordmark-d-path-1"></path>
+        <linearGradient x1="25.9355099%" y1="0%" x2="63.5613444%" y2="91.834983%" id="pdf-wordmark-d-linearGradient-2">
+            <stop stopColor="#2A2A2A" stopOpacity="0.980392157" offset="0%"></stop>
+            <stop stopColor="#050505" offset="100%"></stop>
+        </linearGradient>
+        <path d="M332,12 L557.393952,12 C613.901876,12 642.155838,12 664.135334,22.0470049 C664.135334,22.0470049 664.135334,22.0470049 664.135334,22.0470049 C686.11483,32.0940098 704.602278,53.4598851 741.577175,96.1916357 L853.580372,225.633315 C884.253388,261.082006 899.589896,278.806351 906.574274,297.524519 C906.574274,297.524519 906.574274,297.524519 906.574274,297.524519 C913.558651,316.242686 913.581362,339.681124 913.626783,386.558 L914.017631,789.931634 C914.119069,894.620332 914.169788,946.964682 881.683622,979.482341 C881.683622,979.482341 881.683622,979.482341 881.683622,979.482341 C849.197455,1012 796.853082,1012 692.164334,1012 L332,1012 C227.348196,1012 175.022295,1012 142.511147,979.488853 C142.511147,979.488853 142.511147,979.488853 142.511147,979.488853 C110,946.977705 110,894.651804 110,790 L110,234 C110,129.348196 110,77.0222946 142.511147,44.5111473 C142.511147,44.5111473 142.511147,44.5111473 142.511147,44.5111473 C175.022295,12 227.348196,12 332,12 Z" id="pdf-wordmark-d-path-3"></path>
+        <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="pdf-wordmark-d-filter-4">
+            <feOffset dx="12" dy="-3" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="28.5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="pdf-wordmark-d-filter-5">
+            <feGaussianBlur stdDeviation="4" in="SourceAlpha" result="shadowBlurInner1"></feGaussianBlur>
+            <feOffset dx="-10" dy="14" in="shadowBlurInner1" result="shadowOffsetInner1"></feOffset>
+            <feComposite in="shadowOffsetInner1" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowInnerInner1"></feComposite>
+            <feColorMatrix values="0 0 0 0 0.194256757   0 0 0 0 0.194256757   0 0 0 0 0.194256757  0 0 0 1 0" type="matrix" in="shadowInnerInner1" result="shadowMatrixInner1"></feColorMatrix>
+            <feGaussianBlur stdDeviation="4" in="SourceAlpha" result="shadowBlurInner2"></feGaussianBlur>
+            <feOffset dx="4" dy="-10" in="shadowBlurInner2" result="shadowOffsetInner2"></feOffset>
+            <feComposite in="shadowOffsetInner2" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowInnerInner2"></feComposite>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.03 0" type="matrix" in="shadowInnerInner2" result="shadowMatrixInner2"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixInner1"></feMergeNode>
+                <feMergeNode in="shadowMatrixInner2"></feMergeNode>
+            </feMerge>
+        </filter>
+        <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="pdf-wordmark-d-filter-6">
+            <feOffset dx="0" dy="5" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="3.5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0.0889199747   0 0 0 0 0.0889199747   0 0 0 0 0.0889199747  0 0 0 0.03 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+        <g id="pdf-wordmark-d-text-7"><g transform="translate(328.523, 733.762)">
+<defs>
+<g>
+<g id="pdf-wordmark-d-pdf-wordmark-d-lbl-glyph0-0">
+<path d="M 0 35.59375 L 106.796875 35.59375 L 106.796875 -125.484375 L 0 -125.484375 Z M 12.640625 -118.375 L 94.15625 -118.375 L 53.40625 -51.96875 Z M 7.125 -113.390625 L 49.125 -45.03125 L 7.125 23.5 Z M 57.671875 -45.03125 L 99.6875 -113.390625 L 99.6875 23.5 Z M 12.640625 28.484375 L 53.40625 -37.90625 L 94.15625 28.484375 Z M 12.640625 28.484375 "/>
+</g>
+<g id="pdf-wordmark-d-pdf-wordmark-d-lbl-glyph0-1">
+<path d="M 25.453125 0.890625 C 34.890625 0.890625 41.46875 -6.234375 41.46875 -15.125 C 41.46875 -23.859375 34.890625 -30.96875 25.453125 -30.96875 C 15.84375 -30.96875 9.25 -23.859375 9.25 -15.125 C 9.25 -6.234375 15.84375 0.890625 25.453125 0.890625 Z M 25.453125 0.890625 "/>
+</g>
+<g id="pdf-wordmark-d-pdf-wordmark-d-lbl-glyph0-2">
+<path d="M 10.328125 0 L 38.09375 0 L 38.09375 -50.734375 L 64.265625 -50.734375 C 92.921875 -50.734375 109.109375 -65.140625 109.109375 -88.109375 C 109.109375 -111.25 92.921875 -125.484375 64.265625 -125.484375 L 10.328125 -125.484375 Z M 63.1875 -103.0625 C 74.9375 -103.0625 81.875 -98.078125 81.875 -88.109375 C 81.875 -78.140625 74.9375 -73.15625 63.1875 -73.15625 L 38.09375 -73.15625 L 38.09375 -103.0625 Z M 63.1875 -103.0625 "/>
+</g>
+<g id="pdf-wordmark-d-pdf-wordmark-d-lbl-glyph0-3">
+<path d="M 10.328125 0 L 52.6875 0 C 93.09375 0 118.1875 -23.140625 118.1875 -62.65625 C 118.1875 -102.171875 93.265625 -125.484375 52.859375 -125.484375 L 10.328125 -125.484375 Z M 51.09375 -101.640625 C 75.828125 -101.640625 88.46875 -87.390625 88.46875 -62.65625 C 88.46875 -37.90625 76 -23.859375 51.09375 -23.859375 L 38.09375 -23.859375 L 38.09375 -101.640625 Z M 51.09375 -101.640625 "/>
+</g>
+<g id="pdf-wordmark-d-pdf-wordmark-d-lbl-glyph0-4">
+<path d="M 10.328125 0 L 38.09375 0 L 38.09375 -53.40625 L 78.671875 -53.40625 L 78.671875 -77.078125 L 38.09375 -77.078125 L 38.09375 -101.8125 L 88.828125 -101.8125 L 88.828125 -125.484375 L 10.328125 -125.484375 Z M 10.328125 0 "/>
+</g>
+</g>
+</defs>
+<g id="pdf-wordmark-d-pdf-wordmark-d-lbl-surface1">
+<g>
+  <use xlinkHref="#pdf-wordmark-d-pdf-wordmark-d-lbl-glyph0-1" x="0.219134" y="162"/>
+</g>
+<g>
+  <use xlinkHref="#pdf-wordmark-d-pdf-wordmark-d-lbl-glyph0-2" x="42.1186" y="162"/>
+  <use xlinkHref="#pdf-wordmark-d-pdf-wordmark-d-lbl-glyph0-3" x="161.432" y="162"/>
+  <use xlinkHref="#pdf-wordmark-d-pdf-wordmark-d-lbl-glyph0-4" x="291.6034" y="162"/>
+</g>
+</g>
+</g></g>
+        <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="pdf-wordmark-d-filter-8">
+            <feMorphology radius="0.5" operator="dilate" in="SourceAlpha" result="shadowSpreadOuter1"></feMorphology>
+            <feOffset dx="-3" dy="3" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.0501685049 0" type="matrix" in="shadowOffsetOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="pdf-wordmark-d-icon/file/pdf/wordmark-dark" stroke="none" fill="none" xlinkHref="#pdf-wordmark-d-path-1">
+        <g id="pdf-wordmark-d-Sheet">
+            <use fill="black" fillOpacity="1" filter="url(#pdf-wordmark-d-filter-4)" xlinkHref="#pdf-wordmark-d-path-3"></use>
+            <use fill="url(#pdf-wordmark-d-linearGradient-2)" fillRule="evenodd" xlinkHref="#pdf-wordmark-d-path-3"></use>
+            <use fill="black" fillOpacity="1" filter="url(#pdf-wordmark-d-filter-5)" xlinkHref="#pdf-wordmark-d-path-3"></use>
+        </g>
+        <g id="pdf-wordmark-d-Lines" filter="url(#pdf-wordmark-d-filter-6)" opacity="0.13" strokeWidth="1" fillRule="evenodd" transform="translate(256.5027, 305.518)" fill="#B2B2B2">
+            <path d="M304.544551,0.447520067 C319.125735,0.47109626 330.927008,12.3105936 330.903467,26.8917774 C330.879856,41.4729613 319.040358,53.2742341 304.459175,53.2506931 L27.7029447,52.8031731 C13.1217608,52.7795969 1.32048809,40.9400996 1.34402902,26.3589157 C1.36764048,11.7777318 13.2071378,-0.0235409293 27.7883217,1.01746264e-13 L304.544551,0.447520067 Z" id="pdf-wordmark-d-Line-1" fillRule="nonzero"></path>
+            <path d="M509,164.674408 C509,179.255611 497.1796,191.076012 482.598397,191.076012 L27.296573,191.076012 C12.7153701,191.076012 0.894969607,179.255611 0.894969607,164.674408 C0.894969607,150.093206 12.7153701,138.272805 27.296573,138.272805 L482.598397,138.272805 C497.1796,138.272805 509,150.093206 509,164.674408 Z" id="pdf-wordmark-d-Line-2" fillRule="nonzero"></path>
+            <path d="M508.552515,304.737062 C508.552515,319.318265 496.732115,331.138666 482.150912,331.138666 L26.8490882,331.138666 C12.2678853,331.138666 0.447484804,319.318265 0.447484804,304.737062 C0.447484804,290.15586 12.2678853,278.335459 26.8490882,278.335459 L482.150912,278.335459 C496.732115,278.335459 508.552515,290.15586 508.552515,304.737062 Z" id="pdf-wordmark-d-Line-3" fillRule="nonzero"></path>
+        </g>
+        <g id="pdf-wordmark-d-Label" fill="#FF5656" fillOpacity="1">
+            <use filter="url(#pdf-wordmark-d-filter-8)" xlinkHref="#pdf-wordmark-d-text-7"></use>
+            <use xlinkHref="#pdf-wordmark-d-text-7"></use>
+        </g>
+    </g>
+</g>
+    </svg>
+  );
+}
+
+export default FileWordmarkPdf;
