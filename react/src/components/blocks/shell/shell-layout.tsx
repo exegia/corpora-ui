@@ -18,6 +18,7 @@ export function ShellLayout({
   panels,
   className,
   header,
+  trailing,
   defaultOpen,
   panelComponents,
   ...panelControlProps
@@ -77,17 +78,22 @@ export function ShellLayout({
             </div>
           )}
           {header && (
-            <div className="flex w-full flex-1 items-center">{header}</div>
+            <div className="flex min-w-0 flex-1 items-center">{header}</div>
           )}
-          {rightContent && (
-            <div className="flex w-full shrink items-center justify-end gap-2">
-              <AnimatedPanelTrigger aria-label="Toggle panel" side="right">
-                <MotionIcon
-                  className="opacity-70"
-                  name="PanelRight"
-                  size={24}
-                />
-              </AnimatedPanelTrigger>
+          {(trailing || rightContent) && (
+            // ml-auto, not flex-fill: the cluster hugs the trailing edge even
+            // when there is no header (or left trigger) to push against.
+            <div className="ml-auto flex shrink-0 items-center justify-end gap-2">
+              {trailing}
+              {rightContent && (
+                <AnimatedPanelTrigger aria-label="Toggle panel" side="right">
+                  <MotionIcon
+                    className="opacity-70"
+                    name="PanelRight"
+                    size={24}
+                  />
+                </AnimatedPanelTrigger>
+              )}
             </div>
           )}
         </header>

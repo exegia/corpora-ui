@@ -212,6 +212,10 @@ export interface ShellLayoutProps extends ShellPanelControlProps {
    * the `left` rail and the `right` drawer; other sides are reserved. */
   panels?: TPanelMap
   header?: ReactNode
+  /** Actions pinned to the header's right edge, rendered just before the
+   * right panel's trigger. The cluster hugs the trailing edge no matter
+   * which of `header` / the left rail / the right panel are present. */
+  trailing?: ReactNode
   className?: string
   variant?: "web" | "desktop"
 }

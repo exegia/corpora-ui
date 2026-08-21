@@ -799,6 +799,12 @@ const { selectedId } = useAISidebarState("app-resources") // subscribes to the s
           "Side-keyed control of the panels — no per-side props. ⌘B toggles the left rail. The `openMobile` family has the same shape for the mobile overlays. Spread `useShellPanels().providerProps` instead of wiring them by hand.",
       },
       {
+        name: "header / trailing",
+        type: "React.ReactNode ×2",
+        description:
+          "`header` fills the middle of the shell's header row (breadcrumbs, search). `trailing` is pinned to the row's right edge, rendered just before the right panel's trigger — it stays flush right even when `header` is omitted or the panels are absent.",
+      },
+      {
         name: "panelComponents",
         type: "Partial<Record<Side, ReactNode>>",
         description:

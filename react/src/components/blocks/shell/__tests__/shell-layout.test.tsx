@@ -114,6 +114,35 @@ describe("ShellLayout", () => {
     expect(rightDrawer("Inspector")).toBeDefined()
   })
 
+  test("trailing actions stay in the right cluster without a header", () => {
+    render(
+      <ShellLayout
+        panels={PANELS}
+        trailing={<button type="button">Upload</button>}
+        variant="web"
+      />
+    )
+
+    const upload = screen.getByRole("button", { name: "Upload" })
+    const cluster = upload.parentElement
+    // Pinned by margin, not by flex-filling: the cluster hugs the right edge
+    // even with nothing beside it to push against.
+    expect(cluster?.className).toContain("ml-auto")
+    // The right panel's trigger sits after the actions, at the far edge.
+    expect(
+      cluster?.contains(screen.getByRole("button", { name: "Toggle panel" }))
+    ).toBe(true)
+  })
+
+  test("trailing renders the cluster even with no right panel", () => {
+    render(
+      <ShellLayout trailing={<button type="button">Upload</button>} variant="web" />
+    )
+
+    expect(screen.getByRole("button", { name: "Upload" })).toBeDefined()
+    expect(screen.queryByRole("button", { name: "Toggle panel" })).toBeNull()
+  })
+
   test("panelComponents renders a side with no static panels entry", () => {
     render(
       <ShellLayout
