@@ -266,4 +266,43 @@ export const atoms: RegistryEntry[] = [
     category: "atoms",
     status: "planned",
   },
+  {
+    slug: "file-icons",
+    name: "File icons",
+    titleStyle: "titlebar",
+    description:
+      "Fourteen file-format icons — seven formats in badge and wordmark families. Each embeds light and dark artwork and switches on Tailwind's dark variant: pure CSS, no props, no hydration flash.",
+    category: "atoms",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/file-icons-demo")),
+    props: [
+      {
+        name: "size",
+        type: "number | string",
+        default: "64",
+        description: "Rendered width and height.",
+      },
+      {
+        name: "title",
+        type: "string | null",
+        default: "e.g. \"TEI file\"",
+        description:
+          "Accessible name (role=img + aria-label). Pass null to mark the icon decorative — it becomes aria-hidden with role=presentation.",
+      },
+      {
+        name: "className / …props",
+        type: "SVGProps<SVGSVGElement>",
+        description:
+          "Everything else is forwarded to the root <svg>. Theme switching needs no props: the light layer is `dark:hidden`, the dark layer `hidden dark:inline`, so the artwork follows whatever drives the app's `dark` variant — scope a `dark` class to force one theme.",
+      },
+    ],
+    usage: `import { FileBadgeTei, FileWordmarkPdf } from "@corpora/ui"
+
+<FileBadgeTei />                         // 64×64, follows the app's dark class
+<FileBadgeTei size={96} />               // any size
+<FileWordmarkPdf title={null} />         // decorative: aria-hidden
+<div className="dark">
+  <FileBadgeTei />                       {/* dark artwork, regardless of theme */}
+</div>`,
+  },
 ]
