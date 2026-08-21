@@ -1,4 +1,3 @@
-export { FILE_ICON_CLASS, FILE_ICON_THEME_CSS } from './theme';
 export type { FileIconProps } from './types';
 
 export { FileBadgeCfm } from './file-badge-cfm';

@@ -1,18 +1,20 @@
 # Corpora file icons
 
 Fourteen React SVG components covering seven file formats in two visual families.
-Every icon carries **both** a light and a dark artwork layer and picks one at render
-time with CSS — no props, no context, no JavaScript.
+Every icon carries **both** a light and a dark artwork layer and picks one with
+Tailwind's `dark` variant — no props, no context, no JavaScript.
 
-Generated from `exegia-prod.sketch` → page `icons`. Do not hand-edit the `.tsx`
-files; regenerate them from Sketch instead (see [Regenerating](#regenerating)).
+Generated from `exegia-prod.sketch` → page `icons`, then simplified (dead defs
+removed, light/dark-identical defs shared, ids stripped). Do not hand-edit the
+`.tsx` files; regenerate them from Sketch instead (see
+[Regenerating](#regenerating)).
 
 ## Usage
 
 ```tsx
 import { FileBadgeTei, FileWordmarkPdf } from '@/components/icons';
 
-<FileBadgeTei />                        // 64×64, follows the OS colour scheme
+<FileBadgeTei />                        // 64×64, follows the app's dark class
 <FileBadgeTei size={128} />             // any size
 <FileWordmarkPdf title={null} />        // decorative: aria-hidden, no accessible name
 <FileBadgeTei title="TEI source file" /> // custom accessible name
@@ -38,24 +40,24 @@ All remaining props are forwarded to the root `<svg>`.
 
 ## Theming
 
-Each icon renders two `<g data-theme-layer>` groups and shows exactly one. The
-rules live in [`theme.ts`](./theme.ts) and are inlined into every SVG, so the
-components work with no stylesheet import.
+Each icon renders two `<g data-theme-layer>` groups and shows exactly one via
+Tailwind's `dark` variant: the light layer is `dark:hidden`, the dark layer
+`hidden dark:inline`. Whatever drives `dark:` in the app drives the icons —
+here that is `@custom-variant dark (&:is(.dark *))` in `index.css`, so the
+icons follow the `.dark` class exactly like every other component, with no
+inline stylesheet and no media query of their own.
 
-Resolution order, later rules winning:
-
-1. **`prefers-color-scheme`** — follows the operating system by default.
-2. **`.dark` class** on any ancestor — Tailwind `darkMode: 'class'`.
-3. **`[data-theme="light"|"dark"]`** on any ancestor — explicit override.
+To force a theme on one subtree, scope the class:
 
 ```tsx
-<div data-theme="dark">
-  <FileBadgeTei />   {/* dark artwork regardless of OS setting */}
+<div className="dark">
+  <FileBadgeTei />   {/* dark artwork regardless of the app theme */}
 </div>
 ```
 
 Because the switch is pure CSS it is SSR-safe and cannot flash the wrong theme
-on hydration.
+on hydration. The `data-theme-layer` attributes stay on the groups as styling
+and test hooks.
 
 ## Notes
 
@@ -63,9 +65,12 @@ on hydration.
   icons do not depend on *TikTok Sans Display* being installed.
 - **IDs are namespaced** per component and per theme layer (`tei-badge-l-…`),
   so gradients and filters never collide when several icons share a page.
-- **Both layers ship in every component.** A hidden layer costs bytes but
-  guarantees the two themes are pixel-faithful to Sketch, including the glass
-  blur that the light badges use and the dark badges deliberately omit.
+  Only referenced defs carry ids; decorative group ids were stripped.
+- **Both layers ship in every component,** but defs that are identical in
+  both themes (sheet geometry, badge plates, label glyphs) exist once and are
+  referenced from both layers — a `<defs>` entry resolves regardless of which
+  layer it sits in, hidden or not. Theme-specific gradients and filters stay
+  per layer, so the two themes remain pixel-faithful to Sketch.
 - **Filter regions were widened** to the SVG default (`-50% / 200%`). Sketch
   exports tight regions such as `height="76.2%"` that clip real geometry in
   spec-compliant renderers — the third sheet line disappears without this.
@@ -77,6 +82,10 @@ on hydration.
    bounding box to PDF (the PDF round-trip is what outlines the type).
 3. Run the generator, which splices the outlined labels into the SVG, namespaces
    the IDs, widens the filter regions and emits the `.tsx` files.
+4. Run `bun scripts/simplify-icons.mjs` (from `react/`), which swaps the layer
+   switching onto Tailwind's `dark` variant, drops dead and duplicated defs,
+   strips unreferenced ids and default-value attributes, and verifies that
+   every remaining `url(#…)` / `href="#…"` reference resolves.
 
 Colours are driven by the `file/*` swatches in the Sketch document, so a palette
 change there propagates to every symbol before export.

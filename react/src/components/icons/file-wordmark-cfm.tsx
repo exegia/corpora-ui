@@ -1,9 +1,8 @@
-import { FILE_ICON_CLASS, FILE_ICON_THEME_CSS } from './theme';
 import type { FileIconProps } from './types';
 
 /**
  * CFM file icon — wordmark variant.
- * Switches between light and dark artwork automatically. See `./theme.ts`.
+ * Light/dark artwork layers switch on Tailwind's `dark` variant.
  */
 export function FileWordmarkCfm({ size = 64, title = 'CFM file', className, ...props }: FileIconProps) {
   return (
@@ -14,20 +13,17 @@ export function FileWordmarkCfm({ size = 64, title = 'CFM file', className, ...p
       role={title ? 'img' : 'presentation'}
       aria-label={title ?? undefined}
       aria-hidden={title ? undefined : true}
-      className={className ? `${FILE_ICON_CLASS} ${className}` : FILE_ICON_CLASS}
+      className={className}
       xmlns="http://www.w3.org/2000/svg"
-      xmlnsXlink="http://www.w3.org/1999/xlink"
       {...props}
     >
-      <style>{FILE_ICON_THEME_CSS}</style>
-      <g data-theme-layer="light">
+      <g data-theme-layer="light" className="dark:hidden">
     <defs>
-        <path d="M664.135334,22.0470049 C686.11483,32.0940098 704.602278,53.4598851 741.577175,96.1916357 L853.580372,225.633315 C884.253388,261.082006 899.589896,278.806351 906.574274,297.524519 C913.558651,316.242686 913.581362,339.681124 913.626783,386.558 L914.017631,789.931634 C914.119069,894.620332 914.169788,946.964682 881.683622,979.482341 C849.197455,1012 796.853082,1012 692.164334,1012 L332,1012 C227.348196,1012 175.022295,1012 142.511147,979.488853 C110,946.977705 110,894.651804 110,790 L110,234 C110,129.348196 110,77.0222946 142.511147,44.5111473 C175.022295,12 227.348196,12 332,12 L557.393952,12 C613.901876,12 642.155838,12 664.135334,22.0470049 Z" id="cfm-wordmark-l-path-1"></path>
         <linearGradient x1="17.6604798%" y1="0%" x2="49.177195%" y2="97.4557292%" id="cfm-wordmark-l-linearGradient-2">
             <stop stopColor="#FBFAFF" offset="0%"></stop>
             <stop stopColor="#E8E7F0" offset="100%"></stop>
         </linearGradient>
-        <path d="M332,12 L557.393952,12 C613.901876,12 642.155838,12 664.135334,22.0470049 C664.135334,22.0470049 664.135334,22.0470049 664.135334,22.0470049 C686.11483,32.0940098 704.602278,53.4598851 741.577175,96.1916357 L853.580372,225.633315 C884.253388,261.082006 899.589896,278.806351 906.574274,297.524519 C906.574274,297.524519 906.574274,297.524519 906.574274,297.524519 C913.558651,316.242686 913.581362,339.681124 913.626783,386.558 L914.017631,789.931634 C914.119069,894.620332 914.169788,946.964682 881.683622,979.482341 C881.683622,979.482341 881.683622,979.482341 881.683622,979.482341 C849.197455,1012 796.853082,1012 692.164334,1012 L332,1012 C227.348196,1012 175.022295,1012 142.511147,979.488853 C142.511147,979.488853 142.511147,979.488853 142.511147,979.488853 C110,946.977705 110,894.651804 110,790 L110,234 C110,129.348196 110,77.0222946 142.511147,44.5111473 C142.511147,44.5111473 142.511147,44.5111473 142.511147,44.5111473 C175.022295,12 227.348196,12 332,12 Z" id="cfm-wordmark-l-path-3"></path>
+        <path d="M332,12 L557.393952,12 C613.901876,12 642.155838,12 664.135334,22.0470049 C686.11483,32.0940098 704.602278,53.4598851 741.577175,96.1916357 L853.580372,225.633315 C884.253388,261.082006 899.589896,278.806351 906.574274,297.524519 C913.558651,316.242686 913.581362,339.681124 913.626783,386.558 L914.017631,789.931634 C914.119069,894.620332 914.169788,946.964682 881.683622,979.482341 C849.197455,1012 796.853082,1012 692.164334,1012 L332,1012 C227.348196,1012 175.022295,1012 142.511147,979.488853 C110,946.977705 110,894.651804 110,790 L110,234 C110,129.348196 110,77.0222946 142.511147,44.5111473 C175.022295,12 227.348196,12 332,12 Z" id="cfm-wordmark-l-path-3"></path>
         <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="cfm-wordmark-l-filter-4">
             <feOffset dx="12" dy="-3" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
             <feGaussianBlur stdDeviation="28.5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
@@ -60,40 +56,34 @@ export function FileWordmarkCfm({ size = 64, title = 'CFM file', className, ...p
             <stop stopColor="#4B008F" offset="0%"></stop>
             <stop stopColor="#080043" offset="61.8567708%"></stop>
         </linearGradient>
-        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="cfm-wordmark-l-linearGradient-8">
-            <stop stopColor="#4B008F" offset="0%"></stop>
-            <stop stopColor="#080043" offset="61.8567708%"></stop>
-        </linearGradient>
         <g id="cfm-wordmark-l-text-9"><g transform="translate(309, 721.762)">
 <defs>
 <g>
-<g id="cfm-wordmark-l-cfm-wordmark-l-lbl-glyph0-0">
-<path d="M 0 35.59375 L 106.796875 35.59375 L 106.796875 -125.484375 L 0 -125.484375 Z M 12.640625 -118.375 L 94.15625 -118.375 L 53.40625 -51.96875 Z M 7.125 -113.390625 L 49.125 -45.03125 L 7.125 23.5 Z M 57.671875 -45.03125 L 99.6875 -113.390625 L 99.6875 23.5 Z M 12.640625 28.484375 L 53.40625 -37.90625 L 94.15625 28.484375 Z M 12.640625 28.484375 "/>
-</g>
-<g id="cfm-wordmark-l-cfm-wordmark-l-lbl-glyph0-1">
+
+<g id="cfm-wordmark-l-lbl-glyph0-1">
 <path d="M 25.453125 0.890625 C 34.890625 0.890625 41.46875 -6.234375 41.46875 -15.125 C 41.46875 -23.859375 34.890625 -30.96875 25.453125 -30.96875 C 15.84375 -30.96875 9.25 -23.859375 9.25 -15.125 C 9.25 -6.234375 15.84375 0.890625 25.453125 0.890625 Z M 25.453125 0.890625 "/>
 </g>
-<g id="cfm-wordmark-l-cfm-wordmark-l-lbl-glyph0-2">
+<g id="cfm-wordmark-l-lbl-glyph0-2">
 <path d="M 125.84375 -36.671875 L 99.140625 -44.671875 C 94.703125 -29.90625 84.1875 -22.078125 68.890625 -22.078125 C 48.0625 -22.078125 35.25 -37.5625 35.25 -62.65625 C 35.25 -87.9375 48.0625 -103.234375 68.703125 -103.234375 C 84.1875 -103.234375 94.703125 -95.40625 99.140625 -80.640625 L 126.203125 -88.828125 C 119.4375 -114.453125 99.6875 -128.15625 68.890625 -128.15625 C 31.328125 -128.15625 5.703125 -102.171875 5.703125 -62.65625 C 5.703125 -23.3125 31.328125 2.84375 69.0625 2.84375 C 99.6875 2.84375 119.078125 -11.03125 125.84375 -36.671875 Z M 125.84375 -36.671875 "/>
 </g>
-<g id="cfm-wordmark-l-cfm-wordmark-l-lbl-glyph0-3">
+<g id="cfm-wordmark-l-lbl-glyph0-3">
 <path d="M 10.328125 0 L 38.09375 0 L 38.09375 -53.40625 L 78.671875 -53.40625 L 78.671875 -77.078125 L 38.09375 -77.078125 L 38.09375 -101.8125 L 88.828125 -101.8125 L 88.828125 -125.484375 L 10.328125 -125.484375 Z M 10.328125 0 "/>
 </g>
-<g id="cfm-wordmark-l-cfm-wordmark-l-lbl-glyph0-4">
+<g id="cfm-wordmark-l-lbl-glyph0-4">
 <path d="M 10.328125 0 L 36.84375 0 L 36.84375 -111.78125 L 59.984375 0 L 99.328125 0 L 122.640625 -111.78125 L 122.640625 0 L 148.984375 0 L 148.984375 -125.484375 L 100.5625 -125.484375 L 79.75 -12.8125 L 58.734375 -125.484375 L 10.328125 -125.484375 Z M 10.328125 0 "/>
 </g>
 </g>
 </defs>
-<g id="cfm-wordmark-l-cfm-wordmark-l-lbl-surface1">
 <g>
-  <use xlinkHref="#cfm-wordmark-l-cfm-wordmark-l-lbl-glyph0-1" x="0.0300664" y="162"/>
-  <use xlinkHref="#cfm-wordmark-l-cfm-wordmark-l-lbl-glyph0-2" x="36.591266" y="162"/>
+<g>
+  <use href="#cfm-wordmark-l-lbl-glyph0-1" x="0.0300664" y="162"/>
+  <use href="#cfm-wordmark-l-lbl-glyph0-2" x="36.591266" y="162"/>
 </g>
 <g>
-  <use xlinkHref="#cfm-wordmark-l-cfm-wordmark-l-lbl-glyph0-3" x="163.220466" y="162"/>
+  <use href="#cfm-wordmark-l-lbl-glyph0-3" x="163.220466" y="162"/>
 </g>
 <g>
-  <use xlinkHref="#cfm-wordmark-l-cfm-wordmark-l-lbl-glyph0-4" x="251.401666" y="162"/>
+  <use href="#cfm-wordmark-l-lbl-glyph0-4" x="251.401666" y="162"/>
 </g>
 </g>
 </g></g>
@@ -103,36 +93,29 @@ export function FileWordmarkCfm({ size = 64, title = 'CFM file', className, ...p
             <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.0501685049 0" type="matrix" in="shadowOffsetOuter1"></feColorMatrix>
         </filter>
     </defs>
-    <g id="cfm-wordmark-l-icon/file/cfm/wordmark-light" stroke="none" fill="none" xlinkHref="#cfm-wordmark-l-path-1">
-        <g id="cfm-wordmark-l-Sheet">
-            <use fill="black" fillOpacity="1" filter="url(#cfm-wordmark-l-filter-4)" xlinkHref="#cfm-wordmark-l-path-3"></use>
-            <use fill="url(#cfm-wordmark-l-linearGradient-2)" fillRule="evenodd" xlinkHref="#cfm-wordmark-l-path-3"></use>
-            <use fill="black" fillOpacity="1" filter="url(#cfm-wordmark-l-filter-5)" xlinkHref="#cfm-wordmark-l-path-3"></use>
+    <g stroke="none" fill="none">
+        <g>
+            <use fill="black" filter="url(#cfm-wordmark-l-filter-4)" href="#cfm-wordmark-l-path-3"></use>
+            <use fill="url(#cfm-wordmark-l-linearGradient-2)" fillRule="evenodd" href="#cfm-wordmark-l-path-3"></use>
+            <use fill="black" filter="url(#cfm-wordmark-l-filter-5)" href="#cfm-wordmark-l-path-3"></use>
         </g>
-        <g id="cfm-wordmark-l-Lines" filter="url(#cfm-wordmark-l-filter-6)" opacity="0.13" strokeWidth="1" fillRule="evenodd" transform="translate(256.5027, 305.518)">
-            <path d="M304.544551,0.447520067 C319.125735,0.47109626 330.927008,12.3105936 330.903467,26.8917774 C330.879856,41.4729613 319.040358,53.2742341 304.459175,53.2506931 L27.7029447,52.8031731 C13.1217608,52.7795969 1.32048809,40.9400996 1.34402902,26.3589157 C1.36764048,11.7777318 13.2071378,-0.0235409293 27.7883217,1.01746264e-13 L304.544551,0.447520067 Z" id="cfm-wordmark-l-Line-1" fill="url(#cfm-wordmark-l-linearGradient-7)" fillRule="nonzero"></path>
-            <path d="M509,164.674408 C509,179.255611 497.1796,191.076012 482.598397,191.076012 L27.296573,191.076012 C12.7153701,191.076012 0.894969607,179.255611 0.894969607,164.674408 C0.894969607,150.093206 12.7153701,138.272805 27.296573,138.272805 L482.598397,138.272805 C497.1796,138.272805 509,150.093206 509,164.674408 Z" id="cfm-wordmark-l-Line-2" fill="url(#cfm-wordmark-l-linearGradient-8)" fillRule="nonzero"></path>
-            <path d="M508.552515,304.737062 C508.552515,319.318265 496.732115,331.138666 482.150912,331.138666 L26.8490882,331.138666 C12.2678853,331.138666 0.447484804,319.318265 0.447484804,304.737062 C0.447484804,290.15586 12.2678853,278.335459 26.8490882,278.335459 L482.150912,278.335459 C496.732115,278.335459 508.552515,290.15586 508.552515,304.737062 Z" id="cfm-wordmark-l-Line-3" fill="url(#cfm-wordmark-l-linearGradient-8)" fillRule="nonzero"></path>
+        <g filter="url(#cfm-wordmark-l-filter-6)" opacity="0.13" fillRule="evenodd" transform="translate(256.5027, 305.518)">
+            <path d="M304.544551,0.447520067 C319.125735,0.47109626 330.927008,12.3105936 330.903467,26.8917774 C330.879856,41.4729613 319.040358,53.2742341 304.459175,53.2506931 L27.7029447,52.8031731 C13.1217608,52.7795969 1.32048809,40.9400996 1.34402902,26.3589157 C1.36764048,11.7777318 13.2071378,-0.0235409293 27.7883217,1.01746264e-13 L304.544551,0.447520067 Z" fill="url(#cfm-wordmark-l-linearGradient-7)" fillRule="nonzero"></path>
+            <path d="M509,164.674408 C509,179.255611 497.1796,191.076012 482.598397,191.076012 L27.296573,191.076012 C12.7153701,191.076012 0.894969607,179.255611 0.894969607,164.674408 C0.894969607,150.093206 12.7153701,138.272805 27.296573,138.272805 L482.598397,138.272805 C497.1796,138.272805 509,150.093206 509,164.674408 Z" fill="url(#cfm-wordmark-l-linearGradient-7)" fillRule="nonzero"></path>
+            <path d="M508.552515,304.737062 C508.552515,319.318265 496.732115,331.138666 482.150912,331.138666 L26.8490882,331.138666 C12.2678853,331.138666 0.447484804,319.318265 0.447484804,304.737062 C0.447484804,290.15586 12.2678853,278.335459 26.8490882,278.335459 L482.150912,278.335459 C496.732115,278.335459 508.552515,290.15586 508.552515,304.737062 Z" fill="url(#cfm-wordmark-l-linearGradient-7)" fillRule="nonzero"></path>
         </g>
-        <g id="cfm-wordmark-l-Label" fill="#D9A300" fillOpacity="1">
-            <use filter="url(#cfm-wordmark-l-filter-10)" xlinkHref="#cfm-wordmark-l-text-9"></use>
-            <use xlinkHref="#cfm-wordmark-l-text-9"></use>
+        <g fill="#D9A300">
+            <use filter="url(#cfm-wordmark-l-filter-10)" href="#cfm-wordmark-l-text-9"></use>
+            <use href="#cfm-wordmark-l-text-9"></use>
         </g>
     </g>
 </g>
-      <g data-theme-layer="dark">
+      <g data-theme-layer="dark" className="hidden dark:inline">
     <defs>
-        <path d="M664.135334,22.0470049 C686.11483,32.0940098 704.602278,53.4598851 741.577175,96.1916357 L853.580372,225.633315 C884.253388,261.082006 899.589896,278.806351 906.574274,297.524519 C913.558651,316.242686 913.581362,339.681124 913.626783,386.558 L914.017631,789.931634 C914.119069,894.620332 914.169788,946.964682 881.683622,979.482341 C849.197455,1012 796.853082,1012 692.164334,1012 L332,1012 C227.348196,1012 175.022295,1012 142.511147,979.488853 C110,946.977705 110,894.651804 110,790 L110,234 C110,129.348196 110,77.0222946 142.511147,44.5111473 C175.022295,12 227.348196,12 332,12 L557.393952,12 C613.901876,12 642.155838,12 664.135334,22.0470049 Z" id="cfm-wordmark-d-path-1"></path>
         <linearGradient x1="25.9355099%" y1="0%" x2="63.5613444%" y2="91.834983%" id="cfm-wordmark-d-linearGradient-2">
             <stop stopColor="#2A2A2A" stopOpacity="0.980392157" offset="0%"></stop>
             <stop stopColor="#050505" offset="100%"></stop>
         </linearGradient>
-        <path d="M332,12 L557.393952,12 C613.901876,12 642.155838,12 664.135334,22.0470049 C664.135334,22.0470049 664.135334,22.0470049 664.135334,22.0470049 C686.11483,32.0940098 704.602278,53.4598851 741.577175,96.1916357 L853.580372,225.633315 C884.253388,261.082006 899.589896,278.806351 906.574274,297.524519 C906.574274,297.524519 906.574274,297.524519 906.574274,297.524519 C913.558651,316.242686 913.581362,339.681124 913.626783,386.558 L914.017631,789.931634 C914.119069,894.620332 914.169788,946.964682 881.683622,979.482341 C881.683622,979.482341 881.683622,979.482341 881.683622,979.482341 C849.197455,1012 796.853082,1012 692.164334,1012 L332,1012 C227.348196,1012 175.022295,1012 142.511147,979.488853 C142.511147,979.488853 142.511147,979.488853 142.511147,979.488853 C110,946.977705 110,894.651804 110,790 L110,234 C110,129.348196 110,77.0222946 142.511147,44.5111473 C142.511147,44.5111473 142.511147,44.5111473 142.511147,44.5111473 C175.022295,12 227.348196,12 332,12 Z" id="cfm-wordmark-d-path-3"></path>
-        <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="cfm-wordmark-d-filter-4">
-            <feOffset dx="12" dy="-3" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
-            <feGaussianBlur stdDeviation="28.5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
-            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
-        </filter>
         <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="cfm-wordmark-d-filter-5">
             <feGaussianBlur stdDeviation="4" in="SourceAlpha" result="shadowBlurInner1"></feGaussianBlur>
             <feOffset dx="-10" dy="14" in="shadowBlurInner1" result="shadowOffsetInner1"></feOffset>
@@ -147,68 +130,21 @@ export function FileWordmarkCfm({ size = 64, title = 'CFM file', className, ...p
                 <feMergeNode in="shadowMatrixInner2"></feMergeNode>
             </feMerge>
         </filter>
-        <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="cfm-wordmark-d-filter-6">
-            <feOffset dx="0" dy="5" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
-            <feGaussianBlur stdDeviation="3.5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
-            <feColorMatrix values="0 0 0 0 0.0889199747   0 0 0 0 0.0889199747   0 0 0 0 0.0889199747  0 0 0 0.03 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
-            <feMerge>
-                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
-                <feMergeNode in="SourceGraphic"></feMergeNode>
-            </feMerge>
-        </filter>
-        <g id="cfm-wordmark-d-text-7"><g transform="translate(309, 721.762)">
-<defs>
-<g>
-<g id="cfm-wordmark-d-cfm-wordmark-d-lbl-glyph0-0">
-<path d="M 0 35.59375 L 106.796875 35.59375 L 106.796875 -125.484375 L 0 -125.484375 Z M 12.640625 -118.375 L 94.15625 -118.375 L 53.40625 -51.96875 Z M 7.125 -113.390625 L 49.125 -45.03125 L 7.125 23.5 Z M 57.671875 -45.03125 L 99.6875 -113.390625 L 99.6875 23.5 Z M 12.640625 28.484375 L 53.40625 -37.90625 L 94.15625 28.484375 Z M 12.640625 28.484375 "/>
-</g>
-<g id="cfm-wordmark-d-cfm-wordmark-d-lbl-glyph0-1">
-<path d="M 25.453125 0.890625 C 34.890625 0.890625 41.46875 -6.234375 41.46875 -15.125 C 41.46875 -23.859375 34.890625 -30.96875 25.453125 -30.96875 C 15.84375 -30.96875 9.25 -23.859375 9.25 -15.125 C 9.25 -6.234375 15.84375 0.890625 25.453125 0.890625 Z M 25.453125 0.890625 "/>
-</g>
-<g id="cfm-wordmark-d-cfm-wordmark-d-lbl-glyph0-2">
-<path d="M 125.84375 -36.671875 L 99.140625 -44.671875 C 94.703125 -29.90625 84.1875 -22.078125 68.890625 -22.078125 C 48.0625 -22.078125 35.25 -37.5625 35.25 -62.65625 C 35.25 -87.9375 48.0625 -103.234375 68.703125 -103.234375 C 84.1875 -103.234375 94.703125 -95.40625 99.140625 -80.640625 L 126.203125 -88.828125 C 119.4375 -114.453125 99.6875 -128.15625 68.890625 -128.15625 C 31.328125 -128.15625 5.703125 -102.171875 5.703125 -62.65625 C 5.703125 -23.3125 31.328125 2.84375 69.0625 2.84375 C 99.6875 2.84375 119.078125 -11.03125 125.84375 -36.671875 Z M 125.84375 -36.671875 "/>
-</g>
-<g id="cfm-wordmark-d-cfm-wordmark-d-lbl-glyph0-3">
-<path d="M 10.328125 0 L 38.09375 0 L 38.09375 -53.40625 L 78.671875 -53.40625 L 78.671875 -77.078125 L 38.09375 -77.078125 L 38.09375 -101.8125 L 88.828125 -101.8125 L 88.828125 -125.484375 L 10.328125 -125.484375 Z M 10.328125 0 "/>
-</g>
-<g id="cfm-wordmark-d-cfm-wordmark-d-lbl-glyph0-4">
-<path d="M 10.328125 0 L 36.84375 0 L 36.84375 -111.78125 L 59.984375 0 L 99.328125 0 L 122.640625 -111.78125 L 122.640625 0 L 148.984375 0 L 148.984375 -125.484375 L 100.5625 -125.484375 L 79.75 -12.8125 L 58.734375 -125.484375 L 10.328125 -125.484375 Z M 10.328125 0 "/>
-</g>
-</g>
-</defs>
-<g id="cfm-wordmark-d-cfm-wordmark-d-lbl-surface1">
-<g>
-  <use xlinkHref="#cfm-wordmark-d-cfm-wordmark-d-lbl-glyph0-1" x="0.0300664" y="162"/>
-  <use xlinkHref="#cfm-wordmark-d-cfm-wordmark-d-lbl-glyph0-2" x="36.591266" y="162"/>
-</g>
-<g>
-  <use xlinkHref="#cfm-wordmark-d-cfm-wordmark-d-lbl-glyph0-3" x="163.220466" y="162"/>
-</g>
-<g>
-  <use xlinkHref="#cfm-wordmark-d-cfm-wordmark-d-lbl-glyph0-4" x="251.401666" y="162"/>
-</g>
-</g>
-</g></g>
-        <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="cfm-wordmark-d-filter-8">
-            <feMorphology radius="0.5" operator="dilate" in="SourceAlpha" result="shadowSpreadOuter1"></feMorphology>
-            <feOffset dx="-3" dy="3" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset>
-            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.0501685049 0" type="matrix" in="shadowOffsetOuter1"></feColorMatrix>
-        </filter>
     </defs>
-    <g id="cfm-wordmark-d-icon/file/cfm/wordmark-dark" stroke="none" fill="none" xlinkHref="#cfm-wordmark-d-path-1">
-        <g id="cfm-wordmark-d-Sheet">
-            <use fill="black" fillOpacity="1" filter="url(#cfm-wordmark-d-filter-4)" xlinkHref="#cfm-wordmark-d-path-3"></use>
-            <use fill="url(#cfm-wordmark-d-linearGradient-2)" fillRule="evenodd" xlinkHref="#cfm-wordmark-d-path-3"></use>
-            <use fill="black" fillOpacity="1" filter="url(#cfm-wordmark-d-filter-5)" xlinkHref="#cfm-wordmark-d-path-3"></use>
+    <g stroke="none" fill="none">
+        <g>
+            <use fill="black" filter="url(#cfm-wordmark-l-filter-4)" href="#cfm-wordmark-l-path-3"></use>
+            <use fill="url(#cfm-wordmark-d-linearGradient-2)" fillRule="evenodd" href="#cfm-wordmark-l-path-3"></use>
+            <use fill="black" filter="url(#cfm-wordmark-d-filter-5)" href="#cfm-wordmark-l-path-3"></use>
         </g>
-        <g id="cfm-wordmark-d-Lines" filter="url(#cfm-wordmark-d-filter-6)" opacity="0.13" strokeWidth="1" fillRule="evenodd" transform="translate(256.5027, 305.518)" fill="#B2B2B2">
-            <path d="M304.544551,0.447520067 C319.125735,0.47109626 330.927008,12.3105936 330.903467,26.8917774 C330.879856,41.4729613 319.040358,53.2742341 304.459175,53.2506931 L27.7029447,52.8031731 C13.1217608,52.7795969 1.32048809,40.9400996 1.34402902,26.3589157 C1.36764048,11.7777318 13.2071378,-0.0235409293 27.7883217,1.01746264e-13 L304.544551,0.447520067 Z" id="cfm-wordmark-d-Line-1" fillRule="nonzero"></path>
-            <path d="M509,164.674408 C509,179.255611 497.1796,191.076012 482.598397,191.076012 L27.296573,191.076012 C12.7153701,191.076012 0.894969607,179.255611 0.894969607,164.674408 C0.894969607,150.093206 12.7153701,138.272805 27.296573,138.272805 L482.598397,138.272805 C497.1796,138.272805 509,150.093206 509,164.674408 Z" id="cfm-wordmark-d-Line-2" fillRule="nonzero"></path>
-            <path d="M508.552515,304.737062 C508.552515,319.318265 496.732115,331.138666 482.150912,331.138666 L26.8490882,331.138666 C12.2678853,331.138666 0.447484804,319.318265 0.447484804,304.737062 C0.447484804,290.15586 12.2678853,278.335459 26.8490882,278.335459 L482.150912,278.335459 C496.732115,278.335459 508.552515,290.15586 508.552515,304.737062 Z" id="cfm-wordmark-d-Line-3" fillRule="nonzero"></path>
+        <g filter="url(#cfm-wordmark-l-filter-6)" opacity="0.13" fillRule="evenodd" transform="translate(256.5027, 305.518)" fill="#B2B2B2">
+            <path d="M304.544551,0.447520067 C319.125735,0.47109626 330.927008,12.3105936 330.903467,26.8917774 C330.879856,41.4729613 319.040358,53.2742341 304.459175,53.2506931 L27.7029447,52.8031731 C13.1217608,52.7795969 1.32048809,40.9400996 1.34402902,26.3589157 C1.36764048,11.7777318 13.2071378,-0.0235409293 27.7883217,1.01746264e-13 L304.544551,0.447520067 Z" fillRule="nonzero"></path>
+            <path d="M509,164.674408 C509,179.255611 497.1796,191.076012 482.598397,191.076012 L27.296573,191.076012 C12.7153701,191.076012 0.894969607,179.255611 0.894969607,164.674408 C0.894969607,150.093206 12.7153701,138.272805 27.296573,138.272805 L482.598397,138.272805 C497.1796,138.272805 509,150.093206 509,164.674408 Z" fillRule="nonzero"></path>
+            <path d="M508.552515,304.737062 C508.552515,319.318265 496.732115,331.138666 482.150912,331.138666 L26.8490882,331.138666 C12.2678853,331.138666 0.447484804,319.318265 0.447484804,304.737062 C0.447484804,290.15586 12.2678853,278.335459 26.8490882,278.335459 L482.150912,278.335459 C496.732115,278.335459 508.552515,290.15586 508.552515,304.737062 Z" fillRule="nonzero"></path>
         </g>
-        <g id="cfm-wordmark-d-Label" fill="#F5C400" fillOpacity="1">
-            <use filter="url(#cfm-wordmark-d-filter-8)" xlinkHref="#cfm-wordmark-d-text-7"></use>
-            <use xlinkHref="#cfm-wordmark-d-text-7"></use>
+        <g fill="#F5C400">
+            <use filter="url(#cfm-wordmark-l-filter-10)" href="#cfm-wordmark-l-text-9"></use>
+            <use href="#cfm-wordmark-l-text-9"></use>
         </g>
     </g>
 </g>
