@@ -23,6 +23,9 @@ export * from "./components/ui/skeleton"
 export * from "./components/ui/spinner"
 export * from "./components/ui/textarea"
 
+// icons
+export * from "./components/icons"
+
 // components
 export * from "./components/composed/logo"
 export * from "./components/composed/password-input"
