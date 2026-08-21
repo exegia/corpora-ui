@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useId, useMemo, useState } from "react"
+import type { ReactNode } from "react"
 import { useAtomValue, useSetAtom } from "jotai"
 
 import {
@@ -12,6 +13,7 @@ import {
 import type {
   ShellPanelControlProps,
   ShellPanelControls,
+  SidebarComponentMap,
   SidebarSide,
   UseShellPanelsOptions,
 } from "./type"
@@ -104,6 +106,23 @@ export function useShellPanels({
     [open, setOpen]
   )
 
+  // The content sticks even when the open is refused (too narrow): it is
+  // what the panel shows whenever it next gets to open, not a one-shot.
+  const [panelComponents, setPanelComponents] = useState<SidebarComponentMap>(
+    {}
+  )
+  const openPanel = useCallback(
+    (side: SidebarSide, component?: ReactNode) => {
+      if (component !== undefined) {
+        setPanelComponents((prev) =>
+          prev[side] === component ? prev : { ...prev, [side]: component }
+        )
+      }
+      setOpen(true, side)
+    },
+    [setOpen]
+  )
+
   const providerProps = useMemo<ShellPanelControlProps>(
     () => ({
       shellId,
@@ -112,8 +131,17 @@ export function useShellPanels({
       onOpenChange: setOpen,
       openMobile,
       onOpenMobileChange: setOpenMobile,
+      panelComponents,
     }),
-    [shellId, defaultPanelWidth, open, openMobile, setOpen, setOpenMobile]
+    [
+      shellId,
+      defaultPanelWidth,
+      open,
+      openMobile,
+      setOpen,
+      setOpenMobile,
+      panelComponents,
+    ]
   )
 
   return {
@@ -126,6 +154,7 @@ export function useShellPanels({
     setOpen,
     setOpenMobile,
     toggle,
+    openPanel,
     providerProps,
   }
 }

@@ -799,6 +799,12 @@ const { selectedId } = useAISidebarState("app-resources") // subscribes to the s
           "Side-keyed control of the panels — no per-side props. ⌘B toggles the left rail. The `openMobile` family has the same shape for the mobile overlays. Spread `useShellPanels().providerProps` instead of wiring them by hand.",
       },
       {
+        name: "panelComponents",
+        type: "Partial<Record<Side, ReactNode>>",
+        description:
+          "Dynamic content per side, normally filled by `useShellPanels().openPanel(side, component)` and delivered through `providerProps`. A side's entry wins over the static `panels` map's `component`, and sticks until the next `openPanel` replaces it — so one shell drawer can host whatever the app last opened into it.",
+      },
+      {
         name: "shellId / defaultPanelWidth",
         type: "string / number",
         description:
@@ -826,6 +832,8 @@ function App() {
   )
 }
 
+// panels.openPanel("right", <Details item={item} />) — open the drawer with
+// dynamic content; it replaces the static panels entry until the next openPanel.
 // panels.toggle("right") from anywhere — a title-bar button, a shortcut.
 // panels.isNarrow / panels.panelWidth mirror the shell's own measurement.
 // Or by id, from any component under ExegiaProvider:

@@ -21,6 +21,8 @@ export function AnimatedPanelProvider({
   defaultOpenMobile,
   onOpenMobileChange,
   onNarrowChange,
+  // ShellLayout renders this; the bare provider only keeps it off the DOM.
+  panelComponents: _panelComponents,
   className,
   style,
   ...props
