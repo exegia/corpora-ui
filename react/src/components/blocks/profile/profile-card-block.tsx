@@ -233,18 +233,18 @@ export function ProfileCardBlock({
               // Quiet at rest — the background only surfaces on hover or
               // while the menu is open.
               "h-auto w-full justify-between py-1.5 pl-1.5 data-popup-open:bg-accent sm:h-auto",
-              // Folded: a 40px avatar tile, the size the tree rail uses. It
-              // is 8px wider than a footer's 32px inner box on purpose — the
-              // -mx-1 lets it borrow the footer padding so the 32px avatar
-              // clears the 1px border and sits dead centre. The label spans
-              // below fold to zero width rather than unmounting so the change
-              // animates. Button's own gap-2 stays: its always-mounted loading
-              // slot carries a -ms-2 that cancels it, so zeroing the gap would
-              // pull the avatar 8px left; the folded chevron cancels its own
-              // gap instead (see below). `sm:size-10` because the base carries
-              // an `sm:h-auto` that an unprefixed size would not beat.
+              // Folded: a full-width h-10 row matching the tree rail's tiles,
+              // avatar centred — a fixed-width tile drifted off the rail's
+              // centre line whenever the collapsed panel was wider than it.
+              // The label spans below fold to zero width rather than
+              // unmounting so the change animates. Button's own gap-2 stays:
+              // its always-mounted loading slot carries a -ms-2 that cancels
+              // it, so zeroing the gap would pull the avatar 8px left; the
+              // folded chevron cancels its own gap instead (see below).
+              // `sm:h-10` because the base carries an `sm:h-auto` that an
+              // unprefixed height would not beat.
               collapsed &&
-                "-mx-1 size-10 shrink-0 justify-center rounded-xl p-0 sm:size-10",
+                "h-10 w-full shrink-0 justify-center rounded-xl p-0 sm:h-10",
               className
             )}
             data-collapsed={collapsed ? "" : undefined}

@@ -161,7 +161,7 @@ export const components: RegistryEntry[] = [
         name: "variant",
         type: '"navigation" | "toc" | "sidebar" | "files"',
         description:
-          "navigation: app nav — 3-level data promotes the top level to collapsible section names. toc: top-level nodes are routes, deeper rows jump to #{id} after select; parents expand from an overlay chevron. sidebar: single-level icon rail (40px collapsed). files: compact explorer with rename, drag-and-drop and trailing actions.",
+          "navigation: app nav — 3-level data promotes the top level to collapsible section names. toc: top-level nodes are routes, deeper rows jump to #{id} after select; parents expand from an overlay chevron. sidebar: single-level icon rail that fills its container; collapsing folds labels to icon tiles. files: compact explorer with rename, drag-and-drop and trailing actions.",
       },
       {
         name: "items",

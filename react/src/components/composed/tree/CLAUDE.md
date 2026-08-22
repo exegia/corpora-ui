@@ -15,9 +15,9 @@ first; this file only holds what is specific to the tree.
 | `use-tree-state.ts` | `useTreeState(id)` (reads, re-renders on any change) and `useTreeActions(id)` (writes only, never re-renders). |
 | `use-tree-dnd.ts`   | Stable drag handlers for `files`; they read `draggedId`/`dropTarget` out of the store at call time.       |
 | `tree-context.ts`   | Context value = `{ treeId, renderTrailing, dnd }` only. Never the controller.                            |
-| `tree.tsx`          | `Tree` (props form → `UncontrolledTree`, controller form → `TreeView`), rail width measurement, roving keyboard nav. |
+| `tree.tsx`          | `Tree` (props form → `UncontrolledTree`, controller form → `TreeView`), roving keyboard nav. |
 | `tree-node.tsx`     | `TreeRow` (memoized). Per-node atom subscriptions, row kind resolution, rename input, tooltip, toc overlay toggle, trailing slot, branch animation. |
-| `constants.ts`      | Durations, easings, `RAIL_COLLAPSED_WIDTH`, motion variants.                                            |
+| `constants.ts`      | Durations, easings, motion variants.                                                                    |
 | `utils.ts`          | Pure tree helpers (`findNode`, `moveNode`, `renameNode`, ancestor walks).                               |
 | `index.ts`          | Barrel. Public atoms are listed explicitly — never `export *`.                                          |
 | `__tests__/`        | `tree.test.tsx` (rendering per variant), `use-tree.test.tsx` (controller/hook), `tree-atom.test.tsx` (store + memo guard). |
@@ -43,10 +43,10 @@ first; this file only holds what is specific to the tree.
   `rowInteractionProps`, spread onto the Button; Base UI's `mergeProps` lets
   them override Button's own `data-slot="button"`. `sound` is forwarded to the
   Button so its press/release cues follow the tree's `sound` prop.
-- Collapsed sidebar rows are `h-10! rounded-xl! justify-center px-0` tiles;
-  the rail is `w-10` (40px). `RAIL_COLLAPSED_WIDTH` **must equal** the class
-  (a test pins it to 40) — the motion target and the resting class must agree
-  or the rail jumps on its first fold.
+- Collapsed sidebar rows are `h-10! rounded-xl! justify-center px-0` tiles
+  spanning the **full rail width** — the rail itself stays `w-full` in both
+  states; its fold is the container's width change (an icon-collapsed panel)
+  plus the labels folding. Folded icons step up to `size-5 text-foreground`.
 - Row kinds (`rowKindOf`): `link` (selectable, `aria-expanded` absent),
   `toggle` (parent in navigation/files, `aria-expanded` on the row),
   `section` (top level of a 3-level navigation tree). `toc` parents are
@@ -68,11 +68,11 @@ first; this file only holds what is specific to the tree.
 3. **Keep the rail label mounted.** Unmounting the label on collapse killed
    the fold animation; it animates `width/opacity/x/display` in place and the
    test asserts `display: none`, not absence. (12b6a1f)
-4. **Both rail width endpoints must be px.** Motion cannot tween a number
+4. **Both rail width endpoints must be px** *(historical — the rail no
+   longer animates its own width; the container's fold carries it, see the
+   fix/tree-collapsed-behavior entry)*. Motion cannot tween a number
    against `"100%"`; doing so pinned the inline width at the collapsed value
-   and the rail never reopened. The expanded width is measured off the
-   container, only while expanded, with the list's inline width cleared for
-   the sample. (a69072d, 2f7539f)
+   and the rail never reopened. (a69072d, 2f7539f)
 5. **Tooltip is disabled, not unmounted, when the rail expands.** Swapping the
    wrapper remounts the row and cuts the label fold short. Test asserts row
    identity across collapse.
@@ -108,6 +108,19 @@ first; this file only holds what is specific to the tree.
   tab or use a real browser for the fold.
 
 ## Change log
+
+- **2026-08-22 — fix/tree-collapsed-behavior** (on `release/v0.28.0`)
+  - `tree.tsx`: the rail no longer narrows itself — the `w-10` collapsed
+    class, the width measurement (`railRef`/ResizeObserver) and the px width
+    tween are gone. The list is `w-full` in both states (root `motion.ul` →
+    plain `ul`); the nav wrapper dropped `justify-center` for `w-full`. The
+    fold is the hosting panel's width change plus the labels folding.
+  - `tree-node.tsx`: folded rail icons step up to `size-5` and take
+    `text-foreground` (rows are icon-only, so muted-at-rest read as disabled).
+  - `constants.ts`: `RAIL_COLLAPSED_WIDTH` removed (was internal-only).
+  - `blocks/profile/profile-card-block.tsx`: the folded card is a full-width
+    `h-10 w-full` row (was a `-mx-1 size-10` tile) so the avatar centres on
+    the rail's own centre line regardless of panel width.
 
 - **2026-08-18 — fix/tree-collapsed** (on `release/v0.21.0`)
   - `tree-node.tsx`: link/toggle rows render the shared `Button` (ghost /
