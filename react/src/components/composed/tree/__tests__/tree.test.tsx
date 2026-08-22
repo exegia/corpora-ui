@@ -3,7 +3,6 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { FileTextIcon, FolderIcon, SearchIcon } from "lucide-react"
 
-import { RAIL_COLLAPSED_WIDTH } from "../constants"
 import { Tree } from "../index"
 import type { TreeNode } from "../type"
 import { moveNode } from "../utils"
@@ -271,12 +270,10 @@ describe("Tree · toc", () => {
 })
 
 describe("Tree · sidebar", () => {
-  test("the rail's width class tracks collapsed in both directions", async () => {
-    // Locks the resting widths to the class, so the rail is right even when
-    // the animation never applies. NB this does NOT reproduce the bug it was
-    // written alongside — that was an inline width pinned at 44px by a
-    // px-against-"100%" motion target, and motion sets no inline styles
-    // under happy-dom. Only a real browser catches that one.
+  test("the rail spans its container in both states", async () => {
+    // The rail no longer narrows itself to a fixed px column — its fold is
+    // the container's width change (an icon-collapsed panel). Both states
+    // must keep w-full so rows span the rail edge to edge.
     const { rerender } = render(<Tree items={RAIL} variant="sidebar" />)
     const rail = () => document.querySelector('[data-slot="tree"]')
 
@@ -285,30 +282,30 @@ describe("Tree · sidebar", () => {
 
     rerender(<Tree collapsed items={RAIL} variant="sidebar" />)
     await settleExit()
-    expect(rail()?.className).toContain("w-10")
+    expect(rail()?.className).toContain("w-full")
+    expect(rail()?.className).not.toContain("w-10")
     expect(rail()?.getAttribute("data-collapsed")).toBe("")
-    // Collapsed rows are square-ish tiles that fill the 40px rail.
+    // Collapsed rows are full-width tiles with the icon centred, stepped up
+    // to size-5 and foreground colour — the icon is the whole row.
     const row = screen.getByRole("button", { name: "Search" })
     expect(row.className).toContain("h-10!")
     expect(row.className).toContain("rounded-xl!")
     expect(row.className).toContain("justify-center")
+    expect(row.className).toContain("w-full")
+    const icon = row.querySelector('[data-slot="tree-row-icon"]')
+    expect(icon?.className).toContain("size-5")
+    expect(icon?.className).toContain("text-foreground")
 
-    // Back open — the direction that was broken.
+    // Back open — rows drop the tile treatment, icons step back down.
     rerender(<Tree items={RAIL} variant="sidebar" />)
     await settleExit()
     expect(rail()?.className).toContain("w-full")
-    expect(rail()?.className).not.toContain("w-10")
     expect(rail()?.getAttribute("data-collapsed")).toBeNull()
-    expect(screen.getByRole("button", { name: "Search" }).className).not.toContain(
-      "h-10!"
-    )
-  })
-
-  test("the collapsed px target matches the resting width class", () => {
-    // tree.tsx animates the rail to RAIL_COLLAPSED_WIDTH once measured, and
-    // falls back to the class before that. Tailwind's w-10 is 2.5rem = 40px;
-    // the two must agree or the rail jumps on its first collapse.
-    expect(RAIL_COLLAPSED_WIDTH).toBe(40)
+    const reopened = screen.getByRole("button", { name: "Search" })
+    expect(reopened.className).not.toContain("h-10!")
+    expect(
+      reopened.querySelector('[data-slot="tree-row-icon"]')?.className
+    ).not.toContain("size-5")
   })
 
   test("collapsed shows icon-only rows that keep an accessible name", async () => {
