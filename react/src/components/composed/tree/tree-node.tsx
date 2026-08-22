@@ -295,9 +295,15 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
       {kind !== "section" && node.icon && (
         <span
           className={cn(
-            "flex size-4 shrink-0 items-center justify-center [&>svg]:size-4",
+            "flex size-4 shrink-0 items-center justify-center transition-[width,height,color] duration-150 [&>svg]:size-4",
+            // Folded rail: the icon is the whole row, so it steps up a size
+            // and takes the foreground colour instead of muted.
+            variant === "sidebar" &&
+              collapsed &&
+              "size-5 text-foreground [&>svg]:size-5",
             active && "text-accent-foreground"
           )}
+          data-slot="tree-row-icon"
         >
           {node.icon}
         </span>

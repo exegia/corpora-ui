@@ -151,9 +151,11 @@ describe("ProfileCardBlock", () => {
     const identity = trigger.querySelector('[data-slot="profile-card-identity"]');
     expect(identity?.getAttribute("aria-hidden")).toBe("true");
     expect(identity?.textContent).toContain("Jenny Hamilton");
-    // 40px tile, like the tree rail: no inset, avatar centred.
+    // Full-width h-10 row, like the tree rail's tiles: avatar centred on
+    // the rail's own centre line, no inset.
     expect(trigger.className).toContain("justify-center");
-    expect(trigger.className).toContain("size-10");
+    expect(trigger.className).toContain("h-10");
+    expect(trigger.className).toContain("w-full");
     expect(trigger.className).toContain("p-0");
 
     rerender(<ProfileCardBlock user={USER} variant="expanded" />);
