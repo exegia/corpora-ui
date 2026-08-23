@@ -11,7 +11,12 @@ export default defineConfig({
     dts({
       tsconfigPath: "./tsconfig.app.json",
       outDir: "dist-lib",
-      include: ["src/index.ts", "src/components/**", "src/lib/**"],
+      include: [
+        "src/index.ts",
+        "src/components/**",
+        "src/lib/**",
+        "src/state/**",
+      ],
     }),
   ],
   resolve: {

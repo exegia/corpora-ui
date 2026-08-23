@@ -1,0 +1,61 @@
+# Mirror each release to the GitHub Package Registry
+# (https://npm.pkg.github.com/@exegia%2fcorpora-ui).
+#
+# This keys off the same merged-release-PR event as release.yml rather than
+# `release: published` — the GitHub Release is created with the default
+# GITHUB_TOKEN, whose events never trigger other workflows. The dispatch is
+# for backfilling a release that predates this workflow (or retrying a
+# failed run); the version already published is skipped, so a re-run is safe.
+name: Publish (GitHub Packages)
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: publish-github-packages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  INSTALL_FLAGS: --frozen-lockfile
+
+jobs:
+  publish:
+    name: publish
+    if: >-
+      github.event_name == 'workflow_dispatch'
+      || (github.event.pull_request.merged == true
+          && startsWith(github.head_ref, 'release/v'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # Unlike ./.github/actions/setup, npm is pointed at GitHub Packages —
+      # the registry-url writes the .npmrc that `make publish-github`
+      # authenticates with.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://npm.pkg.github.com
+          scope: '@exegia'
+
+      - run: make install build
+
+      - name: Publish to GitHub Packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: make publish-github

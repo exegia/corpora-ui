@@ -2,6 +2,7 @@
 .github/aw/logs/
 .DS_Store
 **/node_modules
+dist-pack/
 /.idea/inspectionProfiles/Project_Default.xml
 /.idea/.gitignore
 /.idea/corpora-ui.iml
@@ -9,3 +10,6 @@
 /.idea/prettier.xml
 /.idea/ShadcnHelperSettings.xml
 /.idea/vcs.xml
+
+# Claude Code local permission overrides
+.claude/settings.local.json

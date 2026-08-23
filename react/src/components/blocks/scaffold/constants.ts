@@ -1,0 +1,39 @@
+/** Icon-rail width in px (the rail sits directly on the desktop backdrop). */
+export const SCAFFOLD_SIDEBAR_WIDTH = 64
+
+/** Inspector drawer width in px. */
+export const SCAFFOLD_INSPECTOR_WIDTH = 272
+
+/** Most panels the canvas holds at once — omit Actions' `onAdd` when the
+ * count reaches it so the Add segment hides. */
+export const SCAFFOLD_PANEL_CAPACITY = 3
+
+/** Narrowest a panel may render, in px. When the canvas can't grant every
+ * panel this width, the scaffold hides panels until the rest fit. */
+export const SCAFFOLD_PANEL_MIN_WIDTH = 320
+
+/** Gap in px between side-by-side panels on the canvas (`gap-2`). */
+export const SCAFFOLD_CANVAS_GAP = 8
+
+/** Gap in px between the drawer/actions and the viewport edges. */
+export const SCAFFOLD_EDGE_GUTTER = 10
+
+/** Vertical room in px reserved above the canvas for the actions cluster. */
+export const SCAFFOLD_HEADER_HEIGHT = 52
+
+/** Height in px of a panel's secondary strip. */
+export const SCAFFOLD_SECONDARY_HEIGHT = 52
+
+/** Gap in px between a panel's primary surface and its secondary strip. */
+export const SCAFFOLD_PANEL_GAP = 10
+
+/** How long the seam menu lingers expanded after the pointer leaves it (ms)
+ * before it collapses back to the compact toggle. The timer keeps counting
+ * even when the pointer leaves the window entirely. */
+export const SCAFFOLD_MENU_COLLAPSE_DELAY = 4000
+
+/** Morph duration in seconds for drawer slides and panel layout shifts. */
+export const SCAFFOLD_MORPH_DURATION = 0.3
+
+/** `--ease-smooth-out` as a motion/react easing tuple. */
+export const SCAFFOLD_EASE = [0.22, 1, 0.36, 1] as const

@@ -7,6 +7,138 @@ are installed HERE (`cd react && bun add <pkg>`), never at the repo root. Verify
 `make check` (runs `tsc -b --noEmit` + eslint) — plain `tsc --noEmit` checks
 nothing here (references-only root tsconfig).
 
+## Tests
+
+`bun test` (run it from `react/`, not the repo root — `bunfig.toml` lives here
+and carries the preload). `src/test/setup.ts` registers happy-dom and stubs
+`matchMedia` + `Element.animate`, which motion needs; component tests use
+`@testing-library/react`. Anything behind `MorphStep`/`Reveal` arrives on an
+animation frame, so assert with `findBy*`, not `getBy*`. Base UI renders a
+hidden native input beside its Checkbox root, so query checkboxes by role
+rather than by label — `getByLabelText` matches both.
+
+## State (one provider, Jotai atom families)
+
+Stateful components keep state in module-level Jotai atom families keyed by an
+instance id, NOT in a per-component React context. Consumers mount
+`ExegiaProvider` once and every state hook works anywhere below it. Never add
+a second provider to the public surface — that is the whole point of this
+layer.
+
+- `src/state/store.ts` — `exegiaStore` (module-level default) + `ExegiaStore`.
+- `src/state/exegia-provider.tsx` — `ExegiaProvider` (jotai `Provider`, plus
+  opt-in `sound` and `theme`) and `useExegiaStore`.
+- `jotai` is a **peerDependency**: the library owns a store, so a consumer app
+  that also uses Jotai must resolve the same module instance.
+- Without the provider, hooks fall back to Jotai's implicit default store,
+  which is not `exegiaStore` — imperative access would then read a different
+  store than the components render from.
+
+### Pattern for adding state to a component
+
+`components/composed/tree/` is the reference implementation.
+
+1. Types in `type.ts` — `<Feature>State`, `<Feature>Actions`, and `@internal`
+   `<Feature>Config` / `<Feature>Handlers` / `<Feature>Seed`. No atom imports:
+   `type.ts` stays dependency-free.
+2. Atoms in `<feature>-atom.ts`. Use the in-house `keyed()` family, NOT
+   `jotai/utils`' `atomFamily` (deprecated for Jotai v3), then the
+   `stateFamily` / `readFamily` / `actionFamily` wrappers. Every atom carries
+   a `debugLabel` of `<feature>/<id>/<name>`.
+3. Mutations are write-only action atoms, never exported setters, so the app
+   can drive a component by id without holding its controller.
+4. `use-<feature>.ts` binds the atoms for the mounting component;
+   `use-<feature>-state.ts` exposes `use<Feature>State(id)` (reads) and
+   `use<Feature>Actions(id)` (writes only, so the caller never re-renders when
+   the component changes).
+5. The barrel exports public atoms explicitly. Never `export *` from the atom
+   module — `@internal` atoms would become a breaking-change surface.
+6. Unnamed instances key off `React.useId()` and are dropped on unmount; an
+   explicit id outlives its component, so a rail's fold survives a route
+   change. Call `remove<Feature>Instance(id)` on logout/teardown.
+
+### Rows read per-node atoms, not the controller
+
+A recursive component must not pull its state off a context value that carries
+the whole controller — every row then re-renders on every toggle. Instead:
+
+- `nodeFamily()` in `<feature>-atom.ts` builds atoms keyed by tree **and** node
+  (`treeNodeExpandedAtom(treeId, nodeId)`, `treeNodeActiveAtom`, …). A row
+  subscribes to its own booleans and sits still when a sibling's change.
+- The context value carries only `treeId`, render props and the **stable** drag
+  handlers (`useTreeDndHandlers`), so it never changes identity. Drag handlers
+  read `draggedId`/`dropTarget` out of the store when they run rather than
+  closing over them — that is what keeps them stable.
+- The row component is wrapped in `React.memo`, so a root re-render (a rail
+  measurement, a new `renderTrailing`) does not walk the tree.
+
+`tree-atom.test.tsx` guards this by counting `renderTrailing` calls per node:
+expanding one branch must leave its sibling's count unchanged. That test fails
+if the memo or the per-node subscriptions are removed.
+
+### The controlled-prop rule that bites
+
+Controlled props stay the source of truth. The hook projects them into the
+atoms in a layout effect so action atoms and remote readers see current data —
+a one-way projection, not a second source of truth, with write gates
+(`controlsItems`, `controlsActiveId`, …) keeping the store from overwriting a
+prop.
+
+A hook must NEVER subscribe to an atom it also writes from a prop of unstable
+identity. An inline `items={[…]}` array is a new reference every render, so
+that round-trip is an infinite loop. `treeOwnedItemsAtom` is the guard: it
+reads empty while a controlled prop owns the data, so the projection write
+notifies remote readers only, never the hook that produced it. Primitive props
+(`activeId`, `collapsed`) need no guard — the effect deps settle on their own.
+
+### Second implementation: the AI sidebar
+
+`components/blocks/nav/sidebar/` follows the tree pattern (atoms in
+`ai-sidebar-atom.ts` keyed by `sidebarId`, `useAISidebarState`/`Actions`,
+per-row atoms + memoized `ResourceRow`). Its deltas: `expandedIds` is a
+controllable _array_ prop, so it gets its own owned-\* loop guard beside
+`items`; `moveAISidebarRowAtom` is an async write atom that applies
+optimistically and rolls back on rejection, reading `movePending` straight
+back out of the store to refuse overlapping moves (no ref needed — store
+writes are synchronous); and the roving-focus `rowRefs` map holds DOM nodes,
+so it stays in `useAISidebar`, never the store — remote `focus`/`closeMenu`
+via `useAISidebarActions` move only the store's roving target.
+
+### Third implementation: auth
+
+`components/blocks/auth/auth-state.ts` is a pure coordination layer — no
+controlled props, so no config/handlers/seed projection and no loop guard.
+Flow atoms (`auth-flow-atom.ts`: step, identifier, status) are
+instance-keyed by `flowId` (default `"default"`); session atoms
+(`auth-session-atom.ts`, the import leaf) are singletons on purpose — a
+session is one user per store, and a family would imply several concurrent
+users. Hooks: `useAuthFlow`/`useAuthFlowActions(flowId?)`,
+`useAuthSession`/`useAuthSessionActions` (`signOut` = `endAuthSessionAtom`,
+which also resets the default flow). Never store passwords, codes or field
+values in the store — the auth blocks keep those in local `useState` on
+purpose. `AuthFlowBlock` (`auth-flow-block.tsx`) is the optional orchestrator
+over this layer: it renders the block for the current step with `goToStep`
+navigation pre-wired, and each submit handler returns an `AuthFlowDirective`
+(`{ user }` / `{ verify }` / `{ step }` / void) that it applies to the store.
+Rejections propagate into the block — the orchestrator never mirrors
+transient status/error into the flow atoms.
+
+### Fourth implementation: the scaffold
+
+`components/blocks/scaffold/` keys everything by `scaffoldId`. Its deltas:
+the visibility bookkeeping (`visibleOrder`/`autoHidden`/`userHidden`) is ONE
+atom because `reconcileVisibility` (in `utils.ts`) always settles the three
+lists together — every action that moves an input (register ids, measure
+capacity, toggle a panel) re-settles before returning, replacing the old
+hook's render-time settling. Tabs and panels read double-keyed
+`panelFamily` atoms (`scaffoldPanelHiddenAtom(scaffoldId, panelId)`,
+`scaffoldPanelDimmedAtom`) so a hover moving between two tabs re-renders
+only the panels whose boolean flips; the empty-key sentinel (`panelId ??
+""`) reads false for un-id'd parts. `ScaffoldContext` carries only
+`{ scaffoldId, inspectorWidth }`; `useScaffold().providerProps` carries a
+`scaffoldId` (not callbacks), and the controlled `inspectorOpen` follows
+the profile card's config/handlers projection.
+
 ## Pulling coss components
 
 `components.json` maps the `@coss` registry (coss.com/ui). Install base
@@ -58,7 +190,7 @@ Follow `ui/button.tsx` exactly:
      (
        | { variant: "glass"; glassVariant?: FrostGlassVariant }
        | { variant?: Exclude<Variant, "glass">; glassVariant?: never }
-     );
+     )
    ```
 3. Default finish is `"liquid-refract"`. Resolve it only when
    `variant === "glass"`; otherwise it stays `undefined`.

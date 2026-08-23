@@ -1,8 +1,19 @@
 import type * as React from "react"
 
+import {
+  Select,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+} from "@/components/ui/select"
+import { Field, FieldLabel } from "@/components/ui/field"
+import { Card, CardContent } from "@/components/ui/card"
+import { Switch } from "../ui/switch"
+
 /**
- * Lightweight playground controls for registry demos. Plain native elements
- * on purpose — docs-only, never part of the published library.
+ * Lightweight playground controls for registry demos — docs-only, never
+ * part of the published library.
  */
 
 export function DemoSelect<T extends string>({
@@ -11,26 +22,36 @@ export function DemoSelect<T extends string>({
   options,
   onChange,
 }: {
-  label: string
+  label?: string
   value: T
   options: readonly T[]
   onChange: (value: T) => void
 }) {
+  const items = options.map((option) => ({ label: option, value: option }))
+
   return (
-    <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-      {label}
-      <select
+    <Field className="ml-0 flex w-full flex-1 flex-row items-center justify-between text-muted-foreground">
+      {label && <FieldLabel className="ml-0 capitalize">{label}</FieldLabel>}
+      <Select
+        items={items}
+        onValueChange={(next) => onChange(next as T)}
         value={value}
-        onChange={(event) => onChange(event.target.value as T)}
-        className="h-7 rounded-md border bg-background px-2 text-xs text-foreground"
       >
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </label>
+        <SelectTrigger
+          className="h-7 min-w-0 rounded-sm text-xs capitalize"
+          size="sm"
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {items.map((item) => (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </Field>
   )
 }
 
@@ -79,14 +100,15 @@ export function DemoToggle({
   onChange: (checked: boolean) => void
 }) {
   return (
-    <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-      />
-      {label}
-    </label>
+    <Field className="ml-0 w-full">
+      <FieldLabel className="ml-0 w-full justify-between capitalize">
+        {label}
+        <Switch
+          checked={checked}
+          onCheckedChange={(value) => onChange(value)}
+        />
+      </FieldLabel>
+    </Field>
   )
 }
 
@@ -96,22 +118,25 @@ export function DemoStage({
   children,
   canvasClassName,
 }: {
-  controls: React.ReactNode
+  controls?: React.ReactNode
   children: React.ReactNode
   canvasClassName?: string
 }) {
   return (
-    <div className="flex w-full flex-col items-center gap-6">
+    <div className="relative flex w-full flex-col items-center">
+      {controls && (
+        <Card className="absolute top-3 right-3 z-20 min-w-48 rounded-lg shadow-lg">
+          <CardContent className="flex flex-col items-start gap-2">
+            {controls}
+          </CardContent>
+        </Card>
+      )}
       <div
         className={
-          canvasClassName ??
-          "flex min-h-28 w-full items-center justify-center rounded-lg"
+          canvasClassName ?? "flex min-h-24 w-full items-center justify-center"
         }
       >
         {children}
-      </div>
-      <div className="flex flex-wrap items-end justify-center gap-x-4 gap-y-3">
-        {controls}
       </div>
     </div>
   )

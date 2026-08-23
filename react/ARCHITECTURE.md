@@ -5,8 +5,8 @@ plus its documentation site — in one Vite + React codebase.
 
 ## Two things live in `src/`
 
-1. **The library** (published to npm as `@corpora/ui`, entry: `src/index.ts`)
-2. **The docs site** (this Vite app, entry: `src/main.tsx`) — like
+1. **The library** (published to npm as `@exegia/corpora-ui`, entry: `react/src/index.ts`)
+2. **The docs site** (this Vite app, entry: `react/src/main.tsx`) — like
    ui.elevenlabs.io for audio, but for corpora's research UI.
 
 ```
@@ -25,6 +25,11 @@ src/
 │   ├── docs/                 # Docs-site-only widgets (preview shell, props table,
 │   │                         #   code block) — NOT exported to npm
 │   └── theme-provider.tsx    # Shared theme context
+│
+├── state/                    # ── SHARED STATE ──
+│   ├── store.ts              # exegiaStore (module-level Jotai store)
+│   ├── exegia-provider.tsx   # ExegiaProvider — the app's ONE provider
+│   └── index.ts
 │
 ├── registry/                 # ── SINGLE SOURCE OF TRUTH for the docs ──
 │   ├── schema.ts             # RegistryEntry / CategoryDef / PropDef types
@@ -49,16 +54,16 @@ src/
 
 ## Routes
 
-| Path                | Page              |
-| ------------------- | ----------------- |
-| `/`                 | Home              |
-| `/atoms`            | Category index    |
-| `/atoms/:slug`      | Entry detail      |
-| `/components`       | Category index    |
-| `/components/:slug` | Entry detail      |
-| `/blocks`           | Category index    |
-| `/blocks/:slug`     | Entry detail      |
-| `*`                 | Not found         |
+| Path                | Page           |
+| ------------------- | -------------- |
+| `/`                 | Home           |
+| `/atoms`            | Category index |
+| `/atoms/:slug`      | Entry detail   |
+| `/components`       | Category index |
+| `/components/:slug` | Entry detail   |
+| `/blocks`           | Category index |
+| `/blocks/:slug`     | Entry detail   |
+| `*`                 | Not found      |
 
 Routes are generated in `routes.tsx` by iterating `registry/index.ts`
 categories — adding a category never touches the router by hand.
@@ -66,6 +71,9 @@ categories — adding a category never touches the router by hand.
 ## Adding a new component (the workflow)
 
 1. Implement it in `src/components/ui|composed|blocks/<name>.tsx`.
+1b. If it holds state, put it in Jotai atom families in
+   `<name>-atom.ts` keyed by an instance id — never a new provider. See
+   the State section of `CLAUDE.md`.
 2. Export it from `src/index.ts` (npm surface).
 3. Add a demo in `src/registry/demos/<name>-demo.tsx`.
 4. Register it in `src/registry/{atoms,components,blocks}.ts` with slug, name,
@@ -81,6 +89,6 @@ props table and usage snippet.
   the first components stabilize; externalize react/react-dom).
 - **shadcn registry**: the registry files mirror the shadcn `registry.json`
   item shape (slug = registry name, `registryDependencies`), so generating
-  `registry.json` for `bunx shadcn add @corpora/<name>` is a mechanical step.
+  `registry.json` for `bunx shadcn add @exegia/corpora-ui/<name>` is a mechanical step.
 - **SPA hosting**: client-side routing needs a catch-all rewrite to
   `index.html` on the host (Vite dev/preview handle it automatically).

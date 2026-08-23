@@ -31,14 +31,29 @@ import {
 export interface SignupBlockProps {
   title?: string;
   description?: string;
+  /**
+   * Replaces the built-in "terms" link inside the consent label — pass your
+   * own dialog trigger to render it inline instead of wiring `onTerms`.
+   */
+  termsComponent?: React.ReactNode;
   /** Brand mark rendered above the title. Omit for no logo row at all. */
   logo?: React.ReactNode;
-  /** Brand accent for the primary action. Omit to keep the default primary. */
+  /** Brand accent for the primary action. Omit keeping the default primary. */
   accent?: AuthAccent;
   providers?: SocialProvider[];
   showNameField?: boolean;
-  /** Require the terms checkbox before submitting. */
+  /** Require the term checkbox before submitting. */
   showTerms?: boolean;
+  /**
+   * Controls the term checkbox. Pass it with `onTermsCheckedChange` when
+   * something outside the block has to tick the box — an "I agree" action in
+   * your own terms dialog, say. Omit letting the block own the state.
+   */
+  termsChecked?: boolean;
+  /** Starting state of the term checkbox while it is uncontrolled. */
+  defaultTermsChecked?: boolean;
+  /** Fires on every change, controlled or not. */
+  onTermsCheckedChange?: (checked: boolean) => void;
   /** Block submission until every password requirement is met. */
   enforceStrongPassword?: boolean;
   onSubmit?: (data: {
@@ -59,21 +74,36 @@ export function SignupBlock({
   providers = ["google", "apple", "github"],
   showNameField = true,
   showTerms = true,
+  termsChecked,
+  defaultTermsChecked = false,
+  onTermsCheckedChange,
   enforceStrongPassword = true,
   onSubmit,
+  termsComponent,
   onProviderSelect,
   onLogin,
   onTerms,
 }: SignupBlockProps) {
   const nameId = React.useId();
   const emailId = React.useId();
+  const passwordId = React.useId();
   const termsId = React.useId();
   const [status, setStatus] = React.useState<AuthStatus>("idle");
   const [error, setError] = React.useState<string | null>(null);
   const [loadingProvider, setLoadingProvider] =
     React.useState<SocialProvider | null>(null);
   const [password, setPassword] = React.useState("");
-  const [terms, setTerms] = React.useState(false);
+  // Controlled when `termsChecked` is passed, uncontrolled otherwise. The
+  // internal state is kept either way, so a block that switches between the
+  // two mid-life does not lose the box, and the callback fires in both modes.
+  const [uncontrolledTerms, setUncontrolledTerms] =
+    React.useState(defaultTermsChecked);
+  const terms = termsChecked ?? uncontrolledTerms;
+
+  function handleTermsChange(checked: boolean) {
+    if (termsChecked === undefined) setUncontrolledTerms(checked);
+    onTermsCheckedChange?.(checked);
+  }
   // Tracked from each input's own constraint validation rather than a regex.
   // The values stay uncontrolled — only validity is needed, and the form reads
   // values from FormData on submit.
@@ -92,7 +122,7 @@ export function SignupBlock({
   const emailPathComplete =
     (!showNameField || nameValid) && emailValid && passwordValid;
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
     if (!strongEnough) {
@@ -198,6 +228,7 @@ export function SignupBlock({
                   id={emailId}
                   name="email"
                   type="email"
+                  aria-label="Email"
                   autoComplete="email"
                   placeholder="you@example.com"
                   required
@@ -209,9 +240,11 @@ export function SignupBlock({
               </Field>
               <Reveal show={emailValid}>
                 <Field name="password">
-                  <FieldLabel>Password</FieldLabel>
+                  <FieldLabel htmlFor={passwordId}>Password</FieldLabel>
                   <PasswordInput
+                    id={passwordId}
                     name="password"
+                    aria-label="Password"
                     autoComplete="new-password"
                     placeholder="Create a password"
                     showStrength
@@ -227,18 +260,18 @@ export function SignupBlock({
                   <Checkbox
                     id={termsId}
                     checked={terms}
-                    onCheckedChange={(checked) => setTerms(checked === true)}
+                    onCheckedChange={(checked) =>
+                      handleTermsChange(checked === true)
+                    }
                     disabled={busy}
                   />
                   <Label htmlFor={termsId} className="font-normal">
                     I agree to the{" "}
-                    <Button
-                      variant="link"
-                      type="button"
-                      onClick={onTerms}
-                    >
-                      terms
-                    </Button>
+                    {termsComponent ?? (
+                      <Button variant="link" type="button" onClick={onTerms}>
+                        terms
+                      </Button>
+                    )}
                   </Label>
                 </div>
               )}
