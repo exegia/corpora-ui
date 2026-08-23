@@ -1,0 +1,65 @@
+# `next` moved: pack a tarball as a gate, then cut/refresh `release/vX.Y.Z`.
+#
+# `pr.yml` already ran the full suite on the promote PR, so this only
+# packages and versions. Pushing the release branch is what starts
+# pr-merged.yml, which opens or refreshes the draft PR into main.
+#
+# No Vercel preview — this repo ships as an npm package.
+name: Next
+
+on:
+  push:
+    branches:
+      - next
+  workflow_dispatch:
+
+concurrency:
+  group: next
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  INSTALL_FLAGS: --frozen-lockfile
+
+jobs:
+  pack:
+    name: pack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - run: make pack
+      - uses: actions/upload-artifact@v4
+        with:
+          name: corpora-ui-tarball
+          path: dist-pack/*.tgz
+          if-no-files-found: error
+
+  cut-release:
+    name: cut-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          app-id: ${{ secrets.AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          token: ${{ steps.app-token.outputs.token }}
+
+      - uses: ./.github/actions/setup
+
+      - name: Cut or refresh the release branch
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          git config user.name  "corpora-automation[bot]"
+          git config user.email "corpora-automation[bot]@users.noreply.github.com"
+          make cut-release
