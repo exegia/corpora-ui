@@ -6,6 +6,8 @@ import type {
   ReactNode,
 } from "react"
 import type { HighlightPopover as HighlightPopoverPrimitive } from "@omsimos/react-highlight-popover"
+import type { PopoverPopup } from "@/components/ui/popover"
+import type { TextProps } from "../text/types"
 
 export interface SelectionPosition {
   top: number
@@ -74,6 +76,24 @@ export interface TextSelectionProps extends Omit<
   onPopoverHide?: () => void
 }
 
+
+export interface TextPopoverRenderProps {
+  open: boolean
+  setOpen: (open: boolean) => void
+  close: () => void
+}
+
+export interface TextClickPopoverProps extends Omit<TextProps, "popover"> {
+  /** Popover content rendered when the text is clicked. */
+  popover?: ReactNode
+  /** Render function for applications that need full control of the markup. */
+  renderPopover?: (props: TextPopoverRenderProps) => ReactNode
+  /** Props forwarded to the popup (side, align, className, …). */
+  popoverProps?: ComponentProps<typeof PopoverPopup>
+  open?: boolean
+  defaultOpen?: boolean
+  onOpenChange?: (open: boolean) => void
+}
 
 export interface UseSelectionOptions {
   selected?: boolean

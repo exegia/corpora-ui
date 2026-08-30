@@ -1,3 +1,4 @@
+export { TextClickPopover } from "./click-popover"
 export { HighlightPopover } from "./popover"
 export { TextSelection } from "./selection"
 export {
@@ -21,6 +22,8 @@ export type {
   SelectionRenderProps,
   SelectionState,
   SelectionStateUpdate,
+  TextClickPopoverProps,
+  TextPopoverRenderProps,
   TextSelectionProps,
   UseSelectionOptions,
   UseSelectionResult,

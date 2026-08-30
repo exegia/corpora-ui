@@ -1,5 +1,9 @@
 export * from "./text"
-export { HighlightPopover, TextSelection } from "./text-selection"
+export {
+  HighlightPopover,
+  TextClickPopover,
+  TextSelection,
+} from "./text-selection"
 export {
   initialSelectionState,
   resetSelectionAtom,
@@ -21,6 +25,8 @@ export type {
   SelectionRenderProps,
   SelectionState,
   SelectionStateUpdate,
+  TextClickPopoverProps,
+  TextPopoverRenderProps,
   TextSelectionProps,
 } from "./text-selection/types"
 export type {

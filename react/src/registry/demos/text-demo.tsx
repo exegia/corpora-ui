@@ -5,8 +5,12 @@ import {
   DemoStage,
   DemoToggle,
 } from "@/components/docs/demo-controls"
-import { Heading, Paragraph, Span, Text } from "@/components/atoms/text"
-import type { SelectionRenderProps } from "@/components/atoms/text-selection"
+import { Heading, Paragraph, Text } from "@/components/atoms/text"
+import { TextClickPopover } from "@/components/atoms/text-selection"
+import type {
+  SelectionRenderProps,
+  TextPopoverRenderProps,
+} from "@/components/atoms/text-selection"
 
 const TYPES = ["default", "heading", "paragraph", "link", "subscript"] as const
 const SIZES = ["small", "medium", "large"] as const
@@ -29,12 +33,36 @@ function SelectionPopoverContent({
   )
 }
 
+function ClickPopoverContent({ close }: TextPopoverRenderProps) {
+  return (
+    <div className="grid gap-1">
+      <p className="text-[8px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
+        Clicked text
+      </p>
+      <p className="text-sm text-foreground">
+        Rendered from a coss Popover on click.
+      </p>
+      <button
+        className="justify-self-start text-xs text-primary hover:text-primary/80"
+        onClick={close}
+        type="button"
+      >
+        Dismiss
+      </button>
+    </div>
+  )
+}
+
 export default function TextDemo(): React.ReactElement {
   const [type, setType] = React.useState<DemoType>("default")
   const [size, setSize] = React.useState<DemoSize>("medium")
   const [selection, setSelection] = React.useState(false)
   const renderSelectionPopover = React.useCallback(
     (props: SelectionRenderProps) => <SelectionPopoverContent {...props} />,
+    []
+  )
+  const renderClickPopover = React.useCallback(
+    (props: TextPopoverRenderProps) => <ClickPopoverContent {...props} />,
     []
   )
 
@@ -85,15 +113,30 @@ export default function TextDemo(): React.ReactElement {
             This paragraph forwards the selection wrapper props, so selecting
             any part of it renders the preview popover above.
           </Paragraph>
-          <Span selection={selection} size="small">
+          <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">
+            Click any of the texts below to open its popover
+          </p>
+          <TextClickPopover
+            className="select-text"
+            renderPopover={renderClickPopover}
+            size="small"
+          >
             Small selected span
-          </Span>
-          <Text size="small" type="link" href="#text-demo">
+          </TextClickPopover>
+          <TextClickPopover
+            renderPopover={renderClickPopover}
+            size="small"
+            type="link"
+          >
             Link text
-          </Text>
-          <Text size="small" type="subscript">
+          </TextClickPopover>
+          <TextClickPopover
+            renderPopover={renderClickPopover}
+            size="small"
+            type="subscript"
+          >
             Subscript note
-          </Text>
+          </TextClickPopover>
         </div>
       </div>
     </DemoStage>

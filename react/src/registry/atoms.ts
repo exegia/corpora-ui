@@ -290,10 +290,16 @@ export const atoms: RegistryEntry[] = [
       },
     ],
     usage: `import { Heading, Paragraph, Text } from "@exegia/corpora-ui"
+import { TextClickPopover } from "@exegia/corpora-ui"
 
 <Heading size="large">Corpus title</Heading>
 <Paragraph>Readable corpus prose belongs here.</Paragraph>
-<Text type="link" href="/activity">View activity</Text>`,
+<Text type="link" href="/activity">View activity</Text>
+
+// Click-triggered popover — works for default (span), link and subscript
+<TextClickPopover type="subscript" popover={<p>Annotation</p>}>
+  Subscript note
+</TextClickPopover>`,
   },
   {
     slug: "file-icons",
