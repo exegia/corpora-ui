@@ -4,7 +4,20 @@ import { useId } from "react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { accentSolid, AiIcon, ghostOnDark, mutedText } from "./shared"
+import { Card } from "@/components/ui/card"
+import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
+import {
+  accentSolid,
+  accentText,
+  AiIcon,
+  ghostMuted,
+  mutedText,
+} from "./shared"
 import type { DiffRow, VersionHistoryEntry } from "./types"
 
 export interface UserMessageProps extends Omit<
@@ -21,7 +34,7 @@ export function UserMessage({
 }: UserMessageProps): React.ReactElement {
   return (
     <div className={cn("flex justify-end", className)} {...props}>
-      <div className="max-w-[88%] rounded-2xl rounded-br-sm bg-[#f3ba20] px-3.5 py-2.5 text-sm text-black">
+      <div className="max-w-[88%] rounded-2xl rounded-br-sm bg-muted px-3.5 py-2.5 text-sm text-foreground">
         {children}
       </div>
     </div>
@@ -50,27 +63,29 @@ export function GeneratedBlock({
     <div
       aria-live="polite"
       aria-atomic="false"
-      className={cn("border-l-2 border-[#f3ba20] pl-3", className)}
+      className={cn("border-l-2 border-amber-400/50 pl-3", className)}
       data-generated="true"
       {...props}
     >
-      <div className="mb-2 flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.12em] text-[#f3ba20]">
+      <div
+        className={cn(
+          "mb-2 flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.12em]",
+          accentText
+        )}
+      >
         <AiIcon className="text-[11px]" />
         GENERATED · NOT PART OF THE CORPUS
       </div>
-      <div className="text-sm leading-6 text-white/85">
+      <div className="text-sm leading-6 text-foreground/90">
         {content}
         {isStreaming ? (
           <>
             <span
               aria-hidden="true"
-              className="ml-1 inline-block h-4 w-0.5 translate-y-0.5 animate-pulse bg-[#f3ba20]"
+              className="ml-1 inline-block h-4 w-0.5 translate-y-0.5 animate-pulse bg-amber-400/80"
             />
             <Button
-              className={cn(
-                "ml-2 border-white/15 font-normal text-white/60",
-                ghostOnDark
-              )}
+              className={cn("ml-2 font-normal", ghostMuted)}
               onClick={onStop}
               size="xs"
               variant="ghost"
@@ -84,7 +99,7 @@ export function GeneratedBlock({
         <div className="mt-2 flex flex-wrap gap-1.5" aria-label="Citations">
           {citations.map((citation) => (
             <span
-              className="rounded bg-white/7 px-1.5 py-0.5 text-[11px] text-white/50"
+              className="rounded bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground"
               key={citation}
             >
               {citation}
@@ -125,47 +140,53 @@ export function SuggestedFixCard({
 }: SuggestedFixCardProps): React.ReactElement {
   const labelId = useId()
   return (
-    <article
-      aria-labelledby={labelId}
-      className={cn(
-        "rounded-xl border border-[#f3ba20]/25 bg-[#f3ba20]/6 p-3.5",
-        className
-      )}
+    <Card
+      render={
+        <article
+          aria-labelledby={labelId}
+          onKeyDown={(event) => {
+            if (
+              !applyDisabled &&
+              (event.metaKey || event.ctrlKey) &&
+              event.key === "Enter"
+            ) {
+              event.preventDefault()
+              onApply?.()
+            }
+            onKeyDown?.(event)
+          }}
+          {...props}
+        />
+      }
+      className={cn("rounded-sm p-3.5", className)}
       data-slot="suggested-fix-card"
-      onKeyDown={(event) => {
-        if (
-          !applyDisabled &&
-          (event.metaKey || event.ctrlKey) &&
-          event.key === "Enter"
-        ) {
-          event.preventDefault()
-          onApply?.()
-        }
-        onKeyDown?.(event)
-      }}
-      {...props}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[10px] font-semibold tracking-[0.12em] text-[#f3ba20]">
+          <p
+            className={cn(
+              "text-[10px] font-semibold tracking-[0.12em]",
+              accentText
+            )}
+          >
             SUGGESTED FIX
           </p>
-          <h3 className="mt-1 text-sm font-medium text-white" id={labelId}>
-            Target node <code className="text-[#f3ba20]">{nodeId}</code>
+          <h3 className="mt-1 text-sm font-medium text-foreground" id={labelId}>
+            Target node <code className={accentText}>{nodeId}</code>
           </h3>
         </div>
         {version ? (
           <span className={cn("text-[11px]", mutedText)}>v{version}</span>
         ) : null}
       </div>
-      <div className="mt-3 grid gap-1.5 rounded-lg border border-white/8 bg-black/15 p-2.5 font-mono text-xs">
+      <div className="mt-3 grid gap-1.5 rounded-sm border bg-muted/40 p-2.5 font-mono text-xs">
         {rows.map((row, index) => (
           <div
             className={cn(
               "flex gap-2 rounded px-1.5 py-1",
               row.type === "add"
-                ? "bg-emerald-400/8 text-emerald-200"
-                : "bg-red-400/8 text-red-200"
+                ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-200"
+                : "bg-red-500/10 text-red-700 dark:text-red-200"
             )}
             key={`${row.type}-${row.field ?? ""}-${index}`}
           >
@@ -186,15 +207,15 @@ export function SuggestedFixCard({
           </div>
         ))}
       </div>
-      <div className="mt-3 border-l border-[#f3ba20]/45 pl-2.5">
-        <p className="text-[10px] font-semibold tracking-[0.1em] text-[#f3ba20]">
+      <div className="mt-3 border-l-2 border-border pl-2.5">
+        <p className="text-[10px] font-semibold tracking-[0.1em] text-muted-foreground">
           GENERATED RATIONALE
         </p>
         <p className={cn("mt-1", mutedText)}>{rationale}</p>
       </div>
       <div className="mt-3 flex items-center justify-between gap-2">
         {disabledReason ? (
-          <p className="text-[11px] text-amber-200/80">{disabledReason}</p>
+          <p className="text-[11px] text-warning">{disabledReason}</p>
         ) : (
           <span className={cn("text-[11px]", mutedText)}>
             Apply writes to the working version.
@@ -202,7 +223,7 @@ export function SuggestedFixCard({
         )}
         <div className="ml-auto flex gap-1.5">
           <Button
-            className={cn("font-normal", ghostOnDark)}
+            className={cn("font-normal", ghostMuted)}
             onClick={onReject}
             size="xs"
             variant="ghost"
@@ -220,7 +241,7 @@ export function SuggestedFixCard({
           </Button>
         </div>
       </div>
-    </article>
+    </Card>
   )
 }
 
@@ -241,33 +262,34 @@ export function StaleCard({
   ...props
 }: StaleCardProps): React.ReactElement {
   return (
-    <article
-      className={cn(
-        "rounded-xl border border-amber-300/30 bg-amber-300/8 p-3.5",
-        className
-      )}
+    <Alert
+      className={cn("rounded-sm", className)}
       data-state="stale"
+      variant="warning"
       {...props}
     >
-      <p className="text-[10px] font-semibold tracking-[0.12em] text-amber-200">
+      <AlertTitle className="text-[10px] font-semibold tracking-[0.12em] text-warning">
         STALE SUGGESTION
-      </p>
-      <p className="mt-1 text-sm text-white">
-        Node <code className="text-amber-200">{nodeId}</code> changed{" "}
-        {versionDelta}.
-      </p>
-      <p className={cn("mt-1", mutedText)}>
-        This fix can no longer be applied to the current version.
-      </p>
-      <Button
-        className="mt-3 border-amber-200/30 font-normal text-amber-100 ring-offset-0 hover:bg-amber-200/10 hover:text-amber-100 data-pressed:bg-amber-200/10 focus-visible:ring-amber-200/60"
-        onClick={onRevalidate}
-        size="xs"
-        variant="ghost"
-      >
-        Re-validate
-      </Button>
-    </article>
+      </AlertTitle>
+      <AlertDescription>
+        <p className="text-sm text-foreground">
+          Node <code>{nodeId}</code> changed {versionDelta}.
+        </p>
+        <p className={cn("-mt-1.5", mutedText)}>
+          This fix can no longer be applied to the current version.
+        </p>
+      </AlertDescription>
+      <AlertAction>
+        <Button
+          className="font-normal"
+          onClick={onRevalidate}
+          size="xs"
+          variant="outline"
+        >
+          Re-validate
+        </Button>
+      </AlertAction>
+    </Alert>
   )
 }
 
@@ -289,11 +311,8 @@ export function AppliedCard({
   ...props
 }: AppliedCardProps): React.ReactElement {
   return (
-    <article
-      className={cn(
-        "rounded-xl border border-emerald-400/25 bg-emerald-400/8 p-3.5",
-        className
-      )}
+    <Alert
+      className={cn("rounded-sm", className)}
       data-state="applied"
       onKeyDown={(event) => {
         if (
@@ -305,30 +324,37 @@ export function AppliedCard({
         }
         onKeyDown?.(event)
       }}
+      variant="success"
       {...props}
     >
-      <p className="text-[10px] font-semibold tracking-[0.12em] text-emerald-300">
+      <AlertTitle className="text-[10px] font-semibold tracking-[0.12em] text-success">
         ✓ APPLIED — VERSION HISTORY v{version}
-      </p>
-      <div className="mt-2 flex flex-wrap gap-3 text-xs">
-        <Button
-          className="font-normal text-emerald-200 underline-offset-2 ring-offset-0 focus-visible:ring-emerald-200/60"
-          onClick={onUndo}
-          size="xs"
-          variant="link"
-        >
-          Undo ⌘Z
-        </Button>
-        <Button
-          className="font-normal text-white/60 underline-offset-2 ring-offset-0 hover:text-white focus-visible:ring-emerald-200/60"
-          onClick={onViewHistory}
-          size="xs"
-          variant="link"
-        >
-          View revision history
-        </Button>
-      </div>
-    </article>
+      </AlertTitle>
+      <AlertDescription>
+        <div className="flex flex-wrap gap-3 text-xs">
+          <Button
+            className="font-normal text-success underline-offset-2 ring-offset-0"
+            onClick={onUndo}
+            size="xs"
+            variant="link"
+          >
+            Undo ⌘Z
+          </Button>
+          <Button
+            className={cn(
+              "font-normal underline-offset-2",
+              ghostMuted,
+              "hover:bg-transparent"
+            )}
+            onClick={onViewHistory}
+            size="xs"
+            variant="link"
+          >
+            View revision history
+          </Button>
+        </div>
+      </AlertDescription>
+    </Alert>
   )
 }
 
@@ -347,11 +373,11 @@ export function VersionHistoryRecord({
       : entry.timestamp
   return (
     <article
-      className={cn("border-l border-white/15 pl-3", className)}
+      className={cn("border-l border-border pl-3", className)}
       data-slot="version-history-record"
     >
-      <p className="text-xs text-white/80">
-        <span className="font-medium text-[#f3ba20]">
+      <p className="text-xs text-foreground/85">
+        <span className={cn("font-medium", accentText)}>
           resp=&quot;{entry.responseId}&quot;
         </span>
         {entry.applyingUser ? ` · ${entry.applyingUser}` : ""}
@@ -359,7 +385,7 @@ export function VersionHistoryRecord({
       <p className={cn("mt-1 text-xs", mutedText)}>
         Node <code>{entry.nodeId}</code> · v{entry.version} · {timestamp}
       </p>
-      <p className="mt-2 text-xs text-white/65">
+      <p className="mt-2 text-xs text-muted-foreground">
         Previous value: <del>{entry.previousValue}</del>
       </p>
     </article>
@@ -376,16 +402,14 @@ export function LockedBanner({
   className,
 }: LockedBannerProps): React.ReactElement {
   return (
-    <div
-      className={cn(
-        "rounded-lg border border-white/12 bg-white/6 px-3 py-2.5 text-xs text-white/70",
-        className
-      )}
-      role="status"
-    >
-      <span aria-hidden="true">🔒 </span>
-      {children}
-    </div>
+    <Alert className={cn("rounded-sm text-xs", className)} role="status">
+      <AlertDescription className="text-xs">
+        <span>
+          <span aria-hidden="true">🔒 </span>
+          {children}
+        </span>
+      </AlertDescription>
+    </Alert>
   )
 }
 
@@ -397,15 +421,11 @@ export function PinnedThreadBanner({
   className,
 }: PinnedThreadBannerProps): React.ReactElement {
   return (
-    <div
-      className={cn(
-        "rounded-lg border border-[#f3ba20]/20 bg-[#f3ba20]/6 px-3 py-2 text-xs text-[#f3ba20]/85",
-        className
-      )}
-      role="status"
-    >
-      Thread follows its passage, not your view.
-    </div>
+    <Alert className={cn("rounded-sm", className)} role="status">
+      <AlertDescription className="text-xs">
+        Thread follows its passage, not your view.
+      </AlertDescription>
+    </Alert>
   )
 }
 
@@ -421,24 +441,20 @@ export function DegradedBanner({
   className,
 }: DegradedBannerProps): React.ReactElement {
   return (
-    <div
-      className={cn(
-        "flex items-center gap-2 rounded-lg border border-amber-300/25 bg-amber-300/8 px-3 py-2.5 text-xs text-amber-100",
-        className
-      )}
-      role="alert"
-    >
-      <span className="flex-1">{reason}</span>
+    <Alert className={cn("rounded-sm", className)} variant="warning">
+      <AlertDescription className="text-xs">{reason}</AlertDescription>
       {onRetry ? (
-        <Button
-          className="text-amber-100 underline underline-offset-2 ring-offset-0 hover:text-amber-100 hover:no-underline data-pressed:no-underline focus-visible:ring-amber-200/60"
-          onClick={onRetry}
-          size="xs"
-          variant="link"
-        >
-          Retry
-        </Button>
+        <AlertAction>
+          <Button
+            className="font-normal"
+            onClick={onRetry}
+            size="xs"
+            variant="outline"
+          >
+            Retry
+          </Button>
+        </AlertAction>
       ) : null}
-    </div>
+    </Alert>
   )
 }

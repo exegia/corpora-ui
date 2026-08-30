@@ -85,10 +85,7 @@ export function ScopePicker({
         aria-controls={isOpen ? id : undefined}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        className={cn(
-          "border-white/12 bg-white/5 font-normal text-white/70 hover:bg-white/10 hover:text-white data-pressed:bg-white/10",
-          accentRing
-        )}
+        className={cn("border font-normal text-muted-foreground hover:text-foreground", accentRing)}
         onClick={() => setOpen(!isOpen)}
         size="xs"
         variant="ghost"
@@ -100,7 +97,7 @@ export function ScopePicker({
         <div
           aria-label="Scope level"
           className={cn(
-            "absolute top-10 right-0 z-20 w-48 rounded-lg p-1",
+            "absolute top-10 right-0 z-20 w-48 rounded-sm p-1",
             surface
           )}
           id={id}
@@ -121,7 +118,7 @@ export function ScopePicker({
           {AI_SCOPE_LEVELS.map((kind) => (
             <button
               aria-selected={selected === kind}
-              className="flex min-h-9 w-full items-center justify-between rounded-md px-2.5 text-left text-sm text-white/75 capitalize outline-none hover:bg-white/8 focus-visible:bg-[#f3ba20]/15 focus-visible:text-[#f3ba20]"
+              className="flex min-h-9 w-full items-center justify-between rounded-sm px-2.5 text-left text-sm text-foreground/80 capitalize outline-none hover:bg-muted focus-visible:bg-amber-400/12 focus-visible:text-amber-700 dark:focus-visible:text-amber-300"
               data-scope-option={kind}
               key={kind}
               onClick={() => select(kind)}

@@ -927,13 +927,13 @@ function App() {
     category: "blocks",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/ai-curation-demo")),
-    registryDependencies: [],
+    registryDependencies: ["card"],
     props: [
       {
         name: "AiPanel",
         type: "scope / thread / composerProps / callbacks",
         description:
-          "Full-height right rail. Keep data fetching, streaming and writes in the host application; the panel provides the stable focus order and layout.",
+          "Full-height rail with no surface chrome or close affordance of its own — host it inside a container such as the shell's right panel. Keep data fetching, streaming and writes in the host application; the panel provides the stable focus order and layout.",
       },
       {
         name: "SelectionPopover",

@@ -1,10 +1,9 @@
 "use client"
 
-import { useEffect, useRef } from "react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { CloseIcon, ghostOnDark, surface } from "./shared"
+import { ghostMuted } from "./shared"
 import { Composer, type ComposerProps } from "./composer"
 import { ScopeChip } from "./scope-chip"
 import { ScopePicker } from "./scope-picker"
@@ -16,7 +15,6 @@ export interface AiPanelProps extends Omit<
   "title"
 > {
   scope: AiScope
-  onClose?: () => void
   onNewThread?: () => void
   onScopeChange?: (kind: AiScope["kind"]) => void
   onRemoveScope?: () => void
@@ -31,13 +29,14 @@ export interface AiPanelProps extends Omit<
 }
 
 /**
- * Full-height curation rail. Data fetching, streaming and version writes stay
- * with the host application; this component only establishes layout and the
- * focus order shared by all panel states.
+ * Full-height curation rail, designed to sit inside a host container such as
+ * the shell's right panel — it brings no surface chrome or close affordance
+ * of its own. Data fetching, streaming and version writes stay with the host
+ * application; this component only establishes layout and the focus order
+ * shared by all panel states.
  */
 export function AiPanel({
   scope,
-  onClose,
   onNewThread,
   onScopeChange,
   onRemoveScope,
@@ -50,49 +49,21 @@ export function AiPanel({
   locked = false,
   headerTitle = "AI curation",
   className,
-  onKeyDown,
   ...props
 }: AiPanelProps): React.ReactElement {
-  const closeRef = useRef<HTMLButtonElement>(null)
-
-  useEffect(() => {
-    closeRef.current?.focus()
-  }, [])
-
   return (
     <aside
       aria-label={headerTitle}
-      className={cn(
-        "flex h-full min-h-[32rem] w-full max-w-md flex-col",
-        surface,
-        className
-      )}
+      className={cn("flex h-full w-full flex-col", className)}
       data-slot="ai-panel"
-      onKeyDown={(event) => {
-        if (event.key === "Escape") {
-          event.preventDefault()
-          onClose?.()
-        }
-        onKeyDown?.(event)
-      }}
       {...props}
     >
-      <header className="flex shrink-0 items-center gap-2 border-b border-white/10 px-4 py-3">
-        <Button
-          aria-label="Close AI curation panel"
-          className={cn("order-3", ghostOnDark)}
-          onClick={onClose}
-          ref={closeRef}
-          size="icon-xs"
-          variant="ghost"
-        >
-          <CloseIcon />
-        </Button>
-        <h2 className="order-1 flex-1 text-sm font-semibold text-white">
+      <header className="flex shrink-0 items-center gap-2 border-b px-4 py-3">
+        <h2 className="flex-1 text-sm font-semibold text-foreground">
           {headerTitle}
         </h2>
         <Button
-          className={cn("order-2 font-normal", ghostOnDark)}
+          className={cn("font-normal", ghostMuted)}
           onClick={onNewThread}
           size="xs"
           variant="ghost"
@@ -101,7 +72,7 @@ export function AiPanel({
         </Button>
       </header>
 
-      <div className="flex shrink-0 items-center gap-2 border-b border-white/8 px-4 py-3">
+      <div className="flex shrink-0 items-center gap-2 border-b px-4 py-3">
         <ScopeChip
           scope={scope}
           removable
@@ -119,7 +90,7 @@ export function AiPanel({
 
       {locked ? (
         <p
-          className="mx-4 mt-3 rounded-lg border border-white/12 bg-white/5 px-3 py-2 text-xs text-white/65"
+          className="mx-4 mt-3 rounded-sm border bg-muted/50 px-3 py-2 text-xs text-muted-foreground"
           role="status"
         >
           🔒 Published corpus — answers only. Editing is disabled.

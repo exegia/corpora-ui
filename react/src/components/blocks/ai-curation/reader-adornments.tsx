@@ -42,7 +42,7 @@ export function AppliedMark({
   return (
     <span
       className={cn(
-        "relative border-b-2 border-[#f3ba20] text-inherit",
+        "relative border-b-2 border-amber-400/70 text-inherit",
         className
       )}
       data-applied-mark="true"
@@ -51,7 +51,7 @@ export function AppliedMark({
     >
       <span
         aria-hidden="true"
-        className="absolute -start-4 top-1/2 text-xs text-[#f3ba20]"
+        className="absolute -start-4 top-1/2 text-xs text-amber-600 dark:text-amber-300/90"
       >
         ◆
       </span>
@@ -78,17 +78,17 @@ export function ApplyToast({
     <div
       aria-live="assertive"
       className={cn(
-        "flex items-center gap-3 rounded-lg border border-emerald-400/30 bg-[#171716] px-3 py-2.5 text-xs text-white shadow-lg",
+        "flex items-center gap-3 rounded-sm border border-success/32 bg-popover px-3 py-2.5 text-xs text-popover-foreground shadow-lg",
         className
       )}
       data-slot="apply-toast"
       role="status"
     >
-      <span className="text-emerald-300">✓</span>
+      <span className="text-success">✓</span>
       <span className="flex-1">{message}</span>
       {onUndo ? (
         <Button
-          className="text-emerald-200 underline underline-offset-2 ring-offset-0 hover:text-emerald-200 focus-visible:ring-emerald-200/60"
+          className="text-success underline underline-offset-2 ring-offset-0 hover:text-success"
           onClick={onUndo}
           size="xs"
           variant="link"

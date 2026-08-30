@@ -5,7 +5,7 @@ import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { accentSolid, ArrowUpIcon, ghostOnDark, mutedText } from "./shared"
+import { accentSolid, ArrowUpIcon, ghostMuted, mutedText } from "./shared"
 import type { ComposerMode } from "./types"
 
 const MODES: readonly { value: ComposerMode; label: string }[] = [
@@ -65,16 +65,16 @@ export function Composer({
 
   return (
     <form
-      className={cn("border-t border-white/10 pt-3", className)}
+      className={cn("border-t pt-3", className)}
       onSubmit={(event) => {
         event.preventDefault()
         send()
       }}
     >
-      <div className="overflow-hidden rounded-xl border border-white/12 bg-white/5 focus-within:border-[#f3ba20]/50">
+      <div className="overflow-hidden rounded-sm border bg-muted/30 focus-within:border-ring">
         <Textarea
           unstyled
-          className="block w-full text-sm leading-5 text-white has-disabled:cursor-not-allowed has-disabled:opacity-50 [&_textarea]:min-h-20 [&_textarea]:resize-none [&_textarea]:px-3 [&_textarea]:py-2.5 [&_textarea]:placeholder:text-white/35"
+          className="block w-full text-sm leading-5 text-foreground has-disabled:cursor-not-allowed has-disabled:opacity-50 [&_textarea]:min-h-20 [&_textarea]:resize-none [&_textarea]:px-3 [&_textarea]:py-2.5 [&_textarea]:placeholder:text-muted-foreground/70"
           aria-label="Message"
           disabled={isDisabled}
           onChange={(event) => changeValue(event.target.value)}
@@ -91,13 +91,13 @@ export function Composer({
           placeholder={placeholder}
           value={draft}
         />
-        <div className="flex items-center justify-between gap-2 border-t border-white/8 px-2 py-1.5">
+        <div className="flex items-center justify-between gap-2 border-t px-2 py-1.5">
           <label className="sr-only" htmlFor={`${selectedMode}-composer-mode`}>
             Composer mode
           </label>
           <select
             aria-label="Composer mode"
-            className="max-w-[10.5rem] bg-transparent text-[11px] text-white/50 outline-none focus:text-white disabled:opacity-50"
+            className="max-w-[10.5rem] bg-transparent text-[11px] text-muted-foreground outline-none focus:text-foreground disabled:opacity-50"
             disabled={isDisabled}
             id={`${selectedMode}-composer-mode`}
             onChange={(event) => {
@@ -108,18 +108,14 @@ export function Composer({
             value={selectedMode}
           >
             {MODES.map((item) => (
-              <option
-                className="bg-[#171716]"
-                key={item.value}
-                value={item.value}
-              >
+              <option key={item.value} value={item.value}>
                 {item.label}
               </option>
             ))}
           </select>
           {isStreaming ? (
             <Button
-              className={cn("bg-white/10 text-white", ghostOnDark, "hover:text-white")}
+              className={cn("font-normal", ghostMuted)}
               onClick={onStop}
               size="xs"
               variant="ghost"

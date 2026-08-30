@@ -34,7 +34,7 @@ export function SuggestedPrompts({
       {prompts.map((prompt) => (
         <Button
           className={cn(
-            "h-auto justify-start whitespace-normal border-white/10 bg-white/4 px-3 py-2 text-left text-xs font-normal text-white/70 hover:border-[#f3ba20]/35 hover:bg-[#f3ba20]/8 hover:text-white data-pressed:bg-[#f3ba20]/8 sm:h-auto sm:text-xs",
+            "h-auto justify-start whitespace-normal border bg-muted/30 px-3 py-2 text-left text-xs font-normal text-muted-foreground hover:border-amber-500/30 hover:text-foreground sm:h-auto sm:text-xs",
             accentRing
           )}
           key={prompt}

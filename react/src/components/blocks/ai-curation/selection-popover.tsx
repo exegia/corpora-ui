@@ -14,7 +14,7 @@ import {
   accentRing,
   AiIcon,
   CloseIcon,
-  ghostOnDark,
+  ghostMuted,
   mutedText,
   surface,
 } from "./shared"
@@ -82,7 +82,7 @@ export function SelectionPopover({
         align="start"
         aria-label="Selection actions"
         className={cn(
-          "w-64 flex-col overflow-hidden rounded-xl p-0",
+          "w-64 flex-col overflow-hidden rounded-sm p-0",
           surface,
           className
         )}
@@ -91,7 +91,7 @@ export function SelectionPopover({
           <div className="min-w-0">
             {variant === "word" && word ? (
               <>
-                <p className="truncate font-medium text-white">{word.lemma}</p>
+                <p className="truncate font-medium text-foreground">{word.lemma}</p>
                 <p className={mutedText}>
                   {[
                     word.partOfSpeech ?? word.pos,
@@ -103,13 +103,13 @@ export function SelectionPopover({
               </>
             ) : node ? (
               <>
-                <p className="font-medium text-white">{node.range}</p>
+                <p className="font-medium text-foreground">{node.range}</p>
                 <p className={mutedText}>
                   {node.nodeIds.length} node
                   {node.nodeIds.length === 1 ? "" : "s"} · {node.wordCount}{" "}
                   words
                 </p>
-                <p className="mt-1 truncate text-[11px] text-white/40">
+                <p className="mt-1 truncate text-[11px] text-muted-foreground/70">
                   {node.nodeIds.join(" · ")}
                 </p>
               </>
@@ -118,7 +118,7 @@ export function SelectionPopover({
           {onClose ? (
             <Button
               aria-label="Close selection actions"
-              className={cn(ghostOnDark, "text-white/45 hover:bg-white/10")}
+              className={ghostMuted}
               onClick={() => handleOpenChange(false)}
               size="icon-xs"
               variant="ghost"
@@ -129,10 +129,10 @@ export function SelectionPopover({
         </div>
         {variant === "word" && word ? (
           <>
-            <Separator className="bg-white/10" />
+            <Separator />
             <Button
               className={cn(
-                "h-auto w-full justify-start rounded-none px-3.5 py-2.5 font-normal text-white/70 hover:bg-white/5 hover:text-white data-pressed:bg-white/5 sm:h-auto",
+                "h-auto w-full justify-start rounded-none px-3.5 py-2.5 font-normal text-muted-foreground hover:text-foreground sm:h-auto",
                 accentRing
               )}
               onClick={word.onViewDetails}
@@ -142,10 +142,10 @@ export function SelectionPopover({
             </Button>
           </>
         ) : null}
-        <Separator className="mx-3.5 bg-white/10 data-[orientation=horizontal]:w-auto" />
+        <Separator className="mx-3.5 data-[orientation=horizontal]:w-auto" />
         <Button
           className={cn(
-            "h-auto min-h-11 w-full justify-start gap-2 rounded-none px-3.5 text-[#f3ba20] hover:bg-[#f3ba20]/10 hover:text-[#f3ba20] data-pressed:bg-[#f3ba20]/10 focus-visible:bg-[#f3ba20]/10 sm:h-auto",
+            "h-auto min-h-11 w-full justify-start gap-2 rounded-none px-3.5 text-amber-700 hover:bg-amber-400/8 hover:text-amber-700 dark:text-amber-300/90 dark:hover:text-amber-300/90 sm:h-auto",
             accentRing
           )}
           onClick={onAddToChat}
@@ -153,7 +153,7 @@ export function SelectionPopover({
         >
           <AiIcon />
           <span>Add to chat</span>
-          <kbd className="ml-auto rounded border border-[#f3ba20]/25 px-1.5 py-0.5 text-[10px] font-normal text-[#f3ba20]/70">
+          <kbd className="ml-auto rounded-sm border border-amber-500/25 px-1.5 py-0.5 text-[10px] font-normal opacity-75">
             ⌘J
           </kbd>
         </Button>

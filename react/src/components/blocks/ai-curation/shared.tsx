@@ -1,7 +1,28 @@
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 
-export const aiAccent = "#f3ba20"
+// The AI accent is a muted amber used sparingly — the ✦ icon, small labels
+// and the primary Apply action. Everything else reads from theme tokens so
+// the block inherits whatever surface hosts it (e.g. the shell right panel).
+export const accentText = "text-amber-600 dark:text-amber-300/90"
+
+export const accentRing = "ring-offset-0 focus-visible:ring-amber-400/40"
+
+export const accentSolid = cn(
+  "border-amber-500/60 bg-amber-400/90 text-amber-950 shadow-none hover:bg-amber-400 data-pressed:bg-amber-400 disabled:opacity-35 *:data-[slot=button-loading-indicator]:text-amber-950",
+  accentRing
+)
+
+export const ghostMuted = cn(
+  "text-muted-foreground hover:text-foreground",
+  accentRing
+)
+
+export const mutedText = "text-[13px] leading-5 text-muted-foreground"
+
+// Floating surfaces (scope picker list, selection popover) — theme tokens,
+// not a hard-coded dark panel.
+export const surface = "border bg-popover text-popover-foreground shadow-lg"
 
 export function AiIcon({
   className,
@@ -9,7 +30,7 @@ export function AiIcon({
   className?: string
 }): React.ReactElement {
   return (
-    <span aria-hidden="true" className={cn("text-[#f3ba20]", className)}>
+    <span aria-hidden="true" className={cn(accentText, className)}>
       ✦
     </span>
   )
@@ -60,21 +81,3 @@ export function formatScopeLabel(scope: {
   }
   return `${scope.label} · ${scope.kind}${scope.location ? ` · ${scope.location}` : ""}`
 }
-
-export const surface =
-  "border border-white/10 bg-[#171716] text-white shadow-[0_12px_40px_rgb(0_0_0/0.28)]"
-
-export const mutedText = "text-[13px] leading-5 text-white/55"
-
-// Overrides that re-skin the shared `ui/button` atom for this dark surface.
-export const accentRing = "ring-offset-0 focus-visible:ring-[#f3ba20]/60"
-
-export const ghostOnDark = cn(
-  "text-white/55 hover:bg-white/8 hover:text-white data-pressed:bg-white/8",
-  accentRing
-)
-
-export const accentSolid = cn(
-  "border-[#f3ba20] bg-[#f3ba20] text-black shadow-none hover:bg-[#ffd45d] data-pressed:bg-[#ffd45d] disabled:opacity-35 *:data-[slot=button-loading-indicator]:text-black",
-  accentRing
-)
