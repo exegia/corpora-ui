@@ -919,4 +919,57 @@ function App() {
 //   useScaffoldActions("workspace").toggleInspector()
 //   useScaffoldState("workspace").hiddenPanelIds`,
   },
+  {
+    slug: "ai-curation",
+    name: "AI Curation Panel",
+    description:
+      "Presentational curation rail for Context-Fabric validation: scoped selections, generated answers, version-bound diffs, provenance, and reader marks.",
+    category: "blocks",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/ai-curation-demo")),
+    registryDependencies: [],
+    props: [
+      {
+        name: "AiPanel",
+        type: "scope / thread / composerProps / callbacks",
+        description:
+          "Full-height right rail. Keep data fetching, streaming and writes in the host application; the panel provides the stable focus order and layout.",
+      },
+      {
+        name: "SelectionPopover",
+        type: '"word" | "node"',
+        description:
+          "One shell for word and node selections. Word details are preserved and both variants append exactly one Add to chat action (⌘J).",
+      },
+      {
+        name: "ScopePicker",
+        type: "word | passage | articulus | quaestio | corpus",
+        description:
+          "Keyboard-operable listbox for the five corpus scope levels.",
+      },
+      {
+        name: "GeneratedBlock / SuggestedFixCard / AppliedCard",
+        type: "content and diff props",
+        description:
+          "Thread blocks with persistent generated labeling, polite live-region streaming, semantic ins/del diff rows, immediate apply affordance, and version-history confirmation.",
+      },
+      {
+        name: "Reader adornments",
+        type: "SelectionHighlight / AppliedMark / ApplyToast",
+        description:
+          "Selection and persistent AI-change marks plus an assertive apply confirmation live region.",
+      },
+    ],
+    usage: `import {
+  AiPanel,
+  GeneratedBlock,
+  SuggestedFixCard,
+} from "@exegia/corpora-ui"
+
+<AiPanel
+  scope={{ kind: "passage", label: "a.1", range: "¶1–¶2" }}
+  thread={<GeneratedBlock content="The boundary is valid." />}
+  composerProps={{ onSend: askContextFabric }}
+/>`,
+  },
 ]
