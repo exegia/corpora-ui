@@ -1,3 +1,4 @@
+export * from "./text"
 export { HighlightPopover, TextSelection } from "./text-selection"
 export {
   initialSelectionState,
@@ -25,4 +26,4 @@ export type {
 export type {
   UseSelectionOptions,
   UseSelectionResult,
-} from "./text-selection/use-selection"
+} from "./text-selection/types"
