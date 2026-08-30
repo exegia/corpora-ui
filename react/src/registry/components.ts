@@ -302,6 +302,51 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
 <Logo name="Corpora" variant="mark" />  // icon rail: mark only`,
   },
   {
+    slug: "verse",
+    name: "Verse",
+    titleStyle: "titlebar",
+    description:
+      "Corpus verse line: a chapter link plus inline spans and note markers, each opening a click popover.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/verse-demo")),
+    registryDependencies: ["text"],
+    props: [
+      {
+        name: "chapter",
+        type: "ReactNode",
+        description:
+          "Chapter reference rendered as a leading superscript link.",
+      },
+      {
+        name: "href",
+        type: "string",
+        description: "Destination of the chapter link.",
+      },
+      {
+        name: "chapterPopover / renderChapterPopover",
+        type: "ReactNode | (props: TextPopoverRenderProps) => ReactNode",
+        description:
+          "Popover opened by clicking the chapter reference. Without it the chapter is a plain link.",
+      },
+      {
+        name: "size",
+        type: '"small" | "medium" | "large" | number',
+        default: '"medium"',
+        description:
+          "Type scale for the verse. Nested VerseSpan/VerseNote inherit it unless they set their own.",
+      },
+    ],
+    usage: `import { Verse, VerseNote, VerseSpan } from "@exegia/corpora-ui"
+
+<Verse chapter="1:1" href="#gen-1" chapterPopover={<p>Genesis 1</p>}>
+  In the beginning{" "}
+  <VerseSpan popover={<p>Hebrew bereshit.</p>}>God created</VerseSpan>{" "}
+  the heavens and the earth
+  <VerseNote popover={<p>Textual note.</p>}>a</VerseNote>.
+</Verse>`,
+  },
+  {
     slug: "search-field",
     name: "Search Field",
     titleStyle: "titlebar",
