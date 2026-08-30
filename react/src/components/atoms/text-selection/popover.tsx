@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import type * as React from "react"
 import { useHighlightPopover } from "@omsimos/react-highlight-popover"
-import { Card } from "@/components/ui/card"
+import { Card, CardPanel } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { useSelection } from "./use-selection"
 import type { HighlightPopoverProps, SelectionRenderProps } from "./types"
@@ -87,10 +87,14 @@ export function HighlightPopover({
       {...componentProps}
       {...props}
       {...componentContextProps}
-      className={cn(forwardedClassName, className)}
+      className={cn(
+        "max-w-52 rounded-md bg-white/50 shadow-lg inset-shadow-sm shadow-black/10 inset-shadow-popover backdrop-blur-md dark:bg-black/20",
+        forwardedClassName,
+        className
+      )}
       data-selection-popover=""
     >
-      {content}
+      <CardPanel className="p-3">{content}</CardPanel>
     </Component>
   )
 }

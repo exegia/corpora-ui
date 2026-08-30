@@ -10,36 +10,7 @@ import {
   setSelectionPositionAtom,
   updateSelectionAtom,
 } from "./selection-atom"
-import type { SelectionState, SelectionStateUpdate } from "./types"
-
-export interface UseSelectionOptions {
-  selected?: boolean
-  onSelectionStart?: () => void
-  onSelectionEnd?: (selection: string) => void
-  onPopoverShow?: () => void
-  onPopoverHide?: () => void
-}
-
-export interface UseSelectionResult {
-  state: SelectionState
-  selected: boolean
-  currentSelection: string
-  showPopover: boolean
-  popoverPosition: SelectionState["popoverPosition"]
-  setSelection: (selection: string) => void
-  setPosition: (
-    position: NonNullable<SelectionState["popoverPosition"]>
-  ) => void
-  setShowPopover: (show: boolean) => void
-  update: (update: SelectionStateUpdate) => void
-  reset: () => void
-  selectionProps: {
-    onSelectionStart: () => void
-    onSelectionEnd: (selection: string) => void
-    onPopoverShow: () => void
-    onPopoverHide: () => void
-  }
-}
+import type { UseSelectionOptions, UseSelectionResult } from "./types"
 
 /**
  * Coordinates the third-party highlight popover callbacks with the shared

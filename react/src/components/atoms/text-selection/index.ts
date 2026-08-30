@@ -22,5 +22,6 @@ export type {
   SelectionState,
   SelectionStateUpdate,
   TextSelectionProps,
+  UseSelectionOptions,
+  UseSelectionResult,
 } from "./types"
-export type { UseSelectionOptions, UseSelectionResult } from "./use-selection"

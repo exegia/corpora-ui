@@ -28,20 +28,27 @@ export function TextSelection({
     onPopoverShow,
     onPopoverHide,
   })
+  const hasPopover =
+    renderPopover !== undefined ||
+    component !== undefined ||
+    popoverComponent !== undefined ||
+    (popover !== undefined && popover !== null)
 
   return (
     <HighlightPopoverPrimitive
       {...props}
       {...selection.selectionProps}
-      renderPopover={() => (
-        <HighlightPopover
-          component={component ?? popoverComponent}
-          componentProps={componentProps ?? popoverProps}
-          render={renderPopover}
-        >
-          {popover}
-        </HighlightPopover>
-      )}
+      renderPopover={() =>
+        hasPopover ? (
+          <HighlightPopover
+            component={component ?? popoverComponent}
+            componentProps={componentProps ?? popoverProps}
+            render={renderPopover}
+          >
+            {popover}
+          </HighlightPopover>
+        ) : null
+      }
     >
       {children}
     </HighlightPopoverPrimitive>
