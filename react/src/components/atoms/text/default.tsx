@@ -46,6 +46,8 @@ export function Text({
       className: cn(
         variantClasses[type],
         typeof size === "number" ? undefined : sizeClasses[size],
+        selectionValue !== undefined &&
+          "rounded-xs outline-1 outline-offset-2 outline-accent/45",
         className
       ),
       "data-selection": selectionValue,
