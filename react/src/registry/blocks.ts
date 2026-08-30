@@ -920,13 +920,13 @@ function App() {
 //   useScaffoldState("workspace").hiddenPanelIds`,
   },
   {
-    slug: "ai-curation",
-    name: "AI Curation Panel",
+    slug: "ai-panel",
+    name: "AI Panel",
     description:
       "Presentational curation rail for Context-Fabric validation: scoped selections, generated answers, version-bound diffs, provenance, and reader marks.",
     category: "blocks",
     status: "in-progress",
-    preview: React.lazy(() => import("./demos/ai-curation-demo")),
+    preview: React.lazy(() => import("./demos/ai-panel-demo")),
     registryDependencies: ["card"],
     props: [
       {

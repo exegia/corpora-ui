@@ -10,7 +10,7 @@ import {
   UserMessage,
   type AiScope,
   type DiffRow,
-} from "@/components/blocks/ai-curation"
+} from "@/components/blocks/ai-panel"
 import { DemoStage } from "@/components/docs/demo-controls"
 
 const SCOPE: AiScope = {
@@ -31,7 +31,7 @@ const DIFF: DiffRow[] = [
  * closing and the wiring from reader selections. The bordered rail below
  * stands in for that host.
  */
-export default function AiCurationDemo(): React.ReactElement {
+export default function AiPanelDemo(): React.ReactElement {
   const [applied, setApplied] = React.useState(false)
 
   return (

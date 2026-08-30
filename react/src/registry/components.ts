@@ -302,6 +302,47 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
 <Logo name="Corpora" variant="mark" />  // icon rail: mark only`,
   },
   {
+    slug: "ai",
+    name: "AI",
+    titleStyle: "titlebar",
+    description:
+      "Reusable AI thread pieces: user message bubble, generated block, the three suggestion states and the prompt composer.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/ai-demo")),
+    registryDependencies: ["card", "button", "textarea"],
+    props: [
+      {
+        name: "UserMessage",
+        type: "children",
+        description: "Right-aligned chat bubble for the person's message.",
+      },
+      {
+        name: "GeneratedBlock",
+        type: "content / isStreaming / onStop / citations",
+        description:
+          "AI output with a persistent GENERATED label, polite live-region streaming (caret + Stop) and citation chips.",
+      },
+      {
+        name: "SuggestedFixCard / StaleCard / AppliedCard",
+        type: "diff and version props",
+        description:
+          "The three states of one suggestion: actionable (coss Card with ins/del diff rows, Reject/Apply ⌘↩), out of date (warning Alert with Re-validate) and confirmed (success Alert with Undo ⌘Z).",
+      },
+      {
+        name: "Composer",
+        type: "value / mode / onSend / isStreaming / disabled",
+        description:
+          "Prompt textarea with a mode select (answer / fix / ask), ⌘↩ send, Esc stop while streaming, and a safety note slot.",
+      },
+    ],
+    usage: `import { Composer, GeneratedBlock, UserMessage } from "@exegia/corpora-ui"
+
+<UserMessage>Validate this passage.</UserMessage>
+<GeneratedBlock content="The boundary is valid." citations={["p-17"]} />
+<Composer onSend={(value, mode) => ask(value, mode)} />`,
+  },
+  {
     slug: "verse",
     name: "Verse",
     titleStyle: "titlebar",

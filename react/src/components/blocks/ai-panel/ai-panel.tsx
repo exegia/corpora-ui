@@ -4,7 +4,10 @@ import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ghostMuted } from "./shared"
-import { Composer, type ComposerProps } from "./composer"
+import {
+  Composer,
+  type ComposerProps,
+} from "@/components/composed/ai/composer"
 import { ScopeChip } from "./scope-chip"
 import { ScopePicker } from "./scope-picker"
 import { SuggestedPrompts } from "./suggested-prompts"
@@ -47,7 +50,7 @@ export function AiPanel({
   scopePickerOpen,
   onScopePickerOpenChange,
   locked = false,
-  headerTitle = "AI curation",
+  headerTitle = "AI panel",
   className,
   ...props
 }: AiPanelProps): React.ReactElement {

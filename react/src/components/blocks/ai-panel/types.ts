@@ -1,5 +1,3 @@
-import type * as React from "react"
-
 export type AiScopeKind =
   "word" | "passage" | "articulus" | "quaestio" | "corpus"
 
@@ -28,13 +26,7 @@ export interface NodeSelection {
   wordCount: number
 }
 
-export type ComposerMode = "answer" | "fix" | "ask"
-
-export interface DiffRow {
-  type: "add" | "remove"
-  value: React.ReactNode
-  field?: string
-}
+export type { ComposerMode, DiffRow } from "@/components/composed/ai/types"
 
 export interface VersionHistoryEntry {
   id?: string
