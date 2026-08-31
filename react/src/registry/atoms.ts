@@ -302,6 +302,57 @@ import { TextClickPopover } from "@exegia/corpora-ui"
 </TextClickPopover>`,
   },
   {
+    slug: "bubble",
+    name: "Bubble",
+    titleStyle: "titlebar",
+    description:
+      "Chat bubble atom: one message surface with sender, recipient and ai variants, plus optional emoji reaction chips and hover-revealed message actions.",
+    category: "atoms",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/bubble-demo")),
+    registryDependencies: ["button"],
+    props: [
+      {
+        name: "variant",
+        type: '"ai" | "sender" | "recipient"',
+        default: '"recipient"',
+        description:
+          "Who the bubble belongs to. sender is right-aligned and inverted, recipient is a muted mirror, ai renders chrome-less prose so generated output never masquerades as a person's message. Sub-components inherit the variant from context.",
+      },
+      {
+        name: "Bubble.Message",
+        type: "children",
+        description: "The message surface, styled by the inherited variant.",
+      },
+      {
+        name: "Bubble.Reactions",
+        type: "reactions / onToggle",
+        description:
+          "Emoji reaction chips with count and aria-pressed state; onToggle(reaction, index) fires on click. Accepts children for custom chips.",
+      },
+      {
+        name: "Bubble.Actions",
+        type: "children",
+        description:
+          "role=toolbar row for per-message actions (copy, retry, …), hidden until the bubble is hovered or an action has focus. Compose with Button size=icon-xs.",
+      },
+    ],
+    usage: `import { Bubble } from "@exegia/corpora-ui"
+
+<Bubble variant="sender">
+  <Bubble.Message>Validate this passage.</Bubble.Message>
+  <Bubble.Reactions
+    reactions={[{ emoji: "👍", count: 2, reacted: true, label: "thumbs up" }]}
+    onToggle={toggleReaction}
+  />
+  <Bubble.Actions>
+    <Button aria-label="Copy" size="icon-xs" variant="ghost">
+      <CopyIcon />
+    </Button>
+  </Bubble.Actions>
+</Bubble>`,
+  },
+  {
     slug: "file-icons",
     name: "File icons",
     titleStyle: "titlebar",
