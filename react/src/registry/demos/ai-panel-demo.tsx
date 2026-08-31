@@ -27,7 +27,7 @@ const DIFF: DiffRow[] = [
 
 function DiffRows({ rows }: { rows: DiffRow[] }): React.ReactElement {
   return (
-    <div className="mt-2 grid gap-1.5 rounded-sm border bg-muted/40 p-2.5 font-mono text-xs">
+    <div className="mt-2 grid gap-1.5 p-2.5 font-mono text-xs">
       {rows.map((row, index) => (
         <div
           className={cn(

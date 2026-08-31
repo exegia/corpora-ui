@@ -235,8 +235,8 @@
 @utility shadow-bezel {
   /* Inherits light/dark ambient highlights automatically */
   box-shadow:
-    inset 1px 1px 2px rgb(255 255 255 / 0.7),
-    inset -2px -2px 4px rgb(0 0 0 / 0.25);
+    inset 1px 1px 4px rgb(255 255 255 / 0.7),
+    inset -2px -2px 2px rgb(0 0 0 / 0.1);
 }
 
 @utility shadow-debossed {
@@ -247,6 +247,6 @@
 
 @utility shadow-bezel-dynamic {
   box-shadow:
-    inset 1px 1px 2px color-mix(in srgb, currentColor 40%, white),
+    inset 1px 1px 2px color-mix(in srgb, currentColor 50%, white),
     inset -2px -2px 4px color-mix(in srgb, currentColor 60%, black);
 }

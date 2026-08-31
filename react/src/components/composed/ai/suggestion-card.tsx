@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronDownIcon } from "lucide-react"
+import { ChevronDownIcon, ChevronLeftIcon, Sparkles } from "lucide-react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -9,9 +9,20 @@ import {
   CollapsiblePanel,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import { Frame, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame"
+import { FramePanel, FrameTitle } from "@/components/ui/frame"
 import { ghostMuted } from "./shared"
 import type { SuggestionState } from "./types"
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardFrame,
+  CardFrameHeader,
+  CardHeader,
+  CardPanel,
+  CardTitle,
+} from "@/components/ui/card"
+import { Text } from "@/components/atoms"
 
 export interface SuggestionCardProps extends Omit<
   React.ComponentPropsWithoutRef<"div">,
@@ -19,8 +30,7 @@ export interface SuggestionCardProps extends Omit<
 > {
   /** Collapsible trigger label, always visible. */
   heading: React.ReactNode
-  /** Panel title, shown above the content when expanded. */
-  title?: React.ReactNode
+  description?: React.ReactNode
   children?: React.ReactNode
   nodeId: string
   state?: SuggestionState
@@ -35,7 +45,7 @@ export interface SuggestionCardProps extends Omit<
 
 export function SuggestionCard({
   heading,
-  title,
+  description,
   children,
   nodeId,
   state = "pending",
@@ -48,8 +58,11 @@ export function SuggestionCard({
   ...props
 }: SuggestionCardProps): React.ReactElement {
   return (
-    <Frame
-      className={cn("w-full", className)}
+    <Card
+      className={cn(
+        "w-full rounded-xl rounded-bl-xs bg-background! shadow-bezel",
+        className
+      )}
       data-node-id={nodeId}
       data-slot="suggestion-card"
       data-state={state}
@@ -60,46 +73,55 @@ export function SuggestionCard({
         onOpenChange={onOpenChange}
         open={open}
       >
-        <FrameHeader className="flex-row items-center justify-between gap-2 px-1 py-1">
-          <CollapsibleTrigger
-            className="min-w-0 justify-start font-normal data-panel-open:[&_svg]:rotate-180"
-            render={<Button size="xs" variant="ghost" />}
-          >
-            <ChevronDownIcon />
-            <span className="truncate">{heading}</span>
-          </CollapsibleTrigger>
-          <code className="shrink-0 pr-1 text-[11px] text-muted-foreground">
-            {nodeId}
-          </code>
-        </FrameHeader>
-        <CollapsiblePanel>
-          <FramePanel className="p-3">
-            {title != null && <FrameTitle>{title}</FrameTitle>}
-            {children}
-            <div className="mt-3 flex items-center justify-end gap-1.5">
-              {state === "pending" ? (
-                <>
-                  <Button
-                    className={cn("font-normal", ghostMuted)}
-                    onClick={onReject}
-                    size="xs"
-                    variant="ghost"
-                  >
-                    Reject
-                  </Button>
-                  <Button onClick={onAccept} size="xs">
-                    Accept
-                  </Button>
-                </>
-              ) : (
-                <span className="text-[11px] text-muted-foreground">
-                  {state === "accepted" ? "Accepted" : "Rejected"}
-                </span>
-              )}
-            </div>
-          </FramePanel>
+        <CollapsibleTrigger
+          className="flex w-full min-w-0 flex-row items-center px-4 py-2.5 data-panel-open:[&_svg]:rotate-90"
+          render={<CardHeader />}
+        >
+          <Sparkles size={14} className="shrink-0 fill-amber-400 stroke-amber-400 animate-jelly
+          " />
+          <div className="flex flex-col items-start justify-start w-full">
+            <CardTitle
+              render={Text.Heading}
+              className="text-sm text-popover-foreground text-left w-full"
+            >
+              {heading}
+            </CardTitle>
+            <CardDescription
+              render={Text.Span}
+              className="w-full text-left text-xs text-muted-foreground"
+            >
+              {description ? description : nodeId}
+            </CardDescription>
+          </div>
+
+          <ChevronLeftIcon size={18} className="opacity-30" />
+        </CollapsibleTrigger>
+
+        <CollapsiblePanel render={CardPanel} className="px-3 py-0">
+          {children}
+          <CardFooter>
+            {state === "pending" ? (
+              <>
+                <Button
+                  className={cn("font-normal", ghostMuted)}
+                  onClick={onReject}
+                  size="xs"
+                  variant="ghost"
+                >
+                  Reject
+                </Button>
+                <Button onClick={onAccept} size="xs">
+                  Accept
+                </Button>
+              </>
+            ) : (
+              <span className="text-[11px] text-muted-foreground">
+                {state === "accepted" ? "Accepted" : "Rejected"}
+              </span>
+            )}
+          </CardFooter>
         </CollapsiblePanel>
       </Collapsible>
-    </Frame>
+    </Card>
   )
 }
