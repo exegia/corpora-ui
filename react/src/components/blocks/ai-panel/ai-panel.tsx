@@ -102,7 +102,7 @@ export function AiPanel({
       ) : null}
 
       <ScrollArea aria-label="Thread" scrollFade fill>
-        <div className="flex min-h-0 flex-1 flex-col gap-y-4 px-5 py-4">
+        <div className="flex min-h-0 flex-1 flex-col gap-y-2 px-5 py-4">
           {thread}
           {!thread && (
             <div className="flex h-full min-h-44 flex-col justify-end">

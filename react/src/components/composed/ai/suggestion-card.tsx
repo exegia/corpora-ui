@@ -71,8 +71,8 @@ export function SuggestionCard({
         open={open}
       >
         <CollapsibleTrigger
-          className="flex w-full min-w-0 flex-row items-center px-4 py-2.5 data-panel-open:[&_svg]:rotate-90"
-          render={<CardHeader />}
+          className="flex w-full min-w-0 cursor-pointer flex-row items-center px-4 py-2.5 text-left data-panel-open:[&_svg]:rotate-90"
+          render={<CardHeader render={<button type="button" />} />}
         >
           <Sparkles
             size={14}
@@ -80,13 +80,13 @@ export function SuggestionCard({
           />
           <div className="flex w-full flex-col items-start justify-start">
             <CardTitle
-              render={Text.Heading}
+              render={<Text.Heading />}
               className="w-full text-left text-sm text-popover-foreground"
             >
               {heading}
             </CardTitle>
             <CardDescription
-              render={Text.Span}
+              render={<Text.Span />}
               className="w-full text-left text-xs text-muted-foreground"
             >
               {description ? `${description} - ${nodeId}` : nodeId}
@@ -96,18 +96,26 @@ export function SuggestionCard({
           <ChevronLeftIcon size={20} className="opacity-40" />
         </CollapsibleTrigger>
 
-        <CollapsiblePanel render={CardPanel} className="gap-y-2 px-0 py-0">
-          <div className="px-3">
-            {children}
-          </div>
-          <CardFooter className="rounded-xl px-2 py-2 mx-1.5 mb-1.5 gap-1 justify-end">
+        <CollapsiblePanel className="gap-y-2 px-0 py-0" render={<CardPanel />}>
+          <div className="px-3">{children}</div>
+          <CardFooter className="mx-1.5 mb-1.5 justify-end gap-1 rounded-xl px-2 py-2">
             {state === "pending" ? (
               <>
-                <Button onClick={onReject} size="xs" variant="ghost"  className="text-destructive-foreground hover:bg-destructive/5 px-3 py-3.5" >
+                <Button
+                  onClick={onReject}
+                  size="xs"
+                  variant="ghost"
+                  className="px-3 py-3.5 text-destructive-foreground hover:bg-destructive/5"
+                >
                   <X size={14} />
                   Reject
                 </Button>
-                <Button onClick={onAccept} size="xs" variant="glass" className="text-success-foreground hover:bg-success/5 px-3 py-3.5">
+                <Button
+                  onClick={onAccept}
+                  size="xs"
+                  variant="glass"
+                  className="px-3 py-3.5 text-success-foreground hover:bg-success/5"
+                >
                   <Check size={14} />
                   Accept
                 </Button>
