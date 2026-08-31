@@ -17,7 +17,10 @@ export function UserMessage({
 }: UserMessageProps): React.ReactElement {
   return (
     <div className={cn("flex justify-end", className)} {...props}>
-      <div className="max-w-[88%] rounded-2xl rounded-br-sm bg-muted px-3.5 py-2.5 text-sm text-foreground">
+      <div
+        className="rounded-xl rounded-br-sm border-none! py-1.5 px-3 text-xs text-background bg-foreground shadow-bezel"
+        // className="max-w-[88%] rounded-xl rounded-br-sm bg-transparent px-3 py-2 text-xs text-foreground"
+      >
         {children}
       </div>
     </div>
