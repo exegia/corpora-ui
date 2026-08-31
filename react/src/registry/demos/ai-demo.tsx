@@ -1,14 +1,13 @@
 import * as React from "react"
 
 import {
-  AppliedCard,
   Composer,
   GeneratedBlock,
-  StaleCard,
-  SuggestedFixCard,
+  SuggestionCard,
   UserMessage,
   type DiffRow,
 } from "@/components/composed/ai"
+import { cn } from "@/lib/utils"
 import { DemoStage, DemoToggle } from "@/components/docs/demo-controls"
 
 const DIFF: DiffRow[] = [
@@ -16,9 +15,44 @@ const DIFF: DiffRow[] = [
   { type: "add", field: "label", value: "p" },
 ]
 
+function DiffRows({ rows }: { rows: DiffRow[] }): React.ReactElement {
+  return (
+    <div className="grid gap-1.5 rounded-sm border bg-muted/40 p-2.5 font-mono text-xs">
+      {rows.map((row, index) => (
+        <div
+          className={cn(
+            "flex gap-2 rounded px-1.5 py-1",
+            row.type === "add"
+              ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-200"
+              : "bg-red-500/10 text-red-700 dark:text-red-200"
+          )}
+          key={`${row.type}-${row.field ?? ""}-${index}`}
+        >
+          <span aria-hidden="true" className="w-3 shrink-0 font-semibold">
+            {row.type === "add" ? "+" : "−"}
+          </span>
+          {row.type === "add" ? (
+            <ins className="no-underline">
+              {row.field ? `${row.field}: ` : ""}
+              {row.value}
+            </ins>
+          ) : (
+            <del>
+              {row.field ? `${row.field}: ` : ""}
+              {row.value}
+            </del>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function AiDemo(): React.ReactElement {
   const [streaming, setStreaming] = React.useState(false)
-  const [applied, setApplied] = React.useState(false)
+  const [state, setState] = React.useState<"pending" | "accepted" | "rejected">(
+    "pending"
+  )
 
   return (
     <DemoStage
@@ -38,22 +72,21 @@ export default function AiDemo(): React.ReactElement {
           isStreaming={streaming}
           onStop={() => setStreaming(false)}
         />
-        {!applied ? (
-          <SuggestedFixCard
-            nodeId="p-17"
-            onApply={() => setApplied(true)}
-            rationale="The canonical paragraph label is required by the schema."
-            rows={DIFF}
-            version="3.4"
-          />
-        ) : (
-          <AppliedCard onUndo={() => setApplied(false)} version="3.5" />
-        )}
-        <StaleCard
-          nodeId="p-18"
-          onRevalidate={() => {}}
-          versionDelta="from v3.3 to v3.4"
-        />
+        <SuggestionCard
+          heading="Label mismatch"
+          nodeId="p-17"
+          onAccept={() => setState("accepted")}
+          onReject={() => setState("rejected")}
+          state={state}
+          title="Suggested fix"
+        >
+          <div className="mt-2 grid gap-2">
+            <DiffRows rows={DIFF} />
+            <p className="text-[13px] leading-5 text-muted-foreground">
+              The canonical paragraph label is required by the schema.
+            </p>
+          </div>
+        </SuggestionCard>
         <Composer onSend={() => {}} />
       </div>
     </DemoStage>

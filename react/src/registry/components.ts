@@ -253,7 +253,7 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     slug: "logo",
     name: "Logo",
     description:
-      "Brand lockup: a mark beside a wordmark. The mark is an SVG, an image, or a monogram tile derived from the name; variant=\"mark\" folds the wordmark away with the same motion a collapsing rail uses. With href the whole lockup is a home link.",
+      'Brand lockup: a mark beside a wordmark. The mark is an SVG, an image, or a monogram tile derived from the name; variant="mark" folds the wordmark away with the same motion a collapsing rail uses. With href the whole lockup is a home link.',
     category: "components",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/logo-demo")),
@@ -293,7 +293,7 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
         name: "href",
         type: "string",
         description:
-          "Renders the lockup as an anchor named by name — the usual \"mark goes home\" affordance.",
+          'Renders the lockup as an anchor named by name — the usual "mark goes home" affordance.',
       },
     ],
     usage: `import { Logo } from "@corpora/ui"
@@ -306,7 +306,7 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     name: "AI",
     titleStyle: "titlebar",
     description:
-      "Reusable AI thread pieces: user message bubble, generated block, the three suggestion states and the prompt composer.",
+      "Reusable AI thread pieces: user message bubble, generated block, the collapsible suggestion card and the prompt composer.",
     category: "components",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/ai-demo")),
@@ -324,10 +324,10 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
           "AI output with a persistent GENERATED label, polite live-region streaming (caret + Stop) and citation chips.",
       },
       {
-        name: "SuggestedFixCard / StaleCard / AppliedCard",
-        type: "diff and version props",
+        name: "SuggestionCard",
+        type: "heading / title / children / nodeId / state",
         description:
-          "The three states of one suggestion: actionable (coss Card with ins/del diff rows, Reject/Apply ⌘↩), out of date (warning Alert with Re-validate) and confirmed (success Alert with Undo ⌘Z).",
+          "One collapsible frame per suggestion (coss Frame + Collapsible) with Reject/Accept actions while pending and a data-state hook for accepted/rejected. Collapse the heading row to save vertical space when a node has several suggestions.",
       },
       {
         name: "Composer",

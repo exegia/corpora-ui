@@ -948,10 +948,10 @@ function App() {
           "Keyboard-operable listbox for the five corpus scope levels.",
       },
       {
-        name: "GeneratedBlock / SuggestedFixCard / AppliedCard",
-        type: "content and diff props",
+        name: "GeneratedBlock / SuggestionCard",
+        type: "content and suggestion props",
         description:
-          "Thread blocks with persistent generated labeling, polite live-region streaming, semantic ins/del diff rows, immediate apply affordance, and version-history confirmation.",
+          "Thread blocks with persistent generated labeling, polite live-region streaming, and collapsible per-node suggestion cards with Reject/Accept actions.",
       },
       {
         name: "Reader adornments",
@@ -963,7 +963,7 @@ function App() {
     usage: `import {
   AiPanel,
   GeneratedBlock,
-  SuggestedFixCard,
+  SuggestionCard,
 } from "@exegia/corpora-ui"
 
 <AiPanel

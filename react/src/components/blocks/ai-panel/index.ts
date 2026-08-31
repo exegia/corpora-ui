@@ -11,24 +11,20 @@ export type { ScopePickerProps } from "./scope-picker"
 export { SuggestedPrompts } from "./suggested-prompts"
 export type { SuggestedPromptsProps } from "./suggested-prompts"
 export {
-  AppliedCard,
   DegradedBanner,
   GeneratedBlock,
   LockedBanner,
   PinnedThreadBanner,
-  StaleCard,
-  SuggestedFixCard,
+  SuggestionCard,
   UserMessage,
   VersionHistoryRecord,
 } from "./thread-blocks"
 export type {
-  AppliedCardProps,
   DegradedBannerProps,
   GeneratedBlockProps,
   LockedBannerProps,
   PinnedThreadBannerProps,
-  StaleCardProps,
-  SuggestedFixCardProps,
+  SuggestionCardProps,
   UserMessageProps,
   VersionHistoryRecordProps,
 } from "./thread-blocks"
@@ -48,6 +44,7 @@ export type {
   ComposerMode,
   DiffRow,
   NodeSelection,
+  SuggestionState,
   VersionHistoryEntry,
   WordSelection,
 } from "./types"

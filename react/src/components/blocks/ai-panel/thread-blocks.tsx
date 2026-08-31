@@ -11,17 +11,13 @@ import type { VersionHistoryEntry } from "./types"
 // and live in `components/composed/ai`; the block re-exports them so its
 // public surface is unchanged.
 export {
-  AppliedCard,
   GeneratedBlock,
-  StaleCard,
-  SuggestedFixCard,
+  SuggestionCard,
   UserMessage,
 } from "@/components/composed/ai"
 export type {
-  AppliedCardProps,
   GeneratedBlockProps,
-  StaleCardProps,
-  SuggestedFixCardProps,
+  SuggestionCardProps,
   UserMessageProps,
 } from "@/components/composed/ai"
 
