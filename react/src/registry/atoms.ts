@@ -264,7 +264,42 @@ export const atoms: RegistryEntry[] = [
     titleStyle: "titlebar",
     description: "Typography primitive for body copy, labels and captions.",
     category: "atoms",
-    status: "planned",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/text-demo")),
+    registryDependencies: [],
+    props: [
+      {
+        name: "type",
+        type: '"default" | "heading" | "paragraph" | "link" | "subscript"',
+        default: '"default"',
+        description:
+          "Selects the semantic element and its typography treatment.",
+      },
+      {
+        name: "size",
+        type: '"small" | "medium" | "large" | number',
+        default: '"medium"',
+        description:
+          "Uses the type scale, or accepts a pixel font size when numeric.",
+      },
+      {
+        name: "selection",
+        type: "string | boolean",
+        description:
+          "Adds a reader-selection treatment; a string is exposed as data-selection.",
+      },
+    ],
+    usage: `import { Heading, Paragraph, Text } from "@exegia/corpora-ui"
+import { TextClickPopover } from "@exegia/corpora-ui"
+
+<Heading size="large">Corpus title</Heading>
+<Paragraph>Readable corpus prose belongs here.</Paragraph>
+<Text type="link" href="/activity">View activity</Text>
+
+// Click-triggered popover — works for default (span), link and subscript
+<TextClickPopover type="subscript" popover={<p>Annotation</p>}>
+  Subscript note
+</TextClickPopover>`,
   },
   {
     slug: "file-icons",
@@ -285,7 +320,7 @@ export const atoms: RegistryEntry[] = [
       {
         name: "title",
         type: "string | null",
-        default: "e.g. \"TEI file\"",
+        default: 'e.g. "TEI file"',
         description:
           "Accessible name (role=img + aria-label). Pass null to mark the icon decorative — it becomes aria-hidden with role=presentation.",
       },

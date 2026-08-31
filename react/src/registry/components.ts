@@ -302,6 +302,92 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
 <Logo name="Corpora" variant="mark" />  // icon rail: mark only`,
   },
   {
+    slug: "ai",
+    name: "AI",
+    titleStyle: "titlebar",
+    description:
+      "Reusable AI thread pieces: user message bubble, generated block, the three suggestion states and the prompt composer.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/ai-demo")),
+    registryDependencies: ["card", "button", "textarea"],
+    props: [
+      {
+        name: "UserMessage",
+        type: "children",
+        description: "Right-aligned chat bubble for the person's message.",
+      },
+      {
+        name: "GeneratedBlock",
+        type: "content / isStreaming / onStop / citations",
+        description:
+          "AI output with a persistent GENERATED label, polite live-region streaming (caret + Stop) and citation chips.",
+      },
+      {
+        name: "SuggestedFixCard / StaleCard / AppliedCard",
+        type: "diff and version props",
+        description:
+          "The three states of one suggestion: actionable (coss Card with ins/del diff rows, Reject/Apply ⌘↩), out of date (warning Alert with Re-validate) and confirmed (success Alert with Undo ⌘Z).",
+      },
+      {
+        name: "Composer",
+        type: "value / mode / onSend / isStreaming / disabled",
+        description:
+          "Prompt textarea with a mode select (answer / fix / ask), ⌘↩ send, Esc stop while streaming, and a safety note slot.",
+      },
+    ],
+    usage: `import { Composer, GeneratedBlock, UserMessage } from "@exegia/corpora-ui"
+
+<UserMessage>Validate this passage.</UserMessage>
+<GeneratedBlock content="The boundary is valid." citations={["p-17"]} />
+<Composer onSend={(value, mode) => ask(value, mode)} />`,
+  },
+  {
+    slug: "verse",
+    name: "Verse",
+    titleStyle: "titlebar",
+    description:
+      "Corpus verse line: a chapter link plus inline spans and note markers, each opening a click popover.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/verse-demo")),
+    registryDependencies: ["text"],
+    props: [
+      {
+        name: "chapter",
+        type: "ReactNode",
+        description:
+          "Chapter reference rendered as a leading superscript link.",
+      },
+      {
+        name: "href",
+        type: "string",
+        description: "Destination of the chapter link.",
+      },
+      {
+        name: "chapterPopover / renderChapterPopover",
+        type: "ReactNode | (props: TextPopoverRenderProps) => ReactNode",
+        description:
+          "Popover opened by clicking the chapter reference. Without it the chapter is a plain link.",
+      },
+      {
+        name: "size",
+        type: '"small" | "medium" | "large" | number',
+        default: '"medium"',
+        description:
+          "Type scale for the verse. Nested VerseSpan/VerseNote inherit it unless they set their own.",
+      },
+    ],
+    usage: `import { Verse, VerseNote, VerseSpan } from "@exegia/corpora-ui"
+
+<Verse chapter="1:1" href="#gen-1" chapterPopover={<p>Genesis 1</p>}>
+  In the beginning{" "}
+  <VerseSpan popover={<p>Hebrew bereshit.</p>}>God created</VerseSpan>{" "}
+  the heavens and the earth
+  <VerseNote popover={<p>Textual note.</p>}>a</VerseNote>.
+</Verse>`,
+  },
+  {
     slug: "search-field",
     name: "Search Field",
     titleStyle: "titlebar",

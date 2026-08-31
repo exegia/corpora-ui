@@ -1,0 +1,101 @@
+"use client"
+
+import type * as React from "react"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+
+export interface SelectionHighlightProps extends React.ComponentPropsWithoutRef<"span"> {
+  range?: string
+}
+
+export function SelectionHighlight({
+  range,
+  className,
+  children,
+  ...props
+}: SelectionHighlightProps): React.ReactElement {
+  return (
+    <span
+      aria-label={range ? `Selected ${range}` : "Selected text"}
+      className={cn(
+        "rounded-xs bg-accent/25 outline outline-1 outline-accent/45",
+        className
+      )}
+      data-selection-highlight="true"
+      {...props}
+    >
+      {children}
+    </span>
+  )
+}
+
+export interface AppliedMarkProps extends React.ComponentPropsWithoutRef<"span"> {
+  nodeId?: string
+}
+
+export function AppliedMark({
+  nodeId,
+  className,
+  children,
+  ...props
+}: AppliedMarkProps): React.ReactElement {
+  return (
+    <span
+      className={cn(
+        "relative border-b-2 border-amber-400/70 text-inherit",
+        className
+      )}
+      data-applied-mark="true"
+      data-node-id={nodeId}
+      {...props}
+    >
+      <span
+        aria-hidden="true"
+        className="absolute -start-4 top-1/2 text-xs text-amber-600 dark:text-amber-300/90"
+      >
+        ◆
+      </span>
+      {children}
+    </span>
+  )
+}
+
+export interface ApplyToastProps {
+  open?: boolean
+  message?: React.ReactNode
+  onUndo?: () => void
+  className?: string
+}
+
+export function ApplyToast({
+  open = true,
+  message = "Change applied and recorded in version history.",
+  onUndo,
+  className,
+}: ApplyToastProps): React.ReactElement | null {
+  if (!open) return null
+  return (
+    <div
+      aria-live="assertive"
+      className={cn(
+        "flex items-center gap-3 rounded-sm border border-success/32 bg-popover px-3 py-2.5 text-xs text-popover-foreground shadow-lg",
+        className
+      )}
+      data-slot="apply-toast"
+      role="status"
+    >
+      <span className="text-success">✓</span>
+      <span className="flex-1">{message}</span>
+      {onUndo ? (
+        <Button
+          className="text-success underline underline-offset-2 ring-offset-0 hover:text-success"
+          onClick={onUndo}
+          size="xs"
+          variant="link"
+        >
+          Undo
+        </Button>
+      ) : null}
+    </div>
+  )
+}
