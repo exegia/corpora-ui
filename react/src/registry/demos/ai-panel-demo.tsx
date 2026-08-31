@@ -82,20 +82,20 @@ export default function AiPanelDemo(): React.ReactElement {
                 content="The paragraph boundary is valid. Node p-17 has a label mismatch."
               />
               <SuggestionCard
-                heading="Label mismatch"
+                heading="Suggested fix"
+                description="Label mismatch"
                 nodeId="p-17"
                 onAccept={() => setState("accepted")}
                 onReject={() => setState("rejected")}
                 state={state}
-                title="Suggested fix"
               >
                 <DiffRows rows={DIFF} />
               </SuggestionCard>
               <SuggestionCard
                 defaultOpen={false}
-                heading="Boundary drift"
+                description="Boundary drift"
                 nodeId="p-18"
-                title="Suggested fix"
+                heading="Suggested fix"
               >
                 <p className="text-[13px] leading-5 text-muted-foreground">
                   Node p-18 changed from v3.3 to v3.4 — re-validate before

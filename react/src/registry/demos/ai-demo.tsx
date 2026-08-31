@@ -73,12 +73,12 @@ export default function AiDemo(): React.ReactElement {
           onStop={() => setStreaming(false)}
         />
         <SuggestionCard
-          heading="Label mismatch"
+          description="Label mismatch"
           nodeId="p-17"
           onAccept={() => setState("accepted")}
           onReject={() => setState("rejected")}
           state={state}
-          title="Suggested fix"
+          heading="Suggested fix"
         >
           <div className="mt-2 grid gap-2">
             <DiffRows rows={DIFF} />

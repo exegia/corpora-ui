@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronDownIcon, ChevronLeftIcon, Sparkles } from "lucide-react"
+import { Check, ChevronLeftIcon, Sparkles, X } from "lucide-react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -9,15 +9,12 @@ import {
   CollapsiblePanel,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import { FramePanel, FrameTitle } from "@/components/ui/frame"
-import { ghostMuted } from "./shared"
+
 import type { SuggestionState } from "./types"
 import {
   Card,
   CardDescription,
   CardFooter,
-  CardFrame,
-  CardFrameHeader,
   CardHeader,
   CardPanel,
   CardTitle,
@@ -77,12 +74,14 @@ export function SuggestionCard({
           className="flex w-full min-w-0 flex-row items-center px-4 py-2.5 data-panel-open:[&_svg]:rotate-90"
           render={<CardHeader />}
         >
-          <Sparkles size={14} className="shrink-0 fill-amber-400 stroke-amber-400 animate-jelly
-          " />
-          <div className="flex flex-col items-start justify-start w-full">
+          <Sparkles
+            size={14}
+            className="shrink-0 animate-tada fill-amber-400 stroke-amber-400"
+          />
+          <div className="flex w-full flex-col items-start justify-start">
             <CardTitle
               render={Text.Heading}
-              className="text-sm text-popover-foreground text-left w-full"
+              className="w-full text-left text-sm text-popover-foreground"
             >
               {heading}
             </CardTitle>
@@ -90,34 +89,33 @@ export function SuggestionCard({
               render={Text.Span}
               className="w-full text-left text-xs text-muted-foreground"
             >
-              {description ? description : nodeId}
+              {description ? `${description} - ${nodeId}` : nodeId}
             </CardDescription>
           </div>
 
-          <ChevronLeftIcon size={18} className="opacity-30" />
+          <ChevronLeftIcon size={20} className="opacity-40" />
         </CollapsibleTrigger>
 
-        <CollapsiblePanel render={CardPanel} className="px-3 py-0">
-          {children}
-          <CardFooter>
+        <CollapsiblePanel render={CardPanel} className="gap-y-2 px-0 py-0">
+          <div className="px-3">
+            {children}
+          </div>
+          <CardFooter className="rounded-xl px-2 py-2 mx-1.5 mb-1.5 gap-1 justify-end">
             {state === "pending" ? (
               <>
-                <Button
-                  className={cn("font-normal", ghostMuted)}
-                  onClick={onReject}
-                  size="xs"
-                  variant="ghost"
-                >
+                <Button onClick={onReject} size="xs" variant="ghost"  className="text-destructive-foreground hover:bg-destructive/5 px-3 py-3.5" >
+                  <X size={14} />
                   Reject
                 </Button>
-                <Button onClick={onAccept} size="xs">
+                <Button onClick={onAccept} size="xs" variant="glass" className="text-success-foreground hover:bg-success/5 px-3 py-3.5">
+                  <Check size={14} />
                   Accept
                 </Button>
               </>
             ) : (
-              <span className="text-[11px] text-muted-foreground">
+              <Text.Label level="subtitle">
                 {state === "accepted" ? "Accepted" : "Rejected"}
-              </span>
+              </Text.Label>
             )}
           </CardFooter>
         </CollapsiblePanel>

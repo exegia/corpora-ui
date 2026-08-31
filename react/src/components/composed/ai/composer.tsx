@@ -12,7 +12,7 @@ import { AnimatePresence, motion } from "motion/react"
 
 const SHELL_TRANSITION = {
   type: "spring",
-  duration: 0.35,
+  duration: 2,
   bounce: 0,
 } as const
 
@@ -45,7 +45,6 @@ export function Composer({
   onValueChange,
   mode,
   defaultMode = "answer",
-  onModeChange,
   onSend,
   onStop,
   isStreaming = false,
@@ -56,7 +55,7 @@ export function Composer({
   className,
 }: ComposerProps): React.ReactElement {
   const [internalValue, setInternalValue] = useState(defaultValue)
-  const [internalMode, setInternalMode] = useState(defaultMode)
+  const [internalMode] = useState(defaultMode)
   const [isExpanded, setIsExpanded] = useState(expanded)
   const draft = value ?? internalValue
   const selectedMode = mode ?? internalMode
@@ -143,8 +142,7 @@ export function Composer({
             "flex w-full flex-1 items-center text-sm text-foreground has-disabled:cursor-not-allowed has-disabled:opacity-50 [&_textarea]:resize-none [&_textarea]:px-3 [&_textarea]:placeholder:text-[13px] [&_textarea]:placeholder:text-muted-foreground/60",
             // Transition the textarea's own box so the auto-height shell
             // follows smoothly in both directions (expand and collapse).
-            "bo",
-            "[&_textarea]:transition-[min-height,padding] [&_textarea]:duration-300 [&_textarea]:ease-out motion-reduce:[&_textarea]:transition-none",
+            "[&_textarea]:transition-[min-height,padding] [&_textarea]:duration-150 [&_textarea]:ease-out motion-reduce:[&_textarea]:transition-none",
             isExpanded
               ? "[&_textarea]:min-h-20 [&_textarea]:py-2.5"
               : "[&_textarea]:min-h-8 [&_textarea]:py-1.5"
