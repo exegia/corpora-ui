@@ -1,0 +1,8 @@
+export { Text } from "./default"
+export { Heading } from "./heading"
+export { Paragraph } from "./paragraph"
+export { Span } from "./span"
+export type { HeadingProps } from "./heading"
+export type { ParagraphProps } from "./paragraph"
+export type { SpanProps } from "./span"
+export type { TextProps, TextSize, TextVariant } from "./types"

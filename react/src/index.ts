@@ -7,6 +7,7 @@
  */
 
 // atoms
+export * from "./components/atoms"
 export * from "./components/ui/avatar"
 export * from "./components/ui/button"
 export * from "./components/ui/card"
@@ -27,10 +28,12 @@ export * from "./components/ui/textarea"
 export * from "./components/icons"
 
 // components
+export * from "./components/composed/ai"
 export * from "./components/composed/logo"
 export * from "./components/composed/password-input"
 export * from "./components/composed/social-providers"
 export * from "./components/composed/tree"
+export * from "./components/composed/verse"
 // user-avatar: named, not `export *` — its barrel also exports an `Avatar`
 // namespace object that would collide with ui/avatar's component above.
 export {
@@ -74,6 +77,7 @@ export * from "./components/blocks/auth/passkey-manager-block"
 export * from "./components/blocks/auth/passkey-sign-in-block"
 export * from "./components/blocks/auth/signup-block"
 export * from "./components/blocks/auth/update-password-block"
+export * from "./components/blocks/ai-panel"
 export * from "./components/blocks/nav/sidebar"
 export * from "./components/blocks/shell"
 export { default as ShellLayout } from "./components/blocks/shell"
