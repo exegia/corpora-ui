@@ -2,7 +2,32 @@
 
 import type * as React from "react"
 import { cn } from "@/lib/utils"
-import type { BubbleReactionsProps } from "./types"
+import type { BubbleReaction, BubbleReactionsProps } from "./types"
+import { Button } from "@base-ui/react";
+
+
+export function Reaction({ reaction, onToggle, index }: { reaction: BubbleReaction; onToggle?: (reaction: BubbleReaction, index: number) => void; index: number }): React.ReactElement {
+  return (
+    <Button
+      aria-label={reaction.label}
+      aria-pressed={reaction.reacted ?? false}
+      className={cn(
+        reaction.reacted && "border-ring/60 bg-accent"
+      )}
+      key={`${reaction.label ?? String(reaction.emoji)}-${index}`}
+      onClick={() => onToggle?.(reaction, index)}
+    >
+      <span aria-hidden={reaction.label ? true : undefined}>
+        {reaction.emoji}
+      </span>
+      {reaction.count != null && reaction.count > 1 && (
+        <span className="text-muted-foreground tabular-nums">
+          {reaction.count}
+        </span>
+      )}
+    </Button>
+  )
+}
 
 /**
  * Emoji reaction chips under a message. Pass `reactions` for the standard
