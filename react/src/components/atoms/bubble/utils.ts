@@ -19,7 +19,7 @@ export const twBubbleAlignClasses: Record<BubbleVariant, ClassValue> = {
  * thread's. Generated output stays full-bleed.
  */
 export const twBubbleColumnClasses: Record<BubbleVariant, ClassValue> = {
-  sender: "max-w-[80%] items-end",
+  sender: "max-w-[80%] items-end min-w-0",
   recipient: "max-w-[80%] items-start",
   ai: "w-full items-start",
 }
@@ -33,7 +33,7 @@ export const twBubbleColumnClasses: Record<BubbleVariant, ClassValue> = {
  */
 export const twBubbleMessageClasses: Record<BubbleVariant, ClassValue> = {
   sender:
-    "bg-neutral-700 dark:bg-neutral-100 text-background chat-bubble bubble-sender mr-4 text-left",
+    "bg-neutral-800 dark:bg-neutral-100 text-background chat-bubble bubble-sender mr-4 text-left",
   recipient:
     "bg-neutral-100 dark:bg-neutral-800 text-foreground chat-bubble bubble-recipient ml-4 text-right",
   ai: "text-sm leading-5 text-foreground/90",

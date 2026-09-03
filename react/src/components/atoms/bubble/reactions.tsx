@@ -28,7 +28,7 @@ export function BubbleReactionChip({
       aria-label={reaction.label}
       aria-pressed={reaction.reacted ?? false}
       className={cn(
-        "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-0.5 text-sm leading-4 font-bold text-neutral-600 transition-colors duration-150 ease-smooth-out outline-none hover:bg-black/6 focus-visible:ring-2 focus-visible:ring-ring dark:text-neutral-300 dark:hover:bg-white/8",
+        "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-2 font-bold text-neutral-600 transition-colors duration-150 ease-smooth-out outline-none hover:bg-black/6 focus-visible:ring-0 focus-visible:ring-ring dark:text-neutral-300 dark:hover:bg-white/8",
         reaction.reacted && "text-foreground",
         className
       )}
@@ -47,7 +47,7 @@ export function BubbleReactionChip({
             : { scale: reaction.reacted ? [1, 1.35, 1] : 1 }
         }
         aria-hidden={reaction.label ? true : undefined}
-        className="inline-block text-[11px] leading-4"
+        className="block text-xs"
         transition={
           reduceMotion
             ? { duration: 0 }
@@ -61,7 +61,7 @@ export function BubbleReactionChip({
           <AnimatePresence initial={false} mode="popLayout">
             <motion.span
               animate={{ y: 0, opacity: 1 }}
-              className="[grid-area:1/1]"
+              className="[grid-area:1/1] text-xs"
               exit={{ y: reduceMotion ? 0 : -10, opacity: 0 }}
               initial={{ y: reduceMotion ? 0 : 10, opacity: 0 }}
               key={reaction.count}
@@ -92,8 +92,8 @@ export function BubbleReactions({
   return (
     <div
       className={cn(
-        "absolute -bottom-5 z-[1] flex h-8 w-fit flex-1",
-        variant === "sender" ? "left-4" : "right-4 justify-items-end",
+        "absolute -bottom-5 z-[1] flex max-h-8 w-fit flex-1 items-center",
+        variant === "sender" ? "left-4" : "right-4",
         className
       )}
     >
@@ -101,7 +101,7 @@ export function BubbleReactions({
         glassVariant="liquid-refract"
         refraction={3}
         bezel={12}
-        saturation={2}
+        saturation={20}
         className={cn(
           "inline-flex h-full w-fit items-center rounded-xl",
           className
@@ -109,7 +109,7 @@ export function BubbleReactions({
         data-slot="bubble-reactions"
         {...props}
       >
-        <div className={cn("mx-1.5", reactions.length === 0 ? "hidden" : undefined)}>
+        <div className={cn("mx-1.5 h-full", reactions.length === 0 ? "hidden" : undefined)}>
           {reactions.map((reaction, index) => (
             <BubbleReactionChip
               index={index}

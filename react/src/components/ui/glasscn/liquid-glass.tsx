@@ -142,7 +142,7 @@ export type LiquidGlassProps = HTMLAttributes<HTMLDivElement> & {
 export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(
   function LiquidGlass(
     {
-      blur = 0.5,
+      blur = 2,
       refraction = 10,
       mapSize: _mapSize,
       bezel = 10.34,

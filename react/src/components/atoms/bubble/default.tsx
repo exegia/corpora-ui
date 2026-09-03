@@ -26,7 +26,7 @@ export function Bubble({
       >
         <div
           className={cn(
-            "flex flex-col gap-y-2  relative",
+            "flex flex-col gap-y-2 relative",
             twBubbleColumnClasses[variant]
           )}
           data-slot="bubble-column"
