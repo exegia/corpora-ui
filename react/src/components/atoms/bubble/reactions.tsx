@@ -47,7 +47,7 @@ export function BubbleReactionChip({
             : { scale: reaction.reacted ? [1, 1.35, 1] : 1 }
         }
         aria-hidden={reaction.label ? true : undefined}
-        className="block text-xs"
+        className="block text-xs select-none"
         transition={
           reduceMotion
             ? { duration: 0 }
@@ -61,7 +61,7 @@ export function BubbleReactionChip({
           <AnimatePresence initial={false} mode="popLayout">
             <motion.span
               animate={{ y: 0, opacity: 1 }}
-              className="[grid-area:1/1] text-xs"
+              className="[grid-area:1/1] text-xs select-none"
               exit={{ y: reduceMotion ? 0 : -10, opacity: 0 }}
               initial={{ y: reduceMotion ? 0 : 10, opacity: 0 }}
               key={reaction.count}

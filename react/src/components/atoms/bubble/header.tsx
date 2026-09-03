@@ -24,7 +24,7 @@ function SparkAvatar(): React.ReactElement {
   return (
     <span
       aria-hidden="true"
-      className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-violet-500 text-sm text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.35),inset_0_-2px_3px_rgb(0_0_0/0.35)]"
+      className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-(--chat-ai-accent) text-sm text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.35),inset_0_-2px_3px_rgb(0_0_0/0.35)]"
       data-slot="bubble-spark"
     >
       ✦

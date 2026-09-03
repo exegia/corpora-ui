@@ -73,7 +73,7 @@ export function AiMessage({
   onStop,
   suggestions,
   suggestionCount,
-  suggestionsLabel = (count) => `Suggestions (${count})`,
+  suggestionsLabel = (_count) => `Suggestions`,
   defaultSuggestionsOpen = false,
   suggestionsOpen,
   onSuggestionsOpenChange,
@@ -105,7 +105,7 @@ export function AiMessage({
         <Bubble.Header avatar={avatar} badge={badge} name={author} time={time} />
       )}
       <div
-        className="ml-[15px] flex flex-col gap-3 border-l-2 border-border/60 pl-5"
+        className="ml-[15px] flex flex-col gap-3 border-l-0 border-border pl-5"
         data-slot="ai-message-body"
       >
         <div aria-atomic="false" aria-live="polite">
@@ -138,7 +138,7 @@ export function AiMessage({
               aria-controls={panelId}
               aria-expanded={open}
               className={cn(
-                "group/suggestions inline-flex w-fit cursor-pointer items-center gap-2 rounded-md px-1 py-1 text-sm font-bold outline-none transition-colors duration-150 ease-smooth-out focus-visible:ring-2 focus-visible:ring-violet-400/50",
+                "group/suggestions inline-flex w-fit cursor-pointer items-center gap-2 rounded-md px-1 py-1 text-sm outline-none transition-colors duration-150 ease-smooth-out focus-visible:ring-1",
                 agentText
               )}
               data-slot="ai-suggestions-trigger"

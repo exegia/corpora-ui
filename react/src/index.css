@@ -123,6 +123,8 @@
   --chat-ring: color-mix(in oklab, var(--foreground) 10%, transparent);
   --chat-inset: rgb(0 0 0 / 0.08);
   --chat-field: oklch(0.985 0 0);
+  --chat-ai-accent-foreground: var(--color-white);
+  --chat-ai-accent: var(--color-indigo-800);
   --inset-shadow-color-light: --alpha(var(--color-white) / 20%);
   --inset-shadow-color-dark: --alpha(var(--color-black) / 10%);
 }
@@ -130,6 +132,8 @@
   --chat-ring: #040404;
   --chat-inset: rgb(0 0 0 / 0.39);
   --chat-field: #252525;
+  --chat-ai-accent-foreground: var(--color-white);
+  --chat-ai-accent: var(--color-indigo-800);
   --inset-shadow-color-light: --alpha(var(--color-white) / 20%);
   --inset-shadow-color-dark: --alpha(var(--color-black) / 10%);
 }

@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "group/badge inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border border-transparent px-2 py-0.5 text-[0.625rem] font-medium whitespace-nowrap transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-2.5!",
+  "group/badge inline-flex h-5.5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-sm border border-transparent px-2 py-1 text-[0.625rem] font-medium whitespace-nowrap transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-2.5!",
   {
     variants: {
       variant: {
@@ -21,10 +21,10 @@ const badgeVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         // Role chips for chat headers — a grey glass tag for people…
         neutral:
-          "rounded-md border-black/10 bg-neutral-500/25 px-1.5 font-bold text-neutral-700 dark:border-neutral-600 dark:bg-neutral-500/70 dark:text-neutral-100",
+          "rounded-sm border-black/10 bg-neutral-500/25 px-1.5 font-bold text-neutral-700 dark:border-neutral-600 dark:bg-neutral-500/70 dark:text-neutral-100",
         // …and the violet one that marks an agent.
         accent:
-          "rounded-md border-violet-300/40 bg-violet-500/70 px-1.5 font-bold text-white dark:border-violet-200/28",
+            "rounded-sm border-(--chat-ai-accent-foreground) bg-(--chat-ai-accent) font-medium text-white dark:border-(--chat-ai-accent-foreground)",
       },
     },
     defaultVariants: {
