@@ -267,10 +267,10 @@
 
 @layer components {
     .chat-bubble {
-      @apply w-fit max-w-fit rounded-[20px] px-5 py-3 text-xs leading-[18px] font-normal;
+      @apply w-fit max-w-fit rounded-[20px] px-5 py-3 text-sm leading-[18px] font-normal;
 
       &.bubble-sender {
-          @apply inset-shadow-lit inset-shadow-dim/80 inset-shadow-dim-b-1.5 inset-shadow-dim-r-1.5 inset-shadow-lit-t-1.5 inset-shadow-lit-l-1.5 inset-shadow-blur-3 rounded-br-[5px];
+          @apply inset-shadow-lit/90 inset-shadow-dim inset-shadow-dim-b-1.5 inset-shadow-dim-r-1.5 inset-shadow-lit-t-2 inset-shadow-lit-l-1.5 inset-shadow-blur-3 rounded-br-[5px];
       }
 
       &.bubble-recipient {
