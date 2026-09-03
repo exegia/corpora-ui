@@ -1,4 +1,4 @@
-import type { ComponentProps, ComponentPropsWithoutRef, ReactNode } from "react"
+import type { ComponentPropsWithoutRef, ReactNode } from "react"
 
 /**
  * Who the bubble belongs to:
@@ -14,12 +14,41 @@ export interface BubbleProps extends ComponentPropsWithoutRef<"div"> {
 
 export type BubbleMessageProps = ComponentPropsWithoutRef<"div">
 
-export interface BubbleReaction<U extends Record<symbol, unknown> = Record<symbol, unknown>> {
-  id: Readonly<string>
+/** Identity shown by `Bubble.Header` when no custom avatar node is passed. */
+export interface BubbleAvatarIdentity {
+  src?: string
+  name?: string
+  initials?: string
+}
+
+export interface BubbleHeaderProps extends Omit<
+  ComponentPropsWithoutRef<"div">,
+  "children"
+> {
+  /** Display name of the author. */
+  name: ReactNode
+  /** Relative or absolute time label, e.g. "5 min ago". */
+  time?: ReactNode
+  /**
+   * Role badge. A string renders the standard chip (neutral for people,
+   * accent for the ai variant); pass a node for anything custom.
+   */
+  badge?: ReactNode
+  /**
+   * Avatar. An identity object renders `UserAvatar`; a node is used as-is.
+   * Omitted, the ai variant falls back to the spark mark and people get
+   * initials derived from `name` when it is a string.
+   */
+  avatar?: ReactNode | BubbleAvatarIdentity
+  /** Extra trailing content (a menu trigger, a status dot). */
+  children?: ReactNode
+}
+
+export interface BubbleReaction {
+  /** Stable key; falls back to the label/emoji when omitted. */
+  id?: string
   emoji: ReactNode
   count?: number
-  /** User avatar to display alongside the reaction. */
-  user?: U
   /** Whether the current user has this reaction. */
   reacted?: boolean
   /** Accessible name, e.g. "thumbs up". Required when emoji is not a string. */
@@ -32,14 +61,6 @@ export interface BubbleReactionsProps extends Omit<
 > {
   reactions?: BubbleReaction[]
   onToggle?: (reaction: BubbleReaction, index: number) => void
-}
-
-type TBubbleReaction<C extends ComponentProps<'button'> = ComponentProps<'button'>> = Omit<C, "onToggle">
-export interface ReactionProps<Index extends number = number, R extends BubbleReaction = BubbleReaction> extends TBubbleReaction {
-  reaction: R
-  key: `${Index}-${R['id']}-`
-  onToggle?: (reaction: R, index: Index) => void
-  index: Index
 }
 
 export type BubbleActionsProps = ComponentPropsWithoutRef<"div">

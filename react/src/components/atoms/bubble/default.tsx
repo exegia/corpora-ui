@@ -4,7 +4,7 @@ import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { BubbleContext } from "./context"
 import type { BubbleProps } from "./types"
-import { twBubbleAlignClasses } from "./utils"
+import { twBubbleAlignClasses, twBubbleColumnClasses } from "./utils"
 
 export function Bubble({
   variant = "recipient",
@@ -16,7 +16,7 @@ export function Bubble({
     <BubbleContext.Provider value={variant}>
       <div
         className={cn(
-          "group/bubble flex w-full flex-col gap-1",
+          "group/bubble flex w-full flex-col",
           twBubbleAlignClasses[variant],
           className
         )}
@@ -24,7 +24,15 @@ export function Bubble({
         data-variant={variant}
         {...props}
       >
-        {children}
+        <div
+          className={cn(
+            "flex flex-col gap-1.5",
+            twBubbleColumnClasses[variant]
+          )}
+          data-slot="bubble-column"
+        >
+          {children}
+        </div>
       </div>
     </BubbleContext.Provider>
   )

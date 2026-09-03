@@ -107,6 +107,18 @@
   }
 }
 
+/* Chat surfaces (bubble, composer) — ring + inset depth per theme. */
+:root {
+  --chat-ring: color-mix(in oklab, var(--foreground) 10%, transparent);
+  --chat-inset: rgb(0 0 0 / 0.08);
+  --chat-field: oklch(0.985 0 0);
+}
+.dark {
+  --chat-ring: #040404;
+  --chat-inset: rgb(0 0 0 / 0.39);
+  --chat-field: #252525;
+}
+
 @theme inline {
   /* motion tokens (transitions.dev scale) */
   --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -249,4 +261,43 @@
   box-shadow:
     inset 1px 1px 2px color-mix(in srgb, currentColor 50%, white),
     inset -2px -2px 4px color-mix(in srgb, currentColor 60%, black);
+}
+
+/* Chat design language — inner-shadow bubbles, glass pills, the composer ring. */
+@utility shadow-bubble-lit {
+  /* Light surface: top highlight + bottom-right shading. */
+  box-shadow:
+    inset 0 4px 2px rgb(255 255 255 / 1),
+    inset 1px -3px 6px rgb(0 0 0 / 0.42);
+}
+
+@utility shadow-bubble-dim {
+  /* Dark surface: soft drop + faint top sheen + bottom-left shading. */
+  box-shadow:
+    0 4px 4px rgb(0 0 0 / 0.15),
+    inset 0 5px 3px rgb(252 252 252 / 0.08),
+    inset -1px -2px 5px rgb(0 0 0 / 0.54);
+}
+
+@utility shadow-pill {
+  box-shadow: 0 4px 8px rgb(0 0 0 / 0.25);
+}
+
+@utility shadow-composer {
+  box-shadow:
+    0 0 0 2px var(--chat-ring),
+    inset 0 0 5px 1px var(--chat-inset);
+}
+
+@utility shadow-composer-open {
+  box-shadow:
+    0 0 0 2px var(--chat-ring),
+    inset 0 2px 8px 5px rgb(0 0 0 / 0.07);
+}
+
+@utility shadow-send {
+  box-shadow:
+    inset 0 2px 0 rgb(239 239 243 / 0.47),
+    0 1px 8px -4px rgb(0 0 0 / 1),
+    inset 0 -2px 2px rgb(23 23 23 / 0.46);
 }

@@ -16,19 +16,30 @@ import {
 const VARIANTS = ["sender", "recipient", "ai"] as const
 
 const COPY: Record<BubbleVariant, string> = {
-  sender: "Validate this passage against the schema.",
-  recipient: "Sounds good — I'll take a look at p-17 today.",
+  sender:
+    "Can you check whether ¶12 keeps the RC003 boundary? The walker looks like it split it.",
+  recipient: "Sounds good — I'll take a look at ¶12 today.",
   ai: "The paragraph boundary is valid. Node p-17 has a label mismatch — accept the suggested fix to align it with the schema.",
+}
+
+const HEADER: Record<
+  BubbleVariant,
+  { name: string; time: string; badge?: string }
+> = {
+  sender: { name: "Sender", time: "10 min ago", badge: "Admin" },
+  recipient: { name: "Recipient", time: "5 min ago" },
+  ai: { name: "Exegia", time: "2 min ago", badge: "Agent" },
 }
 
 export default function BubbleDemo(): React.ReactElement {
   const [variant, setVariant] =
     React.useState<(typeof VARIANTS)[number]>("sender")
+  const [withHeader, setWithHeader] = React.useState(true)
   const [withReactions, setWithReactions] = React.useState(true)
-  const [withActions, setWithActions] = React.useState(true)
+  const [withActions, setWithActions] = React.useState(false)
   const [reactions, setReactions] = React.useState<BubbleReaction[]>([
-    { emoji: "👍", count: 2, reacted: true, label: "thumbs up" },
-    { emoji: "🎯", count: 1, label: "on target" },
+    { id: "heart", emoji: "❤️", count: 4, reacted: true, label: "heart" },
+    { id: "thumbs", emoji: "👍", count: 2, label: "thumbs up" },
   ])
 
   const toggleReaction = (_: BubbleReaction, index: number): void =>
@@ -55,6 +66,11 @@ export default function BubbleDemo(): React.ReactElement {
             value={variant}
           />
           <DemoToggle
+            checked={withHeader}
+            label="header"
+            onChange={setWithHeader}
+          />
+          <DemoToggle
             checked={withReactions}
             label="reactions"
             onChange={setWithReactions}
@@ -69,8 +85,15 @@ export default function BubbleDemo(): React.ReactElement {
     >
       <div className="mx-auto w-full max-w-sm">
         <Bubble variant={variant}>
+          {withHeader && (
+            <Bubble.Header
+              badge={HEADER[variant].badge}
+              name={HEADER[variant].name}
+              time={HEADER[variant].time}
+            />
+          )}
           <Bubble.Message>{COPY[variant]}</Bubble.Message>
-          {withReactions && (
+          {withReactions && variant !== "ai" && (
             <Bubble.Reactions onToggle={toggleReaction} reactions={reactions} />
           )}
           {withActions && (

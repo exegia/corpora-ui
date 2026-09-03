@@ -11,12 +11,16 @@ import type { VersionHistoryEntry } from "./types"
 // and live in `components/composed/ai`; the block re-exports them so its
 // public surface is unchanged.
 export {
+  AiMessage,
   GeneratedBlock,
+  ReferenceChip,
   SuggestionCard,
   UserMessage,
 } from "@/components/composed/ai"
 export type {
+  AiMessageProps,
   GeneratedBlockProps,
+  ReferenceChipProps,
   SuggestionCardProps,
   UserMessageProps,
 } from "@/components/composed/ai"

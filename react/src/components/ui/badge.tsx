@@ -19,6 +19,12 @@ const badgeVariants = cva(
         ghost:
           "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
         link: "text-primary underline-offset-4 hover:underline",
+        // Role chips for chat headers — a grey glass tag for people…
+        neutral:
+          "rounded-md border-black/10 bg-neutral-500/25 px-1.5 font-bold text-neutral-700 dark:border-neutral-600 dark:bg-neutral-500/70 dark:text-neutral-100",
+        // …and the violet one that marks an agent.
+        accent:
+          "rounded-md border-violet-300/40 bg-violet-500/70 px-1.5 font-bold text-white dark:border-violet-200/28",
       },
     },
     defaultVariants: {

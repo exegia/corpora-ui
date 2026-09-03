@@ -1,58 +1,50 @@
 import * as React from "react"
 
+import { Bubble, type BubbleReaction } from "@/components/atoms"
 import {
+  AiMessage,
   Composer,
-  GeneratedBlock,
+  ReferenceChip,
   SuggestionCard,
   UserMessage,
-  type DiffRow,
+  type SuggestionState,
 } from "@/components/composed/ai"
-import { cn } from "@/lib/utils"
 import { DemoStage, DemoToggle } from "@/components/docs/demo-controls"
 
-const DIFF: DiffRow[] = [
-  { type: "remove", field: "label", value: "paragraph" },
-  { type: "add", field: "label", value: "p" },
-]
+const QUESTION =
+  "Can you check whether ¶12 keeps the RC003 boundary? The walker looks like it split it."
 
-function DiffRows({ rows }: { rows: DiffRow[] }): React.ReactElement {
-  return (
-    <div className="grid gap-1.5 rounded-sm border bg-muted/40 p-2.5 font-mono text-xs">
-      {rows.map((row, index) => (
-        <div
-          className={cn(
-            "flex gap-2 rounded px-1.5 py-1",
-            row.type === "add"
-              ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-200"
-              : "bg-red-500/10 text-red-700 dark:text-red-200"
-          )}
-          key={`${row.type}-${row.field ?? ""}-${index}`}
-        >
-          <span aria-hidden="true" className="w-3 shrink-0 font-semibold">
-            {row.type === "add" ? "+" : "−"}
-          </span>
-          {row.type === "add" ? (
-            <ins className="no-underline">
-              {row.field ? `${row.field}: ` : ""}
-              {row.value}
-            </ins>
-          ) : (
-            <del>
-              {row.field ? `${row.field}: ` : ""}
-              {row.value}
-            </del>
-          )}
-        </div>
-      ))}
-    </div>
-  )
+function useReactions(
+  initial: BubbleReaction[]
+): [BubbleReaction[], (reaction: BubbleReaction, index: number) => void] {
+  const [reactions, setReactions] = React.useState(initial)
+  const toggle = (_: BubbleReaction, index: number): void =>
+    setReactions((previous) =>
+      previous.map((reaction, at) =>
+        at === index
+          ? {
+              ...reaction,
+              reacted: !reaction.reacted,
+              count: (reaction.count ?? 0) + (reaction.reacted ? -1 : 1),
+            }
+          : reaction
+      )
+    )
+  return [reactions, toggle]
 }
 
 export default function AiDemo(): React.ReactElement {
   const [streaming, setStreaming] = React.useState(false)
-  const [state, setState] = React.useState<"pending" | "accepted" | "rejected">(
-    "pending"
-  )
+  const [first, setFirst] = React.useState<SuggestionState>("accepted")
+  const [second, setSecond] = React.useState<SuggestionState>("pending")
+  const [senderReactions, toggleSender] = useReactions([
+    { id: "heart", emoji: "❤️", count: 4, reacted: true, label: "heart" },
+    { id: "thumbs", emoji: "👍", count: 2, label: "thumbs up" },
+  ])
+  const [recipientReactions, toggleRecipient] = useReactions([
+    { id: "heart", emoji: "❤️", count: 4, label: "heart" },
+    { id: "thumbs", emoji: "👍", count: 2, reacted: true, label: "thumbs up" },
+  ])
 
   return (
     <DemoStage
@@ -64,30 +56,69 @@ export default function AiDemo(): React.ReactElement {
         />
       }
     >
-      <div className="mx-auto grid w-full max-w-sm gap-4">
-        <UserMessage>Validate this passage against the schema.</UserMessage>
-        <GeneratedBlock
-          citations={["p-17", "p-18", "RC-BOUNDARY-02"]}
-          content="The paragraph boundary is valid. Node p-17 has a label mismatch."
+      <div className="mx-auto grid w-full max-w-md gap-5">
+        <UserMessage
+          author="Sender"
+          badge="Admin"
+          onReactionToggle={toggleSender}
+          reactions={senderReactions}
+          time="10 min ago"
+        >
+          {QUESTION}
+        </UserMessage>
+
+        <Bubble variant="recipient">
+          <Bubble.Header name="Recipient" time="5 min ago" />
+          <Bubble.Message>{QUESTION}</Bubble.Message>
+          <Bubble.Reactions
+            onToggle={toggleRecipient}
+            reactions={recipientReactions}
+          />
+        </Bubble>
+
+        <AiMessage
+          author="Exegia"
+          defaultSuggestionsOpen
           isStreaming={streaming}
           onStop={() => setStreaming(false)}
-        />
-        <SuggestionCard
-          description="Label mismatch"
-          nodeId="p-17"
-          onAccept={() => setState("accepted")}
-          onReject={() => setState("rejected")}
-          state={state}
-          heading="Suggested fix"
+          suggestions={
+            <>
+              <SuggestionCard
+                defaultOpen={false}
+                description="Label mismatch on p-17"
+                heading="Suggestion"
+                key="p-17"
+                nodeId="p-17"
+                onAccept={() => setFirst("accepted")}
+                onReject={() => setFirst("rejected")}
+                reference={<ReferenceChip href="#p-17">Reference 1</ReferenceChip>}
+                state={first}
+              >
+                The canonical paragraph label is required by the schema.
+              </SuggestionCard>
+              <SuggestionCard
+                description="Boundary drift on p-18"
+                heading="Suggestion"
+                key="p-18"
+                nodeId="p-18"
+                onAccept={() => setSecond("accepted")}
+                onReject={() => setSecond("rejected")}
+                reference={<ReferenceChip href="#p-18">Reference 1</ReferenceChip>}
+                state={second}
+              >
+                Scanned 30,102 nodes in a.1. Two boundary defects and one
+                missing case feature. Nothing here needs a walker re-run.
+              </SuggestionCard>
+            </>
+          }
+          time="2 min ago"
         >
-          <div className="mt-2 grid gap-2">
-            <DiffRows rows={DIFF} />
-            <p className="text-[13px] leading-5 text-muted-foreground">
-              The canonical paragraph label is required by the schema.
-            </p>
-          </div>
-        </SuggestionCard>
-        <Composer onSend={() => {}} />
+          ¶12 keeps the RC003 boundary — the walker split the rendering, not
+          the node. Two labels drifted from the schema while it ran; both
+          fixes are below.
+        </AiMessage>
+
+        <Composer onAttach={() => {}} onSend={() => {}} />
       </div>
     </DemoStage>
   )

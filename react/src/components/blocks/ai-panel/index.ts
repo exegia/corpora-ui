@@ -11,19 +11,23 @@ export type { ScopePickerProps } from "./scope-picker"
 export { SuggestedPrompts } from "./suggested-prompts"
 export type { SuggestedPromptsProps } from "./suggested-prompts"
 export {
+  AiMessage,
   DegradedBanner,
   GeneratedBlock,
   LockedBanner,
   PinnedThreadBanner,
+  ReferenceChip,
   SuggestionCard,
   UserMessage,
   VersionHistoryRecord,
 } from "./thread-blocks"
 export type {
+  AiMessageProps,
   DegradedBannerProps,
   GeneratedBlockProps,
   LockedBannerProps,
   PinnedThreadBannerProps,
+  ReferenceChipProps,
   SuggestionCardProps,
   UserMessageProps,
   VersionHistoryRecordProps,

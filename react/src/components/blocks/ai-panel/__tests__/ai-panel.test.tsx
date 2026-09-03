@@ -82,7 +82,7 @@ describe("AI curation component set", () => {
     const user = userEvent.setup()
     const onAccept = mock(() => {})
     const onReject = mock(() => {})
-    const { rerender } = render(
+    const { container, rerender } = render(
       <SuggestionCard
         heading="Label mismatch"
         nodeId="p-17"
@@ -93,10 +93,12 @@ describe("AI curation component set", () => {
       </SuggestionCard>
     )
 
-    expect(screen.getByText("p-17")).toBeDefined()
-    await user.click(screen.getByRole("button", { name: "Accept" }))
+    expect(
+      container.querySelector('[data-slot="suggestion-card"]')?.getAttribute("data-node-id")
+    ).toBe("p-17")
+    await user.click(screen.getByRole("button", { name: "Ok, fix them" }))
     expect(onAccept).toHaveBeenCalledTimes(1)
-    await user.click(screen.getByRole("button", { name: "Reject" }))
+    await user.click(screen.getByRole("button", { name: "Ignore" }))
     expect(onReject).toHaveBeenCalledTimes(1)
 
     rerender(
@@ -104,8 +106,10 @@ describe("AI curation component set", () => {
         <p>label: paragraph → p</p>
       </SuggestionCard>
     )
-    expect(screen.queryByRole("button", { name: "Accept" })).toBeNull()
-    expect(screen.getByText("Accepted")).toBeDefined()
+    // The actions fade out before the outcome label mounts (AnimatePresence
+    // mode="wait"), so wait for the label rather than polling the button.
+    expect(await screen.findByText("Accepted")).toBeDefined()
+    expect(screen.queryByRole("button", { name: "Ok, fix them" })).toBeNull()
   })
 
   test("suggestion card collapses its panel from the heading trigger", async () => {

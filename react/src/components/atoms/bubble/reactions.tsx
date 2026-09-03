@@ -1,37 +1,101 @@
 "use client"
 
+import {
+  AnimatePresence,
+  type HTMLMotionProps,
+  motion,
+  useReducedMotion,
+} from "motion/react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
+import { EASE_IN_OUT, SPRING_PRESS, SPRING_SWAP } from "@/lib/ease"
+import { useBubbleVariant } from "./context"
 import type { BubbleReaction, BubbleReactionsProps } from "./types"
-import { Button } from "@base-ui/react";
 
+export interface BubbleReactionChipProps extends Omit<
+  HTMLMotionProps<"button">,
+  "onToggle" | "children"
+> {
+  reaction: BubbleReaction
+  index: number
+  onToggle?: (reaction: BubbleReaction, index: number) => void
+}
 
-export function Reaction({ reaction, onToggle, index }: { reaction: BubbleReaction; onToggle?: (reaction: BubbleReaction, index: number) => void; index: number }): React.ReactElement {
+function reactionKey(reaction: BubbleReaction, index: number): string {
+  return reaction.id ?? `${reaction.label ?? String(reaction.emoji)}-${index}`
+}
+
+/**
+ * One emoji + count inside the pill. Pressing it springs the emoji, and a
+ * count change slides the old number out as the new one drops in.
+ */
+export function BubbleReactionChip({
+  reaction,
+  index,
+  onToggle,
+  className,
+  ...props
+}: BubbleReactionChipProps): React.ReactElement {
+  const reduceMotion = useReducedMotion()
+  const showCount = reaction.count != null && reaction.count > 0
+
   return (
-    <Button
+    <motion.button
       aria-label={reaction.label}
       aria-pressed={reaction.reacted ?? false}
       className={cn(
-        reaction.reacted && "border-ring/60 bg-accent"
+        "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-0.5 text-sm leading-4 font-bold text-neutral-600 outline-none transition-colors duration-150 ease-smooth-out hover:bg-black/6 focus-visible:ring-2 focus-visible:ring-ring dark:text-neutral-300 dark:hover:bg-white/8",
+        reaction.reacted && "text-foreground",
+        className
       )}
-      key={`${reaction.label ?? String(reaction.emoji)}-${index}`}
+      data-reacted={reaction.reacted ? "" : undefined}
+      data-slot="bubble-reaction"
       onClick={() => onToggle?.(reaction, index)}
+      transition={SPRING_PRESS}
+      type="button"
+      whileTap={reduceMotion ? undefined : { scale: 0.88 }}
+      {...props}
     >
-      <span aria-hidden={reaction.label ? true : undefined}>
+      <motion.span
+        animate={
+          reduceMotion
+            ? { scale: 1 }
+            : { scale: reaction.reacted ? [1, 1.35, 1] : 1 }
+        }
+        aria-hidden={reaction.label ? true : undefined}
+        className="inline-block text-[11px] leading-4"
+        transition={
+          reduceMotion
+            ? { duration: 0 }
+            : { duration: 0.36, ease: EASE_IN_OUT, times: [0, 0.45, 1] }
+        }
+      >
         {reaction.emoji}
-      </span>
-      {reaction.count != null && reaction.count > 1 && (
-        <span className="text-muted-foreground tabular-nums">
-          {reaction.count}
+      </motion.span>
+      {showCount ? (
+        <span className="relative inline-grid overflow-hidden tabular-nums">
+          <AnimatePresence initial={false} mode="popLayout">
+            <motion.span
+              animate={{ y: 0, opacity: 1 }}
+              className="[grid-area:1/1]"
+              exit={{ y: reduceMotion ? 0 : -10, opacity: 0 }}
+              initial={{ y: reduceMotion ? 0 : 10, opacity: 0 }}
+              key={reaction.count}
+              transition={reduceMotion ? { duration: 0 } : SPRING_SWAP}
+            >
+              {reaction.count}
+            </motion.span>
+          </AnimatePresence>
         </span>
-      )}
-    </Button>
+      ) : null}
+    </motion.button>
   )
 }
 
 /**
- * Emoji reaction chips under a message. Pass `reactions` for the standard
- * chip rendering, or children for a custom row — both share the container.
+ * Glass reaction pill that hangs off the bubble's bottom trailing corner.
+ * Pass `reactions` for the standard chips, or children for a custom row —
+ * both share the pill.
  */
 export function BubbleReactions({
   reactions = [],
@@ -40,33 +104,24 @@ export function BubbleReactions({
   children,
   ...props
 }: BubbleReactionsProps): React.ReactElement {
+  const variant = useBubbleVariant()
   return (
     <div
-      className={cn("flex flex-wrap items-center gap-1", className)}
+      className={cn(
+        "relative z-[1] -mt-4 inline-flex w-fit items-center gap-1 rounded-xl border border-black/6 bg-neutral-50/85 px-1.5 py-0.5 shadow-pill backdrop-blur-[7px] backdrop-saturate-150 dark:border-white/8 dark:bg-neutral-900/80",
+        variant === "sender" ? "self-end mr-3" : "self-end mr-2",
+        className
+      )}
       data-slot="bubble-reactions"
       {...props}
     >
       {reactions.map((reaction, index) => (
-        <button
-          aria-label={reaction.label}
-          aria-pressed={reaction.reacted ?? false}
-          className={cn(
-            "inline-flex cursor-pointer items-center gap-1 rounded-full border bg-background px-1.5 py-0.5 text-[11px] leading-4 text-foreground transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
-            reaction.reacted && "border-ring/60 bg-accent"
-          )}
-          key={`${reaction.label ?? String(reaction.emoji)}-${index}`}
-          onClick={() => onToggle?.(reaction, index)}
-          type="button"
-        >
-          <span aria-hidden={reaction.label ? true : undefined}>
-            {reaction.emoji}
-          </span>
-          {reaction.count != null && reaction.count > 1 && (
-            <span className="text-muted-foreground tabular-nums">
-              {reaction.count}
-            </span>
-          )}
-        </button>
+        <BubbleReactionChip
+          index={index}
+          key={reactionKey(reaction, index)}
+          onToggle={onToggle}
+          reaction={reaction}
+        />
       ))}
       {children}
     </div>

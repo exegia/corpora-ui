@@ -306,18 +306,24 @@ import { TextClickPopover } from "@exegia/corpora-ui"
     name: "Bubble",
     titleStyle: "titlebar",
     description:
-      "Chat bubble atom: one message surface with sender, recipient and ai variants, plus optional emoji reaction chips and hover-revealed message actions.",
+      "Chat bubble atom: an inner-shadowed message surface with sender, recipient and ai variants, an author header (avatar, name, time, role badge), a glass reaction pill hanging off the corner and hover-revealed message actions.",
     category: "atoms",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/bubble-demo")),
-    registryDependencies: ["button"],
+    registryDependencies: ["button", "badge", "user-avatar"],
     props: [
       {
         name: "variant",
         type: '"ai" | "sender" | "recipient"',
         default: '"recipient"',
         description:
-          "Who the bubble belongs to. sender is right-aligned and inverted, recipient is a muted mirror, ai renders chrome-less prose so generated output never masquerades as a person's message. Sub-components inherit the variant from context.",
+          "Who the bubble belongs to. sender is right-aligned on a lit inverted surface with the bottom-right tail pinched, recipient is its dim mirror, ai renders chrome-less prose so generated output never masquerades as a person's message. Sub-components inherit the variant from context.",
+      },
+      {
+        name: "Bubble.Header",
+        type: "name / time / badge / avatar",
+        description:
+          "Author row: avatar (an identity object renders UserAvatar; a node is used as-is; the ai variant defaults to the spark mark), bold name, muted time and a role badge — a string picks the neutral chip for people and the accent chip for the agent. The sender variant mirrors the row.",
       },
       {
         name: "Bubble.Message",
@@ -328,7 +334,7 @@ import { TextClickPopover } from "@exegia/corpora-ui"
         name: "Bubble.Reactions",
         type: "reactions / onToggle",
         description:
-          "Emoji reaction chips with count and aria-pressed state; onToggle(reaction, index) fires on click. Accepts children for custom chips.",
+          "Frosted reaction pill overlapping the bubble's bottom corner. Each chip carries aria-pressed, springs its emoji on toggle and rolls its count; onToggle(reaction, index) fires on click. Accepts children for custom chips.",
       },
       {
         name: "Bubble.Actions",
@@ -340,9 +346,10 @@ import { TextClickPopover } from "@exegia/corpora-ui"
     usage: `import { Bubble } from "@exegia/corpora-ui"
 
 <Bubble variant="sender">
-  <Bubble.Message>Validate this passage.</Bubble.Message>
+  <Bubble.Header name="Sender" time="10 min ago" badge="Admin" />
+  <Bubble.Message>Can you check whether ¶12 keeps the boundary?</Bubble.Message>
   <Bubble.Reactions
-    reactions={[{ emoji: "👍", count: 2, reacted: true, label: "thumbs up" }]}
+    reactions={[{ id: "heart", emoji: "❤️", count: 4, reacted: true, label: "heart" }]}
     onToggle={toggleReaction}
   />
   <Bubble.Actions>

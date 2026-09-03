@@ -1,9 +1,10 @@
 import * as React from "react"
 
 import {
+  AiMessage,
   AiPanel,
   ApplyToast,
-  GeneratedBlock,
+  ReferenceChip,
   SuggestionCard,
   UserMessage,
   type AiScope,
@@ -74,34 +75,44 @@ export default function AiPanelDemo(): React.ReactElement {
           scope={SCOPE}
           thread={
             <>
-              <UserMessage>
+              <UserMessage author="Sender" badge="Admin" time="10 min ago">
                 Validate this passage against the schema.
               </UserMessage>
-              <GeneratedBlock
-                citations={["p-17", "p-18", "RC-BOUNDARY-02"]}
-                content="The paragraph boundary is valid. Node p-17 has a label mismatch."
-              />
-              <SuggestionCard
-                heading="Suggested fix"
-                description="Label mismatch"
-                nodeId="p-17"
-                onAccept={() => setState("accepted")}
-                onReject={() => setState("rejected")}
-                state={state}
+              <AiMessage
+                author="Exegia"
+                defaultSuggestionsOpen
+                suggestions={
+                  <>
+                    <SuggestionCard
+                      description="Label mismatch"
+                      heading="Suggested fix"
+                      key="p-17"
+                      nodeId="p-17"
+                      onAccept={() => setState("accepted")}
+                      onReject={() => setState("rejected")}
+                      reference={<ReferenceChip>p-17</ReferenceChip>}
+                      state={state}
+                    >
+                      <DiffRows rows={DIFF} />
+                    </SuggestionCard>
+                    <SuggestionCard
+                      defaultOpen={false}
+                      description="Boundary drift"
+                      heading="Suggested fix"
+                      key="p-18"
+                      nodeId="p-18"
+                      reference={<ReferenceChip>p-18</ReferenceChip>}
+                    >
+                      Node p-18 changed from v3.3 to v3.4 — re-validate before
+                      applying.
+                    </SuggestionCard>
+                  </>
+                }
+                time="2 min ago"
               >
-                <DiffRows rows={DIFF} />
-              </SuggestionCard>
-              <SuggestionCard
-                defaultOpen={false}
-                description="Boundary drift"
-                nodeId="p-18"
-                heading="Suggested fix"
-              >
-                <p className="text-[13px] leading-5 text-muted-foreground">
-                  Node p-18 changed from v3.3 to v3.4 — re-validate before
-                  applying.
-                </p>
-              </SuggestionCard>
+                The paragraph boundary is valid. Node p-17 has a label
+                mismatch.
+              </AiMessage>
               {state === "accepted" && (
                 <ApplyToast onUndo={() => setState("pending")} />
               )}
