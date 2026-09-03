@@ -6,6 +6,8 @@
 @import "@fontsource-variable/figtree";
 @import "motion-icons-react/style.css";
 
+@plugin "./tailwind-inset-shadow.js";
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -97,10 +99,10 @@
   --success-foreground: var(--color-emerald-400);
   --warning: var(--color-amber-500);
   --warning-foreground: var(--color-amber-400);
-  --liquid-glass-rim-light: rgba(255,255,255,0.8);
+  --liquid-glass-rim-light: rgba(255,255,255,0.3);
   --liquid-glass-rim-dark: rgba(0,0,0,0.5);
-  --liquid-glass-rim-fade: 2%;
-  --liquid-glass-rim-width: 1.8px;
+  --liquid-glass-rim-fade: 4%;
+  --liquid-glass-rim-width: 1.5px;
 
 
   .shadow-bezel {
@@ -265,18 +267,18 @@
 
 @layer components {
     .chat-bubble {
-      @apply w-fit max-w-full rounded-[20px] rounded-br-[4px] px-5 py-3 text-xs leading-[18px] font-normal;
+      @apply w-fit max-w-fit rounded-[20px] px-5 py-3 text-xs leading-[18px] font-normal;
 
       &.bubble-sender {
-        @apply shadow-bezel-dynamic-50 dark:shadow-bezel-dynamic-20;
+          @apply inset-shadow-lit inset-shadow-dim/80 inset-shadow-dim-b-1.5 inset-shadow-dim-r-1.5 inset-shadow-lit-t-1.5 inset-shadow-lit-l-1.5 inset-shadow-blur-3 rounded-br-[5px];
       }
 
       &.bubble-recipient {
-        @apply shadow-bezel-dynamic-50;
+         @apply inset-shadow-lit inset-shadow-dim/15 dark:inset-shadow-lit/30 dark:inset-shadow-dim/90 inset-shadow-dim-b-1 inset-shadow-dim-r-1 inset-shadow-lit-t-1 inset-shadow-lit-l-1 inset-shadow-blur-3 rounded-bl-[5px];
       }
 
       &.bubble-ai {
-        @apply shadow-bezel-dynamic-0; 
+        /*@apply shadow-bezel-dynamic-0; */
       }
     }
 }
@@ -293,12 +295,117 @@
     inset 2px 2px 4px rgb(0 0 0 / 0.25),
     inset -1px -1px 2px rgb(255 255 255 / 0.7);
 }
-/*shadow-[inset_4px_-4px_6px_0px_#00000010,inset_-3px_4px_4px_0px_#ffffff20]*/
-/*@utility shadow-bezel-dynamic {
+
+
+/* ── Inset bezel ─────────────────────────────────────────────────────────
+   Two independent inset layers you compose one axis at a time: `lit`, the
+   light catching the surface, and `dim`, the shading opposite it. Each layer
+   carries its own edges, blur and opacity.
+
+     inset-shadow-lit-t-2       lit layer cast in from the top edge, 2px
+     inset-shadow-lit-l-2       …and in from the left edge, 2px
+     inset-shadow-lit/20        the whole lit layer at 20% opacity
+     inset-shadow-lit-blur-6    6px blur on the lit layer
+     inset-shadow-blur-6        6px blur on both layers
+
+   `dim-*` mirrors all of it. The letter names the edge the light enters
+   from, so `-t-` pushes the layer down and `-b-` up; opposite edges of one
+   layer write the same axis, so pick one per layer. Offsets take a bare px
+   count or an arbitrary length (`inset-shadow-lit-t-[0.5rem]`). Recolour a
+   layer through --inset-shadow-lit-color / --inset-shadow-dim-color.
+
+   The family owns `box-shadow` outright — never pair it with `shadow-*`, and
+   note it can only draw inset layers, so it cannot replace the outer drop in
+   `shadow-bubble-dim`.
+*/
+@utility inset-shadow-bezel {
   box-shadow:
-    inset 1px 1px 2px color-mix(in srgb, currentColor 50%, white),
-    inset -2px -2px 4px color-mix(in srgb, currentColor 60%, black);
-}*/
+    inset var(--inset-shadow-lit-x, 0) var(--inset-shadow-lit-y, 0)
+      var(--inset-shadow-lit-blur, 0)
+      color-mix(
+        in srgb,
+        var(--inset-shadow-lit-color, #fff)
+          calc(var(--inset-shadow-lit-alpha, 100) * 1%),
+        transparent
+      ),
+    inset var(--inset-shadow-dim-x, 0) var(--inset-shadow-dim-y, 0)
+      var(--inset-shadow-dim-blur, 0)
+      color-mix(
+        in srgb,
+        var(--inset-shadow-dim-color, #000)
+          calc(var(--inset-shadow-dim-alpha, 100) * 1%),
+        transparent
+      );
+}
+
+@utility inset-shadow-lit-t-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-lit-y: calc(--value(number) * 1px);
+  --inset-shadow-lit-y: --value([length]);
+}
+
+@utility inset-shadow-lit-b-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-lit-y: calc(--value(number) * -1px);
+  --inset-shadow-lit-y: calc(--value([length]) * -1);
+}
+
+@utility inset-shadow-lit-l-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-lit-x: calc(--value(number) * 1px);
+  --inset-shadow-lit-x: --value([length]);
+}
+
+@utility inset-shadow-lit-r-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-lit-x: calc(--value(number) * -1px);
+  --inset-shadow-lit-x: calc(--value([length]) * -1);
+}
+
+@utility inset-shadow-dim-t-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-dim-y: calc(--value(number) * 1px);
+  --inset-shadow-dim-y: --value([length]);
+}
+
+@utility inset-shadow-dim-b-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-dim-y: calc(--value(number) * -1px);
+  --inset-shadow-dim-y: calc(--value([length]) * -1);
+}
+
+@utility inset-shadow-dim-l-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-dim-x: calc(--value(number) * 1px);
+  --inset-shadow-dim-x: --value([length]);
+}
+
+@utility inset-shadow-dim-r-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-dim-x: calc(--value(number) * -1px);
+  --inset-shadow-dim-x: calc(--value([length]) * -1);
+}
+
+@utility inset-shadow-lit-blur-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-lit-blur: calc(--value(number) * 1px);
+  --inset-shadow-lit-blur: --value([length]);
+}
+
+@utility inset-shadow-dim-blur-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-dim-blur: calc(--value(number) * 1px);
+  --inset-shadow-dim-blur: --value([length]);
+}
+
+/* Blur both layers at once. */
+@utility inset-shadow-blur-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-lit-blur: calc(--value(number) * 1px);
+  --inset-shadow-lit-blur: --value([length]);
+  --inset-shadow-dim-blur: calc(--value(number) * 1px);
+  --inset-shadow-dim-blur: --value([length]);
+}
 
 
 

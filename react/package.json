@@ -25,6 +25,7 @@
     "src/lib",
     "src/state",
     "src/index.css",
+    "src/tailwind-inset-shadow.js",
     "src/index.ts"
   ],
   "scripts": {

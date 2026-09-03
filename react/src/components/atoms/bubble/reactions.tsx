@@ -1,19 +1,13 @@
 "use client"
 
-import {
-  AnimatePresence,
-  motion,
-  useReducedMotion,
-} from "motion/react"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { EASE_IN_OUT, SPRING_PRESS, SPRING_SWAP } from "@/lib/ease"
 import { useBubbleVariant } from "./context"
 import type { BubbleReactionsProps, BubbleReactionChipProps } from "./types"
-import { reactionKey } from "./utils";
-import { GlassContainer } from "@/components/ui/glasscn/glass-container";
-
-
+import { reactionKey } from "./utils"
+import { GlassContainer } from "@/components/ui/glasscn/glass-container"
 
 /**
  * One emoji + count inside the pill. Pressing it springs the emoji, and a
@@ -34,7 +28,7 @@ export function BubbleReactionChip({
       aria-label={reaction.label}
       aria-pressed={reaction.reacted ?? false}
       className={cn(
-        "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-0.5 text-sm leading-4 font-bold text-neutral-600 outline-none transition-colors duration-150 ease-smooth-out hover:bg-black/6 focus-visible:ring-2 focus-visible:ring-ring dark:text-neutral-300 dark:hover:bg-white/8",
+        "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-0.5 text-sm leading-4 font-bold text-neutral-600 transition-colors duration-150 ease-smooth-out outline-none hover:bg-black/6 focus-visible:ring-2 focus-visible:ring-ring dark:text-neutral-300 dark:hover:bg-white/8",
         reaction.reacted && "text-foreground",
         className
       )}
@@ -96,29 +90,34 @@ export function BubbleReactions({
 }: BubbleReactionsProps): React.ReactElement {
   const variant = useBubbleVariant()
   return (
-    <div className="absolute w-full h-8 z-[1] -bottom-4">
+    <div
+      className={cn(
+        "absolute -bottom-5 z-[1] flex h-8 w-fit flex-1",
+        variant === "sender" ? "left-4" : "right-4 justify-items-end",
+        className
+      )}
+    >
       <GlassContainer
         glassVariant="liquid-refract"
-        refraction={100}
-        bezel={10}
-        saturation={-100}
+        refraction={3}
+        bezel={12}
+        saturation={2}
         className={cn(
-          "inline-flex w-fit h-full items-center rounded-xl",
-          //variant === "sender" ? "self-end mr-3" : "self-end mr-2",
+          "inline-flex h-full w-fit items-center rounded-xl",
           className
         )}
         data-slot="bubble-reactions"
         {...props}
       >
-        <div className="mx-1.5">
-        {reactions.map((reaction, index) => (
-          <BubbleReactionChip
-            index={index}
-            key={reactionKey(reaction, index)}
-            onToggle={onToggle}
-            reaction={reaction}
-          />
-        ))}
+        <div className={cn("mx-1.5", reactions.length === 0 ? "hidden" : undefined)}>
+          {reactions.map((reaction, index) => (
+            <BubbleReactionChip
+              index={index}
+              key={reactionKey(reaction, index)}
+              onToggle={onToggle}
+              reaction={reaction}
+            />
+          ))}
           {children}
         </div>
       </GlassContainer>
