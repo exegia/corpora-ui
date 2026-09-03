@@ -1,5 +1,10 @@
 import type { ClassValue } from "clsx"
-import type { BubbleVariant } from "./types"
+import type { BubbleReaction, BubbleVariant } from "./types"
+
+/** Returns a stable key for a reaction, falling back to the emoji label if no ID is provided. */
+export function reactionKey(reaction: BubbleReaction, index: number): string {
+  return reaction.id ?? `${reaction.label ?? String(reaction.emoji)}-${index}`
+}
 
 /** Root alignment: outgoing hugs the right edge, everything else the left. */
 export const twBubbleAlignClasses: Record<BubbleVariant, ClassValue> = {
@@ -28,8 +33,8 @@ export const twBubbleColumnClasses: Record<BubbleVariant, ClassValue> = {
  */
 export const twBubbleMessageClasses: Record<BubbleVariant, ClassValue> = {
   sender:
-    "w-fit max-w-full rounded-[20px] rounded-br-[4px] bg-foreground px-5 py-3 text-xs leading-[15px] font-semibold text-background shadow-bubble-dim dark:shadow-bubble-lit",
+    "bg-neutral-700 dark:bg-neutral-200 text-background chat-bubble bubble-sender",
   recipient:
-    "w-fit max-w-full rounded-[20px] rounded-bl-lg bg-neutral-100 px-[18px] py-3 text-xs leading-4 font-semibold text-foreground shadow-bubble-lit dark:bg-neutral-800 dark:shadow-bubble-dim",
-  ai: "w-full text-sm leading-5 font-medium text-foreground/90",
+    "bg-neutral-100 text-foreground shadow-bubble-lit chat-bubble bubble-recipient",
+  ai: "text-sm leading-5 text-foreground/90 chat-bubble bubble-ai",
 }

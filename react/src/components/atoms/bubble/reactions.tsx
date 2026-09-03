@@ -2,7 +2,6 @@
 
 import {
   AnimatePresence,
-  type HTMLMotionProps,
   motion,
   useReducedMotion,
 } from "motion/react"
@@ -10,20 +9,11 @@ import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { EASE_IN_OUT, SPRING_PRESS, SPRING_SWAP } from "@/lib/ease"
 import { useBubbleVariant } from "./context"
-import type { BubbleReaction, BubbleReactionsProps } from "./types"
+import type { BubbleReactionsProps, BubbleReactionChipProps } from "./types"
+import { reactionKey } from "./utils";
+import { GlassContainer } from "@/components/ui/glasscn/glass-container";
 
-export interface BubbleReactionChipProps extends Omit<
-  HTMLMotionProps<"button">,
-  "onToggle" | "children"
-> {
-  reaction: BubbleReaction
-  index: number
-  onToggle?: (reaction: BubbleReaction, index: number) => void
-}
 
-function reactionKey(reaction: BubbleReaction, index: number): string {
-  return reaction.id ?? `${reaction.label ?? String(reaction.emoji)}-${index}`
-}
 
 /**
  * One emoji + count inside the pill. Pressing it springs the emoji, and a
@@ -106,24 +96,32 @@ export function BubbleReactions({
 }: BubbleReactionsProps): React.ReactElement {
   const variant = useBubbleVariant()
   return (
-    <div
-      className={cn(
-        "relative z-[1] -mt-4 inline-flex w-fit items-center gap-1 rounded-xl border border-black/6 bg-neutral-50/85 px-1.5 py-0.5 shadow-pill backdrop-blur-[7px] backdrop-saturate-150 dark:border-white/8 dark:bg-neutral-900/80",
-        variant === "sender" ? "self-end mr-3" : "self-end mr-2",
-        className
-      )}
-      data-slot="bubble-reactions"
-      {...props}
-    >
-      {reactions.map((reaction, index) => (
-        <BubbleReactionChip
-          index={index}
-          key={reactionKey(reaction, index)}
-          onToggle={onToggle}
-          reaction={reaction}
-        />
-      ))}
-      {children}
+    <div className="absolute w-full h-8 z-[1] -bottom-4">
+      <GlassContainer
+        glassVariant="liquid-refract"
+        refraction={100}
+        bezel={10}
+        saturation={-100}
+        className={cn(
+          "inline-flex w-fit h-full items-center rounded-xl",
+          //variant === "sender" ? "self-end mr-3" : "self-end mr-2",
+          className
+        )}
+        data-slot="bubble-reactions"
+        {...props}
+      >
+        <div className="mx-1.5">
+        {reactions.map((reaction, index) => (
+          <BubbleReactionChip
+            index={index}
+            key={reactionKey(reaction, index)}
+            onToggle={onToggle}
+            reaction={reaction}
+          />
+        ))}
+          {children}
+        </div>
+      </GlassContainer>
     </div>
   )
 }

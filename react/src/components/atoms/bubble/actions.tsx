@@ -17,7 +17,7 @@ export function BubbleActions({
     <div
       aria-label={ariaLabel}
       className={cn(
-        "flex items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover/bubble:opacity-100 focus-within:opacity-100 motion-reduce:transition-none",
+        "flex items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover/bubble:opacity-100 focus-within:opacity-100 motion-reduce:transition-none relative",
         className
       )}
       data-slot="bubble-actions"

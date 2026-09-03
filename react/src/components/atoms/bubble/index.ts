@@ -5,7 +5,6 @@ import { BubbleHeader } from "./header"
 import { BubbleMessage } from "./message"
 import {
   BubbleReactionChip,
-  type BubbleReactionChipProps,
   BubbleReactions,
 } from "./reactions"
 
@@ -25,12 +24,13 @@ export {
   BubbleReactions,
   useBubbleVariant,
 }
-export type { BubbleReactionChipProps }
+
 export type {
   BubbleActionsProps,
   BubbleAvatarIdentity,
   BubbleHeaderProps,
   BubbleMessageProps,
+  BubbleReactionChipProps,
   BubbleProps,
   BubbleReaction,
   BubbleReactionsProps,

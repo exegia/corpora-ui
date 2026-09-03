@@ -1,3 +1,4 @@
+import type { HTMLMotionProps } from "motion/react";
 import type { ComponentPropsWithoutRef, ReactNode } from "react"
 
 /**
@@ -47,7 +48,7 @@ export interface BubbleHeaderProps extends Omit<
 export interface BubbleReaction {
   /** Stable key; falls back to the label/emoji when omitted. */
   id?: string
-  emoji: ReactNode
+  emoji: ReactNode | string
   count?: number
   /** Whether the current user has this reaction. */
   reacted?: boolean
@@ -64,3 +65,13 @@ export interface BubbleReactionsProps extends Omit<
 }
 
 export type BubbleActionsProps = ComponentPropsWithoutRef<"div">
+
+
+export interface BubbleReactionChipProps extends Omit<
+  HTMLMotionProps<"button">,
+  "onToggle" | "children"
+> {
+  reaction: BubbleReaction
+  index: number
+  onToggle?: (reaction: BubbleReaction, index: number) => void
+}

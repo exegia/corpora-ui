@@ -52,6 +52,10 @@
   --success-foreground: var(--color-emerald-700);
   --warning: var(--color-amber-500);
   --warning-foreground: var(--color-amber-700);
+  --liquid-glass-rim-light: rgba(255,255,255,0.8);
+  --liquid-glass-rim-dark: rgba(0,0,0,0.5);
+  --liquid-glass-rim-fade: 2%;
+  --liquid-glass-rim-width: 1.8px;
 }
 
 .dark {
@@ -93,6 +97,11 @@
   --success-foreground: var(--color-emerald-400);
   --warning: var(--color-amber-500);
   --warning-foreground: var(--color-amber-400);
+  --liquid-glass-rim-light: rgba(255,255,255,0.8);
+  --liquid-glass-rim-dark: rgba(0,0,0,0.5);
+  --liquid-glass-rim-fade: 2%;
+  --liquid-glass-rim-width: 1.8px;
+
 
   .shadow-bezel {
     box-shadow:
@@ -112,11 +121,15 @@
   --chat-ring: color-mix(in oklab, var(--foreground) 10%, transparent);
   --chat-inset: rgb(0 0 0 / 0.08);
   --chat-field: oklch(0.985 0 0);
+  --inset-shadow-color-light: --alpha(var(--color-white) / 20%);
+  --inset-shadow-color-dark: --alpha(var(--color-black) / 10%);
 }
 .dark {
   --chat-ring: #040404;
   --chat-inset: rgb(0 0 0 / 0.39);
   --chat-field: #252525;
+  --inset-shadow-color-light: --alpha(var(--color-white) / 20%);
+  --inset-shadow-color-dark: --alpha(var(--color-black) / 10%);
 }
 
 @theme inline {
@@ -244,6 +257,30 @@
   }
 }
 
+@utility shadow-bezel-dynamic-* {
+  box-shadow:
+    inset 1.5px 3px 1.8px color-mix(in srgb, currentColor calc(--value(number) * 1%), white),
+    inset -1px -2px 2px color-mix(in srgb, currentColor calc(--value(number) * 1%), black);
+}
+
+@layer components {
+    .chat-bubble {
+      @apply w-fit max-w-full rounded-[20px] rounded-br-[4px] px-5 py-3 text-xs leading-[18px] font-normal;
+
+      &.bubble-sender {
+        @apply shadow-bezel-dynamic-50 dark:shadow-bezel-dynamic-20;
+      }
+
+      &.bubble-recipient {
+        @apply shadow-bezel-dynamic-50;
+      }
+
+      &.bubble-ai {
+        @apply shadow-bezel-dynamic-0; 
+      }
+    }
+}
+
 @utility shadow-bezel {
   /* Inherits light/dark ambient highlights automatically */
   box-shadow:
@@ -256,12 +293,14 @@
     inset 2px 2px 4px rgb(0 0 0 / 0.25),
     inset -1px -1px 2px rgb(255 255 255 / 0.7);
 }
-
-@utility shadow-bezel-dynamic {
+/*shadow-[inset_4px_-4px_6px_0px_#00000010,inset_-3px_4px_4px_0px_#ffffff20]*/
+/*@utility shadow-bezel-dynamic {
   box-shadow:
     inset 1px 1px 2px color-mix(in srgb, currentColor 50%, white),
     inset -2px -2px 4px color-mix(in srgb, currentColor 60%, black);
-}
+}*/
+
+
 
 /* Chat design language — inner-shadow bubbles, glass pills, the composer ring. */
 @utility shadow-bubble-lit {

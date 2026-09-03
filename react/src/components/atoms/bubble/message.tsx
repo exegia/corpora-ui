@@ -13,7 +13,7 @@ export function BubbleMessage({
   const variant = useBubbleVariant()
   return (
     <div
-      className={cn(twBubbleMessageClasses[variant], className)}
+      className={cn("relative", twBubbleMessageClasses[variant], className)}
       data-slot="bubble-message"
       {...props}
     />

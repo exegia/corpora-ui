@@ -142,11 +142,11 @@ export type LiquidGlassProps = HTMLAttributes<HTMLDivElement> & {
 export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(
   function LiquidGlass(
     {
-      blur = 2,
+      blur = 0,
       refraction = 15,
       mapSize: _mapSize,
-      bezel = 0.34,
-      saturation = 1.28,
+      bezel = 10.34,
+      saturation = 10.28,
       className,
       style,
       children,
@@ -259,7 +259,7 @@ export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(
             className="pointer-events-none absolute inset-0 rounded-[inherit]"
             style={{
               // Rim thickness, overridable per-consumer via --liquid-glass-rim-width.
-              padding: "var(--liquid-glass-rim-width, 0.5px)",
+              padding: "var(--liquid-glass-rim-width, 2.9px)",
               background:
                 // iOS 27 liquid-glass rim. Each gradient runs ALONG its edges and
                 // fades to nothing at the corners, uniform in between:
@@ -306,7 +306,7 @@ export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(
                 yChannelSelector="G"
                 result="displaced"
               />
-              <feGaussianBlur in="displaced" stdDeviation="0.15" />
+              <feGaussianBlur in="displaced" stdDeviation="0.55" />
             </filter>
           </svg>
         )}

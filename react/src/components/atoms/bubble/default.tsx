@@ -16,7 +16,7 @@ export function Bubble({
     <BubbleContext.Provider value={variant}>
       <div
         className={cn(
-          "group/bubble flex w-full flex-col",
+          "group/bubble flex w-full flex-col relative",
           twBubbleAlignClasses[variant],
           className
         )}
@@ -26,7 +26,7 @@ export function Bubble({
       >
         <div
           className={cn(
-            "flex flex-col gap-1.5",
+            "flex flex-col gap-1.5 relative",
             twBubbleColumnClasses[variant]
           )}
           data-slot="bubble-column"
