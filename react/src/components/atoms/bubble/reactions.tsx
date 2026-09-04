@@ -8,6 +8,8 @@ import { useBubbleVariant } from "./context"
 import type { BubbleReactionsProps, BubbleReactionChipProps } from "./types"
 import { reactionKey } from "./utils"
 import { GlassContainer } from "@/components/ui/glasscn/glass-container"
+import { Button } from "@/components/ui/button";
+import { FaceSlightlySmilingPlus } from "lucide-react";
 
 /**
  * One emoji + count inside the pill. Pressing it springs the emoji, and a
@@ -109,7 +111,7 @@ export function BubbleReactions({
         data-slot="bubble-reactions"
         {...props}
       >
-        <div className={cn("mx-1.5 h-full", reactions.length === 0 ? "hidden" : undefined)}>
+        <div className={cn("mx-1.5 h-full inline-flex items-center")}>
           {reactions.map((reaction, index) => (
             <BubbleReactionChip
               index={index}
@@ -118,6 +120,9 @@ export function BubbleReactions({
               reaction={reaction}
             />
           ))}
+          <Button size="icon-xs" variant="glass" glassVariant="clear" className="border-0 bg-transparent backdrop-blur-none">
+            <FaceSlightlySmilingPlus />
+          </Button>
           {children}
         </div>
       </GlassContainer>

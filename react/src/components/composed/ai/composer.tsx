@@ -13,29 +13,6 @@ import { Stop } from "iconsax-reactjs"
 import { SendHint } from "./shared"
 import type { ComposerMode } from "./types"
 
-export interface ComposerProps {
-  value?: string
-  defaultValue?: string
-  onValueChange?: (value: string) => void
-  mode?: ComposerMode
-  defaultMode?: ComposerMode
-  onModeChange?: (mode: ComposerMode) => void
-  onSend?: (value: string, mode: ComposerMode) => void
-  /** Start in the tall, focused layout. */
-  expanded?: boolean
-  onStop?: () => void
-  isStreaming?: boolean
-  disabled?: boolean
-  /** Attach affordance — the "+" button. Hidden when omitted. */
-  onAttach?: () => void
-  attachLabel?: string
-  sendLabel?: React.ReactNode
-  stopLabel?: React.ReactNode
-  safetyNote?: React.ReactNode
-  placeholder?: string
-  className?: string
-}
-
 /**
  * Prompt field with two shapes: a pill at rest showing the "⌘ + ↵" hint,
  * that squares off into a taller field on focus with the attach and Send
@@ -84,11 +61,11 @@ export function Composer({
   // One attach button for both shapes: it is absolutely positioned in each,
   // so the class swap moves it and `layout` glides it between the two spots
   // rather than mounting a second control.
-  const attachButton = onAttach ? (
+  const attachButton = onAttach && (
     <motion.div
       className={cn(
         "absolute",
-        isExpanded ? "bottom-2.5 left-2.5" : "top-1/2 right-2 -translate-y-1/2"
+       "bottom-2 left-2" 
       )}
       data-slot="composer-attach"
       layout={reduceMotion ? false : "position"}
@@ -105,7 +82,7 @@ export function Composer({
         <Plus className="size-4" />
       </Button>
     </motion.div>
-  ) : null
+  )
 
   return (
     <form
@@ -165,7 +142,7 @@ export function Composer({
         />
 
         <AnimatePresence initial={false}>
-          {showRestHint ? (
+          {showRestHint && (
             <motion.div
               animate={{ opacity: 1, x: 0 }}
               className="pointer-events-none absolute inset-y-0 left-4 flex items-center"
@@ -176,7 +153,7 @@ export function Composer({
             >
               <SendHint />
             </motion.div>
-          ) : null}
+          )}
         </AnimatePresence>
 
         {attachButton}

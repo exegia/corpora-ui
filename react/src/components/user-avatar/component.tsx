@@ -8,7 +8,7 @@ import { Fallback } from "./fallback"
 import { PresenceBadge } from "./presence-badge"
 import type { UserAvatarProps } from "./type"
 import { useUserAvatar } from "./use-user-avatar"
-import { bezelAlphasForTone } from "./utils"
+import { bezelAlphasForTone, twAvatarEmbossClasses } from "./utils"
 
 /**
  * Identity avatar: an image when one is given, initials otherwise, with an
@@ -77,11 +77,11 @@ export function UserAvatar({
           // fraction of whatever `size-*` the caller put on this element —
           // instead of a fixed text step. `text-xl` stays as the fallback for
           // engines without container units.
-          "@container size-8 border-1 border-white bg-neutral-800! text-xl dark:border-neutral-900",
+          "@container size-8 border border-white/5 bg-neutral-600 text-xl dark:border-neutral-900",
           // The emboss itself: an inset drop toward the light's opposite side
-          // is what the ring below is rotated against.
-          bezel &&
-            "shadow-[inset_0_3px_3px_--theme(--color-white/80%),inset_0_-1px_2px_--theme(--color-black/15%)] dark:shadow-[inset_0_1px_1px_--theme(--color-white/5%),inset_0_-8px_2px_--theme(--color-black/20%)]",
+          // is what the ring below is rotated against. See `utils.ts` for how
+          // the two layers are tuned.
+          bezel && twAvatarEmbossClasses,
           className
         )}
         data-avatar-id={avatar.avatarId}
@@ -121,8 +121,8 @@ export function UserAvatar({
             "[--reflect:--theme(--color-emerald-500)] dark:[--reflect:--theme(--color-emerald-400)]",
             showsImage
               ? "[--reflect-peak:30%] [--reflect-mid:12%] [--reflect-reach:56%] dark:[--reflect-peak:40%] dark:[--reflect-mid:16%] dark:[--reflect-reach:60%]"
-              : "[--reflect-peak:16%] [--reflect-mid:6%] [--reflect-reach:40%] dark:[--reflect-peak:26%] dark:[--reflect-mid:9%] dark:[--reflect-reach:46%]",
-            "bg-[radial-gradient(circle_at_88%_88%,color-mix(in_oklab,var(--reflect)_var(--reflect-peak),transparent)_0%,color-mix(in_oklab,var(--reflect)_var(--reflect-mid),transparent)_22%,transparent_var(--reflect-reach))]",
+              : "[--reflect-peak:16%] [--reflect-mid:6%] [--reflect-reach:4%] dark:[--reflect-peak:26%] dark:[--reflect-mid:9%] dark:[--reflect-reach:46%]",
+            "bg-[radial-gradient(circle_at_8%_8%,color-mix(in_oklab,var(--reflect)_var(--reflect-peak),transparent)_50%,color-mix(in_oklab,var(--reflect)_var(--reflect-mid),transparent)_2%,transparent_var(--reflect-reach))]",
             "transition-opacity duration-150 ease-smooth-out"
           )}
           data-image={showsImage ? "" : undefined}
@@ -146,8 +146,8 @@ export function UserAvatar({
             "pointer-events-none absolute inset-0 rounded-full",
             "[--bezel-hi-a:1] [--bezel-lo-a:0.2] dark:[--bezel-hi-a:0.18] dark:[--bezel-lo-a:0.4]",
             "[--bezel-hi-k:1] dark:[--bezel-hi-k:0.55]",
-            "[--bezel-hi:color-mix(in_oklab,white_calc(var(--bezel-hi-a)*100%),transparent)]",
-            "[--bezel-lo:color-mix(in_oklab,black_calc(var(--bezel-lo-a)*100%),transparent)]",
+            "[--bezel-hi:color-mix(in_oklab,white_calc(var(--bezel-hi-a)*50%),transparent)]",
+            "[--bezel-lo:color-mix(in_oklab,black_calc(var(--bezel-lo-a)*50%),transparent)]",
             // Starts at 6 o'clock: shadow there, highlight peaking at 12 (50%),
             // symmetric either side — so rotate(angle) puts the highlight at
             // exactly `bezelAngle` clockwise from 12.

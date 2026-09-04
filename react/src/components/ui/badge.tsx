@@ -21,10 +21,10 @@ const badgeVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         // Role chips for chat headers — a grey glass tag for people…
         neutral:
-          "rounded-sm border-black/10 bg-neutral-500/25 px-1.5 font-bold text-neutral-700 dark:border-neutral-600 dark:bg-neutral-500/70 dark:text-neutral-100",
+          "rounded-sm border-black/30 bg-neutral-500/25 px-1.5 font-bold text-neutral-700 dark:border-neutral-500 dark:bg-neutral-500/70 dark:text-neutral-100",
         // …and the violet one that marks an agent.
         accent:
-            "rounded-sm border-(--chat-ai-accent-foreground) bg-(--chat-ai-accent) font-medium text-white dark:border-(--chat-ai-accent-foreground)",
+            "rounded-sm border-(--chat-ai-accent-foreground) bg-(--chat-ai-accent)/60 font-medium text-white dark:border-(--chat-ai-accent)",
       },
     },
     defaultVariants: {

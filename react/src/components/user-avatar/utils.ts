@@ -1,3 +1,33 @@
+import type { ClassValue } from "clsx"
+
+/**
+ * The avatar's emboss, drawn with the `inset-shadow-{lit,dim}-*` family in
+ * `index.css`: a highlight raking down from the top edge and shading pushed
+ * back up from the bottom, one CSS custom property per class.
+ *
+ * This is the *static* drop that the pointer-lit rim — the conic sweep in
+ * `component.tsx` — is rotated against. It deliberately does not follow the
+ * pointer: the rim reads as a moving light only because there is a fixed
+ * emboss underneath for it to move over.
+ *
+ * Dark mode is not the light values dimmed. On a dark page the white
+ * highlight has to all but vanish (5% against 80%) while the shadow grows
+ * long and soft (8px against 1px), or the disc reads as a lit dome on black.
+ *
+ * Only visible where nothing covers it. `AvatarImage` and `AvatarFallback`
+ * are both `size-full`, so a loaded photo fills the disc edge to edge and the
+ * rim is what carries the emboss there; the initials avatar is where this
+ * shows, its fallback being transparent on purpose.
+ */
+export const twAvatarEmbossClasses: ClassValue = [
+  // Highlight, from the top edge.
+  "inset-shadow-lit-t-3 inset-shadow-lit-blur-3 inset-shadow-lit/80",
+  "dark:inset-shadow-lit-t-1 dark:inset-shadow-lit-blur-1 dark:inset-shadow-lit/5",
+  // Shading, from the bottom edge.
+  "inset-shadow-dim-b-1 inset-shadow-dim-blur-2 inset-shadow-dim/15",
+  "dark:inset-shadow-dim-b-8 dark:inset-shadow-dim-blur-2 dark:inset-shadow-dim/20",
+]
+
 /** "Jenny Hamilton" → "JH", "luna" → "L". */
 export function initialsFrom(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
