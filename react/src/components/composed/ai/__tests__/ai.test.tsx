@@ -84,7 +84,7 @@ describe("SuggestionCard", () => {
 })
 
 describe("AiMessage", () => {
-  test("counts its suggestions and toggles the disclosure", async () => {
+  test("toggles the suggestions disclosure", async () => {
     const user = userEvent.setup()
     render(
       <AiMessage
@@ -101,7 +101,9 @@ describe("AiMessage", () => {
       </AiMessage>
     )
     expect(screen.getByText("Agent")).toBeDefined()
-    const trigger = screen.getByRole("button", { name: "Suggestions (2)" })
+    // The default label is bare — the cards land right under the trigger, so
+    // the tally would only be noise. `suggestionsLabel` is the way back to it.
+    const trigger = screen.getByRole("button", { name: "Suggestions" })
     expect(trigger.getAttribute("aria-expanded")).toBe("false")
     expect(screen.queryByText("One")).toBeNull()
 
@@ -109,5 +111,23 @@ describe("AiMessage", () => {
     expect(trigger.getAttribute("aria-expanded")).toBe("true")
     expect(await screen.findByText("One")).toBeDefined()
     expect(await screen.findByText("Two")).toBeDefined()
+  })
+
+  test("still counts the cards, for a label that asks for the tally", () => {
+    render(
+      <AiMessage
+        author="Exegia"
+        suggestions={
+          <>
+            <SuggestionCard heading="One" key="1" nodeId="p-1" />
+            <SuggestionCard heading="Two" key="2" nodeId="p-2" />
+          </>
+        }
+        suggestionsLabel={(count) => `Suggestions (${count})`}
+      >
+        Generated prose
+      </AiMessage>
+    )
+    expect(screen.getByRole("button", { name: "Suggestions (2)" })).toBeDefined()
   })
 })

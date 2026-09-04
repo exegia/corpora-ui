@@ -24,10 +24,13 @@ export interface AiMessageProps extends Omit<
   children: React.ReactNode
   isStreaming?: boolean
   onStop?: () => void
-  /** Suggestion cards revealed by the "Suggestions (n)" disclosure. */
+  /** Suggestion cards revealed by the "Suggestions" disclosure. */
   suggestions?: React.ReactNode
-  /** Overrides the count derived from `suggestions`' children. */
+  /** Overrides the count derived from `suggestions`' children. The default
+   * label ignores it — pass `suggestionsLabel` to surface it. */
   suggestionCount?: number
+  /** Names the disclosure. Plain "Suggestions" by default: the cards fan out
+   * right below it, so the tally reads as noise on the trigger. */
   suggestionsLabel?: (count: number) => React.ReactNode
   defaultSuggestionsOpen?: boolean
   suggestionsOpen?: boolean
@@ -60,8 +63,8 @@ const ITEM_VARIANTS = {
 
 /**
  * An agent turn: author row, prose body and — when the model proposed
- * changes — a "Suggestions (n)" disclosure that fans the cards out below
- * with a staggered spring.
+ * changes — a "Suggestions" disclosure that fans the cards out below with a
+ * staggered spring.
  */
 export function AiMessage({
   author = "Assistant",

@@ -11,7 +11,11 @@ import { Textarea } from "@/components/ui/textarea"
 import { Text } from "@/components/atoms"
 import { Stop } from "iconsax-reactjs"
 import { SendHint } from "./shared"
-import type { ComposerMode } from "./types"
+import type { ComposerProps } from "./types"
+
+// `ComposerProps` moved to `types.ts`; both the barrel and `ai-panel` still
+// reach for it here, so keep this module the address it has always had.
+export type { ComposerProps }
 
 /**
  * Prompt field with two shapes: a pill at rest showing the "⌘ + ↵" hint,
