@@ -269,20 +269,6 @@
     inset -1px -2px 2px color-mix(in srgb, currentColor calc(--value(number) * 1%), black);
 }
 
-@layer components {
-    .chat-bubble {
-      @apply w-fit max-w-fit rounded-[20px] px-5 py-3.5 text-sm leading-[18px] font-normal;
-
-      &.bubble-sender {
-          @apply inset-shadow-lit/90 inset-shadow-dim inset-shadow-dim-b-1.5 inset-shadow-dim-r-1.5 inset-shadow-lit-t-2 inset-shadow-lit-l-1.5 inset-shadow-blur-3 rounded-br-[5px];
-      }
-
-      &.bubble-recipient {
-         @apply inset-shadow-lit inset-shadow-dim/20 dark:inset-shadow-lit/30 dark:inset-shadow-dim/90 inset-shadow-dim-b-1 inset-shadow-dim-r-1 inset-shadow-lit-t-2 inset-shadow-lit-l-1 inset-shadow-blur-3 rounded-bl-[5px];
-      }
-    }
-}
-
 @utility shadow-bezel {
   /* Inherits light/dark ambient highlights automatically */
   box-shadow:
