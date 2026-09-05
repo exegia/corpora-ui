@@ -253,7 +253,7 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     slug: "logo",
     name: "Logo",
     description:
-      "Brand lockup: a mark beside a wordmark. The mark is an SVG, an image, or a monogram tile derived from the name; variant=\"mark\" folds the wordmark away with the same motion a collapsing rail uses. With href the whole lockup is a home link.",
+      'Brand lockup: a mark beside a wordmark. The mark is an SVG, an image, or a monogram tile derived from the name; variant="mark" folds the wordmark away with the same motion a collapsing rail uses. With href the whole lockup is a home link.',
     category: "components",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/logo-demo")),
@@ -293,7 +293,7 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
         name: "href",
         type: "string",
         description:
-          "Renders the lockup as an anchor named by name — the usual \"mark goes home\" affordance.",
+          'Renders the lockup as an anchor named by name — the usual "mark goes home" affordance.',
       },
     ],
     usage: `import { Logo } from "@corpora/ui"
@@ -306,41 +306,72 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     name: "AI",
     titleStyle: "titlebar",
     description:
-      "Reusable AI thread pieces: user message bubble, generated block, the three suggestion states and the prompt composer.",
+      "Reusable AI thread pieces: the person's message bubble, the agent turn with its fan-out suggestions disclosure, frosted suggestion cards with a gliding reference chip, and the pill-to-field prompt composer.",
     category: "components",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/ai-demo")),
-    registryDependencies: ["card", "button", "textarea"],
+    registryDependencies: ["bubble", "card", "button", "textarea"],
     props: [
       {
         name: "UserMessage",
-        type: "children",
-        description: "Right-aligned chat bubble for the person's message.",
+        type: "children / author / time / badge / reactions",
+        description:
+          "Right-aligned chat bubble for the person's message; with an author it grows the Bubble.Header row, and reactions hang a glass pill off the corner.",
+      },
+      {
+        name: "AiMessage",
+        type: "children / author / suggestions / isStreaming / onStop",
+        description:
+          "The agent turn: spark avatar, Agent badge, prose body with a polite live-region caret while streaming, and a violet \"Suggestions (n)\" disclosure that fans its SuggestionCard children out with a staggered spring. Controllable via suggestionsOpen.",
+      },
+      {
+        name: "SuggestionCard",
+        type: "heading / description / nodeId / state / reference / children",
+        description:
+          "Frosted collapsible card per suggestion. The state mark morphs (hollow → violet check → grey cross), the reference chip sits in the folded header and glides into the body on open, and the footer shows Ignore / \"Ok, fix them\" while pending (labels via rejectLabel / acceptLabel).",
+      },
+      {
+        name: "ReferenceChip",
+        type: "children / href / onClick",
+        description:
+          "\"Reference 1 ↗\" tag pointing at the grounding node. Renders as a link, a button or a plain tag depending on what it is given.",
       },
       {
         name: "GeneratedBlock",
         type: "content / isStreaming / onStop / citations",
         description:
-          "AI output with a persistent GENERATED label, polite live-region streaming (caret + Stop) and citation chips.",
-      },
-      {
-        name: "SuggestedFixCard / StaleCard / AppliedCard",
-        type: "diff and version props",
-        description:
-          "The three states of one suggestion: actionable (coss Card with ins/del diff rows, Reject/Apply ⌘↩), out of date (warning Alert with Re-validate) and confirmed (success Alert with Undo ⌘Z).",
+          "Lower-level AI output with a persistent GENERATED label, streaming caret + Stop and citation chips — for hosts that keep their own author row.",
       },
       {
         name: "Composer",
-        type: "value / mode / onSend / isStreaming / disabled",
+        type: "value / onSend / onAttach / isStreaming / disabled",
         description:
-          "Prompt textarea with a mode select (answer / fix / ask), ⌘↩ send, Esc stop while streaming, and a safety note slot.",
+          "A pill at rest showing the ⌘ + ↵ hint that springs into a taller field on focus, with the attach (+) and amber Send controls entering along the bottom edge. ⌘↩ sends, Esc stops while streaming; a safety note slot sits underneath.",
       },
     ],
-    usage: `import { Composer, GeneratedBlock, UserMessage } from "@exegia/corpora-ui"
+    usage: `import { AiMessage, Composer, ReferenceChip, SuggestionCard, UserMessage } from "@exegia/corpora-ui"
 
-<UserMessage>Validate this passage.</UserMessage>
-<GeneratedBlock content="The boundary is valid." citations={["p-17"]} />
-<Composer onSend={(value, mode) => ask(value, mode)} />`,
+<UserMessage author="Sender" badge="Admin" time="10 min ago">
+  Validate this passage.
+</UserMessage>
+<AiMessage
+  author="Exegia"
+  suggestions={
+    <SuggestionCard
+      heading="Suggestion"
+      description="Label mismatch"
+      nodeId="p-17"
+      reference={<ReferenceChip href="#p-17">Reference 1</ReferenceChip>}
+      onAccept={apply}
+      onReject={dismiss}
+    >
+      The canonical paragraph label is required by the schema.
+    </SuggestionCard>
+  }
+>
+  The boundary is valid — one label drifted.
+</AiMessage>
+<Composer onSend={(value, mode) => ask(value, mode)} onAttach={pickFile} />`,
   },
   {
     slug: "verse",

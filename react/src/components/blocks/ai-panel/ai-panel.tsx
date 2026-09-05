@@ -4,14 +4,12 @@ import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ghostMuted } from "./shared"
-import {
-  Composer,
-  type ComposerProps,
-} from "@/components/composed/ai/composer"
+import { Composer, type ComposerProps } from "@/components/composed/ai/composer"
 import { ScopeChip } from "./scope-chip"
 import { ScopePicker } from "./scope-picker"
 import { SuggestedPrompts } from "./suggested-prompts"
 import type { AiScope } from "./types"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 export interface AiPanelProps extends Omit<
   React.ComponentPropsWithoutRef<"aside">,
@@ -55,41 +53,44 @@ export function AiPanel({
   ...props
 }: AiPanelProps): React.ReactElement {
   return (
-    <aside
+    <div
       aria-label={headerTitle}
-      className={cn("flex h-full w-full flex-col", className)}
+      className={cn("flex h-full w-full flex-col bg-sidebar", className)}
       data-slot="ai-panel"
       {...props}
     >
-      <header className="flex shrink-0 items-center gap-2 border-b px-4 py-3">
-        <h2 className="flex-1 text-sm font-semibold text-foreground">
-          {headerTitle}
-        </h2>
-        <Button
-          className={cn("font-normal", ghostMuted)}
-          onClick={onNewThread}
-          size="xs"
-          variant="ghost"
-        >
-          New thread
-        </Button>
+      <header className="flex shrink-0 flex-col items-center gap-2 px-3.5 pt-3">
+        <div className="flex w-full flex-row items-center justify-between">
+          <h2 className="flex-1 text-sm font-semibold text-foreground">
+            {headerTitle}
+          </h2>
+          <Button
+            className={cn("font-normal", ghostMuted)}
+            onClick={onNewThread}
+            size="xs"
+            variant="ghost"
+          >
+            New thread
+          </Button>
+        </div>
+        <ScrollArea scrollFade fill>
+          <div className="flex w-max shrink-0 items-center gap-2">
+            <ScopeChip
+              scope={scope}
+              removable
+              tabIndex={0}
+              onRemove={onRemoveScope}
+            />
+            <ScopePicker
+              onOpenChange={onScopePickerOpenChange}
+              onValueChange={onScopeChange}
+              open={scopePickerOpen}
+              scope={scope}
+              value={scope.kind}
+            />
+          </div>
+        </ScrollArea>
       </header>
-
-      <div className="flex shrink-0 items-center gap-2 border-b px-4 py-3">
-        <ScopeChip
-          scope={scope}
-          removable
-          tabIndex={0}
-          onRemove={onRemoveScope}
-        />
-        <ScopePicker
-          onOpenChange={onScopePickerOpenChange}
-          onValueChange={onScopeChange}
-          open={scopePickerOpen}
-          scope={scope}
-          value={scope.kind}
-        />
-      </div>
 
       {locked ? (
         <p
@@ -100,17 +101,16 @@ export function AiPanel({
         </p>
       ) : null}
 
-      <section
-        aria-label="Thread"
-        className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4"
-      >
-        {thread}
-        {!thread ? (
-          <div className="flex h-full min-h-44 flex-col justify-end">
-            <SuggestedPrompts onSelect={onPromptSelect} prompts={prompts} />
-          </div>
-        ) : null}
-      </section>
+      <ScrollArea aria-label="Thread" scrollFade fill>
+        <div className="flex min-h-0 flex-1 flex-col gap-y-2 px-5 py-4">
+          {thread}
+          {!thread && (
+            <div className="flex h-full min-h-44 flex-col justify-end">
+              <SuggestedPrompts onSelect={onPromptSelect} prompts={prompts} />
+            </div>
+          )}
+        </div>
+      </ScrollArea>
 
       {thread && prompts.length ? (
         <div className="shrink-0 px-4 pb-3">
@@ -123,6 +123,6 @@ export function AiPanel({
           disabled={locked || composerProps?.disabled}
         />
       </footer>
-    </aside>
+    </div>
   )
 }

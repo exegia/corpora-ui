@@ -1,0 +1,173 @@
+"use client";
+
+import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
+import type React from "react";
+import {
+  type FrostGlassVariant,
+  glassVariantStyles,
+} from "@/lib/glass-variants";
+import { cn } from "@/lib/utils";
+
+/** Layout, sizing and transition — shared by every popup variant. */
+const popupStructuralClasses =
+  "relative flex h-(--popup-height,auto) w-(--popup-width,auto) origin-(--transform-origin) rounded-lg outline-none transition-[width,height,scale,opacity] has-data-[slot=calendar]:rounded-xl data-starting-style:scale-98 data-starting-style:opacity-0";
+
+/** The solid surface: border, fill and the hairline `before` bevel. */
+const popupDefaultSurfaceClasses =
+  "border bg-popover not-dark:bg-clip-padding text-popover-foreground shadow-lg/5 before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] before:shadow-[0_1px_--theme(--color-black/4%)] has-data-[slot=calendar]:before:rounded-[calc(var(--radius-xl)-1px)] dark:before:shadow-[0_-1px_--theme(--color-white/6%)]";
+
+/**
+ * Neutral base for the glass treatment — the finish itself (blur, tint,
+ * bevel) comes from `glassVariantStyles` keyed by `glassVariant`, which is
+ * only accepted when `variant` is "glass".
+ */
+const popupGlassBaseClasses = "border-transparent text-foreground";
+
+/**
+ * Every finish except "liquid-refract". That one delegates its look to the
+ * `LiquidGlass` wrapper, whose `overflow-hidden` box measures 0px tall around
+ * an absolutely-sized popup and clips it away entirely — so a popup offers the
+ * four pure-class finishes only, and defaults to "frosted" rather than to
+ * Button's "liquid-refract".
+ */
+type PopoverGlassVariant = Exclude<FrostGlassVariant, "liquid-refract">;
+
+export const PopoverCreateHandle: typeof PopoverPrimitive.createHandle =
+  PopoverPrimitive.createHandle;
+
+export const Popover: typeof PopoverPrimitive.Root = PopoverPrimitive.Root;
+
+export function PopoverTrigger({
+  className,
+  children,
+  ...props
+}: PopoverPrimitive.Trigger.Props): React.ReactElement {
+  return (
+    <PopoverPrimitive.Trigger
+      className={className}
+      data-slot="popover-trigger"
+      {...props}
+    >
+      {children}
+    </PopoverPrimitive.Trigger>
+  );
+}
+
+type PopoverPopupBaseProps = PopoverPrimitive.Popup.Props & {
+  portalProps?: PopoverPrimitive.Portal.Props;
+  side?: PopoverPrimitive.Positioner.Props["side"];
+  align?: PopoverPrimitive.Positioner.Props["align"];
+  sideOffset?: PopoverPrimitive.Positioner.Props["sideOffset"];
+  alignOffset?: PopoverPrimitive.Positioner.Props["alignOffset"];
+  tooltipStyle?: boolean;
+  anchor?: PopoverPrimitive.Positioner.Props["anchor"];
+};
+
+export type PopoverPopupProps = PopoverPopupBaseProps &
+  (
+    | {
+        variant: "glass";
+        /** Glass finish. Only available when `variant` is "glass". */
+        glassVariant?: PopoverGlassVariant;
+      }
+    | {
+        variant?: "default";
+        glassVariant?: never;
+      }
+  );
+
+export function PopoverPopup({
+  children,
+  className,
+  side = "bottom",
+  align = "center",
+  sideOffset = 4,
+  alignOffset = 0,
+  tooltipStyle = false,
+  anchor,
+  portalProps,
+  variant,
+  glassVariant,
+  ...props
+}: PopoverPopupProps): React.ReactElement {
+  const resolvedGlassVariant: PopoverGlassVariant | undefined =
+    variant === "glass" ? (glassVariant ?? "frosted") : undefined;
+  return (
+    <PopoverPrimitive.Portal {...portalProps}>
+      <PopoverPrimitive.Positioner
+        align={align}
+        alignOffset={alignOffset}
+        anchor={anchor}
+        className="z-50 h-(--positioner-height) w-(--positioner-width) max-w-(--available-width) transition-[top,left,right,bottom,transform] data-instant:transition-none"
+        data-slot="popover-positioner"
+        side={side}
+        sideOffset={sideOffset}
+      >
+        <PopoverPrimitive.Popup
+          className={cn(
+            popupStructuralClasses,
+            resolvedGlassVariant
+              ? cn(
+                  popupGlassBaseClasses,
+                  glassVariantStyles[resolvedGlassVariant],
+                )
+              : popupDefaultSurfaceClasses,
+            tooltipStyle &&
+              "w-fit text-balance rounded-md text-xs shadow-md/5 before:rounded-[calc(var(--radius-md)-1px)]",
+            className,
+          )}
+          
+          data-glass-variant={resolvedGlassVariant}
+          data-slot="popover-popup"
+          {...props}
+        >
+          <PopoverPrimitive.Viewport
+            className={cn(
+              "relative size-full max-h-(--available-height) overflow-clip px-(--viewport-inline-padding) py-4 [--viewport-inline-padding:--spacing(4)] has-data-[slot=calendar]:p-2 data-instant:transition-none **:data-current:data-ending-style:opacity-0 **:data-current:data-starting-style:opacity-0 **:data-previous:data-ending-style:opacity-0 **:data-previous:data-starting-style:opacity-0 **:data-current:w-[calc(var(--popup-width)-2*var(--viewport-inline-padding)-2px)] **:data-previous:w-[calc(var(--popup-width)-2*var(--viewport-inline-padding)-2px)] **:data-current:opacity-100 **:data-previous:opacity-100 **:data-current:transition-opacity **:data-previous:transition-opacity",
+              tooltipStyle
+                ? "py-1 [--viewport-inline-padding:--spacing(2)]"
+                : "not-data-transitioning:overflow-y-auto",
+            )}
+            data-slot="popover-viewport"
+          >
+            {children}
+          </PopoverPrimitive.Viewport>
+        </PopoverPrimitive.Popup>
+      </PopoverPrimitive.Positioner>
+    </PopoverPrimitive.Portal>
+  );
+}
+
+export function PopoverClose({
+  ...props
+}: PopoverPrimitive.Close.Props): React.ReactElement {
+  return <PopoverPrimitive.Close data-slot="popover-close" {...props} />;
+}
+
+export function PopoverTitle({
+  className,
+  ...props
+}: PopoverPrimitive.Title.Props): React.ReactElement {
+  return (
+    <PopoverPrimitive.Title
+      className={cn("font-semibold text-lg leading-none", className)}
+      data-slot="popover-title"
+      {...props}
+    />
+  );
+}
+
+export function PopoverDescription({
+  className,
+  ...props
+}: PopoverPrimitive.Description.Props): React.ReactElement {
+  return (
+    <PopoverPrimitive.Description
+      className={cn("text-muted-foreground text-sm", className)}
+      data-slot="popover-description"
+      {...props}
+    />
+  );
+}
+
+export { PopoverPrimitive, PopoverPopup as PopoverContent };

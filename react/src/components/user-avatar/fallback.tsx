@@ -14,7 +14,7 @@ export function Fallback({
   return (
     // Initials scale with the disc: 42% of the avatar's width (≈ text-xl on
     // size-12), resolved against the `@container` on the Avatar root.
-    <AvatarFallback className="text-[42cqw]">
+    <AvatarFallback className="text-[42cqw] text-white">
       {loading ? (
         <Skeleton
           className="size-full rounded-full"

@@ -6,9 +6,8 @@ import {
   ScopeChip,
   ScopePicker,
   SelectionPopover,
-  SuggestedFixCard,
+  SuggestionCard,
   type AiScope,
-  type DiffRow,
 } from "../index"
 
 const passageScope: AiScope = {
@@ -79,25 +78,52 @@ describe("AI curation component set", () => {
     expect(onValueChange).toHaveBeenCalledWith("corpus")
   })
 
-  test("uses ins and del semantics for suggested diff rows", () => {
-    const rows: DiffRow[] = [
-      { type: "remove", field: "label", value: "wrong" },
-      { type: "add", field: "label", value: "right" },
-    ]
-    const { container } = render(
-      <SuggestedFixCard
+  test("suggestion card offers accept and reject only while pending", async () => {
+    const user = userEvent.setup()
+    const onAccept = mock(() => {})
+    const onReject = mock(() => {})
+    const { container, rerender } = render(
+      <SuggestionCard
+        heading="Label mismatch"
         nodeId="p-17"
-        onApply={mock(() => {})}
-        rationale="The label must match the schema."
-        rows={rows}
-      />
+        onAccept={onAccept}
+        onReject={onReject}
+      >
+        <p>label: paragraph → p</p>
+      </SuggestionCard>
     )
 
-    expect(container.querySelector("del")?.textContent).toContain("wrong")
-    expect(container.querySelector("ins")?.textContent).toContain("right")
     expect(
-      screen.getByRole("heading", { name: /Target node p-17/ })
-    ).toBeDefined()
+      container.querySelector('[data-slot="suggestion-card"]')?.getAttribute("data-node-id")
+    ).toBe("p-17")
+    await user.click(screen.getByRole("button", { name: "Ok, fix them" }))
+    expect(onAccept).toHaveBeenCalledTimes(1)
+    await user.click(screen.getByRole("button", { name: "Ignore" }))
+    expect(onReject).toHaveBeenCalledTimes(1)
+
+    rerender(
+      <SuggestionCard heading="Label mismatch" nodeId="p-17" state="accepted">
+        <p>label: paragraph → p</p>
+      </SuggestionCard>
+    )
+    // The actions fade out before the outcome label mounts (AnimatePresence
+    // mode="wait"), so wait for the label rather than polling the button.
+    expect(await screen.findByText("Accepted")).toBeDefined()
+    expect(screen.queryByRole("button", { name: "Ok, fix them" })).toBeNull()
+  })
+
+  test("suggestion card collapses its panel from the heading trigger", async () => {
+    const user = userEvent.setup()
+    render(
+      <SuggestionCard heading="Label mismatch" nodeId="p-17">
+        <p>label: paragraph → p</p>
+      </SuggestionCard>
+    )
+
+    const trigger = screen.getByRole("button", { name: /Label mismatch/ })
+    expect(trigger.getAttribute("aria-expanded")).toBe("true")
+    await user.click(trigger)
+    expect(trigger.getAttribute("aria-expanded")).toBe("false")
   })
 
   test("marks generated streaming output as a polite live region", () => {

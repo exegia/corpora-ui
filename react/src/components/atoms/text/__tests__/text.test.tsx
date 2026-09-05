@@ -1,18 +1,18 @@
 import { describe, expect, test } from "bun:test"
 import { render, screen } from "@testing-library/react"
-import { Heading, Paragraph, Span, Text } from "../index"
+import { Text } from "../index"
 
 describe("Text", () => {
   test("maps variants to semantic elements", () => {
     render(
       <>
-        <Text>Default</Text>
-        <Heading>Heading</Heading>
-        <Paragraph>Paragraph</Paragraph>
-        <Text href="#activity" type="link">
+        <Text.Root>Default</Text.Root>
+        <Text.Heading>Heading</Text.Heading>
+        <Text.Paragraph>Paragraph</Text.Paragraph>
+        <Text.Root href="#activity" type="link">
           Link
-        </Text>
-        <Text type="subscript">Note</Text>
+        </Text.Root>
+        <Text.Root type="subscript">Note</Text.Root>
       </>
     )
 
@@ -28,8 +28,8 @@ describe("Text", () => {
   test("supports named and numeric sizes", () => {
     render(
       <>
-        <Span size="small">Small</Span>
-        <Text size={18}>Custom</Text>
+        <Text.Span size="small">Small</Text.Span>
+        <Text.Root size={18}>Custom</Text.Root>
       </>
     )
 
@@ -38,7 +38,7 @@ describe("Text", () => {
   })
 
   test("marks selected text without relying on color alone", () => {
-    render(<Text selection="node-17">Selected corpus text</Text>)
+    render(<Text.Root selection="node-17">Selected corpus text</Text.Root>)
 
     const selected = screen.getByText("Selected corpus text")
     expect(selected.getAttribute("data-selection")).toBe("node-17")

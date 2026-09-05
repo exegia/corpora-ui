@@ -6,6 +6,8 @@
 @import "@fontsource-variable/figtree";
 @import "motion-icons-react/style.css";
 
+@plugin "./tailwind-inset-shadow.js";
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -52,6 +54,10 @@
   --success-foreground: var(--color-emerald-700);
   --warning: var(--color-amber-500);
   --warning-foreground: var(--color-amber-700);
+  --liquid-glass-rim-light: rgba(255,255,255,0.8);
+  --liquid-glass-rim-dark: rgba(0,0,0,0.5);
+  --liquid-glass-rim-fade: 2%;
+  --liquid-glass-rim-width: 1.8px;
 }
 
 .dark {
@@ -93,6 +99,11 @@
   --success-foreground: var(--color-emerald-400);
   --warning: var(--color-amber-500);
   --warning-foreground: var(--color-amber-400);
+  --liquid-glass-rim-light: rgba(255,255,255,0.3);
+  --liquid-glass-rim-dark: rgba(0,0,0,0.5);
+  --liquid-glass-rim-fade: 4%;
+  --liquid-glass-rim-width: 1.5px;
+
 
   .shadow-bezel {
     box-shadow:
@@ -105,6 +116,26 @@
       inset 2px 2px 4px rgb(0 0 0 / 0.6),
       inset -1px -1px 2px rgb(255 255 255 / 0.15);
   }
+}
+
+/* Chat surfaces (bubble, composer) — ring + inset depth per theme. */
+:root {
+  --chat-ring: color-mix(in oklab, var(--foreground) 10%, transparent);
+  --chat-inset: rgb(0 0 0 / 0.08);
+  --chat-field: oklch(0.985 0 0);
+  --chat-ai-accent-foreground: var(--color-white);
+  --chat-ai-accent: var(--color-indigo-800);
+  --inset-shadow-color-light: --alpha(var(--color-white) / 20%);
+  --inset-shadow-color-dark: --alpha(var(--color-black) / 10%);
+}
+.dark {
+  --chat-ring: #040404;
+  --chat-inset: rgb(0 0 0 / 0.39);
+  --chat-field: #252525;
+  --chat-ai-accent-foreground: var(--color-white);
+  --chat-ai-accent: var(--color-indigo-800);
+  --inset-shadow-color-light: --alpha(var(--color-white) / 20%);
+  --inset-shadow-color-dark: --alpha(var(--color-black) / 10%);
 }
 
 @theme inline {
@@ -232,11 +263,17 @@
   }
 }
 
+@utility shadow-bezel-dynamic-* {
+  box-shadow:
+    inset 1.5px 3px 1.8px color-mix(in srgb, currentColor calc(--value(number) * 1%), white),
+    inset -1px -2px 2px color-mix(in srgb, currentColor calc(--value(number) * 1%), black);
+}
+
 @utility shadow-bezel {
   /* Inherits light/dark ambient highlights automatically */
   box-shadow:
-    inset 1px 1px 2px rgb(255 255 255 / 0.7),
-    inset -2px -2px 4px rgb(0 0 0 / 0.25);
+    inset 1px 1px 4px rgb(255 255 255 / 0.7),
+    inset -2px -2px 3px rgb(0 0 0 / 0.05);
 }
 
 @utility shadow-debossed {
@@ -245,8 +282,154 @@
     inset -1px -1px 2px rgb(255 255 255 / 0.7);
 }
 
-@utility shadow-bezel-dynamic {
+
+/* ── Inset bezel ─────────────────────────────────────────────────────────
+   Two independent inset layers you compose one axis at a time: `lit`, the
+   light catching the surface, and `dim`, the shading opposite it. Each layer
+   carries its own edges, blur and opacity.
+
+     inset-shadow-lit-t-2       lit layer cast in from the top edge, 2px
+     inset-shadow-lit-l-2       …and in from the left edge, 2px
+     inset-shadow-lit/20        the whole lit layer at 20% opacity
+     inset-shadow-lit-blur-6    6px blur on the lit layer
+     inset-shadow-blur-6        6px blur on both layers
+
+   `dim-*` mirrors all of it. The letter names the edge the light enters
+   from, so `-t-` pushes the layer down and `-b-` up; opposite edges of one
+   layer write the same axis, so pick one per layer. Offsets take a bare px
+   count or an arbitrary length (`inset-shadow-lit-t-[0.5rem]`). Recolour a
+   layer through --inset-shadow-lit-color / --inset-shadow-dim-color.
+
+   The family owns `box-shadow` outright — never pair it with `shadow-*`, and
+   note it can only draw inset layers, so it cannot replace the outer drop in
+   `shadow-bubble-dim`.
+*/
+@utility inset-shadow-bezel {
   box-shadow:
-    inset 1px 1px 2px color-mix(in srgb, currentColor 40%, white),
-    inset -2px -2px 4px color-mix(in srgb, currentColor 60%, black);
+    inset var(--inset-shadow-lit-x, 0) var(--inset-shadow-lit-y, 0)
+      var(--inset-shadow-lit-blur, 0)
+      color-mix(
+        in srgb,
+        var(--inset-shadow-lit-color, #fff)
+          calc(var(--inset-shadow-lit-alpha, 100) * 1%),
+        transparent
+      ),
+    inset var(--inset-shadow-dim-x, 0) var(--inset-shadow-dim-y, 0)
+      var(--inset-shadow-dim-blur, 0)
+      color-mix(
+        in srgb,
+        var(--inset-shadow-dim-color, #000)
+          calc(var(--inset-shadow-dim-alpha, 100) * 1%),
+        transparent
+      );
+}
+
+@utility inset-shadow-lit-t-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-lit-y: calc(--value(number) * 1px);
+  --inset-shadow-lit-y: --value([length]);
+}
+
+@utility inset-shadow-lit-b-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-lit-y: calc(--value(number) * -1px);
+  --inset-shadow-lit-y: calc(--value([length]) * -1);
+}
+
+@utility inset-shadow-lit-l-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-lit-x: calc(--value(number) * 1px);
+  --inset-shadow-lit-x: --value([length]);
+}
+
+@utility inset-shadow-lit-r-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-lit-x: calc(--value(number) * -1px);
+  --inset-shadow-lit-x: calc(--value([length]) * -1);
+}
+
+@utility inset-shadow-dim-t-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-dim-y: calc(--value(number) * 1px);
+  --inset-shadow-dim-y: --value([length]);
+}
+
+@utility inset-shadow-dim-b-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-dim-y: calc(--value(number) * -1px);
+  --inset-shadow-dim-y: calc(--value([length]) * -1);
+}
+
+@utility inset-shadow-dim-l-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-dim-x: calc(--value(number) * 1px);
+  --inset-shadow-dim-x: --value([length]);
+}
+
+@utility inset-shadow-dim-r-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-dim-x: calc(--value(number) * -1px);
+  --inset-shadow-dim-x: calc(--value([length]) * -1);
+}
+
+@utility inset-shadow-lit-blur-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-lit-blur: calc(--value(number) * 1px);
+  --inset-shadow-lit-blur: --value([length]);
+}
+
+@utility inset-shadow-dim-blur-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-dim-blur: calc(--value(number) * 1px);
+  --inset-shadow-dim-blur: --value([length]);
+}
+
+/* Blur both layers at once. */
+@utility inset-shadow-blur-* {
+  @apply inset-shadow-bezel;
+  --inset-shadow-lit-blur: calc(--value(number) * 1px);
+  --inset-shadow-lit-blur: --value([length]);
+  --inset-shadow-dim-blur: calc(--value(number) * 1px);
+  --inset-shadow-dim-blur: --value([length]);
+}
+
+
+
+/* Chat design language — inner-shadow bubbles, glass pills, the composer ring. */
+@utility shadow-bubble-lit {
+  /* Light surface: top highlight + bottom-right shading. */
+  box-shadow:
+    inset 0 4px 2px rgb(255 255 255 / 1),
+    inset 1px -3px 6px rgb(0 0 0 / 0.42);
+}
+
+@utility shadow-bubble-dim {
+  /* Dark surface: soft drop + faint top sheen + bottom-left shading. */
+  box-shadow:
+    0 4px 4px rgb(0 0 0 / 0.15),
+    inset 0 5px 3px rgb(252 252 252 / 0.08),
+    inset -1px -2px 5px rgb(0 0 0 / 0.54);
+}
+
+@utility shadow-pill {
+  box-shadow: 0 4px 8px rgb(0 0 0 / 0.25);
+}
+
+@utility shadow-composer {
+  box-shadow:
+    0 0 0 2px var(--chat-ring),
+    inset 0 0 5px 1px var(--chat-inset);
+}
+
+@utility shadow-composer-open {
+  box-shadow:
+    0 0 0 2px var(--chat-ring),
+    inset 0 2px 8px 5px rgb(0 0 0 / 0.07);
+}
+
+@utility shadow-send {
+  box-shadow:
+    inset 0 2px 0 rgb(239 239 243 / 0.47),
+    0 1px 8px -4px rgb(0 0 0 / 1),
+    inset 0 -2px 2px rgb(23 23 23 / 0.46);
 }

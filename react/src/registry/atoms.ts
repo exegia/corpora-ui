@@ -302,6 +302,102 @@ import { TextClickPopover } from "@exegia/corpora-ui"
 </TextClickPopover>`,
   },
   {
+    slug: "bubble",
+    name: "Bubble",
+    titleStyle: "titlebar",
+    description:
+      "Chat bubble atom: an inner-shadowed message surface with sender, recipient and ai variants, an author header (avatar, name, time, role badge), a glass reaction pill hanging off the corner and hover-revealed message actions.",
+    category: "atoms",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/bubble-demo")),
+    registryDependencies: ["button", "badge", "user-avatar", "emoji-picker"],
+    props: [
+      {
+        name: "variant",
+        type: '"ai" | "sender" | "recipient"',
+        default: '"recipient"',
+        description:
+          "Who the bubble belongs to. sender is right-aligned on a lit inverted surface with the bottom-right tail pinched, recipient is its dim mirror, ai renders chrome-less prose so generated output never masquerades as a person's message. Sub-components inherit the variant from context.",
+      },
+      {
+        name: "Bubble.Header",
+        type: "name / time / badge / avatar",
+        description:
+          "Author row: avatar (an identity object renders UserAvatar; a node is used as-is; the ai variant defaults to the spark mark), bold name, muted time and a role badge — a string picks the neutral chip for people and the accent chip for the agent. The sender variant mirrors the row.",
+      },
+      {
+        name: "Bubble.Message",
+        type: "children",
+        description: "The message surface, styled by the inherited variant.",
+      },
+      {
+        name: "Bubble.Reactions",
+        type: "reactions / onToggle / onEmojiSelect",
+        description:
+          "Frosted reaction pill overlapping the bubble's bottom corner. Each chip carries aria-pressed, springs its emoji on toggle and rolls its count; onToggle(reaction, index) fires on click. The trailing add-reaction button opens a frimousse emoji picker in a frosted-glass popover — onEmojiSelect({ emoji, label }) fires on pick. Accepts children for custom chips.",
+      },
+      {
+        name: "Bubble.Actions",
+        type: "children",
+        description:
+          "role=toolbar row for per-message actions (copy, retry, …), hidden until the bubble is hovered or an action has focus. Compose with Button size=icon-xs.",
+      },
+    ],
+    usage: `import { Bubble } from "@exegia/corpora-ui"
+
+<Bubble variant="sender">
+  <Bubble.Header name="Sender" time="10 min ago" badge="Admin" />
+  <Bubble.Message>Can you check whether ¶12 keeps the boundary?</Bubble.Message>
+  <Bubble.Reactions
+    reactions={[{ id: "heart", emoji: "❤️", count: 4, reacted: true, label: "heart" }]}
+    onToggle={toggleReaction}
+  />
+  <Bubble.Actions>
+    <Button aria-label="Copy" size="icon-xs" variant="ghost">
+      <CopyIcon />
+    </Button>
+  </Bubble.Actions>
+</Bubble>`,
+  },
+  {
+    slug: "emoji-action-bar",
+    name: "Emoji action bar",
+    titleStyle: "titlebar",
+    description:
+      "Compact reaction picker: a toolbar of quick reaction emoji built on the action-bar composed component, with a trailing More action that swaps the surface for the full frimousse picker. Designed to sit inside a glass popover.",
+    category: "atoms",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/emoji-action-bar-demo")),
+    registryDependencies: ["popover", "toolbar", "tooltip", "emoji-picker"],
+    props: [
+      {
+        name: "onEmojiSelect",
+        type: "(emoji: { emoji, label }) => void",
+        description:
+          "Fires for both a quick reaction and a pick from the full picker, so a caller wires one handler.",
+      },
+      {
+        name: "reactions",
+        type: "readonly BubblePickedEmoji[]",
+        default: "QUICK_REACTIONS",
+        description:
+          "The quick row. frimousse cannot render a subset — EmojiPicker.Root exposes only columns/skinTone/locale/emojiVersion/emojibaseUrl/sticky, and its list is virtualized on fixed-height rows, so a fixed list is the only way to show just a few. It also costs no network request: the emoji CDN is fetched only if More is opened.",
+      },
+      {
+        name: "hideMore",
+        type: "boolean",
+        default: "false",
+        description:
+          "Drops the trailing More action, leaving the quick row only — nothing then loads emoji data at all.",
+      },
+    ],
+    usage: `import { EmojiActionBar } from "@exegia/corpora-ui"
+
+<PopoverPopup glassVariant="frosted" side="top" variant="glass">
+  <EmojiActionBar onEmojiSelect={({ emoji, label }) => react(emoji, label)} />
+</PopoverPopup>`,
+  },
+  {
     slug: "file-icons",
     name: "File icons",
     titleStyle: "titlebar",

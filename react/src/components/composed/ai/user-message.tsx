@@ -1,25 +1,46 @@
 "use client"
 
 import type * as React from "react"
-import { cn } from "@/lib/utils"
+import {
+  Bubble,
+  type BubbleHeaderProps,
+  type BubbleReaction,
+} from "@/components/atoms/bubble"
 
 export interface UserMessageProps extends Omit<
   React.ComponentPropsWithoutRef<"div">,
   "children"
 > {
   children: React.ReactNode
+  /** Author row above the bubble. Without a name no header renders. */
+  author?: React.ReactNode
+  time?: React.ReactNode
+  badge?: React.ReactNode
+  avatar?: BubbleHeaderProps["avatar"]
+  /** Emoji reactions hanging off the bubble's corner. */
+  reactions?: BubbleReaction[]
+  onReactionToggle?: (reaction: BubbleReaction, index: number) => void
 }
 
 export function UserMessage({
   children,
-  className,
+  author,
+  time,
+  badge,
+  avatar,
+  reactions,
+  onReactionToggle,
   ...props
 }: UserMessageProps): React.ReactElement {
   return (
-    <div className={cn("flex justify-end", className)} {...props}>
-      <div className="max-w-[88%] rounded-2xl rounded-br-sm bg-muted px-3.5 py-2.5 text-sm text-foreground">
-        {children}
-      </div>
-    </div>
+    <Bubble variant="sender" {...props}>
+      {author !== undefined && author !== null ? (
+        <Bubble.Header avatar={avatar} badge={badge} name={author} time={time} />
+      ) : null}
+      <Bubble.Message>{children}</Bubble.Message>
+      {reactions?.length ? (
+        <Bubble.Reactions onToggle={onReactionToggle} reactions={reactions} />
+      ) : null}
+    </Bubble>
   )
 }

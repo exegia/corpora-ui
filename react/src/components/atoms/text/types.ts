@@ -19,3 +19,13 @@ export type TextProps = Omit<
   selection?: string | boolean
   style?: CSSProperties
 }
+
+export type LabelLevel = "heading" | "title" | "caption" | "subtitle"
+export type Key = string | LabelLevel
+
+export type LabelProps<T extends LabelLevel = LabelLevel> = {
+  children: ReactNode
+  className?: string
+  level: T extends LabelLevel ? T : never
+  id?: string
+}
