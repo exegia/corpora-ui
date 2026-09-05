@@ -53,6 +53,23 @@ describe("Bubble", () => {
     expect(onToggle.mock.calls[0]?.[1]).toBe(1)
   })
 
+  test("the add-reaction button opens the emoji picker popover", async () => {
+    const user = userEvent.setup()
+    render(
+      <Bubble variant="recipient">
+        <Bubble.Message>Hi</Bubble.Message>
+        <Bubble.Reactions reactions={[]} />
+      </Bubble>
+    )
+    const trigger = screen.getByRole("button", { name: "Add reaction" })
+    expect(document.querySelector('[data-slot="popover-popup"]')).toBeNull()
+    await user.click(trigger)
+    expect(
+      await screen.findByRole("searchbox")
+    ).toBeDefined()
+    expect(document.querySelector('[data-slot="emoji-picker"]')).not.toBeNull()
+  })
+
   test("root carries the variant for styling hooks", () => {
     const { container } = render(
       <Bubble variant="sender">

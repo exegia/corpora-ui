@@ -28,6 +28,7 @@ export {
 export type {
   BubbleActionsProps,
   BubbleAvatarIdentity,
+  BubblePickedEmoji,
   BubbleHeaderProps,
   BubbleMessageProps,
   BubbleReactionChipProps,

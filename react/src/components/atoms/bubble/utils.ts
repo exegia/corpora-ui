@@ -8,6 +8,7 @@ export function reactionKey(reaction: BubbleReaction, index: number): string {
 
 /** Root alignment: outgoing hugs the right edge, everything else the left. */
 export const twBubbleAlignClasses: Record<BubbleVariant, ClassValue> = {
+  default: "items-start",
   sender: "items-end",
   recipient: "items-start",
   ai: "items-start",
@@ -19,8 +20,9 @@ export const twBubbleAlignClasses: Record<BubbleVariant, ClassValue> = {
  * thread's. Generated output stays full-bleed.
  */
 export const twBubbleColumnClasses: Record<BubbleVariant, ClassValue> = {
-  sender: "max-w-[80%] items-end min-w-0",
-  recipient: "max-w-[80%] items-start",
+  default: "max-w-[80%] min-w-0",
+  sender: "items-end",
+  recipient: "items-start",
   ai: "w-full items-start",
 }
 
@@ -32,9 +34,10 @@ export const twBubbleColumnClasses: Record<BubbleVariant, ClassValue> = {
  * a person's message.
  */
 export const twBubbleMessageClasses: Record<BubbleVariant, ClassValue> = {
+  default: "w-fit max-w-fit rounded-[20px] px-5 py-3.5 text-sm leading-[18px] font-normal",
   sender:
-    "bg-neutral-800 dark:bg-neutral-100 text-background chat-bubble bubble-sender mr-4 text-left",
+    "inset-shadow-lit/90 inset-shadow-dim inset-shadow-dim-b-1.5 inset-shadow-dim-r-1.5 inset-shadow-lit-t-2 inset-shadow-lit-l-1.5 inset-shadow-blur-3 rounded-br-[5px] bg-indigo-600 dark:bg-neutral-100 text-background chat-bubble bubble-sender mr-4 text-left",
   recipient:
-    "bg-neutral-100 dark:bg-neutral-800 text-foreground chat-bubble bubble-recipient ml-4 text-right",
+    "inset-shadow-lit inset-shadow-dim/20 dark:inset-shadow-lit/30 dark:inset-shadow-dim/90 inset-shadow-dim-b-1 inset-shadow-dim-r-1 inset-shadow-lit-t-2 inset-shadow-lit-l-1 inset-shadow-blur-3 rounded-bl-[5px] bg-neutral-100 dark:bg-neutral-800 text-foreground chat-bubble bubble-recipient ml-4 text-right",
   ai: "text-sm leading-5 text-foreground/90",
 }

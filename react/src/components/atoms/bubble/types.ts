@@ -7,7 +7,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from "react"
  * - "recipient" — an incoming message from another person (left-aligned, muted)
  * - "ai"        — generated output (left-aligned, chrome-less prose)
  */
-export type BubbleVariant = "ai" | "sender" | "recipient"
+export type BubbleVariant = "default" | "ai" | "sender" | "recipient"
 
 export interface BubbleProps extends ComponentPropsWithoutRef<"div"> {
   variant?: BubbleVariant
@@ -56,12 +56,21 @@ export interface BubbleReaction {
   label?: string
 }
 
+/** An emoji chosen from the picker. Mirrors frimousse's payload so the
+ *  library never re-exports a dependency's type on its public surface. */
+export interface BubblePickedEmoji {
+  emoji: string
+  label: string
+}
+
 export interface BubbleReactionsProps extends Omit<
   ComponentPropsWithoutRef<"div">,
   "onToggle"
 > {
   reactions?: BubbleReaction[]
   onToggle?: (reaction: BubbleReaction, index: number) => void
+  /** Fires when an emoji is picked from the add-reaction popover. */
+  onEmojiSelect?: (emoji: BubblePickedEmoji) => void
 }
 
 export type BubbleActionsProps = ComponentPropsWithoutRef<"div">
@@ -74,4 +83,13 @@ export interface BubbleReactionChipProps extends Omit<
   reaction: BubbleReaction
   index: number
   onToggle?: (reaction: BubbleReaction, index: number) => void
+}
+
+export type BubbleReactionsButtonProps = Omit<
+  HTMLMotionProps<"button">,
+  "onToggle" | "children" | "onClick"
+> & {
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
+  /** Fires when an emoji is picked from the popover. */
+  onEmojiSelect?: (emoji: BubblePickedEmoji) => void
 }

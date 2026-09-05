@@ -5,10 +5,17 @@ import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { EASE_IN_OUT, SPRING_PRESS, SPRING_SWAP } from "@/lib/ease"
 import { useBubbleVariant } from "./context"
-import type { BubbleReactionsProps, BubbleReactionChipProps } from "./types"
+import type { BubbleReactionsProps, BubbleReactionChipProps, BubbleReactionsButtonProps } from "./types"
 import { reactionKey } from "./utils"
 import { GlassContainer } from "@/components/ui/glasscn/glass-container"
-import { Button } from "@/components/ui/button";
+import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover"
+import {
+  EmojiPicker,
+  EmojiPickerContent,
+  EmojiPickerFooter,
+  EmojiPickerSearch,
+} from "@/components/ui/emoji-picker"
+import { useState } from "react"
 import { FaceSlightlySmilingPlus } from "lucide-react";
 
 /**
@@ -78,6 +85,75 @@ export function BubbleReactionChip({
   )
 }
 
+export function BubbleReactionsButton({
+  className,
+  onClick,
+  onEmojiSelect,
+  ...props
+}: BubbleReactionsButtonProps): React.ReactElement {
+  const reduceMotion = useReducedMotion()
+  const [open, setOpen] = useState(false)
+  return (
+    <Popover onOpenChange={setOpen} open={open}>
+      <PopoverTrigger
+        render={
+          <motion.button
+            aria-label="Add reaction"
+            className={cn(
+              "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-2 font-bold text-neutral-600 transition-colors duration-150 ease-smooth-out outline-none hover:bg-black/6 focus-visible:ring-0 focus-visible:ring-ring dark:text-neutral-300 dark:hover:bg-white/8",
+              className
+            )}
+            data-slot="bubble-reaction-button"
+            onClick={onClick}
+            transition={SPRING_PRESS}
+            type="button"
+            whileTap={reduceMotion ? undefined : { scale: 0.88 }}
+            {...props}
+          />
+        }
+      >
+        <motion.span
+          animate={reduceMotion ? { scale: 1 } : { scale: open ? [1, 1.35, 1] : 1 }}
+          className="block text-xs select-none"
+          transition={
+            reduceMotion
+              ? { duration: 0 }
+              : { duration: 0.36, ease: EASE_IN_OUT, times: [0, 0.8, 1] }
+          }
+        >
+          <FaceSlightlySmilingPlus size={16} />
+        </motion.span>
+      </PopoverTrigger>
+      <PopoverPopup
+        align="end"
+        // The viewport sizes its transitioning child with
+        // calc(--popup-width - 2*--viewport-inline-padding - 2px), so zeroing the
+        // variable (not just the padding) is what keeps the picker from being
+        // squeezed by 2x16px while Base UI holds --popup-width at a concrete px.
+        // The picker paints its own bg-popover on the root and on each sticky
+        // category header; both have to come off for the glass to show, and the
+        // headers get a tint of their own so emoji still pass behind them.
+        className="w-fit [&_[data-slot=emoji-picker-category-header]]:bg-white/65 [&_[data-slot=emoji-picker-category-header]]:backdrop-blur-sm [&_[data-slot=emoji-picker]]:bg-transparent [&_[data-slot=popover-viewport]]:[--viewport-inline-padding:0px] [&_[data-slot=popover-viewport]]:max-h-none [&_[data-slot=popover-viewport]]:overflow-clip [&_[data-slot=popover-viewport]]:py-0 dark:[&_[data-slot=emoji-picker-category-header]]:bg-black/55"
+        glassVariant="frosted"
+        side="top"
+        variant="glass"
+      >
+        <EmojiPicker
+          className="h-[326px]"
+          onEmojiSelect={({ emoji, label }) => {
+            onEmojiSelect?.({ emoji, label })
+            setOpen(false)
+          }}
+        >
+          <EmojiPickerSearch />
+          <EmojiPickerContent />
+          <EmojiPickerFooter />
+        </EmojiPicker>
+      </PopoverPopup>
+    </Popover>
+  )
+}
+
 /**
  * Glass reaction pill that hangs off the bubble's bottom trailing corner.
  * Pass `reactions` for the standard chips, or children for a custom row —
@@ -86,6 +162,7 @@ export function BubbleReactionChip({
 export function BubbleReactions({
   reactions = [],
   onToggle,
+  onEmojiSelect,
   className,
   children,
   ...props
@@ -100,10 +177,11 @@ export function BubbleReactions({
       )}
     >
       <GlassContainer
-        glassVariant="liquid-refract"
+        glassVariant="frosted"
         refraction={3}
         bezel={12}
-        saturation={20}
+        blur={5}
+        saturation={2}
         className={cn(
           "inline-flex h-full w-fit items-center rounded-xl",
           className
@@ -120,9 +198,7 @@ export function BubbleReactions({
               reaction={reaction}
             />
           ))}
-          <Button size="icon-xs" variant="glass" glassVariant="clear" className="border-0 bg-transparent backdrop-blur-none">
-            <FaceSlightlySmilingPlus />
-          </Button>
+          <BubbleReactionsButton onEmojiSelect={onEmojiSelect} />
           {children}
         </div>
       </GlassContainer>
