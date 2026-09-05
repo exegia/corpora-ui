@@ -6,7 +6,7 @@ import type {
   ReactNode,
 } from "react"
 import type { HighlightPopover as HighlightPopoverPrimitive } from "@omsimos/react-highlight-popover"
-import type { PopoverPopup } from "@/components/ui/popover"
+import type { PopoverPopup } from "@/components/ui/popover-popup"
 import type { TextProps } from "../text/types"
 
 export interface SelectionPosition {

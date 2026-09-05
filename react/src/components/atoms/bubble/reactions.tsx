@@ -8,13 +8,8 @@ import { useBubbleVariant } from "./context"
 import type { BubbleReactionsProps, BubbleReactionChipProps, BubbleReactionsButtonProps } from "./types"
 import { reactionKey } from "./utils"
 import { GlassContainer } from "@/components/ui/glasscn/glass-container"
-import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover"
-import {
-  EmojiPicker,
-  EmojiPickerContent,
-  EmojiPickerFooter,
-  EmojiPickerSearch,
-} from "@/components/ui/emoji-picker"
+import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover-popup"
+import { EmojiActionBar } from "./emoji-action-bar"
 import { useState } from "react"
 import { FaceSlightlySmilingPlus } from "lucide-react";
 
@@ -126,6 +121,9 @@ export function BubbleReactionsButton({
       </PopoverTrigger>
       <PopoverPopup
         align="end"
+        // Opens as the compact quick-reaction bar and grows to the full picker
+        // when "More" is pressed — that swap is a genuine popup resize, which is
+        // why the viewport variable below has to be zeroed, not just the padding.
         // The viewport sizes its transitioning child with
         // calc(--popup-width - 2*--viewport-inline-padding - 2px), so zeroing the
         // variable (not just the padding) is what keeps the picker from being
@@ -138,17 +136,12 @@ export function BubbleReactionsButton({
         side="top"
         variant="glass"
       >
-        <EmojiPicker
-          className="h-[326px]"
-          onEmojiSelect={({ emoji, label }) => {
-            onEmojiSelect?.({ emoji, label })
+        <EmojiActionBar
+          onEmojiSelect={(picked) => {
+            onEmojiSelect?.(picked)
             setOpen(false)
           }}
-        >
-          <EmojiPickerSearch />
-          <EmojiPickerContent />
-          <EmojiPickerFooter />
-        </EmojiPicker>
+        />
       </PopoverPopup>
     </Popover>
   )

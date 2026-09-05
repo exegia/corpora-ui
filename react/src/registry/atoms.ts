@@ -360,6 +360,44 @@ import { TextClickPopover } from "@exegia/corpora-ui"
 </Bubble>`,
   },
   {
+    slug: "emoji-action-bar",
+    name: "Emoji action bar",
+    titleStyle: "titlebar",
+    description:
+      "Compact reaction picker: a toolbar of quick reaction emoji built on the action-bar composed component, with a trailing More action that swaps the surface for the full frimousse picker. Designed to sit inside a glass popover.",
+    category: "atoms",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/emoji-action-bar-demo")),
+    registryDependencies: ["popover", "toolbar", "tooltip", "emoji-picker"],
+    props: [
+      {
+        name: "onEmojiSelect",
+        type: "(emoji: { emoji, label }) => void",
+        description:
+          "Fires for both a quick reaction and a pick from the full picker, so a caller wires one handler.",
+      },
+      {
+        name: "reactions",
+        type: "readonly BubblePickedEmoji[]",
+        default: "QUICK_REACTIONS",
+        description:
+          "The quick row. frimousse cannot render a subset — EmojiPicker.Root exposes only columns/skinTone/locale/emojiVersion/emojibaseUrl/sticky, and its list is virtualized on fixed-height rows, so a fixed list is the only way to show just a few. It also costs no network request: the emoji CDN is fetched only if More is opened.",
+      },
+      {
+        name: "hideMore",
+        type: "boolean",
+        default: "false",
+        description:
+          "Drops the trailing More action, leaving the quick row only — nothing then loads emoji data at all.",
+      },
+    ],
+    usage: `import { EmojiActionBar } from "@exegia/corpora-ui"
+
+<PopoverPopup glassVariant="frosted" side="top" variant="glass">
+  <EmojiActionBar onEmojiSelect={({ emoji, label }) => react(emoji, label)} />
+</PopoverPopup>`,
+  },
+  {
     slug: "file-icons",
     name: "File icons",
     titleStyle: "titlebar",

@@ -1,6 +1,7 @@
 import type { ButtonProps } from "@/components/ui/button";
-import type { PopoverPopupProps } from "@/components/ui/popover";
+import type { PopoverPopupProps } from "@/components/ui/popover-popup";
 import type { ToolbarSeparatorProps } from "@base-ui/react";
+import type { Emoji } from "frimousse";
 import type { LucideIcon } from "lucide-react";
 import type { FunctionComponent } from "react";
 
@@ -8,7 +9,7 @@ import type { FunctionComponent } from "react";
 export interface ActionButtonProps<T extends string> extends Omit<ButtonProps, "variant" | "glassVariant" | "size"> {
   action: () => void;
   tooltip?: string;
-  Icon: LucideIcon;
+  Icon: LucideIcon | Emoji;
   id: T;
 }
 

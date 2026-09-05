@@ -53,7 +53,7 @@ describe("Bubble", () => {
     expect(onToggle.mock.calls[0]?.[1]).toBe(1)
   })
 
-  test("the add-reaction button opens the emoji picker popover", async () => {
+  test("the add-reaction button opens the quick reaction bar, not the full picker", async () => {
     const user = userEvent.setup()
     render(
       <Bubble variant="recipient">
@@ -64,10 +64,47 @@ describe("Bubble", () => {
     const trigger = screen.getByRole("button", { name: "Add reaction" })
     expect(document.querySelector('[data-slot="popover-popup"]')).toBeNull()
     await user.click(trigger)
-    expect(
-      await screen.findByRole("searchbox")
-    ).toBeDefined()
+
+    expect(await screen.findByRole("button", { name: "heart" })).toBeDefined()
+    // The full picker is what costs a CDN fetch, so it must stay unmounted
+    // until "More" is pressed.
+    expect(document.querySelector('[data-slot="emoji-picker"]')).toBeNull()
+    expect(screen.queryByRole("searchbox")).toBeNull()
+  })
+
+  test('"More emoji" swaps the quick bar for the full picker', async () => {
+    const user = userEvent.setup()
+    render(
+      <Bubble variant="recipient">
+        <Bubble.Message>Hi</Bubble.Message>
+        <Bubble.Reactions reactions={[]} />
+      </Bubble>
+    )
+    await user.click(screen.getByRole("button", { name: "Add reaction" }))
+    await user.click(await screen.findByRole("button", { name: "More emoji" }))
+
+    expect(await screen.findByRole("searchbox")).toBeDefined()
     expect(document.querySelector('[data-slot="emoji-picker"]')).not.toBeNull()
+    expect(screen.queryByRole("button", { name: "heart" })).toBeNull()
+  })
+
+  test("picking a quick reaction reports the emoji and closes the popover", async () => {
+    const user = userEvent.setup()
+    const onEmojiSelect = mock((_picked: { emoji: string; label: string }) => {})
+    render(
+      <Bubble variant="recipient">
+        <Bubble.Message>Hi</Bubble.Message>
+        <Bubble.Reactions onEmojiSelect={onEmojiSelect} reactions={[]} />
+      </Bubble>
+    )
+    await user.click(screen.getByRole("button", { name: "Add reaction" }))
+    await user.click(await screen.findByRole("button", { name: "thumbs up" }))
+
+    expect(onEmojiSelect).toHaveBeenCalledTimes(1)
+    expect(onEmojiSelect.mock.calls[0]?.[0]).toEqual({
+      emoji: "\u{1F44D}",
+      label: "thumbs up",
+    })
   })
 
   test("root carries the variant for styling hooks", () => {

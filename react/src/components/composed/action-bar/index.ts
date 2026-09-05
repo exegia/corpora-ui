@@ -1,5 +1,5 @@
 export { default as ActionBar } from "./toolbar";
-export { Action, Separator } from "./action";
+export { Action, EmojiAction, Separator } from "./action";
 export { useActionBar } from "./utils";
 export type {
   ActionBarProps,

@@ -23,9 +23,13 @@ export function Action({ tooltip, action, Icon }: Omit<ActionButtonProps<string>
       className="after:absolute after:left-full after:h-full after:w-1"
       handle={tooltipHandle}
       payload={Payload}
-      render={<ToolbarButton data-tooltip={tooltip} onClick={action}/>}
+      // The icon is aria-hidden, so without this the button has no accessible
+      // name at all — `data-tooltip` is not exposed to assistive tech.
+      render={
+        <ToolbarButton aria-label={tooltip} data-tooltip={tooltip} onClick={action} />
+      }
     >
-      <Icon aria-hidden="true" />
+      {'emoji' in Icon ? <span>{Icon.emoji}</span> : <Icon aria-hidden="true" />}
     </TooltipTrigger>
   );
 }
@@ -36,4 +40,38 @@ export function Action({ tooltip, action, Icon }: Omit<ActionButtonProps<string>
  */
 export function Separator(props: ToolbarSeparatorProps) {
   return <ToolbarSeparator orientation="vertical" {...props} />;
+}
+
+/**
+ * An action labelled by an emoji glyph rather than a Lucide icon. The glyph is
+ * `aria-hidden` — `label` is the accessible name, so a screen reader reads
+ * "thumbs up" rather than announcing the character.
+ */
+export function EmojiAction({
+  emoji,
+  label,
+  action,
+}: {
+  emoji: string;
+  label: string;
+  action: () => void;
+}) {
+  return (
+    <TooltipTrigger
+      className="after:absolute after:left-full after:h-full after:w-1"
+      handle={tooltipHandle}
+      payload={Payload}
+      render={
+        <ToolbarButton
+          aria-label={label}
+          className="inline-flex size-8 cursor-pointer items-center justify-center rounded-md text-base leading-none transition-[background-color,scale] duration-150 ease-smooth-out hover:bg-black/6 focus-visible:bg-black/6 active:scale-90 motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-white/10 dark:focus-visible:bg-white/10"
+          data-emoji={emoji}
+          data-tooltip={label}
+          onClick={action}
+        />
+      }
+    >
+      <span aria-hidden="true">{emoji}</span>
+    </TooltipTrigger>
+  );
 }

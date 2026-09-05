@@ -7,6 +7,7 @@ import {
   BubbleReactionChip,
   BubbleReactions,
 } from "./reactions"
+import { EmojiActionBar } from "./emoji-action-bar"
 
 export const Bubble = Object.assign(BubbleRoot, {
   Header: BubbleHeader,
@@ -18,12 +19,16 @@ export const Bubble = Object.assign(BubbleRoot, {
 
 export {
   BubbleActions,
+  EmojiActionBar,
   BubbleHeader,
   BubbleMessage,
   BubbleReactionChip,
   BubbleReactions,
   useBubbleVariant,
 }
+
+export { QUICK_REACTIONS } from "./utils"
+export type { EmojiActionBarProps } from "./emoji-action-bar"
 
 export type {
   BubbleActionsProps,
