@@ -2,7 +2,35 @@
 
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
 import type React from "react";
+import {
+  type FrostGlassVariant,
+  glassVariantStyles,
+} from "@/lib/glass-variants";
 import { cn } from "@/lib/utils";
+
+/** Layout, sizing and transition — shared by every popup variant. */
+const popupStructuralClasses =
+  "relative flex h-(--popup-height,auto) w-(--popup-width,auto) origin-(--transform-origin) rounded-lg outline-none transition-[width,height,scale,opacity] has-data-[slot=calendar]:rounded-xl data-starting-style:scale-98 data-starting-style:opacity-0";
+
+/** The solid surface: border, fill and the hairline `before` bevel. */
+const popupDefaultSurfaceClasses =
+  "border bg-popover not-dark:bg-clip-padding text-popover-foreground shadow-lg/5 before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] before:shadow-[0_1px_--theme(--color-black/4%)] has-data-[slot=calendar]:before:rounded-[calc(var(--radius-xl)-1px)] dark:before:shadow-[0_-1px_--theme(--color-white/6%)]";
+
+/**
+ * Neutral base for the glass treatment — the finish itself (blur, tint,
+ * bevel) comes from `glassVariantStyles` keyed by `glassVariant`, which is
+ * only accepted when `variant` is "glass".
+ */
+const popupGlassBaseClasses = "border-transparent text-foreground";
+
+/**
+ * Every finish except "liquid-refract". That one delegates its look to the
+ * `LiquidGlass` wrapper, whose `overflow-hidden` box measures 0px tall around
+ * an absolutely-sized popup and clips it away entirely — so a popup offers the
+ * four pure-class finishes only, and defaults to "frosted" rather than to
+ * Button's "liquid-refract".
+ */
+type PopoverGlassVariant = Exclude<FrostGlassVariant, "liquid-refract">;
 
 export const PopoverCreateHandle: typeof PopoverPrimitive.createHandle =
   PopoverPrimitive.createHandle;
@@ -25,6 +53,29 @@ export function PopoverTrigger({
   );
 }
 
+type PopoverPopupBaseProps = PopoverPrimitive.Popup.Props & {
+  portalProps?: PopoverPrimitive.Portal.Props;
+  side?: PopoverPrimitive.Positioner.Props["side"];
+  align?: PopoverPrimitive.Positioner.Props["align"];
+  sideOffset?: PopoverPrimitive.Positioner.Props["sideOffset"];
+  alignOffset?: PopoverPrimitive.Positioner.Props["alignOffset"];
+  tooltipStyle?: boolean;
+  anchor?: PopoverPrimitive.Positioner.Props["anchor"];
+};
+
+export type PopoverPopupProps = PopoverPopupBaseProps &
+  (
+    | {
+        variant: "glass";
+        /** Glass finish. Only available when `variant` is "glass". */
+        glassVariant?: PopoverGlassVariant;
+      }
+    | {
+        variant?: "default";
+        glassVariant?: never;
+      }
+  );
+
 export function PopoverPopup({
   children,
   className,
@@ -35,16 +86,12 @@ export function PopoverPopup({
   tooltipStyle = false,
   anchor,
   portalProps,
+  variant,
+  glassVariant,
   ...props
-}: PopoverPrimitive.Popup.Props & {
-  portalProps?: PopoverPrimitive.Portal.Props;
-  side?: PopoverPrimitive.Positioner.Props["side"];
-  align?: PopoverPrimitive.Positioner.Props["align"];
-  sideOffset?: PopoverPrimitive.Positioner.Props["sideOffset"];
-  alignOffset?: PopoverPrimitive.Positioner.Props["alignOffset"];
-  tooltipStyle?: boolean;
-  anchor?: PopoverPrimitive.Positioner.Props["anchor"];
-}): React.ReactElement {
+}: PopoverPopupProps): React.ReactElement {
+  const resolvedGlassVariant: PopoverGlassVariant | undefined =
+    variant === "glass" ? (glassVariant ?? "frosted") : undefined;
   return (
     <PopoverPrimitive.Portal {...portalProps}>
       <PopoverPrimitive.Positioner
@@ -58,11 +105,18 @@ export function PopoverPopup({
       >
         <PopoverPrimitive.Popup
           className={cn(
-            "relative flex h-(--popup-height,auto) w-(--popup-width,auto) origin-(--transform-origin) rounded-lg border bg-popover not-dark:bg-clip-padding text-popover-foreground shadow-lg/5 outline-none transition-[width,height,scale,opacity] before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] before:shadow-[0_1px_--theme(--color-black/4%)] has-data-[slot=calendar]:rounded-xl has-data-[slot=calendar]:before:rounded-[calc(var(--radius-xl)-1px)] data-starting-style:scale-98 data-starting-style:opacity-0 dark:before:shadow-[0_-1px_--theme(--color-white/6%)]",
+            popupStructuralClasses,
+            resolvedGlassVariant
+              ? cn(
+                  popupGlassBaseClasses,
+                  glassVariantStyles[resolvedGlassVariant],
+                )
+              : popupDefaultSurfaceClasses,
             tooltipStyle &&
               "w-fit text-balance rounded-md text-xs shadow-md/5 before:rounded-[calc(var(--radius-md)-1px)]",
             className,
           )}
+          data-glass-variant={resolvedGlassVariant}
           data-slot="popover-popup"
           {...props}
         >

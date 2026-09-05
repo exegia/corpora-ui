@@ -83,7 +83,7 @@ const glassSidebarVariableStyles: Record<FrostGlassVariant, string> = {
 }
 
 type GlassSidebarProps = React.HTMLAttributes<HTMLDivElement> &
-  FrostGlassVariantProp & { refraction?: number, bezel?: number, saturation?: number }
+  FrostGlassVariantProp & { refraction?: number, bezel?: number, saturation?: number, blur?: number }
 
 function getGlassSidebarStandaloneClasses(glassVariant: FrostGlassVariant) {
   return cn(
@@ -100,6 +100,7 @@ function GlassContainer({
   children,
   refraction,
   bezel,
+  blur,
   saturation,
   ...props
 }: GlassSidebarProps) {
@@ -108,6 +109,7 @@ function GlassContainer({
       className={cn("rounded-[1.75rem]", className)}
       refraction={refraction ?? 50}
       bezel={bezel}
+      blur={blur}
       saturation={saturation}
     >
       <div

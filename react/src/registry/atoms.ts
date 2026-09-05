@@ -310,7 +310,7 @@ import { TextClickPopover } from "@exegia/corpora-ui"
     category: "atoms",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/bubble-demo")),
-    registryDependencies: ["button", "badge", "user-avatar"],
+    registryDependencies: ["button", "badge", "user-avatar", "emoji-picker"],
     props: [
       {
         name: "variant",
@@ -332,9 +332,9 @@ import { TextClickPopover } from "@exegia/corpora-ui"
       },
       {
         name: "Bubble.Reactions",
-        type: "reactions / onToggle",
+        type: "reactions / onToggle / onEmojiSelect",
         description:
-          "Frosted reaction pill overlapping the bubble's bottom corner. Each chip carries aria-pressed, springs its emoji on toggle and rolls its count; onToggle(reaction, index) fires on click. Accepts children for custom chips.",
+          "Frosted reaction pill overlapping the bubble's bottom corner. Each chip carries aria-pressed, springs its emoji on toggle and rolls its count; onToggle(reaction, index) fires on click. The trailing add-reaction button opens a frimousse emoji picker in a frosted-glass popover — onEmojiSelect({ emoji, label }) fires on pick. Accepts children for custom chips.",
       },
       {
         name: "Bubble.Actions",

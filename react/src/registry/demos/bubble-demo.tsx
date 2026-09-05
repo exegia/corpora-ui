@@ -3,8 +3,8 @@ import { CopyIcon, PencilIcon, RotateCcwIcon } from "lucide-react"
 
 import {
   Bubble,
+  type BubblePickedEmoji,
   type BubbleReaction,
-  type BubbleVariant,
 } from "@/components/atoms"
 import { Button } from "@/components/ui/button"
 import {
@@ -15,7 +15,9 @@ import {
 
 const VARIANTS = ["sender", "recipient", "ai"] as const
 
-const COPY: Record<BubbleVariant, string> = {
+type DemoVariant = (typeof VARIANTS)[number]
+
+const COPY: Record<DemoVariant, string> = {
   sender:
     "Can you check whether ¶12 keeps the RC003 boundary? The walker looks like it split it.",
   recipient: "Sounds good — I'll take a look at ¶12 today.",
@@ -23,7 +25,7 @@ const COPY: Record<BubbleVariant, string> = {
 }
 
 const HEADER: Record<
-  BubbleVariant,
+  DemoVariant,
   { name: string; time: string; badge?: string }
 > = {
   sender: { name: "Sender", time: "10 min ago", badge: "Admin" },
@@ -33,7 +35,7 @@ const HEADER: Record<
 
 export default function BubbleDemo(): React.ReactElement {
   const [variant, setVariant] =
-    React.useState<(typeof VARIANTS)[number]>("sender")
+    React.useState<DemoVariant>("sender")
   const [withHeader, setWithHeader] = React.useState(true)
   const [withReactions, setWithReactions] = React.useState(true)
   const [withActions, setWithActions] = React.useState(false)
@@ -54,6 +56,19 @@ export default function BubbleDemo(): React.ReactElement {
           : reaction
       )
     )
+
+  const addReaction = ({ emoji, label }: BubblePickedEmoji): void =>
+    setReactions((previous) => {
+      const at = previous.findIndex((reaction) => reaction.emoji === emoji)
+      if (at === -1) {
+        return [...previous, { id: emoji, emoji, count: 1, reacted: true, label }]
+      }
+      return previous.map((reaction, index) =>
+        index === at
+          ? { ...reaction, reacted: true, count: (reaction.count ?? 0) + (reaction.reacted ? 0 : 1) }
+          : reaction
+      )
+    })
 
   return (
     <DemoStage
@@ -94,7 +109,11 @@ export default function BubbleDemo(): React.ReactElement {
           )}
           <Bubble.Message>{COPY[variant]}</Bubble.Message>
           {withReactions && variant !== "ai" && (
-            <Bubble.Reactions onToggle={toggleReaction} reactions={reactions} />
+            <Bubble.Reactions
+              onEmojiSelect={addReaction}
+              onToggle={toggleReaction}
+              reactions={reactions}
+            />
           )}
           {withActions && (
             <Bubble.Actions>
