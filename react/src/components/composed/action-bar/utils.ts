@@ -1,16 +1,19 @@
-import { type ComponentType, useMemo } from "react";
-import { TooltipCreateHandle } from "@/components/ui/tooltip";
+import { type ComponentType, useMemo, useState } from "react"
+import { TooltipCreateHandle } from "@/components/ui/tooltip"
 import type {
   ActionBarSegment,
   ActionEntry,
   ActionItemsByGroup,
   ActionKey,
   ActionMap,
-} from "./types";
+  EmojiActionBarProps,
+} from "./types"
+import type { Emoji } from "frimousse"
 
-export const tooltipHandle = TooltipCreateHandle<ComponentType>();
+export const tooltipHandle = TooltipCreateHandle<ComponentType>()
 
-const isSeparator = (key: string): boolean => key.startsWith("separator-");
+export const isSeparator = (key: string): boolean =>
+  key.startsWith("separator-")
 
 /**
  * Splits `actions` into render-ready segments at every `separator-*` key.
@@ -20,38 +23,42 @@ const isSeparator = (key: string): boolean => key.startsWith("separator-");
  * Empty groups are dropped, which is what keeps a leading, trailing or
  * doubled separator from rendering a `ToolbarGroup` with nothing in it.
  */
-export const useActionBar = ({ actions }: { actions: ActionMap<ActionKey> }) => {
+export const useActionBar = ({
+  actions,
+}: {
+  actions: ActionMap<ActionKey>
+}) => {
   return useMemo(() => {
-    const entries = Object.entries(actions) as ActionEntry[];
-    const segments: ActionBarSegment[] = [];
-    let open: ActionEntry[] = [];
+    const entries = Object.entries(actions) as ActionEntry[]
+    const segments: ActionBarSegment[] = []
+    let open: ActionEntry[] = []
 
     const closeGroup = (): void => {
-      if (open.length === 0) return;
-      segments.push({ type: "group", key: `group-${open[0][0]}`, items: open });
-      open = [];
-    };
+      if (open.length === 0) return
+      segments.push({ type: "group", key: `group-${open[0][0]}`, items: open })
+      open = []
+    }
 
     for (const entry of entries) {
-      const [key, Item] = entry;
+      const [key, Item] = entry
       if (isSeparator(key)) {
-        closeGroup();
-        segments.push({ type: "separator", key, Separator: Item });
-        continue;
+        closeGroup()
+        segments.push({ type: "separator", key, Separator: Item })
+        continue
       }
-      open.push(entry);
+      open.push(entry)
     }
-    closeGroup();
+    closeGroup()
 
-    const groups = segments.filter((s) => s.type === "group");
+    const groups = segments.filter((s) => s.type === "group")
 
     // A bar with no separators renders flat — `ToolbarGroup` is only added
     // once the caller has actually asked for grouping.
-    const hasGroups = segments.some((s) => s.type === "separator");
+    const hasGroups = segments.some((s) => s.type === "separator")
 
     const actionItemsByGroup: ActionItemsByGroup = Object.fromEntries(
-      groups.map((group) => [group.key, group.items]),
-    );
+      groups.map((group) => [group.key, group.items])
+    )
 
     return {
       segments,
@@ -60,6 +67,72 @@ export const useActionBar = ({ actions }: { actions: ActionMap<ActionKey> }) => 
       groupsCount: groups.length,
       separatorCount: segments.length - groups.length,
       actionItemsByGroup,
-    };
-  }, [actions]);
-};
+    }
+  }, [actions])
+}
+
+/**
+ * The quick row. frimousse has no way to render a subset — `EmojiPicker.Root`
+ * takes `columns`/`skinTone`/`locale`/`emojiVersion`/`emojibaseUrl`/`sticky`
+ * and nothing else, and its list is virtualized on fixed-height rows, so a
+ * custom `Emoji` component that returns null leaves holes rather than a short
+ * row. A fixed list is the only way to show just these, and it costs no
+ * network request — the CDN fetch only happens if "More" is opened.
+ */
+export const QUICK_REACTIONS: readonly Emoji[] = [
+  { emoji: "❤️", label: "heart" },
+  { emoji: "👍", label: "thumbs up" },
+  { emoji: "😊", label: "smiling face" },
+  { emoji: "😂", label: "face with tears of joy" },
+  { emoji: "🎉", label: "party popper" },
+  { emoji: "🙏", label: "folded hands" },
+]
+
+/**
+ * Hook for managing the emoji picker state and actions.
+ *
+ * @param props - The emoji picker props.
+ * @returns The emoji picker state and actions.
+ *
+ * @example
+ * ```tsx
+ * const { open, handleOpen, handleClose, handleEmojiSelect, quickReactions, showMore, actions } = useEmojiPicker({ onEmojiSelect: handleEmojiSelect });
+ * ```
+ */
+export const useEmojiPicker = ({
+  onEmojiSelect,
+  reactions,
+  hideMore,
+}: EmojiActionBarProps) => {
+  const [open, setOpen] = useState(false)
+  const [isFullPicker, setShowAll] = useState(false)
+  const handleOpen = () => setOpen(true)
+  const handleClose = () => setOpen(false)
+  // Handles emoji selection, calling the onEmojiSelect callback if provided.
+  const handleEmojiSelect = (emoji: Emoji) =>
+    onEmojiSelect && onEmojiSelect(emoji)
+
+  // Toggles the picker between quick reactions and the full picker.
+  const togglePicker = () => setShowAll(!isFullPicker)
+  // The quick reactions to display.
+  const quickReactions = reactions ?? QUICK_REACTIONS
+  const actions = useMemo(() => {
+    if (hideMore) return quickReactions
+    return [
+      ...quickReactions,
+      { emoji: "Separator", label: "separator" },
+      { emoji: "More", label: "more" },
+    ]
+  }, [quickReactions, hideMore])
+
+  return {
+    open,
+    handleOpen,
+    isFullPicker,
+    handleClose,
+    handleEmojiSelect,
+    quickReactions,
+    actions,
+    togglePicker,
+  }
+}
