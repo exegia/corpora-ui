@@ -46,3 +46,13 @@ export interface ActionBarProps extends Omit<PopoverPopupProps, "variant" | "chi
   variant: "default" | "ghost" | "glass";
   actions: ActionMap<ActionKey>;
 }
+
+
+export interface EmojiActionBarProps {
+  /** Fires for both a quick reaction and a pick from the full picker. */
+  onEmojiSelect?: (emoji: Emoji) => void
+  /** Quick row contents. Defaults to {@link QUICK_REACTIONS}. */
+  reactions?: readonly Emoji[]
+  /** Hides the trailing "More" action, leaving the quick row only. */
+  hideMore?: boolean
+}
