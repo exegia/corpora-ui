@@ -12,12 +12,12 @@ import type { ActionBarProps } from "./types"
 /**
  * Toolbar chrome. "default" keeps the bordered card surface; "ghost" and
  * "glass" drop it so the bar can sit inside a surface that already paints one
- * — a `PopoverPopup variant="glass"`, for instance.
+ * — a `PopoverGlass variant="glass"`, for instance.
  */
 const toolbarVariants = {
-  default: "",
-  ghost: "border-0 bg-transparent shadow-none",
-  glass: "border-0 bg-transparent p-0 shadow-none",
+  default: "border-none bg-transparent backdrop-blur-none!",
+  ghost: "border-0 bg-transparent! shadow-none",
+  glass: "border-0 bg-transparent! shadow-sm shadow-black",
 } as const
 
 export default function Toolbar({

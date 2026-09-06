@@ -1,5 +1,5 @@
 import type { ButtonProps } from "@/components/ui/button";
-import type { PopoverPopupProps } from "@/components/ui/popover-popup";
+import type { PopoverGlassProps } from "@/components/ui/popover-glass";
 import type { ToolbarSeparatorProps } from "@base-ui/react";
 import type { Emoji } from "frimousse";
 import type { LucideIcon } from "lucide-react";
@@ -41,7 +41,7 @@ export type ActionBarSegment =
   | { type: "group"; key: string; items: ActionEntry[] }
   | { type: "separator"; key: string; Separator: FunctionComponent<ToolbarSeparatorProps> };
 
-export interface ActionBarProps extends Omit<PopoverPopupProps, "variant" | "children"> {
+export interface ActionBarProps extends Omit<PopoverGlassProps, "variant" | "children"> {
   id: string;
   variant: "default" | "ghost" | "glass";
   actions: ActionMap<ActionKey>;

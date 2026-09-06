@@ -12,8 +12,7 @@ import type { Emoji } from "frimousse"
 
 export const tooltipHandle = TooltipCreateHandle<ComponentType>()
 
-export const isSeparator = (key: string): boolean =>
-  key.startsWith("separator-")
+export const isSeparator = (key: string): boolean => key.includes("separator")
 
 /**
  * Splits `actions` into render-ready segments at every `separator-*` key.

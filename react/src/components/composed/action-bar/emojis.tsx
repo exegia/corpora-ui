@@ -4,22 +4,23 @@ import { useMemo } from "react"
 import type * as React from "react"
 import { MoreHorizontal } from "lucide-react"
 import { Action, EmojiAction, Separator } from "./action"
+import { motion } from "framer-motion"
 import ActionBar from "./toolbar"
+import { BOUNCE_IN_OUT } from "@/lib/ease"
 
 import type { ActionKey, ActionMap, EmojiActionBarProps } from "./types"
 import {
   EmojiPicker,
   EmojiPickerContent,
-  // EmojiPickerFooter,
+  EmojiPickerFooter,
   EmojiPickerSearch,
 } from "@/components/ui/emoji-picker"
 import { isSeparator, QUICK_REACTIONS, useEmojiPicker } from "./utils"
-import { GlassContainer } from "@/components/ui/glasscn/glass-container"
 
 /**
  * Compact reaction picker: a toolbar of quick emoji, then a "More" action that
  * swaps the surface for the full frimousse picker. Meant to sit inside a
- * `PopoverPopup variant="glass"` — swapping the two surfaces resizes the popup,
+ * `PopoverGlass variant="glass"` — swapping the two surfaces resizes the popup,
  * which is why the popup's viewport padding variable has to be zeroed rather
  * than only its padding (see `BubbleReactionsButton`).
  */
@@ -64,20 +65,24 @@ export function EmojiActionBar({
   }, [quickReactions, onEmojiSelect, togglePicker])
 
   return (
-    <GlassContainer>
+    <motion.div className="relative" initial={{ height: "auto" }} animate={{ height: isFullPicker ? 326 : "auto" }} transition={BOUNCE_IN_OUT}>
       {isFullPicker ? (
         <EmojiPicker
-          className="h-[326px]"
-          onEmojiSelect={({ emoji, label }) =>
-            onEmojiSelect?.({ emoji, label })
-          }
+          className="h-full"
+          onEmojiSelect={onEmojiSelect}
         >
           <EmojiPickerSearch />
           <EmojiPickerContent />
+          <EmojiPickerFooter />
         </EmojiPicker>
       ) : (
-        <ActionBar actions={actions} id="emoji-action-bar" variant="glass" />
+        <ActionBar
+          actions={actions}
+          id="emoji-action-bar"
+          variant="default"
+          className="pr-3 pl-1.5"
+        />
       )}
-    </GlassContainer>
+    </motion.div>
   )
 }
