@@ -452,9 +452,9 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     ],
     usage: `import { EmojiActionBar } from "@exegia/corpora-ui"
 
-<PopoverPopup glassVariant="frosted" side="top" variant="glass">
+<PopoverGlass glassVariant="frosted">
   <EmojiActionBar onEmojiSelect={({ emoji, label }) => react(emoji, label)} />
-</PopoverPopup>`,
+</PopoverGlass>`,
   },
   {
     slug: "search-field",
