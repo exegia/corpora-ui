@@ -1,4 +1,3 @@
-import type { BubblePickedEmoji } from "./types"
 import type { ClassValue } from "clsx"
 import type { BubbleReaction, BubbleVariant } from "./types"
 
@@ -43,19 +42,3 @@ export const twBubbleMessageClasses: Record<BubbleVariant, ClassValue> = {
   ai: "text-sm leading-5 text-foreground/90",
 }
 
-/**
- * The quick row. frimousse has no way to render a subset — `EmojiPicker.Root`
- * takes `columns`/`skinTone`/`locale`/`emojiVersion`/`emojibaseUrl`/`sticky`
- * and nothing else, and its list is virtualized on fixed-height rows, so a
- * custom `Emoji` component that returns null leaves holes rather than a short
- * row. A fixed list is the only way to show just these, and it costs no
- * network request — the CDN fetch only happens if "More" is opened.
- */
-export const QUICK_REACTIONS: readonly BubblePickedEmoji[] = [
-  { emoji: "❤️", label: "heart" },
-  { emoji: "👍", label: "thumbs up" },
-  { emoji: "😊", label: "smiling face" },
-  { emoji: "😂", label: "face with tears of joy" },
-  { emoji: "🎉", label: "party popper" },
-  { emoji: "🙏", label: "folded hands" },
-]

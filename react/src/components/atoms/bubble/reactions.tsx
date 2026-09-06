@@ -5,13 +5,21 @@ import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { EASE_IN_OUT, SPRING_PRESS, SPRING_SWAP } from "@/lib/ease"
 import { useBubbleVariant } from "./context"
-import type { BubbleReactionsProps, BubbleReactionChipProps, BubbleReactionsButtonProps } from "./types"
+import type {
+  BubbleReactionsProps,
+  BubbleReactionChipProps,
+  BubbleReactionsButtonProps,
+} from "./types"
 import { reactionKey } from "./utils"
 import { GlassContainer } from "@/components/ui/glasscn/glass-container"
-import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover-popup"
-import { EmojiActionBar } from "./emoji-action-bar"
+import {
+  Popover,
+  PopoverPopup,
+  PopoverTrigger,
+} from "@/components/ui/popover-popup"
+import { ActionBar } from "@/components/composed/action-bar"
 import { useState } from "react"
-import { FaceSlightlySmilingPlus } from "lucide-react";
+import { FaceSlightlySmilingPlus } from "lucide-react"
 
 /**
  * One emoji + count inside the pill. Pressing it springs the emoji, and a
@@ -65,7 +73,7 @@ export function BubbleReactionChip({
           <AnimatePresence initial={false} mode="popLayout">
             <motion.span
               animate={{ y: 0, opacity: 1 }}
-              className="[grid-area:1/1] text-xs select-none"
+              className="text-xs select-none [grid-area:1/1]"
               exit={{ y: reduceMotion ? 0 : -10, opacity: 0 }}
               initial={{ y: reduceMotion ? 0 : 10, opacity: 0 }}
               key={reaction.count}
@@ -108,7 +116,9 @@ export function BubbleReactionsButton({
         }
       >
         <motion.span
-          animate={reduceMotion ? { scale: 1 } : { scale: open ? [1, 1.35, 1] : 1 }}
+          animate={
+            reduceMotion ? { scale: 1 } : { scale: open ? [1, 1.35, 1] : 1 }
+          }
           className="block text-xs select-none"
           transition={
             reduceMotion
@@ -131,12 +141,12 @@ export function BubbleReactionsButton({
         // The picker paints its own bg-popover on the root and on each sticky
         // category header; both have to come off for the glass to show, and the
         // headers get a tint of their own so emoji still pass behind them.
-        className="w-fit [&_[data-slot=emoji-picker-category-header]]:bg-white/65 [&_[data-slot=emoji-picker-category-header]]:backdrop-blur-sm [&_[data-slot=emoji-picker]]:bg-transparent [&_[data-slot=popover-viewport]]:[--viewport-inline-padding:0px] [&_[data-slot=popover-viewport]]:max-h-none [&_[data-slot=popover-viewport]]:overflow-clip [&_[data-slot=popover-viewport]]:py-0 dark:[&_[data-slot=emoji-picker-category-header]]:bg-black/55"
-        glassVariant="frosted"
+        className="w-fit [&_[data-slot=emoji-picker-category-header]]:bg-white/65 [&_[data-slot=emoji-picker-category-header]]:backdrop-blur-sm dark:[&_[data-slot=emoji-picker-category-header]]:bg-black/55 [&_[data-slot=emoji-picker]]:bg-transparent [&_[data-slot=popover-viewport]]:max-h-none [&_[data-slot=popover-viewport]]:overflow-clip [&_[data-slot=popover-viewport]]:py-0 [&_[data-slot=popover-viewport]]:[--viewport-inline-padding:0px]"
+        //  glassVariant="frosted"
         side="top"
-        variant="glass"
+        //variant="glass"
       >
-        <EmojiActionBar
+        <ActionBar.Emoji
           onEmojiSelect={(picked) => {
             onEmojiSelect?.(picked)
             setOpen(false)
@@ -182,7 +192,7 @@ export function BubbleReactions({
         data-slot="bubble-reactions"
         {...props}
       >
-        <div className={cn("mx-1.5 h-full inline-flex items-center")}>
+        <div className={cn("mx-1.5 inline-flex h-full items-center")}>
           {reactions.map((reaction, index) => (
             <BubbleReactionChip
               index={index}
