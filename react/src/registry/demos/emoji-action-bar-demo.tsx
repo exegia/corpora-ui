@@ -4,9 +4,9 @@ import { DemoStage, DemoToggle } from "@/components/docs/demo-controls"
 import { Button } from "@/components/ui/button"
 import {
   Popover,
-  PopoverPopup,
+  PopoverGlass,
   PopoverTrigger,
-} from "@/components/ui/popover-popup"
+} from "@/components/ui/popover-glass"
 import type { Emoji } from "frimousse"
 import { ActionBar, QUICK_REACTIONS } from "@/components/composed/action-bar"
 
@@ -15,11 +15,6 @@ import { ActionBar, QUICK_REACTIONS } from "@/components/composed/action-bar"
  * header, and the popup's viewport subtracts an inline-padding variable that
  * has to be zeroed — the same overrides `BubbleReactions` ships with.
  */
-const PICKER_ON_GLASS =
-  "w-fit [&_[data-slot=emoji-picker-category-header]]:bg-white/65 [&_[data-slot=emoji-picker-category-header]]:backdrop-blur-sm [&_[data-slot=emoji-picker]]:bg-transparent [&_[data-slot=popover-viewport]]:[--viewport-inline-padding:0px] [&_[data-slot=popover-viewport]]:max-h-none [&_[data-slot=popover-viewport]]:overflow-clip [&_[data-slot=popover-viewport]]:py-0 dark:[&_[data-slot=emoji-picker-category-header]]:bg-black/55"
-
-const DEFAULT_BG =
-  "w-fit [&_[data-slot=popover-viewport]]:[--viewport-inline-padding:0px] [&_[data-slot=popover-viewport]]:max-h-none [&_[data-slot=popover-viewport]]:overflow-clip [&_[data-slot=popover-viewport]]:py-0"
 
 export default function EmojiActionBarDemo() {
   const [glass, setGlass] = React.useState(true)
@@ -47,14 +42,9 @@ export default function EmojiActionBarDemo() {
             render={<Button variant="outline">Add reaction</Button>}
           />
 
-          <PopoverPopup
-            className={glass ? PICKER_ON_GLASS : DEFAULT_BG}
-            glassVariant="liquid"
-            side="top"
-            variant="glass"
-          >
+          <PopoverGlass glassVariant="frosted" side="top">
             <ActionBar.Emoji onEmojiSelect={onEmojiSelect} />
-          </PopoverPopup>
+          </PopoverGlass>
         </Popover>
 
         <p className="text-sm text-muted-foreground">
