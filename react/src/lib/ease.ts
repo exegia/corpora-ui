@@ -64,6 +64,13 @@ export const SHELL_TRANSITION: Transition = {
   mass: 0.85,
 };
 
+export const BOUNCE_IN_OUT: Transition = {
+  type: "spring",
+  stiffness: 300,
+  damping: 20,
+  mass: 0.85,
+} as const;
+
 export const ICON_VARIANTS: Variants = {
   hidden: { opacity: 0, filter: "blur(3px)" },
   visible: {
