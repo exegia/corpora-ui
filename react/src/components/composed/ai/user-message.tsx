@@ -34,13 +34,13 @@ export function UserMessage({
 }: UserMessageProps): React.ReactElement {
   return (
     <Bubble variant="sender" {...props}>
-      {author !== undefined && author !== null ? (
+      {author !== undefined && author !== null && (
         <Bubble.Header avatar={avatar} badge={badge} name={author} time={time} />
-      ) : null}
+      )}
       <Bubble.Message>{children}</Bubble.Message>
-      {reactions?.length ? (
+      {reactions?.length && (
         <Bubble.Reactions onToggle={onReactionToggle} reactions={reactions} />
-      ) : null}
+      )}
     </Bubble>
   )
 }
