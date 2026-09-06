@@ -5,6 +5,7 @@ import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { EASE_IN_OUT, SPRING_PRESS, SPRING_SWAP } from "@/lib/ease"
 import { useBubbleVariant } from "./context"
+import { MorphIcon } from "morphicons/react";
 import type {
   BubbleReactionsProps,
   BubbleReactionChipProps,
@@ -14,12 +15,12 @@ import { reactionKey } from "./utils"
 import { GlassContainer } from "@/components/ui/glasscn/glass-container"
 import {
   Popover,
-  PopoverPopup,
+  PopoverGlass,
   PopoverTrigger,
-} from "@/components/ui/popover-popup"
+} from "@/components/ui/popover-glass"
 import { ActionBar } from "@/components/composed/action-bar"
 import { useState } from "react"
-import { FaceSlightlySmilingPlus } from "lucide-react"
+import { FaceSlightlySmilingPlus, X } from "lucide"
 
 /**
  * One emoji + count inside the pill. Pressing it springs the emoji, and a
@@ -91,60 +92,37 @@ export function BubbleReactionChip({
 export function BubbleReactionsButton({
   className,
   onClick,
-  onEmojiSelect,
-  ...props
+  onEmojiSelect
 }: BubbleReactionsButtonProps): React.ReactElement {
-  const reduceMotion = useReducedMotion()
+
   const [open, setOpen] = useState(false)
   return (
     <Popover onOpenChange={setOpen} open={open}>
       <PopoverTrigger
-        render={
-          <motion.button
+        render={(_props, state) => (
+          <button
             aria-label="Add reaction"
             className={cn(
-              "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-2 font-bold text-neutral-600 transition-colors duration-150 ease-smooth-out outline-none hover:bg-black/6 focus-visible:ring-0 focus-visible:ring-ring dark:text-neutral-300 dark:hover:bg-white/8",
+              "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-2 font-bold text-neutral-600 duration-150 ease-smooth-out outline-none hover:bg-black/6 focus-visible:ring-0 dark:text-neutral-300 dark:hover:bg-white/8",
               className
             )}
             data-slot="bubble-reaction-button"
-            onClick={onClick}
-            transition={SPRING_PRESS}
+            onClick={onClick}  
             type="button"
-            whileTap={reduceMotion ? undefined : { scale: 0.88 }}
-            {...props}
-          />
-        }
-      >
-        <motion.span
-          animate={
-            reduceMotion ? { scale: 1 } : { scale: open ? [1, 1.35, 1] : 1 }
-          }
-          className="block text-xs select-none"
-          transition={
-            reduceMotion
-              ? { duration: 0 }
-              : { duration: 0.36, ease: EASE_IN_OUT, times: [0, 0.8, 1] }
-          }
-        >
-          <FaceSlightlySmilingPlus size={16} />
-        </motion.span>
-      </PopoverTrigger>
-      <PopoverPopup
-        align="end"
-        // Opens as the compact quick-reaction bar and grows to the full picker
-        // when "More" is pressed — that swap is a genuine popup resize, which is
-        // why the viewport variable below has to be zeroed, not just the padding.
-        // The viewport sizes its transitioning child with
-        // calc(--popup-width - 2*--viewport-inline-padding - 2px), so zeroing the
-        // variable (not just the padding) is what keeps the picker from being
-        // squeezed by 2x16px while Base UI holds --popup-width at a concrete px.
-        // The picker paints its own bg-popover on the root and on each sticky
-        // category header; both have to come off for the glass to show, and the
-        // headers get a tint of their own so emoji still pass behind them.
-        className="w-fit [&_[data-slot=emoji-picker-category-header]]:bg-white/65 [&_[data-slot=emoji-picker-category-header]]:backdrop-blur-sm dark:[&_[data-slot=emoji-picker-category-header]]:bg-black/55 [&_[data-slot=emoji-picker]]:bg-transparent [&_[data-slot=popover-viewport]]:max-h-none [&_[data-slot=popover-viewport]]:overflow-clip [&_[data-slot=popover-viewport]]:py-0 [&_[data-slot=popover-viewport]]:[--viewport-inline-padding:0px]"
-        //  glassVariant="frosted"
+            {..._props}
+          >
+             <MorphIcon icon={state.open ? X : FaceSlightlySmilingPlus} size={16} />
+          </button>
+        )}
+      />
+       
+      <PopoverGlass
+        align="center"
+        alignOffset={-25}
+  
+        glassVariant="frosted"
+        sideOffset={5}
         side="top"
-        //variant="glass"
       >
         <ActionBar.Emoji
           onEmojiSelect={(picked) => {
@@ -152,7 +130,7 @@ export function BubbleReactionsButton({
             setOpen(false)
           }}
         />
-      </PopoverPopup>
+      </PopoverGlass>
     </Popover>
   )
 }
