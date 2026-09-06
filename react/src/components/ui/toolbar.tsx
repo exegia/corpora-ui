@@ -27,6 +27,7 @@ export function ToolbarButton({
   return (
     <ToolbarPrimitive.Button
       className={cn(className)}
+      
       data-slot="toolbar-button"
       {...props}
     />
