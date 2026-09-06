@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import type { ReactElement } from "react"
-import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover-popup"
+import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { Text } from "../text/default"
 import type { TextClickPopoverProps, TextPopoverRenderProps } from "./types"
