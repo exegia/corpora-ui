@@ -1,7 +1,5 @@
 import * as React from "react"
 
-import { EmojiActionBar, QUICK_REACTIONS } from "@/components/atoms"
-import type { BubblePickedEmoji } from "@/components/atoms"
 import { DemoStage, DemoToggle } from "@/components/docs/demo-controls"
 import { Button } from "@/components/ui/button"
 import {
@@ -9,6 +7,8 @@ import {
   PopoverPopup,
   PopoverTrigger,
 } from "@/components/ui/popover-popup"
+import type { Emoji } from "frimousse"
+import { ActionBar, QUICK_REACTIONS } from "@/components/composed/action-bar"
 
 /**
  * The picker paints its own bg-popover on the root and on each sticky category
@@ -25,9 +25,9 @@ export default function EmojiActionBarDemo() {
   const [glass, setGlass] = React.useState(true)
   const [more, setMore] = React.useState(true)
   const [open, setOpen] = React.useState(false)
-  const [picked, setPicked] = React.useState<BubblePickedEmoji | null>(null)
+  const [picked, setPicked] = React.useState<Emoji | null>(null)
 
-  const onEmojiSelect = (next: BubblePickedEmoji) => {
+  const onEmojiSelect = (next: Emoji) => {
     setPicked(next)
     setOpen(false)
   }
@@ -53,7 +53,7 @@ export default function EmojiActionBarDemo() {
             side="top"
             variant="glass"
           >
-            <EmojiActionBar hideMore={!more} onEmojiSelect={onEmojiSelect} />
+            <ActionBar.Emoji onEmojiSelect={onEmojiSelect} />
           </PopoverPopup>
         </Popover>
 
