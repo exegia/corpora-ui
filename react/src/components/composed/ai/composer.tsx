@@ -133,6 +133,7 @@ export function Composer({
         // The rest state paints its own keycap hint over the field.
         showRestHint && "[&_textarea]:placeholder:text-transparent"
       )}
+      size="lg"
       disabled={isDisabled}
       onChange={(event) => changeValue(event.target.value)}
       onKeyDown={(event) => {
@@ -153,7 +154,6 @@ export function Composer({
 
   return (
     <form
-      className={cn("", className)}
       data-expanded={isExpanded ? "" : undefined}
       data-slot="composer"
       onSubmit={(event) => {
@@ -163,7 +163,7 @@ export function Composer({
     >
       <motion.div
         animate={{
-          borderRadius: isExpanded ? "100%" : 21,
+      //    borderRadius: isExpanded ? 24 : 21,
         }}
         // The textarea trades `absolute` for static between the two shapes, so
         // the box's height changes in a single frame. `layout` measures the two
@@ -172,11 +172,12 @@ export function Composer({
         layout={!reduceMotion}
         className={cn(
           "relative overflow-clip  flex flex-1 flex-col p-1.5  bg-(--chat-field) transition-shadow duration-300 ease-smooth-out",
-          isExpanded ? "shadow-[inset_0px_0px_15px_2px_rgba(0,_0,_0,_0.1)] items-end" : "items-center shadow-[inset_0px_0px_7px_-1.5px_rgba(0,_0,_0,_0.3)]",
-          "motion-reduce:transition-none"
+          isExpanded ? "shadow-[inset_0px_0px_15px_2px_rgba(0,_0,_0,_0.1)] items-end rounded-lg rounded-bl-xl" : "rounded-full items-center shadow-[inset_0px_0px_7px_-1.5px_rgba(0,_0,_0,_0.3)]",
+          "motion-reduce:transition-none",
+          className
         )}
-        initial={{ borderRadius: "100%" }}
-        exit={{ borderRadius: "100%"}}
+        initial={false}
+      
         onBlur={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget)) {
             setIsExpanded(false)
