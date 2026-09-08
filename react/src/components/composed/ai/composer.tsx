@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Text } from "@/components/atoms"
 import { Stop } from "iconsax-reactjs"
 import { SendHint } from "./shared"
+import { SuggestedPrompts } from "./suggested-prompt"
 import type { ComposerProps } from "./types"
 
 // `ComposerProps` moved to `types.ts`; both the barrel and `ai-panel` still
@@ -41,6 +42,11 @@ export function Composer({
   safetyNote = "Changes apply immediately and are recorded in version history. Undo anytime.",
   expanded = false,
   placeholder = "Ask about this selection…",
+  suggestedPrompts,
+  suggestionsLabel,
+  defaultSuggestionsOpen,
+  suggestionsOpen,
+  onSuggestionsOpenChange,
   className,
 }: ComposerProps): React.ReactElement {
   const reduceMotion = useReducedMotion()
@@ -161,6 +167,21 @@ export function Composer({
         send()
       }}
     >
+      {/* Sibling of the shell, never a child: the shell animates `layout`,
+          which Motion runs as a scale, and a list that grows and shrinks
+          inside it would drive that scale for an unrelated reason and
+          distort the field. The pill just paints over the panel's tucked
+          bottom edge instead. */}
+      {suggestedPrompts ? (
+        <SuggestedPrompts
+          defaultOpen={defaultSuggestionsOpen}
+          label={suggestionsLabel}
+          onOpenChange={onSuggestionsOpenChange}
+          open={suggestionsOpen}
+        >
+          {suggestedPrompts}
+        </SuggestedPrompts>
+      ) : null}
       <motion.div
         animate={{
       //    borderRadius: isExpanded ? 24 : 21,
@@ -171,7 +192,7 @@ export function Composer({
         // row from teleporting down and swallowing the send hint's slide.
         layout={!reduceMotion}
         className={cn(
-          "relative overflow-clip  flex flex-1 flex-col p-1.5  bg-(--chat-field) transition-shadow duration-300 ease-smooth-out",
+          "relative z-10 overflow-clip  flex flex-1 flex-col p-1.5  bg-(--chat-field) transition-shadow duration-300 ease-smooth-out",
           isExpanded ? "shadow-[inset_0px_0px_15px_2px_rgba(0,_0,_0,_0.1)] items-end rounded-lg rounded-bl-xl" : "rounded-full items-center shadow-[inset_0px_0px_7px_-1.5px_rgba(0,_0,_0,_0.3)]",
           "motion-reduce:transition-none",
           className

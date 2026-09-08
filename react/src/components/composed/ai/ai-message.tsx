@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 import { EASE_IN_OUT, SPRING_PANEL } from "@/lib/ease"
 import { Bubble, type BubbleHeaderProps } from "@/components/atoms/bubble"
 import { Button } from "@/components/ui/button"
-import { agentText, ghostMuted } from "./shared"
+import { agentText, ghostMuted, ITEM_VARIANTS, LIST_VARIANTS } from "./shared"
 
 export interface AiMessageProps extends Omit<
   React.ComponentPropsWithoutRef<"div">,
@@ -44,21 +44,6 @@ function flattenChildren(children: React.ReactNode): React.ReactNode[] {
       ? flattenChildren(child.props.children)
       : [child]
   )
-}
-
-const LIST_VARIANTS = {
-  hidden: { transition: { staggerChildren: 0.04, staggerDirection: -1 } },
-  visible: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
-}
-
-const ITEM_VARIANTS = {
-  hidden: {
-    opacity: 0,
-    y: 14,
-    scale: 0.97,
-    transition: { duration: 0.18, ease: EASE_IN_OUT },
-  },
-  visible: { opacity: 1, y: 0, scale: 1, transition: SPRING_PANEL },
 }
 
 /**

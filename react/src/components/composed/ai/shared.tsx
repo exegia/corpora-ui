@@ -1,8 +1,8 @@
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { Kbd as KbdKey, KbdGroup } from "@/components/ui/kbd";
-import { motion, useReducedMotion } from "motion/react";
-import { SPRING_LAYOUT } from "@/lib/ease";
+import { motion, useReducedMotion, type Variants } from "motion/react";
+import { EASE_IN_OUT, SPRING_LAYOUT, SPRING_PANEL } from "@/lib/ease";
 
 
 // The AI accent is a muted amber used sparingly — the ✦ icon, small labels
@@ -128,4 +128,22 @@ export function SendHint({
       </motion.span>
     </motion.span>
   )
+}
+
+// The suggestions fan-out: the list holds the stagger, each item springs up
+// into place. Shared by `AiMessage`'s disclosure and `SuggestedPrompts`, so
+// both fan out with the same rhythm.
+export const LIST_VARIANTS: Variants = {
+  hidden: { transition: { staggerChildren: 0.04, staggerDirection: -1 } },
+  visible: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+}
+
+export const ITEM_VARIANTS: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 14,
+    scale: 0.97,
+    transition: { duration: 0.18, ease: EASE_IN_OUT },
+  },
+  visible: { opacity: 1, y: 0, scale: 1, transition: SPRING_PANEL },
 }

@@ -31,5 +31,14 @@ export interface ComposerProps {
   stopLabel?: React.ReactNode
   safetyNote?: React.ReactNode
   placeholder?: string
+  /**
+   * `SuggestedPrompt` rows shown in a "Suggestions (n)" disclosure above the
+   * field, their panel tucked behind the pill. Omitted, no disclosure renders.
+   */
+  suggestedPrompts?: React.ReactNode
+  suggestionsLabel?: (count: number) => React.ReactNode
+  defaultSuggestionsOpen?: boolean
+  suggestionsOpen?: boolean
+  onSuggestionsOpenChange?: (open: boolean) => void
   className?: string
 }
