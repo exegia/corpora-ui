@@ -13,7 +13,13 @@ export function BubbleMessage({
   const variant = useBubbleVariant()
   return (
     <div
-      className={cn("relative select-none", twBubbleMessageClasses['default'], twBubbleMessageClasses[variant], className)}
+      className={cn(
+        "relative select-none",
+    //
+        twBubbleMessageClasses["default"],
+        twBubbleMessageClasses[variant],
+        className
+      )}
       data-slot="bubble-message"
       {...props}
     />

@@ -1,5 +1,9 @@
 import type * as React from "react"
 import { cn } from "@/lib/utils"
+import { Kbd as KbdKey, KbdGroup } from "@/components/ui/kbd";
+import { motion, useReducedMotion } from "motion/react";
+import { SPRING_LAYOUT } from "@/lib/ease";
+
 
 // The AI accent is a muted amber used sparingly — the ✦ icon, small labels
 // and the primary Apply action. Everything else reads from theme tokens so
@@ -67,9 +71,9 @@ export function Kbd({
   ...props
 }: React.ComponentPropsWithoutRef<"kbd">): React.ReactElement {
   return (
-    <kbd
+    <KbdKey
       className={cn(
-        "inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-[5px] border border-black/10 bg-black/5 px-1 font-sans text-[10px] leading-none text-muted-foreground shadow-[inset_0_-1px_0_rgb(0_0_0/0.08)] dark:border-white/10 dark:bg-white/6 dark:shadow-[inset_0_-1px_0_rgb(0_0_0/0.4)]",
+        "inline-flex h-[22px] min-w-[18px] items-center justify-center rounded-[5px] border border-black/10 bg-black/5 px-1 font-sans text-[10px] leading-none text-muted-foreground  border-b-black/15 dark:border-b-black/25 border-b-1  dark:bg-white/6 dark:shadow-[inset_0_-1px_0_rgb(0_0_0/0.4)]",
         className
       )}
       {...props}
@@ -77,27 +81,51 @@ export function Kbd({
   )
 }
 
+
 /** "Press ⌘ + ↵ to send message" — the composer's send hint. */
 export function SendHint({
   className,
   verbose = true,
 }: {
   className?: string
-  /** Drop the trailing "to send message" when space is tight. */
+  /** Pin the keycaps to the end and drop the trailing "to send message". */
   verbose?: boolean
 }): React.ReactElement {
+  const reduceMotion = useReducedMotion()
+  // `justify-content` and `display` are discrete — they snap rather than tween.
+  // A spacer whose flex-grow rises 0 → 1 buys the start → end shift, and it
+  // takes exactly the room the collapsing label gives back, so both halves ride
+  // the same spring.
+  const transition = reduceMotion ? { duration: 0 } : SPRING_LAYOUT
+
   return (
-    <span
+    <motion.span
       className={cn(
-        "inline-flex items-center gap-1 text-sm whitespace-nowrap text-muted-foreground/60",
+        "flex items-center gap-1 flex-1 text-sm whitespace-nowrap text-muted-foreground/60",
         className
       )}
       data-slot="send-hint"
     >
-      Press <Kbd aria-label="Command">⌘</Kbd>
-      <span aria-hidden="true">+</span>
-      <Kbd aria-label="Enter">↵</Kbd>
-      {verbose ? <span>to send message</span> : null}
-    </span>
+      <motion.span
+        aria-hidden="true"
+        animate={{ flexGrow: verbose ? 1 : 0 }}
+        className="-mr-1 block shrink-0 basis-0"
+        initial={false}
+        transition={transition}
+      />
+      Press
+      <KbdGroup>
+        <Kbd aria-label="Command">⌘</Kbd>
+        <Kbd aria-label="Enter" className="w-8">↵</Kbd>
+      </KbdGroup>
+      <motion.span
+        animate={{ opacity: verbose ? 0 : 1, width: verbose ? 0 : "auto", x: verbose ? -8 : 0 }}
+        className="inline-block shrink-0 overflow-hidden"
+        initial={false}
+        transition={transition}
+      >
+        to send message
+      </motion.span>
+    </motion.span>
   )
 }

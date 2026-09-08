@@ -1,6 +1,6 @@
 "use client"
 
-import { Sparkles } from "lucide-react"
+import { Sparkle } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { Children, Fragment, isValidElement, useId, useState } from "react"
 import type * as React from "react"
@@ -118,7 +118,7 @@ export function AiMessage({
               <>
                 <span
                   aria-hidden="true"
-                  className="ml-1 inline-block h-4 w-0.5 translate-y-0.5 animate-caret-blink bg-violet-400"
+                  className="ml-1 inline-block h-4 w-0.5 translate-y-0.5 animate-caret-blink bg-indigo-500"
                 />
                 {onStop ? (
                   <Button
@@ -141,7 +141,7 @@ export function AiMessage({
               aria-controls={panelId}
               aria-expanded={open}
               className={cn(
-                "group/suggestions inline-flex w-fit cursor-pointer items-center gap-2 rounded-md px-1 py-1 text-sm outline-none transition-colors duration-150 ease-smooth-out focus-visible:ring-1",
+                "group/suggestions inline-flex w-fit cursor-pointer items-center gap-2 rounded-md px-1 py-1 text-sm outline-none transition-colors duration-150 ease-smooth-out focus-visible:ring-0 text-indigo-400!",
                 agentText
               )}
               data-slot="ai-suggestions-trigger"
@@ -151,10 +151,10 @@ export function AiMessage({
             >
               <motion.span
                 animate={{ rotate: open ? 90 : 0, scale: open ? 1.1 : 1 }}
-                className="inline-flex"
+                className="inline-flex "
                 transition={reduceMotion ? { duration: 0 } : SPRING_PANEL}
               >
-                <Sparkles aria-hidden="true" className="size-4 stroke-[1.5]" />
+                <Sparkle aria-hidden="true" className="size-4 stroke-[1.5] stroke-indigo-400" />
               </motion.span>
               {suggestionsLabel(count)}
             </motion.button>

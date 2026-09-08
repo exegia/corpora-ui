@@ -2,7 +2,7 @@
 
 import { useMemo } from "react"
 import type * as React from "react"
-import { MoreHorizontal } from "lucide-react"
+import { MoreHorizontal, X } from "lucide-react"
 import { Action, EmojiAction, Separator } from "./action"
 import { motion } from "framer-motion"
 import ActionBar from "./toolbar"
@@ -16,6 +16,7 @@ import {
   EmojiPickerSearch,
 } from "@/components/ui/emoji-picker"
 import { isSeparator, QUICK_REACTIONS, useEmojiPicker } from "./utils"
+import { Button } from "@/components/ui/button";
 
 /**
  * Compact reaction picker: a toolbar of quick emoji, then a "More" action that
@@ -65,13 +66,20 @@ export function EmojiActionBar({
   }, [quickReactions, onEmojiSelect, togglePicker])
 
   return (
-    <motion.div className="relative" initial={{ height: "auto" }} animate={{ height: isFullPicker ? 326 : "auto" }} transition={BOUNCE_IN_OUT}>
+    <motion.div className="relative" initial={{ height: "auto" }} exit={{ height: "auto" }} animate={{ height: isFullPicker ? 326 : "auto" }} transition={BOUNCE_IN_OUT}>
+     
       {isFullPicker ? (
         <EmojiPicker
-          className="h-full"
+          className="h-full relative"
           onEmojiSelect={onEmojiSelect}
         >
-          <EmojiPickerSearch />
+          <div className="flex items-center">
+               <EmojiPickerSearch />
+            <Button variant="secondary" size="icon-xs" onClick={togglePicker}>
+              <X className="size-3 stroke-3" />
+            </Button>
+          </div>
+       
           <EmojiPickerContent />
           <EmojiPickerFooter />
         </EmojiPicker>

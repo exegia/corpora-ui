@@ -61,7 +61,7 @@ function StateMark({ state }: { state: SuggestionState }): React.ReactElement {
         {state === "pending" ? (
           <motion.span
             animate={{ scale: 1, opacity: 1 }}
-            className="size-4 rounded-full border-[1.5px] border-neutral-400 [grid-area:1/1] dark:border-neutral-500"
+            className="size-4 rounded-full border-[1.5px] border-neutral-800 [grid-area:1/1] dark:border-neutral-300"
             exit={{ scale: 0.4, opacity: 0 }}
             initial={{ scale: 0.4, opacity: 0 }}
             key="pending"
@@ -70,13 +70,13 @@ function StateMark({ state }: { state: SuggestionState }): React.ReactElement {
         ) : state === "accepted" ? (
           <motion.span
             animate={{ scale: 1, opacity: 1, rotate: 0 }}
-            className="inline-grid size-4 place-items-center rounded-full bg-violet-500 text-white [grid-area:1/1]"
+            className="inline-grid size-4.5 place-items-center rounded-full bg-indigo-500/80 text-white [grid-area:1/1]"
             exit={{ scale: 0.4, opacity: 0 }}
             initial={{ scale: 0.4, opacity: 0, rotate: -45 }}
             key="accepted"
             transition={transition}
           >
-            <Check aria-hidden="true" className="size-2.5 stroke-[3]" />
+            <Check aria-hidden="true" className="size-3 stroke-[4]" />
           </motion.span>
         ) : (
           <motion.span
@@ -136,7 +136,7 @@ export function SuggestionCard({
   return (
     <LayoutGroup id={layoutId}>
       <Card
-        className={cn("w-full text-card-foreground", glassCard, className)}
+        className={cn("w-full text-card-foreground rounded-sm overflow-clip", glassCard, className)}
         data-node-id={nodeId}
         data-slot="suggestion-card"
         data-state={state}
@@ -144,41 +144,27 @@ export function SuggestionCard({
       >
         <Collapsible onOpenChange={handleOpenChange} open={isOpen}>
           <CollapsibleTrigger
-            className="flex w-full min-w-0 cursor-pointer flex-row items-center gap-3 rounded-[15px] px-4 py-2.5 text-left outline-none transition-colors duration-150 ease-smooth-out hover:bg-black/4 focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/4"
+            className="flex w-full min-w-0 cursor-pointer flex-row items-center gap-3 rounded-none px-4 py-2.5 text-left outline-none transition-colors duration-150 ease-smooth-out hover:bg-black/4 focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/4"
             render={<CardHeader render={<button type="button" />} />}
           >
             <StateMark state={state} />
             <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
-              <span className="w-full truncate text-sm leading-none font-bold text-foreground">
+              <span className="w-full truncate text-xs  font-semibold text-foreground">
                 {heading}
               </span>
               {description ? (
-                <span className="w-full truncate text-xs leading-none font-semibold text-muted-foreground">
+                <span className="w-full truncate text-xs leading-none font-normal text-muted-foreground">
                   {description}
                 </span>
               ) : null}
             </div>
-            <AnimatePresence initial={false} mode="popLayout">
-              {!isOpen && referenceNode ? (
-                <motion.span
-                  animate={{ opacity: 1 }}
-                  className="inline-flex shrink-0"
-                  exit={{ opacity: 0 }}
-                  initial={{ opacity: 0 }}
-                  key="header-reference"
-                  transition={{ duration: 0.15, ease: EASE_IN_OUT }}
-                >
-                  {referenceNode}
-                </motion.span>
-              ) : null}
-            </AnimatePresence>
             <motion.span
-              animate={{ rotate: isOpen ? 180 : 0 }}
+              animate={{ rotate: isOpen ? 180 : 90 }}
               aria-hidden="true"
               className="inline-flex shrink-0 text-foreground/50"
               transition={reduceMotion ? { duration: 0 } : SPRING_LAYOUT}
             >
-              <ChevronDown className="size-4" />
+              <ChevronDown className="size-4 stroke-3" />
             </motion.span>
           </CollapsibleTrigger>
 
@@ -193,7 +179,7 @@ export function SuggestionCard({
                 </div>
               ) : null}
               {children ? (
-                <div className="text-base leading-[22px] text-foreground/90">
+                <div className="text-sm leading-[22px] text-foreground/90">
                   {children}
                 </div>
               ) : null}
@@ -210,32 +196,38 @@ export function SuggestionCard({
                     transition={{ duration: 0.18, ease: EASE_IN_OUT }}
                   >
                     <Button
-                      className="h-8 rounded-xl border-transparent bg-neutral-300/60 px-3 text-sm font-medium text-foreground hover:bg-neutral-300 data-pressed:bg-neutral-300 dark:bg-neutral-700/70 dark:hover:bg-neutral-700 dark:data-pressed:bg-neutral-700 sm:h-8"
+                     
                       onClick={onReject}
                       size="sm"
-                      variant="ghost"
+                      variant="destructive-outline"
                     >
+                      <X className="size-4 stroke-3" />
                       {rejectLabel}
                     </Button>
                     <Button
-                      className="h-8 rounded-xl border-black/20 bg-neutral-950 px-3 text-sm font-medium text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.12)] hover:bg-neutral-900 data-pressed:bg-neutral-900 dark:border-white/12 dark:bg-black dark:hover:bg-neutral-900 sm:h-8"
+                 
                       onClick={onAccept}
                       size="sm"
-                      variant="ghost"
+                      variant="outline"
                     >
+                      <Check className="size-4 stroke-3" />
                       {acceptLabel}
                     </Button>
                   </motion.div>
                 ) : (
                   <motion.span
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-xs font-semibold text-muted-foreground"
+                    className="text-xs font-normal inline-flex gap-1 text-success-foreground flex-col items-end px-2 pb-1"
                     exit={{ opacity: 0, y: 4 }}
                     initial={{ opacity: 0, y: 4 }}
                     key={state}
                     transition={{ duration: 0.18, ease: EASE_IN_OUT }}
-                  >
-                    {STATE_LABEL[state]}
+                    >
+                      <div className="flex gap-1 items-center">
+                        <Check className="size-3.5 stroke-3" />
+                        {STATE_LABEL[state]}
+                      </div>
+                      <span className="text-[10px] text-muted-foreground text-right leading-1">12 min. ago - by user</span>
                   </motion.span>
                 )}
               </AnimatePresence>

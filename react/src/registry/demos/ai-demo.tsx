@@ -1,10 +1,9 @@
 import * as React from "react"
 
-import { Bubble, type BubbleReaction } from "@/components/atoms"
+import { Bubble, Reference, type BubbleReaction } from "@/components/atoms"
 import {
   AiMessage,
   Composer,
-  ReferenceChip,
   SuggestionCard,
   UserMessage,
   type SuggestionState,
@@ -56,7 +55,7 @@ export default function AiDemo(): React.ReactElement {
         />
       }
     >
-      <div className="mx-auto grid w-full max-w-md gap-5">
+      <div className="mx-auto grid w-full max-w-md gap-5 py-4">
         <UserMessage
           author="Sender"
           badge="Admin"
@@ -91,7 +90,7 @@ export default function AiDemo(): React.ReactElement {
                 nodeId="p-17"
                 onAccept={() => setFirst("accepted")}
                 onReject={() => setFirst("rejected")}
-                reference={<ReferenceChip href="#p-17">Reference 1</ReferenceChip>}
+                reference={<Reference href="#p-17">Book:rc003/word8</Reference>}
                 state={first}
               >
                 The canonical paragraph label is required by the schema.
@@ -103,7 +102,7 @@ export default function AiDemo(): React.ReactElement {
                 nodeId="p-18"
                 onAccept={() => setSecond("accepted")}
                 onReject={() => setSecond("rejected")}
-                reference={<ReferenceChip href="#p-18">Reference 1</ReferenceChip>}
+                 reference={<Reference href="#p-17">Book:rc003/word8</Reference>}
                 state={second}
               >
                 Scanned 30,102 nodes in a.1. Two boundary defects and one

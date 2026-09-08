@@ -21,9 +21,9 @@ export const twBubbleAlignClasses: Record<BubbleVariant, ClassValue> = {
  */
 export const twBubbleColumnClasses: Record<BubbleVariant, ClassValue> = {
   default: "max-w-[80%] min-w-0",
-  sender: "items-end",
-  recipient: "items-start",
-  ai: "w-full items-start",
+  sender: "items-end max-w-[80%] min-w-0",
+  recipient: "items-start max-w-[80%] min-w-0",
+  ai: "w-full items-stretch max-w-[90%] min-w-0",
 }
 
 /**
@@ -34,11 +34,11 @@ export const twBubbleColumnClasses: Record<BubbleVariant, ClassValue> = {
  * a person's message.
  */
 export const twBubbleMessageClasses: Record<BubbleVariant, ClassValue> = {
-  default: "w-fit max-w-fit rounded-[20px] px-5 py-3.5 text-sm leading-[18px] font-normal",
+  default:
+    "w-fit  rounded-[14px] text-sm leading-[18px] font-normal relative",
   sender:
-    "inset-shadow-lit/90 inset-shadow-dim inset-shadow-dim-b-1.5 inset-shadow-dim-r-1.5 inset-shadow-lit-t-2 inset-shadow-lit-l-1.5 inset-shadow-blur-3 rounded-br-[5px] bg-indigo-600 dark:bg-neutral-100 text-background chat-bubble bubble-sender mr-4 text-left",
+    "inset-shadow-lit/50 inset-shadow-dim inset-shadow-dim-b-1 inset-shadow-dim-r-1 inset-shadow-lit-t-1 inset-shadow-lit-l-1.5 inset-shadow-blur-3 rounded-br-[5px] bg-indigo-600 dark:bg-neutral-100 text-background chat-bubble bubble-sender mr-4 text-left px-5 py-3.5",
   recipient:
-    "inset-shadow-lit inset-shadow-dim/20 dark:inset-shadow-lit/30 dark:inset-shadow-dim/90 inset-shadow-dim-b-1 inset-shadow-dim-r-1 inset-shadow-lit-t-2 inset-shadow-lit-l-1 inset-shadow-blur-3 rounded-bl-[5px] bg-neutral-100 dark:bg-neutral-800 text-foreground chat-bubble bubble-recipient ml-4 text-right",
-  ai: "text-sm leading-5 text-foreground/90",
+    "inset-shadow-lit inset-shadow-dim/20 dark:inset-shadow-lit/30 dark:inset-shadow-dim/90 inset-shadow-dim-b-1 inset-shadow-dim-r-1 inset-shadow-lit-t-1 inset-shadow-lit-l-1 inset-shadow-blur-3 rounded-bl-[5px] bg-neutral-100 dark:bg-neutral-800 text-foreground chat-bubble bubble-recipient ml-4 text-right px-5 py-3.5",
+  ai: "text-sm leading-5 text-foreground/90 w-full",
 }
-

@@ -259,6 +259,19 @@ export const atoms: RegistryEntry[] = [
 </InputGroup>`,
   },
   {
+    slug: "reference",
+    name: "Reference",
+    titleStyle: "expanded",
+    description: "Reference link with optional header and reactions.",
+    category: "atoms",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/reference-demo")),
+    registryDependencies: ["chip", "button"],
+    usage: `import { Reference } from "@corpora/ui"
+
+<Reference />`,
+  },
+  {
     slug: "text",
     name: "Text",
     titleStyle: "titlebar",

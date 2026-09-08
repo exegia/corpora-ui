@@ -5,7 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { useCallback, useState } from "react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
-import { EASE_IN_OUT, SPRING_PANEL } from "@/lib/ease"
+import { BOUNCE_IN_OUT, SPRING_PANEL } from "@/lib/ease"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Text } from "@/components/atoms"
@@ -16,6 +16,8 @@ import type { ComposerProps } from "./types"
 // `ComposerProps` moved to `types.ts`; both the barrel and `ai-panel` still
 // reach for it here, so keep this module the address it has always had.
 export type { ComposerProps }
+
+const MotionButton = motion.create(Button)
 
 /**
  * Prompt field with two shapes: a pill at rest showing the "⌘ + ↵" hint,
@@ -67,30 +69,91 @@ export function Composer({
   // rather than mounting a second control.
   const attachButton = onAttach && (
     <motion.div
-      className={cn(
-        "absolute",
-       "bottom-2 left-2" 
-      )}
+   //   className={cn("absolute", "bottom-2 left-2")}
       data-slot="composer-attach"
-      layout={reduceMotion ? false : "position"}
+      layout={!reduceMotion && "position"}
       transition={SPRING_PANEL}
     >
       <Button
         aria-label={attachLabel}
-        className="size-7 rounded-full border-black/10 bg-black/5 text-muted-foreground hover:bg-black/10 hover:text-foreground data-pressed:bg-black/10 dark:border-white/10 dark:bg-white/6 dark:hover:bg-white/12 dark:data-pressed:bg-white/12 sm:size-7 [&_svg]:transition-transform [&_svg]:duration-200 [&_svg]:ease-smooth-out hover:[&_svg]:rotate-90 motion-reduce:hover:[&_svg]:rotate-0"
+        className="[&_svg]:transition-transform bg-background/50 [&_svg]:duration-200 [&_svg]:ease-smooth-out hover:[&_svg]:rotate-90 motion-reduce:hover:[&_svg]:rotate-0"
         disabled={disabled}
         onClick={onAttach}
-        size="icon-xs"
-        variant="ghost"
+        size="icon-lg"
+        glassVariant="liquid-refract"
+        variant="glass"
       >
-        <Plus className="size-4" />
+        <Plus className="size-4 stroke-3" />
       </Button>
     </motion.div>
   )
 
+  const sendButton = (<MotionButton
+    aria-label={isStreaming ? "Stop" : "Send message"}
+    className={cn(
+      "rounded-md px-3 mr-1 mb-1",
+      isExpanded ? undefined : "hidden"
+    )}
+    disabled={isStreaming ? false : isDisabled || !draft.trim()}
+    onClick={isStreaming ? onStop : undefined}
+    size="default"
+    transition={BOUNCE_IN_OUT}
+    exit={{ opacity: 0, scale: 0 }}
+    animate={{
+      opacity: isExpanded ? 1 : 0,
+      scale: isExpanded ? 1 : 0,
+    }}
+    initial={{ opacity: 0, scale: 0 }}
+    whileHover={{ scale: 1, opacity: 1 }}
+    type={isStreaming ? "button" : "submit"}
+  >
+    {isStreaming ? (
+      <>
+        <Stop className="size-4 animate-pulse fill-current" />
+        {stopLabel}
+      </>
+    ) : (
+      sendLabel
+    )}
+  </MotionButton>)
+
+
+  const renderTextarea = () => (
+    <Textarea
+      aria-label="Message"
+      className={cn(
+        "flex w-full flex-1 items-center text-sm text-foreground has-disabled:cursor-not-allowed has-disabled:opacity-50 [&_textarea]:resize-none [&_textarea]:px-4 [&_textarea]:placeholder:text-sm [&_textarea]:placeholder:text-muted-foreground/60",
+        // Transition the textarea's own box so the auto-height shell
+        // follows smoothly in both directions (expand and collapse).
+        "[&_textarea]:transition-[min-height,padding] [&_textarea]:duration-300 [&_textarea]:ease-smooth-out motion-reduce:[&_textarea]:transition-none",
+        isExpanded
+          ? "[&_textarea]:min-h-14 [&_textarea]:py-3"
+          : "[&_textarea]:min-h-0 [&_textarea]:py-0 h-full",
+        !isExpanded && onAttach && "[&_textarea]:pr-12",
+        // The rest state paints its own keycap hint over the field.
+        showRestHint && "[&_textarea]:placeholder:text-transparent"
+      )}
+      disabled={isDisabled}
+      onChange={(event) => changeValue(event.target.value)}
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && isStreaming) {
+          event.preventDefault()
+          onStop?.()
+        }
+        if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+          event.preventDefault()
+          send()
+        }
+      }}
+      placeholder={placeholder}
+      unstyled
+      value={draft}
+    />
+)
+
   return (
     <form
-      className={cn(className)}
+      className={cn("", className)}
       data-expanded={isExpanded ? "" : undefined}
       data-slot="composer"
       onSubmit={(event) => {
@@ -99,13 +162,21 @@ export function Composer({
       }}
     >
       <motion.div
-        animate={{ borderRadius: isExpanded ? 14 : 21 }}
+        animate={{
+          borderRadius: isExpanded ? 20 : 21,
+        }}
+        // The textarea trades `absolute` for static between the two shapes, so
+        // the box's height changes in a single frame. `layout` measures the two
+        // boxes and springs between them, which is also what keeps the controls
+        // row from teleporting down and swallowing the send hint's slide.
+        layout={!reduceMotion}
         className={cn(
-          "relative overflow-hidden bg-(--chat-field) transition-shadow duration-300 ease-smooth-out",
-          isExpanded ? "shadow-composer-open" : "shadow-composer",
+          "relative overflow-hidden flex flex-1 flex-col p-1.5  bg-(--chat-field) transition-shadow duration-300 ease-smooth-out",
+          isExpanded ? "shadow-composer-open items-end" : "shadow-composer items-center",
           "motion-reduce:transition-none"
         )}
-        initial={false}
+        initial={{ borderRadius: 21 }}
+        exit={{ borderRadius: 21 }}
         onBlur={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget)) {
             setIsExpanded(false)
@@ -114,99 +185,32 @@ export function Composer({
         onFocus={() => setIsExpanded(true)}
         transition={reduceMotion ? { duration: 0 } : SPRING_PANEL}
       >
-        <Textarea
-          aria-label="Message"
-          className={cn(
-            "flex w-full flex-1 items-center text-sm text-foreground has-disabled:cursor-not-allowed has-disabled:opacity-50 [&_textarea]:resize-none [&_textarea]:px-4 [&_textarea]:placeholder:text-sm [&_textarea]:placeholder:text-muted-foreground/60",
-            // Transition the textarea's own box so the auto-height shell
-            // follows smoothly in both directions (expand and collapse).
-            "[&_textarea]:transition-[min-height,padding] [&_textarea]:duration-300 [&_textarea]:ease-smooth-out motion-reduce:[&_textarea]:transition-none",
-            isExpanded
-              ? "[&_textarea]:min-h-14 [&_textarea]:py-3"
-              : "[&_textarea]:min-h-11 [&_textarea]:py-3",
-            !isExpanded && onAttach && "[&_textarea]:pr-12",
-            // The rest state paints its own keycap hint over the field.
-            showRestHint && "[&_textarea]:placeholder:text-transparent"
-          )}
-          disabled={isDisabled}
-          onChange={(event) => changeValue(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Escape" && isStreaming) {
-              event.preventDefault()
-              onStop?.()
-            }
-            if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
-              event.preventDefault()
-              send()
-            }
-          }}
-          placeholder={placeholder}
-          unstyled
-          value={draft}
-        />
+        {/* The shell's `layout` animation is a scale, so the field has to be
+            positioned *by* this wrapper, not against the shell — an absolute
+            child of the shell leaves the projection tree and inherits that
+            scale uncorrected, stretching draft text ~2.3x on collapse. */}
+        <motion.div
+          className={cn("w-full", !isExpanded && "absolute inset-0 z-10")}
+          layout={!reduceMotion && "position"}
+          transition={reduceMotion ? { duration: 0 } : SPRING_PANEL}
+        >
+          {renderTextarea()}
+        </motion.div>
+        <motion.div
+          className={cn("flex items-center flex-1 w-full gap-x-2 relative flex-row")}
+          layout={!reduceMotion && "position"}
+          transition={reduceMotion ? { duration: 0 } : SPRING_PANEL}
+        >
+          {attachButton}
+          <SendHint  verbose={isExpanded} />
+          <AnimatePresence initial={false}>
+            {isExpanded && sendButton}
+          </AnimatePresence>
+        </motion.div>
 
-        <AnimatePresence initial={false}>
-          {showRestHint && (
-            <motion.div
-              animate={{ opacity: 1, x: 0 }}
-              className="pointer-events-none absolute inset-y-0 left-4 flex items-center"
-              exit={{ opacity: 0, x: reduceMotion ? 0 : -6 }}
-              initial={{ opacity: 0, x: reduceMotion ? 0 : -6 }}
-              key="rest-hint"
-              transition={{ duration: 0.18, ease: EASE_IN_OUT }}
-            >
-              <SendHint />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {attachButton}
-
-        <AnimatePresence initial={false}>
-          {isExpanded ? (
-            <motion.div
-              animate={{ opacity: 1, y: 0 }}
-              className={cn(
-                "flex items-center justify-end gap-3 px-2.5 pb-2.5",
-                onAttach && "pl-12"
-              )}
-              exit={{ opacity: 0, y: reduceMotion ? 0 : 8 }}
-              initial={{ opacity: 0, y: reduceMotion ? 0 : 8 }}
-              key="composer-footer"
-              transition={reduceMotion ? { duration: 0 } : SPRING_PANEL}
-            >
-              <div className="flex items-center gap-3">
-                <SendHint className="max-sm:hidden" verbose={false} />
-                <Button
-                  aria-label={isStreaming ? "Stop" : "Send message"}
-                  className={cn(
-                    "h-8 rounded-[13px] border-transparent px-3.5 text-[15px] font-medium sm:h-8",
-                    isStreaming
-                      ? "bg-neutral-800 text-white hover:bg-neutral-700 data-pressed:bg-neutral-700"
-                      : "bg-[#F3BA20] text-[#080808] shadow-send hover:bg-[#F7C63A] data-pressed:bg-[#E5AE1A] disabled:shadow-none"
-                  )}
-                  disabled={isStreaming ? false : isDisabled || !draft.trim()}
-                  onClick={isStreaming ? onStop : undefined}
-                  size="sm"
-                  type={isStreaming ? "button" : "submit"}
-                  variant="ghost"
-                >
-                  {isStreaming ? (
-                    <>
-                      <Stop className="size-4 animate-pulse fill-current" />
-                      {stopLabel}
-                    </>
-                  ) : (
-                    sendLabel
-                  )}
-                </Button>
-              </div>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
       </motion.div>
       {safetyNote && (
-        <Text.Label level="caption" className="mt-2 px-1.5">
+        <Text.Label level="caption" className="mt-2 max-w-5/6 pl-3 text-xs">
           {safetyNote}
         </Text.Label>
       )}

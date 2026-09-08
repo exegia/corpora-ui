@@ -6,6 +6,7 @@ export const EASE_DRAWER = [0.32, 0.72, 0, 1] as const;
 
 /** CSS string form of EASE_OUT for inline style transitions. */
 export const EASE_OUT_CSS = "cubic-bezier(0.16, 1, 0.3, 1)";
+export const EASE_IN_OUT_MOTION = { type: "spring", stiffness: 300, damping: 30, mass: 0.6 } as const;
 
 /** Press feedback on buttons and other tappable surfaces. */
 export const SPRING_PRESS = {
@@ -68,7 +69,7 @@ export const BOUNCE_IN_OUT: Transition = {
   type: "spring",
   stiffness: 300,
   damping: 20,
-  mass: 0.85,
+  mass: 0.50,
 } as const;
 
 export const ICON_VARIANTS: Variants = {

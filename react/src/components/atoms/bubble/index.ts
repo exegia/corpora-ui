@@ -3,6 +3,7 @@ import { useBubbleVariant } from "./context"
 import { BubbleActions } from "./actions"
 import { BubbleHeader } from "./header"
 import { BubbleMessage } from "./message"
+import { Reference } from "./reference"
 import {
   BubbleReactionChip,
   BubbleReactions,
@@ -22,6 +23,7 @@ export {
   BubbleMessage,
   BubbleReactionChip,
   BubbleReactions,
+  Reference,
   useBubbleVariant,
 }
 
@@ -37,4 +39,5 @@ export type {
   BubbleReaction,
   BubbleReactionsProps,
   BubbleVariant,
+  ReferenceProps,
 } from "./types"

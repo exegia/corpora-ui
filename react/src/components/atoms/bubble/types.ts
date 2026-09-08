@@ -93,3 +93,12 @@ export type BubbleReactionsButtonProps = Omit<
   /** Fires when an emoji is picked from the popover. */
   onEmojiSelect?: (emoji: BubblePickedEmoji) => void
 }
+
+
+export interface ReferenceProps extends React.ComponentPropsWithoutRef<"a"> {
+  /** Without an href the chip renders as a button (or a plain span if it has no onClick). */
+  href?: string
+  onClick?: React.MouseEventHandler<HTMLElement>
+  /** Hide the trailing arrow, e.g. for a non-navigating tag. */
+  showArrow?: boolean
+}
