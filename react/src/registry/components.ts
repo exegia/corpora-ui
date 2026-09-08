@@ -343,13 +343,19 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
           "Lower-level AI output with a persistent GENERATED label, streaming caret + Stop and citation chips — for hosts that keep their own author row.",
       },
       {
+        name: "SuggestedPrompt",
+        type: "children / onSelect / layoutId",
+        description:
+          "One suggested prompt row — violet spark, the prompt, a `+` affordance. Pass them to Composer's suggestedPrompts and they fan out of a \"Suggestions (n)\" disclosure whose panel tucks behind the pill. Give the row and the resulting message bubble the same layoutId and picking it flies the row into the bubble.",
+      },
+      {
         name: "Composer",
-        type: "value / onSend / onAttach / isStreaming / disabled",
+        type: "value / onSend / onAttach / suggestedPrompts / isStreaming / disabled",
         description:
           "A pill at rest showing the ⌘ + ↵ hint that springs into a taller field on focus, with the attach (+) and amber Send controls entering along the bottom edge. ⌘↩ sends, Esc stops while streaming; a safety note slot sits underneath.",
       },
     ],
-    usage: `import { AiMessage, Composer, ReferenceChip, SuggestionCard, UserMessage } from "@exegia/corpora-ui"
+    usage: `import { AiMessage, Composer, ReferenceChip, SuggestedPrompt, SuggestionCard, UserMessage } from "@exegia/corpora-ui"
 
 <UserMessage author="Sender" badge="Admin" time="10 min ago">
   Validate this passage.
@@ -371,7 +377,15 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
 >
   The boundary is valid — one label drifted.
 </AiMessage>
-<Composer onSend={(value, mode) => ask(value, mode)} onAttach={pickFile} />`,
+<Composer
+  onSend={(value, mode) => ask(value, mode)}
+  onAttach={pickFile}
+  suggestedPrompts={prompts.map((prompt) => (
+    <SuggestedPrompt key={prompt.id} layoutId={prompt.id} onSelect={() => ask(prompt.text, "answer")}>
+      {prompt.text}
+    </SuggestedPrompt>
+  ))}
+/>`,
   },
   {
     slug: "verse",
