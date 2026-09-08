@@ -24,7 +24,7 @@ const badgeVariants = cva(
           "rounded-sm border-black/30 bg-neutral-500/25 px-1.5 font-bold text-neutral-700 dark:border-neutral-500 dark:bg-neutral-500/70 dark:text-neutral-100",
         // …and the violet one that marks an agent.
         accent:
-            "rounded-sm border-(--chat-ai-accent-foreground) bg-(--chat-ai-accent)/60 font-medium text-white dark:border-(--chat-ai-accent)",
+            "rounded-sm border-indigo-900 border bg-indigo-600 font-medium text-white dark:border-indigo-800",
       },
     },
     defaultVariants: {

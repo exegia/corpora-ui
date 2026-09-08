@@ -120,7 +120,8 @@
 /* Chat surfaces (bubble, composer) — ring + inset depth per theme. */
 :root {
   --chat-ring: color-mix(in oklab, var(--foreground) 10%, transparent);
-  --chat-inset: rgb(0 0 0 / 0.08);
+  --chat-inset: rgb(0 0 0 / 0.05);
+  --chat-inset-shadow: inset 0 2px 8px 5px var(--chat-inset);
   --chat-field: oklch(0.985 0 0);
   --chat-ai-accent-foreground: var(--color-white);
   --chat-ai-accent: var(--color-indigo-800);
@@ -129,7 +130,8 @@
 }
 .dark {
   --chat-ring: #040404;
-  --chat-inset: rgb(0 0 0 / 0.39);
+  --chat-inset: --alpha(var(--color-black) / 55%);
+  --chat-inset-shadow: inset 0 2px 8px 5px var(--chat-inset);
   --chat-field: #252525;
   --chat-ai-accent-foreground: var(--color-white);
   --chat-ai-accent: var(--color-indigo-800);
@@ -412,18 +414,6 @@
 
 @utility shadow-pill {
   box-shadow: 0 4px 8px rgb(0 0 0 / 0.25);
-}
-
-@utility shadow-composer {
-  box-shadow:
-    0 0 0 2px var(--chat-ring),
-    inset 0 0 5px 1px var(--chat-inset);
-}
-
-@utility shadow-composer-open {
-  box-shadow:
-    0 0 0 2px var(--chat-ring),
-    inset 0 2px 8px 5px rgb(0 0 0 / 0.07);
 }
 
 @utility shadow-send {

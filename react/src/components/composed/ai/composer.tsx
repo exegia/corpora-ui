@@ -91,7 +91,7 @@ export function Composer({
   const sendButton = (<MotionButton
     aria-label={isStreaming ? "Stop" : "Send message"}
     className={cn(
-      "rounded-md px-3 mr-1 mb-1",
+      "rounded-md px-3",
       isExpanded ? undefined : "hidden"
     )}
     disabled={isStreaming ? false : isDisabled || !draft.trim()}
@@ -163,7 +163,7 @@ export function Composer({
     >
       <motion.div
         animate={{
-          borderRadius: isExpanded ? 20 : 21,
+          borderRadius: isExpanded ? "100%" : 21,
         }}
         // The textarea trades `absolute` for static between the two shapes, so
         // the box's height changes in a single frame. `layout` measures the two
@@ -171,12 +171,12 @@ export function Composer({
         // row from teleporting down and swallowing the send hint's slide.
         layout={!reduceMotion}
         className={cn(
-          "relative overflow-hidden flex flex-1 flex-col p-1.5  bg-(--chat-field) transition-shadow duration-300 ease-smooth-out",
-          isExpanded ? "shadow-composer-open items-end" : "shadow-composer items-center",
+          "relative overflow-clip  flex flex-1 flex-col p-1.5  bg-(--chat-field) transition-shadow duration-300 ease-smooth-out",
+          isExpanded ? "shadow-[inset_0px_0px_15px_2px_rgba(0,_0,_0,_0.1)] items-end" : "items-center shadow-[inset_0px_0px_7px_-1.5px_rgba(0,_0,_0,_0.3)]",
           "motion-reduce:transition-none"
         )}
-        initial={{ borderRadius: 21 }}
-        exit={{ borderRadius: 21 }}
+        initial={{ borderRadius: "100%" }}
+        exit={{ borderRadius: "100%"}}
         onBlur={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget)) {
             setIsExpanded(false)
@@ -197,7 +197,7 @@ export function Composer({
           {renderTextarea()}
         </motion.div>
         <motion.div
-          className={cn("flex items-center flex-1 w-full gap-x-2 relative flex-row")}
+          className={cn("flex items-center flex-1 w-full gap-x-1 relative flex-row")}
           layout={!reduceMotion && "position"}
           transition={reduceMotion ? { duration: 0 } : SPRING_PANEL}
         >

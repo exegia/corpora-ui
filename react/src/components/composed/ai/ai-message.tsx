@@ -118,7 +118,7 @@ export function AiMessage({
               <>
                 <span
                   aria-hidden="true"
-                  className="ml-1 inline-block h-4 w-0.5 translate-y-0.5 animate-caret-blink bg-indigo-500"
+                  className="ml-1 inline-block h-4 w-0.5 translate-y-0.5 animate-caret-blink bg-indigo-700 dark:bg-indigo-500"
                 />
                 {onStop ? (
                   <Button
@@ -141,8 +141,9 @@ export function AiMessage({
               aria-controls={panelId}
               aria-expanded={open}
               className={cn(
-                "group/suggestions inline-flex w-fit cursor-pointer items-center gap-2 rounded-md px-1 py-1 text-sm outline-none transition-colors duration-150 ease-smooth-out focus-visible:ring-0 text-indigo-400!",
-                agentText
+                "group/suggestions inline-flex w-fit cursor-pointer items-center gap-2 rounded-md px-1 py-1 text-sm outline-none transition-colors duration-150 ease-smooth-out focus-visible:ring-0",
+                agentText,
+                "text-indigo-700 dark:text-indigo-400"
               )}
               data-slot="ai-suggestions-trigger"
               onClick={() => setOpen(!open)}
@@ -154,7 +155,7 @@ export function AiMessage({
                 className="inline-flex "
                 transition={reduceMotion ? { duration: 0 } : SPRING_PANEL}
               >
-                <Sparkle aria-hidden="true" className="size-4 stroke-[1.5] stroke-indigo-400" />
+                <Sparkle aria-hidden="true" className="size-4 stroke-[1.5] stroke-indigo-800 dark:stroke-indigo-400" />
               </motion.span>
               {suggestionsLabel(count)}
             </motion.button>
