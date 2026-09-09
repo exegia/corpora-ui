@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test"
-import { fireEvent, render, screen } from "@testing-library/react"
+import { act, fireEvent, render, screen } from "@testing-library/react"
 
 import { Attachment } from "../attachment"
 
@@ -28,5 +28,18 @@ describe("Attachment", () => {
     expect(screen.getByRole("button", { name: "Play" })).toBeDefined()
     expect(screen.getByText("0:42")).toBeDefined()
     expect(container.querySelectorAll('[data-variant="preview"]').length).toBe(2)
+  })
+
+  test("previewable chip shows its preview on hover / focus", async () => {
+    render(<Attachment kind="text-selection" title="Iliad · Book 1, §12" quote="the will of Zeus" />)
+    expect(screen.queryByText("the will of Zeus")).toBeNull()
+    const chip = screen.getByText("Iliad · Book 1, §12").closest("[data-slot=attachment]")!
+    await act(async () => {
+      fireEvent.focus(chip)
+      fireEvent.mouseEnter(chip)
+      fireEvent.mouseMove(chip)
+      await new Promise((r) => setTimeout(r, 400))
+    })
+    expect(await screen.findByText("the will of Zeus")).toBeDefined()
   })
 })
