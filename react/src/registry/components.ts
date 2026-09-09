@@ -526,4 +526,204 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
   data={[{ label: "Pist.", units: 62 }, { label: "Vanilla", units: 88 }]}
   series={[{ key: "units", label: "Units sold" }]} />`,
   },
+  {
+    slug: "markdown",
+    name: "Markdown",
+    titleStyle: "titlebar",
+    description:
+      "Rendered markdown behind a Preview | Markup toggle, with copy and expand controls. The active pane lives in a keyed Jotai atom so an app can flip a card by id.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/markdown-demo")),
+    registryDependencies: ["chat-presentation-atoms"],
+    props: [
+      { name: "source", type: "string", required: true, description: "Markdown text (headings, paragraphs, lists, inline and fenced code)." },
+      { name: "markdownId", type: "string", description: "Stable id for the view atom; unnamed cards use useId()." },
+      { name: "view / defaultView / onViewChange", type: '"preview" | "markup"', description: "Controlled or uncontrolled pane." },
+      { name: "onCopy / onExpand", type: "(source) => void / () => void", description: "Header icon buttons." },
+      { name: "bare", type: "boolean", default: "false", description: "Drop the card border." },
+    ],
+    usage: `import { Markdown } from "@corpora/ui"
+
+<Markdown source={answer} onCopy={(md) => navigator.clipboard.writeText(md)} />`,
+  },
+  {
+    slug: "research-answer",
+    name: "Research answer",
+    titleStyle: "titlebar",
+    description:
+      "Answer card with a kicker, the content, Source / Date / Author(s) meta and an actions row: Copy citation, Share, Add to list, thumbs up / down.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/research-answer-demo")),
+    registryDependencies: ["chat-presentation-atoms", "button"],
+    props: [
+      { name: "content", type: "ReactNode", required: true, description: "The answer." },
+      { name: "kicker / kickerSub / corpus", type: "ReactNode", description: "Header row; corpus renders as a pill." },
+      { name: "source / date / authors", type: "ReactNode", description: "Meta columns; omitted ones are hidden." },
+      { name: "onCopyCitation / onShare / onAddToList / onFeedback", type: "() => void / (vote) => void", description: "Actions. Add to list behaviour is not designed — the callback is all the card does." },
+    ],
+    usage: `import { ResearchAnswer } from "@corpora/ui"
+
+<ResearchAnswer corpus="Iliad" content="…" source="Iliad · Homer corpus" date="c. 750 BCE" authors="Homer" onFeedback={vote} />`,
+  },
+  {
+    slug: "streaming-text",
+    name: "Streaming text",
+    titleStyle: "titlebar",
+    description:
+      "Streamed answer: word-by-word reveal with a caret, inline source chips, an action row, a collapsible sources panel (keyed atom) and follow-up prompts.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/streaming-text-demo")),
+    registryDependencies: ["chat-presentation-atoms"],
+    props: [
+      { name: "paragraphs", type: '(string | StreamingToken[])[]', required: true, description: "Each paragraph is words or tokens; `{ cite }` renders an inline SourceChip." },
+      { name: "streaming / wordMs", type: 'boolean / number', default: '55', description: "Animate the reveal; reduced motion shows everything at once." },
+      { name: "sources / sourcesLabel", type: 'StreamingSource[] / ReactNode', description: "Rows of the collapsible panel; open state lives in streamingSourcesOpenAtom(id)." },
+      { name: "followUps / onFollowUp", type: 'string[] / (text) => void', description: "Follow-up rows." },
+      { name: "onCopy / onRegenerate / onFeedback", type: 'callbacks', description: "Action row." },
+    ],
+    usage: `import { StreamingText } from "@corpora/ui"
+
+<StreamingText streaming paragraphs={[answer, [{ cite: "scoopdata.io" }, ...]]} sources={sources} followUps={["…"]} />`,
+  },
+  {
+    slug: "recommendation-card",
+    name: "Recommendation card",
+    titleStyle: "titlebar",
+    description:
+      "Human-in-the-loop proposal: title, description with entity and lead-time pills, other options with signal bars, confidence and Accept / Alternatives.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/recommendation-card-demo")),
+    registryDependencies: ["chat-presentation-atoms", "button"],
+    props: [
+      { name: "title / description", type: 'ReactNode', required: true, description: "Header and the sentence before the entity pill." },
+      { name: "entity / descriptionSuffix / leadTime", type: '{ name, initials?, src? } / ReactNode / ReactNode', description: "Inline pills." },
+      { name: "options / onSelectOption", type: 'RecommendationOption[] / (index) => void', description: "Rows under Other options." },
+      { name: "confidence", type: '"high" | "medium" | "low"', default: '"high"', description: "Footer signal." },
+      { name: "onAccept / onAlternatives", type: '() => void', description: "Footer buttons." },
+    ],
+    usage: `import { RecommendationCard } from "@corpora/ui"
+
+<RecommendationCard title="Want me to place this restock order?" description="Reorder waffle cones from" entity={{ name: "Cone King" }} leadTime="7 days" onAccept={accept} />`,
+  },
+  {
+    slug: "context-cards",
+    name: "Context cards",
+    titleStyle: "titlebar",
+    description:
+      "Retrieved chunks: header with a count pill, then a card per chunk with title, character count, snippet and the source file pill.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/context-cards-demo")),
+    registryDependencies: ["chat-presentation-atoms"],
+    props: [
+      { name: "cards", type: 'ContextCard[]', required: true, description: "title, meta, snippet, file { name, type }." },
+      { name: "header / count", type: 'ReactNode', description: "Defaults to All chunks and cards.length." },
+      { name: "onOpen", type: '(card, index) => void', description: "File pill click." },
+    ],
+    usage: `import { ContextCards } from "@corpora/ui"
+
+<ContextCards count={32} cards={[{ title: "Vendor onboarding rule", meta: "290 characters", snippet: "…", file: { name: "SOP.pdf", type: "PDF" } }]} />`,
+  },
+  {
+    slug: "code-block",
+    name: "Code block",
+    titleStyle: "titlebar",
+    description:
+      "Code card with filename, Code | Diff toggle and Copy; gutter line numbers and keyword / string tinting from the --code-* tokens. No highlighter dependency.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/code-block-demo")),
+    registryDependencies: ["chat-presentation-atoms", "button"],
+    props: [
+      { name: "code", type: 'string', required: true, description: "Source; split on newlines." },
+      { name: "filename", type: 'ReactNode', description: "Header label." },
+      { name: "diff", type: '{ type?: "add" | "remove", text }[]', description: "Enables the Diff view." },
+      { name: "view / defaultView / onViewChange", type: '"code" | "diff"', description: "Controlled or uncontrolled." },
+      { name: "onCopy", type: '(code) => void', description: "Copy button." },
+      { name: "keywords", type: 'string[]', description: "Extra keywords to tint." },
+    ],
+    usage: `import { CodeBlock } from "@corpora/ui"
+
+<CodeBlock filename="churn.ts" code={source} onCopy={copy} />`,
+  },
+  {
+    slug: "filter-table",
+    name: "Filter table",
+    titleStyle: "titlebar",
+    description:
+      "Status filter pills over a compact table. The active filter lives in a keyed atom (filterTableFilterAtom) so an app can set it by table id.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/filter-table-demo")),
+    registryDependencies: ["chat-presentation-atoms"],
+    props: [
+      { name: "statuses", type: '{ id, label, tone }[]', required: true, description: "Filter pills and status dot colours." },
+      { name: "columns", type: '{ key, header, className? }[]', required: true, description: "Table columns; the status column renders a dot." },
+      { name: "rows", type: '{ id, status, … }[]', required: true, description: "Rows; filtered by status." },
+      { name: "filter / onFilterChange", type: 'string | null', description: "Controlled filter; null is All." },
+    ],
+    usage: `import { FilterTable } from "@corpora/ui"
+
+<FilterTable statuses={statuses} columns={columns} rows={rows} />`,
+  },
+  {
+    slug: "records-table",
+    name: "Records table",
+    titleStyle: "titlebar",
+    description:
+      "Selectable records with an initial avatar, tags with +N overflow, relative date and connection strength. Selection lives in recordsTableSelectionAtom(id); sorting is a callback only.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/records-table-demo")),
+    registryDependencies: ["chat-presentation-atoms", "checkbox"],
+    props: [
+      { name: "rows", type: 'RecordsRow[]', required: true, description: "id, name, initial, tags, lastInteraction, strength." },
+      { name: "selected / onSelectionChange", type: 'ReadonlySet<string>', description: "Controlled selection." },
+      { name: "onSortChange", type: '(column) => void', description: "Header sort control; the design shows no direction." },
+      { name: "maxTags", type: 'number', default: '2', description: "Tags shown before +N." },
+    ],
+    usage: `import { RecordsTable } from "@corpora/ui"
+
+<RecordsTable rows={rows} onSortChange={sortBy} />`,
+  },
+  {
+    slug: "flowchart",
+    name: "Flowchart",
+    titleStyle: "titlebar",
+    description:
+      "Dot-grid canvas with a vertical chain of Trigger and If / Else nodes built from data.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/flowchart-demo")),
+    registryDependencies: ["chat-presentation-atoms"],
+    props: [
+      { name: "nodes", type: 'FlowchartNode[]', required: true, description: "A trigger node (title, description, icon) or a condition node whose rows mix words and pills ({ pill, accent? })." },
+    ],
+    usage: `import { Flowchart } from "@corpora/ui"
+
+<Flowchart nodes={[{ kind: "trigger", title: "New order created" }, { kind: "condition", rows: [{ parts: ["If", { pill: "order" }, "is", { pill: "Rocky Road", accent: true }] }] }]} />`,
+  },
+  {
+    slug: "insight-cards",
+    name: "Insight cards",
+    titleStyle: "titlebar",
+    description:
+      "Paged insights: header with count and prev / next, summary, two stats, a trend snapshot (line plot) and a follow-up prompt.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/insight-cards-demo")),
+    registryDependencies: ["chat-presentation-atoms", "chart"],
+    props: [
+      { name: "insights", type: 'Insight[]', required: true, description: "summary, stats (StatProps[]), snapshot { data, series }, followUp." },
+      { name: "index / defaultIndex / onIndexChange", type: 'number', description: "Which insight is shown." },
+      { name: "onFollowUp", type: '(text) => void', description: "Follow-up pill." },
+    ],
+    usage: `import { InsightCards, InsightEntity } from "@corpora/ui"
+
+<InsightCards insights={[{ summary: <>Worst performer in <InsightEntity>Creamery</InsightEntity>…</>, stats: [...], snapshot: { data, series } }]} />`,
+  },
 ]
