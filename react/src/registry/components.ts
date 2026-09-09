@@ -526,4 +526,45 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
   data={[{ label: "Pist.", units: 62 }, { label: "Vanilla", units: 88 }]}
   series={[{ key: "units", label: "Units sold" }]} />`,
   },
+  {
+    slug: "markdown",
+    name: "Markdown",
+    titleStyle: "titlebar",
+    description:
+      "Rendered markdown behind a Preview | Markup toggle, with copy and expand controls. The active pane lives in a keyed Jotai atom so an app can flip a card by id.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/markdown-demo")),
+    registryDependencies: ["chat-presentation-atoms"],
+    props: [
+      { name: "source", type: "string", required: true, description: "Markdown text (headings, paragraphs, lists, inline and fenced code)." },
+      { name: "markdownId", type: "string", description: "Stable id for the view atom; unnamed cards use useId()." },
+      { name: "view / defaultView / onViewChange", type: '"preview" | "markup"', description: "Controlled or uncontrolled pane." },
+      { name: "onCopy / onExpand", type: "(source) => void / () => void", description: "Header icon buttons." },
+      { name: "bare", type: "boolean", default: "false", description: "Drop the card border." },
+    ],
+    usage: `import { Markdown } from "@corpora/ui"
+
+<Markdown source={answer} onCopy={(md) => navigator.clipboard.writeText(md)} />`,
+  },
+  {
+    slug: "research-answer",
+    name: "Research answer",
+    titleStyle: "titlebar",
+    description:
+      "Answer card with a kicker, the content, Source / Date / Author(s) meta and an actions row: Copy citation, Share, Add to list, thumbs up / down.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/research-answer-demo")),
+    registryDependencies: ["chat-presentation-atoms", "button"],
+    props: [
+      { name: "content", type: "ReactNode", required: true, description: "The answer." },
+      { name: "kicker / kickerSub / corpus", type: "ReactNode", description: "Header row; corpus renders as a pill." },
+      { name: "source / date / authors", type: "ReactNode", description: "Meta columns; omitted ones are hidden." },
+      { name: "onCopyCitation / onShare / onAddToList / onFeedback", type: "() => void / (vote) => void", description: "Actions. Add to list behaviour is not designed — the callback is all the card does." },
+    ],
+    usage: `import { ResearchAnswer } from "@corpora/ui"
+
+<ResearchAnswer corpus="Iliad" content="…" source="Iliad · Homer corpus" date="c. 750 BCE" authors="Homer" onFeedback={vote} />`,
+  },
 ]
