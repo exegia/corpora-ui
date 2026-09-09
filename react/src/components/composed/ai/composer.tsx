@@ -53,6 +53,19 @@ export function Composer({
   const [internalValue, setInternalValue] = useState(defaultValue)
   const [internalMode] = useState(defaultMode)
   const [isExpanded, setIsExpanded] = useState(expanded)
+  // The prompts fold when the field expands: the two never stack open.
+  const [internalPromptsOpen, setInternalPromptsOpen] = useState(
+    defaultSuggestionsOpen ?? true
+  )
+  const promptsOpen = suggestionsOpen ?? internalPromptsOpen
+  const setPromptsOpen = (next: boolean): void => {
+    if (suggestionsOpen === undefined) setInternalPromptsOpen(next)
+    onSuggestionsOpenChange?.(next)
+  }
+  const expand = (): void => {
+    setIsExpanded(true)
+    if (promptsOpen) setPromptsOpen(false)
+  }
   const draft = value ?? internalValue
   const selectedMode = mode ?? internalMode
   const isDisabled = disabled || isStreaming
@@ -174,10 +187,9 @@ export function Composer({
           bottom edge instead. */}
       {suggestedPrompts ? (
         <SuggestedPrompts
-          defaultOpen={defaultSuggestionsOpen}
           label={suggestionsLabel}
-          onOpenChange={onSuggestionsOpenChange}
-          open={suggestionsOpen}
+          onOpenChange={setPromptsOpen}
+          open={promptsOpen}
         >
           {suggestedPrompts}
         </SuggestedPrompts>
@@ -204,7 +216,7 @@ export function Composer({
             setIsExpanded(false)
           }
         }}
-        onFocus={() => setIsExpanded(true)}
+        onFocus={expand}
         transition={reduceMotion ? { duration: 0 } : SPRING_PANEL}
       >
         {/* The shell's `layout` animation is a scale, so the field has to be

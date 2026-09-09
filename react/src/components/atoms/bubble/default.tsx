@@ -16,7 +16,10 @@ export function Bubble({
     <BubbleContext.Provider value={variant}>
       <div
         className={cn(
-          "group/bubble relative my-3 flex w-fit flex-col gap-y-3",
+          // Full width, not `w-fit`: a fit-content root anchors left, so a
+          // short sender message would sit mid-thread with its column
+          // right-aligned inside its own box instead of hugging the edge.
+          "group/bubble relative my-3 flex w-full flex-col gap-y-3",
           twBubbleAlignClasses[variant],
           className
         )}

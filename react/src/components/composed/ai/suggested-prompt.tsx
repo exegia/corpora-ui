@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronDown, Plus, Sparkle } from "lucide-react"
+import { ChevronDown, Plus, Sparkle, Sparkles } from "lucide-react"
 import {
   AnimatePresence,
   motion,
@@ -122,7 +122,7 @@ export function SuggestedPrompts({
   return (
     <motion.div
       animate={{ height: items.length ? "auto" : 0, opacity: items.length ? 1 : 0 }}
-      className={cn("flex flex-col overflow-hidden", className)}
+      className={cn("flex flex-col overflow-hidden w-11/12 mx-auto", className)}
       data-slot="suggested-prompts"
       initial={false}
       transition={
@@ -133,13 +133,13 @@ export function SuggestedPrompts({
       <motion.button
         aria-controls={panelId}
         aria-expanded={open}
-        className="flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-1 text-sm text-muted-foreground outline-none transition-colors duration-150 ease-smooth-out hover:text-foreground focus-visible:text-foreground"
+        className="flex w-full mx-auto cursor-pointer items-center gap-2 px-4 py-1 text-xs text-muted-foreground outline-none transition-colors duration-150 ease-smooth-out hover:text-foreground focus-visible:text-foreground"
         data-slot="suggested-prompts-trigger"
         onClick={() => setOpen(!open)}
         type="button"
         whileTap={reduceMotion ? undefined : { scale: 0.97 }}
       >
-        <Sparkle aria-hidden="true" className="size-4 stroke-[1.5]" />
+        <Sparkles aria-hidden="true" className="size-3.5 stroke-[1.5]" />
         <span className="flex-1 text-left">{label(count ?? items.length)}</span>
         <motion.span
           animate={{ rotate: open ? 0 : 90 }}
@@ -170,7 +170,7 @@ export function SuggestedPrompts({
               animate="visible"
               // The bottom padding is what the composer pill sits over, so the
               // panel reads as tucked behind it rather than stacked on it.
-              className="-mb-5 mt-1 flex flex-col gap-0.5 rounded-2xl bg-(--chat-field) p-1.5 pb-6"
+              className="-mb-5 mt-1 flex flex-col gap-0.5 border-t border-t-border rounded-md bg-secondary p-1.5 pb-6"
               exit="hidden"
               initial={reduceMotion ? false : "hidden"}
               variants={LIST_VARIANTS}

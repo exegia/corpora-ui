@@ -10,6 +10,20 @@ export interface DiffRow {
   field?: string
 }
 
+export interface ReferenceBase {
+  id: string
+  title?: string
+  url?: string
+}
+
+export interface AISuggestionBase {
+  heading: string
+  description?: string | React.ReactNode
+  state?: SuggestionState
+  updatedAt?: string
+  references?: ReferenceBase[] | ReferenceBase
+}
+
 
 export interface ComposerProps {
   value?: string

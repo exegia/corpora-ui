@@ -1,7 +1,12 @@
 "use client"
 
-import { Check, ChevronDown, X } from "lucide-react"
-import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react"
+import { Check, ChevronDown, Undo2, X, type SVGAttributes } from "lucide-react"
+import {
+  AnimatePresence,
+  LayoutGroup,
+  motion,
+  useReducedMotion,
+} from "motion/react"
 import { useId, useState } from "react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
@@ -14,23 +19,23 @@ import {
 } from "@/components/ui/collapsible"
 import { Card, CardFooter, CardHeader, CardPanel } from "@/components/ui/card"
 import { glassCard } from "./shared"
-import type { SuggestionState } from "./types"
+import type { AISuggestionBase, SuggestionState } from "./types"
+import { Reference } from "@/components/atoms"
+import { Badge } from "@/components/ui/badge";
 
-export interface SuggestionCardProps extends Omit<
-  React.ComponentPropsWithoutRef<"div">,
-  "title"
-> {
+export interface SuggestionCardProps<
+  T extends AISuggestionBase = AISuggestionBase,
+> extends Omit<React.ComponentPropsWithoutRef<"div">, "title"> {
   /** Collapsible trigger label, always visible. */
-  heading: React.ReactNode
-  description?: React.ReactNode
+  heading: T["heading"]
+  description?: T["description"]
   children?: React.ReactNode
-  nodeId: string
+  reference?: T["references"]
   state?: SuggestionState
   /**
    * Grounding reference (a `ReferenceChip`). Sits in the header while the
    * card is folded and glides down into the body when it opens.
    */
-  reference?: React.ReactNode
   onAccept?: () => void
   onReject?: () => void
   acceptLabel?: React.ReactNode
@@ -43,14 +48,41 @@ export interface SuggestionCardProps extends Omit<
 }
 
 const STATE_LABEL: Record<Exclude<SuggestionState, "pending">, string> = {
-  accepted: "Accepted",
-  rejected: "Ignored",
+  accepted: "Done",
+  rejected: "Skipped",
+}
+
+const STATE_COLOR: Record<Exclude<SuggestionState, "pending">, string> = {
+  accepted: "bg-green-500",
+  rejected: "bg-red-500",
+}
+
+const STATE_ICON: Record<Exclude<SuggestionState, "pending">, React.FC<SVGAttributes>> = {
+  accepted: Check,
+  rejected: X,
 }
 
 /** The outcome mark: hollow while pending, violet check when accepted, grey cross when ignored. */
 function StateMark({ state }: { state: SuggestionState }): React.ReactElement {
   const reduceMotion = useReducedMotion()
   const transition = reduceMotion ? { duration: 0 } : SPRING_PRESS
+
+  const renderActions = () => {
+    const MotionIcon = state === "pending" ? null : motion.create(STATE_ICON[state])
+    return <span
+      className={cn("rounded-full border-[1.5px] inline-grid size-4.5 place-items-center [grid-area:1/1]", state === "accepted" ? " bg-indigo-500/80 text-white" : state === "rejected" ? "bg-foreground/30 text-muted" : "bg-transparent border-neutral-800 dark:border-neutral-300")}
+      key={state}
+    >
+     {MotionIcon && <MotionIcon
+        animate={{ scale: 1, opacity: 1, rotate: 0 }}
+        exit={{ scale: 0.4, opacity: 0 }}
+        initial={{ scale: 0.4, opacity: 0, rotate: -45 }}
+        aria-hidden="true"
+        className="size-3 stroke-[4]"
+        transition={transition}
+      />}
+    </span>
+  }
   return (
     <span
       className="relative inline-grid size-4 shrink-0 place-items-center"
@@ -58,38 +90,7 @@ function StateMark({ state }: { state: SuggestionState }): React.ReactElement {
       data-state={state}
     >
       <AnimatePresence initial={false} mode="popLayout">
-        {state === "pending" ? (
-          <motion.span
-            animate={{ scale: 1, opacity: 1 }}
-            className="size-4 rounded-full border-[1.5px] border-neutral-800 [grid-area:1/1] dark:border-neutral-300"
-            exit={{ scale: 0.4, opacity: 0 }}
-            initial={{ scale: 0.4, opacity: 0 }}
-            key="pending"
-            transition={transition}
-          />
-        ) : state === "accepted" ? (
-          <motion.span
-            animate={{ scale: 1, opacity: 1, rotate: 0 }}
-            className="inline-grid size-4.5 place-items-center rounded-full bg-indigo-500/80 text-white [grid-area:1/1]"
-            exit={{ scale: 0.4, opacity: 0 }}
-            initial={{ scale: 0.4, opacity: 0, rotate: -45 }}
-            key="accepted"
-            transition={transition}
-          >
-            <Check aria-hidden="true" className="size-3 stroke-[4]" />
-          </motion.span>
-        ) : (
-          <motion.span
-            animate={{ scale: 1, opacity: 1, rotate: 0 }}
-            className="inline-grid size-4 place-items-center rounded-full bg-neutral-500 text-white [grid-area:1/1] dark:bg-neutral-600"
-            exit={{ scale: 0.4, opacity: 0 }}
-            initial={{ scale: 0.4, opacity: 0, rotate: 45 }}
-            key="rejected"
-            transition={transition}
-          >
-            <X aria-hidden="true" className="size-2.5 stroke-[3]" />
-          </motion.span>
-        )}
+       {renderActions()}
       </AnimatePresence>
     </span>
   )
@@ -99,7 +100,6 @@ export function SuggestionCard({
   heading,
   description,
   children,
-  nodeId,
   state = "pending",
   reference,
   onAccept,
@@ -122,42 +122,60 @@ export function SuggestionCard({
     onOpenChange?.(next)
   }
 
-  const referenceNode = reference ? (
-    <motion.span
-      className="inline-flex max-w-full"
-      layout={reduceMotion ? false : "position"}
-      layoutId={`${layoutId}-reference`}
-      transition={SPRING_LAYOUT}
-    >
-      {reference}
-    </motion.span>
-  ) : null
+  const renderReference = () => {
+    if (!reference || Array.isArray(reference)) return null
+    // TODO: handle array reference.
+    return (
+      <motion.span
+        className="inline-flex max-w-full"
+        layout={reduceMotion ? false : "position"}
+        layoutId={`${layoutId}-reference`}
+        transition={SPRING_LAYOUT}
+      >
+        <Reference>{reference.url}</Reference>
+      </motion.span>
+    )
+  }
 
   return (
     <LayoutGroup id={layoutId}>
       <Card
-        className={cn("w-full text-card-foreground rounded-sm overflow-clip", glassCard, className)}
-        data-node-id={nodeId}
+        className={cn(
+          "w-full overflow-clip rounded-sm text-card-foreground",
+          glassCard,
+          className
+        )}
+        data-node-id={reference && "id" in reference ? reference.id : null}
         data-slot="suggestion-card"
         data-state={state}
         {...props}
       >
         <Collapsible onOpenChange={handleOpenChange} open={isOpen}>
           <CollapsibleTrigger
-            className="flex w-full min-w-0 cursor-pointer flex-row items-center gap-3 rounded-none px-4 py-2.5 text-left outline-none transition-colors duration-150 ease-smooth-out hover:bg-black/4 focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/4"
+            className="flex w-full min-w-0 cursor-pointer flex-row items-center gap-3 rounded-none px-4 py-2.5 text-left transition-colors duration-150 ease-smooth-out outline-none hover:bg-black/4 focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/4"
             render={<CardHeader render={<button type="button" />} />}
           >
             <StateMark state={state} />
             <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
-              <span className="w-full truncate text-xs  font-semibold text-foreground">
+              <span
+                className={cn(
+                  "w-full truncate text-xs font-semibold text-foreground",
+                  state === "rejected" ? "font-light text-muted-foreground line-through" : ""
+                )}
+              >
                 {heading}
               </span>
               {description ? (
-                <span className="w-full truncate text-xs leading-none font-normal text-muted-foreground">
+                <span className={cn(
+                  "w-full truncate text-xs leading-none font-normal text-muted-foreground",
+                  state === "rejected" ? "line-through opacity-50" : ""
+                )}>
                   {description}
                 </span>
               ) : null}
+              
             </div>
+            {state === "accepted" || state === "rejected" && <Badge variant="outline" className={cn(STATE_COLOR[state], "uppercase")}>{STATE_LABEL[state]}</Badge> }
             <motion.span
               animate={{ rotate: isOpen ? 180 : 90 }}
               aria-hidden="true"
@@ -169,13 +187,13 @@ export function SuggestionCard({
           </CollapsibleTrigger>
 
           <CollapsiblePanel
-            className="ease-smooth-out duration-300 motion-reduce:transition-none"
+            className="duration-300 ease-smooth-out motion-reduce:transition-none"
             render={<CardPanel className="gap-0 px-0 py-0" />}
           >
             <div className="flex flex-col gap-3 px-4 pt-1 pb-3">
-              {isOpen && referenceNode ? (
+              {isOpen && renderReference() ? (
                 <div className="flex" data-slot="suggestion-reference">
-                  {referenceNode}
+                  {renderReference()}
                 </div>
               ) : null}
               {children ? (
@@ -196,7 +214,6 @@ export function SuggestionCard({
                     transition={{ duration: 0.18, ease: EASE_IN_OUT }}
                   >
                     <Button
-                     
                       onClick={onReject}
                       size="sm"
                       variant="destructive-outline"
@@ -204,31 +221,24 @@ export function SuggestionCard({
                       <X className="size-4 stroke-3" />
                       {rejectLabel}
                     </Button>
-                    <Button
-                 
-                      onClick={onAccept}
-                      size="sm"
-                      variant="outline"
-                    >
+                    <Button onClick={onAccept} size="sm" variant="outline">
                       <Check className="size-4 stroke-3" />
                       {acceptLabel}
                     </Button>
                   </motion.div>
                 ) : (
-                  <motion.span
+                  <motion.div
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-xs font-normal inline-flex gap-1 text-success-foreground flex-col items-end px-2 pb-1"
+                    className="inline-flex items-center gap-1 px-2 pb-1 text-xs font-normal text-success-foreground"
                     exit={{ opacity: 0, y: 4 }}
                     initial={{ opacity: 0, y: 4 }}
                     key={state}
                     transition={{ duration: 0.18, ease: EASE_IN_OUT }}
                     >
-                      <div className="flex gap-1 items-center">
-                        <Check className="size-3.5 stroke-3" />
-                        {STATE_LABEL[state]}
-                      </div>
-                      <span className="text-[10px] text-muted-foreground text-right leading-1">12 min. ago - by user</span>
-                  </motion.span>
+                      {state === "rejected" && <Button onClick={onReject} size="xs" variant="ghost" className="text-amber-400"><Undo2 className="size-3 stroke-3" /> Undo</Button>}
+                    {state === "accepted" || state === "rejected" && <Badge variant="outline" className={cn(STATE_COLOR[state], "uppercase")}>{STATE_LABEL[state]}</Badge> }
+
+                  </motion.div>
                 )}
               </AnimatePresence>
             </CardFooter>
