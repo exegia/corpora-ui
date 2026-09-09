@@ -1,0 +1,61 @@
+---
+title: "Chart cards"
+description: "Pie, area, line and bar cards on Recharts with series colours bound to the chart tokens."
+icon: "chart-column"
+---
+
+Spec folder: [`specs/002-chart-cards`](https://github.com/exegia/corpora-ui/tree/dev/specs/002-chart-cards). Sketch masters: `Component / Chart / Pie|Area|Line|Bar` in the `exegia-ui` document (cloud `01945ba6-1dcb-4f55-bc46-c0cf4d09aa7c`). Every component carries its master name in a `@sketch` JSDoc tag.
+
+## Problem
+
+AI answers return small datasets (share by corpus, corpus growth, revenue vs forecast, sales by flavor). The design shows one 320×244 card for four chart types with the same chrome. Nothing in the library rendered charts.
+
+## Solution
+
+- `Chart` (`composed/chat/chart.tsx`) with `type="pie" | "area" | "line" | "bar"`, built on Recharts.
+- Colours: `--chart-series-1…5`, grid `--chart-grid`, area fill `--chart-area-fill` — light and dark switch through CSS variables only.
+- Atoms: `Dot` (semantic and series tones), `LegendItem`, `Pill`.
+- `headerless` + `plotHeight` let `InsightCards` embed a bare plot.
+
+## UI reference
+
+<Frame caption="Chart cards — Light (Sketch frame)">
+  <img src="/images/ai-presentation-light.png" alt="Chart cards light showcase" />
+</Frame>
+<Frame caption="Chart cards — Dark (Sketch frame)">
+  <img src="/images/ai-presentation-dark.png" alt="Chart cards dark showcase" />
+</Frame>
+
+## Usage
+
+```tsx
+import { Chart } from "@corpora/ui"
+
+<Chart type="bar" title="Sales by flavor" subtitle="Units · last 6 months"
+  data={[{ label: "Pist.", units: 62 }, { label: "Vanilla", units: 88 }]}
+  series={[{ key: "units", label: "Units sold" }]} />
+```
+
+## Acceptance criteria
+
+Copied from `specs/002-chart-cards/spec.md`. Each holds in light and dark.
+
+- [ ] AC-1 Card 320×244 (fluid width, fixed 244 height by default), radius 12, card surface, default border; header: title 13/600 + subtitle 11 secondary left, type Pill ("Pie", "Area", "Line", "Bar") top-right.
+- [ ] AC-2 Pie: 140px donut, centre value 17/600 + label 11 secondary ("1,284 / queries"); right column legend rows with dot, label, and value ("Iliad 42%").
+- [ ] AC-3 Area: single series stroke `series-1` with `chart-area-fill`, horizontal grid lines `chart-grid`, x labels W1…W7 11px secondary, legend below plot.
+- [ ] AC-4 Line: two series (`series-1`, `series-2`) with point markers, grid, x labels, legend of two items.
+- [ ] AC-5 Bar: single series bars radius 4 in `series-1`, x labels (abbreviated), legend "Units sold".
+- [ ] AC-6 Series colours cycle `--chart-series-1…5`; a `series[i].color` override is allowed but defaults to the token.
+- [ ] AC-7 Light and dark swap via CSS variables only (no theme prop).
+- [ ] AC-8 Empty `data` renders the chrome with an empty plot area and no legend (no crash).
+- [ ] AC-9 Registry entry + demo showing all four types; `make check`.
+
+## Open questions
+
+- Tooltips/hover are not in the design; Recharts tooltips are left off (`interactive` prop reserved, default false).
+
+## Related issues
+
+- [#138](https://github.com/exegia/corpora-ui/issues/138)
+- [#143](https://github.com/exegia/corpora-ui/issues/143)
+- [#147](https://github.com/exegia/corpora-ui/issues/147)

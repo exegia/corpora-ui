@@ -1,0 +1,94 @@
+---
+title: "Chat attachments"
+description: "Attachment chips and previews, the message blocks and the composer tray — from the exegia-ui Sketch frame Chat Attachments."
+icon: "paperclip"
+---
+
+Spec folder: [`specs/001-chat-attachments`](https://github.com/exegia/corpora-ui/tree/dev/specs/001-chat-attachments). Sketch masters: `Component / Attachment / <Kind> / Default|Preview`, `Block / Message / Sender + Attachment`, `Block / Message / Recipient + Attachment`, `Block / Composer / With Attachments` in the `exegia-ui` document (cloud `01945ba6-1dcb-4f55-bc46-c0cf4d09aa7c`). Every component carries its master name in a `@sketch` JSDoc tag.
+
+## Problem
+
+The Corpora chat needs one way to show a file, image, media clip, corpus text selection, quoted reply, user handle or URL — both as a composer chip before sending and as a rendered preview inside a bubble. Before this work `composed/ai` had a composer and a user message but no attachment model, and no shared colour tokens for chat surfaces.
+
+## Solution
+
+- A token layer: 49 CSS variables named after the Sketch swatches (`--bg-page`, `--surface-card`, `--accent-default`, `--chart-series-1` …), light in `:root`, dark under `.dark`, exposed to Tailwind through `@theme inline`.
+- Atoms in `ui/chat/`: `IconTile`, `Thumbnail`, `AvatarHandle`, `RemoveButton`, `PlayButton`, `SendButton`, `AddButton`, `FileTypeBadge`, `Favicon`, `Waveform`, `QuoteRail`, `DurationPill`.
+- `Attachment` (`composed/chat/attachment.tsx`) with `kind` × `variant="default" | "preview"`; `media` + `audio` renders the audio row.
+- Blocks in `blocks/chat/`: `MessageSender`, `MessageRecipient`, `ComposerWithAttachments` — the tray lives in a keyed Jotai family (`composerAttachmentsAtom(id)`).
+
+## UI reference
+
+<Frame caption="Chat attachments — Light (Sketch frame)">
+  <img src="/images/chat-attachments-light.png" alt="Chat attachments light showcase" />
+</Frame>
+<Frame caption="Chat attachments — Dark (Sketch frame)">
+  <img src="/images/chat-attachments-dark.png" alt="Chat attachments dark showcase" />
+</Frame>
+
+## Usage
+
+```tsx
+import { Attachment, ComposerWithAttachments, MessageSender } from "@corpora/ui"
+
+<Attachment kind="document" title="Q3-financial-report.pdf" meta="PDF · 2.4 MB" onRemove={remove} />
+<MessageSender attachment={<Attachment kind="image" variant="preview" src={url} />}>
+  Here’s the Q3 report.
+</MessageSender>
+<ComposerWithAttachments composerId="thread-1" onSend={(draft, attachments) => send(draft, attachments)} />
+```
+
+## Acceptance criteria
+
+Copied from `specs/001-chat-attachments/spec.md`. Each holds in light and dark.
+
+Taken from the showcase frame. Each holds in light and dark.
+
+#### Tokens
+- [ ] AC-T1 Every `Light / *` and `Dark / *` swatch (98) maps to one variable with the exact hex from Sketch; `bg-surface-card`, `text-text-secondary`, `border-border-default`, `bg-accent-subtle` classes resolve.
+- [ ] AC-T2 Radii scale present: 4 badge · 6 chip · 8 send/tag · 10 chip/tile/quote · 12 card/composer · 14 large thumbnail · 20 bubble.
+
+#### Atoms
+- [ ] AC-A1 IconTile is 40×40, radius 10, `surface-subtle` fill, icon slot tinted `--icon`.
+- [ ] AC-A2 Thumbnail `size="sm"` is 40×40 radius 10; `size="lg"` 240×160 radius 14; image slot covers.
+- [ ] AC-A3 AvatarHandle is 20px, initials fallback on `accent-subtle`.
+- [ ] AC-A4 RemoveButton 18px circle, `text-primary` fill, inverse ✕; PlayButton 36px scrim circle with white ▶; SendButton 61×31 brand-yellow pill "Send"; AddButton 26px ghost "+".
+- [ ] AC-A5 FileTypeBadge 28×14 radius 4 uppercase label; Favicon 16px tile with globe fallback; Waveform 20px tall bars from a `bars` array; QuoteRail 3px accent bar; DurationPill 37×16 scrim pill "0:42".
+
+#### Attachment · default (composer chip)
+- [ ] AC-D1 240×52 card, radius 10, card surface, default border; H stack: leading 40px tile/thumbnail · title 13px/500 + meta 11px secondary · RemoveButton.
+- [ ] AC-D2 All seven kinds render with the frame's leading icon (file-text, image thumbnail, film, text-quote, reply, at-sign, link) and copy: title + meta from props.
+- [ ] AC-D3 `onRemove` fires from the ✕; `removable={false}` hides it.
+- [ ] AC-D4 Title truncates with ellipsis at chip width (URL Link shows `sketch.com/s/0194…`).
+
+#### Attachment · preview (in bubble)
+- [ ] AC-P1 image: 240×160 radius 14 cover image.
+- [ ] AC-P2 media: poster + centred PlayButton + DurationPill bottom-right; `onPlay` callback. `audio`: 240×56 row, PlayButton · Waveform · meta "0:42 · voice-note.m4a".
+- [ ] AC-P3 document: 260×56 row with tile, title, meta "PDF · 2.4 MB · 12 pages", trailing download icon (`onAction`).
+- [ ] AC-P4 text-selection: 260 wide, QuoteRail, source row (book-open icon + accent label), quote paragraph on `surface-subtle`, radius 10.
+- [ ] AC-P5 chat-reply: QuoteRail, header (reply icon · author accent · time muted), body 2-line clamp.
+- [ ] AC-P6 username-handle: 113×24 pill, avatar 20 + accent handle.
+- [ ] AC-P7 url-link: 240 card, 120px cover, favicon + domain (mono, secondary), title 13/500, description 2-line clamp.
+
+#### Blocks
+- [ ] AC-B1 MessageSender: attachment preview above a sender bubble (`surface-bubble-sender`, inverse text, radius 20), right-aligned at 280 max.
+- [ ] AC-B2 MessageRecipient: header (name 13/600 + time 11 muted), recipient bubble (`surface-bubble-recipient`), text then attachment preview inside.
+- [ ] AC-B3 ComposerWithAttachments: 520 wide card radius 12; chip tray (H, gap 8, wraps); draft text; actions row Add · hint "Press ⌘ + ↵ to send message" · Send. Removing a chip updates the tray; `onSend(draft, attachments)`; ⌘↵ sends.
+- [ ] AC-B4 Tray state lives in a keyed Jotai family (`composerAttachmentsAtom(id)`) so an app can add/remove chips by id; drops on unmount for unnamed ids.
+- [ ] AC-B5 Empty tray renders no tray row (composer collapses to draft + actions).
+
+#### Quality gates
+- [ ] Registry entry + demo per exported item; `make check`; `bun test` green with tests for the composer tray and attachment remove.
+
+## Open questions
+
+- URL Link default shows "Link · fetching preview" — loading is a `status` prop; no fetching is built in.
+- Document preview trailing action is download in the frame; kept as generic `onAction` with `actionIcon` default `Download`.
+
+## Related issues
+
+- [#137](https://github.com/exegia/corpora-ui/issues/137)
+- [#141](https://github.com/exegia/corpora-ui/issues/141)
+- [#142](https://github.com/exegia/corpora-ui/issues/142)
+- [#146](https://github.com/exegia/corpora-ui/issues/146)
+- [#151](https://github.com/exegia/corpora-ui/issues/151)
