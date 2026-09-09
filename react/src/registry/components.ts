@@ -695,17 +695,21 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     name: "Flowchart",
     titleStyle: "titlebar",
     description:
-      "Dot-grid canvas with a vertical chain of Trigger and If / Else nodes built from data.",
+      "Dot-grid canvas of draggable, selectable step cards joined by bezier connectors (Beautiful-UI port).",
     category: "components",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/flowchart-demo")),
     registryDependencies: ["chat-presentation-atoms"],
     props: [
-      { name: "nodes", type: 'FlowchartNode[]', required: true, description: "A trigger node (title, description, icon) or a condition node whose rows mix words and pills ({ pill, accent? })." },
+      { name: "steps", type: 'StepNode[]', description: "Cards to lay out: { id, row, x (0–1 centre), w, kind?: { label, hue }, hue?, title?, caption?, condition? }. Defaults to the Trigger → If / Else sample." },
+      { name: "className", type: 'string', description: "Extra classes on the canvas." },
     ],
     usage: `import { Flowchart } from "@corpora/ui"
 
-<Flowchart nodes={[{ kind: "trigger", title: "New order created" }, { kind: "condition", rows: [{ parts: ["If", { pill: "order" }, "is", { pill: "Rocky Road", accent: true }] }] }]} />`,
+<Flowchart.Root steps={[
+  { id: "trigger", row: 0, x: 0.5, w: 300, kind: { label: "Trigger", hue: "#9a5cff" }, hue: "#9a5cff", title: "New order created" },
+  { id: "cond", row: 1, x: 0.5, w: 356, kind: { label: "If / Else", hue: "#f09a2f" }, condition: true },
+]} />`,
   },
   {
     slug: "insight-cards",

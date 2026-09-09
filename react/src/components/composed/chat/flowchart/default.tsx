@@ -1,9 +1,8 @@
 "use client"
 
-import { useRef } from "react"
-import { useLayoutEffect } from "react"
+import { useLayoutEffect, useRef } from "react"
 import type { FlowchartProps, StepNode } from "./types"
-import { useFlowchart } from "./hooks"
+import { FlowchartContext, useFlowchart } from "./hooks"
 import { AMBER, EDGES, PURPLE } from "./constant"
 import { Connector } from "./connector"
 import { ChartNode } from "./chart-node"
@@ -30,22 +29,16 @@ const NODES: StepNode[] = [
   },
 ]
 
-/* ── the canvas ── */
-export default function Flowchart({
-  steps = NODES,
-  className,
-  children,
-}: FlowchartProps) {
+/**
+ * Dot-grid canvas with draggable, selectable step cards joined by bezier connectors.
+ *
+ * @sketch "Component / Flowchart"
+ */
+export default function Flowchart({ steps = NODES, className, children }: FlowchartProps) {
   const canvasRef = useRef<HTMLDivElement>(null)
   const nodeRefs = useRef(new Map<string, HTMLElement>())
-  const {
-    updateHeights,
-    updateWidth,
-    canvasHeight,
-    isLit,
-    bezierCurve,
-    connectorWidth,
-  } = useFlowchart({ steps })
+  const chart = useFlowchart({ steps })
+  const { updateHeights, updateWidth, canvasHeight, isLit, bezierCurve, connectorWidth } = chart
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current
@@ -68,6 +61,7 @@ export default function Flowchart({
     }
 
     measure()
+    if (typeof ResizeObserver === "undefined") return
     const observer = new ResizeObserver(measure)
     observer.observe(canvas)
     nodeRefs.current.forEach((el) => observer.observe(el))
@@ -75,52 +69,36 @@ export default function Flowchart({
   }, [updateHeights, updateWidth])
 
   return (
-    <div
-      ref={canvasRef}
-      className={cn(
-        "rounded-card bg-page shadow-hairline relative w-full overflow-hidden select-none",
-        className
-      )}
-      style={{
-        height: canvasHeight,
-        backgroundImage:
-          "radial-gradient(var(--line-strong) 1px, transparent 1.25px)",
-        backgroundSize: "22px 22px",
-        backgroundPosition: "center",
-      }}
-    >
-      {children}
-      {/* connectors */}
-      <svg
-        width={connectorWidth}
-        height={canvasHeight}
-        className="pointer-events-none absolute inset-0"
+    <FlowchartContext.Provider value={chart}>
+      <div
+        ref={canvasRef}
+        data-slot="flowchart"
+        className={cn("rounded-card bg-page shadow-hairline relative w-full overflow-hidden select-none", className)}
+        style={{
+          height: canvasHeight,
+          backgroundImage: "radial-gradient(var(--line-strong) 1px, transparent 1.25px)",
+          backgroundSize: "22px 22px",
+          backgroundPosition: "center",
+        }}
       >
-        {EDGES.map((edge) => (
-          <Connector
-            id={edge.id}
-            edge={edge}
-            isLit={isLit(edge)}
-            d={bezierCurve(edge)}
+        {children}
+        <svg width={connectorWidth} height={canvasHeight} className="pointer-events-none absolute inset-0">
+          {EDGES.map((edge) => (
+            <Connector key={edge.id} edge={edge} isLit={isLit(edge)} d={bezierCurve(edge)} />
+          ))}
+        </svg>
+        {steps.map((node) => (
+          <ChartNode
+            key={node.id}
+            node={node}
+            steps={steps}
+            onRef={(el) => {
+              if (el) nodeRefs.current.set(node.id, el)
+              else nodeRefs.current.delete(node.id)
+            }}
           />
         ))}
-      </svg>
-
-      {/* nodes */}
-      {steps &&
-        steps.map((node) => {
-          return (
-            <ChartNode
-              key={node.id}
-              node={node}
-              steps={steps}
-              onRef={(el) => {
-                if (el) nodeRefs.current.set(node.id, el)
-                else nodeRefs.current.delete(node.id)
-              }}
-            />
-          )
-        })}
-    </div>
+      </div>
+    </FlowchartContext.Provider>
   )
 }

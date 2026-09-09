@@ -1,17 +1,17 @@
-
 import type { ChartNodeProps } from "./types";
-import { StepBody } from "./step-body";
-import { useFlowchart } from "./hooks";
+import { ConditionBody, StepBody } from "./step-body";
+import { useFlowchartContext } from "./hooks";
 import { mix } from "./utils";
 
-export function ChartNode({ node, steps, onRef, children }: ChartNodeProps) {
-  const { selected, updateSelected, onPointerDown, onPointerMove, onPointerUp, handlePlace, wasDragged, drag } = useFlowchart({ steps })
+export function ChartNode({ node, onRef, children }: ChartNodeProps) {
+  const { selected, updateSelected, onPointerDown, onPointerMove, onPointerUp, handlePlace, wasDragged, drag } =
+    useFlowchartContext();
   const { w, cx, top } = handlePlace(node);
   const active = selected === node.id;
   return (
     <div
-      key={node.id}
       ref={onRef}
+      data-node={node.id}
       onPointerDown={onPointerDown(node)}
       onPointerMove={onPointerMove(node)}
       onPointerUp={onPointerUp(node)}
@@ -31,7 +31,7 @@ export function ChartNode({ node, steps, onRef, children }: ChartNodeProps) {
       )}
       {node.condition ? (
         <div className="w-full rounded-[18px] bg-surface shadow-card transition-shadow duration-150 hover:shadow-raised">
-          {children}
+          {children ?? <ConditionBody />}
         </div>
       ) : (
         <button
@@ -42,16 +42,16 @@ export function ChartNode({ node, steps, onRef, children }: ChartNodeProps) {
           }}
           aria-pressed={active}
           className={`w-full cursor-pointer rounded-[18px] bg-surface text-left outline-none
-            transition-shadow duration-150 focus-visible:shadow-[0_0_0_1.5px_var(--accent)]
+            transition-shadow duration-150 focus-visible:shadow-[0_0_0_1.5px_var(--accent-default)]
             ${
               active
-                ? "shadow-[0_0_0_1.5px_var(--accent),0_2px_10px_rgba(0,0,0,0.045)]"
+                ? "shadow-[0_0_0_1.5px_var(--accent-default),0_2px_10px_rgba(0,0,0,0.045)]"
                 : "shadow-card hover:shadow-raised"
-              }`}
-          >
-            <StepBody node={node} />
-          </button>
-        )}
-      </div>
-    );
+            }`}
+        >
+          <StepBody node={node} />
+        </button>
+      )}
+    </div>
+  );
 }
