@@ -2,6 +2,7 @@
 
 import type * as React from "react"
 import { cn } from "@/lib/utils"
+import { Card, CardFrame, CardFrameFooter, CardFrameHeader, CardPanel } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { AvatarHandle, Signal, Tag, type SignalLevel } from "@/components/ui/chat"
 
@@ -43,8 +44,8 @@ export function RecommendationCard({
   onAccept, onAlternatives, onSelectOption, className, ...props
 }: RecommendationCardProps): React.ReactElement {
   return (
-    <div data-slot="recommendation-card" className={cn("flex w-[380px] max-w-full flex-col rounded-xl border border-border-default bg-surface-card", className)} {...props}>
-      <div className="flex flex-col gap-2 p-3">
+    <CardFrame data-slot="recommendation-card" className={cn("w-[380px] max-w-full", className)} {...props}>
+      <CardFrameHeader className="flex flex-col gap-2 p-3">
         <span className="text-[14px] font-semibold leading-4 text-text-primary">{title}</span>
         <span className="flex flex-wrap items-center gap-x-1.5 gap-y-1.5 text-[13px] leading-[15px] text-text-secondary">
           {description}
@@ -57,9 +58,9 @@ export function RecommendationCard({
           {descriptionSuffix}
           {leadTime ? <Tag tone="green" className="rounded-full">{leadTime}</Tag> : null}
         </span>
-      </div>
+      </CardFrameHeader>
       {options.length ? (
-        <div className="flex flex-col gap-2 bg-surface-subtle px-3.5 py-2.5">
+        <Card><CardPanel className="flex flex-col gap-2 px-3.5 py-2.5">
           <span className="text-[11px] leading-3 text-text-secondary">{optionsLabel}</span>
           {options.map((o, i) => (
             <button
@@ -73,16 +74,16 @@ export function RecommendationCard({
               {o.status ? <span className="text-[11px] text-text-muted">{o.status}</span> : null}
             </button>
           ))}
-        </div>
+        </CardPanel></Card>
       ) : null}
-      <div className="flex items-center gap-2 p-3">
+      <CardFrameFooter className="flex items-center gap-2 p-3">
         <Signal level={confidence} />
         <span className="text-[12.5px] text-text-primary">{confidenceLabel ?? CONFIDENCE[confidence]}</span>
         <span className="ml-auto flex items-center gap-2">
           <Button variant="outline" size="xs" onClick={onAlternatives} className="h-[27px] rounded-full px-3 text-[12px] font-medium sm:h-[27px]">{alternativesLabel}</Button>
           <Button variant="default" size="xs" onClick={onAccept} className="h-[27px] rounded-full border-semantic-info bg-semantic-info px-3 text-[12px] font-medium text-white hover:bg-semantic-info/90 sm:h-[27px]">{acceptLabel}</Button>
         </span>
-      </div>
-    </div>
+      </CardFrameFooter>
+    </CardFrame>
   )
 }

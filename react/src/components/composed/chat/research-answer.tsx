@@ -3,6 +3,7 @@
 import { BookOpen, Calendar, Copy, ListPlus, Share2, ThumbsDown, ThumbsUp, Users } from "lucide-react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
+import { Card, CardFrame, CardFrameFooter, CardFrameHeader, CardPanel } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { IconButton, IconTile, Pill } from "@/components/ui/chat"
 
@@ -42,20 +43,21 @@ export function ResearchAnswer({
   ].filter((m) => m.value !== undefined)
 
   return (
-    <div
+    <CardFrame
       data-slot="research-answer"
-      className={cn("flex w-[380px] max-w-full flex-col rounded-xl bg-surface-card", !bare && "border border-border-default", className)}
+      className={cn("w-[380px] max-w-full", bare && "border-transparent shadow-none", className)}
       {...props}
     >
-      <div className="flex items-start gap-2 px-3.5 pt-3">
+      <CardFrameHeader className="flex flex-row items-start gap-2 px-3.5 py-3">
         <IconTile size={28}><BookOpen /></IconTile>
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="text-[13px] font-semibold leading-4 text-text-primary">{kicker}</span>
           {kickerSub ? <span className="text-[11px] leading-3 text-text-secondary">{kickerSub}</span> : null}
         </div>
         {corpus ? <Pill>{corpus}</Pill> : null}
-      </div>
-      <div className="px-3.5 pb-3.5 pt-3 text-[13px] leading-[15px] text-text-primary">{content}</div>
+      </CardFrameHeader>
+      <Card>
+      <CardPanel className="px-3.5 py-3.5 text-[13px] leading-[15px] text-text-primary">{content}</CardPanel>
       {meta.length ? (
         <>
           <div className="mx-3.5 h-px bg-border-default" />
@@ -69,8 +71,8 @@ export function ResearchAnswer({
           </div>
         </>
       ) : null}
-      <div className="h-px w-full bg-border-default" />
-      <div className="flex items-center gap-0.5 p-2">
+      </Card>
+      <CardFrameFooter className="flex items-center gap-0.5 p-2">
         <Button variant="ghost" size="xs" className={GHOST} onClick={onCopyCitation}><Copy />Copy citation</Button>
         <Button variant="ghost" size="xs" className={GHOST} onClick={onShare}><Share2 />Share</Button>
         <Button variant="ghost" size="xs" className={GHOST} onClick={onAddToList}><ListPlus />Add to list</Button>
@@ -78,7 +80,7 @@ export function ResearchAnswer({
           <IconButton aria-label="Helpful" onClick={() => onFeedback?.("up")}><ThumbsUp /></IconButton>
           <IconButton aria-label="Not helpful" onClick={() => onFeedback?.("down")}><ThumbsDown /></IconButton>
         </span>
-      </div>
-    </div>
+      </CardFrameFooter>
+    </CardFrame>
   )
 }

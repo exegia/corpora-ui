@@ -6,6 +6,7 @@ import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis,
 } from "recharts"
 import { cn } from "@/lib/utils"
+import { Card, CardFrame, CardFrameHeader, CardPanel } from "@/components/ui/card"
 import { Dot, LegendItem, Pill, type DotTone } from "@/components/ui/chat"
 
 export type ChartType = "pie" | "area" | "line" | "bar"
@@ -91,23 +92,8 @@ export function Chart({
   const anim = { isAnimationActive: !reduceMotion, animationDuration: 700, animationEasing: "ease-out" as const }
   const tooltip = <Tooltip content={<ChartTooltip series={series} />} cursor={{ stroke: "var(--chart-grid)", fill: "var(--chart-grid)", fillOpacity: 0.4 }} isAnimationActive={!reduceMotion} animationDuration={150} />
 
-  return (
-    <div
-      data-slot="chart"
-      data-type={type}
-      className={cn("flex w-80 max-w-full flex-col rounded-xl border border-border-default bg-surface-card p-3.5", headerless ? "gap-2" : "gap-3", className)}
-      {...props}
-    >
-      {headerless ? null : (
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <span className="truncate text-[13px] font-semibold leading-4 text-text-primary">{title}</span>
-            {subtitle ? <span className="truncate text-[11px] leading-3 text-text-secondary">{subtitle}</span> : null}
-          </div>
-          <Pill>{badge ?? TYPE_LABEL[type]}</Pill>
-        </div>
-      )}
-
+  const plot = (
+    <>
       {type === "pie" ? (
         <div className="flex items-center gap-6">
           <div className="relative shrink-0" style={{ width: height, height }}>
@@ -179,6 +165,29 @@ export function Chart({
           )}
         </>
       )}
-    </div>
+    </>
+  )
+
+  // Embedded (InsightCards) plots stay bare; a titled chart is a framed card.
+  if (headerless) {
+    return (
+      <div data-slot="chart" data-type={type} className={cn("flex w-80 max-w-full flex-col gap-2", className)} {...props}>
+        {plot}
+      </div>
+    )
+  }
+  return (
+    <CardFrame data-slot="chart" data-type={type} className={cn("w-80 max-w-full", className)} {...props}>
+      <CardFrameHeader className="flex flex-row items-start justify-between gap-3 px-3.5 py-3">
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <span className="truncate text-[13px] font-semibold leading-4 text-text-primary">{title}</span>
+          {subtitle ? <span className="truncate text-[11px] leading-3 text-text-secondary">{subtitle}</span> : null}
+        </div>
+        <Pill>{badge ?? TYPE_LABEL[type]}</Pill>
+      </CardFrameHeader>
+      <Card>
+        <CardPanel className="flex flex-col gap-3 p-3.5">{plot}</CardPanel>
+      </Card>
+    </CardFrame>
   )
 }

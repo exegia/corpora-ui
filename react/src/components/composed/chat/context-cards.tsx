@@ -3,6 +3,7 @@
 import { AlignLeft, ExternalLink, FileText } from "lucide-react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
+import { Card, CardPanel } from "@/components/ui/card"
 import { FileTypeBadge, Pill } from "@/components/ui/chat"
 
 export interface ContextCard {
@@ -37,7 +38,7 @@ export function ContextCards({ header = "All chunks", cards, count, onOpen, clas
         <Pill>{count ?? cards.length}</Pill>
       </div>
       {cards.map((card, i) => (
-        <div key={card.id ?? i} className="flex flex-col gap-2 rounded-xl border border-border-default bg-surface-card p-3">
+        <Card key={card.id ?? i}><CardPanel className="flex flex-col gap-2 p-3">
           <div className="flex items-center gap-1.5">
             <span className="text-icon [&_svg]:size-3">{card.icon ?? (i % 2 ? <AlignLeft /> : <FileText />)}</span>
             <span className="flex-1 truncate text-[13px] font-semibold leading-4 text-text-primary">{card.title}</span>
@@ -55,7 +56,7 @@ export function ContextCards({ header = "All chunks", cards, count, onOpen, clas
               <ExternalLink />
             </button>
           ) : null}
-        </div>
+        </CardPanel></Card>
       ))}
     </div>
   )

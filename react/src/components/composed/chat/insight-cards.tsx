@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { Card, CardFrame, CardFrameHeader, CardPanel } from "@/components/ui/card"
 import { SPRING_SWAP } from "@/lib/ease"
 import { Dot, FollowUpRow, IconButton, Pill, Stat, type DotTone, type StatProps } from "@/components/ui/chat"
 import { Chart, type ChartDatum, type ChartSeries } from "./chart"
@@ -68,20 +69,20 @@ export function InsightCards({ header = "Insights", insights, index, defaultInde
           <p className="text-[13px] leading-[15px] text-text-secondary [&_[data-slot=dot]]:mx-0.5 [&_[data-slot=dot]]:inline-block [&_[data-slot=dot]]:align-middle">
             {insight.summary}
           </p>
-          <div className="flex flex-col gap-3 rounded-xl border border-border-default bg-surface-card p-3">
-            <div className="flex gap-4">
+          <CardFrame>
+            <CardFrameHeader className="flex flex-row gap-4 p-3">
               {insight.stats.map((s, i) => <Stat key={i} {...s} />)}
-            </div>
+            </CardFrameHeader>
             {insight.snapshot ? (
-              <div className="flex flex-col gap-2 rounded-[10px] bg-surface-subtle p-2.5">
+              <Card><CardPanel className="flex flex-col gap-2 p-2.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] leading-3 text-text-secondary">{insight.snapshot.label ?? "Trend snapshot"}</span>
                   <Pill>{insight.snapshot.badge ?? "Snapshot"}</Pill>
                 </div>
-                <Chart type="line" headerless plotHeight={110} data={insight.snapshot.data} series={insight.snapshot.series} className="w-full border-0 bg-transparent p-0" />
-              </div>
+                <Chart type="line" headerless plotHeight={110} data={insight.snapshot.data} series={insight.snapshot.series} className="w-full" />
+              </CardPanel></Card>
             ) : null}
-          </div>
+          </CardFrame>
           {insight.followUp ? <FollowUpRow onSelect={() => onFollowUp?.(insight.followUp!)} className="w-fit rounded-full border border-border-default bg-surface-card px-3 hover:bg-surface-subtle">{insight.followUp}</FollowUpRow> : null}
         </motion.div>
       ) : null}

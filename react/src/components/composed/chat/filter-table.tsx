@@ -3,6 +3,7 @@
 import { useAtom } from "jotai"
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { Card } from "@/components/ui/card"
 import { createKeyedFamilies } from "@/lib/keyed-atom"
 import { Dot, type DotTone } from "@/components/ui/chat"
 
@@ -82,7 +83,7 @@ export function FilterTable<Row extends { id: string; status: string }>({
           </button>
         ))}
       </div>
-      <div className="overflow-x-auto rounded-xl border border-border-default bg-surface-card">
+      <Card className="overflow-x-auto">
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="border-b border-border-default">
@@ -112,7 +113,7 @@ export function FilterTable<Row extends { id: string; status: string }>({
             ) : null}
           </tbody>
         </table>
-      </div>
+      </Card>
     </div>
   )
 }

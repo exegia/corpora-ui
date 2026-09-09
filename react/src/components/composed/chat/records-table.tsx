@@ -4,6 +4,7 @@ import { ChevronsUpDown } from "lucide-react"
 import { useAtom } from "jotai"
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { Card } from "@/components/ui/card"
 import { createKeyedFamilies } from "@/lib/keyed-atom"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tag, type TagTone } from "@/components/ui/chat"
@@ -77,7 +78,7 @@ export function RecordsTable({ tableId, rows, headers, maxTags = 2, selected, on
   )
 
   return (
-    <div data-slot="records-table" className={cn("w-[540px] max-w-full overflow-x-auto rounded-xl border border-border-default bg-surface-card", className)} {...props}>
+    <Card data-slot="records-table" className={cn("w-[540px] max-w-full overflow-x-auto", className)} {...props}>
       <table className="w-full border-collapse text-left">
         <thead>
           <tr className="border-b border-border-default text-[11px] font-medium leading-3 text-text-secondary">
@@ -122,6 +123,6 @@ export function RecordsTable({ tableId, rows, headers, maxTags = 2, selected, on
           })}
         </tbody>
       </table>
-    </div>
+    </Card>
   )
 }
