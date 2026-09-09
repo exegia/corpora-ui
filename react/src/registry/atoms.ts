@@ -302,12 +302,12 @@ export const atoms: RegistryEntry[] = [
           "Adds a reader-selection treatment; a string is exposed as data-selection.",
       },
     ],
-    usage: `import { Heading, Paragraph, Text } from "@exegia/corpora-ui"
+    usage: `import { Text } from "@exegia/corpora-ui"
 import { TextClickPopover } from "@exegia/corpora-ui"
 
-<Heading size="large">Corpus title</Heading>
-<Paragraph>Readable corpus prose belongs here.</Paragraph>
-<Text type="link" href="/activity">View activity</Text>
+<Text.Heading size="large">Corpus title</Text.Heading>
+<Text.Paragraph>Readable corpus prose belongs here.</Text.Paragraph>
+<Text.Root type="link" href="/activity">View activity</Text.Root>
 
 // Click-triggered popover — works for default (span), link and subscript
 <TextClickPopover type="subscript" popover={<p>Annotation</p>}>

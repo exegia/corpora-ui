@@ -78,16 +78,16 @@ describe("AI curation component set", () => {
     expect(onValueChange).toHaveBeenCalledWith("corpus")
   })
 
-  test("suggestion card offers accept and reject only while pending", async () => {
+  test("suggestion card reports accept and reject while pending", async () => {
     const user = userEvent.setup()
     const onAccept = mock(() => {})
     const onReject = mock(() => {})
-    const { container, rerender } = render(
+    const { container } = render(
       <SuggestionCard
         heading="Label mismatch"
-        nodeId="p-17"
         onAccept={onAccept}
         onReject={onReject}
+        reference={{ id: "p-17" }}
       >
         <p>label: paragraph → p</p>
       </SuggestionCard>
@@ -100,22 +100,27 @@ describe("AI curation component set", () => {
     expect(onAccept).toHaveBeenCalledTimes(1)
     await user.click(screen.getByRole("button", { name: "Ignore" }))
     expect(onReject).toHaveBeenCalledTimes(1)
+  })
 
-    rerender(
-      <SuggestionCard heading="Label mismatch" nodeId="p-17" state="accepted">
+  // Mounted resolved rather than re-rendered from pending: the actions leave
+  // through an AnimatePresence exit that runs on the wall clock, and polling
+  // for their removal outlasts the 5s per-test budget on a loaded suite.
+  test("a settled suggestion card shows its outcome, not the actions", () => {
+    render(
+      <SuggestionCard heading="Label mismatch" state="accepted">
         <p>label: paragraph → p</p>
       </SuggestionCard>
     )
-    // The actions fade out before the outcome label mounts (AnimatePresence
-    // mode="wait"), so wait for the label rather than polling the button.
-    expect(await screen.findByText("Accepted")).toBeDefined()
+
+    expect(screen.getByText("Done")).toBeDefined()
     expect(screen.queryByRole("button", { name: "Ok, fix them" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "Ignore" })).toBeNull()
   })
 
   test("suggestion card collapses its panel from the heading trigger", async () => {
     const user = userEvent.setup()
     render(
-      <SuggestionCard heading="Label mismatch" nodeId="p-17">
+      <SuggestionCard heading="Label mismatch">
         <p>label: paragraph → p</p>
       </SuggestionCard>
     )

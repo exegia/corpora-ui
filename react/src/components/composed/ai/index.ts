@@ -30,4 +30,10 @@ export {
   SendHint,
   surface,
 } from "./shared"
-export type { ComposerMode, DiffRow, SuggestionState } from "./types"
+export type {
+  AISuggestionBase,
+  ComposerMode,
+  DiffRow,
+  ReferenceBase,
+  SuggestionState,
+} from "./types"

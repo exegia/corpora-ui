@@ -7,11 +7,11 @@ import {
   useReducedMotion,
   type HTMLMotionProps,
 } from "motion/react"
-import { Children, Fragment, isValidElement, useId, useState } from "react"
+import { isValidElement, useId, useState } from "react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { EASE_IN_OUT, SPRING_PANEL } from "@/lib/ease"
-import { ITEM_VARIANTS, LIST_VARIANTS } from "./shared"
+import { flattenChildren, ITEM_VARIANTS, LIST_VARIANTS } from "./shared"
 
 export interface SuggestedPromptProps extends Omit<
   HTMLMotionProps<"button">,
@@ -79,15 +79,6 @@ export interface SuggestedPromptsProps extends Omit<
   defaultOpen?: boolean
   open?: boolean
   onOpenChange?: (open: boolean) => void
-}
-
-/** Children.toArray, but looking through fragments so `<>{a}{b}</>` counts two. */
-function flattenChildren(children: React.ReactNode): React.ReactNode[] {
-  return Children.toArray(children).flatMap((child) =>
-    isValidElement<{ children?: React.ReactNode }>(child) && child.type === Fragment
-      ? flattenChildren(child.props.children)
-      : [child]
-  )
 }
 
 /**

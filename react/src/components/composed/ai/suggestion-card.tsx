@@ -1,6 +1,6 @@
 "use client"
 
-import { Check, ChevronDown, Undo2, X, type SVGAttributes } from "lucide-react"
+import { Check, ChevronDown, Undo2, X } from "lucide-react"
 import {
   AnimatePresence,
   LayoutGroup,
@@ -30,14 +30,16 @@ export interface SuggestionCardProps<
   heading: T["heading"]
   description?: T["description"]
   children?: React.ReactNode
+  /**
+   * Grounding reference(s) — the node, passage or source the suggestion is
+   * based on. Rendered as `Reference` chips in the open body.
+   */
   reference?: T["references"]
   state?: SuggestionState
-  /**
-   * Grounding reference (a `ReferenceChip`). Sits in the header while the
-   * card is folded and glides down into the body when it opens.
-   */
   onAccept?: () => void
   onReject?: () => void
+  /** Takes the card back to `pending`. Without it no Undo is offered. */
+  onUndo?: () => void
   acceptLabel?: React.ReactNode
   rejectLabel?: React.ReactNode
   /** Uncontrolled initial open state of the collapsible. */
@@ -57,9 +59,11 @@ const STATE_COLOR: Record<Exclude<SuggestionState, "pending">, string> = {
   rejected: "bg-red-500",
 }
 
-const STATE_ICON: Record<Exclude<SuggestionState, "pending">, React.FC<SVGAttributes>> = {
-  accepted: Check,
-  rejected: X,
+// Hoisted: `motion.create` inside render makes a new component type on every
+// pass, which remounts the mark and replays its entry animation.
+const STATE_ICON = {
+  accepted: motion.create(Check),
+  rejected: motion.create(X),
 }
 
 /** The outcome mark: hollow while pending, violet check when accepted, grey cross when ignored. */
@@ -68,7 +72,7 @@ function StateMark({ state }: { state: SuggestionState }): React.ReactElement {
   const transition = reduceMotion ? { duration: 0 } : SPRING_PRESS
 
   const renderActions = () => {
-    const MotionIcon = state === "pending" ? null : motion.create(STATE_ICON[state])
+    const MotionIcon = state === "pending" ? null : STATE_ICON[state]
     return <span
       className={cn("rounded-full border-[1.5px] inline-grid size-4.5 place-items-center [grid-area:1/1]", state === "accepted" ? " bg-indigo-500/80 text-white" : state === "rejected" ? "bg-foreground/30 text-muted" : "bg-transparent border-neutral-800 dark:border-neutral-300")}
       key={state}
@@ -104,6 +108,7 @@ export function SuggestionCard({
   reference,
   onAccept,
   onReject,
+  onUndo,
   acceptLabel = "Ok, fix them",
   rejectLabel = "Ignore",
   defaultOpen = true,
@@ -122,20 +127,22 @@ export function SuggestionCard({
     onOpenChange?.(next)
   }
 
-  const renderReference = () => {
-    if (!reference || Array.isArray(reference)) return null
-    // TODO: handle array reference.
-    return (
-      <motion.span
-        className="inline-flex max-w-full"
-        layout={reduceMotion ? false : "position"}
-        layoutId={`${layoutId}-reference`}
-        transition={SPRING_LAYOUT}
-      >
-        <Reference>{reference.url}</Reference>
-      </motion.span>
-    )
-  }
+  const references = reference
+    ? Array.isArray(reference)
+      ? reference
+      : [reference]
+    : []
+  const referenceNodes = references.map((item) => (
+    <motion.span
+      className="inline-flex max-w-full"
+      key={item.id}
+      layout={reduceMotion ? false : "position"}
+      layoutId={`${layoutId}-reference-${item.id}`}
+      transition={SPRING_LAYOUT}
+    >
+      <Reference href={item.url}>{item.title ?? item.url ?? item.id}</Reference>
+    </motion.span>
+  ))
 
   return (
     <LayoutGroup id={layoutId}>
@@ -145,7 +152,7 @@ export function SuggestionCard({
           glassCard,
           className
         )}
-        data-node-id={reference && "id" in reference ? reference.id : null}
+        data-node-id={references.length === 1 ? references[0].id : undefined}
         data-slot="suggestion-card"
         data-state={state}
         {...props}
@@ -175,7 +182,14 @@ export function SuggestionCard({
               ) : null}
               
             </div>
-            {state === "accepted" || state === "rejected" && <Badge variant="outline" className={cn(STATE_COLOR[state], "uppercase")}>{STATE_LABEL[state]}</Badge> }
+            {state === "pending" ? null : (
+              <Badge
+                className={cn(STATE_COLOR[state], "uppercase")}
+                variant="outline"
+              >
+                {STATE_LABEL[state]}
+              </Badge>
+            )}
             <motion.span
               animate={{ rotate: isOpen ? 180 : 90 }}
               aria-hidden="true"
@@ -191,9 +205,9 @@ export function SuggestionCard({
             render={<CardPanel className="gap-0 px-0 py-0" />}
           >
             <div className="flex flex-col gap-3 px-4 pt-1 pb-3">
-              {isOpen && renderReference() ? (
-                <div className="flex" data-slot="suggestion-reference">
-                  {renderReference()}
+              {isOpen && referenceNodes.length > 0 ? (
+                <div className="flex flex-wrap gap-2" data-slot="suggestion-reference">
+                  {referenceNodes}
                 </div>
               ) : null}
               {children ? (
@@ -227,6 +241,8 @@ export function SuggestionCard({
                     </Button>
                   </motion.div>
                 ) : (
+                  // Always a node, never null: `mode="wait"` only releases the
+                  // leaving actions once a sibling enters behind them.
                   <motion.div
                     animate={{ opacity: 1, y: 0 }}
                     className="inline-flex items-center gap-1 px-2 pb-1 text-xs font-normal text-success-foreground"
@@ -234,10 +250,17 @@ export function SuggestionCard({
                     initial={{ opacity: 0, y: 4 }}
                     key={state}
                     transition={{ duration: 0.18, ease: EASE_IN_OUT }}
-                    >
-                      {state === "rejected" && <Button onClick={onReject} size="xs" variant="ghost" className="text-amber-400"><Undo2 className="size-3 stroke-3" /> Undo</Button>}
-                    {state === "accepted" || state === "rejected" && <Badge variant="outline" className={cn(STATE_COLOR[state], "uppercase")}>{STATE_LABEL[state]}</Badge> }
-
+                  >
+                    {onUndo ? (
+                      <Button
+                        className="text-amber-400"
+                        onClick={onUndo}
+                        size="xs"
+                        variant="ghost"
+                      >
+                        <Undo2 className="size-3 stroke-3" /> Undo
+                      </Button>
+                    ) : null}
                   </motion.div>
                 )}
               </AnimatePresence>

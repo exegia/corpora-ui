@@ -38,9 +38,9 @@ export function UserMessage({
         <Bubble.Header avatar={avatar} badge={badge} name={author} time={time} />
       )}
       <Bubble.Message>{children}</Bubble.Message>
-      {reactions?.length && (
+      {reactions?.length ? (
         <Bubble.Reactions onToggle={onReactionToggle} reactions={reactions} />
-      )}
+      ) : null}
     </Bubble>
   )
 }

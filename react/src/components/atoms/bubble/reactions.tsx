@@ -107,9 +107,15 @@ export function BubbleReactionsButton({
               className
             )}
             data-slot="bubble-reaction-button"
-            onClick={onClick}  
             type="button"
             {..._props}
+            // After the spread, and composed: base-ui's own onClick is what
+            // opens the popover, so overwriting it would wedge the trigger and
+            // letting it win would swallow the caller's handler.
+            onClick={(event) => {
+              _props.onClick?.(event)
+              onClick?.(event)
+            }}
           >
              <MorphIcon icon={state.open ? X : FaceSlightlySmilingPlus} size={16} />
           </button>

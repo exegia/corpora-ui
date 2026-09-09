@@ -53,7 +53,9 @@ export function AiPanel({
   ...props
 }: AiPanelProps): React.ReactElement {
   return (
-    <div
+    // A landmark, not a bare div: `aria-label` on a roleless element is not
+    // exposed, so the panel would lose both its name and its region.
+    <aside
       aria-label={headerTitle}
       className={cn("flex h-full w-full flex-col bg-sidebar", className)}
       data-slot="ai-panel"
@@ -101,7 +103,7 @@ export function AiPanel({
         </p>
       ) : null}
 
-      <ScrollArea aria-label="Thread" scrollFade fill>
+      <ScrollArea aria-label="Thread" role="region" scrollFade fill>
         <div className="flex min-h-0 flex-1 flex-col gap-y-2 px-5 py-4">
           {thread}
           {!thread && (
@@ -123,6 +125,6 @@ export function AiPanel({
           disabled={locked || composerProps?.disabled}
         />
       </footer>
-    </div>
+    </aside>
   )
 }

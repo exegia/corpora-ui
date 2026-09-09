@@ -326,9 +326,9 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
       },
       {
         name: "SuggestionCard",
-        type: "heading / description / nodeId / state / reference / children",
+        type: "heading / description / reference / state / onUndo / children",
         description:
-          "Frosted collapsible card per suggestion. The state mark morphs (hollow → violet check → grey cross), the reference chip sits in the folded header and glides into the body on open, and the footer shows Ignore / \"Ok, fix them\" while pending (labels via rejectLabel / acceptLabel).",
+          "Frosted collapsible card per suggestion. The state mark morphs (hollow → violet check → grey cross), `reference` takes one or many `{ id, title, url }` and renders a Reference chip per entry in the open body, and the footer shows Ignore / \"Ok, fix them\" while pending (labels via rejectLabel / acceptLabel) — then an Undo, if onUndo is given.",
       },
       {
         name: "ReferenceChip",
@@ -355,7 +355,7 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
           "A pill at rest showing the ⌘ + ↵ hint that springs into a taller field on focus, with the attach (+) and amber Send controls entering along the bottom edge. ⌘↩ sends, Esc stops while streaming; a safety note slot sits underneath.",
       },
     ],
-    usage: `import { AiMessage, Composer, ReferenceChip, SuggestedPrompt, SuggestionCard, UserMessage } from "@exegia/corpora-ui"
+    usage: `import { AiMessage, Composer, SuggestedPrompt, SuggestionCard, UserMessage } from "@exegia/corpora-ui"
 
 <UserMessage author="Sender" badge="Admin" time="10 min ago">
   Validate this passage.
@@ -366,10 +366,10 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     <SuggestionCard
       heading="Suggestion"
       description="Label mismatch"
-      nodeId="p-17"
-      reference={<ReferenceChip href="#p-17">Reference 1</ReferenceChip>}
+      reference={{ id: "p-17", title: "Reference 1", url: "#p-17" }}
       onAccept={apply}
       onReject={dismiss}
+      onUndo={reset}
     >
       The canonical paragraph label is required by the schema.
     </SuggestionCard>

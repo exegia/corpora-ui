@@ -61,8 +61,11 @@ describe("Bubble", () => {
         <Bubble.Reactions reactions={[]} />
       </Bubble>
     )
+    // The popup is `keepMounted`, so it is in the DOM from the start — closed
+    // is what matters, and base-ui hides it from the a11y tree until then.
     const trigger = screen.getByRole("button", { name: "Add reaction" })
-    expect(document.querySelector('[data-slot="popover-popup"]')).toBeNull()
+    expect(trigger.getAttribute("aria-expanded")).toBe("false")
+    expect(screen.queryByRole("button", { name: "heart" })).toBeNull()
     await user.click(trigger)
 
     expect(await screen.findByRole("button", { name: "heart" })).toBeDefined()

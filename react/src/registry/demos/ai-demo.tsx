@@ -1,7 +1,7 @@
 import * as React from "react"
 import { LayoutGroup, motion, useReducedMotion } from "motion/react"
 
-import { Bubble, Reference, type BubbleReaction } from "@/components/atoms"
+import { Bubble, type BubbleReaction } from "@/components/atoms"
 import {
   AiMessage,
   Composer,
@@ -121,12 +121,14 @@ export default function AiDemo(): React.ReactElement {
                   description="Label mismatch on p-17"
                   heading="Suggestion"
                   key="p-17"
-                  nodeId="p-17"
                   onAccept={() => setFirst("accepted")}
                   onReject={() => setFirst("rejected")}
-                  reference={
-                    <Reference href="#p-17">Book:rc003/word8</Reference>
-                  }
+                  onUndo={() => setFirst("pending")}
+                  reference={{
+                    id: "p-17",
+                    title: "Book:rc003/word8",
+                    url: "#p-17",
+                  }}
                   state={first}
                 >
                   The canonical paragraph label is required by the schema.
@@ -135,12 +137,14 @@ export default function AiDemo(): React.ReactElement {
                   description="Boundary drift on p-18"
                   heading="Suggestion"
                   key="p-18"
-                  nodeId="p-18"
                   onAccept={() => setSecond("accepted")}
                   onReject={() => setSecond("rejected")}
-                  reference={
-                    <Reference href="#p-17">Book:rc003/word8</Reference>
-                  }
+                  onUndo={() => setSecond("pending")}
+                  reference={{
+                    id: "p-18",
+                    title: "Book:rc003/word8",
+                    url: "#p-18",
+                  }}
                   state={second}
                 >
                   Scanned 30,102 nodes in a.1. Two boundary defects and one

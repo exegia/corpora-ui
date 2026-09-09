@@ -21,11 +21,11 @@ export type TextProps = Omit<
 }
 
 export type LabelLevel = "heading" | "title" | "caption" | "subtitle"
-export type Key = string | LabelLevel
 
-export type LabelProps<T extends LabelLevel = LabelLevel> = {
+export type LabelProps = {
   children: ReactNode
   className?: string
-  level: T extends LabelLevel ? T : never
+  /** Type scale of the label. Defaults to "title". */
+  level?: LabelLevel
   id?: string
 }

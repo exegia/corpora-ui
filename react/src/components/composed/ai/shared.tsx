@@ -1,3 +1,4 @@
+import { Children, Fragment, isValidElement } from "react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { Kbd as KbdKey, KbdGroup } from "@/components/ui/kbd";
@@ -147,3 +148,13 @@ export const ITEM_VARIANTS: Variants = {
   },
   visible: { opacity: 1, y: 0, scale: 1, transition: SPRING_PANEL },
 }
+
+/** Children.toArray, but looking through fragments so `<>{a}{b}</>` counts two. */
+export function flattenChildren(children: React.ReactNode): React.ReactNode[] {
+  return Children.toArray(children).flatMap((child) =>
+    isValidElement<{ children?: React.ReactNode }>(child) && child.type === Fragment
+      ? flattenChildren(child.props.children)
+      : [child]
+  )
+}
+

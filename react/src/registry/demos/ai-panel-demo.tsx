@@ -4,7 +4,6 @@ import {
   AiMessage,
   AiPanel,
   ApplyToast,
-  ReferenceChip,
   SuggestionCard,
   UserMessage,
   type AiScope,
@@ -87,10 +86,10 @@ export default function AiPanelDemo(): React.ReactElement {
                       description="Label mismatch"
                       heading="Suggested fix"
                       key="p-17"
-                      nodeId="p-17"
                       onAccept={() => setState("accepted")}
                       onReject={() => setState("rejected")}
-                      reference={<ReferenceChip>p-17</ReferenceChip>}
+                      onUndo={() => setState("pending")}
+                      reference={{ id: "p-17", title: "p-17" }}
                       state={state}
                     >
                       <DiffRows rows={DIFF} />
@@ -100,8 +99,7 @@ export default function AiPanelDemo(): React.ReactElement {
                       description="Boundary drift"
                       heading="Suggested fix"
                       key="p-18"
-                      nodeId="p-18"
-                      reference={<ReferenceChip>p-18</ReferenceChip>}
+                      reference={{ id: "p-18", title: "p-18" }}
                     >
                       Node p-18 changed from v3.3 to v3.4 — re-validate before
                       applying.

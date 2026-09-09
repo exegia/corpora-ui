@@ -95,10 +95,21 @@ export type BubbleReactionsButtonProps = Omit<
 }
 
 
-export interface ReferenceProps extends React.ComponentPropsWithoutRef<"a"> {
-  /** Without an href the chip renders as a button (or a plain span if it has no onClick). */
+/**
+ * Only what the chip actually forwards. It renders through `Button`, which is
+ * either a `<button>` or — with an href — an `<a>`, so the full anchor prop
+ * set cannot be honoured (and `type` means two different things across the
+ * two elements). Declaring the anchor set wholesale only advertised props the
+ * chip silently dropped.
+ */
+export interface ReferenceProps {
+  /** With an href the chip renders as a link, otherwise as a button. */
   href?: string
+  target?: React.HTMLAttributeAnchorTarget
+  rel?: string
+  id?: string
+  className?: string
+  children?: React.ReactNode
+  "aria-label"?: string
   onClick?: React.MouseEventHandler<HTMLElement>
-  /** Hide the trailing arrow, e.g. for a non-navigating tag. */
-  showArrow?: boolean
 }

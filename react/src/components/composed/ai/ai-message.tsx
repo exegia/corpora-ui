@@ -2,13 +2,19 @@
 
 import { Sparkle } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
-import { Children, Fragment, isValidElement, useId, useState } from "react"
+import { isValidElement, useId, useState } from "react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { EASE_IN_OUT, SPRING_PANEL } from "@/lib/ease"
 import { Bubble, type BubbleHeaderProps } from "@/components/atoms/bubble"
 import { Button } from "@/components/ui/button"
-import { agentText, ghostMuted, ITEM_VARIANTS, LIST_VARIANTS } from "./shared"
+import {
+  agentText,
+  flattenChildren,
+  ghostMuted,
+  ITEM_VARIANTS,
+  LIST_VARIANTS,
+} from "./shared"
 
 export interface AiMessageProps extends Omit<
   React.ComponentPropsWithoutRef<"div">,
@@ -35,15 +41,6 @@ export interface AiMessageProps extends Omit<
   defaultSuggestionsOpen?: boolean
   suggestionsOpen?: boolean
   onSuggestionsOpenChange?: (open: boolean) => void
-}
-
-/** Children.toArray, but looking through fragments so `<>{a}{b}</>` counts two. */
-function flattenChildren(children: React.ReactNode): React.ReactNode[] {
-  return Children.toArray(children).flatMap((child) =>
-    isValidElement<{ children?: React.ReactNode }>(child) && child.type === Fragment
-      ? flattenChildren(child.props.children)
-      : [child]
-  )
 }
 
 /**

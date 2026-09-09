@@ -1,4 +1,5 @@
 import { type ComponentType, useMemo, useState } from "react"
+import { Tooltip } from "@base-ui/react/tooltip"
 import { TooltipCreateHandle } from "@/components/ui/tooltip"
 import type {
   ActionBarSegment,
@@ -10,7 +11,10 @@ import type {
 } from "./types"
 import type { Emoji } from "frimousse"
 
-export const tooltipHandle = TooltipCreateHandle<ComponentType>()
+// Annotated, not inferred: the emitted .d.ts cannot name base-ui's
+// `TooltipHandle` on its own (TS2883).
+export const tooltipHandle: Tooltip.Handle<ComponentType> =
+  TooltipCreateHandle<ComponentType>()
 
 export const isSeparator = (key: string): boolean => key.includes("separator")
 
@@ -95,7 +99,7 @@ export const QUICK_REACTIONS: readonly Emoji[] = [
  *
  * @example
  * ```tsx
- * const { open, handleOpen, handleClose, handleEmojiSelect, quickReactions, showMore, actions } = useEmojiPicker({ onEmojiSelect: handleEmojiSelect });
+ * const { isFullPicker, quickReactions, actions, togglePicker, selectEmoji } = useEmojiPicker({ onEmojiSelect });
  * ```
  */
 export const useEmojiPicker = ({
@@ -103,16 +107,19 @@ export const useEmojiPicker = ({
   reactions,
   hideMore,
 }: EmojiActionBarProps) => {
-  const [open, setOpen] = useState(false)
   const [isFullPicker, setShowAll] = useState(false)
-  const handleOpen = () => setOpen(true)
-  const handleClose = () => setOpen(false)
-  // Handles emoji selection, calling the onEmojiSelect callback if provided.
-  const handleEmojiSelect = (emoji: Emoji) =>
-    onEmojiSelect && onEmojiSelect(emoji)
 
   // Toggles the picker between quick reactions and the full picker.
-  const togglePicker = () => setShowAll(!isFullPicker)
+  const togglePicker = () => setShowAll((previous) => !previous)
+  /**
+   * Reports the pick and folds the full picker back to the quick row. The bar
+   * lives inside a `keepMounted` popover, so it is never unmounted on close —
+   * without this reset the next open would still show the full picker.
+   */
+  const selectEmoji = (emoji: Emoji): void => {
+    setShowAll(false)
+    onEmojiSelect?.(emoji)
+  }
   // The quick reactions to display.
   const quickReactions = reactions ?? QUICK_REACTIONS
   const actions = useMemo(() => {
@@ -120,18 +127,15 @@ export const useEmojiPicker = ({
     return [
       ...quickReactions,
       { emoji: "Separator", label: "separator" },
-      { emoji: "More", label: "more" },
+      { emoji: "More", label: "More emoji" },
     ]
   }, [quickReactions, hideMore])
 
   return {
-    open,
-    handleOpen,
     isFullPicker,
-    handleClose,
-    handleEmojiSelect,
     quickReactions,
     actions,
     togglePicker,
+    selectEmoji,
   }
 }

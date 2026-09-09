@@ -4,7 +4,7 @@ import { useMemo } from "react"
 import type * as React from "react"
 import { MoreHorizontal, X } from "lucide-react"
 import { Action, EmojiAction, Separator } from "./action"
-import { motion } from "framer-motion"
+import { motion } from "motion/react"
 import ActionBar from "./toolbar"
 import { BOUNCE_IN_OUT } from "@/lib/ease"
 
@@ -34,6 +34,7 @@ export function EmojiActionBar({
     actions: quickReactions,
     isFullPicker,
     togglePicker,
+    selectEmoji,
   } = useEmojiPicker({ onEmojiSelect, reactions, hideMore })
 
   const actions = useMemo(() => {
@@ -56,14 +57,14 @@ export function EmojiActionBar({
         <EmojiAction
           emoji={item.emoji}
           label={item.label}
-          action={() => onEmojiSelect?.(item)}
+          action={() => selectEmoji(item)}
         />
       )
       // Store the action in the acc, using a separator if the key starts with "separator-"
       acc[key] = () => (isSeparator(key) ? <Separator /> : action)
       return acc
     }, {})
-  }, [quickReactions, onEmojiSelect, togglePicker])
+  }, [quickReactions, selectEmoji, togglePicker])
 
   return (
     <motion.div className="relative" initial={{ height: "auto" }} exit={{ height: "auto" }} animate={{ height: isFullPicker ? 326 : "auto" }} transition={BOUNCE_IN_OUT}>
@@ -71,7 +72,7 @@ export function EmojiActionBar({
       {isFullPicker ? (
         <EmojiPicker
           className="h-full relative"
-          onEmojiSelect={onEmojiSelect}
+          onEmojiSelect={selectEmoji}
         >
           <div className="flex items-center">
                <EmojiPickerSearch />
