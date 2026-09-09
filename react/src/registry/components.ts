@@ -502,4 +502,28 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
 <Attachment kind="document" title="Q3-financial-report.pdf" meta="PDF · 2.4 MB" onRemove={remove} />
 <Attachment kind="url-link" variant="preview" title="Exegia UI" domain="sketch.com" description="…" href="https://sketch.com" />`,
   },
+  {
+    slug: "chart",
+    name: "Chart",
+    titleStyle: "titlebar",
+    description:
+      "320×244 chart card — pie, area, line or bar — with title, subtitle, type pill, plot and legend. Series colours come from the --chart-series-1…5 tokens, grid from --chart-grid.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/chart-demo")),
+    registryDependencies: ["chat-presentation-atoms"],
+    props: [
+      { name: "type", type: '"pie" | "area" | "line" | "bar"', required: true, description: "Plot kind." },
+      { name: "data", type: "{ label: string; [key]: number | string }[]", required: true, description: "One row per x label (or pie slice)." },
+      { name: "series", type: "{ key, label, color? }[]", required: true, description: "Keys to plot; colour defaults to the series token by position. Pie uses the first." },
+      { name: "title / subtitle / badge", type: "ReactNode", description: "Header row; badge defaults to the type name." },
+      { name: "center", type: "{ value, label? }", description: "Pie only: donut centre." },
+      { name: "headerless / plotHeight", type: "boolean / number", description: "Bare plot for embedding (InsightCards)." },
+    ],
+    usage: `import { Chart } from "@corpora/ui"
+
+<Chart type="bar" title="Sales by flavor" subtitle="Units · last 6 months"
+  data={[{ label: "Pist.", units: 62 }, { label: "Vanilla", units: 88 }]}
+  series={[{ key: "units", label: "Units sold" }]} />`,
+  },
 ]

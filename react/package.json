@@ -57,6 +57,8 @@
     "morphicons": "^1.7.1",
     "motion": "^13.2.0",
     "motion-icons-react": "^1.1.0",
+    "react-markdown": "^10.1.0",
+    "recharts": "^3.10.1",
     "tailwind-animations": "^1.0.2",
     "tailwind-merge": "^3.6.0"
   },
