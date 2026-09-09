@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, mock } from "bun:test"
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 
 import { Flowchart, type StepNode } from "../flowchart"
 
@@ -35,19 +35,22 @@ describe("Flowchart", () => {
     expect(container.querySelector('path[data-edge="a->b"]')).toBeTruthy()
   })
 
-  it("fires onAdd with the side and onRemove, confirming orphans", () => {
+  it("fires onAdd with the side and onRemove, confirming orphans in an AlertDialog", async () => {
     const onAdd = mock(() => {})
     const onRemove = mock(() => {})
-    const confirm = mock(() => false)
-    window.confirm = confirm
     render(<Flowchart.Root steps={STEPS} onAdd={onAdd} onRemove={onRemove} />)
     fireEvent.click(screen.getAllByRole("button", { name: "Add node right" })[0])
     expect(onAdd).toHaveBeenCalledWith("a", "right")
-    fireEvent.click(screen.getAllByRole("button", { name: "Remove node" })[0])
-    expect(confirm).toHaveBeenCalled()
-    expect(onRemove).not.toHaveBeenCalled()
+    // leaf: removed outright
     fireEvent.click(screen.getAllByRole("button", { name: "Remove node" })[1])
     expect(onRemove).toHaveBeenCalledWith("b")
+    // parent: asks first
+    fireEvent.click(screen.getAllByRole("button", { name: "Remove node" })[0])
+    const dialog = await screen.findByRole("alertdialog")
+    expect(dialog.textContent).toContain("orphaned")
+    expect(onRemove).toHaveBeenCalledTimes(1)
+    fireEvent.click(screen.getByRole("button", { name: "Delete anyway" }))
+    await waitFor(() => expect(onRemove).toHaveBeenCalledWith("a"))
   })
 
   it("hides add / remove controls when read-only", () => {

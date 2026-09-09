@@ -707,7 +707,7 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
       { name: "zoomable", type: 'boolean', default: "false", description: "Ctrl / ⌘ + wheel and the +/− buttons scale the canvas (25–200%)." },
       { name: "onDrag", type: '(id, { dx, dy }) => void', description: "A card was dragged; offset from its laid-out position." },
       { name: "onAdd", type: '(id, side) => void', description: "Hover add button on a side (top / right / bottom / left) was pressed. Buttons only render when set." },
-      { name: "onRemove", type: '(id) => void', description: "Hover remove button or Delete on a selected card. Confirms first when children would be orphaned." },
+      { name: "onRemove", type: '(id) => void', description: "Hover remove button or Delete on a selected card. Opens an AlertDialog first when children would be orphaned." },
       { name: "className", type: 'string', description: "Extra classes on the canvas." },
     ],
     usage: `import { Flowchart } from "@corpora/ui"

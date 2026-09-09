@@ -8,6 +8,16 @@ import { AMBER, PURPLE } from "./constant"
 import { Connector } from "./connector"
 import { ChartNode } from "./chart-node"
 import { IconButton } from "@/components/ui/chat"
+import { Button } from "@/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogClose,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogPopup,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 
 const NODES: StepNode[] = [
@@ -40,7 +50,7 @@ export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, on
   const canvasRef = useRef<HTMLDivElement>(null)
   const nodeRefs = useRef(new Map<string, HTMLElement>())
   const chart = useFlowchart({ steps, edges, readOnly, zoomable, onDrag, onAdd, onRemove })
-  const { updateHeights, updateWidth, canvasHeight, isLit, bezierCurve, connectorWidth, scale, zoomBy, resetZoom } = chart
+  const { updateHeights, updateWidth, canvasHeight, isLit, bezierCurve, connectorWidth, scale, zoomBy, resetZoom, pendingRemove, commitRemove, cancelRemove } = chart
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current
@@ -125,6 +135,24 @@ export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, on
           </div>
         ) : null}
       </div>
+      <AlertDialog open={pendingRemove !== null} onOpenChange={(open) => { if (!open) cancelRemove() }}>
+        <AlertDialogPopup>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this node?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingRemove?.orphans.length === 1
+                ? "One child node has no other parent and will be left orphaned."
+                : `${pendingRemove?.orphans.length ?? 0} child nodes have no other parent and will be left orphaned.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogClose render={<Button variant="ghost" />}>Cancel</AlertDialogClose>
+            <Button variant="destructive" onClick={() => pendingRemove && commitRemove(pendingRemove.id)}>
+              Delete anyway
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogPopup>
+      </AlertDialog>
     </FlowchartContext.Provider>
   )
 }

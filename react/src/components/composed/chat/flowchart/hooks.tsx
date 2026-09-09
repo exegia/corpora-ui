@@ -20,6 +20,7 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
   const [selected, setSelected] = useState<string | null>(null);
   const [offsets, setOffsets] = useState<Offsets>({});
   const [scale, setScale] = useState(1);
+  const [pendingRemove, setPendingRemove] = useState<{ id: string; orphans: string[] } | null>(null);
   const drag = useRef<{
     id: string;
     startX: number;
@@ -102,13 +103,19 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
       .map((e) => e.target)
       .filter((child) => !edges.some((e) => e.target === child && e.source !== id));
 
-  const removeNode = (id: string) => {
-    const orphans = orphansOf(id);
-    // ponytail: native confirm; swap for AlertDialog if the design calls for one
-    if (orphans.length && !window.confirm(`Deleting this node leaves ${orphans.length} child node${orphans.length > 1 ? "s" : ""} orphaned. Delete anyway?`)) return;
+  const commitRemove = (id: string) => {
     if (selected === id) setSelected(null);
+    setPendingRemove(null);
     onRemove?.(id);
   };
+
+  /** Removes outright, or parks the id in `pendingRemove` for Root's AlertDialog when children would be orphaned. */
+  const removeNode = (id: string) => {
+    const orphans = orphansOf(id);
+    if (orphans.length) setPendingRemove({ id, orphans });
+    else commitRemove(id);
+  };
+  const cancelRemove = () => setPendingRemove(null);
 
   return {
     steps,
@@ -120,6 +127,9 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
     resetZoom,
     onAdd,
     removeNode,
+    commitRemove,
+    cancelRemove,
+    pendingRemove,
     orphansOf,
     updateHeights,
     offsets,
