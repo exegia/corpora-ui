@@ -15,7 +15,7 @@ The Corpora chat needs one way to show a file, image, media clip, corpus text se
 - A token layer: 49 CSS variables named after the Sketch swatches (`--bg-page`, `--surface-card`, `--accent-default`, `--chart-series-1` …), light in `:root`, dark under `.dark`, exposed to Tailwind through `@theme inline`.
 - Atoms in `ui/chat/`: `IconTile`, `Thumbnail`, `AvatarHandle`, `RemoveButton`, `PlayButton`, `SendButton`, `AddButton`, `FileTypeBadge`, `Favicon`, `Waveform`, `QuoteRail`, `DurationPill`.
 - `Attachment` (`composed/chat/attachment.tsx`) with `kind` × `variant="default" | "preview"`; `media` + `audio` renders the audio row.
-- Blocks in `blocks/chat/`: `MessageSender`, `MessageRecipient`, `ComposerWithAttachments` — the tray lives in a keyed Jotai family (`composerAttachmentsAtom(id)`).
+- Messages are the `Bubble` atom (`sender` / `recipient`) with an `Attachment` preview beside `Bubble.Message`; the `Composer` (`composed/ai`) carries the chip tray itself — it lives in a keyed Jotai family (`composerAttachmentsAtom(id)`).
 
 ## UI reference
 
@@ -29,13 +29,14 @@ The Corpora chat needs one way to show a file, image, media clip, corpus text se
 ## Usage
 
 ```tsx
-import { Attachment, ComposerWithAttachments, MessageSender } from "@corpora/ui"
+import { Attachment, Bubble, Composer } from "@corpora/ui"
 
 <Attachment kind="document" title="Q3-financial-report.pdf" meta="PDF · 2.4 MB" onRemove={remove} />
-<MessageSender attachment={<Attachment kind="image" variant="preview" src={url} />}>
-  Here’s the Q3 report.
-</MessageSender>
-<ComposerWithAttachments composerId="thread-1" onSend={(draft, attachments) => send(draft, attachments)} />
+<Bubble variant="sender">
+  <Attachment kind="image" variant="preview" src={url} />
+  <Bubble.Message>Here’s the Q3 report.</Bubble.Message>
+</Bubble>
+<Composer composerId="thread-1" onSend={(draft, mode, attachments) => send(draft, attachments)} />
 ```
 
 ## Acceptance criteria
@@ -71,9 +72,9 @@ Taken from the showcase frame. Each holds in light and dark.
 - [ ] AC-P7 url-link: 240 card, 120px cover, favicon + domain (mono, secondary), title 13/500, description 2-line clamp.
 
 #### Blocks
-- [ ] AC-B1 MessageSender: attachment preview above a sender bubble (`surface-bubble-sender`, inverse text, radius 20), right-aligned at 280 max.
-- [ ] AC-B2 MessageRecipient: header (name 13/600 + time 11 muted), recipient bubble (`surface-bubble-recipient`), text then attachment preview inside.
-- [ ] AC-B3 ComposerWithAttachments: 520 wide card radius 12; chip tray (H, gap 8, wraps); draft text; actions row Add · hint "Press ⌘ + ↵ to send message" · Send. Removing a chip updates the tray; `onSend(draft, attachments)`; ⌘↵ sends.
+- [ ] AC-B1 Sender: attachment preview above the `Bubble` sender message, right-aligned.
+- [ ] AC-B2 Recipient: `Bubble.Header` (name + time), recipient message with text then the attachment preview inside.
+- [ ] AC-B3 Composer: chip tray (H, gap 8, wraps) above the draft inside the field; actions row + · hint · Send. Removing a chip updates the tray; `onSend(draft, attachments)`; ⌘↵ sends.
 - [ ] AC-B4 Tray state lives in a keyed Jotai family (`composerAttachmentsAtom(id)`) so an app can add/remove chips by id; drops on unmount for unnamed ids.
 - [ ] AC-B5 Empty tray renders no tray row (composer collapses to draft + actions).
 

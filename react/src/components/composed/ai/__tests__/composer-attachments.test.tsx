@@ -2,19 +2,19 @@ import { describe, expect, mock, test } from "bun:test"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { Provider } from "jotai"
 
-import { ComposerWithAttachments, type ComposerAttachment } from "../index"
+import { Composer, type ComposerAttachment } from "../index"
 
 const SEED: ComposerAttachment[] = [
   { id: "a", kind: "document", title: "Q3.pdf", meta: "PDF" },
   { id: "b", kind: "image", title: "IMG.jpg" },
 ]
 
-describe("ComposerWithAttachments", () => {
+describe("Composer attachments", () => {
   test("renders the tray, removes a chip and sends with ⌘↵", () => {
     const onSend = mock(() => {})
     render(
       <Provider>
-        <ComposerWithAttachments defaultAttachments={SEED} defaultValue="hello" onSend={onSend} />
+        <Composer defaultAttachments={SEED} defaultValue="hello" onSend={onSend} safetyNote={null} />
       </Provider>
     )
     expect(screen.getAllByRole("button", { name: "Remove" }).length).toBe(2)
@@ -23,7 +23,7 @@ describe("ComposerWithAttachments", () => {
 
     fireEvent.keyDown(screen.getByRole("textbox", { name: "Message" }), { key: "Enter", metaKey: true })
     expect(onSend).toHaveBeenCalledTimes(1)
-    const [draft, attachments] = onSend.mock.calls[0] as unknown as [string, ComposerAttachment[]]
+    const [draft, , attachments] = onSend.mock.calls[0] as unknown as [string, string, ComposerAttachment[]]
     expect(draft).toBe("hello")
     expect(attachments.map((a) => a.id)).toEqual(["b"])
   })
@@ -31,7 +31,7 @@ describe("ComposerWithAttachments", () => {
   test("empty tray renders no tray row", () => {
     const { container } = render(
       <Provider>
-        <ComposerWithAttachments />
+        <Composer safetyNote={null} />
       </Provider>
     )
     expect(container.querySelector('[data-slot="composer-tray"]')).toBeNull()

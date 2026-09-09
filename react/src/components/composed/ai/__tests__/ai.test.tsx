@@ -19,7 +19,7 @@ describe("Composer", () => {
 
     await user.type(field, "Validate ¶12")
     await user.keyboard("{Meta>}{Enter}{/Meta}")
-    expect(onSend).toHaveBeenCalledWith("Validate ¶12", "answer")
+    expect(onSend).toHaveBeenCalledWith("Validate ¶12", "answer", [])
 
     await user.click(screen.getByRole("button", { name: "Attach" }))
     expect(onAttach).toHaveBeenCalledTimes(1)

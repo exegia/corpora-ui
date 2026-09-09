@@ -3,6 +3,7 @@
 import { Copy, FileCode } from "lucide-react"
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { Card, CardFrame, CardFrameHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { SegmentedToggle } from "@/components/ui/chat"
 
@@ -58,8 +59,8 @@ export function CodeBlock({ filename, code, diff, view, defaultView = "code", on
   const lines: CodeDiffLine[] = current === "diff" && diff ? diff : code.split("\n").map((text) => ({ text }))
 
   return (
-    <div data-slot="code-block" data-view={current} className={cn("flex w-[420px] max-w-full flex-col overflow-hidden rounded-xl border border-border-default bg-surface-card", className)} {...props}>
-      <div className="flex h-11 items-center gap-2 px-4">
+    <CardFrame data-slot="code-block" data-view={current} className={cn("w-[420px] max-w-full", className)} {...props}>
+      <CardFrameHeader className="flex h-11 flex-row items-center gap-2 px-4 py-0">
         <FileCode className="size-[15px] text-icon" />
         <span className="flex-1 truncate font-mono text-[12px] font-semibold text-text-primary">{filename}</span>
         {diff ? (
@@ -76,8 +77,8 @@ export function CodeBlock({ filename, code, diff, view, defaultView = "code", on
         <Button variant="ghost" size="xs" onClick={() => onCopy?.(code)} className="h-6 gap-1.5 rounded-md px-2 text-[11.5px] font-medium text-text-secondary hover:bg-surface-subtle hover:text-text-primary sm:h-6 [&_svg]:size-3.5! [&_svg]:opacity-100">
           <Copy />Copy
         </Button>
-      </div>
-      <div className="h-px bg-border-default" />
+      </CardFrameHeader>
+      <Card className="overflow-hidden">
       <pre className="overflow-x-auto bg-surface-code py-3 font-mono text-[11.5px] leading-[21px] text-text-primary">
         {lines.map((line, i) => (
           <div
@@ -89,6 +90,7 @@ export function CodeBlock({ filename, code, diff, view, defaultView = "code", on
           </div>
         ))}
       </pre>
-    </div>
+      </Card>
+    </CardFrame>
   )
 }

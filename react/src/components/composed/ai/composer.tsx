@@ -2,17 +2,20 @@
 
 import { Plus } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
-import { useCallback, useState } from "react"
+import { useAtom } from "jotai"
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { BOUNCE_IN_OUT, SPRING_PANEL } from "@/lib/ease"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Text } from "@/components/atoms"
+import { Attachment } from "@/components/composed/chat"
 import { Stop } from "iconsax-reactjs"
 import { SendHint } from "./shared"
 import { SuggestedPrompts } from "./suggested-prompt"
 import type { ComposerProps } from "./types"
+import { composerAttachmentsAtom, removeComposerInstance } from "./composer-attachments-atom"
 
 // `ComposerProps` moved to `types.ts`; both the barrel and `ai-panel` still
 // reach for it here, so keep this module the address it has always had.
@@ -32,6 +35,8 @@ export function Composer({
   mode,
   defaultMode = "answer",
   onSend,
+  composerId,
+  defaultAttachments,
   onStop,
   isStreaming = false,
   disabled = false,
@@ -52,7 +57,7 @@ export function Composer({
   const reduceMotion = useReducedMotion()
   const [internalValue, setInternalValue] = useState(defaultValue)
   const [internalMode] = useState(defaultMode)
-  const [isExpanded, setIsExpanded] = useState(expanded)
+  const [isFocused, setIsExpanded] = useState(expanded)
   // The prompts fold when the field expands: the two never stack open.
   const [internalPromptsOpen, setInternalPromptsOpen] = useState(
     defaultSuggestionsOpen ?? true
@@ -66,6 +71,22 @@ export function Composer({
     setIsExpanded(true)
     if (promptsOpen) setPromptsOpen(false)
   }
+  const generatedId = useId()
+  const id = composerId ?? generatedId
+  const [attachments, setAttachments] = useAtom(composerAttachmentsAtom(id))
+  // Seed once, then the atoms own the tray.
+  const seeded = useRef(false)
+  useLayoutEffect(() => {
+    if (seeded.current) return
+    seeded.current = true
+    if (defaultAttachments?.length) setAttachments(defaultAttachments)
+  }, [defaultAttachments, setAttachments])
+  useEffect(() => {
+    if (composerId) return
+    return () => removeComposerInstance(id)
+  }, [composerId, id])
+  // The pill has no room for a tray: chips hold the tall shape open.
+  const isExpanded = isFocused || attachments.length > 0
   const draft = value ?? internalValue
   const selectedMode = mode ?? internalMode
   const isDisabled = disabled || isStreaming
@@ -79,9 +100,9 @@ export function Composer({
   const send = useCallback((): void => {
     const trimmed = draft.trim()
     if (!trimmed || isDisabled) return
-    onSend?.(trimmed, selectedMode)
+    onSend?.(trimmed, selectedMode, attachments)
     if (value === undefined) setInternalValue("")
-  }, [draft, isDisabled, onSend, selectedMode, value])
+  }, [attachments, draft, isDisabled, onSend, selectedMode, value])
 
   // One attach button for both shapes: it is absolutely positioned in each,
   // so the class swap moves it and `layout` glides it between the two spots
@@ -219,6 +240,17 @@ export function Composer({
         onFocus={expand}
         transition={reduceMotion ? { duration: 0 } : SPRING_PANEL}
       >
+        {attachments.length > 0 ? (
+          <div className="flex w-full flex-wrap gap-2 p-1.5" data-slot="composer-tray">
+            {attachments.map(({ id: itemId, ...item }) => (
+              <Attachment
+                key={itemId}
+                {...item}
+                onRemove={() => setAttachments(attachments.filter((a) => a.id !== itemId))}
+              />
+            ))}
+          </div>
+        ) : null}
         {/* The shell's `layout` animation is a scale, so the field has to be
             positioned *by* this wrapper, not against the shell — an absolute
             child of the shell leaves the projection tree and inherits that

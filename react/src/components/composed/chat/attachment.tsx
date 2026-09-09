@@ -4,6 +4,7 @@ import { AtSign, BookOpen, Download, Film, FileText, Image as ImageIcon, Link as
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { PreviewCard, PreviewCardPopup, PreviewCardTrigger } from "@/components/ui/preview-card"
 import {
   AvatarHandle,
   DurationPill,
@@ -75,11 +76,24 @@ const metaClasses = "truncate text-[11px] leading-3 text-text-secondary"
  * @sketch "Component / Attachment / {Image, Media, Document, Text Selection, Chat Reply, Username Handle, URL Link} / {Default, Preview}", "Component / Attachment / Media / Preview Audio"
  */
 export function Attachment(props: AttachmentProps): React.ReactElement {
-  return props.variant === "preview" ? <AttachmentPreview {...props} /> : <AttachmentChip {...props} />
+  if (props.variant === "preview") return <AttachmentPreview {...props} />
+  if (!PREVIEWABLE.has(props.kind)) return <AttachmentChip {...props} />
+  // A chip whose kind has a richer rendering shows it on hover / focus.
+  return (
+    <PreviewCard>
+      <PreviewCardTrigger delay={300} render={<AttachmentChip {...props} />} />
+      <PreviewCardPopup className="w-fit p-1.5">
+        <AttachmentPreview {...props} variant="preview" removable={false} />
+      </PreviewCardPopup>
+    </PreviewCard>
+  )
 }
 
-function AttachmentChip(props: AttachmentProps): React.ReactElement {
-  const { kind, variant: _variant, title, meta, onRemove, removable = true, className, id, style } = props
+/** Kinds whose preview rendering says more than the chip: images, media, quotes, replies and link cards. */
+const PREVIEWABLE: ReadonlySet<AttachmentKind> = new Set(["image", "media", "text-selection", "chat-reply", "url-link"])
+
+function AttachmentChip(props: AttachmentProps & Record<string, unknown>): React.ReactElement {
+  const { kind, variant: _variant, title, meta, onRemove, removable = true, className, id, style, ...rest } = props
   const Icon = KIND_ICON[kind]
   const leading =
     kind === "image" ? (
@@ -90,7 +104,7 @@ function AttachmentChip(props: AttachmentProps): React.ReactElement {
       </IconTile>
     )
   return (
-    <div data-slot="attachment" data-kind={kind} data-variant="default" className={cn(chipClasses, className)} id={id} style={style}>
+    <div {...chipRest(rest)} data-slot="attachment" data-kind={kind} data-variant="default" className={cn(chipClasses, className)} id={id} style={style}>
       {leading}
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className={titleClasses}>{title}</span>
@@ -99,6 +113,12 @@ function AttachmentChip(props: AttachmentProps): React.ReactElement {
       {removable && onRemove ? <RemoveButton onClick={onRemove} /> : null}
     </div>
   )
+}
+
+/** Only what the preview-card trigger merges in (ref, hover/focus handlers, aria); the kind-specific props stay off the DOM. */
+const KIND_PROPS = new Set(["src", "alt", "poster", "duration", "audio", "onPlay", "waveform", "quote", "author", "time", "body", "initials", "domain", "description", "favicon", "href", "onAction", "actionIcon"])
+function chipRest(rest: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(rest).filter(([k]) => !KIND_PROPS.has(k)))
 }
 
 function AttachmentPreview(props: AttachmentProps): React.ReactElement {

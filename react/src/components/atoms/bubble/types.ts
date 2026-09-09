@@ -11,6 +11,11 @@ export type BubbleVariant = "default" | "ai" | "sender" | "recipient"
 
 export interface BubbleProps extends ComponentPropsWithoutRef<"div"> {
   variant?: BubbleVariant
+  /**
+   * A follow-up in a run of messages from the same author: tucks under the
+   * previous bubble. Render `Bubble.Header` on the first of the run only.
+   */
+  continued?: boolean
 }
 
 export type BubbleMessageProps = ComponentPropsWithoutRef<"div">
@@ -112,4 +117,9 @@ export interface ReferenceProps {
   children?: React.ReactNode
   "aria-label"?: string
   onClick?: React.MouseEventHandler<HTMLElement>
+  /**
+   * The passage the chip points at, shown in a preview card on hover or
+   * focus. Omitted, the chip is just a link.
+   */
+  preview?: React.ReactNode
 }

@@ -977,27 +977,33 @@ function App() {
     name: "Message + Attachment",
     titleStyle: "titlebar",
     description:
-      "Sender and recipient messages with an attachment preview — above the dark sender bubble, inside the muted recipient bubble.",
+      "The Bubble atom carrying an attachment preview — above the sender bubble, inside the recipient bubble. No separate message component: the sender and recipient variants of Bubble are the message.",
     category: "blocks",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/chat-messages-demo")),
-    registryDependencies: ["attachment"],
+    registryDependencies: ["bubble", "attachment"],
     props: [
-      { name: "attachment", type: "ReactNode", description: 'An <Attachment variant="preview" />.' },
-      { name: "name / time", type: "ReactNode", description: "MessageRecipient header." },
+      { name: "variant", type: '"sender" | "recipient"', description: "Bubble variant; sender hugs the right edge." },
+      { name: "Bubble.Header", type: "{ name, time, badge?, avatar? }", description: "Author row: render it on the first message of a run, and mark the follow-ups `continued`." },
+      { name: "Bubble.Message", type: "children", description: 'Put an <Attachment variant="preview" /> before it (sender) or inside it (recipient).' },
     ],
-    usage: `import { MessageSender, MessageRecipient, Attachment } from "@corpora/ui"
+    usage: `import { Bubble, Attachment } from "@corpora/ui"
 
-<MessageSender attachment={<Attachment kind="document" variant="preview" title="Q3.pdf" />}>
-  Here’s the Q3 report.
-</MessageSender>`,
+<Bubble variant="sender">
+  <Bubble.Header name="You" time="Just now" />
+  <Attachment kind="document" variant="preview" title="Q3.pdf" />
+  <Bubble.Message>Here’s the Q3 report.</Bubble.Message>
+</Bubble>
+<Bubble variant="sender" continued>
+  <Bubble.Message>Can you check §4 before Thursday?</Bubble.Message>
+</Bubble>`,
   },
   {
     slug: "composer-with-attachments",
     name: "Composer with attachments",
     titleStyle: "titlebar",
     description:
-      "Composer card with a chip tray above the draft. The tray lives in a keyed Jotai family, so an app can add or remove chips by composer id.",
+      "The prompt Composer with its attachment tray filled. The tray lives in a keyed Jotai family, so an app can add or remove chips by composer id — no separate component.",
     category: "blocks",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/composer-with-attachments-demo")),
@@ -1005,13 +1011,13 @@ function App() {
     props: [
       { name: "composerId", type: "string", description: "Stable id for the tray atoms; unnamed composers use useId() and drop state on unmount." },
       { name: "defaultAttachments", type: "ComposerAttachment[]", description: "Seeds the tray once." },
-      { name: "onSend", type: "(draft, attachments) => void", description: "Send button or ⌘/Ctrl+↵." },
-      { name: "onAdd", type: "() => void", description: "The + button." },
+      { name: "onSend", type: "(draft, mode, attachments) => void", description: "Send button or ⌘/Ctrl+↵." },
+      { name: "onAttach", type: "() => void", description: "The + button." },
       { name: "useComposerAttachmentActions(id)", type: "{ add, remove, clear }", description: "Drive the tray from anywhere under ExegiaProvider." },
     ],
-    usage: `import { ComposerWithAttachments, useComposerAttachmentActions } from "@corpora/ui"
+    usage: `import { Composer, useComposerAttachmentActions } from "@corpora/ui"
 
-<ComposerWithAttachments composerId="thread-1" onSend={send} />
+<Composer composerId="thread-1" onSend={send} />
 const { add } = useComposerAttachmentActions("thread-1")
 add({ id: "pdf", kind: "document", title: "Q3.pdf", meta: "PDF · 2.4 MB" })`,
   },
@@ -1020,7 +1026,7 @@ add({ id: "pdf", kind: "document", title: "Q3.pdf", meta: "PDF · 2.4 MB" })`,
     name: "AI bubble",
     titleStyle: "titlebar",
     description:
-      "Agent reply: sparkles tile · name · Agent badge · time, then one of four content cards — Markdown, Research answer, Chart or Streaming text — typed as a discriminated union.",
+      "Agent reply on the ai Bubble atom: spark mark · name · Agent badge · time, then one of four content cards — Markdown, Research answer, Chart or Streaming text — typed as a discriminated union.",
     category: "blocks",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/ai-bubble-demo")),

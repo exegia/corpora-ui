@@ -262,14 +262,18 @@ export const atoms: RegistryEntry[] = [
     slug: "reference",
     name: "Reference",
     titleStyle: "expanded",
-    description: "Reference link with optional header and reactions.",
+    description: "Reference chip pointing at the node, passage or source a suggestion is grounded in, with an optional hover preview of the passage.",
     category: "atoms",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/reference-demo")),
-    registryDependencies: ["chip", "button"],
+    registryDependencies: ["button", "preview-card"],
+    props: [
+      { name: "href", type: "string", description: "Renders the chip as a link." },
+      { name: "preview", type: "ReactNode", description: "The passage, shown in a PreviewCard on hover / focus. Omitted, no card." },
+    ],
     usage: `import { Reference } from "@corpora/ui"
 
-<Reference />`,
+<Reference href="/corpus/iliad/1.12" preview={passage}>Iliad 1.12</Reference>`,
   },
   {
     slug: "text",
@@ -331,6 +335,12 @@ import { TextClickPopover } from "@exegia/corpora-ui"
         default: '"recipient"',
         description:
           "Who the bubble belongs to. sender is right-aligned on a lit inverted surface with the bottom-right tail pinched, recipient is its dim mirror, ai renders chrome-less prose so generated output never masquerades as a person's message. Sub-components inherit the variant from context.",
+      },
+      {
+        name: "continued",
+        type: "boolean",
+        default: "false",
+        description: "A follow-up in a run from the same author: tucks under the previous bubble. Render Bubble.Header on the first of the run only.",
       },
       {
         name: "Bubble.Header",

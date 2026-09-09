@@ -4,7 +4,9 @@ import { Copy, Maximize2 } from "lucide-react"
 import * as React from "react"
 import ReactMarkdown, { type Components } from "react-markdown"
 import { cn } from "@/lib/utils"
-import { IconButton, SegmentedToggle } from "@/components/ui/chat"
+import { Card, CardFrame, CardFrameHeader, CardPanel } from "@/components/ui/card"
+import { IconButton } from "@/components/ui/chat"
+import { Tabs, TabsList, TabsTab } from "@/components/ui/tabs"
 import { markdownViewAtom, removeMarkdownInstance, type MarkdownView, useMarkdownView } from "./markdown-atom"
 
 export { markdownViewAtom, removeMarkdownInstance, useMarkdownView, type MarkdownView }
@@ -68,27 +70,34 @@ export function Markdown({
   }
 
   return (
-    <div
+    <CardFrame
       data-slot="markdown"
       data-view={current}
-      className={cn("flex w-[360px] max-w-full flex-col rounded-xl bg-surface-card", !bare && "border border-border-default", className)}
+      className={cn("w-[360px] max-w-full", bare && "border-transparent shadow-none", className)}
       {...props}
     >
-      <div className="flex items-center justify-between px-3 py-2.5">
-        <SegmentedToggle label="Markdown view" options={VIEWS} value={current} onValueChange={select} />
+      <CardFrameHeader className="flex flex-row items-center justify-between px-3 py-2">
+        <Tabs className="gap-0" value={current} onValueChange={(next) => select(next as MarkdownView)}>
+          <TabsList aria-label="Markdown view" size="sm">
+            {VIEWS.map((v) => <TabsTab key={v.value} value={v.value}>{v.label}</TabsTab>)}
+          </TabsList>
+        </Tabs>
         <span className="flex items-center gap-1">
           <IconButton aria-label="Expand" onClick={onExpand}><Maximize2 /></IconButton>
           <IconButton aria-label="Copy markdown" onClick={() => onCopy?.(source)}><Copy /></IconButton>
         </span>
-      </div>
-      <div className="h-px w-full bg-border-default" />
-      {current === "preview" ? (
-        <div className="flex flex-col gap-2.5 p-4">
-          <ReactMarkdown components={COMPONENTS}>{source}</ReactMarkdown>
-        </div>
-      ) : (
-        <pre className="m-3 overflow-x-auto whitespace-pre-wrap rounded-lg bg-surface-code px-2.5 py-2 font-mono text-[11px] leading-[13px] text-text-primary">{source}</pre>
-      )}
-    </div>
+      </CardFrameHeader>
+      <Card>
+        <CardPanel className="p-4">
+          {current === "preview" ? (
+            <div className="flex flex-col gap-2.5">
+              <ReactMarkdown components={COMPONENTS}>{source}</ReactMarkdown>
+            </div>
+          ) : (
+            <pre className="overflow-x-auto whitespace-pre-wrap rounded-lg bg-surface-code px-2.5 py-2 font-mono text-[11px] leading-[13px] text-text-primary">{source}</pre>
+          )}
+        </CardPanel>
+      </Card>
+    </CardFrame>
   )
 }

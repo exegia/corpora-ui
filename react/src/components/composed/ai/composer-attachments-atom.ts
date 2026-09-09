@@ -1,5 +1,5 @@
 /**
- * Per-instance tray state for `ComposerWithAttachments`, keyed by composer id
+ * Per-instance attachment tray for `Composer`, keyed by composer id
  * so an app can add or remove chips without holding the component.
  */
 import { useAtomValue, useSetAtom } from "jotai"
