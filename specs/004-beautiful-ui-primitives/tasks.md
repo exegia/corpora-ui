@@ -1,10 +1,10 @@
 # 004 — Tasks
 
-- [ ] T1 Extract `lib/keyed-atom.ts` from tree-atom (keep tree using it)
-- [ ] T2 Atoms: Tag, Signal, SourceChip, AvatarStack, Stat, FollowUpRow, pill/ghost Button variants + registry/demos
-- [ ] T3 StreamingText (+ atom, test)
-- [ ] T4 RecommendationCard, ContextCards
-- [ ] T5 CodeBlock (tokenizer + diff)
-- [ ] T6 FilterTable (+ atom, test), RecordsTable (+ atom, test)
-- [ ] T7 Flowchart, InsightCards
-- [ ] T8 Registry + demos; `make check`; `bun test`; export
+- [x] T1 Add `lib/keyed-atom.ts` (`createKeyedFamilies`) for chat state — tree/scaffold/sidebar keep their own copies for now
+- [x] T2 Atoms: Tag, Signal, SourceChip, AvatarStack, Stat, FollowUpRow, pill/ghost Button variants + registry/demos
+- [x] T3 StreamingText (+ atom, test)
+- [x] T4 RecommendationCard, ContextCards
+- [x] T5 CodeBlock (tokenizer + diff)
+- [x] T6 FilterTable (+ atom, test), RecordsTable (+ atom, test)
+- [x] T7 Flowchart, InsightCards
+- [x] T8 Registry + demos; `make check`; `bun test`; export
