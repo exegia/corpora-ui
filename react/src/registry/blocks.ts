@@ -972,4 +972,47 @@ function App() {
   composerProps={{ onSend: askContextFabric }}
 />`,
   },
+  {
+    slug: "chat-messages",
+    name: "Message + Attachment",
+    titleStyle: "titlebar",
+    description:
+      "Sender and recipient messages with an attachment preview — above the dark sender bubble, inside the muted recipient bubble.",
+    category: "blocks",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/chat-messages-demo")),
+    registryDependencies: ["attachment"],
+    props: [
+      { name: "attachment", type: "ReactNode", description: 'An <Attachment variant="preview" />.' },
+      { name: "name / time", type: "ReactNode", description: "MessageRecipient header." },
+    ],
+    usage: `import { MessageSender, MessageRecipient, Attachment } from "@corpora/ui"
+
+<MessageSender attachment={<Attachment kind="document" variant="preview" title="Q3.pdf" />}>
+  Here’s the Q3 report.
+</MessageSender>`,
+  },
+  {
+    slug: "composer-with-attachments",
+    name: "Composer with attachments",
+    titleStyle: "titlebar",
+    description:
+      "Composer card with a chip tray above the draft. The tray lives in a keyed Jotai family, so an app can add or remove chips by composer id.",
+    category: "blocks",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/composer-with-attachments-demo")),
+    registryDependencies: ["attachment", "chat-atoms"],
+    props: [
+      { name: "composerId", type: "string", description: "Stable id for the tray atoms; unnamed composers use useId() and drop state on unmount." },
+      { name: "defaultAttachments", type: "ComposerAttachment[]", description: "Seeds the tray once." },
+      { name: "onSend", type: "(draft, attachments) => void", description: "Send button or ⌘/Ctrl+↵." },
+      { name: "onAdd", type: "() => void", description: "The + button." },
+      { name: "useComposerAttachmentActions(id)", type: "{ add, remove, clear }", description: "Drive the tray from anywhere under ExegiaProvider." },
+    ],
+    usage: `import { ComposerWithAttachments, useComposerAttachmentActions } from "@corpora/ui"
+
+<ComposerWithAttachments composerId="thread-1" onSend={send} />
+const { add } = useComposerAttachmentActions("thread-1")
+add({ id: "pdf", kind: "document", title: "Q3.pdf", meta: "PDF · 2.4 MB" })`,
+  },
 ]

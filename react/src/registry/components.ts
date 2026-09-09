@@ -480,4 +480,26 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     status: "planned",
     registryDependencies: ["input", "button"],
   },
+  {
+    slug: "attachment",
+    name: "Attachment",
+    titleStyle: "titlebar",
+    description:
+      "One attachment in every shape the chat needs: a 240×52 composer chip with a remove button, or the in-bubble preview — for documents, images, media (and audio), corpus text selections, quoted replies, @-handles and URL cards.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/attachment-demo")),
+    registryDependencies: ["chat-atoms"],
+    props: [
+      { name: "kind", type: '"document" | "image" | "media" | "text-selection" | "chat-reply" | "username-handle" | "url-link"', required: true, description: "Which attachment; picks the leading icon and the preview layout." },
+      { name: "variant", type: '"default" | "preview"', default: '"default"', description: "Composer chip or in-bubble rendering." },
+      { name: "title / meta", type: "ReactNode", description: "Primary and secondary chip lines." },
+      { name: "onRemove / removable", type: "() => void / boolean", description: "The chip's ✕. Hidden when no handler is passed or removable is false." },
+      { name: "kind props", type: "src, poster, duration, audio, onPlay, quote, author, time, body, initials, domain, description, favicon, href, onAction", description: "Accepted per kind; the union type rejects props that don't belong to the chosen kind." },
+    ],
+    usage: `import { Attachment } from "@corpora/ui"
+
+<Attachment kind="document" title="Q3-financial-report.pdf" meta="PDF · 2.4 MB" onRemove={remove} />
+<Attachment kind="url-link" variant="preview" title="Exegia UI" domain="sketch.com" description="…" href="https://sketch.com" />`,
+  },
 ]
