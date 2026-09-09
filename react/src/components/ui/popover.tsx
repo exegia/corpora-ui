@@ -44,7 +44,8 @@ export function PopoverPopup({
   alignOffset?: PopoverPrimitive.Positioner.Props["alignOffset"];
   tooltipStyle?: boolean;
   anchor?: PopoverPrimitive.Positioner.Props["anchor"];
-}): React.ReactElement {
+  }): React.ReactElement {
+
   return (
     <PopoverPrimitive.Portal {...portalProps}>
       <PopoverPrimitive.Positioner
@@ -55,6 +56,7 @@ export function PopoverPopup({
         data-slot="popover-positioner"
         side={side}
         sideOffset={sideOffset}
+        
       >
         <PopoverPrimitive.Popup
           className={cn(

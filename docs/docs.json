@@ -1,0 +1,46 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "willow",
+  "name": "corpora-ui",
+  "description": "React component library for the Corpora apps.",
+  "colors": {
+    "primary": "#a153ff",
+    "light": "#b171ff",
+    "dark": "#6b21c9"
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get started",
+        "pages": [
+          "index"
+        ]
+      },
+      {
+        "group": "Chat UI",
+        "pages": [
+          "chat/chat-attachments",
+          "chat/chart-cards",
+          "chat/ai-presentation-bubbles",
+          "chat/beautiful-ui-primitives"
+        ]
+      }
+    ]
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "GitHub",
+        "href": "https://github.com/exegia/corpora-ui"
+      }
+    ]
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/exegia/corpora-ui"
+    }
+  },
+  "icons": {
+    "library": "lucide"
+  }
+}
