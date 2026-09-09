@@ -977,20 +977,22 @@ function App() {
     name: "Message + Attachment",
     titleStyle: "titlebar",
     description:
-      "Sender and recipient messages with an attachment preview — above the dark sender bubble, inside the muted recipient bubble.",
+      "The Bubble atom carrying an attachment preview — above the sender bubble, inside the recipient bubble. No separate message component: the sender and recipient variants of Bubble are the message.",
     category: "blocks",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/chat-messages-demo")),
-    registryDependencies: ["attachment"],
+    registryDependencies: ["bubble", "attachment"],
     props: [
-      { name: "attachment", type: "ReactNode", description: 'An <Attachment variant="preview" />.' },
-      { name: "name / time", type: "ReactNode", description: "MessageRecipient header." },
+      { name: "variant", type: '"sender" | "recipient"', description: "Bubble variant; sender hugs the right edge." },
+      { name: "Bubble.Header", type: "{ name, time, badge?, avatar? }", description: "Author row above the message." },
+      { name: "Bubble.Message", type: "children", description: 'Put an <Attachment variant="preview" /> before it (sender) or inside it (recipient).' },
     ],
-    usage: `import { MessageSender, MessageRecipient, Attachment } from "@corpora/ui"
+    usage: `import { Bubble, Attachment } from "@corpora/ui"
 
-<MessageSender attachment={<Attachment kind="document" variant="preview" title="Q3.pdf" />}>
-  Here’s the Q3 report.
-</MessageSender>`,
+<Bubble variant="sender">
+  <Attachment kind="document" variant="preview" title="Q3.pdf" />
+  <Bubble.Message>Here’s the Q3 report.</Bubble.Message>
+</Bubble>`,
   },
   {
     slug: "composer-with-attachments",
@@ -1020,7 +1022,7 @@ add({ id: "pdf", kind: "document", title: "Q3.pdf", meta: "PDF · 2.4 MB" })`,
     name: "AI bubble",
     titleStyle: "titlebar",
     description:
-      "Agent reply: sparkles tile · name · Agent badge · time, then one of four content cards — Markdown, Research answer, Chart or Streaming text — typed as a discriminated union.",
+      "Agent reply on the ai Bubble atom: spark mark · name · Agent badge · time, then one of four content cards — Markdown, Research answer, Chart or Streaming text — typed as a discriminated union.",
     category: "blocks",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/ai-bubble-demo")),
