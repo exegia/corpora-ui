@@ -37,3 +37,13 @@ export type {
   ReferenceBase,
   SuggestionState,
 } from "./types"
+export {
+  addComposerAttachmentAtom,
+  clearComposerAttachmentsAtom,
+  composerAttachmentsAtom,
+  removeComposerAttachmentAtom,
+  removeComposerInstance,
+  useComposerAttachmentActions,
+  useComposerAttachments,
+} from "./composer-attachments-atom"
+export type { ComposerAttachment } from "./composer-attachments-atom"

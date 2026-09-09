@@ -997,7 +997,7 @@ function App() {
     name: "Composer with attachments",
     titleStyle: "titlebar",
     description:
-      "Composer card with a chip tray above the draft. The tray lives in a keyed Jotai family, so an app can add or remove chips by composer id.",
+      "The prompt Composer with its attachment tray filled. The tray lives in a keyed Jotai family, so an app can add or remove chips by composer id — no separate component.",
     category: "blocks",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/composer-with-attachments-demo")),
@@ -1005,13 +1005,13 @@ function App() {
     props: [
       { name: "composerId", type: "string", description: "Stable id for the tray atoms; unnamed composers use useId() and drop state on unmount." },
       { name: "defaultAttachments", type: "ComposerAttachment[]", description: "Seeds the tray once." },
-      { name: "onSend", type: "(draft, attachments) => void", description: "Send button or ⌘/Ctrl+↵." },
-      { name: "onAdd", type: "() => void", description: "The + button." },
+      { name: "onSend", type: "(draft, mode, attachments) => void", description: "Send button or ⌘/Ctrl+↵." },
+      { name: "onAttach", type: "() => void", description: "The + button." },
       { name: "useComposerAttachmentActions(id)", type: "{ add, remove, clear }", description: "Drive the tray from anywhere under ExegiaProvider." },
     ],
-    usage: `import { ComposerWithAttachments, useComposerAttachmentActions } from "@corpora/ui"
+    usage: `import { Composer, useComposerAttachmentActions } from "@corpora/ui"
 
-<ComposerWithAttachments composerId="thread-1" onSend={send} />
+<Composer composerId="thread-1" onSend={send} />
 const { add } = useComposerAttachmentActions("thread-1")
 add({ id: "pdf", kind: "document", title: "Q3.pdf", meta: "PDF · 2.4 MB" })`,
   },

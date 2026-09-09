@@ -1,5 +1,7 @@
 import type * as React from "react"
 
+import type { ComposerAttachment } from "./composer-attachments-atom"
+
 export type ComposerMode = "answer" | "fix" | "ask"
 
 export type SuggestionState = "accepted" | "rejected" | "pending"
@@ -32,7 +34,14 @@ export interface ComposerProps {
   mode?: ComposerMode
   defaultMode?: ComposerMode
   onModeChange?: (mode: ComposerMode) => void
-  onSend?: (value: string, mode: ComposerMode) => void
+  onSend?: (value: string, mode: ComposerMode, attachments: ComposerAttachment[]) => void
+  /**
+   * Key for the attachment tray atoms. Unnamed composers key off `useId()`
+   * and drop their tray on unmount; a named one survives a remount.
+   */
+  composerId?: string
+  /** Seeds the tray once on mount; the atoms own it from then on. */
+  defaultAttachments?: ComposerAttachment[]
   /** Start in the tall, focused layout. */
   expanded?: boolean
   onStop?: () => void
