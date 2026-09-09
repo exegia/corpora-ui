@@ -1,4 +1,5 @@
 export * from "./bubble"
+export { SelectChip, SourceChip as FlowchartSourceChip } from "./chip"
 export * from "./text"
 export {
   HighlightPopover,

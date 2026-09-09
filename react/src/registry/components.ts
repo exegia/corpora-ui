@@ -695,17 +695,33 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     name: "Flowchart",
     titleStyle: "titlebar",
     description:
-      "Dot-grid canvas with a vertical chain of Trigger and If / Else nodes built from data.",
+      "Dot-grid canvas of draggable, selectable step cards joined by bezier connectors (Beautiful-UI port).",
     category: "components",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/flowchart-demo")),
     registryDependencies: ["chat-presentation-atoms"],
     props: [
-      { name: "nodes", type: 'FlowchartNode[]', required: true, description: "A trigger node (title, description, icon) or a condition node whose rows mix words and pills ({ pill, accent? })." },
+      { name: "steps", type: 'StepNode[]', description: "Cards to lay out: { id, row, x (0–1 centre), w, kind?: { label, hue }, hue?, title?, caption?, condition?, children? }. `children` replaces the default title / caption body. Defaults to the Trigger → If / Else sample." },
+      { name: "edges", type: 'Edge[]', description: "Connectors { id, source, target }. Defaults to a chain through steps in order." },
+      { name: "readOnly", type: 'boolean', default: "false", description: "No drag, no add / remove buttons. Selection still works." },
+      { name: "zoomable", type: 'boolean', default: "false", description: "Ctrl / ⌘ + wheel and the +/− buttons scale the canvas (25–200%)." },
+      { name: "onDrag", type: '(id, { dx, dy }) => void', description: "A card was dragged; offset from its laid-out position." },
+      { name: "onAdd", type: '(id, side) => void', description: "Hover add button on a side (top / right / bottom / left) was pressed. Buttons only render when set." },
+      { name: "onRemove", type: '(id) => void', description: "Hover remove button or Delete on a selected card. Opens an AlertDialog first when children would be orphaned." },
+      { name: "className", type: 'string', description: "Extra classes on the canvas." },
     ],
     usage: `import { Flowchart } from "@corpora/ui"
 
-<Flowchart nodes={[{ kind: "trigger", title: "New order created" }, { kind: "condition", rows: [{ parts: ["If", { pill: "order" }, "is", { pill: "Rocky Road", accent: true }] }] }]} />`,
+<Flowchart.Root
+  steps={[
+    { id: "trigger", row: 0, x: 0.5, w: 300, kind: { label: "Trigger", hue: "#9a5cff" }, hue: "#9a5cff", title: "New order created" },
+    { id: "cond", row: 1, x: 0.5, w: 356, kind: { label: "If / Else", hue: "#f09a2f" }, children: <MyBody /> },
+  ]}
+  edges={[{ id: "e1", source: "trigger", target: "cond" }]}
+  zoomable
+  onAdd={(id, side) => …}
+  onRemove={(id) => …}
+/>`,
   },
   {
     slug: "insight-cards",
