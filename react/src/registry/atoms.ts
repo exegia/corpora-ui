@@ -412,4 +412,27 @@ import { TextClickPopover } from "@exegia/corpora-ui"
   <FileBadgeTei />                       {/* dark artwork, regardless of theme */}
 </div>`,
   },
+  {
+    slug: "chat-atoms",
+    name: "Chat atoms",
+    titleStyle: "titlebar",
+    description:
+      "Attachment primitives from the exegia-ui Sketch library: IconTile, Thumbnail, AvatarHandle, Remove/Play/Send/Add buttons, FileTypeBadge, Favicon, Waveform, QuoteRail, DurationPill. Colours come from the chat tokens, so light and dark need no props.",
+    category: "atoms",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/chat-atoms-demo")),
+    registryDependencies: ["button"],
+    props: [
+      { name: "IconTile size", type: "28 | 32 | 36 | 40", default: "40", description: "Tile edge; `tone=\"accent\"` swaps the neutral fill for accent-subtle." },
+      { name: "Thumbnail size", type: '"sm" | "lg"', default: '"sm"', description: "40px chip tile or 240×160 preview; gradient placeholder without `src`." },
+      { name: "AvatarHandle initials", type: "string", description: "Fallback initials when `src` is absent." },
+      { name: "Waveform bars / progress", type: "number[] / number", description: "Bar heights in 0…1; bars below `progress` render in accent." },
+      { name: "SendButton …props", type: "ButtonProps", description: "Brand-yellow pill; accepts every Button prop except variant." },
+    ],
+    usage: `import { IconTile, RemoveButton, SendButton } from "@corpora/ui"
+
+<IconTile><FileText /></IconTile>
+<RemoveButton onClick={remove} />
+<SendButton onClick={send} />`,
+  },
 ]
