@@ -111,3 +111,4 @@ export * from "./lib/utils"
 
 // chat (exegia-ui Sketch library)
 export * from "./components/ui/chat"
+export * from "./components/composed/chat"
