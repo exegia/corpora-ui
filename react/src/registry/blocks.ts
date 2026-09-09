@@ -984,14 +984,18 @@ function App() {
     registryDependencies: ["bubble", "attachment"],
     props: [
       { name: "variant", type: '"sender" | "recipient"', description: "Bubble variant; sender hugs the right edge." },
-      { name: "Bubble.Header", type: "{ name, time, badge?, avatar? }", description: "Author row above the message." },
+      { name: "Bubble.Header", type: "{ name, time, badge?, avatar? }", description: "Author row: render it on the first message of a run, and mark the follow-ups `continued`." },
       { name: "Bubble.Message", type: "children", description: 'Put an <Attachment variant="preview" /> before it (sender) or inside it (recipient).' },
     ],
     usage: `import { Bubble, Attachment } from "@corpora/ui"
 
 <Bubble variant="sender">
+  <Bubble.Header name="You" time="Just now" />
   <Attachment kind="document" variant="preview" title="Q3.pdf" />
   <Bubble.Message>Here’s the Q3 report.</Bubble.Message>
+</Bubble>
+<Bubble variant="sender" continued>
+  <Bubble.Message>Can you check §4 before Thursday?</Bubble.Message>
 </Bubble>`,
   },
   {

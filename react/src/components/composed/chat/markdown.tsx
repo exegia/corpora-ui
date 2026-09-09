@@ -4,7 +4,8 @@ import { Copy, Maximize2 } from "lucide-react"
 import * as React from "react"
 import ReactMarkdown, { type Components } from "react-markdown"
 import { cn } from "@/lib/utils"
-import { IconButton, SegmentedToggle } from "@/components/ui/chat"
+import { IconButton } from "@/components/ui/chat"
+import { Tabs, TabsList, TabsTab } from "@/components/ui/tabs"
 import { markdownViewAtom, removeMarkdownInstance, type MarkdownView, useMarkdownView } from "./markdown-atom"
 
 export { markdownViewAtom, removeMarkdownInstance, useMarkdownView, type MarkdownView }
@@ -75,7 +76,11 @@ export function Markdown({
       {...props}
     >
       <div className="flex items-center justify-between px-3 py-2.5">
-        <SegmentedToggle label="Markdown view" options={VIEWS} value={current} onValueChange={select} />
+        <Tabs className="gap-0" value={current} onValueChange={(next) => select(next as MarkdownView)}>
+          <TabsList aria-label="Markdown view" size="sm">
+            {VIEWS.map((v) => <TabsTab key={v.value} value={v.value}>{v.label}</TabsTab>)}
+          </TabsList>
+        </Tabs>
         <span className="flex items-center gap-1">
           <IconButton aria-label="Expand" onClick={onExpand}><Maximize2 /></IconButton>
           <IconButton aria-label="Copy markdown" onClick={() => onCopy?.(source)}><Copy /></IconButton>

@@ -333,6 +333,12 @@ import { TextClickPopover } from "@exegia/corpora-ui"
           "Who the bubble belongs to. sender is right-aligned on a lit inverted surface with the bottom-right tail pinched, recipient is its dim mirror, ai renders chrome-less prose so generated output never masquerades as a person's message. Sub-components inherit the variant from context.",
       },
       {
+        name: "continued",
+        type: "boolean",
+        default: "false",
+        description: "A follow-up in a run from the same author: tucks under the previous bubble. Render Bubble.Header on the first of the run only.",
+      },
+      {
         name: "Bubble.Header",
         type: "name / time / badge / avatar",
         description:
