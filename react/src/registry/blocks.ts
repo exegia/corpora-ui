@@ -1015,4 +1015,23 @@ function App() {
 const { add } = useComposerAttachmentActions("thread-1")
 add({ id: "pdf", kind: "document", title: "Q3.pdf", meta: "PDF · 2.4 MB" })`,
   },
+  {
+    slug: "ai-bubble",
+    name: "AI bubble",
+    titleStyle: "titlebar",
+    description:
+      "Agent reply: sparkles tile · name · Agent badge · time, then one of four content cards — Markdown, Research answer, Chart or Streaming text — typed as a discriminated union.",
+    category: "blocks",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/ai-bubble-demo")),
+    registryDependencies: ["markdown", "research-answer", "chart", "streaming-text"],
+    props: [
+      { name: "content", type: '{ kind: "markdown" | "research" | "chart" | "streaming", …props }', required: true, description: "The content card and its own props." },
+      { name: "name / time / badge / avatar", type: "ReactNode", description: 'Header; defaults to "Exegia" and an "Agent" badge with a sparkles tile.' },
+    ],
+    usage: `import { AiBubble } from "@corpora/ui"
+
+<AiBubble time="2 min ago" content={{ kind: "markdown", source: answer }} />
+<AiBubble content={{ kind: "chart", type: "bar", title: "Sales by flavor", data, series }} />`,
+  },
 ]
