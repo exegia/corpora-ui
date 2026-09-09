@@ -435,4 +435,29 @@ import { TextClickPopover } from "@exegia/corpora-ui"
 <RemoveButton onClick={remove} />
 <SendButton onClick={send} />`,
   },
+  {
+    slug: "chat-presentation-atoms",
+    name: "Presentation atoms",
+    titleStyle: "titlebar",
+    description:
+      "Atoms for AI answers and charts: SegmentedToggle, IconButton, AgentBadge, Pill, Dot, LegendItem, Tag, Signal, SourceChip, AvatarStack, Stat, FollowUpRow.",
+    category: "atoms",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/chat-presentation-atoms-demo")),
+    registryDependencies: ["button"],
+    props: [
+      { name: "SegmentedToggle options / value / defaultValue / onValueChange", type: "{ value, label }[] …", description: "Radiogroup semantics, arrow keys, controlled or uncontrolled; `sound` plays the toggle cue." },
+      { name: "IconButton aria-label", type: "string", required: true, description: "Icon-only control, 24px." },
+      { name: "Dot tone", type: '"success" | "warning" | "info" | "danger" | "neutral" | "accent" | "brand" | "series-1…5"', default: '"neutral"', description: "Marker colour from the semantic and chart-series tokens." },
+      { name: "Tag tone", type: '"amber" | "purple" | "blue" | "green"', default: '"blue"', description: "Text, fill and border from the matching --tag-* tokens." },
+      { name: "Signal level", type: '"high" | "medium" | "low"', default: '"high"', description: "Lit bars: 3 green, 2 orange, 1 grey." },
+      { name: "Stat label / value / delta / trend / tone", type: "ReactNode … / \"positive\" | \"negative\"", description: "Value and delta take the trend colour." },
+      { name: "FollowUpRow onSelect", type: "() => void", description: "Fires when the row is activated." },
+    ],
+    usage: `import { SegmentedToggle, Tag, Stat } from "@corpora/ui"
+
+<SegmentedToggle options={[{ value: "preview", label: "Preview" }, { value: "markup", label: "Markup" }]} onValueChange={setView} />
+<Tag tone="green">Active</Tag>
+<Stat label="Pistachio" value="+1.15%" delta="+$617.22" trend="positive" />`,
+  },
 ]
