@@ -1,5 +1,3 @@
-import type { Edge } from "./types";
-
 /* ── layout constants ── */
 export const PAD_Y = 24;
 export const ROW_GAP = 64;
@@ -7,8 +5,6 @@ export const PILL_OFFSET = 30; // kind pill + gap above a card
 
 export const PURPLE = "#9a5cff";
 export const AMBER = "#f09a2f";
-
-export const EDGES: Edge[] = [{ id: "uuid", source: "trigger", target: "cond" }];
 
 /* estimated heights for the first paint; measured immediately after */
 export const EST_H: Record<string, number> = { trigger: 92, cond: 134 };

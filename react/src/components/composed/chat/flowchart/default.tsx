@@ -1,11 +1,13 @@
 "use client"
 
-import { useLayoutEffect, useRef } from "react"
+import { useEffect, useLayoutEffect, useRef } from "react"
+import { Minus, Plus } from "lucide-react"
 import type { FlowchartProps, StepNode } from "./types"
 import { FlowchartContext, useFlowchart } from "./hooks"
-import { AMBER, EDGES, PURPLE } from "./constant"
+import { AMBER, PURPLE } from "./constant"
 import { Connector } from "./connector"
 import { ChartNode } from "./chart-node"
+import { IconButton } from "@/components/ui/chat"
 import { cn } from "@/lib/utils"
 
 const NODES: StepNode[] = [
@@ -30,15 +32,15 @@ const NODES: StepNode[] = [
 ]
 
 /**
- * Dot-grid canvas with draggable, selectable step cards joined by bezier connectors.
+ * Dot-grid canvas of draggable, selectable step cards joined by bezier connectors.
  *
  * @sketch "Component / Flowchart"
  */
-export default function Flowchart({ steps = NODES, className, children }: FlowchartProps) {
+export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, onDrag, onAdd, onRemove, className, children }: FlowchartProps) {
   const canvasRef = useRef<HTMLDivElement>(null)
   const nodeRefs = useRef(new Map<string, HTMLElement>())
-  const chart = useFlowchart({ steps })
-  const { updateHeights, updateWidth, canvasHeight, isLit, bezierCurve, connectorWidth } = chart
+  const chart = useFlowchart({ steps, edges, readOnly, zoomable, onDrag, onAdd, onRemove })
+  const { updateHeights, updateWidth, canvasHeight, isLit, bezierCurve, connectorWidth, scale, zoomBy, resetZoom } = chart
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current
@@ -66,38 +68,62 @@ export default function Flowchart({ steps = NODES, className, children }: Flowch
     observer.observe(canvas)
     nodeRefs.current.forEach((el) => observer.observe(el))
     return () => observer.disconnect()
-  }, [updateHeights, updateWidth])
+  }, [updateHeights, updateWidth, steps])
+
+  // React's onWheel is passive, so preventDefault (no page scroll while zooming) needs a native listener.
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas || !zoomable) return
+    const onWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey && !event.metaKey) return
+      event.preventDefault()
+      zoomBy(event.deltaY < 0 ? 1.1 : 1 / 1.1)
+    }
+    canvas.addEventListener("wheel", onWheel, { passive: false })
+    return () => canvas.removeEventListener("wheel", onWheel)
+  }, [zoomable, zoomBy])
 
   return (
     <FlowchartContext.Provider value={chart}>
       <div
         ref={canvasRef}
         data-slot="flowchart"
+        data-readonly={readOnly || undefined}
         className={cn("rounded-card bg-page shadow-hairline relative w-full overflow-hidden select-none", className)}
         style={{
-          height: canvasHeight,
+          height: canvasHeight * scale,
           backgroundImage: "radial-gradient(var(--line-strong) 1px, transparent 1.25px)",
-          backgroundSize: "22px 22px",
+          backgroundSize: `${22 * scale}px ${22 * scale}px`,
           backgroundPosition: "center",
         }}
       >
         {children}
-        <svg width={connectorWidth} height={canvasHeight} className="pointer-events-none absolute inset-0">
-          {EDGES.map((edge) => (
-            <Connector key={edge.id} edge={edge} isLit={isLit(edge)} d={bezierCurve(edge)} />
+        <div className="absolute inset-x-0 top-0 origin-top" style={{ height: canvasHeight, transform: `scale(${scale})` }}>
+          <svg width={connectorWidth} height={canvasHeight} className="pointer-events-none absolute inset-0">
+            {chart.edges.map((edge) => (
+              <Connector key={edge.id} edge={edge} isLit={isLit(edge)} d={bezierCurve(edge)} />
+            ))}
+          </svg>
+          {steps.map((node) => (
+            <ChartNode
+              key={node.id}
+              node={node}
+              onRef={(el) => {
+                if (el) nodeRefs.current.set(node.id, el)
+                else nodeRefs.current.delete(node.id)
+              }}
+            />
           ))}
-        </svg>
-        {steps.map((node) => (
-          <ChartNode
-            key={node.id}
-            node={node}
-            steps={steps}
-            onRef={(el) => {
-              if (el) nodeRefs.current.set(node.id, el)
-              else nodeRefs.current.delete(node.id)
-            }}
-          />
-        ))}
+        </div>
+        {zoomable ? (
+          <div data-ui className="absolute right-2 bottom-2 flex items-center gap-0.5 rounded-md bg-surface p-0.5 shadow-btn">
+            <IconButton aria-label="Zoom out" onClick={() => zoomBy(1 / 1.25)}><Minus /></IconButton>
+            <button type="button" onClick={resetZoom} className="min-w-10 text-center text-[11px] tabular-nums text-ink-2">
+              {Math.round(scale * 100)}%
+            </button>
+            <IconButton aria-label="Zoom in" onClick={() => zoomBy(1.25)}><Plus /></IconButton>
+          </div>
+        ) : null}
       </div>
     </FlowchartContext.Provider>
   )

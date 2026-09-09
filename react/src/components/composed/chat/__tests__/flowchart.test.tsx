@@ -1,7 +1,14 @@
-import { describe, expect, it } from "bun:test"
-import { render, screen, fireEvent } from "@testing-library/react"
+import { afterEach, describe, expect, it, mock } from "bun:test"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 
-import { Flowchart } from "../flowchart"
+import { Flowchart, type StepNode } from "../flowchart"
+
+const STEPS: StepNode[] = [
+  { id: "a", row: 0, x: 0.5, w: 200, title: "A" },
+  { id: "b", row: 1, x: 0.5, w: 200, title: "B" },
+]
+
+afterEach(cleanup)
 
 describe("Flowchart", () => {
   it("lays out the default steps and draws a connector", () => {
@@ -20,5 +27,40 @@ describe("Flowchart", () => {
     fireEvent.click(step)
     expect(step.getAttribute("aria-pressed")).toBe("true")
     expect(container.querySelector("path[data-edge]")!.getAttribute("stroke")).toContain("accent")
+  })
+
+  it("renders custom children and chains edges by default", () => {
+    const { container } = render(<Flowchart.Root steps={[{ ...STEPS[0], children: <em>custom</em> }, STEPS[1]]} />)
+    expect(screen.getByText("custom").tagName).toBe("EM")
+    expect(container.querySelector('path[data-edge="a->b"]')).toBeTruthy()
+  })
+
+  it("fires onAdd with the side and onRemove, confirming orphans", () => {
+    const onAdd = mock(() => {})
+    const onRemove = mock(() => {})
+    const confirm = mock(() => false)
+    window.confirm = confirm
+    render(<Flowchart.Root steps={STEPS} onAdd={onAdd} onRemove={onRemove} />)
+    fireEvent.click(screen.getAllByRole("button", { name: "Add node right" })[0])
+    expect(onAdd).toHaveBeenCalledWith("a", "right")
+    fireEvent.click(screen.getAllByRole("button", { name: "Remove node" })[0])
+    expect(confirm).toHaveBeenCalled()
+    expect(onRemove).not.toHaveBeenCalled()
+    fireEvent.click(screen.getAllByRole("button", { name: "Remove node" })[1])
+    expect(onRemove).toHaveBeenCalledWith("b")
+  })
+
+  it("hides add / remove controls when read-only", () => {
+    render(<Flowchart.Root steps={STEPS} readOnly onAdd={() => {}} onRemove={() => {}} />)
+    expect(screen.queryByRole("button", { name: /Add node/ })).toBeNull()
+    expect(screen.queryByRole("button", { name: "Remove node" })).toBeNull()
+  })
+
+  it("zooms with the buttons", () => {
+    const { container } = render(<Flowchart.Root steps={STEPS} zoomable />)
+    fireEvent.click(screen.getByRole("button", { name: "Zoom in" }))
+    expect(screen.getByText("125%")).toBeTruthy()
+    const canvas = container.querySelector('[data-slot="flowchart"]') as HTMLElement
+    expect(canvas.style.backgroundSize).toContain("27.5px")
   })
 })
