@@ -262,14 +262,18 @@ export const atoms: RegistryEntry[] = [
     slug: "reference",
     name: "Reference",
     titleStyle: "expanded",
-    description: "Reference link with optional header and reactions.",
+    description: "Reference chip pointing at the node, passage or source a suggestion is grounded in, with an optional hover preview of the passage.",
     category: "atoms",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/reference-demo")),
-    registryDependencies: ["chip", "button"],
+    registryDependencies: ["button", "preview-card"],
+    props: [
+      { name: "href", type: "string", description: "Renders the chip as a link." },
+      { name: "preview", type: "ReactNode", description: "The passage, shown in a PreviewCard on hover / focus. Omitted, no card." },
+    ],
     usage: `import { Reference } from "@corpora/ui"
 
-<Reference />`,
+<Reference href="/corpus/iliad/1.12" preview={passage}>Iliad 1.12</Reference>`,
   },
   {
     slug: "text",

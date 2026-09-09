@@ -117,4 +117,9 @@ export interface ReferenceProps {
   children?: React.ReactNode
   "aria-label"?: string
   onClick?: React.MouseEventHandler<HTMLElement>
+  /**
+   * The passage the chip points at, shown in a preview card on hover or
+   * focus. Omitted, the chip is just a link.
+   */
+  preview?: React.ReactNode
 }
