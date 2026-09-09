@@ -5,7 +5,7 @@ import {
   DemoStage,
   DemoToggle,
 } from "@/components/docs/demo-controls"
-import { Heading, Paragraph, Text } from "@/components/atoms/text"
+import { Text } from "@/components/atoms/text"
 import { TextClickPopover } from "@/components/atoms/text-selection"
 import type {
   SelectionRenderProps,
@@ -91,28 +91,28 @@ export default function TextDemo(): React.ReactElement {
       }
     >
       <div className="grid max-w-xl gap-5">
-        <Text selection={selection} size={size} type={type}>
+        <Text.Root selection={selection} size={size} type={type}>
           A reusable text primitive for corpus prose and interface copy.
-        </Text>
+        </Text.Root>
         <div className="grid gap-3 border-t pt-4 text-muted-foreground">
           <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">
             Select words in either text block to open its popover
           </p>
-          <Heading
+          <Text.Heading
             renderPopover={renderSelectionPopover}
             selection={selection}
             size="large"
           >
             Select this heading to inspect the current selection.
-          </Heading>
-          <Paragraph
+          </Text.Heading>
+          <Text.Paragraph
             renderPopover={renderSelectionPopover}
             selection={selection}
             size="medium"
           >
             This paragraph forwards the selection wrapper props, so selecting
             any part of it renders the preview popover above.
-          </Paragraph>
+          </Text.Paragraph>
           <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">
             Click any of the texts below to open its popover
           </p>

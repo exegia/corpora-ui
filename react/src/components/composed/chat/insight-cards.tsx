@@ -1,0 +1,98 @@
+"use client"
+
+import { ChevronDown, ChevronUp } from "lucide-react"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
+import * as React from "react"
+import { cn } from "@/lib/utils"
+import { Card, CardFrame, CardFrameHeader, CardPanel } from "@/components/ui/card"
+import { SPRING_SWAP } from "@/lib/ease"
+import { Dot, FollowUpRow, IconButton, Pill, Stat, type DotTone, type StatProps } from "@/components/ui/chat"
+import { Chart, type ChartDatum, type ChartSeries } from "./chart"
+
+export interface Insight {
+  /** Sentence; `entity` is highlighted with a dot in front. */
+  summary: React.ReactNode
+  stats: [StatProps, StatProps] | StatProps[]
+  snapshot?: { label?: React.ReactNode; badge?: React.ReactNode; data: ChartDatum[]; series: ChartSeries[] }
+  followUp?: string
+}
+
+export interface InsightCardsProps extends React.ComponentPropsWithoutRef<"div"> {
+  header?: React.ReactNode
+  insights: Insight[]
+  index?: number
+  defaultIndex?: number
+  onIndexChange?: (index: number) => void
+  onFollowUp?: (text: string) => void
+}
+
+/**
+ * Paged insights: header with count and prev/next, summary, two stats,
+ * a trend snapshot (line plot + legend) and a follow-up prompt.
+ *
+ * @sketch "Component / Insight Cards"
+ */
+export function InsightCards({ header = "Insights", insights, index, defaultIndex = 0, onIndexChange, onFollowUp, className, ...props }: InsightCardsProps): React.ReactElement {
+  const reduceMotion = useReducedMotion()
+  const [internal, setInternal] = React.useState(defaultIndex)
+  const current = Math.min(index ?? internal, Math.max(insights.length - 1, 0))
+  // Which way the card slides: next pulls the new one up from below, previous from above.
+  const [direction, setDirection] = React.useState(1)
+  const go = (next: number) => {
+    setDirection(next > current ? 1 : -1)
+    if (index === undefined) setInternal(next)
+    onIndexChange?.(next)
+  }
+  const insight = insights[current]
+  const offset = reduceMotion ? 0 : 24 * direction
+
+  return (
+    <div data-slot="insight-cards" className={cn("flex w-[344px] max-w-full flex-col gap-2.5", className)} {...props}>
+      <div className="flex items-center gap-1.5">
+        <span className="text-[13px] font-semibold leading-4 text-text-primary">{header}</span>
+        <span className="text-[13px] text-text-muted">{insights.length}</span>
+        <span className="ml-auto flex items-center gap-0.5">
+          <IconButton aria-label="Previous insight" disabled={current <= 0} onClick={() => go(current - 1)}><ChevronUp /></IconButton>
+          <IconButton aria-label="Next insight" disabled={current >= insights.length - 1} onClick={() => go(current + 1)}><ChevronDown /></IconButton>
+        </span>
+      </div>
+      <AnimatePresence custom={direction} initial={false} mode="popLayout">
+      {insight ? (
+        <motion.div
+          key={current}
+          className="flex flex-col gap-2.5"
+          initial={{ opacity: 0, y: offset }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -offset }}
+          transition={reduceMotion ? { duration: 0 } : SPRING_SWAP}
+        >
+          <p className="text-[13px] leading-[15px] text-text-secondary [&_[data-slot=dot]]:mx-0.5 [&_[data-slot=dot]]:inline-block [&_[data-slot=dot]]:align-middle">
+            {insight.summary}
+          </p>
+          <CardFrame>
+            <CardFrameHeader className="flex flex-row gap-4 p-3">
+              {insight.stats.map((s, i) => <Stat key={i} {...s} />)}
+            </CardFrameHeader>
+            {insight.snapshot ? (
+              <Card><CardPanel className="flex flex-col gap-2 p-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] leading-3 text-text-secondary">{insight.snapshot.label ?? "Trend snapshot"}</span>
+                  <Pill>{insight.snapshot.badge ?? "Snapshot"}</Pill>
+                </div>
+                <Chart type="line" headerless plotHeight={110} data={insight.snapshot.data} series={insight.snapshot.series} className="w-full" />
+              </CardPanel></Card>
+            ) : null}
+          </CardFrame>
+          {insight.followUp ? <FollowUpRow onSelect={() => onFollowUp?.(insight.followUp!)} className="w-fit rounded-full border border-border-default bg-surface-card px-3 hover:bg-surface-subtle">{insight.followUp}</FollowUpRow> : null}
+        </motion.div>
+      ) : null}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+/** Inline entity marker for `Insight.summary`: dot + name. */
+export function InsightEntity({ tone = "neutral", children }: { tone?: DotTone; children: React.ReactNode }): React.ReactElement {
+  return <><Dot tone={tone} size={8} /> {children}</>
+}
+

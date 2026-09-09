@@ -38,9 +38,15 @@ export function AvatarFallback({
   ...props
 }: AvatarPrimitive.Fallback.Props): React.ReactElement {
   return (
+    // Deliberately unpainted. Being `size-full`, the fallback covers the root
+    // edge to edge, so a background here hides whatever the root paints
+    // beneath it — including the emboss an avatar may carry (see
+    // `twAvatarEmbossClasses`). Callers wanting a tint put it on the Avatar
+    // root, not here; note `UserAvatar`'s initials are white, so a pale tint
+    // needs a text colour to go with it.
     <AvatarPrimitive.Fallback
       className={cn(
-        "flex size-full items-center justify-center rounded-full bg-muted",
+        "flex size-full items-center justify-center rounded-full",
         className,
       )}
       data-slot="avatar-fallback"

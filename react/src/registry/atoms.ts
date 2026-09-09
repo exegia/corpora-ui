@@ -259,6 +259,23 @@ export const atoms: RegistryEntry[] = [
 </InputGroup>`,
   },
   {
+    slug: "reference",
+    name: "Reference",
+    titleStyle: "expanded",
+    description: "Reference chip pointing at the node, passage or source a suggestion is grounded in, with an optional hover preview of the passage.",
+    category: "atoms",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/reference-demo")),
+    registryDependencies: ["button", "preview-card"],
+    props: [
+      { name: "href", type: "string", description: "Renders the chip as a link." },
+      { name: "preview", type: "ReactNode", description: "The passage, shown in a PreviewCard on hover / focus. Omitted, no card." },
+    ],
+    usage: `import { Reference } from "@corpora/ui"
+
+<Reference href="/corpus/iliad/1.12" preview={passage}>Iliad 1.12</Reference>`,
+  },
+  {
     slug: "text",
     name: "Text",
     titleStyle: "titlebar",
@@ -289,18 +306,83 @@ export const atoms: RegistryEntry[] = [
           "Adds a reader-selection treatment; a string is exposed as data-selection.",
       },
     ],
-    usage: `import { Heading, Paragraph, Text } from "@exegia/corpora-ui"
+    usage: `import { Text } from "@exegia/corpora-ui"
 import { TextClickPopover } from "@exegia/corpora-ui"
 
-<Heading size="large">Corpus title</Heading>
-<Paragraph>Readable corpus prose belongs here.</Paragraph>
-<Text type="link" href="/activity">View activity</Text>
+<Text.Heading size="large">Corpus title</Text.Heading>
+<Text.Paragraph>Readable corpus prose belongs here.</Text.Paragraph>
+<Text.Root type="link" href="/activity">View activity</Text.Root>
 
 // Click-triggered popover — works for default (span), link and subscript
 <TextClickPopover type="subscript" popover={<p>Annotation</p>}>
   Subscript note
 </TextClickPopover>`,
   },
+  {
+    slug: "bubble",
+    name: "Bubble",
+    titleStyle: "titlebar",
+    description:
+      "Chat bubble atom: an inner-shadowed message surface with sender, recipient and ai variants, an author header (avatar, name, time, role badge), a glass reaction pill hanging off the corner and hover-revealed message actions.",
+    category: "atoms",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/bubble-demo")),
+    registryDependencies: ["button", "badge", "user-avatar", "emoji-picker"],
+    props: [
+      {
+        name: "variant",
+        type: '"ai" | "sender" | "recipient"',
+        default: '"recipient"',
+        description:
+          "Who the bubble belongs to. sender is right-aligned on a lit inverted surface with the bottom-right tail pinched, recipient is its dim mirror, ai renders chrome-less prose so generated output never masquerades as a person's message. Sub-components inherit the variant from context.",
+      },
+      {
+        name: "continued",
+        type: "boolean",
+        default: "false",
+        description: "A follow-up in a run from the same author: tucks under the previous bubble. Render Bubble.Header on the first of the run only.",
+      },
+      {
+        name: "Bubble.Header",
+        type: "name / time / badge / avatar",
+        description:
+          "Author row: avatar (an identity object renders UserAvatar; a node is used as-is; the ai variant defaults to the spark mark), bold name, muted time and a role badge — a string picks the neutral chip for people and the accent chip for the agent. The sender variant mirrors the row.",
+      },
+      {
+        name: "Bubble.Message",
+        type: "children",
+        description: "The message surface, styled by the inherited variant.",
+      },
+      {
+        name: "Bubble.Reactions",
+        type: "reactions / onToggle / onEmojiSelect",
+        description:
+          "Frosted reaction pill overlapping the bubble's bottom corner. Each chip carries aria-pressed, springs its emoji on toggle and rolls its count; onToggle(reaction, index) fires on click. The trailing add-reaction button opens a frimousse emoji picker in a frosted-glass popover — onEmojiSelect({ emoji, label }) fires on pick. Accepts children for custom chips.",
+      },
+      {
+        name: "Bubble.Actions",
+        type: "children",
+        description:
+          "role=toolbar row for per-message actions (copy, retry, …), hidden until the bubble is hovered or an action has focus. Compose with Button size=icon-xs.",
+      },
+    ],
+    usage: `import { Bubble } from "@exegia/corpora-ui"
+
+<Bubble variant="sender">
+  <Bubble.Header name="Sender" time="10 min ago" badge="Admin" />
+  <Bubble.Message>Can you check whether ¶12 keeps the boundary?</Bubble.Message>
+  <Bubble.Reactions
+    reactions={[{ id: "heart", emoji: "❤️", count: 4, reacted: true, label: "heart" }]}
+    onToggle={toggleReaction}
+  />
+  <Bubble.Actions>
+    <Button aria-label="Copy" size="icon-xs" variant="ghost">
+      <CopyIcon />
+    </Button>
+  </Bubble.Actions>
+</Bubble>`,
+  },
+
   {
     slug: "file-icons",
     name: "File icons",
@@ -339,5 +421,53 @@ import { TextClickPopover } from "@exegia/corpora-ui"
 <div className="dark">
   <FileBadgeTei />                       {/* dark artwork, regardless of theme */}
 </div>`,
+  },
+  {
+    slug: "chat-atoms",
+    name: "Chat atoms",
+    titleStyle: "titlebar",
+    description:
+      "Attachment primitives from the exegia-ui Sketch library: IconTile, Thumbnail, AvatarHandle, Remove/Play/Send/Add buttons, FileTypeBadge, Favicon, Waveform, QuoteRail, DurationPill. Colours come from the chat tokens, so light and dark need no props.",
+    category: "atoms",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/chat-atoms-demo")),
+    registryDependencies: ["button"],
+    props: [
+      { name: "IconTile size", type: "28 | 32 | 36 | 40", default: "40", description: "Tile edge; `tone=\"accent\"` swaps the neutral fill for accent-subtle." },
+      { name: "Thumbnail size", type: '"sm" | "lg"', default: '"sm"', description: "40px chip tile or 240×160 preview; gradient placeholder without `src`." },
+      { name: "AvatarHandle initials", type: "string", description: "Fallback initials when `src` is absent." },
+      { name: "Waveform bars / progress", type: "number[] / number", description: "Bar heights in 0…1; bars below `progress` render in accent." },
+      { name: "SendButton …props", type: "ButtonProps", description: "Brand-yellow pill; accepts every Button prop except variant." },
+    ],
+    usage: `import { IconTile, RemoveButton, SendButton } from "@corpora/ui"
+
+<IconTile><FileText /></IconTile>
+<RemoveButton onClick={remove} />
+<SendButton onClick={send} />`,
+  },
+  {
+    slug: "chat-presentation-atoms",
+    name: "Presentation atoms",
+    titleStyle: "titlebar",
+    description:
+      "Atoms for AI answers and charts: SegmentedToggle, IconButton, AgentBadge, Pill, Dot, LegendItem, Tag, Signal, SourceChip, AvatarStack, Stat, FollowUpRow.",
+    category: "atoms",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/chat-presentation-atoms-demo")),
+    registryDependencies: ["button"],
+    props: [
+      { name: "SegmentedToggle options / value / defaultValue / onValueChange", type: "{ value, label }[] …", description: "Radiogroup semantics, arrow keys, controlled or uncontrolled; `sound` plays the toggle cue." },
+      { name: "IconButton aria-label", type: "string", required: true, description: "Icon-only control, 24px." },
+      { name: "Dot tone", type: '"success" | "warning" | "info" | "danger" | "neutral" | "accent" | "brand" | "series-1…5"', default: '"neutral"', description: "Marker colour from the semantic and chart-series tokens." },
+      { name: "Tag tone", type: '"amber" | "purple" | "blue" | "green"', default: '"blue"', description: "Text, fill and border from the matching --tag-* tokens." },
+      { name: "Signal level", type: '"high" | "medium" | "low"', default: '"high"', description: "Lit bars: 3 green, 2 orange, 1 grey." },
+      { name: "Stat label / value / delta / trend / tone", type: "ReactNode … / \"positive\" | \"negative\"", description: "Value and delta take the trend colour." },
+      { name: "FollowUpRow onSelect", type: "() => void", description: "Fires when the row is activated." },
+    ],
+    usage: `import { SegmentedToggle, Tag, Stat } from "@corpora/ui"
+
+<SegmentedToggle options={[{ value: "preview", label: "Preview" }, { value: "markup", label: "Markup" }]} onValueChange={setView} />
+<Tag tone="green">Active</Tag>
+<Stat label="Pistachio" value="+1.15%" delta="+$617.22" trend="positive" />`,
   },
 ]

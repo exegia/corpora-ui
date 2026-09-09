@@ -948,10 +948,10 @@ function App() {
           "Keyboard-operable listbox for the five corpus scope levels.",
       },
       {
-        name: "GeneratedBlock / SuggestedFixCard / AppliedCard",
-        type: "content and diff props",
+        name: "GeneratedBlock / SuggestionCard",
+        type: "content and suggestion props",
         description:
-          "Thread blocks with persistent generated labeling, polite live-region streaming, semantic ins/del diff rows, immediate apply affordance, and version-history confirmation.",
+          "Thread blocks with persistent generated labeling, polite live-region streaming, and collapsible per-node suggestion cards with Reject/Accept actions.",
       },
       {
         name: "Reader adornments",
@@ -963,7 +963,7 @@ function App() {
     usage: `import {
   AiPanel,
   GeneratedBlock,
-  SuggestedFixCard,
+  SuggestionCard,
 } from "@exegia/corpora-ui"
 
 <AiPanel
@@ -971,5 +971,73 @@ function App() {
   thread={<GeneratedBlock content="The boundary is valid." />}
   composerProps={{ onSend: askContextFabric }}
 />`,
+  },
+  {
+    slug: "chat-messages",
+    name: "Message + Attachment",
+    titleStyle: "titlebar",
+    description:
+      "The Bubble atom carrying an attachment preview — above the sender bubble, inside the recipient bubble. No separate message component: the sender and recipient variants of Bubble are the message.",
+    category: "blocks",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/chat-messages-demo")),
+    registryDependencies: ["bubble", "attachment"],
+    props: [
+      { name: "variant", type: '"sender" | "recipient"', description: "Bubble variant; sender hugs the right edge." },
+      { name: "Bubble.Header", type: "{ name, time, badge?, avatar? }", description: "Author row: render it on the first message of a run, and mark the follow-ups `continued`." },
+      { name: "Bubble.Message", type: "children", description: 'Put an <Attachment variant="preview" /> before it (sender) or inside it (recipient).' },
+    ],
+    usage: `import { Bubble, Attachment } from "@corpora/ui"
+
+<Bubble variant="sender">
+  <Bubble.Header name="You" time="Just now" />
+  <Attachment kind="document" variant="preview" title="Q3.pdf" />
+  <Bubble.Message>Here’s the Q3 report.</Bubble.Message>
+</Bubble>
+<Bubble variant="sender" continued>
+  <Bubble.Message>Can you check §4 before Thursday?</Bubble.Message>
+</Bubble>`,
+  },
+  {
+    slug: "composer-with-attachments",
+    name: "Composer with attachments",
+    titleStyle: "titlebar",
+    description:
+      "The prompt Composer with its attachment tray filled. The tray lives in a keyed Jotai family, so an app can add or remove chips by composer id — no separate component.",
+    category: "blocks",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/composer-with-attachments-demo")),
+    registryDependencies: ["attachment", "chat-atoms"],
+    props: [
+      { name: "composerId", type: "string", description: "Stable id for the tray atoms; unnamed composers use useId() and drop state on unmount." },
+      { name: "defaultAttachments", type: "ComposerAttachment[]", description: "Seeds the tray once." },
+      { name: "onSend", type: "(draft, mode, attachments) => void", description: "Send button or ⌘/Ctrl+↵." },
+      { name: "onAttach", type: "() => void", description: "The + button." },
+      { name: "useComposerAttachmentActions(id)", type: "{ add, remove, clear }", description: "Drive the tray from anywhere under ExegiaProvider." },
+    ],
+    usage: `import { Composer, useComposerAttachmentActions } from "@corpora/ui"
+
+<Composer composerId="thread-1" onSend={send} />
+const { add } = useComposerAttachmentActions("thread-1")
+add({ id: "pdf", kind: "document", title: "Q3.pdf", meta: "PDF · 2.4 MB" })`,
+  },
+  {
+    slug: "ai-bubble",
+    name: "AI bubble",
+    titleStyle: "titlebar",
+    description:
+      "Agent reply on the ai Bubble atom: spark mark · name · Agent badge · time, then one of four content cards — Markdown, Research answer, Chart or Streaming text — typed as a discriminated union.",
+    category: "blocks",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/ai-bubble-demo")),
+    registryDependencies: ["markdown", "research-answer", "chart", "streaming-text"],
+    props: [
+      { name: "content", type: '{ kind: "markdown" | "research" | "chart" | "streaming", …props }', required: true, description: "The content card and its own props." },
+      { name: "name / time / badge / avatar", type: "ReactNode", description: 'Header; defaults to "Exegia" and an "Agent" badge with a sparkles tile.' },
+    ],
+    usage: `import { AiBubble } from "@corpora/ui"
+
+<AiBubble time="2 min ago" content={{ kind: "markdown", source: answer }} />
+<AiBubble content={{ kind: "chart", type: "bar", title: "Sales by flavor", data, series }} />`,
   },
 ]

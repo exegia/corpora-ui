@@ -1,0 +1,32 @@
+---
+title: "corpora-ui"
+description: "React component library for the Corpora apps — atoms, components and blocks built from the exegia-ui Sketch document."
+icon: "layers"
+---
+
+`@corpora/ui` is a shadcn-style library (base-ui, style `base-mira`) plus its docs site, in one Vite + React codebase under `react/`. Components map 1:1 to Sketch symbol masters and are grouped by feature spec.
+
+<CardGroup cols={2}>
+  <Card title="Chat attachments" icon="paperclip" href="/chat/chat-attachments">
+    Composer chips, in-bubble previews, message blocks and the composer tray.
+  </Card>
+  <Card title="Chart cards" icon="chart-column" href="/chat/chart-cards">
+    Pie, area, line and bar cards on the chart tokens.
+  </Card>
+  <Card title="AI presentation bubbles" icon="sparkles" href="/chat/ai-presentation-bubbles">
+    Markdown, research answer and the AiBubble frame.
+  </Card>
+  <Card title="Beautiful-UI primitives" icon="layout-grid" href="/chat/beautiful-ui-primitives">
+    Streaming text, tables, code, flowchart and insights.
+  </Card>
+</CardGroup>
+
+## Install
+
+```bash
+cd react && bun install
+make check   # tsc -b --noEmit + eslint
+bun test     # from react/
+```
+
+Mount `ExegiaProvider` once at the app root; every stateful chat component keys its Jotai atoms by instance id below it.
