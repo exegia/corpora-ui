@@ -515,7 +515,7 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     props: [
       { name: "type", type: '"pie" | "area" | "line" | "bar"', required: true, description: "Plot kind." },
       { name: "data", type: "{ label: string; [key]: number | string }[]", required: true, description: "One row per x label (or pie slice)." },
-      { name: "series", type: "{ key, label, color? }[]", required: true, description: "Keys to plot; colour defaults to the series token by position. Pie uses the first." },
+      { name: "series", type: "{ key, label, color?, format? }[]", required: true, description: "Keys to plot; colour defaults to the series token by position. Pie uses the first. `format` renders the value in the legend and hover tooltip." },
       { name: "title / subtitle / badge", type: "ReactNode", description: "Header row; badge defaults to the type name." },
       { name: "center", type: "{ value, label? }", description: "Pie only: donut centre." },
       { name: "headerless / plotHeight", type: "boolean / number", description: "Bare plot for embedding (InsightCards)." },
