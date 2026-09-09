@@ -1,8 +1,10 @@
 "use client"
 
 import { ChevronDown, ChevronUp } from "lucide-react"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { SPRING_SWAP } from "@/lib/ease"
 import { Dot, FollowUpRow, IconButton, Pill, Stat, type DotTone, type StatProps } from "@/components/ui/chat"
 import { Chart, type ChartDatum, type ChartSeries } from "./chart"
 
@@ -30,13 +32,18 @@ export interface InsightCardsProps extends React.ComponentPropsWithoutRef<"div">
  * @sketch "Component / Insight Cards"
  */
 export function InsightCards({ header = "Insights", insights, index, defaultIndex = 0, onIndexChange, onFollowUp, className, ...props }: InsightCardsProps): React.ReactElement {
+  const reduceMotion = useReducedMotion()
   const [internal, setInternal] = React.useState(defaultIndex)
   const current = Math.min(index ?? internal, Math.max(insights.length - 1, 0))
+  // Which way the card slides: next pulls the new one up from below, previous from above.
+  const [direction, setDirection] = React.useState(1)
   const go = (next: number) => {
+    setDirection(next > current ? 1 : -1)
     if (index === undefined) setInternal(next)
     onIndexChange?.(next)
   }
   const insight = insights[current]
+  const offset = reduceMotion ? 0 : 24 * direction
 
   return (
     <div data-slot="insight-cards" className={cn("flex w-[344px] max-w-full flex-col gap-2.5", className)} {...props}>
@@ -48,8 +55,16 @@ export function InsightCards({ header = "Insights", insights, index, defaultInde
           <IconButton aria-label="Next insight" disabled={current >= insights.length - 1} onClick={() => go(current + 1)}><ChevronDown /></IconButton>
         </span>
       </div>
+      <AnimatePresence custom={direction} initial={false} mode="popLayout">
       {insight ? (
-        <>
+        <motion.div
+          key={current}
+          className="flex flex-col gap-2.5"
+          initial={{ opacity: 0, y: offset }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -offset }}
+          transition={reduceMotion ? { duration: 0 } : SPRING_SWAP}
+        >
           <p className="text-[13px] leading-[15px] text-text-secondary [&_[data-slot=dot]]:mx-0.5 [&_[data-slot=dot]]:inline-block [&_[data-slot=dot]]:align-middle">
             {insight.summary}
           </p>
@@ -68,8 +83,9 @@ export function InsightCards({ header = "Insights", insights, index, defaultInde
             ) : null}
           </div>
           {insight.followUp ? <FollowUpRow onSelect={() => onFollowUp?.(insight.followUp!)} className="w-fit rounded-full border border-border-default bg-surface-card px-3 hover:bg-surface-subtle">{insight.followUp}</FollowUpRow> : null}
-        </>
+        </motion.div>
       ) : null}
+      </AnimatePresence>
     </div>
   )
 }

@@ -4,7 +4,8 @@ import { DemoStage } from "@/components/docs/demo-controls"
 import { InsightCards, InsightEntity } from "@/components/composed/chat"
 
 const WEEKS = ["W1", "W2", "W3", "W4", "W5", "W6", "W7"]
-const trend = [40, 46, 38, 52, 44, 60, 72].map((a, i) => ({ label: WEEKS[i], mint: a, pistachio: 30 + i * 6 }))
+const coverage = [61, 64, 63, 68, 70, 74, 79].map((v, i) => ({ label: WEEKS[i], iliad: v, odyssey: 48 + i * 4 }))
+const hapax = [1180, 1164, 1151, 1133, 1120, 1097, 1072].map((v, i) => ({ label: WEEKS[i], hapax: v }))
 
 export default function InsightCardsDemo(): React.ReactElement {
   return (
@@ -12,22 +13,28 @@ export default function InsightCardsDemo(): React.ReactElement {
       <InsightCards
         insights={[
           {
-            summary: <>The worst performer in your <InsightEntity>Creamery</InsightEntity> is Rocky Road — down -6% or -$2,453.44.</>,
+            summary: <>Lexicon coverage of the <InsightEntity>Iliad</InsightEntity> passed the Odyssey this week — 79% of tokens now resolve to a lemma.</>,
             stats: [
-              { tone: "series-1", label: "Mint Chip", value: "-4.41%", delta: "-$2,377.66", trend: "negative" },
-              { tone: "series-3", label: "Pistachio", value: "+1.15%", delta: "+$617.22", trend: "positive" },
+              { tone: "series-1", label: "Iliad", value: "79%", delta: "+5 pts", trend: "positive" },
+              { tone: "series-2", label: "Odyssey", value: "72%", delta: "+2 pts", trend: "positive" },
             ],
-            snapshot: { data: trend, series: [{ key: "mint", label: "Mint Chip" }, { key: "pistachio", label: "Pistachio", color: "var(--chart-series-2)" }] },
-            followUp: "Should I rebalance flavors?",
+            snapshot: { label: "Coverage · 7 weeks", data: coverage, series: [{ key: "iliad", label: "Iliad" }, { key: "odyssey", label: "Odyssey" }] },
+            followUp: "Which lemmas are still unresolved?",
           },
           {
-            summary: <>Vanilla margins in <InsightEntity>Retail</InsightEntity> recovered after the March price change.</>,
+            summary: <>Hapax legomena in <InsightEntity>Hesiod</InsightEntity> keep shrinking as the lexicon links more variant spellings.</>,
             stats: [
-              { tone: "series-2", label: "Vanilla", value: "+3.2%", delta: "+$1,204.10", trend: "positive" },
-              { tone: "series-4", label: "Mango", value: "-0.8%", delta: "-$212.00", trend: "negative" },
+              { tone: "series-3", label: "Hapax", value: "1,072", delta: "-108", trend: "positive" },
+              { tone: "series-4", label: "Unlinked forms", value: "312", delta: "-41", trend: "positive" },
             ],
+            snapshot: { label: "Hapax count", badge: "Trend", data: hapax, series: [{ key: "hapax", label: "Hapax", color: "var(--chart-series-3)" }] },
+            followUp: "Show the newest links",
           },
-          { summary: "Cone inventory covers 11 days at current velocity.", stats: [{ label: "Cones", value: "11 days", trend: "positive" }] },
+          {
+            summary: <>The <InsightEntity>Homeric Hymns</InsightEntity> have 14 lemmas flagged for review after the last import.</>,
+            stats: [{ tone: "series-5", label: "Flagged lemmas", value: "14", delta: "+9", trend: "negative" }],
+            followUp: "Open the review queue",
+          },
         ]}
       />
     </DemoStage>
