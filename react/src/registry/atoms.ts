@@ -259,6 +259,19 @@ export const atoms: RegistryEntry[] = [
 </InputGroup>`,
   },
   {
+    slug: "reference",
+    name: "Reference",
+    titleStyle: "expanded",
+    description: "Reference link with optional header and reactions.",
+    category: "atoms",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/reference-demo")),
+    registryDependencies: ["chip", "button"],
+    usage: `import { Reference } from "@corpora/ui"
+
+<Reference />`,
+  },
+  {
     slug: "text",
     name: "Text",
     titleStyle: "titlebar",
@@ -289,18 +302,77 @@ export const atoms: RegistryEntry[] = [
           "Adds a reader-selection treatment; a string is exposed as data-selection.",
       },
     ],
-    usage: `import { Heading, Paragraph, Text } from "@exegia/corpora-ui"
+    usage: `import { Text } from "@exegia/corpora-ui"
 import { TextClickPopover } from "@exegia/corpora-ui"
 
-<Heading size="large">Corpus title</Heading>
-<Paragraph>Readable corpus prose belongs here.</Paragraph>
-<Text type="link" href="/activity">View activity</Text>
+<Text.Heading size="large">Corpus title</Text.Heading>
+<Text.Paragraph>Readable corpus prose belongs here.</Text.Paragraph>
+<Text.Root type="link" href="/activity">View activity</Text.Root>
 
 // Click-triggered popover — works for default (span), link and subscript
 <TextClickPopover type="subscript" popover={<p>Annotation</p>}>
   Subscript note
 </TextClickPopover>`,
   },
+  {
+    slug: "bubble",
+    name: "Bubble",
+    titleStyle: "titlebar",
+    description:
+      "Chat bubble atom: an inner-shadowed message surface with sender, recipient and ai variants, an author header (avatar, name, time, role badge), a glass reaction pill hanging off the corner and hover-revealed message actions.",
+    category: "atoms",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/bubble-demo")),
+    registryDependencies: ["button", "badge", "user-avatar", "emoji-picker"],
+    props: [
+      {
+        name: "variant",
+        type: '"ai" | "sender" | "recipient"',
+        default: '"recipient"',
+        description:
+          "Who the bubble belongs to. sender is right-aligned on a lit inverted surface with the bottom-right tail pinched, recipient is its dim mirror, ai renders chrome-less prose so generated output never masquerades as a person's message. Sub-components inherit the variant from context.",
+      },
+      {
+        name: "Bubble.Header",
+        type: "name / time / badge / avatar",
+        description:
+          "Author row: avatar (an identity object renders UserAvatar; a node is used as-is; the ai variant defaults to the spark mark), bold name, muted time and a role badge — a string picks the neutral chip for people and the accent chip for the agent. The sender variant mirrors the row.",
+      },
+      {
+        name: "Bubble.Message",
+        type: "children",
+        description: "The message surface, styled by the inherited variant.",
+      },
+      {
+        name: "Bubble.Reactions",
+        type: "reactions / onToggle / onEmojiSelect",
+        description:
+          "Frosted reaction pill overlapping the bubble's bottom corner. Each chip carries aria-pressed, springs its emoji on toggle and rolls its count; onToggle(reaction, index) fires on click. The trailing add-reaction button opens a frimousse emoji picker in a frosted-glass popover — onEmojiSelect({ emoji, label }) fires on pick. Accepts children for custom chips.",
+      },
+      {
+        name: "Bubble.Actions",
+        type: "children",
+        description:
+          "role=toolbar row for per-message actions (copy, retry, …), hidden until the bubble is hovered or an action has focus. Compose with Button size=icon-xs.",
+      },
+    ],
+    usage: `import { Bubble } from "@exegia/corpora-ui"
+
+<Bubble variant="sender">
+  <Bubble.Header name="Sender" time="10 min ago" badge="Admin" />
+  <Bubble.Message>Can you check whether ¶12 keeps the boundary?</Bubble.Message>
+  <Bubble.Reactions
+    reactions={[{ id: "heart", emoji: "❤️", count: 4, reacted: true, label: "heart" }]}
+    onToggle={toggleReaction}
+  />
+  <Bubble.Actions>
+    <Button aria-label="Copy" size="icon-xs" variant="ghost">
+      <CopyIcon />
+    </Button>
+  </Bubble.Actions>
+</Bubble>`,
+  },
+
   {
     slug: "file-icons",
     name: "File icons",

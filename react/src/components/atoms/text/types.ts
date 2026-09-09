@@ -19,3 +19,13 @@ export type TextProps = Omit<
   selection?: string | boolean
   style?: CSSProperties
 }
+
+export type LabelLevel = "heading" | "title" | "caption" | "subtitle"
+
+export type LabelProps = {
+  children: ReactNode
+  className?: string
+  /** Type scale of the label. Defaults to "title". */
+  level?: LabelLevel
+  id?: string
+}

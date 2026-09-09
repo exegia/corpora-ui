@@ -145,7 +145,22 @@ describe("UserAvatar · bezel", () => {
     render(<UserAvatar name="Jenny Hamilton" />)
     const root = document.querySelector('[data-slot="user-avatar"]')
     expect(root?.hasAttribute("data-bezel")).toBe(true)
-    expect(root?.className).toContain("shadow-[inset")
+    // Both emboss layers, in both themes. Asserted class by class rather than
+    // as "some inset shadow": the family is custom, so a `cn()` that does not
+    // know it folds the lot into one built-in group and keeps only the last —
+    // which still passes a laxer check while the emboss is gone from screen.
+    for (const expected of [
+      "inset-shadow-lit-t-3",
+      "inset-shadow-lit-blur-3",
+      "inset-shadow-lit/80",
+      "dark:inset-shadow-lit/5",
+      "inset-shadow-dim-b-1",
+      "inset-shadow-dim-blur-2",
+      "inset-shadow-dim/15",
+      "dark:inset-shadow-dim-b-8",
+    ]) {
+      expect(root?.className).toContain(expected)
+    }
     // Rests at the classic top-left light until a pointer moves.
     expect(rimRotation()).toBeCloseTo(DEFAULT_BEZEL_ANGLE * BEZEL_DAMPING, 5)
   })
