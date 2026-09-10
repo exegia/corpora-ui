@@ -14,7 +14,7 @@ export function ScrollArea({
   overscrollContain = false,
   ...props
 }: ScrollAreaPrimitive.Root.Props & {
-  scrollFade?: boolean;
+  scrollFade?: boolean | "top" | "bottom";
   scrollbarGutter?: boolean;
   fill?: boolean;
   clampContentMinWidth?: boolean;
@@ -27,9 +27,11 @@ export function ScrollArea({
     >
       <ScrollAreaPrimitive.Viewport
         className={cn(
-          "h-full rounded-[inherit] outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background",
+          "h-full rounded-[inherit] outline-none transition-shadow focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background",
           overscrollContain &&
-            "data-has-overflow-y:overscroll-y-contain data-has-overflow-x:overscroll-x-contain",
+          "data-has-overflow-y:overscroll-y-contain data-has-overflow-x:overscroll-x-contain",
+            scrollFade === "top" && "mask-t-from-[calc(100%-min(var(--fade-size),var(--scroll-area-overflow-y-start)))] mask-l-from-[calc(100%-min(var(--fade-size),var(--scroll-area-overflow-x-start)))]",
+            scrollFade === "bottom" && "mask-b-from-[calc(100%-min(var(--fade-size),var(--scroll-area-overflow-y-end)))] mask-r-from-[calc(100%-min(var(--fade-size),var(--scroll-area-overflow-x-end)))]",
           scrollFade &&
             "mask-t-from-[calc(100%-min(var(--fade-size),var(--scroll-area-overflow-y-start)))] mask-b-from-[calc(100%-min(var(--fade-size),var(--scroll-area-overflow-y-end)))] mask-l-from-[calc(100%-min(var(--fade-size),var(--scroll-area-overflow-x-start)))] mask-r-from-[calc(100%-min(var(--fade-size),var(--scroll-area-overflow-x-end)))] [--fade-size:1.5rem]",
           scrollbarGutter &&
@@ -68,7 +70,7 @@ export function ScrollBar({
       {...props}
     >
       <ScrollAreaPrimitive.Thumb
-        className="relative flex-1 rounded-full bg-foreground/20"
+        className="relative flex-1 rounded-full bg-foreground/0"
         data-slot="scroll-area-thumb"
       />
     </ScrollAreaPrimitive.Scrollbar>
