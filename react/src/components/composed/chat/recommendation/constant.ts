@@ -1,5 +1,7 @@
-import type { SignalLevel } from "@/components/ui/chat";
-import { motion } from "motion/react";
+import { Check, X } from "lucide-react"
+import { motion } from "motion/react"
+import type { SignalLevel } from "@/components/ui/chat"
+import type { RecommendationState } from "./types"
 
 export const CONFIDENCE: Record<SignalLevel, string> = {
   high: "High confidence",
@@ -7,12 +9,18 @@ export const CONFIDENCE: Record<SignalLevel, string> = {
   low: "Low confidence",
 }
 
-export const STATE_LABEL: Record<Exclude<SuggestionState, "pending">, string> = {
+export const STATE_LABEL: Record<
+  Exclude<RecommendationState, "pending">,
+  string
+> = {
   accepted: "Done",
   rejected: "Skipped",
 }
 
-export const STATE_COLOR: Record<Exclude<SuggestionState, "pending">, string> = {
+export const STATE_COLOR: Record<
+  Exclude<RecommendationState, "pending">,
+  string
+> = {
   accepted: "bg-green-500",
   rejected: "bg-red-500",
 }
