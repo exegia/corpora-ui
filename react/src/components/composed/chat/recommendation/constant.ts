@@ -1,6 +1,4 @@
-import { Check, X } from "lucide-react"
-import { motion } from "motion/react"
-import type { SignalLevel } from "@/components/ui/chat"
+import type { SignalLevel, TagTone } from "@/components/ui/chat"
 import type { RecommendationState } from "./types"
 
 export const CONFIDENCE: Record<SignalLevel, string> = {
@@ -17,17 +15,11 @@ export const STATE_LABEL: Record<
   rejected: "Skipped",
 }
 
-export const STATE_COLOR: Record<
+/** Status pill tones, shared with the presentation Tag atom. */
+export const STATE_TONE: Record<
   Exclude<RecommendationState, "pending">,
-  string
+  TagTone
 > = {
-  accepted: "bg-green-500",
-  rejected: "bg-red-500",
-}
-
-// Hoisted: `motion.create` inside render makes a new component type on every
-// pass, which remounts the mark and replays its entry animation.
-export const STATE_ICON = {
-  accepted: motion.create(Check),
-  rejected: motion.create(X),
+  accepted: "green",
+  rejected: "amber",
 }

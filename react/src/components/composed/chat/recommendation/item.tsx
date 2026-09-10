@@ -8,7 +8,6 @@ import {
   AccordionPanel,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -20,7 +19,7 @@ import { AvatarHandle, Signal, Tag } from "@/components/ui/chat"
 import { EASE_IN_OUT, EASE_OUT_STRONG } from "@/lib/ease"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "./checkbox"
-import { CONFIDENCE, STATE_COLOR, STATE_LABEL } from "./constant"
+import { CONFIDENCE, STATE_LABEL, STATE_TONE } from "./constant"
 import type { RecommendationItemProps } from "./types"
 
 const ACTION_MOTION = {
@@ -64,6 +63,7 @@ export function Item({
   rejectLabel,
   alternativesLabel = "Alternatives",
   state = "pending",
+  step,
   onAccept,
   onReject,
   onAlternatives,
@@ -107,7 +107,7 @@ export function Item({
         data-state={state}
       >
         <AccordionTrigger className="relative items-center gap-3 rounded-t-[calc(var(--radius-md)-1px)] rounded-b-none px-3 py-2.5 text-left hover:bg-black/4 focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/4">
-          <Checkbox state={state} />
+          <Checkbox state={state} step={step} />
           <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
             <span
               className={cn(
@@ -143,12 +143,9 @@ export function Item({
             </span>
           </div>
           {state === "pending" ? null : (
-            <Badge
-              className={cn(STATE_COLOR[state], "uppercase")}
-              variant="outline"
-            >
+            <Tag className="uppercase" tone={STATE_TONE[state]}>
               {STATE_LABEL[state]}
-            </Badge>
+            </Tag>
           )}
         </AccordionTrigger>
 
@@ -162,7 +159,7 @@ export function Item({
                 {options.map((option, index) => (
                   <motion.button
                     {...optionMotion(index)}
-                    className="flex h-6 items-center gap-2.5 rounded-md text-left text-[12.5px] leading-none text-text-primary outline-none hover:bg-black/4 focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/6"
+                    className="-mx-2 flex h-6 items-center gap-2.5 rounded-md px-2 text-left text-[12.5px] leading-none text-text-primary outline-none hover:bg-black/4 focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/6"
                     key={index}
                     onClick={() => onSelectOption?.(index)}
                     type="button"
@@ -184,7 +181,7 @@ export function Item({
               {children}
             </div>
           ) : null}
-          <CardFrameFooter className="relative flex items-center gap-2 p-3">
+          <CardFrameFooter className="relative flex items-center gap-2 px-4 py-3">
             <Signal level={confidence} />
             <span className="text-[12.5px] text-text-primary">
               {confidenceLabel ?? CONFIDENCE[confidence]}

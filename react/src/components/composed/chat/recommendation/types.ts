@@ -31,6 +31,8 @@ export interface RecommendationFields {
   rejectLabel?: React.ReactNode
   alternativesLabel?: React.ReactNode
   state?: RecommendationState
+  /** Number inside the pending ring, e.g. the item's position in its group. */
+  step?: number
   onAccept?: () => void
   /** Skip / ignore. Wins over `onAlternatives` when both are passed. */
   onReject?: () => void

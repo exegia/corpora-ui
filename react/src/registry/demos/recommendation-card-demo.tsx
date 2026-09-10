@@ -6,26 +6,28 @@ import type { RecommendationState } from "@/components/composed/chat"
 
 const GROUP = [
   {
-    value: "restock",
-    title: "Reorder waffle cones",
-    description: "12 cases from",
-    entity: { name: "Cone King", initials: "C" },
-    leadTime: "7 days",
+    value: "convert",
+    title: "Convert the Homeric Hymns EPUB to Text-Fabric",
+    description: "Walk the EPUB into slots and sections under",
+    entity: { name: "Homer corpus", initials: "H" },
+    leadTime: "~4 min",
     confidence: "high",
   },
   {
-    value: "vendor",
-    title: "Switch vanilla supplier",
-    description: "Move the Madagascar SKU to",
-    entity: { name: "Bourbon & Co", initials: "B" },
-    leadTime: "3 weeks",
+    value: "otext",
+    title: "Repair the otext section config",
+    description: "sectionTypes lists book,chapter but chapter nodes have no",
+    entity: { name: "Iliad", initials: "I" },
+    descriptionSuffix: "feature",
+    leadTime: "~1 min",
     confidence: "medium",
   },
   {
-    value: "promo",
-    title: "Run a weekend promo",
-    description: "Discount pints 15% to clear",
-    leadTime: "2 days",
+    value: "lemma",
+    title: "Backfill lemma on 312 unlinked forms",
+    description: "Match variant spellings against the",
+    entity: { name: "Hesiod lexicon", initials: "L" },
+    leadTime: "~9 min",
     confidence: "low",
   },
 ] as const
@@ -39,10 +41,11 @@ function GroupDemo(): React.ReactElement {
 
   return (
     <Recommendation.Group defaultValue={["restock"]}>
-      {GROUP.map(({ value, ...item }) => (
+      {GROUP.map(({ value, ...item }, index) => (
         <Recommendation.Item
           key={value}
           value={value}
+          step={index + 1}
           state={states[value] ?? "pending"}
           onAccept={set(value, "accepted")}
           onReject={set(value, "rejected")}
@@ -63,14 +66,14 @@ export default function RecommendationCardDemo(): React.ReactElement {
           Single card
         </h3>
         <RecommendationCard
-          title="Want me to place this restock order?"
-          description="Reorder waffle cones from"
-          entity={{ name: "Cone King", initials: "C" }}
-          descriptionSuffix="with lead time"
-          leadTime="7 days"
+          title="Want me to validate the Iliad corpus before the walker runs?"
+          description="Check otype, oslots and the section features in"
+          entity={{ name: "Iliad · Homer corpus", initials: "I" }}
+          descriptionSuffix="which takes about"
+          leadTime="2 min"
           options={[
-            { label: "Switch to Vanilla Madagascar", status: "Needs review", signal: "medium" },
-            { label: "Full restock across every SKU", status: "No signal", signal: "low" },
+            { label: "Reconcile against the source TEI first", status: "Needs review", signal: "medium" },
+            { label: "Rebuild the .cfm cache and skip validation", status: "No signal", signal: "low" },
           ]}
           confidence="high"
         />
