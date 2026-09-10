@@ -552,41 +552,38 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     name: "Research answer",
     titleStyle: "titlebar",
     description:
-      "Answer card with a kicker, the content, Source / Date / Author(s) meta and an actions row: Copy citation, Share, Add to list, thumbs up / down.",
+      "Answer card with a kicker, the content, stacked Source / Date / Author(s) rows and an actions row: Copy citation, Share, Add to list.",
     category: "components",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/research-answer-demo")),
     registryDependencies: ["chat-presentation-atoms", "button"],
     props: [
       { name: "content", type: "ReactNode", required: true, description: "The answer." },
-      { name: "kicker / kickerSub / corpus", type: "ReactNode", description: "Header row; corpus renders as a pill." },
+      { name: "kicker / kickerSub", type: "ReactNode", description: "Header row." },
       { name: "source / date / authors", type: "ReactNode", description: "Meta columns; omitted ones are hidden." },
-      { name: "onCopyCitation / onShare / onAddToList / onFeedback", type: "() => void / (vote) => void", description: "Actions. Add to list behaviour is not designed — the callback is all the card does." },
+      { name: "onCopyCitation / onShare / onAddToList", type: "() => void", description: "Actions. Add to list behaviour is not designed — the callback is all the card does." },
     ],
     usage: `import { ResearchAnswer } from "@corpora/ui"
 
-<ResearchAnswer corpus="Iliad" content="…" source="Iliad · Homer corpus" date="c. 750 BCE" authors="Homer" onFeedback={vote} />`,
+<ResearchAnswer content="…" source="Iliad · Homer corpus" date="c. 750 BCE" authors="Homer" onCopyCitation={copy} />`,
   },
   {
     slug: "streaming-text",
     name: "Streaming text",
     titleStyle: "titlebar",
     description:
-      "Streamed answer: word-by-word reveal with a caret, inline source chips, an action row, a collapsible sources panel (keyed atom) and follow-up prompts.",
+      "Streamed answer: word-by-word reveal with a caret and inline source previews.",
     category: "components",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/streaming-text-demo")),
     registryDependencies: ["chat-presentation-atoms"],
     props: [
-      { name: "paragraphs", type: '(string | StreamingToken[])[]', required: true, description: "Each paragraph is words or tokens; `{ cite }` renders an inline SourceChip." },
+      { name: "paragraphs", type: '(string | StreamingToken[])[]', required: true, description: "Each paragraph is words or tokens; `{ cite, title?, description?, href? }` renders an InlineSource." },
       { name: "streaming / wordMs", type: 'boolean / number', default: '55', description: "Animate the reveal; reduced motion shows everything at once." },
-      { name: "sources / sourcesLabel", type: 'StreamingSource[] / ReactNode', description: "Rows of the collapsible panel; open state lives in streamingSourcesOpenAtom(id)." },
-      { name: "followUps / onFollowUp", type: 'string[] / (text) => void', description: "Follow-up rows." },
-      { name: "onCopy / onRegenerate / onFeedback", type: 'callbacks', description: "Action row." },
     ],
     usage: `import { StreamingText } from "@corpora/ui"
 
-<StreamingText streaming paragraphs={[answer, [{ cite: "scoopdata.io" }, ...]]} sources={sources} followUps={["…"]} />`,
+<StreamingText streaming paragraphs={[answer, [{ cite: "scoopdata.io", href: "https://scoopdata.io" }, ...]]} />`,
   },
   {
     slug: "recommendation-card",

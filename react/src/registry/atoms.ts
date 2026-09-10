@@ -450,7 +450,7 @@ import { TextClickPopover } from "@exegia/corpora-ui"
     name: "Presentation atoms",
     titleStyle: "titlebar",
     description:
-      "Atoms for AI answers and charts: SegmentedToggle, IconButton, AgentBadge, Pill, Dot, LegendItem, Tag, Signal, SourceChip, AvatarStack, Stat, FollowUpRow.",
+      "Atoms for AI answers and charts: SegmentedToggle, IconButton, AgentBadge, Pill, Dot, LegendItem, Tag, Signal, SourceChip, InlineSource, AvatarStack, Stat, FollowUpRow.",
     category: "atoms",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/chat-presentation-atoms-demo")),
@@ -462,6 +462,7 @@ import { TextClickPopover } from "@exegia/corpora-ui"
       { name: "Tag tone", type: '"amber" | "purple" | "blue" | "green"', default: '"blue"', description: "Text, fill and border from the matching --tag-* tokens." },
       { name: "Signal level", type: '"high" | "medium" | "low"', default: '"high"', description: "Lit bars: 3 green, 2 orange, 1 grey." },
       { name: "Stat label / value / delta / trend / tone", type: "ReactNode … / \"positive\" | \"negative\"", description: "Value and delta take the trend colour." },
+      { name: "InlineSource domain / favicon / title / description / href", type: "ReactNode / string …", description: "SourceChip that opens a hover preview with an Open source button when it carries a title, description or href." },
       { name: "FollowUpRow onSelect", type: "() => void", description: "Fires when the row is activated." },
     ],
     usage: `import { SegmentedToggle, Tag, Stat } from "@corpora/ui"
