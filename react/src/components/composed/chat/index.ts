@@ -73,5 +73,7 @@ export {
   InsightCards,
   InsightEntity,
   type Insight,
+  type InsightAllocation,
+  type InsightSegment,
   type InsightCardsProps,
 } from "./insight-cards"

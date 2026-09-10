@@ -725,13 +725,13 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     name: "Insight cards",
     titleStyle: "titlebar",
     description:
-      "Paged insights: header with count and prev / next, summary, two stats, a trend snapshot (line plot) and a follow-up prompt.",
+      "Paged insights: header with count and prev / next, summary, stats, a trend snapshot (line plot) or an allocation breakdown with selectable segments, and a follow-up prompt.",
     category: "components",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/insight-cards-demo")),
     registryDependencies: ["chat-presentation-atoms", "chart"],
     props: [
-      { name: "insights", type: 'Insight[]', required: true, description: "summary, stats (StatProps[]), snapshot { data, series }, followUp." },
+      { name: "insights", type: 'Insight[]', required: true, description: "summary, stats (StatProps[]), snapshot { data, series }, allocation { label, value, initials, segments[] }, followUp." },
       { name: "index / defaultIndex / onIndexChange", type: 'number', description: "Which insight is shown." },
       { name: "onFollowUp", type: '(text) => void', description: "Follow-up pill." },
     ],
