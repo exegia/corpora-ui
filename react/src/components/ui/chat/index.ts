@@ -9,3 +9,4 @@ export { SegmentedToggle, type SegmentedToggleOption, type SegmentedToggleProps 
 export { AgentBadge, IconButton, type IconButtonProps } from "./icon-button"
 export { Signal, Tag, type SignalLevel, type SignalProps, type TagProps, type TagTone } from "./tag"
 export { AvatarStack, FollowUpRow, SourceChip, Stat, type AvatarStackProps, type FollowUpRowProps, type SourceChipProps, type StatProps } from "./chips"
+export { InlineSource, type InlineSourceProps } from "./inline-source"

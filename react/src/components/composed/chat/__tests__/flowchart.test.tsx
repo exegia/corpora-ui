@@ -14,11 +14,11 @@ describe("Flowchart", () => {
   it("lays out the default steps and draws a connector", () => {
     const { container } = render(<Flowchart.Root />)
     expect(screen.getByText("New order created")).toBeTruthy()
-    expect(screen.getByText("If / Else")).toBeTruthy()
+    expect(screen.getByText("Node 2")).toBeTruthy()
     const path = container.querySelector("path[data-edge]")!
     expect(path.getAttribute("d")).toMatch(/^M \d/)
     const canvas = container.querySelector('[data-slot="flowchart"]') as HTMLElement
-    expect(parseFloat(canvas.style.height)).toBeGreaterThan(0)
+    expect(parseFloat(canvas.style.minHeight)).toBeGreaterThan(0)
   })
 
   it("lights the connector when a step is selected", () => {
@@ -35,17 +35,25 @@ describe("Flowchart", () => {
     expect(container.querySelector('path[data-edge="a->b"]')).toBeTruthy()
   })
 
-  it("fires onAdd with the side and onRemove, confirming orphans in an AlertDialog", async () => {
+  it("offers add child, duplicate and delete from the context menu, confirming orphans", async () => {
     const onAdd = mock(() => {})
     const onRemove = mock(() => {})
-    render(<Flowchart.Root steps={STEPS} onAdd={onAdd} onRemove={onRemove} />)
-    fireEvent.click(screen.getAllByRole("button", { name: "Add node right" })[0])
-    expect(onAdd).toHaveBeenCalledWith("a", "right")
+    const onDuplicate = mock(() => {})
+    render(<Flowchart.Root steps={STEPS} onAdd={onAdd} onRemove={onRemove} onDuplicate={onDuplicate} />)
+    expect(screen.queryByRole("button", { name: /Add node/ })).toBeNull()
+    fireEvent.contextMenu(screen.getByRole("button", { name: "A" }))
+    fireEvent.click(await screen.findByRole("menuitem", { name: "Add child" }))
+    expect(onAdd).toHaveBeenCalledWith("a", "bottom")
+    fireEvent.contextMenu(screen.getByRole("button", { name: "B" }))
+    fireEvent.click(await screen.findByRole("menuitem", { name: "Duplicate" }))
+    expect(onDuplicate).toHaveBeenCalledWith("b")
     // leaf: removed outright
-    fireEvent.click(screen.getAllByRole("button", { name: "Remove node" })[1])
+    fireEvent.contextMenu(screen.getByRole("button", { name: "B" }))
+    fireEvent.click(await screen.findByRole("menuitem", { name: "Delete" }))
     expect(onRemove).toHaveBeenCalledWith("b")
     // parent: asks first
-    fireEvent.click(screen.getAllByRole("button", { name: "Remove node" })[0])
+    fireEvent.contextMenu(screen.getByRole("button", { name: "A" }))
+    fireEvent.click(await screen.findByRole("menuitem", { name: "Delete" }))
     const dialog = await screen.findByRole("alertdialog")
     expect(dialog.textContent).toContain("orphaned")
     expect(onRemove).toHaveBeenCalledTimes(1)
@@ -53,10 +61,27 @@ describe("Flowchart", () => {
     await waitFor(() => expect(onRemove).toHaveBeenCalledWith("a"))
   })
 
-  it("hides add / remove controls when read-only", () => {
+  it("hides the context menu when read-only", () => {
     render(<Flowchart.Root steps={STEPS} readOnly onAdd={() => {}} onRemove={() => {}} />)
-    expect(screen.queryByRole("button", { name: /Add node/ })).toBeNull()
-    expect(screen.queryByRole("button", { name: "Remove node" })).toBeNull()
+    fireEvent.contextMenu(screen.getByRole("button", { name: "A" }))
+    expect(screen.queryByRole("menu")).toBeNull()
+  })
+
+  it("renames a card from its pill and labels conditions Node n", async () => {
+    const onRename = mock(() => {})
+    render(
+      <Flowchart.Root
+        steps={[{ ...STEPS[0], kind: { label: "Trigger", hue: "#000" } }, { ...STEPS[1], condition: true }]}
+        onRename={onRename}
+      />
+    )
+    expect(screen.getByText("Trigger")).toBeTruthy()
+    expect(screen.getByText("Node 2")).toBeTruthy()
+    fireEvent.doubleClick(screen.getByText("Node 2"))
+    const input = screen.getByRole("textbox", { name: "Node name" })
+    fireEvent.change(input, { target: { value: "Cross references" } })
+    fireEvent.keyDown(input, { key: "Enter" })
+    expect(onRename).toHaveBeenCalledWith("b", "Cross references")
   })
 
   it("zooms with the buttons", () => {
@@ -65,5 +90,43 @@ describe("Flowchart", () => {
     expect(screen.getByText("125%")).toBeTruthy()
     const canvas = container.querySelector('[data-slot="flowchart"]') as HTMLElement
     expect(canvas.style.backgroundSize).toContain("27.5px")
+  })
+
+  it("fills its parent and keeps a min-height floor when zooming out or removing a card", () => {
+    const { container, rerender } = render(<Flowchart.Root steps={STEPS} zoomable height={300} />)
+    const canvas = container.querySelector('[data-slot="flowchart"]') as HTMLElement
+    expect(canvas.className).toContain("h-full")
+    expect(canvas.style.minHeight).toBe("300px")
+    fireEvent.click(screen.getByRole("button", { name: "Zoom out" }))
+    expect(canvas.style.minHeight).toBe("300px")
+    rerender(<Flowchart.Root steps={[STEPS[0]]} zoomable height={300} />)
+    expect(canvas.style.minHeight).toBe("300px")
+  })
+
+  it("clears the selected card on a still click on empty canvas", () => {
+    const { container } = render(<Flowchart.Root steps={STEPS} />)
+    const step = screen.getByRole("button", { name: "A" })
+    fireEvent.click(step)
+    expect(step.getAttribute("aria-pressed")).toBe("true")
+    const canvas = container.querySelector('[data-slot="flowchart"]') as HTMLElement
+    fireEvent.pointerDown(canvas, { button: 0, clientX: 5, clientY: 5 })
+    fireEvent.pointerUp(canvas)
+    expect(step.getAttribute("aria-pressed")).toBe("false")
+  })
+
+  it("selects a connector and edits it from the toolbar", () => {
+    const onEdgeRemove = mock(() => {})
+    const onEdgeChange = mock(() => {})
+    const { container } = render(<Flowchart.Root steps={STEPS} onEdgeRemove={onEdgeRemove} onEdgeChange={onEdgeChange} />)
+    expect(screen.queryByRole("toolbar")).toBeNull()
+    // the wide transparent twin is the click target
+    fireEvent.click(container.querySelector('path[data-edge="a->b"]')!.nextElementSibling!)
+    expect(screen.getByRole("toolbar", { name: "Connector" })).toBeTruthy()
+    expect(container.querySelector('path[data-edge="a->b"]')!.getAttribute("stroke")).toContain("accent")
+    fireEvent.click(screen.getByRole("button", { name: "Stroke 3" }))
+    expect(onEdgeChange).toHaveBeenCalledWith("a->b", { strokeWidth: 3 })
+    fireEvent.click(screen.getByRole("button", { name: "Disconnect" }))
+    expect(onEdgeRemove).toHaveBeenCalledWith("a->b")
+    expect(screen.queryByRole("toolbar")).toBeNull()
   })
 })

@@ -56,7 +56,7 @@ function ChartTooltip({ active, payload, label, series }: { active?: boolean; pa
   // Pie rows already carry the category as their name, so no heading there.
   const heading = series.length > 1 || label !== undefined ? (label ?? payload[0].payload?.label) : undefined
   return (
-    <div data-slot="chart-tooltip" className="min-w-28 rounded-lg border border-border-default bg-surface-card px-2.5 py-2 shadow-md">
+    <div data-slot="chart-tooltip" className="min-w-28 rounded-md border border-border-default bg-surface-card px-2.5 py-2 shadow-md">
       {heading !== undefined ? <div className="mb-1.5 text-[11px] font-medium leading-3 text-text-secondary">{String(heading)}</div> : null}
       <ul className="flex flex-col gap-1">
         {payload.map((row, i) => {
@@ -177,7 +177,7 @@ export function Chart({
     )
   }
   return (
-    <CardFrame data-slot="chart" data-type={type} className={cn("w-80 max-w-full", className)} {...props}>
+    <CardFrame data-slot="chart" data-type={type} className={cn("w-80 max-w-full [--frame-radius:var(--radius-md)]", className)} {...props}>
       <CardFrameHeader className="flex flex-row items-start justify-between gap-3 px-3.5 py-3">
         <div className="flex min-w-0 flex-col gap-0.5">
           <span className="truncate text-[13px] font-semibold leading-4 text-text-primary">{title}</span>

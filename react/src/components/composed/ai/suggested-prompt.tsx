@@ -43,7 +43,7 @@ export function SuggestedPrompt({
   return (
     <motion.button
       className={cn(
-        "group/prompt flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1 text-left text-sm text-foreground/90 outline-none transition-colors duration-150 ease-smooth-out hover:bg-foreground/5 focus-visible:bg-foreground/5 disabled:cursor-not-allowed disabled:opacity-50",
+        "group/prompt flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-left text-sm text-foreground/90 outline-none transition-colors duration-150 ease-smooth-out hover:bg-foreground/5 focus-visible:bg-foreground/5 disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       data-slot="suggested-prompt"

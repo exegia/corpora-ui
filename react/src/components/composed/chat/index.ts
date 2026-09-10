@@ -23,17 +23,23 @@ export {
 export { ResearchAnswer, type ResearchAnswerProps } from "./research-answer"
 export {
   StreamingText,
-  removeStreamingInstance,
-  streamingSourcesOpenAtom,
-  type StreamingSource,
   type StreamingTextProps,
   type StreamingToken,
 } from "./streaming-text"
 export {
+  Recommendation,
   RecommendationCard,
-  type RecommendationCardProps,
-  type RecommendationOption,
-} from "./recommendation-card"
+} from "./recommendation"
+export type {
+  RecommendationCardProps,
+  RecommendationCheckboxProps,
+  RecommendationEntity,
+  RecommendationFields,
+  RecommendationGroupProps,
+  RecommendationItemProps,
+  RecommendationOption,
+  RecommendationState,
+} from "./recommendation"
 export {
   ContextCards,
   type ContextCard,
@@ -67,5 +73,7 @@ export {
   InsightCards,
   InsightEntity,
   type Insight,
+  type InsightAllocation,
+  type InsightSegment,
   type InsightCardsProps,
 } from "./insight-cards"

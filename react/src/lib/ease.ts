@@ -85,3 +85,6 @@ export const ICON_VARIANTS: Variants = {
     transition: { duration: 0.18, ease: EASE_OUT },
   },
 };
+
+/** Strong ease-out for pop-ins, row entrances and panel expands. Matches `--ease-out-strong`. */
+export const EASE_OUT_STRONG = [0.23, 1, 0.32, 1] as const;

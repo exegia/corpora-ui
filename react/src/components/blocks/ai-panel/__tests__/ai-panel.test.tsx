@@ -96,7 +96,7 @@ describe("AI curation component set", () => {
     expect(
       container.querySelector('[data-slot="suggestion-card"]')?.getAttribute("data-node-id")
     ).toBe("p-17")
-    await user.click(screen.getByRole("button", { name: "Ok, fix them" }))
+    await user.click(screen.getByRole("button", { name: "Ok, fix" }))
     expect(onAccept).toHaveBeenCalledTimes(1)
     await user.click(screen.getByRole("button", { name: "Ignore" }))
     expect(onReject).toHaveBeenCalledTimes(1)
@@ -113,7 +113,7 @@ describe("AI curation component set", () => {
     )
 
     expect(screen.getByText("Done")).toBeDefined()
-    expect(screen.queryByRole("button", { name: "Ok, fix them" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "Ok, fix" })).toBeNull()
     expect(screen.queryByRole("button", { name: "Ignore" })).toBeNull()
   })
 

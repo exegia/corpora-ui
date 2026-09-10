@@ -9,12 +9,14 @@ import { cn } from "@/lib/utils"
 import { BOUNCE_IN_OUT, SPRING_PANEL } from "@/lib/ease"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { MenuCommand } from "@/components/ui/menu-command"
 import { Text } from "@/components/atoms"
 import { Attachment } from "@/components/composed/chat"
-import { Stop } from "iconsax-reactjs"
 import { SendHint } from "./shared"
 import { SuggestedPrompts } from "./suggested-prompt"
 import type { ComposerProps } from "./types"
+import { ArrowUp, Squircle } from "lucide"
+import { MorphIcon } from "morphicons/react"
 import { composerAttachmentsAtom, removeComposerInstance } from "./composer-attachments-atom"
 
 // `ComposerProps` moved to `types.ts`; both the barrel and `ai-panel` still
@@ -42,8 +44,8 @@ export function Composer({
   disabled = false,
   onAttach,
   attachLabel = "Attach",
-  sendLabel = "Send",
-  stopLabel = "Stop",
+  commands,
+  onCommand,
   safetyNote = "Changes apply immediately and are recorded in version history. Undo anytime.",
   expanded = false,
   placeholder = "Ask about this selection…",
@@ -107,54 +109,54 @@ export function Composer({
   // One attach button for both shapes: it is absolutely positioned in each,
   // so the class swap moves it and `layout` glides it between the two spots
   // rather than mounting a second control.
-  const attachButton = onAttach && (
+  const plusButton = (
+    <Button
+      aria-label={attachLabel}
+      className="[&_svg]:transition-transform bg-background/50 [&_svg]:duration-200 [&_svg]:ease-smooth-out hover:[&_svg]:rotate-90 motion-reduce:hover:[&_svg]:rotate-0 data-popup-open:[&_svg]:rotate-45"
+      disabled={disabled}
+      onClick={commands ? undefined : onAttach}
+      size="icon-lg"
+      glassVariant="liquid-refract"
+      variant="glass"
+    >
+      <Plus className="size-4 stroke-3" />
+    </Button>
+  )
+  const attachButton = (onAttach || commands) && (
     <motion.div
-   //   className={cn("absolute", "bottom-2 left-2")}
       data-slot="composer-attach"
       layout={!reduceMotion && "position"}
+      className="z-20"
       transition={SPRING_PANEL}
     >
-      <Button
-        aria-label={attachLabel}
-        className="[&_svg]:transition-transform bg-background/50 [&_svg]:duration-200 [&_svg]:ease-smooth-out hover:[&_svg]:rotate-90 motion-reduce:hover:[&_svg]:rotate-0"
-        disabled={disabled}
-        onClick={onAttach}
-        size="icon-lg"
-        glassVariant="liquid-refract"
-        variant="glass"
-      >
-        <Plus className="size-4 stroke-3" />
-      </Button>
+      {commands ? (
+        <MenuCommand items={commands} onSelect={onCommand}>
+          {plusButton}
+        </MenuCommand>
+      ) : (
+        plusButton
+      )}
     </motion.div>
   )
 
   const sendButton = (<MotionButton
     aria-label={isStreaming ? "Stop" : "Send message"}
-    className={cn(
-      "rounded-md px-3",
-      isExpanded ? undefined : "hidden"
-    )}
+    className={cn("shrink-0 justify-self-center", !isExpanded && "hidden")}
     disabled={isStreaming ? false : isDisabled || !draft.trim()}
     onClick={isStreaming ? onStop : undefined}
-    size="default"
     transition={BOUNCE_IN_OUT}
     exit={{ opacity: 0, scale: 0 }}
     animate={{
       opacity: isExpanded ? 1 : 0,
       scale: isExpanded ? 1 : 0,
     }}
+   
     initial={{ opacity: 0, scale: 0 }}
+    size="icon-sm"
     whileHover={{ scale: 1, opacity: 1 }}
     type={isStreaming ? "button" : "submit"}
   >
-    {isStreaming ? (
-      <>
-        <Stop className="size-4 animate-pulse fill-current" />
-        {stopLabel}
-      </>
-    ) : (
-      sendLabel
-    )}
+    <MorphIcon className={cn("size-4", isStreaming ? "animate-pulse fill-current" : "stroke-2")} icon={isStreaming ? Squircle : ArrowUp} />
   </MotionButton>)
 
 
@@ -162,18 +164,18 @@ export function Composer({
     <Textarea
       aria-label="Message"
       className={cn(
-        "flex w-full flex-1 items-center text-sm text-foreground has-disabled:cursor-not-allowed has-disabled:opacity-50 [&_textarea]:resize-none [&_textarea]:px-4 [&_textarea]:placeholder:text-sm [&_textarea]:placeholder:text-muted-foreground/60",
+        "flex w-full flex-1 items-center text-sm text-foreground has-disabled:cursor-not-allowed has-disabled:opacity-50 [&_textarea]:resize-none [&_textarea]:px-2 [&_textarea]:placeholder:text-sm [&_textarea]:placeholder:text-muted-foreground/60",
         // Transition the textarea's own box so the auto-height shell
         // follows smoothly in both directions (expand and collapse).
         "[&_textarea]:transition-[min-height,padding] [&_textarea]:duration-300 [&_textarea]:ease-smooth-out motion-reduce:[&_textarea]:transition-none",
         isExpanded
-          ? "[&_textarea]:min-h-14 [&_textarea]:py-3"
+          ? "[&_textarea]:min-h-14 [&_textarea]:py-2"
           : "[&_textarea]:min-h-0 [&_textarea]:py-0 h-full",
-        !isExpanded && onAttach && "[&_textarea]:pr-12",
+        !isExpanded && (onAttach || commands) && "[&_textarea]:pr-12",
         // The rest state paints its own keycap hint over the field.
         showRestHint && "[&_textarea]:placeholder:text-transparent"
       )}
-      size="lg"
+   
       disabled={isDisabled}
       onChange={(event) => changeValue(event.target.value)}
       onKeyDown={(event) => {
@@ -216,22 +218,20 @@ export function Composer({
         </SuggestedPrompts>
       ) : null}
       <motion.div
-        animate={{
-      //    borderRadius: isExpanded ? 24 : 21,
-        }}
         // The textarea trades `absolute` for static between the two shapes, so
         // the box's height changes in a single frame. `layout` measures the two
         // boxes and springs between them, which is also what keeps the controls
         // row from teleporting down and swallowing the send hint's slide.
         layout={!reduceMotion}
         className={cn(
-          "relative z-10 overflow-clip  flex flex-1 flex-col p-1.5  bg-(--chat-field) transition-shadow duration-300 ease-smooth-out",
-          isExpanded ? "shadow-[inset_0px_0px_15px_2px_rgba(0,_0,_0,_0.1)] items-end rounded-lg rounded-bl-xl" : "rounded-full items-center shadow-[inset_0px_0px_7px_-1.5px_rgba(0,_0,_0,_0.3)]",
-          "motion-reduce:transition-none",
+          "relative z-10 overflow-clip  flex flex-1 flex-col p-2.5  bg-(--chat-field) transition-shadow duration-300 ease-smooth-out",
+          isExpanded ? "shadow-[inset_0px_0px_15px_2px_rgba(0,_0,_0,_0.1)] items-end rounded-md" : "rounded-full items-center shadow-[inset_0px_0px_7px_-1.5px_rgba(0,_0,_0,_0.3)]",
+          "motion-reduce:transition-none py-2.5",
+          // Two attachment chips (260px each) plus tray gap and paddings.
+          attachments.length > 0 && "min-w-[35rem]",
           className
         )}
         initial={false}
-      
         onBlur={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget)) {
             setIsExpanded(false)
@@ -263,20 +263,20 @@ export function Composer({
           {renderTextarea()}
         </motion.div>
         <motion.div
-          className={cn("flex items-center flex-1 w-full gap-x-1 relative flex-row")}
+          className={cn("flex flex-1 items-center w-full gap-x-1 relative justify-stretch flex-row")}
           layout={!reduceMotion && "position"}
           transition={reduceMotion ? { duration: 0 } : SPRING_PANEL}
         >
           {attachButton}
-          <SendHint  verbose={isExpanded} />
-          <AnimatePresence initial={false}>
+          <SendHint className="pl-1"  verbose={isExpanded} />
+          <AnimatePresence initial={false} mode="popLayout">
             {isExpanded && sendButton}
           </AnimatePresence>
         </motion.div>
 
       </motion.div>
       {safetyNote && (
-        <Text.Label level="caption" className="mt-2 max-w-5/6 pl-3 text-xs">
+        <Text.Label level="caption" className="mt-1 max-w-5/6 pl-1.5 text-[10px]">
           {safetyNote}
         </Text.Label>
       )}
