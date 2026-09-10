@@ -177,7 +177,7 @@ export function Chart({
     )
   }
   return (
-    <CardFrame data-slot="chart" data-type={type} className={cn("w-80 max-w-full", className)} {...props}>
+    <CardFrame data-slot="chart" data-type={type} className={cn("w-80 max-w-full [--frame-radius:var(--radius-md)]", className)} {...props}>
       <CardFrameHeader className="flex flex-row items-start justify-between gap-3 px-3.5 py-3">
         <div className="flex min-w-0 flex-col gap-0.5">
           <span className="truncate text-[13px] font-semibold leading-4 text-text-primary">{title}</span>

@@ -145,7 +145,7 @@ export function Markdown({
       data-slot="markdown"
       data-view={current}
       className={cn(
-        "w-[360px] max-w-full",
+        "w-[360px] max-w-full [--frame-radius:var(--radius-md)]",
         bare && "border-transparent shadow-none",
         className,
         "rounded-md!"
@@ -178,7 +178,7 @@ export function Markdown({
           </IconButton>
         </span>
       </CardFrameHeader>
-      <Card className="rounded-lg">
+      <Card>
         <CardPanel className={current === "preview" ? "p-4" : "p-2"}>
           {current === "preview" ? (
             <div className="flex flex-col gap-2.5">

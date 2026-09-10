@@ -5,18 +5,14 @@ import { Provider } from "jotai"
 import { FilterTable, RecordsTable, StreamingText } from "../index"
 
 describe("StreamingText", () => {
-  test("shows all text without streaming and toggles the sources panel", () => {
+  test("shows all text without streaming, with the inline source chip", () => {
     render(
       <Provider>
-        <StreamingText paragraphs={["Hello world", [{ cite: "a.io" }, { text: "done" }]]} sources={[{ name: "A", domain: "a.io" }]} />
+        <StreamingText paragraphs={["Hello world", [{ cite: "a.io" }, { text: "done" }]]} />
       </Provider>
     )
     expect(screen.getByText(/Hello/)).toBeDefined()
-    expect(screen.queryByRole("list")).toBeNull()
-    fireEvent.click(screen.getByRole("button", { name: /1 sources/ }))
-    expect(screen.getByRole("list")).toBeDefined()
-    fireEvent.click(screen.getByRole("button", { name: /1 sources/ }))
-    expect(screen.queryByRole("list")).toBeNull()
+    expect(screen.getByText("a.io")).toBeDefined()
   })
 })
 

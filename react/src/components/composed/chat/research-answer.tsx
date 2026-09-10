@@ -1,18 +1,16 @@
 "use client"
 
-import { BookOpen, Calendar, Copy, ListPlus, Share2, ThumbsDown, ThumbsUp, Users } from "lucide-react"
+import { BookOpen, Calendar, Copy, ListPlus, Share2, Users } from "lucide-react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { Card, CardFrame, CardFrameFooter, CardFrameHeader, CardPanel } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { IconButton, IconTile, Pill } from "@/components/ui/chat"
+import { IconTile } from "@/components/ui/chat"
 
 export interface ResearchAnswerProps extends Omit<React.ComponentPropsWithoutRef<"div">, "content"> {
   kicker?: React.ReactNode
   /** "Answered from 3 passages · 0.8 s" */
   kickerSub?: React.ReactNode
-  /** Corpus pill, top-right ("Iliad"). */
-  corpus?: React.ReactNode
   content: React.ReactNode
   source?: React.ReactNode
   date?: React.ReactNode
@@ -21,7 +19,6 @@ export interface ResearchAnswerProps extends Omit<React.ComponentPropsWithoutRef
   onShare?: () => void
   /** TODO(spec 003): the design shows the control only; behaviour is the caller's. */
   onAddToList?: () => void
-  onFeedback?: (vote: "up" | "down") => void
   bare?: boolean
 }
 
@@ -33,8 +30,8 @@ const GHOST = "h-6 gap-1.5 rounded-md px-2 text-[11.5px] font-medium text-text-s
  * @sketch "Component / Research Answer"
  */
 export function ResearchAnswer({
-  kicker = "Research answer", kickerSub, corpus, content, source, date, authors,
-  onCopyCitation, onShare, onAddToList, onFeedback, bare = false, className, ...props
+  kicker = "Research answer", kickerSub, content, source, date, authors,
+  onCopyCitation, onShare, onAddToList, bare = false, className, ...props
 }: ResearchAnswerProps): React.ReactElement {
   const meta = [
     { icon: <BookOpen />, label: "Source", value: source },
@@ -45,7 +42,7 @@ export function ResearchAnswer({
   return (
     <CardFrame
       data-slot="research-answer"
-      className={cn("w-[380px] max-w-full", bare && "border-transparent shadow-none", className)}
+      className={cn("w-[380px] max-w-full [--frame-radius:var(--radius-md)]", bare && "border-transparent shadow-none", className)}
       {...props}
     >
       <CardFrameHeader className="flex flex-row items-start gap-2 px-3.5 py-3">
@@ -54,21 +51,20 @@ export function ResearchAnswer({
           <span className="text-[13px] font-semibold leading-4 text-text-primary">{kicker}</span>
           {kickerSub ? <span className="text-[11px] leading-3 text-text-secondary">{kickerSub}</span> : null}
         </div>
-        {corpus ? <Pill>{corpus}</Pill> : null}
       </CardFrameHeader>
       <Card>
       <CardPanel className="px-3.5 py-3.5 text-[13px] leading-[15px] text-text-primary">{content}</CardPanel>
       {meta.length ? (
         <>
           <div className="mx-3.5 h-px bg-border-default" />
-          <div className="grid grid-cols-3 gap-2.5 px-3.5 py-3">
+          <dl className="flex flex-col gap-1.5 px-3.5 py-3">
             {meta.map((m) => (
-              <div key={m.label} className="flex min-w-0 flex-col gap-1">
-                <span className="flex items-center gap-1 text-[11px] leading-3 text-text-secondary [&_svg]:size-3 [&_svg]:text-icon">{m.icon}{m.label}</span>
-                <span className="text-[12px] leading-4 text-text-primary">{m.value}</span>
+              <div key={m.label} className="flex items-baseline gap-3">
+                <dt className="flex w-20 shrink-0 items-center gap-1 text-[11px] leading-4 text-text-secondary [&_svg]:size-3 [&_svg]:self-center [&_svg]:text-icon">{m.icon}{m.label}</dt>
+                <dd className="min-w-0 flex-1 text-[12px] leading-4 text-text-primary">{m.value}</dd>
               </div>
             ))}
-          </div>
+          </dl>
         </>
       ) : null}
       </Card>
@@ -76,10 +72,6 @@ export function ResearchAnswer({
         <Button variant="ghost" size="xs" className={GHOST} onClick={onCopyCitation}><Copy />Copy citation</Button>
         <Button variant="ghost" size="xs" className={GHOST} onClick={onShare}><Share2 />Share</Button>
         <Button variant="ghost" size="xs" className={GHOST} onClick={onAddToList}><ListPlus />Add to list</Button>
-        <span className="ml-auto flex items-center gap-0.5">
-          <IconButton aria-label="Helpful" onClick={() => onFeedback?.("up")}><ThumbsUp /></IconButton>
-          <IconButton aria-label="Not helpful" onClick={() => onFeedback?.("down")}><ThumbsDown /></IconButton>
-        </span>
       </CardFrameFooter>
     </CardFrame>
   )
