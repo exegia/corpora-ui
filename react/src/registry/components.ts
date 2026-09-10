@@ -700,10 +700,10 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     props: [
       { name: "steps", type: 'StepNode[]', description: "Cards to lay out: { id, row, x (0–1 centre), w, kind?: { label, hue }, name?, hue?, title?, caption?, image?, icon?, condition?, children? }. Content-agnostic: `image` fills the tile, `children` replaces the body. Defaults to the Trigger → If / Else sample." },
       { name: "edges", type: 'Edge[]', description: "Connectors { id, source, target, strokeWidth?, color? }. Defaults to a chain through steps in order." },
-      { name: "height", type: 'number', default: "360", description: "Canvas height floor; it only grows when scaled content is taller, so zooming out or removing a card never collapses it." },
+      { name: "height", type: 'number', description: "Canvas min-height. The canvas fills its parent and floors at the content height it loaded with, so zooming out or removing a card never collapses it." },
+      { name: "zoomable", type: 'boolean', default: "false", description: "Ctrl / ⌘ + wheel and the +/− buttons scale the canvas (25–200%) about its centre with a 300ms ease. The world behind the frame is twice its size: drag empty canvas to pan, click it to clear the selection." },
       { name: "onEdgeRemove / onEdgeConnect / onEdgeChange", type: '(id) / (edge) / (id, { strokeWidth?, color? }) => void', description: "Enable connector editing: click a connector for a toolbar (widths, colours, disconnect) and drag either end handle towards another card — it snaps to the nearest anchor and previews the card before you release." },
       { name: "readOnly", type: 'boolean', default: "false", description: "No drag, no add / remove buttons. Selection still works." },
-      { name: "zoomable", type: 'boolean', default: "false", description: "Ctrl / ⌘ + wheel and the +/− buttons scale the canvas (25–200%)." },
       { name: "onDrag", type: '(id, { dx, dy }) => void', description: "A card was dragged; offset from its laid-out position." },
       { name: "onAdd", type: '(id, side) => void', description: "\"Add child\" in the card's context menu (side is \"bottom\")." },
       { name: "onRemove", type: '(id) => void', description: "\"Delete\" in the context menu or Delete on a selected card. Opens an AlertDialog first when children would be orphaned." },

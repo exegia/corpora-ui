@@ -24,11 +24,15 @@ export const chainEdges = (steps: StepNode[]): Edge[] =>
   steps.slice(1).map((n, i) => ({ id: `${steps[i].id}->${n.id}`, source: steps[i].id, target: n.id }));
 
 export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomable = false, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, onRename, onDuplicate, canvasRef }: Options) => {
-  const [width, setWidth] = useState(0);
+  /** Visible canvas box; the world behind it is twice this size. */
+  const [frame, setFrame] = useState({ w: 0, h: 0 });
   const [heights, setHeights] = useState<Heights>(EST_H);
   const [selected, setSelected] = useState<string | null>(null);
   const [offsets, setOffsets] = useState<Offsets>({});
-  const [scale, setScale] = useState(1);
+  /** Zoom and pan of the world inside the frame (pan in frame px). */
+  const [view, setView] = useState({ scale: 1, x: 0, y: 0 });
+  const scale = view.scale;
+  const pan = useRef<{ startX: number; startY: number; baseX: number; baseY: number; moved: boolean } | null>(null);
   const [pendingRemove, setPendingRemove] = useState<{ id: string; orphans: string[] } | null>(null);
   const [selectedEdge, setSelectedEdge] = useState<string | null>(null);
   const [edgeDrag, setEdgeDrag] = useState<EdgeDrag | null>(null);
@@ -45,15 +49,37 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
 
   const edges = useMemo(() => edgesProp ?? chainEdges(steps), [edgesProp, steps]);
   const rowHeight = useMemo(() => rowH(steps, heights), [heights, steps]);
+  // The world is twice the frame so there is always hidden canvas to drag into view.
+  const width = frame.w * 2;
   const layout = useMemo<Layout>(() => {
     const _rows = rows(steps);
     return { width, offsets, rows: _rows, rowY: rowYs(rowHeight), heights };
   }, [steps, width, offsets, rowHeight, heights]);
   const canvasHeight = useMemo(() => canvasH(layout.rowY, rowHeight), [layout.rowY, rowHeight]);
   const connectorWidth = cw(width);
+  const worldHeight = Math.max(canvasHeight, frame.h * 2);
+
+  /** Keep the world covering the frame: clamp when it is larger, centre it when smaller. */
+  const clampPan = useCallback(
+    (x: number, y: number, s: number, f = frame) => {
+      const fit = (offset: number, visible: number, content: number) =>
+        content <= visible ? (visible - content) / 2 : Math.min(0, Math.max(visible - content, offset));
+      return { x: fit(x, f.w, connectorWidth * s), y: fit(y, f.h, worldHeight * s) };
+    },
+    [frame, connectorWidth, worldHeight],
+  );
 
   const updateHeights = useCallback((callback: (prev: Heights) => Heights) => setHeights(callback), []);
-  const updateWidth = useCallback((next: number) => setWidth((prev) => (prev === next ? prev : next)), []);
+  const updateFrame = useCallback((w: number, h: number) => {
+    setFrame((prev) => (prev.w === w && prev.h === h ? prev : { w, h }));
+    // First measurement centres the world horizontally, top-aligned; later
+    // width changes scale the pan so the view stays put as the world resizes.
+    const prevW = frame.w;
+    setView((v) => {
+      if (w <= 0 || w === prevW) return v;
+      return prevW === 0 ? { ...v, x: (w - w * 2 * v.scale) / 2, y: 0 } : { ...v, x: (v.x * w) / prevW };
+    });
+  }, [frame.w]);
   const updateSelected = (id: string | null) => {
     setSelected((prev) => (prev === id ? prev : id));
     if (id !== null) setSelectedEdge(null);
@@ -64,11 +90,47 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
     setSelectedEdge(id);
     if (id !== null) setSelected(null);
   };
-  const zoomBy = useCallback(
-    (factor: number) => setScale((s) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, +(s * factor).toFixed(3)))),
-    [],
+  /** Zoom about the frame centre so what is in the middle stays there. */
+  const zoomTo = useCallback(
+    (next: number) =>
+      setView((v) => {
+        const s = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, +next.toFixed(3)));
+        const cx = frame.w / 2;
+        const cy = frame.h / 2;
+        const k = s / v.scale;
+        return { scale: s, ...clampPan(cx - (cx - v.x) * k, cy - (cy - v.y) * k, s) };
+      }),
+    [frame, clampPan],
   );
-  const resetZoom = useCallback(() => setScale(1), []);
+  const zoomBy = useCallback((factor: number) => zoomTo(scale * factor), [zoomTo, scale]);
+  const resetZoom = useCallback(() => zoomTo(1), [zoomTo]);
+
+  /** Dragging empty canvas pans the world; a still click clears the selection. */
+  const onCanvasPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0) return;
+    const target = event.target as Element;
+    if (target.closest("[data-node], [data-ui], [data-edge-handle], [data-edge]")) return;
+    pan.current = { startX: event.clientX, startY: event.clientY, baseX: view.x, baseY: view.y, moved: false };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+  const onCanvasPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const p = pan.current;
+    if (!p) return;
+    const dx = event.clientX - p.startX;
+    const dy = event.clientY - p.startY;
+    if (!p.moved && Math.hypot(dx, dy) < 3) return;
+    p.moved = true;
+    setView((v) => ({ ...v, ...clampPan(p.baseX + dx, p.baseY + dy, v.scale) }));
+  };
+  const onCanvasPointerUp = () => {
+    const p = pan.current;
+    pan.current = null;
+    if (p && !p.moved) {
+      setSelected(null);
+      setSelectedEdge(null);
+    }
+  };
+  const isPanning = () => pan.current?.moved === true;
 
   const onPointerDown = (node: StepNode) => (event: React.PointerEvent<HTMLDivElement>) => {
     // Left button only: a right-press belongs to the context menu.
@@ -100,7 +162,7 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
     const baseCx = node.x * connectorWidth;
     const baseTop = layout.rowY[layout.rows.indexOf(node.row)] ?? 0;
     const cx = Math.min(Math.max(baseCx + dx, w / 2 + 8), connectorWidth - w / 2 - 8);
-    const top = Math.min(Math.max(baseTop + dy, 8), canvasHeight - h - 8);
+    const top = Math.min(Math.max(baseTop + dy, 8), worldHeight - h - 8);
     setOffsets((current) => ({ ...current, [node.id]: { dx: cx - baseCx, dy: top - baseTop } }));
   };
 
@@ -120,7 +182,7 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
   /** Client → unscaled canvas coordinates. */
   const toCanvas = (clientX: number, clientY: number): Point => {
     const rect = canvasRef.current?.getBoundingClientRect();
-    return { x: (clientX - (rect?.left ?? 0)) / scale, y: (clientY - (rect?.top ?? 0)) / scale };
+    return { x: (clientX - (rect?.left ?? 0) - view.x) / scale, y: (clientY - (rect?.top ?? 0) - view.y) / scale };
   };
   const edgeEnds = (edge: Edge) => edgePoints({ from: edge.source, to: edge.target }, steps, layout);
 
@@ -216,8 +278,15 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
     readOnly,
     zoomable,
     scale,
+    view,
     zoomBy,
     resetZoom,
+    onCanvasPointerDown,
+    onCanvasPointerMove,
+    onCanvasPointerUp,
+    isPanning,
+    frame,
+    worldHeight,
     onAdd,
     removeNode,
     commitRemove,
@@ -230,7 +299,7 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
     selected,
     drag,
     updateSelected,
-    updateWidth,
+    updateFrame,
     onPointerDown,
     onPointerMove,
     onPointerUp,

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useLayoutEffect, useRef } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { Minus, Plus } from "lucide-react"
 import type { FlowchartProps, StepNode } from "./types"
 import { FlowchartContext, useFlowchart } from "./hooks"
@@ -48,16 +48,20 @@ const NODES: StepNode[] = [
  *
  * @sketch "Component / Flowchart"
  */
-export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, height = 360, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, onRename, onDuplicate, className, children }: FlowchartProps) {
+export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, height, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, onRename, onDuplicate, className, children }: FlowchartProps) {
   const canvasRef = useRef<HTMLDivElement>(null)
   const nodeRefs = useRef(new Map<string, HTMLElement>())
   const chart = useFlowchart({ steps, edges, readOnly, zoomable, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, onRename, onDuplicate, canvasRef })
   const {
-    updateHeights, updateWidth, canvasHeight, isLit, bezierCurve, connectorWidth, scale, zoomBy, resetZoom, pendingRemove, commitRemove, cancelRemove,
+    updateHeights, updateFrame, canvasHeight, worldHeight, isLit, bezierCurve, connectorWidth, scale, view, zoomBy, resetZoom, pendingRemove, commitRemove, cancelRemove,
+    onCanvasPointerDown, onCanvasPointerMove, onCanvasPointerUp, isPanning,
     editableEdges, selectedEdge, selectEdge, edgeDrag, edgeEnds, onEdgeHandleDown, onEdgeHandleMove, onEdgeHandleUp, ghostCurve, removeEdge,
   } = chart
-  // Floor, never a ceiling: the frame only grows when scaled content is taller.
-  const frameHeight = Math.max(height, canvasHeight * scale)
+  // The canvas fills its parent; its floor is the content height it loaded with
+  // (or `height`), so zooming out or removing a card never collapses it.
+  const [floor, setFloor] = useState<number | null>(null)
+  if (floor === null && chart.frame.w > 0) setFloor(canvasHeight)
+  const minHeight = height ?? floor ?? canvasHeight
   const selectedEdgeObj = chart.edges.find((e) => e.id === selectedEdge)
   const selectedEnds = selectedEdgeObj ? edgeEnds(selectedEdgeObj) : null
 
@@ -66,7 +70,7 @@ export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, he
     if (!canvas) return
 
     const measure = () => {
-      updateWidth(canvas.clientWidth)
+      updateFrame(canvas.clientWidth, canvas.clientHeight)
       updateHeights((prev) => {
         const next = { ...prev }
         let changed = false
@@ -87,7 +91,7 @@ export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, he
     observer.observe(canvas)
     nodeRefs.current.forEach((el) => observer.observe(el))
     return () => observer.disconnect()
-  }, [updateHeights, updateWidth, steps])
+  }, [updateHeights, updateFrame, steps])
 
   // React's onWheel is passive, so preventDefault (no page scroll while zooming) needs a native listener.
   useEffect(() => {
@@ -108,18 +112,30 @@ export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, he
         ref={canvasRef}
         data-slot="flowchart"
         data-readonly={readOnly || undefined}
-        className={cn("rounded-card bg-page shadow-hairline relative w-full overflow-hidden select-none", className)}
-        onClick={() => selectEdge(null)}
+        className={cn(
+          "rounded-card bg-page shadow-hairline relative h-full w-full touch-none overflow-hidden select-none",
+          "transition-[background-size,background-position] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+          isPanning() ? "cursor-grabbing" : "cursor-grab",
+          className,
+        )}
+        onPointerDown={onCanvasPointerDown}
+        onPointerMove={onCanvasPointerMove}
+        onPointerUp={onCanvasPointerUp}
+        onPointerCancel={onCanvasPointerUp}
         style={{
-          height: frameHeight,
+          minHeight,
           backgroundImage: "radial-gradient(var(--line-strong) 1px, transparent 1.25px)",
           backgroundSize: `${22 * scale}px ${22 * scale}px`,
-          backgroundPosition: "center",
+          backgroundPosition: `${view.x}px ${view.y}px`,
         }}
       >
         {children}
-        <div className="absolute inset-x-0 top-0 origin-top" style={{ height: canvasHeight, transform: `scale(${scale})` }}>
-          <svg width={connectorWidth} height={canvasHeight} className="pointer-events-none absolute inset-0 overflow-visible">
+        <div
+          data-slot="flowchart-world"
+          className={cn("absolute top-0 left-0 origin-top-left", !isPanning() && "transition-transform duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none")}
+          style={{ width: connectorWidth, height: worldHeight, transform: `translate(${view.x}px, ${view.y}px) scale(${scale})` }}
+        >
+          <svg width={connectorWidth} height={worldHeight} className="pointer-events-none absolute inset-0 overflow-visible">
             {chart.edges.map((edge) => (
               <Connector
                 key={edge.id}
@@ -151,7 +167,7 @@ export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, he
             />
           ))}
           {/* Above the cards, so the grab handles are reachable at a card's edge. */}
-          <svg width={connectorWidth} height={canvasHeight} className="pointer-events-none absolute inset-0 z-10 overflow-visible">
+          <svg width={connectorWidth} height={worldHeight} className="pointer-events-none absolute inset-0 z-10 overflow-visible">
             {edgeDrag ? (
               <path data-edge-ghost fill="none" stroke="var(--accent-default)" strokeWidth={1.5} strokeDasharray="4 3" d={ghostCurve()} />
             ) : null}

@@ -18,8 +18,9 @@ export interface FlowchartProps {
   /** The remove button was pressed (already confirmed when children would be orphaned). */
   onRemove?: (id: string) => void
   /**
-   * Canvas height floor in px. The canvas grows past it only when the scaled
-   * content is taller, so zooming out or removing a card never collapses it.
+   * Canvas min-height in px. The canvas fills its parent; without this it
+   * floors at the content height it loaded with, so zooming out or removing
+   * a card never collapses it.
    */
   height?: number
   /** Disconnect was pressed on a selected connector. Enables connector editing. */

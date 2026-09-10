@@ -18,7 +18,7 @@ describe("Flowchart", () => {
     const path = container.querySelector("path[data-edge]")!
     expect(path.getAttribute("d")).toMatch(/^M \d/)
     const canvas = container.querySelector('[data-slot="flowchart"]') as HTMLElement
-    expect(parseFloat(canvas.style.height)).toBeGreaterThan(0)
+    expect(parseFloat(canvas.style.minHeight)).toBeGreaterThan(0)
   })
 
   it("lights the connector when a step is selected", () => {
@@ -92,14 +92,26 @@ describe("Flowchart", () => {
     expect(canvas.style.backgroundSize).toContain("27.5px")
   })
 
-  it("keeps the canvas at its height floor when zooming out or removing a card", () => {
+  it("fills its parent and keeps a min-height floor when zooming out or removing a card", () => {
     const { container, rerender } = render(<Flowchart.Root steps={STEPS} zoomable height={300} />)
     const canvas = container.querySelector('[data-slot="flowchart"]') as HTMLElement
-    expect(canvas.style.height).toBe("300px")
+    expect(canvas.className).toContain("h-full")
+    expect(canvas.style.minHeight).toBe("300px")
     fireEvent.click(screen.getByRole("button", { name: "Zoom out" }))
-    expect(canvas.style.height).toBe("300px")
+    expect(canvas.style.minHeight).toBe("300px")
     rerender(<Flowchart.Root steps={[STEPS[0]]} zoomable height={300} />)
-    expect(canvas.style.height).toBe("300px")
+    expect(canvas.style.minHeight).toBe("300px")
+  })
+
+  it("clears the selected card on a still click on empty canvas", () => {
+    const { container } = render(<Flowchart.Root steps={STEPS} />)
+    const step = screen.getByRole("button", { name: "A" })
+    fireEvent.click(step)
+    expect(step.getAttribute("aria-pressed")).toBe("true")
+    const canvas = container.querySelector('[data-slot="flowchart"]') as HTMLElement
+    fireEvent.pointerDown(canvas, { button: 0, clientX: 5, clientY: 5 })
+    fireEvent.pointerUp(canvas)
+    expect(step.getAttribute("aria-pressed")).toBe("false")
   })
 
   it("selects a connector and edits it from the toolbar", () => {
