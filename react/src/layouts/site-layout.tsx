@@ -7,7 +7,7 @@ export function SiteLayout() {
   return (
     <div className="flex min-h-svh flex-col">
       <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur">
-        <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-6 px-6">
+        <div className="flex h-14 w-full max-w-6xl items-center gap-6 px-6">
           <NavLink to="/" className="font-semibold">
             corpora/ui
           </NavLink>
@@ -31,7 +31,7 @@ export function SiteLayout() {
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full flex-1 px-6 py-10">
+      <main className="w-full flex-1 px-6 py-10">
         <Outlet />
       </main>
     </div>

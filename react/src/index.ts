@@ -7,6 +7,7 @@
  */
 
 // atoms
+export * from "./components/atoms"
 export * from "./components/ui/avatar"
 export * from "./components/ui/button"
 export * from "./components/ui/card"
@@ -17,6 +18,9 @@ export * from "./components/ui/input"
 export * from "./components/ui/input-group"
 export * from "./components/ui/label"
 export * from "./components/ui/menu"
+export * from "./components/ui/menu-command"
+export * from "./components/ui/context-menu"
+export * from "./components/ui/toast"
 export * from "./components/ui/otp-field"
 export * from "./components/ui/separator"
 export * from "./components/ui/skeleton"
@@ -27,10 +31,12 @@ export * from "./components/ui/textarea"
 export * from "./components/icons"
 
 // components
+export * from "./components/composed/ai"
 export * from "./components/composed/logo"
 export * from "./components/composed/password-input"
 export * from "./components/composed/social-providers"
 export * from "./components/composed/tree"
+export * from "./components/composed/verse"
 // user-avatar: named, not `export *` — its barrel also exports an `Avatar`
 // namespace object that would collide with ui/avatar's component above.
 export {
@@ -74,6 +80,7 @@ export * from "./components/blocks/auth/passkey-manager-block"
 export * from "./components/blocks/auth/passkey-sign-in-block"
 export * from "./components/blocks/auth/signup-block"
 export * from "./components/blocks/auth/update-password-block"
+export * from "./components/blocks/ai-panel"
 export * from "./components/blocks/nav/sidebar"
 export * from "./components/blocks/shell"
 export { default as ShellLayout } from "./components/blocks/shell"
@@ -104,3 +111,9 @@ export * from "./lib/auth-accent"
 export * from "./lib/ease"
 export * from "./lib/sound"
 export * from "./lib/utils"
+
+// chat (exegia-ui Sketch library)
+export * from "./components/ui/chat"
+export * from "./components/composed/chat"
+export * from "./components/blocks/chat"
+export * from "./lib/keyed-atom"

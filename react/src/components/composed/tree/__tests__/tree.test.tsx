@@ -289,7 +289,7 @@ describe("Tree · sidebar", () => {
     // to size-5 and foreground colour — the icon is the whole row.
     const row = screen.getByRole("button", { name: "Search" })
     expect(row.className).toContain("h-10!")
-    expect(row.className).toContain("rounded-xl!")
+    expect(row.className).toContain("rounded-md!")
     expect(row.className).toContain("justify-center")
     expect(row.className).toContain("w-full")
     const icon = row.querySelector('[data-slot="tree-row-icon"]')

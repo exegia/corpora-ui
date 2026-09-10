@@ -1,0 +1,143 @@
+import { describe, expect, mock, test } from "bun:test"
+import { render, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
+import {
+  GeneratedBlock,
+  ScopeChip,
+  ScopePicker,
+  SelectionPopover,
+  SuggestionCard,
+  type AiScope,
+} from "../index"
+
+const passageScope: AiScope = {
+  kind: "passage",
+  label: "a.1",
+  range: "¶1–¶2",
+  nodeIds: ["p-1", "p-2"],
+}
+
+describe("AI curation component set", () => {
+  test("keeps the word popover content and appends one Add to chat action", async () => {
+    const onAddToChat = mock(() => {})
+    const user = userEvent.setup()
+    render(
+      <SelectionPopover
+        open
+        onAddToChat={onAddToChat}
+        variant="word"
+        word={{
+          lemma: "doctrina",
+          partOfSpeech: "noun",
+          frequency: 12,
+          onViewDetails: mock(() => {}),
+        }}
+      >
+        <span>doctrina in context</span>
+      </SelectionPopover>
+    )
+
+    expect(screen.getByText("doctrina")).toBeDefined()
+    expect(screen.getByText("noun · 12×")).toBeDefined()
+    expect(screen.getByRole("button", { name: /View details/ })).toBeDefined()
+    expect(screen.getAllByRole("button", { name: /Add to chat/ })).toHaveLength(
+      1
+    )
+    await user.click(screen.getByRole("button", { name: /Add to chat/ }))
+    expect(onAddToChat).toHaveBeenCalledTimes(1)
+  })
+
+  test("renders range and pinned chip states", () => {
+    const { rerender } = render(<ScopeChip removable scope={passageScope} />)
+    expect(screen.getByText("a.1 ¶1–¶2 · passage")).toBeDefined()
+
+    rerender(
+      <ScopeChip
+        scope={{ kind: "passage", label: "a.1 ¶1–¶2", pinned: true }}
+      />
+    )
+    expect(screen.getByText("PINNED · a.1 ¶1–¶2")).toBeDefined()
+  })
+
+  test("scope picker exposes the exact keyboard-operable node ladder", async () => {
+    const user = userEvent.setup()
+    const onValueChange = mock(() => {})
+    render(
+      <ScopePicker
+        defaultOpen
+        defaultValue="word"
+        onValueChange={onValueChange}
+      />
+    )
+
+    expect(screen.getAllByRole("option")).toHaveLength(5)
+    expect(
+      screen.getByRole("option", { name: "word" }).getAttribute("aria-selected")
+    ).toBe("true")
+    await user.click(screen.getByRole("option", { name: "corpus" }))
+    expect(onValueChange).toHaveBeenCalledWith("corpus")
+  })
+
+  test("suggestion card reports accept and reject while pending", async () => {
+    const user = userEvent.setup()
+    const onAccept = mock(() => {})
+    const onReject = mock(() => {})
+    const { container } = render(
+      <SuggestionCard
+        heading="Label mismatch"
+        onAccept={onAccept}
+        onReject={onReject}
+        reference={{ id: "p-17" }}
+      >
+        <p>label: paragraph → p</p>
+      </SuggestionCard>
+    )
+
+    expect(
+      container.querySelector('[data-slot="suggestion-card"]')?.getAttribute("data-node-id")
+    ).toBe("p-17")
+    await user.click(screen.getByRole("button", { name: "Ok, fix" }))
+    expect(onAccept).toHaveBeenCalledTimes(1)
+    await user.click(screen.getByRole("button", { name: "Ignore" }))
+    expect(onReject).toHaveBeenCalledTimes(1)
+  })
+
+  // Mounted resolved rather than re-rendered from pending: the actions leave
+  // through an AnimatePresence exit that runs on the wall clock, and polling
+  // for their removal outlasts the 5s per-test budget on a loaded suite.
+  test("a settled suggestion card shows its outcome, not the actions", () => {
+    render(
+      <SuggestionCard heading="Label mismatch" state="accepted">
+        <p>label: paragraph → p</p>
+      </SuggestionCard>
+    )
+
+    expect(screen.getByText("Done")).toBeDefined()
+    expect(screen.queryByRole("button", { name: "Ok, fix" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "Ignore" })).toBeNull()
+  })
+
+  test("suggestion card collapses its panel from the heading trigger", async () => {
+    const user = userEvent.setup()
+    render(
+      <SuggestionCard heading="Label mismatch">
+        <p>label: paragraph → p</p>
+      </SuggestionCard>
+    )
+
+    const trigger = screen.getByRole("button", { name: /Label mismatch/ })
+    expect(trigger.getAttribute("aria-expanded")).toBe("true")
+    await user.click(trigger)
+    expect(trigger.getAttribute("aria-expanded")).toBe("false")
+  })
+
+  test("marks generated streaming output as a polite live region", () => {
+    render(<GeneratedBlock content="Checking node p-17…" isStreaming />)
+    const liveRegion = screen
+      .getByText("Checking node p-17…")
+      .closest("[aria-live]")
+    expect(liveRegion?.getAttribute("aria-live")).toBe("polite")
+    expect(screen.getByText("GENERATED · NOT PART OF THE CORPUS")).toBeDefined()
+    expect(screen.getByRole("button", { name: "Stop" })).toBeDefined()
+  })
+})

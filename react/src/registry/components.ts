@@ -253,7 +253,7 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     slug: "logo",
     name: "Logo",
     description:
-      "Brand lockup: a mark beside a wordmark. The mark is an SVG, an image, or a monogram tile derived from the name; variant=\"mark\" folds the wordmark away with the same motion a collapsing rail uses. With href the whole lockup is a home link.",
+      'Brand lockup: a mark beside a wordmark. The mark is an SVG, an image, or a monogram tile derived from the name; variant="mark" folds the wordmark away with the same motion a collapsing rail uses. With href the whole lockup is a home link.',
     category: "components",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/logo-demo")),
@@ -293,13 +293,182 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
         name: "href",
         type: "string",
         description:
-          "Renders the lockup as an anchor named by name — the usual \"mark goes home\" affordance.",
+          'Renders the lockup as an anchor named by name — the usual "mark goes home" affordance.',
       },
     ],
     usage: `import { Logo } from "@corpora/ui"
 
 <Logo name="Corpora" href="/" mark={<BrandMark />} />
 <Logo name="Corpora" variant="mark" />  // icon rail: mark only`,
+  },
+  {
+    slug: "ai",
+    name: "AI",
+    titleStyle: "titlebar",
+    description:
+      "Reusable AI thread pieces: the person's message bubble, the agent turn with its fan-out suggestions disclosure, frosted suggestion cards with a gliding reference chip, and the pill-to-field prompt composer.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/ai-demo")),
+    registryDependencies: ["bubble", "card", "button", "textarea"],
+    props: [
+      {
+        name: "UserMessage",
+        type: "children / author / time / badge / reactions",
+        description:
+          "Right-aligned chat bubble for the person's message; with an author it grows the Bubble.Header row, and reactions hang a glass pill off the corner.",
+      },
+      {
+        name: "AiMessage",
+        type: "children / author / suggestions / isStreaming / onStop",
+        description:
+          "The agent turn: spark avatar, Agent badge, prose body with a polite live-region caret while streaming, and a violet \"Suggestions (n)\" disclosure that fans its SuggestionCard children out with a staggered spring. Controllable via suggestionsOpen.",
+      },
+      {
+        name: "SuggestionCard",
+        type: "heading / description / reference / state / onUndo / children",
+        description:
+          "Frosted collapsible card per suggestion. The state mark morphs (hollow → violet check → grey cross), `reference` takes one or many `{ id, title, url }` and renders a Reference chip per entry in the open body, and the footer shows Ignore / \"Ok, fix them\" while pending (labels via rejectLabel / acceptLabel) — then an Undo, if onUndo is given.",
+      },
+      {
+        name: "ReferenceChip",
+        type: "children / href / onClick",
+        description:
+          "\"Reference 1 ↗\" tag pointing at the grounding node. Renders as a link, a button or a plain tag depending on what it is given.",
+      },
+      {
+        name: "GeneratedBlock",
+        type: "content / isStreaming / onStop / citations",
+        description:
+          "Lower-level AI output with a persistent GENERATED label, streaming caret + Stop and citation chips — for hosts that keep their own author row.",
+      },
+      {
+        name: "SuggestedPrompt",
+        type: "children / onSelect / layoutId",
+        description:
+          "One suggested prompt row — violet spark, the prompt, a `+` affordance. Pass them to Composer's suggestedPrompts and they fan out of a \"Suggestions (n)\" disclosure whose panel tucks behind the pill. Give the row and the resulting message bubble the same layoutId and picking it flies the row into the bubble.",
+      },
+      {
+        name: "Composer",
+        type: "value / onSend / onAttach / suggestedPrompts / isStreaming / disabled",
+        description:
+          "A pill at rest showing the ⌘ + ↵ hint that springs into a taller field on focus, with the attach (+) and amber Send controls entering along the bottom edge. ⌘↩ sends, Esc stops while streaming; a safety note slot sits underneath.",
+      },
+    ],
+    usage: `import { AiMessage, Composer, SuggestedPrompt, SuggestionCard, UserMessage } from "@exegia/corpora-ui"
+
+<UserMessage author="Sender" badge="Admin" time="10 min ago">
+  Validate this passage.
+</UserMessage>
+<AiMessage
+  author="Exegia"
+  suggestions={
+    <SuggestionCard
+      heading="Suggestion"
+      description="Label mismatch"
+      reference={{ id: "p-17", title: "Reference 1", url: "#p-17" }}
+      onAccept={apply}
+      onReject={dismiss}
+      onUndo={reset}
+    >
+      The canonical paragraph label is required by the schema.
+    </SuggestionCard>
+  }
+>
+  The boundary is valid — one label drifted.
+</AiMessage>
+<Composer
+  onSend={(value, mode) => ask(value, mode)}
+  onAttach={pickFile}
+  suggestedPrompts={prompts.map((prompt) => (
+    <SuggestedPrompt key={prompt.id} layoutId={prompt.id} onSelect={() => ask(prompt.text, "answer")}>
+      {prompt.text}
+    </SuggestedPrompt>
+  ))}
+/>`,
+  },
+  {
+    slug: "verse",
+    name: "Verse",
+    titleStyle: "titlebar",
+    description:
+      "Corpus verse line: a chapter link plus inline spans and note markers, each opening a click popover.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/verse-demo")),
+    registryDependencies: ["text"],
+    props: [
+      {
+        name: "chapter",
+        type: "ReactNode",
+        description:
+          "Chapter reference rendered as a leading superscript link.",
+      },
+      {
+        name: "href",
+        type: "string",
+        description: "Destination of the chapter link.",
+      },
+      {
+        name: "chapterPopover / renderChapterPopover",
+        type: "ReactNode | (props: TextPopoverRenderProps) => ReactNode",
+        description:
+          "Popover opened by clicking the chapter reference. Without it the chapter is a plain link.",
+      },
+      {
+        name: "size",
+        type: '"small" | "medium" | "large" | number',
+        default: '"medium"',
+        description:
+          "Type scale for the verse. Nested VerseSpan/VerseNote inherit it unless they set their own.",
+      },
+    ],
+    usage: `import { Verse, VerseNote, VerseSpan } from "@exegia/corpora-ui"
+
+<Verse chapter="1:1" href="#gen-1" chapterPopover={<p>Genesis 1</p>}>
+  In the beginning{" "}
+  <VerseSpan popover={<p>Hebrew bereshit.</p>}>God created</VerseSpan>{" "}
+  the heavens and the earth
+  <VerseNote popover={<p>Textual note.</p>}>a</VerseNote>.
+</Verse>`,
+  },
+  {
+    slug: "emoji-action-bar",
+    name: "Emoji action bar",
+    titleStyle: "titlebar",
+    description:
+      "Compact reaction picker: a toolbar of quick reaction emoji built on the action-bar composed component, with a trailing More action that swaps the surface for the full frimousse picker. Designed to sit inside a glass popover.",
+    category: "atoms",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/emoji-action-bar-demo")),
+    registryDependencies: ["popover", "toolbar", "tooltip", "emoji-picker"],
+    props: [
+      {
+        name: "onEmojiSelect",
+        type: "(emoji: { emoji, label }) => void",
+        description:
+          "Fires for both a quick reaction and a pick from the full picker, so a caller wires one handler.",
+      },
+      {
+        name: "reactions",
+        type: "readonly Emoji[]",
+        default: "QUICK_REACTIONS",
+        description:
+          "The quick row. frimousse cannot render a subset — EmojiPicker.Root exposes only columns/skinTone/locale/emojiVersion/emojibaseUrl/sticky, and its list is virtualized on fixed-height rows, so a fixed list is the only way to show just a few. It also costs no network request: the emoji CDN is fetched only if More is opened.",
+      },
+      {
+        name: "hideMore",
+        type: "boolean",
+        default: "false",
+        description:
+          "Drops the trailing More action, leaving the quick row only — nothing then loads emoji data at all.",
+      },
+    ],
+    usage: `import { EmojiActionBar } from "@exegia/corpora-ui"
+
+<PopoverGlass glassVariant="frosted">
+  <EmojiActionBar onEmojiSelect={({ emoji, label }) => react(emoji, label)} />
+</PopoverGlass>`,
   },
   {
     slug: "search-field",
@@ -310,5 +479,267 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     category: "components",
     status: "planned",
     registryDependencies: ["input", "button"],
+  },
+  {
+    slug: "attachment",
+    name: "Attachment",
+    titleStyle: "titlebar",
+    description:
+      "One attachment in every shape the chat needs: a 240×52 composer chip with a remove button, or the in-bubble preview — for documents, images, media (and audio), corpus text selections, quoted replies, @-handles and URL cards.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/attachment-demo")),
+    registryDependencies: ["chat-atoms"],
+    props: [
+      { name: "kind", type: '"document" | "image" | "media" | "text-selection" | "chat-reply" | "username-handle" | "url-link"', required: true, description: "Which attachment; picks the leading icon and the preview layout." },
+      { name: "variant", type: '"default" | "preview"', default: '"default"', description: "Composer chip or in-bubble rendering." },
+      { name: "title / meta", type: "ReactNode", description: "Primary and secondary chip lines." },
+      { name: "onRemove / removable", type: "() => void / boolean", description: "The chip's ✕. Hidden when no handler is passed or removable is false." },
+      { name: "kind props", type: "src, poster, duration, audio, onPlay, quote, author, time, body, initials, domain, description, favicon, href, onAction", description: "Accepted per kind; the union type rejects props that don't belong to the chosen kind." },
+    ],
+    usage: `import { Attachment } from "@corpora/ui"
+
+<Attachment kind="document" title="Q3-financial-report.pdf" meta="PDF · 2.4 MB" onRemove={remove} />
+<Attachment kind="url-link" variant="preview" title="Exegia UI" domain="sketch.com" description="…" href="https://sketch.com" />`,
+  },
+  {
+    slug: "chart",
+    name: "Chart",
+    titleStyle: "titlebar",
+    description:
+      "320×244 chart card — pie, area, line or bar — with title, subtitle, type pill, plot and legend. Series colours come from the --chart-series-1…5 tokens, grid from --chart-grid.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/chart-demo")),
+    registryDependencies: ["chat-presentation-atoms"],
+    props: [
+      { name: "type", type: '"pie" | "area" | "line" | "bar"', required: true, description: "Plot kind." },
+      { name: "data", type: "{ label: string; [key]: number | string }[]", required: true, description: "One row per x label (or pie slice)." },
+      { name: "series", type: "{ key, label, color?, format? }[]", required: true, description: "Keys to plot; colour defaults to the series token by position. Pie uses the first. `format` renders the value in the legend and hover tooltip." },
+      { name: "title / subtitle / badge", type: "ReactNode", description: "Header row; badge defaults to the type name." },
+      { name: "center", type: "{ value, label? }", description: "Pie only: donut centre." },
+      { name: "headerless / plotHeight", type: "boolean / number", description: "Bare plot for embedding (InsightCards)." },
+    ],
+    usage: `import { Chart } from "@corpora/ui"
+
+<Chart type="bar" title="Sales by flavor" subtitle="Units · last 6 months"
+  data={[{ label: "Pist.", units: 62 }, { label: "Vanilla", units: 88 }]}
+  series={[{ key: "units", label: "Units sold" }]} />`,
+  },
+  {
+    slug: "markdown",
+    name: "Markdown",
+    titleStyle: "titlebar",
+    description:
+      "Rendered markdown behind a Preview | Markup toggle, with copy and expand controls. The active pane lives in a keyed Jotai atom so an app can flip a card by id.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/markdown-demo")),
+    registryDependencies: ["chat-presentation-atoms"],
+    props: [
+      { name: "source", type: "string", required: true, description: "Markdown text (headings, paragraphs, lists, inline and fenced code)." },
+      { name: "markdownId", type: "string", description: "Stable id for the view atom; unnamed cards use useId()." },
+      { name: "view / defaultView / onViewChange", type: '"preview" | "markup"', description: "Controlled or uncontrolled pane." },
+      { name: "onCopy / onExpand", type: "(source) => void / () => void", description: "Header icon buttons." },
+      { name: "bare", type: "boolean", default: "false", description: "Drop the card border." },
+    ],
+    usage: `import { Markdown } from "@corpora/ui"
+
+<Markdown source={answer} onCopy={(md) => navigator.clipboard.writeText(md)} />`,
+  },
+  {
+    slug: "research-answer",
+    name: "Research answer",
+    titleStyle: "titlebar",
+    description:
+      "Answer card with a kicker, the content, stacked Source / Date / Author(s) rows and an actions row: Copy citation, Share, Add to list.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/research-answer-demo")),
+    registryDependencies: ["chat-presentation-atoms", "button"],
+    props: [
+      { name: "content", type: "ReactNode", required: true, description: "The answer." },
+      { name: "kicker / kickerSub", type: "ReactNode", description: "Header row." },
+      { name: "source / date / authors", type: "ReactNode", description: "Meta columns; omitted ones are hidden." },
+      { name: "onCopyCitation / onShare / onAddToList", type: "() => void", description: "Actions. Add to list behaviour is not designed — the callback is all the card does." },
+    ],
+    usage: `import { ResearchAnswer } from "@corpora/ui"
+
+<ResearchAnswer content="…" source="Iliad · Homer corpus" date="c. 750 BCE" authors="Homer" onCopyCitation={copy} />`,
+  },
+  {
+    slug: "streaming-text",
+    name: "Streaming text",
+    titleStyle: "titlebar",
+    description:
+      "Streamed answer: word-by-word reveal with a caret and inline source previews.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/streaming-text-demo")),
+    registryDependencies: ["chat-presentation-atoms"],
+    props: [
+      { name: "paragraphs", type: '(string | StreamingToken[])[]', required: true, description: "Each paragraph is words or tokens; `{ cite, title?, description?, href? }` renders an InlineSource." },
+      { name: "streaming / wordMs", type: 'boolean / number', default: '55', description: "Animate the reveal; reduced motion shows everything at once." },
+    ],
+    usage: `import { StreamingText } from "@corpora/ui"
+
+<StreamingText streaming paragraphs={[answer, [{ cite: "scoopdata.io", href: "https://scoopdata.io" }, ...]]} />`,
+  },
+  {
+    slug: "recommendation-card",
+    name: "Recommendation card",
+    titleStyle: "titlebar",
+    description:
+      "Human-in-the-loop proposal: title, description with entity and lead-time pills, other options with signal bars, confidence and Accept / Alternatives.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/recommendation-card-demo")),
+    registryDependencies: ["chat-presentation-atoms", "button"],
+    props: [
+      { name: "title / description", type: 'ReactNode', required: true, description: "Header and the sentence before the entity pill." },
+      { name: "entity / descriptionSuffix / leadTime", type: '{ name, initials?, src? } / ReactNode / ReactNode', description: "Inline pills." },
+      { name: "options / onSelectOption", type: 'RecommendationOption[] / (index) => void', description: "Rows under Other options." },
+      { name: "confidence", type: '"high" | "medium" | "low"', default: '"high"', description: "Footer signal." },
+      { name: "onAccept / onAlternatives", type: '() => void', description: "Footer buttons." },
+    ],
+    usage: `import { RecommendationCard } from "@corpora/ui"
+
+<RecommendationCard title="Want me to place this restock order?" description="Reorder waffle cones from" entity={{ name: "Cone King" }} leadTime="7 days" onAccept={accept} />`,
+  },
+  {
+    slug: "context-cards",
+    name: "Context cards",
+    titleStyle: "titlebar",
+    description:
+      "Retrieved chunks: header with a count pill, then a card per chunk with title, character count, snippet and the source file pill.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/context-cards-demo")),
+    registryDependencies: ["chat-presentation-atoms"],
+    props: [
+      { name: "cards", type: 'ContextCard[]', required: true, description: "title, meta, snippet, file { name, type }." },
+      { name: "header / count", type: 'ReactNode', description: "Defaults to All chunks and cards.length." },
+      { name: "onOpen", type: '(card, index) => void', description: "File pill click." },
+    ],
+    usage: `import { ContextCards } from "@corpora/ui"
+
+<ContextCards count={32} cards={[{ title: "Vendor onboarding rule", meta: "290 characters", snippet: "…", file: { name: "SOP.pdf", type: "PDF" } }]} />`,
+  },
+  {
+    slug: "code-block",
+    name: "Code block",
+    titleStyle: "titlebar",
+    description:
+      "Code card with filename, Code | Diff toggle and Copy; gutter line numbers and keyword / string tinting from the --code-* tokens. No highlighter dependency.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/code-block-demo")),
+    registryDependencies: ["chat-presentation-atoms", "button"],
+    props: [
+      { name: "code", type: 'string', required: true, description: "Source; split on newlines." },
+      { name: "filename", type: 'ReactNode', description: "Header label." },
+      { name: "diff", type: '{ type?: "add" | "remove", text }[]', description: "Enables the Diff view." },
+      { name: "view / defaultView / onViewChange", type: '"code" | "diff"', description: "Controlled or uncontrolled." },
+      { name: "onCopy", type: '(code) => void', description: "Copy button." },
+      { name: "keywords", type: 'string[]', description: "Extra keywords to tint." },
+    ],
+    usage: `import { CodeBlock } from "@corpora/ui"
+
+<CodeBlock filename="churn.ts" code={source} onCopy={copy} />`,
+  },
+  {
+    slug: "filter-table",
+    name: "Filter table",
+    titleStyle: "titlebar",
+    description:
+      "Status filter pills over a compact table. The active filter lives in a keyed atom (filterTableFilterAtom) so an app can set it by table id.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/filter-table-demo")),
+    registryDependencies: ["chat-presentation-atoms"],
+    props: [
+      { name: "statuses", type: '{ id, label, tone }[]', required: true, description: "Filter pills and status dot colours." },
+      { name: "columns", type: '{ key, header, className? }[]', required: true, description: "Table columns; the status column renders a dot." },
+      { name: "rows", type: '{ id, status, … }[]', required: true, description: "Rows; filtered by status." },
+      { name: "filter / onFilterChange", type: 'string | null', description: "Controlled filter; null is All." },
+    ],
+    usage: `import { FilterTable } from "@corpora/ui"
+
+<FilterTable statuses={statuses} columns={columns} rows={rows} />`,
+  },
+  {
+    slug: "records-table",
+    name: "Records table",
+    titleStyle: "titlebar",
+    description:
+      "Selectable records with an initial avatar, tags with +N overflow, relative date and connection strength. Selection lives in recordsTableSelectionAtom(id); sorting is a callback only.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/records-table-demo")),
+    registryDependencies: ["chat-presentation-atoms", "checkbox"],
+    props: [
+      { name: "rows", type: 'RecordsRow[]', required: true, description: "id, name, initial, tags, lastInteraction, strength." },
+      { name: "selected / onSelectionChange", type: 'ReadonlySet<string>', description: "Controlled selection." },
+      { name: "onSortChange", type: '(column) => void', description: "Header sort control; the design shows no direction." },
+      { name: "maxTags", type: 'number', default: '2', description: "Tags shown before +N." },
+    ],
+    usage: `import { RecordsTable } from "@corpora/ui"
+
+<RecordsTable rows={rows} onSortChange={sortBy} />`,
+  },
+  {
+    slug: "flowchart",
+    name: "Flowchart",
+    titleStyle: "titlebar",
+    description:
+      "Dot-grid canvas of draggable, selectable step cards joined by bezier connectors (Beautiful-UI port).",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/flowchart-demo")),
+    registryDependencies: ["chat-presentation-atoms"],
+    props: [
+      { name: "steps", type: 'StepNode[]', description: "Cards to lay out: { id, row, x (0–1 centre), w, kind?: { label, hue }, name?, hue?, title?, caption?, image?, icon?, condition?, children? }. Content-agnostic: `image` fills the tile, `children` replaces the body. Defaults to the Trigger → If / Else sample." },
+      { name: "edges", type: 'Edge[]', description: "Connectors { id, source, target, strokeWidth?, color? }. Defaults to a chain through steps in order." },
+      { name: "height", type: 'number', description: "Canvas min-height. The canvas fills its parent and floors at the content height it loaded with, so zooming out or removing a card never collapses it." },
+      { name: "zoomable", type: 'boolean', default: "false", description: "Ctrl / ⌘ + wheel and the +/− buttons scale the canvas (25–200%) about its centre with a 300ms ease. The world behind the frame is twice its size: drag empty canvas to pan, click it to clear the selection." },
+      { name: "onEdgeRemove / onEdgeConnect / onEdgeChange", type: '(id) / (edge) / (id, { strokeWidth?, color? }) => void', description: "Enable connector editing: click a connector for a toolbar (widths, colours, disconnect) and drag either end handle towards another card — it snaps to the nearest anchor and previews the card before you release." },
+      { name: "readOnly", type: 'boolean', default: "false", description: "No drag, no add / remove buttons. Selection still works." },
+      { name: "onDrag", type: '(id, { dx, dy }) => void', description: "A card was dragged; offset from its laid-out position." },
+      { name: "onAdd", type: '(id, side) => void', description: "\"Add child\" in the card's context menu (side is \"bottom\")." },
+      { name: "onRemove", type: '(id) => void', description: "\"Delete\" in the context menu or Delete on a selected card. Opens an AlertDialog first when children would be orphaned." },
+      { name: "onRename / onDuplicate", type: '(id, name) / (id) => void', description: "Double-click the pill to rename (commits on blur or Enter with a toast); \"Duplicate\" copies the card to the right. The context menu also offers \"Connect to…\", which previews the hovered card and fires onEdgeConnect." },
+      { name: "className", type: 'string', description: "Extra classes on the canvas." },
+    ],
+    usage: `import { Flowchart } from "@corpora/ui"
+
+<Flowchart.Root
+  steps={[
+    { id: "trigger", row: 0, x: 0.5, w: 300, kind: { label: "Trigger", hue: "#9a5cff" }, hue: "#9a5cff", title: "New order created" },
+    { id: "cond", row: 1, x: 0.5, w: 356, kind: { label: "If / Else", hue: "#f09a2f" }, children: <MyBody /> },
+  ]}
+  edges={[{ id: "e1", source: "trigger", target: "cond" }]}
+  zoomable
+  onAdd={(id, side) => …}
+  onRemove={(id) => …}
+/>`,
+  },
+  {
+    slug: "insight-cards",
+    name: "Insight cards",
+    titleStyle: "titlebar",
+    description:
+      "Paged insights: header with count and prev / next, summary, stats, a trend snapshot (line plot) or an allocation breakdown with selectable segments, and a follow-up prompt.",
+    category: "components",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/insight-cards-demo")),
+    registryDependencies: ["chat-presentation-atoms", "chart"],
+    props: [
+      { name: "insights", type: 'Insight[]', required: true, description: "summary, stats (StatProps[]), snapshot { data, series }, allocation { label, value, initials, segments[] }, followUp." },
+      { name: "index / defaultIndex / onIndexChange", type: 'number', description: "Which insight is shown." },
+      { name: "onFollowUp", type: '(text) => void', description: "Follow-up pill." },
+    ],
+    usage: `import { InsightCards, InsightEntity } from "@corpora/ui"
+
+<InsightCards insights={[{ summary: <>Worst performer in <InsightEntity>Creamery</InsightEntity>…</>, stats: [...], snapshot: { data, series } }]} />`,
   },
 ]
