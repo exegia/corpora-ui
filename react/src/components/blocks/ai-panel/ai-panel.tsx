@@ -3,13 +3,12 @@
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { ghostMuted } from "./shared"
 import { Composer, type ComposerProps } from "@/components/composed/ai/composer"
-import { ScopeChip } from "./scope-chip"
-import { ScopePicker } from "./scope-picker"
 import { SuggestedPrompts } from "./suggested-prompts"
 import type { AiScope } from "./types"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Lock, Plus } from "lucide-react"
+import { Tooltip, TooltipPopup, TooltipTrigger } from "@/components/ui/tooltip"
 
 export interface AiPanelProps extends Omit<
   React.ComponentPropsWithoutRef<"aside">,
@@ -37,91 +36,93 @@ export interface AiPanelProps extends Omit<
  * shared by all panel states.
  */
 export function AiPanel({
-  scope,
   onNewThread,
-  onScopeChange,
-  onRemoveScope,
   thread,
   prompts = [],
   onPromptSelect,
   composerProps,
-  scopePickerOpen,
-  onScopePickerOpenChange,
   locked = false,
   headerTitle = "AI panel",
   className,
   ...props
 }: AiPanelProps): React.ReactElement {
+
+
+  const renderLocked = () => {
+    return (
+      <Tooltip>
+        <TooltipTrigger
+          disabled={locked}
+          render={
+            <Button variant="ghost" size="icon-xs" className="opacity-50" />
+          }
+        >
+          <Lock className="size-3" />
+        </TooltipTrigger>
+        <TooltipPopup side="bottom">
+          <div>
+            <div className="flex items-center gap-1">
+              <Lock className="size-2.5" />
+              <h6 className="text-sm">Published corpus</h6>
+            </div>
+            <p className="text-xs text-muted-foreground">Editing is disabled. Answers only.</p>
+          </div>
+        </TooltipPopup>
+      </Tooltip>
+    )
+  }
+  
+  const renderTitle = () => {
+    return (
+      <div className="flex-1 flex items-center">
+          <h2 className="text-sm font-semibold text-foreground" >
+            {headerTitle}
+        </h2>
+          {!locked && renderLocked()}
+      </div>
+    )
+  }
+
   return (
     // A landmark, not a bare div: `aria-label` on a roleless element is not
     // exposed, so the panel would lose both its name and its region.
     <aside
       aria-label={headerTitle}
-      className={cn("flex h-full w-full flex-col bg-sidebar", className)}
+      className={cn(
+        "relative flex h-full w-full flex-col bg-background",
+        className
+      )}
       data-slot="ai-panel"
       {...props}
     >
-      <header className="flex shrink-0 flex-col items-center gap-2 px-3.5 pt-3">
+      <header className="sticky top-0 flex shrink-0 flex-col items-center gap-2 border-b border-border bg-sidebar px-3 py-2">
         <div className="flex w-full flex-row items-center justify-between">
-          <h2 className="flex-1 text-sm font-semibold text-foreground">
-            {headerTitle}
-          </h2>
+          {renderTitle()}
           <Button
-            className={cn("font-normal", ghostMuted)}
+            className={cn("font-semibold")}
             onClick={onNewThread}
-            size="xs"
+            size="icon-xs"
             variant="ghost"
           >
-            New thread
+            <Plus className="size-4 stroke-3" />
           </Button>
         </div>
-        <ScrollArea scrollFade fill>
-          <div className="flex w-max shrink-0 items-center gap-2">
-            <ScopeChip
-              scope={scope}
-              removable
-              tabIndex={0}
-              onRemove={onRemoveScope}
-            />
-            <ScopePicker
-              onOpenChange={onScopePickerOpenChange}
-              onValueChange={onScopeChange}
-              open={scopePickerOpen}
-              scope={scope}
-              value={scope.kind}
-            />
-          </div>
-        </ScrollArea>
       </header>
 
-      {locked ? (
-        <p
-          className="mx-4 mt-3 rounded-sm border bg-muted/50 px-3 py-2 text-xs text-muted-foreground"
-          role="status"
-        >
-          🔒 Published corpus — answers only. Editing is disabled.
-        </p>
-      ) : null}
-
-      <ScrollArea aria-label="Thread" role="region" scrollFade fill>
-        <div className="flex min-h-0 flex-1 flex-col gap-y-2 px-5 py-4">
+      <ScrollArea aria-label="Thread" role="region"  fill>
+        <div className="flex min-h-0 flex-1 flex-col px-2">
           {thread}
-          {!thread && (
+          {thread && (
             <div className="flex h-full min-h-44 flex-col justify-end">
               <SuggestedPrompts onSelect={onPromptSelect} prompts={prompts} />
             </div>
           )}
         </div>
       </ScrollArea>
-
-      {thread && prompts.length ? (
-        <div className="shrink-0 px-4 pb-3">
-          <SuggestedPrompts onSelect={onPromptSelect} prompts={prompts} />
-        </div>
-      ) : null}
-      <footer className="shrink-0 px-4 pb-4">
+      <footer className="shrink-0 px-3 pb-2">
         <Composer
           {...composerProps}
+          suggestedPrompts={prompts}
           disabled={locked || composerProps?.disabled}
         />
       </footer>
