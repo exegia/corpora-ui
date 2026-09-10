@@ -103,7 +103,6 @@
   --liquid-glass-rim-fade: 4%;
   --liquid-glass-rim-width: 1.5px;
 
-
   .shadow-bezel {
     box-shadow:
       inset 1px 1px 2px rgb(255 255 255 / 0.15),
@@ -117,8 +116,6 @@
   }
 }
 
-
-
 /* Tailwind v4 resets buttons to cursor:default — anything
  * clickable must invite the click */
 button:not(:disabled),
@@ -127,7 +124,6 @@ label:has(input),
 a {
   cursor: pointer;
 }
-
 
 :focus-visible {
   outline: 2px solid var(--accent);
@@ -164,7 +160,6 @@ a:hover .animated-underline::after,
 a:focus-visible .animated-underline::after {
   transform: scaleX(1);
 }
-
 
 /* Chat surfaces (bubble, composer) — ring + inset depth per theme. */
 :root {
@@ -295,7 +290,73 @@ a:focus-visible .animated-underline::after {
       opacity: 0;
     }
   }
-}
+  --animate-toast-success-odd: toast-success-odd 0.32s cubic-bezier(0.5, 1, 0.89, 1);
+  --animate-toast-success-even: toast-success-even 0.32s cubic-bezier(0.5, 1, 0.89, 1);
+  --animate-toast-error-odd: toast-error-odd 0.28s cubic-bezier(0.5, 1, 0.89, 1);
+  --animate-toast-error-even: toast-error-even 0.28s cubic-bezier(0.5, 1, 0.89, 1)
+;
+  @keyframes toast-success-odd {
+  0% {
+    scale: 1;
+    }
+  30% {
+    scale: 1.025;
+    }
+  60% {
+    scale: 0.99;
+    }
+  100% {
+    scale: 1;
+    }
+  }
+  @keyframes toast-error-odd {
+  0% {
+    translate: 0 0;
+    }
+  25% {
+    translate: -3px 0;
+    }
+  50% {
+    translate: 3px 0;
+    }
+  75% {
+    translate: -3px 0;
+    }
+  100% {
+    translate: 0 0;
+    }
+  }
+  @keyframes toast-success-even {
+  0% {
+    scale: 1;
+    }
+  30% {
+    scale: 1.025;
+    }
+  60% {
+    scale: 0.99;
+    }
+  100% {
+    scale: 1;
+    }
+  }
+  @keyframes toast-error-even {
+  0% {
+    translate: 0 0;
+    }
+  25% {
+    translate: -3px 0;
+    }
+  50% {
+    translate: 3px 0;
+    }
+  75% {
+    translate: -3px 0;
+    }
+  100% {
+    translate: 0 0;
+    }
+  }}
 
 @layer base {
   * {
@@ -331,7 +392,6 @@ a:focus-visible .animated-underline::after {
     inset 2px 2px 4px rgb(0 0 0 / 0.25),
     inset -1px -1px 2px rgb(255 255 255 / 0.7);
 }
-
 
 /* ── Inset bezel ─────────────────────────────────────────────────────────
    Two independent inset layers you compose one axis at a time: `lit`, the
@@ -442,8 +502,6 @@ a:focus-visible .animated-underline::after {
   --inset-shadow-dim-blur: calc(--value(number) * 1px);
   --inset-shadow-dim-blur: --value([length]);
 }
-
-
 
 /* Chat design language — inner-shadow bubbles, glass pills, the composer ring. */
 @utility shadow-bubble-lit {

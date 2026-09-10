@@ -14,7 +14,7 @@ describe("Flowchart", () => {
   it("lays out the default steps and draws a connector", () => {
     const { container } = render(<Flowchart.Root />)
     expect(screen.getByText("New order created")).toBeTruthy()
-    expect(screen.getByText("If / Else")).toBeTruthy()
+    expect(screen.getByText("Node 2")).toBeTruthy()
     const path = container.querySelector("path[data-edge]")!
     expect(path.getAttribute("d")).toMatch(/^M \d/)
     const canvas = container.querySelector('[data-slot="flowchart"]') as HTMLElement
@@ -35,17 +35,25 @@ describe("Flowchart", () => {
     expect(container.querySelector('path[data-edge="a->b"]')).toBeTruthy()
   })
 
-  it("fires onAdd with the side and onRemove, confirming orphans in an AlertDialog", async () => {
+  it("offers add child, duplicate and delete from the context menu, confirming orphans", async () => {
     const onAdd = mock(() => {})
     const onRemove = mock(() => {})
-    render(<Flowchart.Root steps={STEPS} onAdd={onAdd} onRemove={onRemove} />)
-    fireEvent.click(screen.getAllByRole("button", { name: "Add node right" })[0])
-    expect(onAdd).toHaveBeenCalledWith("a", "right")
+    const onDuplicate = mock(() => {})
+    render(<Flowchart.Root steps={STEPS} onAdd={onAdd} onRemove={onRemove} onDuplicate={onDuplicate} />)
+    expect(screen.queryByRole("button", { name: /Add node/ })).toBeNull()
+    fireEvent.contextMenu(screen.getByRole("button", { name: "A" }))
+    fireEvent.click(await screen.findByRole("menuitem", { name: "Add child" }))
+    expect(onAdd).toHaveBeenCalledWith("a", "bottom")
+    fireEvent.contextMenu(screen.getByRole("button", { name: "B" }))
+    fireEvent.click(await screen.findByRole("menuitem", { name: "Duplicate" }))
+    expect(onDuplicate).toHaveBeenCalledWith("b")
     // leaf: removed outright
-    fireEvent.click(screen.getAllByRole("button", { name: "Remove node" })[1])
+    fireEvent.contextMenu(screen.getByRole("button", { name: "B" }))
+    fireEvent.click(await screen.findByRole("menuitem", { name: "Delete" }))
     expect(onRemove).toHaveBeenCalledWith("b")
     // parent: asks first
-    fireEvent.click(screen.getAllByRole("button", { name: "Remove node" })[0])
+    fireEvent.contextMenu(screen.getByRole("button", { name: "A" }))
+    fireEvent.click(await screen.findByRole("menuitem", { name: "Delete" }))
     const dialog = await screen.findByRole("alertdialog")
     expect(dialog.textContent).toContain("orphaned")
     expect(onRemove).toHaveBeenCalledTimes(1)
@@ -53,10 +61,27 @@ describe("Flowchart", () => {
     await waitFor(() => expect(onRemove).toHaveBeenCalledWith("a"))
   })
 
-  it("hides add / remove controls when read-only", () => {
+  it("hides the context menu when read-only", () => {
     render(<Flowchart.Root steps={STEPS} readOnly onAdd={() => {}} onRemove={() => {}} />)
-    expect(screen.queryByRole("button", { name: /Add node/ })).toBeNull()
-    expect(screen.queryByRole("button", { name: "Remove node" })).toBeNull()
+    fireEvent.contextMenu(screen.getByRole("button", { name: "A" }))
+    expect(screen.queryByRole("menu")).toBeNull()
+  })
+
+  it("renames a card from its pill and labels conditions Node n", async () => {
+    const onRename = mock(() => {})
+    render(
+      <Flowchart.Root
+        steps={[{ ...STEPS[0], kind: { label: "Trigger", hue: "#000" } }, { ...STEPS[1], condition: true }]}
+        onRename={onRename}
+      />
+    )
+    expect(screen.getByText("Trigger")).toBeTruthy()
+    expect(screen.getByText("Node 2")).toBeTruthy()
+    fireEvent.doubleClick(screen.getByText("Node 2"))
+    const input = screen.getByRole("textbox", { name: "Node name" })
+    fireEvent.change(input, { target: { value: "Cross references" } })
+    fireEvent.keyDown(input, { key: "Enter" })
+    expect(onRename).toHaveBeenCalledWith("b", "Cross references")
   })
 
   it("zooms with the buttons", () => {

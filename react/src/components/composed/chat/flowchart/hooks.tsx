@@ -1,24 +1,29 @@
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 import type { Edge, EdgeEnd, FlowchartProps, StepNode } from "./types";
-import { bezier, canvasH, curve, cw, edgePoints, place, rowH, rows, rowYs, type Heights, type Layout, type Offsets, type Point } from "./utils";
-import { EST_H } from "./constant";
+import { anchors, bezier, canvasH, curve, cw, edgePoints, place, rowH, rows, rowYs, type Heights, type Layout, type Offsets, type Point } from "./utils";
+import { EST_H, SNAP_RADIUS } from "./constant";
+import { toastManager } from "@/components/ui/toast";
 
 export const ZOOM_MIN = 0.25;
 export const ZOOM_MAX = 2;
 
-type Options = Pick<FlowchartProps, "edges" | "readOnly" | "zoomable" | "onDrag" | "onAdd" | "onRemove" | "onEdgeRemove" | "onEdgeConnect" | "onEdgeChange"> & {
+type Options = Pick<FlowchartProps, "edges" | "readOnly" | "zoomable" | "onDrag" | "onAdd" | "onRemove" | "onEdgeRemove" | "onEdgeConnect" | "onEdgeChange" | "onRename" | "onDuplicate"> & {
   steps: StepNode[];
   canvasRef: React.RefObject<HTMLDivElement | null>;
 };
 
-/** A connector end being dragged towards a new card. */
-export type EdgeDrag = { id: string; end: EdgeEnd; point: Point };
+/** A connector end being dragged towards a new card; `snap` is the card whose anchor is in range. */
+export type EdgeDrag = { id: string; end: EdgeEnd; point: Point; snap?: string };
+
+/** Pill text: explicit name, else the kind label, else "Node n" (conditions always count). */
+export const nodeLabel = (node: StepNode, index: number) =>
+  node.name ?? (node.condition || !node.kind ? `Node ${index + 1}` : node.kind.label);
 
 /** Default connectors: a chain through the steps in order. */
 export const chainEdges = (steps: StepNode[]): Edge[] =>
   steps.slice(1).map((n, i) => ({ id: `${steps[i].id}->${n.id}`, source: steps[i].id, target: n.id }));
 
-export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomable = false, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, canvasRef }: Options) => {
+export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomable = false, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, onRename, onDuplicate, canvasRef }: Options) => {
   const [width, setWidth] = useState(0);
   const [heights, setHeights] = useState<Heights>(EST_H);
   const [selected, setSelected] = useState<string | null>(null);
@@ -27,6 +32,8 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
   const [pendingRemove, setPendingRemove] = useState<{ id: string; orphans: string[] } | null>(null);
   const [selectedEdge, setSelectedEdge] = useState<string | null>(null);
   const [edgeDrag, setEdgeDrag] = useState<EdgeDrag | null>(null);
+  /** Card highlighted while the user browses "Connect to…" in the context menu. */
+  const [previewNode, setPreviewNode] = useState<string | null>(null);
   const drag = useRef<{
     id: string;
     startX: number;
@@ -64,7 +71,8 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
   const resetZoom = useCallback(() => setScale(1), []);
 
   const onPointerDown = (node: StepNode) => (event: React.PointerEvent<HTMLDivElement>) => {
-    if (readOnly) return;
+    // Left button only: a right-press belongs to the context menu.
+    if (readOnly || event.button !== 0) return;
     if ((event.target as Element).closest("[data-ui]")) return;
     const off = offsets[node.id];
     drag.current = {
@@ -122,15 +130,31 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
     (event.currentTarget as Element).setPointerCapture(event.pointerId);
     setEdgeDrag({ id: edge.id, end, point: toCanvas(event.clientX, event.clientY) });
   };
+  /** Nearest anchor of another card within SNAP_RADIUS: top anchors for a target end, bottom for a source end. */
+  const snapCandidate = (edge: Edge, end: EdgeEnd, point: Point) => {
+    const other = end === "source" ? edge.target : edge.source;
+    let best: { id: string; d: number } | null = null;
+    for (const node of steps) {
+      if (node.id === other) continue;
+      const a = anchors(node, layout);
+      const p = end === "source" ? a.bottom : a.top;
+      const d = Math.hypot(p.x - point.x, p.y - point.y);
+      if (d <= SNAP_RADIUS && (!best || d < best.d)) best = { id: node.id, d };
+    }
+    return best?.id;
+  };
   const onEdgeHandleMove = (event: React.PointerEvent<SVGElement>) => {
     if (!edgeDrag) return;
-    setEdgeDrag({ ...edgeDrag, point: toCanvas(event.clientX, event.clientY) });
+    const point = toCanvas(event.clientX, event.clientY);
+    const edge = edges.find((e) => e.id === edgeDrag.id);
+    const snap = edge ? snapCandidate(edge, edgeDrag.end, point) : undefined;
+    setEdgeDrag({ ...edgeDrag, point, snap });
   };
   const onEdgeHandleUp = (event: React.PointerEvent<SVGElement>) => {
     if (!edgeDrag) return;
     const edge = edges.find((e) => e.id === edgeDrag.id);
     const card = document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>("[data-node]");
-    const target = card?.dataset.node;
+    const target = edgeDrag.snap ?? card?.dataset.node;
     setEdgeDrag(null);
     if (!edge || !target) return;
     const other = edgeDrag.end === "source" ? edge.target : edge.source;
@@ -143,8 +167,21 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
     const edge = edges.find((e) => e.id === edgeDrag.id);
     const pts = edge && edgeEnds(edge);
     if (!pts) return "";
-    return edgeDrag.end === "source" ? curve(edgeDrag.point, pts.to) : curve(pts.from, edgeDrag.point);
+    const snapNode = edgeDrag.snap ? steps.find((n) => n.id === edgeDrag.snap) : undefined;
+    const point = snapNode ? anchors(snapNode, layout)[edgeDrag.end === "source" ? "bottom" : "top"] : edgeDrag.point;
+    return edgeDrag.end === "source" ? curve(point, pts.to) : curve(pts.from, point);
   };
+  /** "Connect to…": a new connector from `source` to `target`, unless one exists. */
+  const connectTo = (source: string, target: string) => {
+    if (source === target || edges.some((e) => e.source === source && e.target === target)) return;
+    onEdgeConnect?.({ id: `${source}->${target}`, source, target });
+  };
+  const renameNode = (id: string, name: string) => {
+    onRename?.(id, name);
+    toastManager.add({ title: "Node renamed", description: name, type: "success" });
+  };
+  const duplicateNode = (id: string) => onDuplicate?.(id);
+  const snapTarget = edgeDrag?.snap ?? null;
   const removeEdge = (id: string) => {
     setSelectedEdge(null);
     onEdgeRemove?.(id);
@@ -210,6 +247,15 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
     ghostCurve,
     removeEdge,
     onEdgeChange,
+    snapTarget,
+    previewNode,
+    setPreviewNode,
+    connectTo,
+    renameNode,
+    duplicateNode,
+    canRename: Boolean(onRename),
+    canDuplicate: Boolean(onDuplicate),
+    canConnect: Boolean(onEdgeConnect),
     rowHeight,
     canvasHeight,
     connectorWidth,

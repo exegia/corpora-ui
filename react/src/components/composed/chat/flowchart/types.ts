@@ -28,6 +28,10 @@ export interface FlowchartProps {
   onEdgeConnect?: (edge: Edge) => void
   /** Stroke width or colour picked from the connector toolbar. */
   onEdgeChange?: (id: string, patch: Pick<Edge, "strokeWidth" | "color">) => void
+  /** The pill was renamed inline (double-click, then click away or Enter). */
+  onRename?: (id: string, name: string) => void
+  /** "Duplicate" in the context menu: copy the card to a new node on its right. */
+  onDuplicate?: (id: string) => void
   variant?: string
   children?: React.ReactNode
   className?: string
@@ -39,9 +43,15 @@ export type StepNode = {
   x: number // 0–1 center of the node
   w: number
   kind?: { label: string; hue: string }
+  /** Pill text; defaults to the kind label, or "Node n" for conditions. */
+  name?: string
   hue?: string
   title?: string
   caption?: string
+  /** Replaces the icon tile — a person, a manuscript, a corpus cover. */
+  image?: { src: string; alt?: string }
+  /** Custom tile icon when there is no image. */
+  icon?: React.ReactNode
   condition?: boolean // renders the if/else chip rows instead
   /** Custom card body; replaces the default title / caption body. */
   children?: React.ReactNode
@@ -71,6 +81,8 @@ export interface ConnectorProps extends Omit<SVGProps<SVGPathElement>, "strokeWi
 
 export interface ChartNodeProps {
   node: StepNode
+  /** Position in `steps`, for the generated "Node n" label. */
+  index?: number
   onRef: (el: HTMLDivElement | null) => void
   children?: React.ReactNode
 }

@@ -48,10 +48,10 @@ const NODES: StepNode[] = [
  *
  * @sketch "Component / Flowchart"
  */
-export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, height = 360, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, className, children }: FlowchartProps) {
+export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, height = 360, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, onRename, onDuplicate, className, children }: FlowchartProps) {
   const canvasRef = useRef<HTMLDivElement>(null)
   const nodeRefs = useRef(new Map<string, HTMLElement>())
-  const chart = useFlowchart({ steps, edges, readOnly, zoomable, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, canvasRef })
+  const chart = useFlowchart({ steps, edges, readOnly, zoomable, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, onRename, onDuplicate, canvasRef })
   const {
     updateHeights, updateWidth, canvasHeight, isLit, bezierCurve, connectorWidth, scale, zoomBy, resetZoom, pendingRemove, commitRemove, cancelRemove,
     editableEdges, selectedEdge, selectEdge, edgeDrag, edgeEnds, onEdgeHandleDown, onEdgeHandleMove, onEdgeHandleUp, ghostCurve, removeEdge,
@@ -139,9 +139,10 @@ export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, he
               onRemove={onEdgeRemove ? removeEdge : undefined}
             />
           ) : null}
-          {steps.map((node) => (
+          {steps.map((node, index) => (
             <ChartNode
               key={node.id}
+              index={index}
               node={node}
               onRef={(el) => {
                 if (el) nodeRefs.current.set(node.id, el)
