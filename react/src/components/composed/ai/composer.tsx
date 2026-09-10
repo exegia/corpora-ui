@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { BOUNCE_IN_OUT, SPRING_PANEL } from "@/lib/ease"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { MenuCommand } from "@/components/ui/menu-command"
 import { Text } from "@/components/atoms"
 import { Attachment } from "@/components/composed/chat"
 import { SendHint } from "./shared"
@@ -43,6 +44,8 @@ export function Composer({
   disabled = false,
   onAttach,
   attachLabel = "Attach",
+  commands,
+  onCommand,
   safetyNote = "Changes apply immediately and are recorded in version history. Undo anytime.",
   expanded = false,
   placeholder = "Ask about this selection…",
@@ -106,33 +109,39 @@ export function Composer({
   // One attach button for both shapes: it is absolutely positioned in each,
   // so the class swap moves it and `layout` glides it between the two spots
   // rather than mounting a second control.
-  const attachButton = onAttach && (
+  const plusButton = (
+    <Button
+      aria-label={attachLabel}
+      className="[&_svg]:transition-transform bg-background/50 [&_svg]:duration-200 [&_svg]:ease-smooth-out hover:[&_svg]:rotate-90 motion-reduce:hover:[&_svg]:rotate-0 data-popup-open:[&_svg]:rotate-45"
+      disabled={disabled}
+      onClick={commands ? undefined : onAttach}
+      size="icon-lg"
+      glassVariant="liquid-refract"
+      variant="glass"
+    >
+      <Plus className="size-4 stroke-3" />
+    </Button>
+  )
+  const attachButton = (onAttach || commands) && (
     <motion.div
       data-slot="composer-attach"
       layout={!reduceMotion && "position"}
       className="z-20"
       transition={SPRING_PANEL}
     >
-      <Button
-        aria-label={attachLabel}
-        className="[&_svg]:transition-transform bg-background/50 [&_svg]:duration-200 [&_svg]:ease-smooth-out hover:[&_svg]:rotate-90 motion-reduce:hover:[&_svg]:rotate-0"
-        disabled={disabled}
-        onClick={onAttach}
-        size="icon-lg"
-        glassVariant="liquid-refract"
-        variant="glass"
-      >
-        <Plus className="size-4 stroke-3" />
-      </Button>
+      {commands ? (
+        <MenuCommand items={commands} onSelect={onCommand}>
+          {plusButton}
+        </MenuCommand>
+      ) : (
+        plusButton
+      )}
     </motion.div>
   )
 
   const sendButton = (<MotionButton
     aria-label={isStreaming ? "Stop" : "Send message"}
-    className={cn(
-      "size-6 min-w-0 shrink-0 justify-self-center",
-      isExpanded ? "min-w-auto" : "hidden"
-    )}
+    className={cn("shrink-0 justify-self-center", !isExpanded && "hidden")}
     disabled={isStreaming ? false : isDisabled || !draft.trim()}
     onClick={isStreaming ? onStop : undefined}
     transition={BOUNCE_IN_OUT}
@@ -143,6 +152,7 @@ export function Composer({
     }}
    
     initial={{ opacity: 0, scale: 0 }}
+    size="icon-sm"
     whileHover={{ scale: 1, opacity: 1 }}
     type={isStreaming ? "button" : "submit"}
   >
@@ -161,7 +171,7 @@ export function Composer({
         isExpanded
           ? "[&_textarea]:min-h-14 [&_textarea]:py-2"
           : "[&_textarea]:min-h-0 [&_textarea]:py-0 h-full",
-        !isExpanded && onAttach && "[&_textarea]:pr-12",
+        !isExpanded && (onAttach || commands) && "[&_textarea]:pr-12",
         // The rest state paints its own keycap hint over the field.
         showRestHint && "[&_textarea]:placeholder:text-transparent"
       )}
@@ -217,6 +227,8 @@ export function Composer({
           "relative z-10 overflow-clip  flex flex-1 flex-col p-2.5  bg-(--chat-field) transition-shadow duration-300 ease-smooth-out",
           isExpanded ? "shadow-[inset_0px_0px_15px_2px_rgba(0,_0,_0,_0.1)] items-end rounded-lg rounded-bl-xl" : "rounded-full items-center shadow-[inset_0px_0px_7px_-1.5px_rgba(0,_0,_0,_0.3)]",
           "motion-reduce:transition-none py-2.5",
+          // Two attachment chips (260px each) plus tray gap and paddings.
+          attachments.length > 0 && "min-w-[35rem]",
           className
         )}
         initial={false}

@@ -471,4 +471,25 @@ import { TextClickPopover } from "@exegia/corpora-ui"
 <Tag tone="green">Active</Tag>
 <Stat label="Pistachio" value="+1.15%" delta="+$617.22" trend="positive" />`,
   },
+  {
+    slug: "menu-command",
+    name: "Menu command",
+    titleStyle: "titlebar",
+    description:
+      "Command rows for a menu popup: icon · label · description · trailing status. MenuCommand wires a trigger to the popup; MenuCommandList drops into any MenuPopup.",
+    category: "atoms",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/menu-command-demo")),
+    registryDependencies: ["button"],
+    props: [
+      { name: "items", type: "MenuCommandItem[]", required: true, description: "{ id, label, description?, icon?, trailing?, href?, disabled?, onSelect? }." },
+      { name: "onSelect", type: "(item) => void", description: "Fires after the row's own onSelect." },
+      { name: "side / align", type: 'Positioner side / align', default: '"top" / "start"', description: "MenuCommand only." },
+    ],
+    usage: `import { MenuCommand } from "@corpora/ui"
+
+<MenuCommand items={[{ id: "web", label: "Web search", description: "Real-time news", icon: <Globe />, trailing: "Connected" }]} onSelect={run}>
+  <Button size="icon-lg" aria-label="Attach">+</Button>
+</MenuCommand>`,
+  },
 ]
