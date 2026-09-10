@@ -17,6 +17,17 @@ export interface FlowchartProps {
   onAdd?: (id: string, side: FlowchartSide) => void
   /** The remove button was pressed (already confirmed when children would be orphaned). */
   onRemove?: (id: string) => void
+  /**
+   * Canvas height floor in px. The canvas grows past it only when the scaled
+   * content is taller, so zooming out or removing a card never collapses it.
+   */
+  height?: number
+  /** Disconnect was pressed on a selected connector. Enables connector editing. */
+  onEdgeRemove?: (id: string) => void
+  /** A connector end was dropped on another card; `edge` carries the new source / target. */
+  onEdgeConnect?: (edge: Edge) => void
+  /** Stroke width or colour picked from the connector toolbar. */
+  onEdgeChange?: (id: string, patch: Pick<Edge, "strokeWidth" | "color">) => void
   variant?: string
   children?: React.ReactNode
   className?: string
@@ -41,11 +52,21 @@ export type Edge = {
   source: string
   target: string
   bezierCurve?: boolean
+  strokeWidth?: number
+  /** Any CSS colour; defaults to the line token, accent when lit. */
+  color?: string
 }
 
-export interface ConnectorProps extends SVGProps<SVGPathElement> {
+export type EdgeEnd = "source" | "target"
+
+export interface ConnectorProps extends Omit<SVGProps<SVGPathElement>, "strokeWidth"> {
   edge: Edge
   isLit: boolean
+  strokeWidth?: number
+  /** Selected for editing: bolder hit, toolbar and end handles render in Root. */
+  selected?: boolean
+  /** Enables the wide click target; called with the edge id. */
+  onPick?: (id: string) => void
 }
 
 export interface ChartNodeProps {

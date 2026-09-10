@@ -66,4 +66,30 @@ describe("Flowchart", () => {
     const canvas = container.querySelector('[data-slot="flowchart"]') as HTMLElement
     expect(canvas.style.backgroundSize).toContain("27.5px")
   })
+
+  it("keeps the canvas at its height floor when zooming out or removing a card", () => {
+    const { container, rerender } = render(<Flowchart.Root steps={STEPS} zoomable height={300} />)
+    const canvas = container.querySelector('[data-slot="flowchart"]') as HTMLElement
+    expect(canvas.style.height).toBe("300px")
+    fireEvent.click(screen.getByRole("button", { name: "Zoom out" }))
+    expect(canvas.style.height).toBe("300px")
+    rerender(<Flowchart.Root steps={[STEPS[0]]} zoomable height={300} />)
+    expect(canvas.style.height).toBe("300px")
+  })
+
+  it("selects a connector and edits it from the toolbar", () => {
+    const onEdgeRemove = mock(() => {})
+    const onEdgeChange = mock(() => {})
+    const { container } = render(<Flowchart.Root steps={STEPS} onEdgeRemove={onEdgeRemove} onEdgeChange={onEdgeChange} />)
+    expect(screen.queryByRole("toolbar")).toBeNull()
+    // the wide transparent twin is the click target
+    fireEvent.click(container.querySelector('path[data-edge="a->b"]')!.nextElementSibling!)
+    expect(screen.getByRole("toolbar", { name: "Connector" })).toBeTruthy()
+    expect(container.querySelector('path[data-edge="a->b"]')!.getAttribute("stroke")).toContain("accent")
+    fireEvent.click(screen.getByRole("button", { name: "Stroke 3" }))
+    expect(onEdgeChange).toHaveBeenCalledWith("a->b", { strokeWidth: 3 })
+    fireEvent.click(screen.getByRole("button", { name: "Disconnect" }))
+    expect(onEdgeRemove).toHaveBeenCalledWith("a->b")
+    expect(screen.queryByRole("toolbar")).toBeNull()
+  })
 })

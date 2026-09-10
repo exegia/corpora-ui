@@ -699,7 +699,9 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     registryDependencies: ["chat-presentation-atoms"],
     props: [
       { name: "steps", type: 'StepNode[]', description: "Cards to lay out: { id, row, x (0–1 centre), w, kind?: { label, hue }, hue?, title?, caption?, condition?, children? }. `children` replaces the default title / caption body. Defaults to the Trigger → If / Else sample." },
-      { name: "edges", type: 'Edge[]', description: "Connectors { id, source, target }. Defaults to a chain through steps in order." },
+      { name: "edges", type: 'Edge[]', description: "Connectors { id, source, target, strokeWidth?, color? }. Defaults to a chain through steps in order." },
+      { name: "height", type: 'number', default: "360", description: "Canvas height floor; it only grows when scaled content is taller, so zooming out or removing a card never collapses it." },
+      { name: "onEdgeRemove / onEdgeConnect / onEdgeChange", type: '(id) / (edge) / (id, { strokeWidth?, color? }) => void', description: "Enable connector editing: click a connector for a toolbar (widths, colours, disconnect) and drag either end handle onto another card to reconnect." },
       { name: "readOnly", type: 'boolean', default: "false", description: "No drag, no add / remove buttons. Selection still works." },
       { name: "zoomable", type: 'boolean', default: "false", description: "Ctrl / ⌘ + wheel and the +/− buttons scale the canvas (25–200%)." },
       { name: "onDrag", type: '(id, { dx, dy }) => void', description: "A card was dragged; offset from its laid-out position." },

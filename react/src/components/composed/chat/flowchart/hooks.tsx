@@ -1,26 +1,32 @@
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
-import type { Edge, FlowchartProps, StepNode } from "./types";
-import { bezier, canvasH, cw, place, rowH, rows, rowYs, type Heights, type Layout, type Offsets } from "./utils";
+import type { Edge, EdgeEnd, FlowchartProps, StepNode } from "./types";
+import { bezier, canvasH, curve, cw, edgePoints, place, rowH, rows, rowYs, type Heights, type Layout, type Offsets, type Point } from "./utils";
 import { EST_H } from "./constant";
 
 export const ZOOM_MIN = 0.25;
 export const ZOOM_MAX = 2;
 
-type Options = Pick<FlowchartProps, "edges" | "readOnly" | "zoomable" | "onDrag" | "onAdd" | "onRemove"> & {
+type Options = Pick<FlowchartProps, "edges" | "readOnly" | "zoomable" | "onDrag" | "onAdd" | "onRemove" | "onEdgeRemove" | "onEdgeConnect" | "onEdgeChange"> & {
   steps: StepNode[];
+  canvasRef: React.RefObject<HTMLDivElement | null>;
 };
+
+/** A connector end being dragged towards a new card. */
+export type EdgeDrag = { id: string; end: EdgeEnd; point: Point };
 
 /** Default connectors: a chain through the steps in order. */
 export const chainEdges = (steps: StepNode[]): Edge[] =>
   steps.slice(1).map((n, i) => ({ id: `${steps[i].id}->${n.id}`, source: steps[i].id, target: n.id }));
 
-export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomable = false, onDrag, onAdd, onRemove }: Options) => {
+export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomable = false, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, canvasRef }: Options) => {
   const [width, setWidth] = useState(0);
   const [heights, setHeights] = useState<Heights>(EST_H);
   const [selected, setSelected] = useState<string | null>(null);
   const [offsets, setOffsets] = useState<Offsets>({});
   const [scale, setScale] = useState(1);
   const [pendingRemove, setPendingRemove] = useState<{ id: string; orphans: string[] } | null>(null);
+  const [selectedEdge, setSelectedEdge] = useState<string | null>(null);
+  const [edgeDrag, setEdgeDrag] = useState<EdgeDrag | null>(null);
   const drag = useRef<{
     id: string;
     startX: number;
@@ -41,7 +47,16 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
 
   const updateHeights = useCallback((callback: (prev: Heights) => Heights) => setHeights(callback), []);
   const updateWidth = useCallback((next: number) => setWidth((prev) => (prev === next ? prev : next)), []);
-  const updateSelected = (id: string | null) => setSelected((prev) => (prev === id ? prev : id));
+  const updateSelected = (id: string | null) => {
+    setSelected((prev) => (prev === id ? prev : id));
+    if (id !== null) setSelectedEdge(null);
+  };
+  const editableEdges = !readOnly && Boolean(onEdgeRemove || onEdgeConnect || onEdgeChange);
+  const selectEdge = (id: string | null) => {
+    if (!editableEdges) return;
+    setSelectedEdge(id);
+    if (id !== null) setSelected(null);
+  };
   const zoomBy = useCallback(
     (factor: number) => setScale((s) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, +(s * factor).toFixed(3)))),
     [],
@@ -92,7 +107,48 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
   };
 
   const wasDragged = () => drag.current?.moved === true;
-  const isLit = (edge: Edge) => selected === edge.source || selected === edge.target;
+  const isLit = (edge: Edge) => selected === edge.source || selected === edge.target || selectedEdge === edge.id;
+
+  /** Client → unscaled canvas coordinates. */
+  const toCanvas = (clientX: number, clientY: number): Point => {
+    const rect = canvasRef.current?.getBoundingClientRect();
+    return { x: (clientX - (rect?.left ?? 0)) / scale, y: (clientY - (rect?.top ?? 0)) / scale };
+  };
+  const edgeEnds = (edge: Edge) => edgePoints({ from: edge.source, to: edge.target }, steps, layout);
+
+  const onEdgeHandleDown = (edge: Edge, end: EdgeEnd) => (event: React.PointerEvent<SVGElement>) => {
+    if (!onEdgeConnect) return;
+    event.stopPropagation();
+    (event.currentTarget as Element).setPointerCapture(event.pointerId);
+    setEdgeDrag({ id: edge.id, end, point: toCanvas(event.clientX, event.clientY) });
+  };
+  const onEdgeHandleMove = (event: React.PointerEvent<SVGElement>) => {
+    if (!edgeDrag) return;
+    setEdgeDrag({ ...edgeDrag, point: toCanvas(event.clientX, event.clientY) });
+  };
+  const onEdgeHandleUp = (event: React.PointerEvent<SVGElement>) => {
+    if (!edgeDrag) return;
+    const edge = edges.find((e) => e.id === edgeDrag.id);
+    const card = document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>("[data-node]");
+    const target = card?.dataset.node;
+    setEdgeDrag(null);
+    if (!edge || !target) return;
+    const other = edgeDrag.end === "source" ? edge.target : edge.source;
+    if (target === other || target === edge[edgeDrag.end]) return;
+    onEdgeConnect?.({ ...edge, [edgeDrag.end]: target });
+  };
+  /** Path of the connector being re-routed, following the pointer. */
+  const ghostCurve = () => {
+    if (!edgeDrag) return "";
+    const edge = edges.find((e) => e.id === edgeDrag.id);
+    const pts = edge && edgeEnds(edge);
+    if (!pts) return "";
+    return edgeDrag.end === "source" ? curve(edgeDrag.point, pts.to) : curve(pts.from, edgeDrag.point);
+  };
+  const removeEdge = (id: string) => {
+    setSelectedEdge(null);
+    onEdgeRemove?.(id);
+  };
   const bezierCurve = (edge: Edge) => bezier({ from: edge.source, to: edge.target }, steps, layout);
   const handlePlace = (node: StepNode) => place(node, layout);
 
@@ -143,6 +199,17 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
     onPointerUp,
     wasDragged,
     isLit,
+    editableEdges,
+    selectedEdge,
+    selectEdge,
+    edgeDrag,
+    edgeEnds,
+    onEdgeHandleDown,
+    onEdgeHandleMove,
+    onEdgeHandleUp,
+    ghostCurve,
+    removeEdge,
+    onEdgeChange,
     rowHeight,
     canvasHeight,
     connectorWidth,

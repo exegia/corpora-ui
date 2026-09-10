@@ -61,6 +61,9 @@ export default function FlowchartDemo(): React.ReactElement {
         onAdd={add}
         onRemove={remove}
         onDrag={(id, offset) => console.log("drag", id, offset)}
+        onEdgeRemove={(id) => setEdges((e) => e.filter((x) => x.id !== id))}
+        onEdgeConnect={(edge) => setEdges((e) => e.map((x) => (x.id === edge.id ? edge : x)))}
+        onEdgeChange={(id, patch) => setEdges((e) => e.map((x) => (x.id === id ? { ...x, ...patch } : x)))}
       />
     </DemoStage>
   )
