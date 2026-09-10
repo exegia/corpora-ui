@@ -49,6 +49,7 @@
     "@remixicon/react": "^4.9.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cn": "^0.2.6",
     "cuelume": "^0.2.2",
     "frimousse": "^0.3.0",
     "iconsax-reactjs": "^0.0.8",

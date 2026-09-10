@@ -24,6 +24,13 @@
   "registries": {
     "@coss": "https://coss.com/ui/r/{name}.json",
     "@glasscn": "https://glasscn-components.vercel.app/r/{name}.json",
-    "@beui": "https://beui.dev/r/{name}.json"
+    "@beui": "https://beui.dev/r/{name}.json",
+    "@codedvisuals": {
+      "url": "https://codedvisuals.com/r/{name}.json",
+      "headers": {
+        "Authorization": "Bearer ${CODEDVISUALS_TOKEN}"
+      }
+    },
+    "@reui": "https://reui.io/r/{style}/{name}.json"
   }
 }
