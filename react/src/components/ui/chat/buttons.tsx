@@ -83,7 +83,7 @@ export function SendButton({ className, children = "Send", ...props }: SendButto
       variant="ghost"
       size="sm"
       className={cn(
-        "h-[31px] rounded-lg border-0 bg-brand px-4 text-[13px] font-semibold text-[#1a1a1a] shadow-none hover:bg-brand/90 data-pressed:bg-brand/90 sm:h-[31px] *:data-[slot=button-loading-indicator]:text-[#1a1a1a]",
+        "h-[31px] rounded-md border-0 bg-brand px-4 text-[13px] font-semibold text-[#1a1a1a] shadow-none hover:bg-brand/90 data-pressed:bg-brand/90 sm:h-[31px] *:data-[slot=button-loading-indicator]:text-[#1a1a1a]",
         className
       )}
       {...props}

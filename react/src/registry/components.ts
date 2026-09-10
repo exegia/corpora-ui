@@ -552,41 +552,38 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     name: "Research answer",
     titleStyle: "titlebar",
     description:
-      "Answer card with a kicker, the content, Source / Date / Author(s) meta and an actions row: Copy citation, Share, Add to list, thumbs up / down.",
+      "Answer card with a kicker, the content, stacked Source / Date / Author(s) rows and an actions row: Copy citation, Share, Add to list.",
     category: "components",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/research-answer-demo")),
     registryDependencies: ["chat-presentation-atoms", "button"],
     props: [
       { name: "content", type: "ReactNode", required: true, description: "The answer." },
-      { name: "kicker / kickerSub / corpus", type: "ReactNode", description: "Header row; corpus renders as a pill." },
+      { name: "kicker / kickerSub", type: "ReactNode", description: "Header row." },
       { name: "source / date / authors", type: "ReactNode", description: "Meta columns; omitted ones are hidden." },
-      { name: "onCopyCitation / onShare / onAddToList / onFeedback", type: "() => void / (vote) => void", description: "Actions. Add to list behaviour is not designed — the callback is all the card does." },
+      { name: "onCopyCitation / onShare / onAddToList", type: "() => void", description: "Actions. Add to list behaviour is not designed — the callback is all the card does." },
     ],
     usage: `import { ResearchAnswer } from "@corpora/ui"
 
-<ResearchAnswer corpus="Iliad" content="…" source="Iliad · Homer corpus" date="c. 750 BCE" authors="Homer" onFeedback={vote} />`,
+<ResearchAnswer content="…" source="Iliad · Homer corpus" date="c. 750 BCE" authors="Homer" onCopyCitation={copy} />`,
   },
   {
     slug: "streaming-text",
     name: "Streaming text",
     titleStyle: "titlebar",
     description:
-      "Streamed answer: word-by-word reveal with a caret, inline source chips, an action row, a collapsible sources panel (keyed atom) and follow-up prompts.",
+      "Streamed answer: word-by-word reveal with a caret and inline source previews.",
     category: "components",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/streaming-text-demo")),
     registryDependencies: ["chat-presentation-atoms"],
     props: [
-      { name: "paragraphs", type: '(string | StreamingToken[])[]', required: true, description: "Each paragraph is words or tokens; `{ cite }` renders an inline SourceChip." },
+      { name: "paragraphs", type: '(string | StreamingToken[])[]', required: true, description: "Each paragraph is words or tokens; `{ cite, title?, description?, href? }` renders an InlineSource." },
       { name: "streaming / wordMs", type: 'boolean / number', default: '55', description: "Animate the reveal; reduced motion shows everything at once." },
-      { name: "sources / sourcesLabel", type: 'StreamingSource[] / ReactNode', description: "Rows of the collapsible panel; open state lives in streamingSourcesOpenAtom(id)." },
-      { name: "followUps / onFollowUp", type: 'string[] / (text) => void', description: "Follow-up rows." },
-      { name: "onCopy / onRegenerate / onFeedback", type: 'callbacks', description: "Action row." },
     ],
     usage: `import { StreamingText } from "@corpora/ui"
 
-<StreamingText streaming paragraphs={[answer, [{ cite: "scoopdata.io" }, ...]]} sources={sources} followUps={["…"]} />`,
+<StreamingText streaming paragraphs={[answer, [{ cite: "scoopdata.io", href: "https://scoopdata.io" }, ...]]} />`,
   },
   {
     slug: "recommendation-card",
@@ -701,13 +698,16 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     preview: React.lazy(() => import("./demos/flowchart-demo")),
     registryDependencies: ["chat-presentation-atoms"],
     props: [
-      { name: "steps", type: 'StepNode[]', description: "Cards to lay out: { id, row, x (0–1 centre), w, kind?: { label, hue }, hue?, title?, caption?, condition?, children? }. `children` replaces the default title / caption body. Defaults to the Trigger → If / Else sample." },
-      { name: "edges", type: 'Edge[]', description: "Connectors { id, source, target }. Defaults to a chain through steps in order." },
+      { name: "steps", type: 'StepNode[]', description: "Cards to lay out: { id, row, x (0–1 centre), w, kind?: { label, hue }, name?, hue?, title?, caption?, image?, icon?, condition?, children? }. Content-agnostic: `image` fills the tile, `children` replaces the body. Defaults to the Trigger → If / Else sample." },
+      { name: "edges", type: 'Edge[]', description: "Connectors { id, source, target, strokeWidth?, color? }. Defaults to a chain through steps in order." },
+      { name: "height", type: 'number', description: "Canvas min-height. The canvas fills its parent and floors at the content height it loaded with, so zooming out or removing a card never collapses it." },
+      { name: "zoomable", type: 'boolean', default: "false", description: "Ctrl / ⌘ + wheel and the +/− buttons scale the canvas (25–200%) about its centre with a 300ms ease. The world behind the frame is twice its size: drag empty canvas to pan, click it to clear the selection." },
+      { name: "onEdgeRemove / onEdgeConnect / onEdgeChange", type: '(id) / (edge) / (id, { strokeWidth?, color? }) => void', description: "Enable connector editing: click a connector for a toolbar (widths, colours, disconnect) and drag either end handle towards another card — it snaps to the nearest anchor and previews the card before you release." },
       { name: "readOnly", type: 'boolean', default: "false", description: "No drag, no add / remove buttons. Selection still works." },
-      { name: "zoomable", type: 'boolean', default: "false", description: "Ctrl / ⌘ + wheel and the +/− buttons scale the canvas (25–200%)." },
       { name: "onDrag", type: '(id, { dx, dy }) => void', description: "A card was dragged; offset from its laid-out position." },
-      { name: "onAdd", type: '(id, side) => void', description: "Hover add button on a side (top / right / bottom / left) was pressed. Buttons only render when set." },
-      { name: "onRemove", type: '(id) => void', description: "Hover remove button or Delete on a selected card. Opens an AlertDialog first when children would be orphaned." },
+      { name: "onAdd", type: '(id, side) => void', description: "\"Add child\" in the card's context menu (side is \"bottom\")." },
+      { name: "onRemove", type: '(id) => void', description: "\"Delete\" in the context menu or Delete on a selected card. Opens an AlertDialog first when children would be orphaned." },
+      { name: "onRename / onDuplicate", type: '(id, name) / (id) => void', description: "Double-click the pill to rename (commits on blur or Enter with a toast); \"Duplicate\" copies the card to the right. The context menu also offers \"Connect to…\", which previews the hovered card and fires onEdgeConnect." },
       { name: "className", type: 'string', description: "Extra classes on the canvas." },
     ],
     usage: `import { Flowchart } from "@corpora/ui"
@@ -728,13 +728,13 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     name: "Insight cards",
     titleStyle: "titlebar",
     description:
-      "Paged insights: header with count and prev / next, summary, two stats, a trend snapshot (line plot) and a follow-up prompt.",
+      "Paged insights: header with count and prev / next, summary, stats, a trend snapshot (line plot) or an allocation breakdown with selectable segments, and a follow-up prompt.",
     category: "components",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/insight-cards-demo")),
     registryDependencies: ["chat-presentation-atoms", "chart"],
     props: [
-      { name: "insights", type: 'Insight[]', required: true, description: "summary, stats (StatProps[]), snapshot { data, series }, followUp." },
+      { name: "insights", type: 'Insight[]', required: true, description: "summary, stats (StatProps[]), snapshot { data, series }, allocation { label, value, initials, segments[] }, followUp." },
       { name: "index / defaultIndex / onIndexChange", type: 'number', description: "Which insight is shown." },
       { name: "onFollowUp", type: '(text) => void', description: "Follow-up pill." },
     ],

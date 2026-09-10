@@ -1,6 +1,6 @@
 "use client"
 
-import { Sparkle } from "lucide-react"
+import { Sparkles } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { isValidElement, useId, useState } from "react"
 import type * as React from "react"
@@ -123,7 +123,7 @@ export function AiMessage({
               aria-controls={panelId}
               aria-expanded={open}
               className={cn(
-                "group/suggestions inline-flex w-fit cursor-pointer items-center gap-2 rounded-md px-1 py-1 text-sm outline-none transition-colors duration-150 ease-smooth-out focus-visible:ring-0",
+                "group/suggestions inline-flex w-fit cursor-pointer pb-1 items-center gap-1 rounded-md px-1 text-xs outline-none transition-colors duration-150 ease-smooth-out focus-visible:ring-0",
                 agentText,
                 "text-indigo-700 dark:text-indigo-400"
               )}
@@ -134,10 +134,13 @@ export function AiMessage({
             >
               <motion.span
                 animate={{ rotate: open ? 90 : 0, scale: open ? 1.1 : 1 }}
-                className="inline-flex "
+                className="inline-flex font-semibold"
                 transition={reduceMotion ? { duration: 0 } : SPRING_PANEL}
               >
-                <Sparkle aria-hidden="true" className="size-4 stroke-[1.5] stroke-indigo-800 dark:stroke-indigo-400" />
+                <Sparkles
+                  aria-hidden="true"
+                  className="size-3 rotate-12 fill-indigo-800/30 dark:fill-indigo-600/10 stroke-[2] stroke-indigo-800 dark:stroke-indigo-400"
+                />
               </motion.span>
               {suggestionsLabel(count)}
             </motion.button>
@@ -157,7 +160,7 @@ export function AiMessage({
                 >
                   <motion.div
                     animate="visible"
-                    className="flex flex-col gap-2 pt-2 pb-1"
+                    className="flex flex-col gap-2 py-2"
                     exit="hidden"
                     initial={reduceMotion ? false : "hidden"}
                     variants={LIST_VARIANTS}

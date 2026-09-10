@@ -2,6 +2,8 @@
 export const PAD_Y = 24;
 export const ROW_GAP = 64;
 export const PILL_OFFSET = 30; // kind pill + gap above a card
+/* a dragged connector end snaps to an anchor inside this radius (canvas px) */
+export const SNAP_RADIUS = 40;
 
 export const PURPLE = "#9a5cff";
 export const AMBER = "#f09a2f";

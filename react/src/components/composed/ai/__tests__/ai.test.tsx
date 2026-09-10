@@ -112,7 +112,7 @@ describe("SuggestionCard", () => {
         onReject={onReject}
       />
     )
-    await user.click(screen.getByRole("button", { name: "Ok, fix them" }))
+    await user.click(screen.getByRole("button", { name: "Ok, fix" }))
     expect(onAccept).toHaveBeenCalledTimes(1)
     await user.click(screen.getByRole("button", { name: "Ignore" }))
     expect(onReject).toHaveBeenCalledTimes(1)
@@ -135,7 +135,7 @@ describe("SuggestionCard", () => {
   // `mode="wait"` swap and the only user of `STATE_ICON.accepted`.
   test("swaps the actions for the accepted outcome", async () => {
     const { rerender } = render(<SuggestionCard heading="Suggestion" />)
-    expect(screen.getByRole("button", { name: "Ok, fix them" })).toBeDefined()
+    expect(screen.getByRole("button", { name: "Ok, fix" })).toBeDefined()
 
     rerender(
       <SuggestionCard heading="Suggestion" onUndo={() => {}} state="accepted" />
@@ -144,7 +144,7 @@ describe("SuggestionCard", () => {
     // Undo only mounts once the actions have finished leaving, so it is the
     // signal that the swap completed — the badge alone lands a frame early.
     expect(await screen.findByRole("button", { name: /Undo/ })).toBeDefined()
-    expect(screen.queryByRole("button", { name: "Ok, fix them" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "Ok, fix" })).toBeNull()
   })
 })
 

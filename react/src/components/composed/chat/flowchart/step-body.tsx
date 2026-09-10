@@ -19,16 +19,25 @@ export function StepBody({ node }: { node: StepNode }) {
   const hue = node.hue ?? "var(--accent-default)";
   return (
     <div className="flex items-center gap-2.5 p-2.5">
-      <span
-        className="flex size-9 shrink-0 items-center justify-center rounded-[8px]"
-        style={{
-          background: mix(hue, 12),
-          color: hue,
-          boxShadow: `0 0 0 1px ${mix(hue, 20)}`,
-        }}
-      >
-        <ConeIcon />
-      </span>
+      {node.image ? (
+        <img
+          alt={node.image.alt ?? ""}
+          className="size-9 shrink-0 rounded-[8px] object-cover"
+          src={node.image.src}
+          style={{ boxShadow: `0 0 0 1px ${mix(hue, 20)}` }}
+        />
+      ) : (
+        <span
+          className="flex size-9 shrink-0 items-center justify-center rounded-[8px] [&>svg]:size-4"
+          style={{
+            background: mix(hue, 12),
+            color: hue,
+            boxShadow: `0 0 0 1px ${mix(hue, 20)}`,
+          }}
+        >
+          {node.icon ?? <ConeIcon />}
+        </span>
+      )}
       <span className="min-w-0 text-left">
         <span className="block truncate text-[13px] font-semibold leading-tight text-ink">{node.title}</span>
         <span className="mt-0.5 block text-[12px] leading-snug text-ink-2">{node.caption}</span>

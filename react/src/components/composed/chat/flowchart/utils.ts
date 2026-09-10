@@ -54,12 +54,25 @@ export const anchors = (n: StepNode, layout: Layout) => {
   };
 };
 
-export const bezier = (edge: { from: string; to: string }, steps: StepNode[], layout: Layout) => {
-  const a = steps.find((n) => n.id === edge.from);
-  const b = steps.find((n) => n.id === edge.to);
-  if (!a || !b) return "";
-  const from = anchors(a, layout).bottom;
-  const to = anchors(b, layout).top;
+export type Point = { x: number; y: number };
+
+/** Vertical S-curve between two points. */
+export const curve = (from: Point, to: Point) => {
   const k = Math.min(Math.max(Math.abs(to.y - from.y) * 0.55, 24), 84);
   return `M ${from.x} ${from.y} C ${from.x} ${from.y + k}, ${to.x} ${to.y - k}, ${to.x} ${to.y}`;
+};
+
+/** Cubic bezier midpoint, where the connector toolbar sits. */
+export const midpoint = (from: Point, to: Point): Point => ({ x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 });
+
+export const edgePoints = (edge: { from: string; to: string }, steps: StepNode[], layout: Layout) => {
+  const a = steps.find((n) => n.id === edge.from);
+  const b = steps.find((n) => n.id === edge.to);
+  if (!a || !b) return null;
+  return { from: anchors(a, layout).bottom, to: anchors(b, layout).top };
+};
+
+export const bezier = (edge: { from: string; to: string }, steps: StepNode[], layout: Layout) => {
+  const pts = edgePoints(edge, steps, layout);
+  return pts ? curve(pts.from, pts.to) : "";
 };

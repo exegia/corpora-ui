@@ -32,7 +32,16 @@ export default function InsightCardsDemo(): React.ReactElement {
           },
           {
             summary: <>The <InsightEntity>Homeric Hymns</InsightEntity> have 14 lemmas flagged for review after the last import.</>,
-            stats: [{ tone: "series-5", label: "Flagged lemmas", value: "14", delta: "+9", trend: "negative" }],
+            allocation: {
+              label: "Flagged lemmas",
+              value: "14",
+              initials: "H",
+              segments: [
+                { key: "ambiguous", label: "AMBIG", value: 8, tone: "series-5", title: "Ambiguous", description: "Forms that resolve to more than one lemma. Pick a reading or add a disambiguation rule; the walker keeps both until then." },
+                { key: "unattested", label: "UNATT", value: 4, tone: "series-3", title: "Unattested", description: "Lemmas the import proposed that no other corpus attests. Confirm against the lexicon before they enter coverage." },
+                { key: "variant", label: "VAR", value: 2, tone: "series-1", title: "Variant spelling", description: "Orthographic variants of a known lemma. Linking them lifts coverage without touching the lexicon." },
+              ],
+            },
             followUp: "Open the review queue",
           },
         ]}

@@ -1,10 +1,12 @@
 import type * as React from "react"
 
 import type { ComposerAttachment } from "./composer-attachments-atom"
+import type { MenuCommandItem } from "@/components/ui/menu-command"
 
 export type ComposerMode = "answer" | "fix" | "ask"
 
 export type SuggestionState = "accepted" | "rejected" | "pending"
+
 
 export interface DiffRow {
   type: "add" | "remove"
@@ -50,6 +52,12 @@ export interface ComposerProps {
   /** Attach affordance — the "+" button. Hidden when omitted. */
   onAttach?: () => void
   attachLabel?: string
+  /**
+   * Turns the "+" button into a `MenuCommand` of these rows (sources, tools,
+   * upload). With `commands` set, `onAttach` is ignored.
+   */
+  commands?: MenuCommandItem[]
+  onCommand?: (item: MenuCommandItem) => void
   sendLabel?: React.ReactNode
   stopLabel?: React.ReactNode
   safetyNote?: React.ReactNode
