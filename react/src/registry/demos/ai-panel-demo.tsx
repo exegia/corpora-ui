@@ -12,6 +12,8 @@ import {
 } from "@/components/blocks/ai-panel"
 import { cn } from "@/lib/utils"
 import { DemoStage } from "@/components/docs/demo-controls"
+import { Frame } from "@/components/ui/frame";
+import { glassCard } from "@/components/composed/ai";
 
 const SCOPE: AiScope = {
   kind: "passage",
@@ -69,7 +71,7 @@ export default function AiPanelDemo(): React.ReactElement {
 
   return (
     <DemoStage controls={null}>
-      <div className="mx-auto h-[42rem] w-full max-w-[21rem] overflow-hidden rounded-sm border bg-background">
+      <div className="mx-auto h-[42rem] w-full max-w-[28rem] overflow-hidden rounded-sm border bg-background">
         <AiPanel
           scope={SCOPE}
           thread={
@@ -81,7 +83,7 @@ export default function AiPanelDemo(): React.ReactElement {
                 author="Exegia"
                 defaultSuggestionsOpen
                 suggestions={
-                  <>
+                  <Frame className={cn("rounded-lg", glassCard)}>
                     <SuggestionCard
                       description="Label mismatch"
                       heading="Suggested fix"
@@ -104,7 +106,7 @@ export default function AiPanelDemo(): React.ReactElement {
                       Node p-18 changed from v3.3 to v3.4 — re-validate before
                       applying.
                     </SuggestionCard>
-                  </>
+                  </Frame>
                 }
                 time="2 min ago"
               >

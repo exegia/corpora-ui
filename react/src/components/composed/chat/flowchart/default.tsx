@@ -1,12 +1,14 @@
 "use client"
 
-import { useEffect, useLayoutEffect, useRef } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { Minus, Plus } from "lucide-react"
 import type { FlowchartProps, StepNode } from "./types"
 import { FlowchartContext, useFlowchart } from "./hooks"
 import { AMBER, PURPLE } from "./constant"
 import { Connector } from "./connector"
 import { ChartNode } from "./chart-node"
+import { EdgeToolbar } from "./edge-toolbar"
+import { midpoint } from "./utils"
 import { IconButton } from "@/components/ui/chat"
 import { Button } from "@/components/ui/button"
 import {
@@ -46,18 +48,29 @@ const NODES: StepNode[] = [
  *
  * @sketch "Component / Flowchart"
  */
-export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, onDrag, onAdd, onRemove, className, children }: FlowchartProps) {
+export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, height, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, onRename, onDuplicate, className, children }: FlowchartProps) {
   const canvasRef = useRef<HTMLDivElement>(null)
   const nodeRefs = useRef(new Map<string, HTMLElement>())
-  const chart = useFlowchart({ steps, edges, readOnly, zoomable, onDrag, onAdd, onRemove })
-  const { updateHeights, updateWidth, canvasHeight, isLit, bezierCurve, connectorWidth, scale, zoomBy, resetZoom, pendingRemove, commitRemove, cancelRemove } = chart
+  const chart = useFlowchart({ steps, edges, readOnly, zoomable, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, onRename, onDuplicate, canvasRef })
+  const {
+    updateHeights, updateFrame, canvasHeight, worldHeight, isLit, bezierCurve, connectorWidth, scale, view, zoomBy, resetZoom, pendingRemove, commitRemove, cancelRemove,
+    onCanvasPointerDown, onCanvasPointerMove, onCanvasPointerUp, isPanning,
+    editableEdges, selectedEdge, selectEdge, edgeDrag, edgeEnds, onEdgeHandleDown, onEdgeHandleMove, onEdgeHandleUp, ghostCurve, removeEdge,
+  } = chart
+  // The canvas fills its parent; its floor is the content height it loaded with
+  // (or `height`), so zooming out or removing a card never collapses it.
+  const [floor, setFloor] = useState<number | null>(null)
+  if (floor === null && chart.frame.w > 0) setFloor(canvasHeight)
+  const minHeight = height ?? floor ?? canvasHeight
+  const selectedEdgeObj = chart.edges.find((e) => e.id === selectedEdge)
+  const selectedEnds = selectedEdgeObj ? edgeEnds(selectedEdgeObj) : null
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
 
     const measure = () => {
-      updateWidth(canvas.clientWidth)
+      updateFrame(canvas.clientWidth, canvas.clientHeight)
       updateHeights((prev) => {
         const next = { ...prev }
         let changed = false
@@ -78,7 +91,7 @@ export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, on
     observer.observe(canvas)
     nodeRefs.current.forEach((el) => observer.observe(el))
     return () => observer.disconnect()
-  }, [updateHeights, updateWidth, steps])
+  }, [updateHeights, updateFrame, steps])
 
   // React's onWheel is passive, so preventDefault (no page scroll while zooming) needs a native listener.
   useEffect(() => {
@@ -99,24 +112,53 @@ export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, on
         ref={canvasRef}
         data-slot="flowchart"
         data-readonly={readOnly || undefined}
-        className={cn("rounded-card bg-page shadow-hairline relative w-full overflow-hidden select-none", className)}
+        className={cn(
+          "rounded-card bg-page shadow-hairline relative h-full w-full touch-none overflow-hidden select-none",
+          "transition-[background-size,background-position] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+          isPanning() ? "cursor-grabbing" : "cursor-grab",
+          className,
+        )}
+        onPointerDown={onCanvasPointerDown}
+        onPointerMove={onCanvasPointerMove}
+        onPointerUp={onCanvasPointerUp}
+        onPointerCancel={onCanvasPointerUp}
         style={{
-          height: canvasHeight * scale,
+          minHeight,
           backgroundImage: "radial-gradient(var(--line-strong) 1px, transparent 1.25px)",
           backgroundSize: `${22 * scale}px ${22 * scale}px`,
-          backgroundPosition: "center",
+          backgroundPosition: `${view.x}px ${view.y}px`,
         }}
       >
         {children}
-        <div className="absolute inset-x-0 top-0 origin-top" style={{ height: canvasHeight, transform: `scale(${scale})` }}>
-          <svg width={connectorWidth} height={canvasHeight} className="pointer-events-none absolute inset-0">
+        <div
+          data-slot="flowchart-world"
+          className={cn("absolute top-0 left-0 origin-top-left", !isPanning() && "transition-transform duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none")}
+          style={{ width: connectorWidth, height: worldHeight, transform: `translate(${view.x}px, ${view.y}px) scale(${scale})` }}
+        >
+          <svg width={connectorWidth} height={worldHeight} className="pointer-events-none absolute inset-0 overflow-visible">
             {chart.edges.map((edge) => (
-              <Connector key={edge.id} edge={edge} isLit={isLit(edge)} d={bezierCurve(edge)} />
+              <Connector
+                key={edge.id}
+                edge={edge}
+                isLit={isLit(edge)}
+                selected={selectedEdge === edge.id}
+                onPick={editableEdges ? selectEdge : undefined}
+                d={bezierCurve(edge)}
+              />
             ))}
           </svg>
-          {steps.map((node) => (
+          {selectedEdgeObj && selectedEnds ? (
+            <EdgeToolbar
+              edge={selectedEdgeObj}
+              at={midpoint(selectedEnds.from, selectedEnds.to)}
+              onChange={onEdgeChange}
+              onRemove={onEdgeRemove ? removeEdge : undefined}
+            />
+          ) : null}
+          {steps.map((node, index) => (
             <ChartNode
               key={node.id}
+              index={index}
               node={node}
               onRef={(el) => {
                 if (el) nodeRefs.current.set(node.id, el)
@@ -124,6 +166,34 @@ export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, on
               }}
             />
           ))}
+          {/* Above the cards, so the grab handles are reachable at a card's edge. */}
+          <svg width={connectorWidth} height={worldHeight} className="pointer-events-none absolute inset-0 z-10 overflow-visible">
+            {edgeDrag ? (
+              <path data-edge-ghost fill="none" stroke="var(--accent-default)" strokeWidth={1.5} strokeDasharray="4 3" d={ghostCurve()} />
+            ) : null}
+            {selectedEdgeObj && selectedEnds && onEdgeConnect
+              ? (["source", "target"] as const).map((end) => {
+                  const p = end === "source" ? selectedEnds.from : selectedEnds.to
+                  return (
+                    <g key={end}>
+                      <circle cx={p.x} cy={p.y} r={5} fill="var(--surface)" stroke="var(--accent-default)" strokeWidth={1.5} />
+                      {/* Generous invisible grab target over the 5px dot. */}
+                      <circle
+                        data-edge-handle={end}
+                        cx={p.x}
+                        cy={p.y}
+                        r={12}
+                        fill="transparent"
+                        className="pointer-events-auto cursor-grab touch-none active:cursor-grabbing"
+                        onPointerDown={onEdgeHandleDown(selectedEdgeObj, end)}
+                        onPointerMove={onEdgeHandleMove}
+                        onPointerUp={onEdgeHandleUp}
+                      />
+                    </g>
+                  )
+                })
+              : null}
+          </svg>
         </div>
         {zoomable ? (
           <div data-ui className="absolute right-2 bottom-2 flex items-center gap-0.5 rounded-md bg-surface p-0.5 shadow-btn">

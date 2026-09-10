@@ -29,16 +29,18 @@ export const twBubbleColumnClasses: Record<BubbleVariant, ClassValue> = {
 /**
  * Message surface per variant. The two people's bubbles are inverted
  * mirrors — a lit surface (top highlight, shaded base) for the sender and
- * a dim one for the recipient — with the tail corner pinched; the ai
+ * a dim one for the recipient — with the tail corner pinched only on the
+ * last bubble of a run (a following `continued` bubble un-pinches it) and
+ * both bottom corners squared to `lg` when an attachment sits inside; the ai
  * variant renders as plain prose so generated output never masquerades as
  * a person's message.
  */
 export const twBubbleMessageClasses: Record<BubbleVariant, ClassValue> = {
   default:
-    "w-fit  rounded-[14px] text-sm leading-[18px] font-normal relative",
+    "w-fit  rounded-full text-xs leading-4 font-medium relative",
   sender:
-    "inset-shadow-lit/50 inset-shadow-dim inset-shadow-dim-b-1 inset-shadow-dim-r-1 inset-shadow-lit-t-1 inset-shadow-lit-l-1.5 inset-shadow-blur-3 rounded-br-[5px] bg-indigo-600 dark:bg-neutral-100 text-background chat-bubble bubble-sender text-left px-5 py-3.5",
+    "inset-shadow-lit inset-shadow-dim inset-shadow-dim-b-1 inset-shadow-dim-r inset-shadow-lit-l-1 inset-shadow-lit-t-1 inset-shadow-blur-1 rounded-br-[8px] group-has-[+[data-continued]]/bubble:rounded-br-full has-[[data-slot=attachment]]:rounded-b-md has-[[data-slot=attachment]]:rounded-t-md bg-indigo-700 dark:bg-neutral-100 text-background chat-bubble bubble-sender text-left pl-6 pr-4 py-3",
   recipient:
-    "inset-shadow-lit inset-shadow-dim/20 dark:inset-shadow-lit/30 dark:inset-shadow-dim/90 inset-shadow-dim-b-1 inset-shadow-dim-r-1 inset-shadow-lit-t-1 inset-shadow-lit-l-1 inset-shadow-blur-3 rounded-bl-[5px] bg-neutral-100 dark:bg-neutral-800 text-foreground chat-bubble bubble-recipient text-right px-5 py-3.5",
-  ai: "text-sm leading-5 text-foreground/90 w-full",
+    "inset-shadow-lit inset-shadow-dim/20 dark:inset-shadow-lit/20 dark:inset-shadow-dim/50 inset-shadow-dim-b-1 inset-shadow-dim-r inset-shadow-lit-t-1 inset-shadow-lit-l-1 inset-shadow-blur-1 rounded-bl-[8px] group-has-[+[data-continued]]/bubble:rounded-bl-full has-[[data-slot=attachment]]:rounded-b-md has-[[data-slot=attachment]]:rounded-t-md bg-neutral-100 dark:bg-neutral-800 text-foreground chat-bubble bubble-recipient text-right pl-4 pr-6 py-3",
+  ai: "text-xs leading-4 text-foreground w-full",
 }

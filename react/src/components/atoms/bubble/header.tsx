@@ -56,6 +56,7 @@ export function BubbleHeader({
         <SparkAvatar />
       ) : (
         <UserAvatar
+          bezel={false}
           alt=""
           className="size-8"
           name={typeof name === "string" ? name : ""}

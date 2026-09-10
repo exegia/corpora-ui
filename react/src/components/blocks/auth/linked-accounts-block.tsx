@@ -145,7 +145,7 @@ export function LinkedAccountsBlock({
                         <motion.li
                           key={identity.id}
                           layout
-                          className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2"
+                          className="flex items-center justify-between gap-3 rounded-md border px-3 py-2"
                           initial={{ opacity: 0, y: -4 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -4 }}

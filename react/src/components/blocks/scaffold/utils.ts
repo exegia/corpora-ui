@@ -72,7 +72,7 @@ export const scaffoldBackgroundClass: ClassNameValue =
 
 /** Card surface shared by a panel's primary area and secondary strip. */
 export const panelSurfaceClass: ClassNameValue =
-  "rounded-2xl bg-slate-100 inset-ring-1 inset-ring-white/60 dark:bg-neutral-900 dark:inset-ring-white/5"
+  "rounded-md bg-slate-100 inset-ring-1 inset-ring-white/60 dark:bg-neutral-900 dark:inset-ring-white/5"
 
 /** Floating icon button hovering over a panel (close, swap). */
 export const floatingButtonClass: ClassNameValue =

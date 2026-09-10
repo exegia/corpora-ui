@@ -157,7 +157,7 @@ function ResourceRowImpl({ row }: ResourceRowProps) {
         onMenuOpenChange(false)
         startRename(row.item.id)
       }}
-      className="flex h-8 w-full items-center gap-2 rounded-lg px-2.5 text-left text-xs text-foreground transition-colors outline-none hover:bg-muted focus-visible:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+      className="flex h-8 w-full items-center gap-2 rounded-md px-2.5 text-left text-xs text-foreground transition-colors outline-none hover:bg-muted focus-visible:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
     >
       <Pencil aria-hidden="true" className="size-3.5" />
       Rename
@@ -326,7 +326,7 @@ function ResourceRowImpl({ row }: ResourceRowProps) {
                   variant="link"
                   aria-label={`Actions for ${row.item.label}`}
                   onClick={(event) => event.stopPropagation()}
-                  className="relative grid size-7 shrink-0 place-items-center rounded-lg opacity-0 transition-opacity duration-150 ease-smooth-out outline-none group-hover/resource:opacity-80 group-hover/resource:delay-150 group-data-[menu-open=true]/resource:opacity-100 hover:bg-foreground/5 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
+                  className="relative grid size-7 shrink-0 place-items-center rounded-md opacity-0 transition-opacity duration-150 ease-smooth-out outline-none group-hover/resource:opacity-80 group-hover/resource:delay-150 group-data-[menu-open=true]/resource:opacity-100 hover:bg-foreground/5 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
                 >
                   <MoreHorizontal aria-hidden="true" className="size-4" />
                 </Button>

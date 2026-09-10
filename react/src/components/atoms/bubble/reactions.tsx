@@ -41,7 +41,7 @@ export function BubbleReactionChip({
       aria-label={reaction.label}
       aria-pressed={reaction.reacted ?? false}
       className={cn(
-        "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-2 font-bold text-neutral-600 transition-colors duration-150 ease-smooth-out outline-none hover:bg-black/6 focus-visible:ring-0 focus-visible:ring-ring dark:text-neutral-300 dark:hover:bg-white/8",
+        "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-1.5 font-bold text-neutral-600 transition-colors duration-150 ease-smooth-out outline-none hover:bg-black/6 focus-visible:ring-0 focus-visible:ring-ring dark:text-neutral-300 dark:hover:bg-white/8",
         reaction.reacted && "text-foreground",
         className
       )}
@@ -60,7 +60,7 @@ export function BubbleReactionChip({
             : { scale: reaction.reacted ? [1, 1.35, 1] : 1 }
         }
         aria-hidden={reaction.label ? true : undefined}
-        className="block text-xs select-none"
+        className="block text-xs/snug select-none"
         transition={
           reduceMotion
             ? { duration: 0 }
@@ -74,7 +74,7 @@ export function BubbleReactionChip({
           <AnimatePresence initial={false} mode="popLayout">
             <motion.span
               animate={{ y: 0, opacity: 1 }}
-              className="text-xs select-none [grid-area:1/1]"
+              className="text-xs/snug select-none"
               exit={{ y: reduceMotion ? 0 : -10, opacity: 0 }}
               initial={{ y: reduceMotion ? 0 : 10, opacity: 0 }}
               key={reaction.count}

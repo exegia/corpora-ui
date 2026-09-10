@@ -8,6 +8,7 @@ import {
   Dot,
   FollowUpRow,
   IconButton,
+  InlineSource,
   LegendItem,
   Pill,
   SegmentedToggle,
@@ -34,6 +35,7 @@ export default function ChatPresentationAtomsDemo(): React.ReactElement {
         <Tag tone="amber">Trigger</Tag><Tag tone="purple">Gelato</Tag><Tag tone="blue">Retail</Tag><Tag tone="green">Active</Tag>
         <Signal level="high" /><Signal level="medium" /><Signal level="low" />
         <SourceChip>scoopdata.io</SourceChip>
+        <InlineSource domain="scoopdata.io" title="Scoop Data · Flavor report" description="Monthly flavor velocity across 1,200 parlours." href="https://scoopdata.io" />
         <AvatarStack />
       </div>
       <div className="flex gap-4">

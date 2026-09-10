@@ -450,7 +450,7 @@ import { TextClickPopover } from "@exegia/corpora-ui"
     name: "Presentation atoms",
     titleStyle: "titlebar",
     description:
-      "Atoms for AI answers and charts: SegmentedToggle, IconButton, AgentBadge, Pill, Dot, LegendItem, Tag, Signal, SourceChip, AvatarStack, Stat, FollowUpRow.",
+      "Atoms for AI answers and charts: SegmentedToggle, IconButton, AgentBadge, Pill, Dot, LegendItem, Tag, Signal, SourceChip, InlineSource, AvatarStack, Stat, FollowUpRow.",
     category: "atoms",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/chat-presentation-atoms-demo")),
@@ -462,6 +462,7 @@ import { TextClickPopover } from "@exegia/corpora-ui"
       { name: "Tag tone", type: '"amber" | "purple" | "blue" | "green"', default: '"blue"', description: "Text, fill and border from the matching --tag-* tokens." },
       { name: "Signal level", type: '"high" | "medium" | "low"', default: '"high"', description: "Lit bars: 3 green, 2 orange, 1 grey." },
       { name: "Stat label / value / delta / trend / tone", type: "ReactNode … / \"positive\" | \"negative\"", description: "Value and delta take the trend colour." },
+      { name: "InlineSource domain / favicon / title / description / href", type: "ReactNode / string …", description: "SourceChip that opens a hover preview with an Open source button when it carries a title, description or href." },
       { name: "FollowUpRow onSelect", type: "() => void", description: "Fires when the row is activated." },
     ],
     usage: `import { SegmentedToggle, Tag, Stat } from "@corpora/ui"
@@ -469,5 +470,26 @@ import { TextClickPopover } from "@exegia/corpora-ui"
 <SegmentedToggle options={[{ value: "preview", label: "Preview" }, { value: "markup", label: "Markup" }]} onValueChange={setView} />
 <Tag tone="green">Active</Tag>
 <Stat label="Pistachio" value="+1.15%" delta="+$617.22" trend="positive" />`,
+  },
+  {
+    slug: "menu-command",
+    name: "Menu command",
+    titleStyle: "titlebar",
+    description:
+      "Command rows for a menu popup: icon · label · description · trailing status. MenuCommand wires a trigger to the popup; MenuCommandList drops into any MenuPopup.",
+    category: "atoms",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/menu-command-demo")),
+    registryDependencies: ["button"],
+    props: [
+      { name: "items", type: "MenuCommandItem[]", required: true, description: "{ id, label, description?, icon?, trailing?, href?, disabled?, onSelect? }." },
+      { name: "onSelect", type: "(item) => void", description: "Fires after the row's own onSelect." },
+      { name: "side / align", type: 'Positioner side / align', default: '"top" / "start"', description: "MenuCommand only." },
+    ],
+    usage: `import { MenuCommand } from "@corpora/ui"
+
+<MenuCommand items={[{ id: "web", label: "Web search", description: "Real-time news", icon: <Globe />, trailing: "Connected" }]} onSelect={run}>
+  <Button size="icon-lg" aria-label="Attach">+</Button>
+</MenuCommand>`,
   },
 ]

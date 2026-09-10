@@ -32,6 +32,7 @@ import * as React from "react"
 import { Provider, useStore } from "jotai"
 
 import { ThemeProvider } from "@/components/theme-provider"
+import { ToastProvider } from "@/components/ui/toast"
 import { bindSounds } from "@/lib/sound"
 import { exegiaStore } from "./store"
 import type { ExegiaStore } from "./store"
@@ -68,9 +69,12 @@ export function ExegiaProvider({
     if (sound) bindSounds()
   }, [sound])
 
+  // Toasts ride on the same single mount: components call `toastManager.add`
+  // and it renders here, so consumers never nest a second provider.
+  const content = <ToastProvider>{children}</ToastProvider>
   return (
     <Provider store={store ?? exegiaStore}>
-      {theme ? <ThemeProvider {...theme}>{children}</ThemeProvider> : children}
+      {theme ? <ThemeProvider {...theme}>{content}</ThemeProvider> : content}
     </Provider>
   )
 }

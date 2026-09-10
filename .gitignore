@@ -13,3 +13,4 @@ dist-pack/
 
 # Claude Code local permission overrides
 .claude/settings.local.json
+react/.env

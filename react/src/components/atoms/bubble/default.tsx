@@ -21,7 +21,8 @@ export function Bubble({
           // short sender message would sit mid-thread with its column
           // right-aligned inside its own box instead of hugging the edge.
           "group/bubble relative my-3 flex w-full flex-col gap-y-3",
-          continued && "-mt-2",
+          // 12px bottom margin above minus 10px: a 2px seam between run bubbles.
+          continued && "-mt-2.5",
           twBubbleAlignClasses[variant],
           className
         )}

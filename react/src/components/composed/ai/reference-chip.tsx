@@ -25,7 +25,7 @@ export function ReferenceChip({
   ...props
 }: ReferenceChipProps): React.ReactElement {
   const classes = cn(
-    "group/reference inline-flex h-7 max-w-full shrink-0 items-center gap-1 rounded-2xl bg-black/6 px-2.5 text-sm leading-none font-medium text-foreground/90 outline-none transition-[background-color,scale] duration-150 ease-smooth-out dark:bg-black/15 dark:text-neutral-100",
+    "group/reference inline-flex h-7 max-w-full shrink-0 items-center gap-1 rounded-md bg-black/6 px-2.5 text-sm leading-none font-medium text-foreground/90 outline-none transition-[background-color,scale] duration-150 ease-smooth-out dark:bg-black/15 dark:text-neutral-100",
     (href || onClick) &&
       "cursor-pointer hover:bg-black/10 active:scale-97 focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-black/25 motion-reduce:active:scale-100",
     className

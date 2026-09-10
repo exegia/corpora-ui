@@ -1013,6 +1013,7 @@ function App() {
       { name: "defaultAttachments", type: "ComposerAttachment[]", description: "Seeds the tray once." },
       { name: "onSend", type: "(draft, mode, attachments) => void", description: "Send button or ⌘/Ctrl+↵." },
       { name: "onAttach", type: "() => void", description: "The + button." },
+      { name: "commands / onCommand", type: "MenuCommandItem[] / (item) => void", description: "Turns the + button into a MenuCommand of sources and tools; replaces onAttach." },
       { name: "useComposerAttachmentActions(id)", type: "{ add, remove, clear }", description: "Drive the tray from anywhere under ExegiaProvider." },
     ],
     usage: `import { Composer, useComposerAttachmentActions } from "@corpora/ui"
