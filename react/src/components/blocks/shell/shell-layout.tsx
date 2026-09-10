@@ -108,7 +108,7 @@ export function ShellLayout({
           className={cn(
             "bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900",
             "outline-offset-0.5 border-t-3 border-white outline-neutral-100 dark:inset-ring-black",
-            "rounded-lg shadow-md shadow-neutral-200 dark:shadow-neutral-950"
+            "rounded-md shadow-md shadow-neutral-200 dark:shadow-neutral-950"
           )}
           collapsible="offcanvas"
           role="complementary"

@@ -1,7 +1,7 @@
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 
-const SIZES = { 28: "size-7 rounded-lg", 32: "size-8 rounded-[10px]", 36: "size-9 rounded-[10px]", 40: "size-10 rounded-[10px]" } as const
+const SIZES = { 28: "size-7 rounded-md", 32: "size-8 rounded-[10px]", 36: "size-9 rounded-[10px]", 40: "size-10 rounded-[10px]" } as const
 
 export interface IconTileProps extends React.ComponentPropsWithoutRef<"span"> {
   /** Tile edge in px. The design uses 40 (attachments), 32 (agent avatar), 28 (research kicker), 36 (flowchart node). */

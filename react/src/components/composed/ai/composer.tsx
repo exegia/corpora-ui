@@ -225,7 +225,7 @@ export function Composer({
         layout={!reduceMotion}
         className={cn(
           "relative z-10 overflow-clip  flex flex-1 flex-col p-2.5  bg-(--chat-field) transition-shadow duration-300 ease-smooth-out",
-          isExpanded ? "shadow-[inset_0px_0px_15px_2px_rgba(0,_0,_0,_0.1)] items-end rounded-lg rounded-bl-xl" : "rounded-full items-center shadow-[inset_0px_0px_7px_-1.5px_rgba(0,_0,_0,_0.3)]",
+          isExpanded ? "shadow-[inset_0px_0px_15px_2px_rgba(0,_0,_0,_0.1)] items-end rounded-md" : "rounded-full items-center shadow-[inset_0px_0px_7px_-1.5px_rgba(0,_0,_0,_0.3)]",
           "motion-reduce:transition-none py-2.5",
           // Two attachment chips (260px each) plus tray gap and paddings.
           attachments.length > 0 && "min-w-[35rem]",

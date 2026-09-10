@@ -37,7 +37,7 @@ export const surface = "border bg-popover text-popover-foreground shadow-lg"
 // Frosted card used by suggestion cards: a translucent field with a lit top
 // edge and a light backdrop blur so the thread reads through it.
 export const glassCard =
-  "rounded-[15px] border-0 border-t-2 border-t-white/70 bg-neutral-200/45 shadow-none backdrop-blur-[3px] backdrop-saturate-125 before:hidden dark:border-t-neutral-700 dark:bg-neutral-800/50"
+  "rounded-md border-0 border-t-2 border-t-white/70 bg-neutral-200/45 shadow-none backdrop-blur-[3px] backdrop-saturate-125 before:hidden dark:border-t-neutral-700 dark:bg-neutral-800/50"
 
 export function AiIcon({
   className,

@@ -363,7 +363,7 @@ function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
         aria-label={variant === "sidebar" && collapsed ? node.label : undefined}
         className={cn(
           "transform cursor-pointer! justify-start transition-transform ease-smooth-out",
-          variant === "sidebar" && collapsed ? "h-10! rounded-xl!" : undefined,
+          variant === "sidebar" && collapsed ? "h-10! rounded-md!" : undefined,
           rowClassName
         )}
         disabled={node.disabled}

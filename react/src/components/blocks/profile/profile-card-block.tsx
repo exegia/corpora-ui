@@ -244,7 +244,7 @@ export function ProfileCardBlock({
               // `sm:h-10` because the base carries an `sm:h-auto` that an
               // unprefixed height would not beat.
               collapsed &&
-                "h-10 w-full shrink-0 justify-center rounded-xl p-0 sm:h-10",
+                "h-10 w-full shrink-0 justify-center rounded-md p-0 sm:h-10",
               className
             )}
             data-collapsed={collapsed ? "" : undefined}
