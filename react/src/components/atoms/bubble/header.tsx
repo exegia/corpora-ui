@@ -1,6 +1,6 @@
 "use client"
 
-import { isValidElement } from "react"
+
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
@@ -8,16 +8,7 @@ import { UserAvatar } from "@/components/user-avatar/component"
 import { useBubbleVariant } from "./context"
 import type { BubbleAvatarIdentity, BubbleHeaderProps } from "./types"
 
-function isIdentity(
-  avatar: BubbleHeaderProps["avatar"]
-): avatar is BubbleAvatarIdentity {
-  return (
-    typeof avatar === "object" &&
-    avatar !== null &&
-    !isValidElement(avatar) &&
-    !Array.isArray(avatar)
-  )
-}
+
 
 /** The ai variant's default mark — a spark on the accent disc. */
 function SparkAvatar(): React.ReactElement {
