@@ -9,6 +9,7 @@ import type { AiScope } from "./types"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Lock, Plus } from "lucide-react"
 import { Tooltip, TooltipPopup, TooltipTrigger } from "@/components/ui/tooltip"
+import Background from "@/components/atoms/background";
 
 export interface AiPanelProps extends Omit<
   React.ComponentPropsWithoutRef<"aside">,
@@ -41,7 +42,6 @@ export interface AiPanelProps extends Omit<
 export function AiPanel({
   onNewThread,
   thread,
-  toast,
   prompts = [],
   onPromptSelect,
   composerProps,
@@ -97,50 +97,44 @@ export function AiPanel({
       data-slot="ai-panel"
       {...props}
     >
-      <header className="sticky top-0 flex shrink-0 flex-col items-center gap-2 border-b border-border bg-sidebar px-3 py-2">
-        <div className="flex w-full flex-row items-center justify-between">
-          {renderTitle()}
-          <Button
-            className={cn("font-semibold")}
-            onClick={onNewThread}
-            size="icon-xs"
-            variant="ghost"
-          >
-            <Plus className="size-4 stroke-3" />
-          </Button>
-        </div>
-      </header>
+      <Background.Texture className="h-full w-full flex relative flex-col" >
+        <header className="sticky top-0 flex shrink-0 flex-col items-center gap-2 border-b border-border bg-sidebar px-3 py-2">
+          <div className="flex w-full flex-row items-center justify-between">
+            {renderTitle()}
+            <Button
+              className={cn("font-semibold")}
+              onClick={onNewThread}
+              size="icon-xs"
+              variant="ghost"
+            >
+              <Plus className="size-4 stroke-3" />
+            </Button>
+          </div>
+        </header>
 
       <div className="relative min-h-0 flex-1">
-        <ScrollArea aria-label="Thread" role="region" fill>
+        <ScrollArea aria-label="Thread" role="region" scrollFade="bottom" fill>
           {/* `w-full`, not `mx-auto`: as a flex item, auto margins shrink the
               column to fit-content, so the thread would drift off the
               composer's gutters. px-3 lines it up with the footer. */}
-          <div className="flex min-h-0 flex-1 flex-col px-3">
+          <div className="flex min-h-0 flex-1 flex-col px-5">
             <div className="w-full">{thread}</div>
-            {thread && (
+            {!thread && (
               <div className="flex h-full min-h-44 flex-col justify-end">
                 <SuggestedPrompts onSelect={onPromptSelect} prompts={prompts} />
               </div>
             )}
           </div>
         </ScrollArea>
-        {toast ? (
-          <div
-            className="absolute inset-x-5 bottom-2 z-10"
-            data-slot="ai-panel-toast"
-          >
-            {toast}
-          </div>
-        ) : null}
       </div>
-      <footer className="shrink-0 px-3 pb-2">
+      <footer className="shrink-0 px-5 pb-3.5">
         <Composer
           {...composerProps}
           suggestedPrompts={prompts}
           disabled={locked || composerProps?.disabled}
         />
-      </footer>
+        </footer>
+      </Background.Texture>
     </aside>
   )
 }
