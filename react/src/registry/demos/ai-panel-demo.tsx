@@ -4,16 +4,17 @@ import {
   AiMessage,
   AiPanel,
   ApplyToast,
-  SuggestionCard,
+  RecommendationStack,
   UserMessage,
   type AiScope,
   type DiffRow,
-  type SuggestionState,
 } from "@/components/blocks/ai-panel"
-import { cn } from "@/lib/utils"
+import {
+  RecommendationCard,
+  type RecommendationState,
+} from "@/components/composed/chat"
 import { DemoStage } from "@/components/docs/demo-controls"
-import { Frame } from "@/components/ui/frame";
-import { glassCard } from "@/components/composed/ai";
+import { cn } from "@/lib/utils"
 
 const SCOPE: AiScope = {
   kind: "passage",
@@ -67,7 +68,7 @@ function DiffRows({ rows }: { rows: DiffRow[] }): React.ReactElement {
  * stands in for that host.
  */
 export default function AiPanelDemo(): React.ReactElement {
-  const [state, setState] = React.useState<SuggestionState>("pending")
+  const [state, setState] = React.useState<RecommendationState>("pending")
 
   return (
     <DemoStage controls={null}>
@@ -79,40 +80,35 @@ export default function AiPanelDemo(): React.ReactElement {
               <UserMessage author="Sender" badge="Admin" time="10 min ago">
                 Validate this passage against the schema.
               </UserMessage>
-              <AiMessage
-                author="Exegia"
-                defaultSuggestionsOpen
-                suggestions={
-                  <Frame className={cn("rounded-lg", glassCard)}>
-                    <SuggestionCard
-                      description="Label mismatch"
-                      heading="Suggested fix"
-                      key="p-17"
-                      onAccept={() => setState("accepted")}
-                      onReject={() => setState("rejected")}
-                      onUndo={() => setState("pending")}
-                      reference={{ id: "p-17", title: "p-17" }}
-                      state={state}
-                    >
-                      <DiffRows rows={DIFF} />
-                    </SuggestionCard>
-                    <SuggestionCard
-                      defaultOpen={false}
-                      description="Boundary drift"
-                      heading="Suggested fix"
-                      key="p-18"
-                      reference={{ id: "p-18", title: "p-18" }}
-                    >
-                      Node p-18 changed from v3.3 to v3.4 — re-validate before
-                      applying.
-                    </SuggestionCard>
-                  </Frame>
-                }
-                time="2 min ago"
-              >
-                The paragraph boundary is valid. Node p-17 has a label
-                mismatch.
+              <AiMessage author="Exegia" time="2 min ago">
+                The paragraph boundary is valid. Node p-17 has a label mismatch.
               </AiMessage>
+              <RecommendationStack>
+                <RecommendationCard
+                  acceptLabel="Apply fix"
+                  confidence="high"
+                  description="Change label from paragraph to p on"
+                  entity={{ name: "p-17", initials: "P" }}
+                  onAccept={() => setState("accepted")}
+                  onReject={() => setState("rejected")}
+                  onUndo={() => setState("pending")}
+                  rejectLabel="Ignore"
+                  state={state}
+                  title="Fix the label mismatch"
+                >
+                  <DiffRows rows={DIFF} />
+                </RecommendationCard>
+                <RecommendationCard
+                  acceptLabel="Re-validate"
+                  confidence="medium"
+                  defaultOpen={false}
+                  description="Node p-18 changed from v3.3 to v3.4"
+                  rejectLabel="Ignore"
+                  title="Re-validate the boundary drift"
+                >
+                  Re-validate this node before applying the corpus update.
+                </RecommendationCard>
+              </RecommendationStack>
               {state === "accepted" && (
                 <ApplyToast onUndo={() => setState("pending")} />
               )}

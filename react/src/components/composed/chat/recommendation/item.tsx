@@ -149,7 +149,9 @@ export function Item({
           )}
         </AccordionTrigger>
 
-        <AccordionPanel className="px-0 pb-0">
+        {/* `relative`: the frame's ::before veil is positioned, so an
+            unpositioned panel body would paint under it and look faded. */}
+        <AccordionPanel className="relative px-0 pb-0">
           {options.length ? (
             <Card className="mx-3 rounded-md before:rounded-[calc(var(--radius-md)-1px)]">
               <CardPanel className="flex flex-col gap-2 px-3.5 py-2.5">

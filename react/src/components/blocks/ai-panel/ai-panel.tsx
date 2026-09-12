@@ -111,7 +111,7 @@ export function AiPanel({
 
       <ScrollArea aria-label="Thread" role="region"  fill>
         <div className="flex min-h-0 flex-1 flex-col px-2">
-          {thread}
+          <div className="mx-auto">{thread}</div>
           {thread && (
             <div className="flex h-full min-h-44 flex-col justify-end">
               <SuggestedPrompts onSelect={onPromptSelect} prompts={prompts} />

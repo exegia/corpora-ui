@@ -927,7 +927,7 @@ function App() {
     category: "blocks",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/ai-panel-demo")),
-    registryDependencies: ["card"],
+    registryDependencies: ["card", "recommendation-card"],
     props: [
       {
         name: "AiPanel",
@@ -948,10 +948,10 @@ function App() {
           "Keyboard-operable listbox for the five corpus scope levels.",
       },
       {
-        name: "GeneratedBlock / SuggestionCard",
-        type: "content and suggestion props",
+        name: "GeneratedBlock / RecommendationCard",
+        type: "content and recommendation props",
         description:
-          "Thread blocks with persistent generated labeling, polite live-region streaming, and collapsible per-node suggestion cards with Reject/Accept actions.",
+          "Thread blocks with persistent generated labeling, polite live-region streaming, and direct human-in-the-loop recommendation cards with Reject/Accept actions.",
       },
       {
         name: "Reader adornments",
@@ -963,12 +963,22 @@ function App() {
     usage: `import {
   AiPanel,
   GeneratedBlock,
-  SuggestionCard,
+  RecommendationCard,
 } from "@exegia/corpora-ui"
 
 <AiPanel
   scope={{ kind: "passage", label: "a.1", range: "¶1–¶2" }}
-  thread={<GeneratedBlock content="The boundary is valid." />}
+  thread={
+    <>
+      <GeneratedBlock content="The boundary is valid." />
+      <RecommendationCard
+        title="Fix the label mismatch"
+        description="Change label from paragraph to p on"
+        entity={{ name: "p-17" }}
+        onAccept={applyFix}
+      />
+    </>
+  }
   composerProps={{ onSend: askContextFabric }}
 />`,
   },

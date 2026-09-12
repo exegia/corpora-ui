@@ -10,6 +10,8 @@ export { AI_SCOPE_LEVELS, ScopePicker } from "./scope-picker"
 export type { ScopePickerProps } from "./scope-picker"
 export { SuggestedPrompts } from "./suggested-prompts"
 export type { SuggestedPromptsProps } from "./suggested-prompts"
+export { RecommendationStack } from "./recommendation-stack"
+export type { RecommendationStackProps } from "./recommendation-stack"
 export {
   AiMessage,
   DegradedBanner,
