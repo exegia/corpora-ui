@@ -20,7 +20,7 @@ export function SelectionHighlight({
     <span
       aria-label={range ? `Selected ${range}` : "Selected text"}
       className={cn(
-        "rounded-xs bg-accent/25 outline outline-1 outline-accent/45",
+        "rounded-xs bg-accent/25 outline-1 outline-accent/45",
         className
       )}
       data-selection-highlight="true"

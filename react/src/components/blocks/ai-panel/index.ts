@@ -19,7 +19,6 @@ export {
   LockedBanner,
   PinnedThreadBanner,
   ReferenceChip,
-  SuggestionCard,
   UserMessage,
   VersionHistoryRecord,
 } from "./thread-blocks"
@@ -30,7 +29,6 @@ export type {
   LockedBannerProps,
   PinnedThreadBannerProps,
   ReferenceChipProps,
-  SuggestionCardProps,
   UserMessageProps,
   VersionHistoryRecordProps,
 } from "./thread-blocks"

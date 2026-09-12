@@ -14,14 +14,12 @@ export {
   AiMessage,
   GeneratedBlock,
   ReferenceChip,
-  SuggestionCard,
   UserMessage,
 } from "@/components/composed/ai"
 export type {
   AiMessageProps,
   GeneratedBlockProps,
   ReferenceChipProps,
-  SuggestionCardProps,
   UserMessageProps,
 } from "@/components/composed/ai"
 
