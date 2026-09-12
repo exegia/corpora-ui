@@ -18,4 +18,5 @@ export interface AvatarProps<T extends UserType> {
   size?: AvatarSize
   className?: string
   audio?: AvatarAudio
+  loading?: boolean
 }

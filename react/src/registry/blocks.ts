@@ -921,7 +921,7 @@ function App() {
   },
   {
     slug: "ai-panel",
-    name: "AI Panel",
+    name: "Chat Panel",
     description:
       "Presentational curation rail for Context-Fabric validation: scoped selections, generated answers, version-bound diffs, provenance, and reader marks.",
     category: "blocks",

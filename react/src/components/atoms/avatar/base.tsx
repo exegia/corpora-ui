@@ -9,19 +9,33 @@ import { cn } from "@/lib/utils"
 import { initialsFrom, ringClasses, sizeClasses, statusClasses } from "./utils"
 import { User } from "lucide-react"
 import { VerifiedBadge } from "./verified"
+import { Spinner } from "@/components/ui/spinner"
 
 export default function Base<T extends UserType>({
   user,
   size = "small",
   className,
+  loading,
   audio,
 }: AvatarProps<T>) {
   return (
-    <div className={cn("relative", audio && "group/avatar flex items-center justify-center")}>
+    <div
+      className={cn(
+        "relative",
+        audio && "group/avatar flex items-center justify-center"
+      )}
+    >
       {
         /* Animated Story Ring */
-        audio && <div className={cn("absolute -inset-1 rounded-full bg-linear-to-tr from-yellow-400 via-fuchsia-500 to-violet-600 blur-xs transition-all duration-500", ringClasses[audio])} />
-      }      
+        audio && (
+          <div
+            className={cn(
+              "absolute -inset-1 rounded-full bg-linear-to-tr from-yellow-400 via-fuchsia-500 to-violet-600 blur-xs transition-all duration-500",
+              ringClasses[audio]
+            )}
+          />
+        )
+      }
       <Avatar className={cn(sizeClasses[size], className)}>
         <AvatarImage src={user?.avatarUrl} alt={user?.firstName} />
         <AvatarFallback>
@@ -36,6 +50,11 @@ export default function Base<T extends UserType>({
           </span>
         )}
       </Avatar>
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center rounded-full bg-background/60">
+          <Spinner className="text-primary" />
+        </div>
+      )}
     </div>
   )
 }
