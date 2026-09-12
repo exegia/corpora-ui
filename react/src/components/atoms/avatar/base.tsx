@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/avatar"
 import type { AvatarProps, UserType } from "./types"
 import { cn } from "@/lib/utils"
-import { initials, ringClasses, sizeClasses, statusClasses } from "./utils"
+import { initialsFrom, ringClasses, sizeClasses, statusClasses } from "./utils"
 import { User } from "lucide-react"
 import { VerifiedBadge } from "./verified"
 
@@ -25,7 +25,7 @@ export default function Base<T extends UserType>({
       <Avatar className={cn(sizeClasses[size], className)}>
         <AvatarImage src={user?.avatarUrl} alt={user?.firstName} />
         <AvatarFallback>
-          {initials(user) ?? <User className="size-4" aria-hidden="true" />}
+          {initialsFrom(user) ?? <User className="size-4" aria-hidden="true" />}
         </AvatarFallback>
         {user && user.status && (
           <AvatarBadge className={statusClasses[user.status]} />
