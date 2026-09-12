@@ -10,8 +10,9 @@ export default defineConfig({
     react(),
     dts({
       tsconfigPath: "./tsconfig.app.json",
-      outDir: "dist-lib",
+      outDirs: "dist-lib",
       include: [
+        "src/assets/**",
         "src/index.ts",
         "src/components/**",
         "src/lib/**",
