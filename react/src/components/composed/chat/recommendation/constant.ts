@@ -8,7 +8,7 @@ export const CONFIDENCE: Record<SignalLevel, string> = {
 }
 
 export const STATE_LABEL: Record<
-  Exclude<RecommendationState, "pending">,
+  Exclude<RecommendationState, "pending" | "running">,
   string
 > = {
   accepted: "Done",
@@ -17,7 +17,7 @@ export const STATE_LABEL: Record<
 
 /** Status pill tones, shared with the presentation Tag atom. */
 export const STATE_TONE: Record<
-  Exclude<RecommendationState, "pending">,
+  Exclude<RecommendationState, "pending" | "running">,
   TagTone
 > = {
   accepted: "green",
