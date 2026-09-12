@@ -19,6 +19,9 @@ export interface AiPanelProps extends Omit<
   onScopeChange?: (kind: AiScope["kind"]) => void
   onRemoveScope?: () => void
   thread?: React.ReactNode
+  /** Transient confirmation (e.g. ApplyToast), anchored to the bottom of the
+   * thread and sized slightly narrower than the composer. */
+  toast?: React.ReactNode
   prompts?: string[]
   onPromptSelect?: (prompt: string) => void
   composerProps?: ComposerProps
@@ -38,6 +41,7 @@ export interface AiPanelProps extends Omit<
 export function AiPanel({
   onNewThread,
   thread,
+  toast,
   prompts = [],
   onPromptSelect,
   composerProps,
@@ -46,8 +50,6 @@ export function AiPanel({
   className,
   ...props
 }: AiPanelProps): React.ReactElement {
-
-
   const renderLocked = () => {
     return (
       <Tooltip>
@@ -65,20 +67,20 @@ export function AiPanel({
               <Lock className="size-2.5" />
               <h6 className="text-sm">Published corpus</h6>
             </div>
-            <p className="text-xs text-muted-foreground">Editing is disabled. Answers only.</p>
+            <p className="text-xs text-muted-foreground">
+              Editing is disabled. Answers only.
+            </p>
           </div>
         </TooltipPopup>
       </Tooltip>
     )
   }
-  
+
   const renderTitle = () => {
     return (
-      <div className="flex-1 flex items-center">
-          <h2 className="text-sm font-semibold text-foreground" >
-            {headerTitle}
-        </h2>
-          {!locked && renderLocked()}
+      <div className="flex flex-1 items-center">
+        <h2 className="text-sm font-semibold text-foreground">{headerTitle}</h2>
+        {!locked && renderLocked()}
       </div>
     )
   }
@@ -109,16 +111,29 @@ export function AiPanel({
         </div>
       </header>
 
-      <ScrollArea aria-label="Thread" role="region"  fill>
-        <div className="flex min-h-0 flex-1 flex-col px-2">
-          <div className="mx-auto">{thread}</div>
-          {thread && (
-            <div className="flex h-full min-h-44 flex-col justify-end">
-              <SuggestedPrompts onSelect={onPromptSelect} prompts={prompts} />
-            </div>
-          )}
-        </div>
-      </ScrollArea>
+      <div className="relative min-h-0 flex-1">
+        <ScrollArea aria-label="Thread" role="region" fill>
+          {/* `w-full`, not `mx-auto`: as a flex item, auto margins shrink the
+              column to fit-content, so the thread would drift off the
+              composer's gutters. px-3 lines it up with the footer. */}
+          <div className="flex min-h-0 flex-1 flex-col px-3">
+            <div className="w-full">{thread}</div>
+            {thread && (
+              <div className="flex h-full min-h-44 flex-col justify-end">
+                <SuggestedPrompts onSelect={onPromptSelect} prompts={prompts} />
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+        {toast ? (
+          <div
+            className="absolute inset-x-5 bottom-2 z-10"
+            data-slot="ai-panel-toast"
+          >
+            {toast}
+          </div>
+        ) : null}
+      </div>
       <footer className="shrink-0 px-3 pb-2">
         <Composer
           {...composerProps}

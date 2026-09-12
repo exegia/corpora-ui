@@ -69,6 +69,23 @@ function DiffRows({ rows }: { rows: DiffRow[] }): React.ReactElement {
  */
 export default function AiPanelDemo(): React.ReactElement {
   const [state, setState] = React.useState<RecommendationState>("pending")
+  const runTimer = React.useRef<ReturnType<typeof setTimeout>>(null)
+
+  // Approve → the agent "works" for a beat → applied.
+  const approve = (): void => {
+    setState("running")
+    runTimer.current = setTimeout(() => setState("accepted"), 1600)
+  }
+  const reset = (next: RecommendationState) => (): void => {
+    if (runTimer.current) clearTimeout(runTimer.current)
+    setState(next)
+  }
+  React.useEffect(
+    () => () => {
+      if (runTimer.current) clearTimeout(runTimer.current)
+    },
+    []
+  )
 
   return (
     <DemoStage controls={null}>
@@ -89,9 +106,9 @@ export default function AiPanelDemo(): React.ReactElement {
                   confidence="high"
                   description="Change label from paragraph to p on"
                   entity={{ name: "p-17", initials: "P" }}
-                  onAccept={() => setState("accepted")}
-                  onReject={() => setState("rejected")}
-                  onUndo={() => setState("pending")}
+                  onAccept={approve}
+                  onReject={reset("rejected")}
+                  onUndo={reset("pending")}
                   rejectLabel="Ignore"
                   state={state}
                   title="Fix the label mismatch"
@@ -109,10 +126,12 @@ export default function AiPanelDemo(): React.ReactElement {
                   Re-validate this node before applying the corpus update.
                 </RecommendationCard>
               </RecommendationStack>
-              {state === "accepted" && (
-                <ApplyToast onUndo={() => setState("pending")} />
-              )}
             </>
+          }
+          toast={
+            state === "accepted" ? (
+              <ApplyToast onUndo={reset("pending")} />
+            ) : null
           }
         />
       </div>
