@@ -12,8 +12,6 @@ export type { SuggestedPromptProps } from "./suggested-prompt"
 // `blocks/ai-panel` already exports that name for its own prompt list, and
 // both barrels flow into `src/index.ts`. Reach it as
 // `composed/ai/suggested-prompt` — or just hand the rows to `Composer`.
-export { SuggestionCard } from "./suggestion-card"
-export type { SuggestionCardProps } from "./suggestion-card"
 export { UserMessage } from "./user-message"
 export type { UserMessageProps } from "./user-message"
 export {

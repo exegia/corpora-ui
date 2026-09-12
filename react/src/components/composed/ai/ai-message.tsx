@@ -90,7 +90,7 @@ export function AiMessage({
         <Bubble.Header avatar={avatar} badge={badge} name={author} time={time} />
       )}
       <div
-        className="ml-[15px] flex flex-col gap-3 border-l-0 border-border pl-5"
+        className="flex flex-col gap-3 border-l-0 border-border pl-4"
         data-slot="ai-message-body"
       >
         <div aria-atomic="false" aria-live="polite">
