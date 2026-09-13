@@ -1,12 +1,12 @@
 "use client"
 
 import { Plus } from "lucide-react"
-import { AnimatePresence, motion, useReducedMotion } from "motion/react"
+import { motion, useReducedMotion } from "motion/react"
 import { useAtom } from "jotai"
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
-import { BOUNCE_IN_OUT, SPRING_PANEL } from "@/lib/ease"
+import { BOUNCE_IN_OUT, EASE_OUT, SPRING_PANEL } from "@/lib/ease"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { MenuCommand } from "@/components/ui/menu-command"
@@ -87,9 +87,9 @@ export function Composer({
     if (composerId) return
     return () => removeComposerInstance(id)
   }, [composerId, id])
-  // The pill has no room for a tray: chips hold the tall shape open.
-  const isExpanded = isFocused || attachments.length > 0
   const draft = value ?? internalValue
+  // The pill has no room for a tray: chips or a draft hold the tall shape open.
+  const isExpanded = isFocused || draft.length > 0 || attachments.length > 0
   const selectedMode = mode ?? internalMode
   const isDisabled = disabled || isStreaming
   const showRestHint = !isExpanded && draft.length === 0
@@ -139,25 +139,36 @@ export function Composer({
     </motion.div>
   )
 
-  const sendButton = (<MotionButton
-    aria-label={isStreaming ? "Stop" : "Send message"}
-    className={cn("shrink-0 justify-self-center", !isExpanded && "hidden")}
-    disabled={isStreaming ? false : isDisabled || !draft.trim()}
-    onClick={isStreaming ? onStop : undefined}
-    transition={BOUNCE_IN_OUT}
-    exit={{ opacity: 0, scale: 0 }}
-    animate={{
-      opacity: isExpanded ? 1 : 0,
-      scale: isExpanded ? 1 : 0,
-    }}
-   
-    initial={{ opacity: 0, scale: 0 }}
-    size="icon-sm"
-    whileHover={{ scale: 1, opacity: 1 }}
-    type={isStreaming ? "button" : "submit"}
-  >
-    <MorphIcon className={cn("size-4", isStreaming ? "animate-pulse fill-current" : "stroke-2")} icon={isStreaming ? Squircle : ArrowUp} />
-  </MotionButton>)
+  // Always mounted: the fade in/out is driven by `animate` alone (opacity
+  // tween + y spring), so there is no AnimatePresence exit to freeze mid-flight
+  // or unmount early. Collapsed, it is inert and invisible but keeps its slot —
+  // the hint's flex-1 absorbs it, so the pill shape never reflows.
+  const sendButton = (
+    <MotionButton
+      aria-hidden={!isExpanded}
+      aria-label={isStreaming ? "Stop" : "Send message"}
+      className={cn("shrink-0 justify-self-center", !isExpanded && "pointer-events-none")}
+      // Empty-draft must NOT disable: the disabled:opacity-50! rule would
+      // pin Motion's inline opacity at 0.5 and break the fade. send() guards
+      // empty drafts, and the collapsed button is pointer-events-none.
+      disabled={isDisabled && !isStreaming}
+      onClick={isStreaming ? onStop : undefined}
+      transition={{
+        y: BOUNCE_IN_OUT,
+        opacity: { duration: 0.16, ease: EASE_OUT },
+      }}
+      animate={{
+        opacity: isExpanded ? 1 : 0,
+        y: isExpanded ? 0 : 10,
+      }}
+      initial={false}
+      size="icon-lg"
+      tabIndex={isExpanded ? 0 : -1}
+      type={isStreaming ? "button" : "submit"}
+    >
+      <MorphIcon className={cn("size-4", isStreaming ? "animate-pulse fill-current" : "stroke-2")} icon={isStreaming ? Squircle : ArrowUp} />
+    </MotionButton>
+  )
 
 
   const renderTextarea = () => (
@@ -196,6 +207,7 @@ export function Composer({
 
   return (
     <form
+      className="w-full max-w-3xl"
       data-expanded={isExpanded ? "" : undefined}
       data-slot="composer"
       onSubmit={(event) => {
@@ -225,10 +237,10 @@ export function Composer({
         layout={!reduceMotion}
         className={cn(
           "relative z-10 overflow-clip  flex flex-1 flex-col p-2.5  bg-(--chat-field) transition-shadow duration-300 ease-smooth-out",
-          isExpanded ? "shadow-[inset_0px_0px_15px_2px_rgba(0,_0,_0,_0.1)] items-end rounded-md" : "rounded-full items-center shadow-[inset_0px_0px_7px_-1.5px_rgba(0,_0,_0,_0.3)]",
+          isExpanded
+            ? "shadow-[inset_0px_0px_15px_2px_rgba(0,_0,_0,_0.1)] items-end rounded-t-md rounded-b-[calc(var(--radius-md)+--spacing(2.5))]"
+            : "rounded-full items-center shadow-[inset_0px_0px_7px_-1.5px_rgba(0,_0,_0,_0.3)]",
           "motion-reduce:transition-none py-2.5",
-          // Two attachment chips (260px each) plus tray gap and paddings.
-          attachments.length > 0 && "min-w-[35rem]",
           className
         )}
         initial={false}
@@ -269,9 +281,7 @@ export function Composer({
         >
           {attachButton}
           <SendHint className="pl-1"  verbose={isExpanded} />
-          <AnimatePresence initial={false} mode="popLayout">
-            {isExpanded && sendButton}
-          </AnimatePresence>
+          {sendButton}
         </motion.div>
 
       </motion.div>
