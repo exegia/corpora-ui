@@ -547,7 +547,7 @@ const { complete } = useAuthFlowActions()
     category: "blocks",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/profile-card-demo")),
-    registryDependencies: ["user-avatar", "button", "menu"],
+    registryDependencies: ["avatar", "button", "menu"],
     props: [
       {
         name: "user",

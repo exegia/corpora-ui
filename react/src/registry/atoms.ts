@@ -327,7 +327,7 @@ import { TextClickPopover } from "@exegia/corpora-ui"
     category: "atoms",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/bubble-demo")),
-    registryDependencies: ["button", "badge", "user-avatar", "emoji-picker"],
+    registryDependencies: ["button", "badge", "avatar", "emoji-picker"],
     props: [
       {
         name: "variant",
@@ -381,6 +381,46 @@ import { TextClickPopover } from "@exegia/corpora-ui"
     </Button>
   </Bubble.Actions>
 </Bubble>`,
+  },
+
+  {
+    slug: "avatar",
+    name: "Avatar",
+    titleStyle: "titlebar",
+    description:
+      "Identity avatar: an image when one is given, initials otherwise, with a presence badge, a loading skeleton, and story-ring audio states.",
+    category: "atoms",
+    status: "in-progress",
+    preview: React.lazy(() => import("./demos/avatar-demo")),
+    props: [
+      {
+        name: "user",
+        type: "UserType",
+        description:
+          "Identity: firstName/lastName drive the initials, avatarUrl the image, status the badge, verified the check.",
+      },
+      {
+        name: "size",
+        type: '"sm" | "md" | "lg" | "xl" | "xxl"',
+        default: '"sm"',
+        description: "Disc size; the badge and its offset scale with it.",
+      },
+      {
+        name: "loading",
+        type: "boolean",
+        description:
+          "Forces the skeleton with a dots loader, for when the identity itself is still being fetched.",
+      },
+      {
+        name: "audio",
+        type: '"muted" | "unmuted" | "speaking"',
+        description:
+          'Story ring — "speaking" spins it, "unmuted" holds it dim, "muted" fades it. Omitted, no ring.',
+      },
+    ],
+    usage: `import { Avatar } from "@corpora/ui"
+
+<Avatar size="lg" user={{ firstName: "John", lastName: "Doe", status: "online" }} />`,
   },
 
   {
