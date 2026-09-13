@@ -41,13 +41,6 @@ export interface ComposerModeProps {
   onModeChange?: (mode: ComposerMode) => void
 }
 
-export type TSubmitType = "send" | "stop"
-export type TSubmitParams<
-  T extends TSubmitType,
-  M extends ComposerMode,
-  A extends ComposerAttachment = ComposerAttachment,
-> = T extends "send" ? [string, M, A[]] : [T]
-
 export interface ComposerBaseProps<
   S extends boolean = boolean,
   E extends boolean = boolean,
@@ -65,7 +58,9 @@ export interface ComposerBaseProps<
   disabled?: boolean
   safetyNote?: React.ReactNode
   placeholder?: string
-  onSubmit?: (...args: TSubmitParams<TSubmitType, M, A>) => void
+  onSubmit?: (value: string, mode: M, attachments: A[]) => void
+  /** Fires from the streaming Stop button and the Escape key. */
+  onStop?: () => void
   className?: string
   defaultValue?: string
 }

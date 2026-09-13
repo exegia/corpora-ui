@@ -33,9 +33,7 @@ describe("Composer", () => {
     expect(
       await screen.findByRole("button", { name: "Send message" })
     ).toBeDefined()
-    expect(
-      screen.getByRole("button", { name: "Add attachment" })
-    ).toBeDefined()
+    expect(screen.getByRole("button", { name: "Add attachment" })).toBeDefined()
 
     await user.type(field, "Validate ¶12")
     await user.keyboard("{Meta>}{Enter}{/Meta}")
@@ -69,15 +67,15 @@ describe("Composer", () => {
     expect(trigger.getAttribute("aria-expanded")).toBe("false")
   })
 
-  test("shows Stop while streaming and routes it to onSubmit", async () => {
+  test("shows Stop while streaming and routes it to onStop", async () => {
     const user = userEvent.setup()
-    const onSubmit = mock(() => {})
+    const onStop = mock(() => {})
     render(
       <Provider>
-        <Composer expanded isStreaming onSubmit={onSubmit} safetyNote={null} />
+        <Composer expanded isStreaming onStop={onStop} safetyNote={null} />
       </Provider>
     )
     await user.click(screen.getByRole("button", { name: "Stop" }))
-    expect(onSubmit).toHaveBeenCalledWith("stop")
+    expect(onStop).toHaveBeenCalledTimes(1)
   })
 })

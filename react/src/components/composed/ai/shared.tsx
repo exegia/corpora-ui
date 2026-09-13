@@ -1,10 +1,9 @@
 import { Children, Fragment, isValidElement } from "react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
-import { Kbd as KbdKey, KbdGroup } from "@/components/ui/kbd";
-import { motion, useReducedMotion, type Variants } from "motion/react";
-import { EASE_IN_OUT, SPRING_LAYOUT, SPRING_PANEL } from "@/lib/ease";
-
+import { Kbd as KbdKey, KbdGroup } from "@/components/ui/kbd"
+import { motion, useReducedMotion, type Variants } from "motion/react"
+import { EASE_IN_OUT, SPRING_LAYOUT, SPRING_PANEL } from "@/lib/ease"
 
 // The AI accent is a muted amber used sparingly — the ✦ icon, small labels
 // and the primary Apply action. Everything else reads from theme tokens so
@@ -15,7 +14,7 @@ export const accentText = "text-amber-600 dark:text-amber-300/90"
 export const accentRing = "ring-offset-0 focus-visible:ring-amber-400/40"
 
 export const accentSolid = cn(
-  "border-amber-500/60 bg-amber-400/90 text-amber-950 shadow-none hover:bg-amber-400 data-pressed:bg-amber-400 disabled:opacity-35 *:data-[slot=button-loading-indicator]:text-amber-950",
+  "border-amber-500/60 bg-amber-400/90 text-amber-950 shadow-none hover:bg-amber-400 disabled:opacity-35 data-pressed:bg-amber-400 *:data-[slot=button-loading-indicator]:text-amber-950",
   accentRing
 )
 
@@ -33,6 +32,21 @@ export const mutedText = "text-[13px] leading-5 text-muted-foreground"
 // Floating surfaces (scope picker list, selection popover) — theme tokens,
 // not a hard-coded dark panel.
 export const surface = "border bg-popover text-popover-foreground shadow-lg"
+
+export function CloseIcon(): React.ReactElement {
+  return (
+    <svg
+      aria-hidden="true"
+      className="size-4"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="m6 6 12 12M18 6 6 18" />
+    </svg>
+  )
+}
 
 // Frosted card used by suggestion cards: a translucent field with a lit top
 // edge and a light backdrop blur so the thread reads through it.
@@ -74,14 +88,13 @@ export function Kbd({
   return (
     <KbdKey
       className={cn(
-        "inline-flex h-[22px] min-w-[18px] items-center justify-center rounded-[6px] border border-black/10 bg-black/5 px-1 font-sans text-[14px] font-medium leading-none dark:text-black  border-b-black/10 dark:border-b-black/25 border-b-2  dark:bg-white/10 dark:shadow-[inset_0_1px_0_rgb(0_0_0/0.25)]",
+        "inline-flex h-[22px] min-w-[18px] items-center justify-center rounded-[6px] border border-b-2 border-black/10 border-b-black/10 bg-black/5 px-1 font-sans text-[14px] leading-none font-medium dark:border-b-black/25 dark:bg-white/10 dark:text-black dark:shadow-[inset_0_1px_0_rgb(0_0_0/0.25)]",
         className
       )}
       {...props}
     />
   )
 }
-
 
 /** "Press ⌘ + ↵ to send message" — the composer's send hint. */
 export function SendHint({
@@ -102,7 +115,7 @@ export function SendHint({
   return (
     <motion.span
       className={cn(
-        "flex items-center gap-1.5 flex-1 text-sm whitespace-nowrap text-muted-foreground/60",
+        "flex flex-1 items-center gap-1.5 text-sm whitespace-nowrap text-muted-foreground/60",
         className
       )}
       data-slot="send-hint"
@@ -117,10 +130,16 @@ export function SendHint({
       Press
       <KbdGroup className="max-h-3 items-center">
         <Kbd aria-label="Command">⌘</Kbd>
-        <Kbd aria-label="Enter" className="w-8">↵</Kbd>
+        <Kbd aria-label="Enter" className="w-8">
+          ↵
+        </Kbd>
       </KbdGroup>
       <motion.span
-        animate={{ opacity: verbose ? 0 : 1, width: verbose ? 0 : "auto", x: verbose ? -8 : 0 }}
+        animate={{
+          opacity: verbose ? 0 : 1,
+          width: verbose ? 0 : "auto",
+          x: verbose ? -8 : 0,
+        }}
         className="inline-block shrink-0 overflow-hidden"
         initial={false}
         transition={transition}
@@ -152,9 +171,9 @@ export const ITEM_VARIANTS: Variants = {
 /** Children.toArray, but looking through fragments so `<>{a}{b}</>` counts two. */
 export function flattenChildren(children: React.ReactNode): React.ReactNode[] {
   return Children.toArray(children).flatMap((child) =>
-    isValidElement<{ children?: React.ReactNode }>(child) && child.type === Fragment
+    isValidElement<{ children?: React.ReactNode }>(child) &&
+    child.type === Fragment
       ? flattenChildren(child.props.children)
       : [child]
   )
 }
-

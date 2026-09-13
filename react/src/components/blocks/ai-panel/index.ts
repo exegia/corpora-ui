@@ -1,7 +1,7 @@
-export { AiPanel } from "./ai-panel"
-export type { AiPanelProps } from "./ai-panel"
-export { SelectionPopover } from "./selection-popover"
-export type { SelectionPopoverProps } from "./selection-popover"
+import { AiPanel } from "./base"
+
+export { AiPanel }
+export { AiPanelHeader } from "./header"
 export { ScopeChip } from "./scope-chip"
 export type { ScopeChipProps } from "./scope-chip"
 export { AI_SCOPE_LEVELS, ScopePicker } from "./scope-picker"
@@ -10,37 +10,47 @@ export { SuggestedPrompts } from "./suggested-prompts"
 export type { SuggestedPromptsProps } from "./suggested-prompts"
 export { RecommendationStack } from "./recommendation-stack"
 export type { RecommendationStackProps } from "./recommendation-stack"
-export {
-  AiMessage,
-  DegradedBanner,
-  GeneratedBlock,
-  LockedBanner,
-  PinnedThreadBanner,
-  ReferenceChip,
-  UserMessage,
-  VersionHistoryRecord,
-} from "./thread-blocks"
+export { DegradedBanner, LockedBanner, PinnedThreadBanner } from "./banners"
 export type {
-  AiMessageProps,
   DegradedBannerProps,
-  GeneratedBlockProps,
   LockedBannerProps,
   PinnedThreadBannerProps,
+} from "./banners"
+export {
+  VersionHistoryRecord,
+  type VersionHistoryRecordProps,
+} from "./version-history-record"
+// The thread's message components are reusable on their own and live in
+// `components/composed/ai`; the reader affordances (selection popover and
+// adornments) live in `components/composed/reader`. The block re-exports
+// both so its public surface is unchanged.
+export {
+  AiMessage,
+  GeneratedBlock,
+  ReferenceChip,
+  UserMessage,
+} from "@/components/composed/ai"
+export type {
+  AiMessageProps,
+  GeneratedBlockProps,
   ReferenceChipProps,
   UserMessageProps,
-  VersionHistoryRecordProps,
-} from "./thread-blocks"
+} from "@/components/composed/ai"
 export {
   AppliedMark,
   ApplyToast,
   SelectionHighlight,
-} from "./reader-adornments"
+  SelectionPopover,
+} from "@/components/composed/reader"
 export type {
   AppliedMarkProps,
   ApplyToastProps,
   SelectionHighlightProps,
-} from "./reader-adornments"
+  SelectionPopoverProps,
+} from "@/components/composed/reader"
 export type {
+  AiPanelHeaderProps,
+  AiPanelProps,
   AiScope,
   AiScopeKind,
   ComposerMode,
@@ -50,3 +60,5 @@ export type {
   VersionHistoryEntry,
   WordSelection,
 } from "./types"
+
+export default AiPanel

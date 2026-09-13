@@ -16,6 +16,7 @@ export function BubbleHeader({
   className,
   children,
   user,
+  UserInfo,
   ...props
 }: BubbleHeaderProps): React.ReactElement {
   const variant = useBubbleVariant()
@@ -32,7 +33,7 @@ export function BubbleHeader({
       data-slot="bubble-header"
       {...props}
     >
-      {user}
+      {UserInfo && <UserInfo user={user} variant="info" />}
       {children}
       {time !== undefined && time !== null ? (
         <span

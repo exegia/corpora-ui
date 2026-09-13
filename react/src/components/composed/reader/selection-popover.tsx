@@ -17,22 +17,8 @@ import {
   ghostMuted,
   mutedText,
   surface,
-} from "./shared"
-import type { NodeSelection, WordSelection } from "./types"
-
-export interface SelectionPopoverProps {
-  open?: boolean
-  defaultOpen?: boolean
-  onOpenChange?: (open: boolean) => void
-  variant: "word" | "node"
-  word?: WordSelection
-  node?: NodeSelection
-  onAddToChat?: () => void
-  onClose?: () => void
-  /** The selected reader content — rendered as the hover/focus trigger. */
-  children?: React.ReactNode
-  className?: string
-}
+} from "@/components/composed/ai/shared"
+import type { SelectionPopoverProps } from "./type"
 
 /**
  * The reader entry point, built on the preview-card atom: hovering or

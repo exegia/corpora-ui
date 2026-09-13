@@ -6,7 +6,6 @@ import {
   ScopeChip,
   ScopePicker,
   SelectionPopover,
-  SuggestionCard,
   type AiScope,
 } from "../index"
 
@@ -78,58 +77,8 @@ describe("AI curation component set", () => {
     expect(onValueChange).toHaveBeenCalledWith("corpus")
   })
 
-  test("suggestion card reports accept and reject while pending", async () => {
-    const user = userEvent.setup()
-    const onAccept = mock(() => {})
-    const onReject = mock(() => {})
-    const { container } = render(
-      <SuggestionCard
-        heading="Label mismatch"
-        onAccept={onAccept}
-        onReject={onReject}
-        reference={{ id: "p-17" }}
-      >
-        <p>label: paragraph → p</p>
-      </SuggestionCard>
-    )
-
-    expect(
-      container.querySelector('[data-slot="suggestion-card"]')?.getAttribute("data-node-id")
-    ).toBe("p-17")
-    await user.click(screen.getByRole("button", { name: "Ok, fix" }))
-    expect(onAccept).toHaveBeenCalledTimes(1)
-    await user.click(screen.getByRole("button", { name: "Ignore" }))
-    expect(onReject).toHaveBeenCalledTimes(1)
-  })
-
-  // Mounted resolved rather than re-rendered from pending: the actions leave
-  // through an AnimatePresence exit that runs on the wall clock, and polling
-  // for their removal outlasts the 5s per-test budget on a loaded suite.
-  test("a settled suggestion card shows its outcome, not the actions", () => {
-    render(
-      <SuggestionCard heading="Label mismatch" state="accepted">
-        <p>label: paragraph → p</p>
-      </SuggestionCard>
-    )
-
-    expect(screen.getByText("Done")).toBeDefined()
-    expect(screen.queryByRole("button", { name: "Ok, fix" })).toBeNull()
-    expect(screen.queryByRole("button", { name: "Ignore" })).toBeNull()
-  })
-
-  test("suggestion card collapses its panel from the heading trigger", async () => {
-    const user = userEvent.setup()
-    render(
-      <SuggestionCard heading="Label mismatch">
-        <p>label: paragraph → p</p>
-      </SuggestionCard>
-    )
-
-    const trigger = screen.getByRole("button", { name: /Label mismatch/ })
-    expect(trigger.getAttribute("aria-expanded")).toBe("true")
-    await user.click(trigger)
-    expect(trigger.getAttribute("aria-expanded")).toBe("false")
-  })
+  // The suggestion-card tests left with the component (removed in b8bb887);
+  // proposals now render through `Recommendation` cards from composed/chat.
 
   test("marks generated streaming output as a polite live region", () => {
     render(<GeneratedBlock content="Checking node p-17…" isStreaming />)

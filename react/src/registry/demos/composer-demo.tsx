@@ -8,7 +8,6 @@ import {
   CommandMenu,
   Composer,
   type ComposerAttachment,
-  type ComposerMode,
 } from "@/components/composed/chat/composer"
 import type { MenuCommandItem } from "@/components/ui/menu-command"
 
@@ -87,11 +86,7 @@ export default function ComposerDemo(): React.ReactElement {
 <Composer onSubmit={(draft) => send(draft)} />`}
       >
         <Composer
-          onSubmit={(
-            draft: string,
-            _mode?: ComposerMode,
-            _attachments?: ComposerAttachment[]
-          ) => setSent(draft)}
+          onSubmit={(draft) => setSent(draft)}
           placeholder="Ask about this selection…"
         />
       </Example>
@@ -127,12 +122,8 @@ const attachments: ComposerAttachment[] = [
               onCommand={(item) => setPicked(item.id)}
             />
           )}
-          onSubmit={(
-            draft: string,
-            _mode?: ComposerMode,
-            attachments?: ComposerAttachment[]
-          ) =>
-            setSent(attachments ? `${draft} (+${attachments.length})` : draft)
+          onSubmit={(draft, _mode, attachments) =>
+            setSent(`${draft} (+${attachments.length})`)
           }
           safetyNote={null}
         />

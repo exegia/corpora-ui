@@ -1,6 +1,7 @@
 import { Avatar } from "@/components/atoms"
 import { Badge } from "@/components/ui/badge"
 import type { UserInfoProps } from "./types"
+import { cn } from "@/lib/utils";
 
 /**
  * This component displays a user's information in a compact format.
@@ -12,10 +13,10 @@ import type { UserInfoProps } from "./types"
  * @description Displays a user's name and role in a compact format.
  *
  */
-export function Info({ user, description }: UserInfoProps) {
+export function Info({ user, description, direction = "left", audio, size }: UserInfoProps) {
   return (
-    <div className="flex items-center gap-1.5">
-      <Avatar size="small" user={user} />
+    <div className={cn("flex items-center gap-1.5", { "flex-row-reverse": direction === "right" })}>
+      <Avatar size={size ?? "sm"} user={user} audio={audio}  />
       <div className="flex flex-col">
         <div className="flex items-center gap-1.5">
           <span className="text-sm font-semibold">

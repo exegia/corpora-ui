@@ -87,7 +87,7 @@ export function AiMessage({
       {...props}
     >
       {author === null ? null : (
-        <Bubble.Header avatar={avatar} badge={badge} name={author} time={time} />
+        <Bubble.Header time={time} />
       )}
       <div
         className="flex flex-col gap-3 border-l-0 border-border pl-4"

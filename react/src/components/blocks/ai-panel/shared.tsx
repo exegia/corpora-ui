@@ -1,32 +1,17 @@
-import type * as React from "react"
-
-// The visual language (accent constants, ✦ icon) lives with the reusable AI
-// components in `components/composed/ai`; the block re-uses it from there.
+// The visual language (accent constants, ✦ icon, close glyph) lives with the
+// reusable AI components in `components/composed/ai`; the block re-uses it
+// from there.
 export {
   accentRing,
   accentSolid,
   accentText,
   AiIcon,
   ArrowUpIcon,
+  CloseIcon,
   ghostMuted,
   mutedText,
   surface,
 } from "@/components/composed/ai/shared"
-
-export function CloseIcon(): React.ReactElement {
-  return (
-    <svg
-      aria-hidden="true"
-      className="size-4"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    >
-      <path d="m6 6 12 12M18 6 6 18" />
-    </svg>
-  )
-}
 
 export function formatScopeLabel(scope: {
   kind: string

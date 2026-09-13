@@ -38,6 +38,7 @@ export function Composer({
   Suggestions,
   defaultValue = "",
   onSubmit,
+  onStop,
   className,
 }: IComposerProps): React.ReactElement {
   const reduceMotion = useReducedMotion()
@@ -107,7 +108,7 @@ export function Composer({
       disabled={isDisabled && !isStreaming}
       isExpanded={isExpanded}
       isStreaming={isStreaming}
-      onStop={() => onSubmit?.("stop")}
+      onStop={onStop}
       transition={{
         y: BOUNCE_IN_OUT,
         opacity: { duration: 0.16, ease: EASE_OUT },
@@ -141,7 +142,7 @@ export function Composer({
       onKeyDown={(event) => {
         if (event.key === "Escape" && isStreaming) {
           event.preventDefault()
-          onSubmit?.("stop")
+          onStop?.()
         }
         if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
           event.preventDefault()

@@ -1,5 +1,7 @@
-import type { HTMLMotionProps } from "motion/react";
-import type { ComponentPropsWithoutRef, ReactNode } from "react"
+import type { UserInfoProps } from "@/components/composed/user"
+import type { HTMLMotionProps } from "motion/react"
+import type { ComponentPropsWithoutRef, ReactNode, FC } from "react"
+import type { UserType } from "../avatar/types";
 
 /**
  * Who the bubble belongs to:
@@ -32,13 +34,14 @@ export interface BubbleHeaderProps extends Omit<
   "children"
 > {
   /** Relative or absolute time label, e.g. "5 min ago". */
-  time?: ReactNode
+  time?: ReactNode | string
   /**
    * User. An identity object renders `User.Info`; a node is used as-is.
    * Omitted, the ai variant falls back to the spark mark and people get
    * initials derived from `name` when it is a string.
    */
-  user?: ReactNode
+  user: UserType
+  UserInfo?: FC<UserInfoProps>
   /** Extra trailing content (a menu trigger, a status dot). */
   children?: ReactNode
 }
@@ -73,7 +76,6 @@ export interface BubbleReactionsProps extends Omit<
 
 export type BubbleActionsProps = ComponentPropsWithoutRef<"div">
 
-
 export interface BubbleReactionChipProps extends Omit<
   HTMLMotionProps<"button">,
   "onToggle" | "children"
@@ -91,7 +93,6 @@ export type BubbleReactionsButtonProps = Omit<
   /** Fires when an emoji is picked from the popover. */
   onEmojiSelect?: (emoji: BubblePickedEmoji) => void
 }
-
 
 /**
  * Only what the chip actually forwards. It renders through `Button`, which is

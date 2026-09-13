@@ -602,10 +602,10 @@ const { complete } = useAuthFlowActions()
           "Names this card's slice of the Jotai store: useProfileCardState(id) reads variant / menuOpen / busy, useProfileCardActions(id) folds it or opens its menu from anywhere under ExegiaProvider. Unnamed cards key off useId and are dropped on unmount.",
       },
       {
-        name: "presence / avatarId",
-        type: '"online" | "offline" / string',
+        name: "presence",
+        type: '"online" | "idle" | "offline"',
         description:
-          "Presence badge on the avatar (presence overrides user.presence). avatarId names the avatar in the store so useUserAvatarActions(id).setPresence() can flip the badge from a socket handler.",
+          "Presence badge on the avatar (presence overrides user.presence).",
       },
       {
         name: "open / defaultOpen / onOpenChange",
@@ -809,7 +809,12 @@ function App() {
     category: "blocks",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/chat-demo")),
-    registryDependencies: ["card", "recommendation-card", "bubble", "attachment"],
+    registryDependencies: [
+      "card",
+      "recommendation-card",
+      "bubble",
+      "attachment",
+    ],
     props: [
       {
         name: "AiPanel",
@@ -866,9 +871,12 @@ function App() {
     examples: [
       {
         title: "Simple chat",
-        description: "Sender and receiver bubbles — the Bubble atom is the message.",
+        description:
+          "Sender and receiver bubbles — the Bubble atom is the message.",
         preview: React.lazy(() =>
-          import("./demos/chat-examples-demo").then((m) => ({ default: m.SimpleChatExample })),
+          import("./demos/chat-examples-demo").then((m) => ({
+            default: m.SimpleChatExample,
+          }))
         ),
         code: `import { Bubble } from "@corpora/ui"
 
@@ -886,9 +894,12 @@ function App() {
       },
       {
         title: "Chat with attachments",
-        description: "A document above the sender bubble and a quoted passage inside the recipient bubble.",
+        description:
+          "A document above the sender bubble and a quoted passage inside the recipient bubble.",
         preview: React.lazy(() =>
-          import("./demos/chat-examples-demo").then((m) => ({ default: m.AttachmentsChatExample })),
+          import("./demos/chat-examples-demo").then((m) => ({
+            default: m.AttachmentsChatExample,
+          }))
         ),
         code: `import { Bubble, Attachment } from "@corpora/ui"
 
@@ -909,7 +920,9 @@ function App() {
         title: "Chat with AI",
         description: "An AiBubble agent reply with a markdown content card.",
         preview: React.lazy(() =>
-          import("./demos/chat-examples-demo").then((m) => ({ default: m.AiChatExample })),
+          import("./demos/chat-examples-demo").then((m) => ({
+            default: m.AiChatExample,
+          }))
         ),
         code: `import { AiBubble } from "@corpora/ui"
 

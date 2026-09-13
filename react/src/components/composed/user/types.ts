@@ -5,6 +5,7 @@ export type TUserInfo<T extends UserType> = T & {
   description?: string
   audio?: AvatarProps<T>['audio']
   size?: AvatarProps<T>['size']
+  direction?: "left" | "right"
 }
 
 export type TUserVariant = "pill" | "info"
