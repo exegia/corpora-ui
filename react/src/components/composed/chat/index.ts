@@ -1,4 +1,3 @@
-
 export {
   Attachment,
   type AttachmentKind,
@@ -20,16 +19,28 @@ export {
   type MarkdownProps,
   type MarkdownView,
 } from "./markdown"
+export {
+  addComposerAttachmentAtom,
+  clearComposerAttachmentsAtom,
+  Composer,
+  composerAttachmentsAtom,
+  removeComposerAttachmentAtom,
+  removeComposerInstance,
+  useComposerAttachmentActions,
+  useComposerAttachments,
+} from "./composer"
+export type {
+  ComposerAttachment,
+  ComposerMode,
+  ComposerProps,
+} from "./composer"
 export { ResearchAnswer, type ResearchAnswerProps } from "./research-answer"
 export {
   StreamingText,
   type StreamingTextProps,
   type StreamingToken,
 } from "./streaming-text"
-export {
-  Recommendation,
-  RecommendationCard,
-} from "./recommendation"
+export { Recommendation, RecommendationCard } from "./recommendation"
 export type {
   RecommendationCardProps,
   RecommendationCheckboxProps,

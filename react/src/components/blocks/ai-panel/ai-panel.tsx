@@ -97,8 +97,8 @@ export function AiPanel({
       data-slot="ai-panel"
       {...props}
     >
-      <Background.Texture className="h-full w-full flex relative flex-col" >
-        <header className="sticky top-0 flex shrink-0 flex-col items-center gap-2 border-b border-border bg-sidebar px-3 py-2">
+      <Background.Texture variant="paper" className="h-full w-full flex relative flex-col" >
+        <header className="sticky top-0 flex shrink-0 flex-col items-center gap-2 border-b border-border bg-sidebar p-3.5">
           <div className="flex w-full flex-row items-center justify-between">
             {renderTitle()}
             <Button
@@ -131,6 +131,7 @@ export function AiPanel({
         <Composer
           {...composerProps}
           suggestedPrompts={prompts}
+          mode="answer"
           disabled={locked || composerProps?.disabled}
         />
         </footer>

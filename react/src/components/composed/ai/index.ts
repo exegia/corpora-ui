@@ -1,7 +1,5 @@
 export { AiMessage } from "./ai-message"
 export type { AiMessageProps } from "./ai-message"
-export { Composer } from "./composer"
-export type { ComposerProps } from "./composer"
 export { GeneratedBlock } from "./generated-block"
 export type { GeneratedBlockProps } from "./generated-block"
 export { ReferenceChip } from "./reference-chip"
@@ -30,18 +28,7 @@ export {
 } from "./shared"
 export type {
   AISuggestionBase,
-  ComposerMode,
   DiffRow,
   ReferenceBase,
   SuggestionState,
 } from "./types"
-export {
-  addComposerAttachmentAtom,
-  clearComposerAttachmentsAtom,
-  composerAttachmentsAtom,
-  removeComposerAttachmentAtom,
-  removeComposerInstance,
-  useComposerAttachmentActions,
-  useComposerAttachments,
-} from "./composer-attachments-atom"
-export type { ComposerAttachment } from "./composer-attachments-atom"

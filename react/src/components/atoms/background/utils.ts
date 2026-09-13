@@ -7,7 +7,7 @@ export const textureMap: Record<Exclude<TextureVariant, "none">, string> = {
   paper: paperBackground,
 }
 
-export const linearGradient = "bg-linear-to-t from-background from-10% to-transparent to-30%";
+export const linearGradient = "bg-linear-to-t from-background from-10% to-transparent to-40% dark:from-10% dark:to-background/30 dark:to-50%";
 
 export const verticalFadeGradient = (color: string, spread: number = 50) =>
   `linear-gradient(to top, ${color} 0%, ${color} ${spread}%, transparent 100%)`
