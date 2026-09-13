@@ -16,7 +16,7 @@ export function Pill({ user }: UserPillProps) {
       size="sm"
       className="rounded-full gap-1 pl-0.5"
     >
-      <Avatar user={user} size="small" />
+      <Avatar user={user} size="sm" />
       <span className="text-xs">@shadcn</span>
     </Button>
   )

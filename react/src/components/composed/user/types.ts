@@ -15,4 +15,4 @@ export interface IUserBaseProps<T extends UserType, Variant extends TUserVariant
 }
 
 export type UserInfoProps<T extends UserType = UserType> = Exclude<IUserBaseProps<T, "info">, "variant"> & TUserInfo<T>
-export type UserPillProps<T extends UserType = UserType> = Exclude<IUserBaseProps<T, "pill">, "variant">
+export type UserPillProps<T extends UserType = UserType> = Exclude<IUserBaseProps<T, "pill">, "variant" | "size">
