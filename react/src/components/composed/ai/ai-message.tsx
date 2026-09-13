@@ -6,7 +6,9 @@ import { isValidElement, useId, useState } from "react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { EASE_IN_OUT, SPRING_PANEL } from "@/lib/ease"
-import { Bubble, type BubbleHeaderProps } from "@/components/atoms/bubble"
+import { Bubble } from "@/components/atoms/bubble"
+import type { UserType } from "@/components/atoms"
+import User, { type UserInfoProps } from "@/components/composed/user"
 import { Button } from "@/components/ui/button"
 import {
   agentText,
@@ -20,12 +22,11 @@ export interface AiMessageProps extends Omit<
   React.ComponentPropsWithoutRef<"div">,
   "children" | "title"
 > {
-  /** Author shown in the header. Omit the header entirely by passing null. */
-  author?: React.ReactNode | null
+  /** Identity shown in the header. Omit the header entirely by passing null. */
+  user?: UserType | null
   time?: React.ReactNode
-  /** Role badge next to the author; "Agent" by default. */
-  badge?: React.ReactNode
-  avatar?: BubbleHeaderProps["avatar"]
+  /** Replaces the default `User.Info` identity row in the header. */
+  UserInfo?: React.FC<UserInfoProps>
   /** The generated prose. */
   children: React.ReactNode
   isStreaming?: boolean
@@ -49,10 +50,9 @@ export interface AiMessageProps extends Omit<
  * staggered spring.
  */
 export function AiMessage({
-  author = "Assistant",
+  user = { firstName: "Assistant", role: "Agent" },
   time,
-  badge = "Agent",
-  avatar,
+  UserInfo = User.Info,
   children,
   isStreaming = false,
   onStop,
@@ -86,8 +86,8 @@ export function AiMessage({
       variant="ai"
       {...props}
     >
-      {author === null ? null : (
-        <Bubble.Header time={time} />
+      {user === null ? null : (
+        <Bubble.Header time={time} user={user} UserInfo={UserInfo} />
       )}
       <div
         className="flex flex-col gap-3 border-l-0 border-border pl-4"
@@ -123,7 +123,7 @@ export function AiMessage({
               aria-controls={panelId}
               aria-expanded={open}
               className={cn(
-                "group/suggestions inline-flex w-fit cursor-pointer pb-1 items-center gap-1 rounded-md px-1 text-xs outline-none transition-colors duration-150 ease-smooth-out focus-visible:ring-0",
+                "group/suggestions inline-flex w-fit cursor-pointer items-center gap-1 rounded-md px-1 pb-1 text-xs transition-colors duration-150 ease-smooth-out outline-none focus-visible:ring-0",
                 agentText,
                 "text-indigo-700 dark:text-indigo-400"
               )}
@@ -139,7 +139,7 @@ export function AiMessage({
               >
                 <Sparkles
                   aria-hidden="true"
-                  className="size-3 rotate-12 fill-indigo-800/30 dark:fill-indigo-600/10 stroke-[2] stroke-indigo-800 dark:stroke-indigo-400"
+                  className="size-3 rotate-12 fill-indigo-800/30 stroke-indigo-800 stroke-[2] dark:fill-indigo-600/10 dark:stroke-indigo-400"
                 />
               </motion.span>
               {suggestionsLabel(count)}
@@ -167,7 +167,11 @@ export function AiMessage({
                   >
                     {items.map((item, index) => (
                       <motion.div
-                        key={isValidElement(item) && item.key != null ? item.key : index}
+                        key={
+                          isValidElement(item) && item.key != null
+                            ? item.key
+                            : index
+                        }
                         variants={reduceMotion ? undefined : ITEM_VARIANTS}
                       >
                         {item}

@@ -100,7 +100,7 @@ export function Composer({
   // tween + y spring), so there is no AnimatePresence exit to freeze mid-flight
   // or unmount early. Collapsed, it is inert and invisible but keeps its slot —
   // the hint's flex-1 absorbs it, so the pill shape never reflows.
-  const sendButton = (
+  const renderSendButton = () =>(
     <MotionSubmit
       // Empty-draft must NOT disable: the disabled:opacity-50! rule would
       // pin Motion's inline opacity at 0.5 and break the fade. send() guards
@@ -232,7 +232,7 @@ export function Composer({
         >
           {ComposerMenu && <ComposerMenu />}
           <SendHint className="pl-1" verbose={isExpanded} />
-          {sendButton}
+          {renderSendButton()}
         </motion.div>
       </motion.div>
       {safetyNote && (

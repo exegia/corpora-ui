@@ -1,25 +1,9 @@
 import type { ClassValue } from "clsx"
-import type {
-  BubbleReaction,
-  BubbleHeaderProps,
-  BubbleVariant,
-  BubbleAvatarIdentity,
-} from "./types"
-import { isValidElement } from "react"
+import type { BubbleReaction, BubbleVariant } from "./types"
+
 /** Returns a stable key for a reaction, falling back to the emoji label if no ID is provided. */
 export function reactionKey(reaction: BubbleReaction, index: number): string {
   return reaction.id ?? `${reaction.label ?? String(reaction.emoji)}-${index}`
-}
-
-export function isIdentity(
-  avatar: BubbleHeaderProps["avatar"]
-): avatar is BubbleAvatarIdentity {
-  return (
-    typeof avatar === "object" &&
-    avatar !== null &&
-    !isValidElement(avatar) &&
-    !Array.isArray(avatar)
-  )
 }
 
 /** Root alignment: outgoing hugs the right edge, everything else the left. */

@@ -881,14 +881,14 @@ function App() {
         code: `import { Bubble } from "@corpora/ui"
 
 <Bubble variant="sender">
-  <Bubble.Header name="You" time="10 min ago" />
+  <Bubble.Header time="10 min ago" user={{ firstName: "You" }} UserInfo={User.Info} />
   <Bubble.Message>Here's the Q3 report.</Bubble.Message>
 </Bubble>
 <Bubble variant="sender" continued>
   <Bubble.Message>Can you check §4 before Thursday?</Bubble.Message>
 </Bubble>
 <Bubble variant="recipient">
-  <Bubble.Header name="Researcher" time="5 min ago" />
+  <Bubble.Header time="5 min ago" user={{ firstName: "Researcher" }} UserInfo={User.Info} />
   <Bubble.Message>Sure — pulling the passage now.</Bubble.Message>
 </Bubble>`,
       },
@@ -904,12 +904,12 @@ function App() {
         code: `import { Bubble, Attachment } from "@corpora/ui"
 
 <Bubble variant="sender">
-  <Bubble.Header name="You" time="10 min ago" />
+  <Bubble.Header time="10 min ago" user={{ firstName: "You" }} UserInfo={User.Info} />
   <Attachment kind="document" variant="preview" title="Q3-financial-report.pdf" meta="PDF · 2.4 MB · 12 pages" />
   <Bubble.Message>Here's the Q3 report.</Bubble.Message>
 </Bubble>
 <Bubble variant="recipient">
-  <Bubble.Header name="Researcher" time="5 min ago" />
+  <Bubble.Header time="5 min ago" user={{ firstName: "Researcher" }} UserInfo={User.Info} />
   <Bubble.Message>
     Sure — the source passage is here. ¶12 stays inside the RC003 boundary:
     <Attachment kind="text-selection" variant="preview" title="Iliad · Book 1, §12" quote="…" />

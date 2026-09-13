@@ -1,22 +1,20 @@
 "use client"
 
 import type * as React from "react"
-import {
-  Bubble,
-  type BubbleHeaderProps,
-  type BubbleReaction,
-} from "@/components/atoms/bubble"
+import { Bubble, type BubbleReaction } from "@/components/atoms/bubble"
+import type { UserType } from "@/components/atoms"
+import User, { type UserInfoProps } from "@/components/composed/user"
 
 export interface UserMessageProps extends Omit<
   React.ComponentPropsWithoutRef<"div">,
   "children"
 > {
   children: React.ReactNode
-  /** Author row above the bubble. Without a name no header renders. */
-  author?: React.ReactNode
+  /** Author row above the bubble. Without a user no header renders. */
+  user?: UserType
   time?: React.ReactNode
-  badge?: React.ReactNode
-  avatar?: BubbleHeaderProps["avatar"]
+  /** Replaces the default `User.Info` identity row in the header. */
+  UserInfo?: React.FC<UserInfoProps>
   /** Emoji reactions hanging off the bubble's corner. */
   reactions?: BubbleReaction[]
   onReactionToggle?: (reaction: BubbleReaction, index: number) => void
@@ -24,19 +22,18 @@ export interface UserMessageProps extends Omit<
 
 export function UserMessage({
   children,
-  author,
+  user,
   time,
-  badge,
-  avatar,
+  UserInfo = User.Info,
   reactions,
   onReactionToggle,
   ...props
 }: UserMessageProps): React.ReactElement {
   return (
     <Bubble variant="sender" {...props}>
-      {author !== undefined && author !== null && (
-        <Bubble.Header avatar={avatar} badge={badge} name={author} time={time} />
-      )}
+      {user ? (
+        <Bubble.Header time={time} user={user} UserInfo={UserInfo} />
+      ) : null}
       <Bubble.Message>{children}</Bubble.Message>
       {reactions?.length ? (
         <Bubble.Reactions onToggle={onReactionToggle} reactions={reactions} />

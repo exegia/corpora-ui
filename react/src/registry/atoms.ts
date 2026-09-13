@@ -262,14 +262,24 @@ export const atoms: RegistryEntry[] = [
     slug: "reference",
     name: "Reference",
     titleStyle: "expanded",
-    description: "Reference chip pointing at the node, passage or source a suggestion is grounded in, with an optional hover preview of the passage.",
+    description:
+      "Reference chip pointing at the node, passage or source a suggestion is grounded in, with an optional hover preview of the passage.",
     category: "atoms",
     status: "in-progress",
     preview: React.lazy(() => import("./demos/reference-demo")),
     registryDependencies: ["button", "preview-card"],
     props: [
-      { name: "href", type: "string", description: "Renders the chip as a link." },
-      { name: "preview", type: "ReactNode", description: "The passage, shown in a PreviewCard on hover / focus. Omitted, no card." },
+      {
+        name: "href",
+        type: "string",
+        description: "Renders the chip as a link.",
+      },
+      {
+        name: "preview",
+        type: "ReactNode",
+        description:
+          "The passage, shown in a PreviewCard on hover / focus. Omitted, no card.",
+      },
     ],
     usage: `import { Reference } from "@corpora/ui"
 
@@ -340,13 +350,14 @@ import { TextClickPopover } from "@exegia/corpora-ui"
         name: "continued",
         type: "boolean",
         default: "false",
-        description: "A follow-up in a run from the same author: tucks under the previous bubble. Render Bubble.Header on the first of the run only.",
+        description:
+          "A follow-up in a run from the same author: tucks under the previous bubble. Render Bubble.Header on the first of the run only.",
       },
       {
         name: "Bubble.Header",
-        type: "name / time / badge / avatar",
+        type: "user / UserInfo / time / children",
         description:
-          "Author row: avatar (an identity object renders UserAvatar; a node is used as-is; the ai variant defaults to the spark mark), bold name, muted time and a role badge — a string picks the neutral chip for people and the accent chip for the agent. The sender variant mirrors the row.",
+          "Author row: `user` (a UserType) rendered through the `UserInfo` slot — pass `User.Info` for the avatar, name and role badge — plus a muted time and trailing extras. The sender variant mirrors the row.",
       },
       {
         name: "Bubble.Message",
@@ -369,7 +380,11 @@ import { TextClickPopover } from "@exegia/corpora-ui"
     usage: `import { Bubble } from "@exegia/corpora-ui"
 
 <Bubble variant="sender">
-  <Bubble.Header name="Sender" time="10 min ago" badge="Admin" />
+  <Bubble.Header
+    time="10 min ago"
+    user={{ firstName: "Jenny", lastName: "Hamilton", role: "Admin" }}
+    UserInfo={User.Info}
+  />
   <Bubble.Message>Can you check whether ¶12 keeps the boundary?</Bubble.Message>
   <Bubble.Reactions
     reactions={[{ id: "heart", emoji: "❤️", count: 4, reacted: true, label: "heart" }]}
@@ -473,11 +488,37 @@ import { TextClickPopover } from "@exegia/corpora-ui"
     preview: React.lazy(() => import("./demos/chat-atoms-demo")),
     registryDependencies: ["button"],
     props: [
-      { name: "IconTile size", type: "28 | 32 | 36 | 40", default: "40", description: "Tile edge; `tone=\"accent\"` swaps the neutral fill for accent-subtle." },
-      { name: "Thumbnail size", type: '"sm" | "lg"', default: '"sm"', description: "40px chip tile or 240×160 preview; gradient placeholder without `src`." },
-      { name: "AvatarHandle initials", type: "string", description: "Fallback initials when `src` is absent." },
-      { name: "Waveform bars / progress", type: "number[] / number", description: "Bar heights in 0…1; bars below `progress` render in accent." },
-      { name: "SendButton …props", type: "ButtonProps", description: "Brand-yellow pill; accepts every Button prop except variant." },
+      {
+        name: "IconTile size",
+        type: "28 | 32 | 36 | 40",
+        default: "40",
+        description:
+          'Tile edge; `tone="accent"` swaps the neutral fill for accent-subtle.',
+      },
+      {
+        name: "Thumbnail size",
+        type: '"sm" | "lg"',
+        default: '"sm"',
+        description:
+          "40px chip tile or 240×160 preview; gradient placeholder without `src`.",
+      },
+      {
+        name: "AvatarHandle initials",
+        type: "string",
+        description: "Fallback initials when `src` is absent.",
+      },
+      {
+        name: "Waveform bars / progress",
+        type: "number[] / number",
+        description:
+          "Bar heights in 0…1; bars below `progress` render in accent.",
+      },
+      {
+        name: "SendButton …props",
+        type: "ButtonProps",
+        description:
+          "Brand-yellow pill; accepts every Button prop except variant.",
+      },
     ],
     usage: `import { IconTile, RemoveButton, SendButton } from "@corpora/ui"
 
@@ -496,14 +537,52 @@ import { TextClickPopover } from "@exegia/corpora-ui"
     preview: React.lazy(() => import("./demos/chat-presentation-atoms-demo")),
     registryDependencies: ["button"],
     props: [
-      { name: "SegmentedToggle options / value / defaultValue / onValueChange", type: "{ value, label }[] …", description: "Radiogroup semantics, arrow keys, controlled or uncontrolled; `sound` plays the toggle cue." },
-      { name: "IconButton aria-label", type: "string", required: true, description: "Icon-only control, 24px." },
-      { name: "Dot tone", type: '"success" | "warning" | "info" | "danger" | "neutral" | "accent" | "brand" | "series-1…5"', default: '"neutral"', description: "Marker colour from the semantic and chart-series tokens." },
-      { name: "Tag tone", type: '"amber" | "purple" | "blue" | "green"', default: '"blue"', description: "Text, fill and border from the matching --tag-* tokens." },
-      { name: "Signal level", type: '"high" | "medium" | "low"', default: '"high"', description: "Lit bars: 3 green, 2 orange, 1 grey." },
-      { name: "Stat label / value / delta / trend / tone", type: "ReactNode … / \"positive\" | \"negative\"", description: "Value and delta take the trend colour." },
-      { name: "InlineSource domain / favicon / title / description / href", type: "ReactNode / string …", description: "SourceChip that opens a hover preview with an Open source button when it carries a title, description or href." },
-      { name: "FollowUpRow onSelect", type: "() => void", description: "Fires when the row is activated." },
+      {
+        name: "SegmentedToggle options / value / defaultValue / onValueChange",
+        type: "{ value, label }[] …",
+        description:
+          "Radiogroup semantics, arrow keys, controlled or uncontrolled; `sound` plays the toggle cue.",
+      },
+      {
+        name: "IconButton aria-label",
+        type: "string",
+        required: true,
+        description: "Icon-only control, 24px.",
+      },
+      {
+        name: "Dot tone",
+        type: '"success" | "warning" | "info" | "danger" | "neutral" | "accent" | "brand" | "series-1…5"',
+        default: '"neutral"',
+        description: "Marker colour from the semantic and chart-series tokens.",
+      },
+      {
+        name: "Tag tone",
+        type: '"amber" | "purple" | "blue" | "green"',
+        default: '"blue"',
+        description: "Text, fill and border from the matching --tag-* tokens.",
+      },
+      {
+        name: "Signal level",
+        type: '"high" | "medium" | "low"',
+        default: '"high"',
+        description: "Lit bars: 3 green, 2 orange, 1 grey.",
+      },
+      {
+        name: "Stat label / value / delta / trend / tone",
+        type: 'ReactNode … / "positive" | "negative"',
+        description: "Value and delta take the trend colour.",
+      },
+      {
+        name: "InlineSource domain / favicon / title / description / href",
+        type: "ReactNode / string …",
+        description:
+          "SourceChip that opens a hover preview with an Open source button when it carries a title, description or href.",
+      },
+      {
+        name: "FollowUpRow onSelect",
+        type: "() => void",
+        description: "Fires when the row is activated.",
+      },
     ],
     usage: `import { SegmentedToggle, Tag, Stat } from "@corpora/ui"
 
@@ -522,9 +601,24 @@ import { TextClickPopover } from "@exegia/corpora-ui"
     preview: React.lazy(() => import("./demos/menu-command-demo")),
     registryDependencies: ["button"],
     props: [
-      { name: "items", type: "MenuCommandItem[]", required: true, description: "{ id, label, description?, icon?, trailing?, href?, disabled?, onSelect? }." },
-      { name: "onSelect", type: "(item) => void", description: "Fires after the row's own onSelect." },
-      { name: "side / align", type: 'Positioner side / align', default: '"top" / "start"', description: "MenuCommand only." },
+      {
+        name: "items",
+        type: "MenuCommandItem[]",
+        required: true,
+        description:
+          "{ id, label, description?, icon?, trailing?, href?, disabled?, onSelect? }.",
+      },
+      {
+        name: "onSelect",
+        type: "(item) => void",
+        description: "Fires after the row's own onSelect.",
+      },
+      {
+        name: "side / align",
+        type: "Positioner side / align",
+        default: '"top" / "start"',
+        description: "MenuCommand only.",
+      },
     ],
     usage: `import { MenuCommand } from "@corpora/ui"
 

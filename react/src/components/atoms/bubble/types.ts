@@ -1,7 +1,7 @@
 import type { UserInfoProps } from "@/components/composed/user"
 import type { HTMLMotionProps } from "motion/react"
 import type { ComponentPropsWithoutRef, ReactNode, FC } from "react"
-import type { UserType } from "../avatar/types";
+import type { UserType } from "../avatar/types"
 
 /**
  * Who the bubble belongs to:
@@ -21,13 +21,6 @@ export interface BubbleProps extends ComponentPropsWithoutRef<"div"> {
 }
 
 export type BubbleMessageProps = ComponentPropsWithoutRef<"div">
-
-/** Identity shown by `Bubble.Header` when no custom avatar node is passed. */
-export interface BubbleAvatarIdentity {
-  src?: string
-  name?: string
-  initials?: string
-}
 
 export interface BubbleHeaderProps extends Omit<
   ComponentPropsWithoutRef<"div">,

@@ -13,7 +13,7 @@ describe("AiMessage", () => {
     const user = userEvent.setup()
     render(
       <AiMessage
-        author="Exegia"
+        user={{ firstName: "Exegia", role: "Agent" }}
         suggestions={
           <>
             <div key="1">One</div>
@@ -41,7 +41,7 @@ describe("AiMessage", () => {
   test("still counts the cards, for a label that asks for the tally", () => {
     render(
       <AiMessage
-        author="Exegia"
+        user={{ firstName: "Exegia", role: "Agent" }}
         suggestions={
           <>
             <div key="1">One</div>

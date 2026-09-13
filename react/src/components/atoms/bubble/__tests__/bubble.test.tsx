@@ -2,30 +2,37 @@ import { describe, expect, mock, test } from "bun:test"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { Bubble, type BubbleReaction } from "../index"
+import User from "@/components/composed/user"
 
 describe("Bubble", () => {
-  test("header renders author, time and a role badge from a string", () => {
+  test("header renders the user's identity row, time and role badge", () => {
     render(
       <Bubble variant="sender">
-        <Bubble.Header badge="Admin" name="Sender" time="10 min ago" />
+        <Bubble.Header
+          time="10 min ago"
+          user={{ firstName: "Sen", lastName: "Der", role: "Admin" }}
+          UserInfo={User.Info}
+        />
         <Bubble.Message>Hello</Bubble.Message>
       </Bubble>
     )
-    expect(screen.getByText("Sender")).toBeDefined()
+    expect(screen.getByText(/Sen\s+Der/)).toBeDefined()
     expect(screen.getByText("10 min ago")).toBeDefined()
-    const badge = screen.getByText("Admin")
-    expect(badge.getAttribute("data-variant")).toBe("neutral")
+    expect(screen.getByText("Admin")).toBeDefined()
   })
 
-  test("the ai header falls back to the spark mark and the accent badge", () => {
+  test("without a UserInfo slot the header only carries time and extras", () => {
     const { container } = render(
       <Bubble variant="ai">
-        <Bubble.Header badge="Agent" name="Exegia" />
+        <Bubble.Header time="2 min ago" user={{ firstName: "Exegia" }} />
         <Bubble.Message>Generated</Bubble.Message>
       </Bubble>
     )
-    expect(container.querySelector('[data-slot="bubble-spark"]')).not.toBeNull()
-    expect(screen.getByText("Agent").getAttribute("data-variant")).toBe("accent")
+    expect(
+      container.querySelector('[data-slot="bubble-header"]')
+    ).not.toBeNull()
+    expect(screen.getByText("2 min ago")).toBeDefined()
+    expect(screen.queryByText("Exegia")).toBeNull()
   })
 
   test("reaction chips expose aria-pressed and report toggles by index", async () => {
@@ -37,7 +44,13 @@ describe("Bubble", () => {
         <Bubble.Reactions
           onToggle={onToggle}
           reactions={[
-            { id: "heart", emoji: "❤️", count: 4, reacted: true, label: "heart" },
+            {
+              id: "heart",
+              emoji: "❤️",
+              count: 4,
+              reacted: true,
+              label: "heart",
+            },
             { id: "thumbs", emoji: "👍", count: 2, label: "thumbs up" },
           ]}
         />
@@ -93,7 +106,9 @@ describe("Bubble", () => {
 
   test("picking a quick reaction reports the emoji and closes the popover", async () => {
     const user = userEvent.setup()
-    const onEmojiSelect = mock((_picked: { emoji: string; label: string }) => {})
+    const onEmojiSelect = mock(
+      (_picked: { emoji: string; label: string }) => {}
+    )
     render(
       <Bubble variant="recipient">
         <Bubble.Message>Hi</Bubble.Message>
@@ -117,7 +132,9 @@ describe("Bubble", () => {
       </Bubble>
     )
     expect(
-      container.querySelector('[data-slot="bubble"]')?.getAttribute("data-variant")
+      container
+        .querySelector('[data-slot="bubble"]')
+        ?.getAttribute("data-variant")
     ).toBe("sender")
   })
 })

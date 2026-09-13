@@ -94,10 +94,22 @@ export default function AiPanelDemo(): React.ReactElement {
           scope={SCOPE}
           thread={
             <>
-              <UserMessage author="Sender" badge="Admin" time="10 min ago">
+              {/* The header renders `User.Info` from composed/user: avatar
+                  with initials, name and the role badge, all from `user`. */}
+              <UserMessage
+                time="10 min ago"
+                user={{
+                  firstName: "Jenny",
+                  lastName: "Hamilton",
+                  role: "Admin",
+                }}
+              >
                 Validate this passage against the schema.
               </UserMessage>
-              <AiMessage author="Exegia" time="2 min ago">
+              <AiMessage
+                time="2 min ago"
+                user={{ firstName: "Exegia", role: "Agent", verified: true }}
+              >
                 The paragraph boundary is valid. Node p-17 has a label mismatch.
               </AiMessage>
               <RecommendationStack>

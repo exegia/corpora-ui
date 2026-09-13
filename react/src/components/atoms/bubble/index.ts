@@ -4,10 +4,7 @@ import { BubbleActions } from "./actions"
 import { BubbleHeader } from "./header"
 import { BubbleMessage } from "./message"
 import { Reference } from "./reference"
-import {
-  BubbleReactionChip,
-  BubbleReactions,
-} from "./reactions"
+import { BubbleReactionChip, BubbleReactions } from "./reactions"
 
 export const Bubble = Object.assign(BubbleRoot, {
   Header: BubbleHeader,
@@ -27,10 +24,8 @@ export {
   useBubbleVariant,
 }
 
-
 export type {
   BubbleActionsProps,
-  BubbleAvatarIdentity,
   BubblePickedEmoji,
   BubbleHeaderProps,
   BubbleMessageProps,
