@@ -74,7 +74,7 @@ export function Kbd({
   return (
     <KbdKey
       className={cn(
-        "inline-flex h-[20px] min-w-[18px] items-center justify-center rounded-[5px] border border-black/10 bg-black/5 px-1 font-sans text-[10px] font-medium leading-none text-muted-foreground  border-b-black/15 dark:border-b-black/25 border-b-1  dark:bg-white/6 dark:shadow-[inset_0_-1px_0_rgb(0_0_0/0.4)]",
+        "inline-flex h-[22px] min-w-[18px] items-center justify-center rounded-[6px] border border-black/10 bg-black/5 px-1 font-sans text-[14px] font-medium leading-none dark:text-black  border-b-black/10 dark:border-b-black/25 border-b-2  dark:bg-white/10 dark:shadow-[inset_0_1px_0_rgb(0_0_0/0.25)]",
         className
       )}
       {...props}
@@ -102,7 +102,7 @@ export function SendHint({
   return (
     <motion.span
       className={cn(
-        "flex items-center gap-1 flex-1 text-xs whitespace-nowrap text-muted-foreground/60",
+        "flex items-center gap-1.5 flex-1 text-sm whitespace-nowrap text-muted-foreground/60",
         className
       )}
       data-slot="send-hint"
@@ -110,7 +110,7 @@ export function SendHint({
       <motion.span
         aria-hidden="true"
         animate={{ flexGrow: verbose ? 1 : 0 }}
-        className="inline-flex shrink-0 basis-0 items-center text-xs"
+        className="inline-flex shrink-0 basis-0 items-center"
         initial={false}
         transition={transition}
       />

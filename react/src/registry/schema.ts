@@ -25,6 +25,16 @@ export interface PropDef {
   description: string
 }
 
+/** One worked example rendered in the "Examples" section of an entry page, below the props. */
+export interface RegistryExample {
+  title: string
+  description?: string
+  /** Import + usage snippet shown under the preview. */
+  code?: string
+  /** Lazy demo rendered above the code. */
+  preview?: React.LazyExoticComponent<React.ComponentType>
+}
+
 export interface RegistryEntry {
   /** URL segment and shadcn registry name, e.g. "button" → /atoms/button */
   slug: string
@@ -46,6 +56,8 @@ export interface RegistryEntry {
   usage?: string
   /** Slugs of other registry entries this one is built from. */
   registryDependencies?: string[]
+  /** Worked examples rendered after the props — the cult-ui pattern: preview/code on top, props, then examples. */
+  examples?: RegistryExample[]
   /** Set the title type of the preview */
   titleStyle?: TitleStyleType
 }

@@ -166,7 +166,7 @@ export function Composer({
       tabIndex={isExpanded ? 0 : -1}
       type={isStreaming ? "button" : "submit"}
     >
-      <MorphIcon className={cn("size-4", isStreaming ? "animate-pulse fill-current" : "stroke-2")} icon={isStreaming ? Squircle : ArrowUp} />
+      <MorphIcon className={cn("size-4 rounded-full", isStreaming ? "animate-pulse fill-current" : "stroke-2")} icon={isStreaming ? Squircle : ArrowUp} />
     </MotionButton>
   )
 
@@ -238,8 +238,8 @@ export function Composer({
         className={cn(
           "relative z-10 overflow-clip  flex flex-1 flex-col p-2.5  bg-(--chat-field) transition-shadow duration-300 ease-smooth-out",
           isExpanded
-            ? "shadow-[inset_0px_0px_15px_2px_rgba(0,_0,_0,_0.1)] items-end rounded-t-md rounded-b-[calc(var(--radius-md)+--spacing(2.5))]"
-            : "rounded-full items-center shadow-[inset_0px_0px_7px_-1.5px_rgba(0,_0,_0,_0.3)]",
+            ? "shadow-[inset_0px_0px_7px_1px_rgba(0,_0,_0,_0.2)] items-end rounded-t-md rounded-b-[calc(var(--radius-md)+--spacing(2.5))]"
+            : "rounded-full items-center shadow-[inset_0px_0px_5px_-0.5px_rgba(0,_0,_0,_0.3)]",
           "motion-reduce:transition-none py-2.5",
           className
         )}

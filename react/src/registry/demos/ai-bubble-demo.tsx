@@ -12,9 +12,19 @@ const CONTENT: Record<(typeof KINDS)[number], AiBubbleContent> = {
     kind: "research",
     kickerSub: "Answered from 3 passages · 0.8 s",
     content: "The quarrel opens when Agamemnon refuses Chryses’ ransom. Apollo’s plague follows, and only Achilles’ call for an assembly forces the priest’s daughter to be returned — the first boundary of the poem (¶12, RC003).",
-    source: "Iliad · Homer corpus",
+    source: {
+      label: "Iliad · Homer corpus",
+      title: "Iliad — Homer corpus",
+      description: "Book 1: the quarrel between Agamemnon and Achilles opens the poem.",
+      href: "https://corpora.dev/iliad",
+    },
     date: "c. 750 BCE · Sep 2",
-    authors: "Homer · M. L. West",
+    authors: {
+      label: "Homer · M. L. West",
+      title: "Homer — author record",
+      description: "Attribution follows M. L. West's critical edition of the corpus.",
+      href: "https://corpora.dev/homer",
+    },
   },
   chart: {
     kind: "chart",

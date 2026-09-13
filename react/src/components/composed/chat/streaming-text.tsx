@@ -15,8 +15,11 @@ export interface StreamingTextProps extends React.ComponentPropsWithoutRef<"div"
   paragraphs: (string | StreamingToken[])[]
   /** Reveal words over time and show the caret. */
   streaming?: boolean
+  /** Reveal gap in ms; defaults to the --stream-gap token (60ms). */
   wordMs?: number
 }
+
+
 
 const toTokens = (p: string | StreamingToken[]): StreamingToken[] => (typeof p === "string" ? p.split(" ").map((text) => ({ text })) : p)
 
@@ -27,7 +30,7 @@ const toTokens = (p: string | StreamingToken[]): StreamingToken[] => (typeof p =
  * @sketch "Component / Streaming Text"
  */
 export function StreamingText({
-  paragraphs, streaming = false, wordMs = 55, className, ...props
+  paragraphs, streaming = false, wordMs, className, ...props
 }: StreamingTextProps): React.ReactElement {
   const reduceMotion = useReducedMotion()
   const tokens = React.useMemo(() => paragraphs.map(toTokens), [paragraphs])
@@ -38,20 +41,30 @@ export function StreamingText({
   const [reveal, setReveal] = React.useState({ total, n: 0 })
   if (reveal.total !== total) setReveal({ total, n: 0 })
   const animate = streaming && !reduceMotion
+  // The JS cadence reads --stream-gap so the token stays the single source of
+  // truth; an explicit wordMs still wins.
+  const gapMs =
+    wordMs ??
+    (parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue("--stream-gap")
+    ) || 60)
   const shown = animate ? Math.min(reveal.n, total) : total
 
   React.useEffect(() => {
     if (!animate) return
-    const timer = setInterval(() => setReveal((r) => (r.n >= r.total ? r : { ...r, n: r.n + 1 })), wordMs)
+    const timer = setInterval(() => setReveal((r) => (r.n >= r.total ? r : { ...r, n: r.n + 1 })), gapMs)
     return () => clearInterval(timer)
-  }, [animate, wordMs, total])
+  }, [animate, gapMs, total])
 
   const done = shown >= total
   let cursor = 0
   // Plain CSS transitions: each word fades in once and never re-animates on
   // re-render, which is what kept the Motion version flickering.
   const word = (visible: boolean) =>
-    cn("inline transition-opacity duration-300 ease-[var(--ease-out-strong)]", !reduceMotion && !visible && "opacity-0")
+    cn(
+      "inline transition-[opacity,filter] duration-[var(--stream-fade)] ease-[var(--stream-ease)]",
+      !reduceMotion && !visible ? "opacity-0 blur-[var(--stream-blur)]" : "blur-[0px]",
+    )
 
   return (
     <div data-slot="streaming-text" data-streaming={streaming && !done} className={cn("flex w-[380px] max-w-full flex-col", className)} {...props}>

@@ -646,125 +646,6 @@ const { signOut } = useAuthSessionActions()
     status: "planned",
   },
   {
-    slug: "sidebar",
-    name: "Sidebar",
-    titleStyle: "titlebar",
-    description:
-      "Nested tree of projects, folders, files and bookmarks for a workspace rail. Rows drag to reorder or reparent, rename in place, and carry a per-row actions menu. Optimistic moves roll back when the handler rejects.",
-    category: "blocks",
-    status: "in-progress",
-    preview: React.lazy(() => import("./demos/resource-tree-demo")),
-    registryDependencies: ["button", "menu"],
-    props: [
-      {
-        name: "items / defaultItems",
-        type: "SidebarResource[]",
-        description:
-          'The tree. A resource is { id, label, kind, children?, disabled? } where kind is "project" | "folder" | "file" | "bookmark". Pass `items` to control the tree, `defaultItems` to let it own its own state.',
-      },
-      {
-        name: "onItemsChange",
-        type: "(items) => void",
-        description:
-          "Fires with the whole tree after any structural change — a move, a rename. This is the uncontrolled escape hatch; use it to persist.",
-      },
-      {
-        name: "onMove",
-        type: "(move) => void | Promise<void>",
-        description:
-          'A drag landed: { itemId, targetId, position } where position is "before" | "inside" | "after" and targetId is null at the root. The move is applied optimistically — reject the promise to roll it back.',
-      },
-      {
-        name: "onMoveError",
-        type: "(error, move) => void",
-        description:
-          "Fires after a rejected `onMove` has been rolled back, so you can surface the failure.",
-      },
-      {
-        name: "onRename",
-        type: "(item, label) => void | Promise<void>",
-        description: "A row committed an in-place rename with the new label.",
-      },
-      {
-        name: "activeId / defaultActiveId / onActiveChange",
-        type: "string | null / string | null / (id) => void",
-        description:
-          "The selected row. Controlled via `activeId`, uncontrolled via `defaultActiveId`.",
-      },
-      {
-        name: "expandedIds / defaultExpandedIds / onExpandedChange",
-        type: "string[] / string[] / (ids) => void",
-        description:
-          "Which rows are open. Controlled via `expandedIds`, uncontrolled via `defaultExpandedIds`.",
-      },
-      {
-        name: "controller",
-        type: "AISidebarController",
-        description:
-          "A useAISidebar() controller, in place of the data and handler props. Every behaviour — select, expand/collapse (one row, all rows, or the ancestors of one), move focus, rename, open a row's menu, reorder — becomes callable from outside the block.",
-      },
-      {
-        name: "renderIcon",
-        type: "(item) => ReactNode",
-        description: "Replaces the default per-kind icon.",
-      },
-      {
-        name: "renderMenu",
-        type: "(item, controls) => ReactNode",
-        description:
-          "Contents of a row's actions popover. `controls` carries { close, rename } so a custom item can start an in-place rename.",
-      },
-      {
-        name: "renderActionsTrigger",
-        type: "(item) => ReactElement",
-        description:
-          'Replaces the default "…" actions button. Must return a single element — the popover clones it to attach its trigger ref and click handler.',
-      },
-      {
-        name: "ariaLabel",
-        type: "string",
-        description: "Accessible name for the tree.",
-      },
-      {
-        name: "sidebarId",
-        type: "string",
-        description:
-          "Names this instance in the shared store so useAISidebarState(id) / useAISidebarActions(id) can reach it from anywhere under ExegiaProvider. A named sidebar keeps its state across unmounts — call removeAISidebarInstance(id) on teardown. Unnamed sidebars are dropped on unmount.",
-      },
-    ],
-    usage: `import {
-  Sidebar,
-  useAISidebar,
-  useAISidebarActions,
-  useAISidebarState,
-  type SidebarResource,
-} from "@corpora/ui"
-
-// Props form — the block owns its state.
-<Sidebar.Wrapper
-  defaultItems={resources}
-  defaultExpandedIds={["corpora"]}
-  defaultActiveId="codex-a"
-  onActiveChange={setActiveId}
-  onMove={(move) => persistMove(move)}
-/>
-
-// Controller form — drive it from anywhere.
-const sidebar = useAISidebar({ defaultItems: resources })
-
-<Sidebar.Wrapper controller={sidebar} />
-<Button onClick={sidebar.collapseAll}>Collapse all</Button>
-<Button onClick={() => sidebar.startRename(sidebar.selectedId!)}>Rename</Button>
-
-// By id — no controller to pass around. Needs <ExegiaProvider> at the root.
-<Sidebar.Wrapper sidebarId="app-resources" defaultItems={resources} />
-
-// …anywhere else in the app:
-const resources = useAISidebarActions("app-resources") // writes only, never re-renders
-const { selectedId } = useAISidebarState("app-resources") // subscribes to the sidebar
-<Button onClick={() => selectedId && resources.reveal(selectedId)}>Reveal</Button>`,
-  },
-  {
     slug: "shell",
     name: "Shell",
     titleStyle: "hidden",
@@ -920,14 +801,15 @@ function App() {
 //   useScaffoldState("workspace").hiddenPanelIds`,
   },
   {
-    slug: "ai-panel",
-    name: "Chat Panel",
+    slug: "chat",
+    name: "Chat",
+    titleStyle: "titlebar",
     description:
-      "Presentational curation rail for Context-Fabric validation: scoped selections, generated answers, version-bound diffs, provenance, and reader marks.",
+      "The chat surface end to end: the chrome-less AiPanel rail (scoped selections, generated answers, recommendation cards) and the Bubble-atom messages that carry attachments and AI content. The panel is the main example; the examples below show message exchanges, attachments and an AI reply.",
     category: "blocks",
     status: "in-progress",
-    preview: React.lazy(() => import("./demos/ai-panel-demo")),
-    registryDependencies: ["card", "recommendation-card"],
+    preview: React.lazy(() => import("./demos/chat-demo")),
+    registryDependencies: ["card", "recommendation-card", "bubble", "attachment"],
     props: [
       {
         name: "AiPanel",
@@ -954,10 +836,10 @@ function App() {
           "Thread blocks with persistent generated labeling, polite live-region streaming, and direct human-in-the-loop recommendation cards with Reject/Accept actions.",
       },
       {
-        name: "Reader adornments",
-        type: "SelectionHighlight / AppliedMark / ApplyToast",
+        name: "Bubble",
+        type: 'variant="sender" | "recipient", Header, Message',
         description:
-          "Selection and persistent AI-change marks plus an assertive apply confirmation live region.",
+          "The message atom: sender hugs the right edge, recipient carries attachments inline. Render Bubble.Header on the first message of a run and mark follow-ups `continued`.",
       },
     ],
     usage: `import {
@@ -981,74 +863,65 @@ function App() {
   }
   composerProps={{ onSend: askContextFabric }}
 />`,
-  },
-  {
-    slug: "chat-messages",
-    name: "Message + Attachment",
-    titleStyle: "titlebar",
-    description:
-      "The Bubble atom carrying an attachment preview — above the sender bubble, inside the recipient bubble. No separate message component: the sender and recipient variants of Bubble are the message.",
-    category: "blocks",
-    status: "in-progress",
-    preview: React.lazy(() => import("./demos/chat-messages-demo")),
-    registryDependencies: ["bubble", "attachment"],
-    props: [
-      { name: "variant", type: '"sender" | "recipient"', description: "Bubble variant; sender hugs the right edge." },
-      { name: "Bubble.Header", type: "{ name, time, badge?, avatar? }", description: "Author row: render it on the first message of a run, and mark the follow-ups `continued`." },
-      { name: "Bubble.Message", type: "children", description: 'Put an <Attachment variant="preview" /> before it (sender) or inside it (recipient).' },
-    ],
-    usage: `import { Bubble, Attachment } from "@corpora/ui"
+    examples: [
+      {
+        title: "Simple chat",
+        description: "Sender and receiver bubbles — the Bubble atom is the message.",
+        preview: React.lazy(() =>
+          import("./demos/chat-examples-demo").then((m) => ({ default: m.SimpleChatExample })),
+        ),
+        code: `import { Bubble } from "@corpora/ui"
 
 <Bubble variant="sender">
-  <Bubble.Header name="You" time="Just now" />
-  <Attachment kind="document" variant="preview" title="Q3.pdf" />
-  <Bubble.Message>Here’s the Q3 report.</Bubble.Message>
+  <Bubble.Header name="You" time="10 min ago" />
+  <Bubble.Message>Here's the Q3 report.</Bubble.Message>
 </Bubble>
 <Bubble variant="sender" continued>
   <Bubble.Message>Can you check §4 before Thursday?</Bubble.Message>
+</Bubble>
+<Bubble variant="recipient">
+  <Bubble.Header name="Researcher" time="5 min ago" />
+  <Bubble.Message>Sure — pulling the passage now.</Bubble.Message>
 </Bubble>`,
-  },
-  {
-    slug: "composer-with-attachments",
-    name: "Composer with attachments",
-    titleStyle: "titlebar",
-    description:
-      "The prompt Composer with its attachment tray filled. The tray lives in a keyed Jotai family, so an app can add or remove chips by composer id — no separate component.",
-    category: "blocks",
-    status: "in-progress",
-    preview: React.lazy(() => import("./demos/composer-with-attachments-demo")),
-    registryDependencies: ["attachment", "chat-atoms"],
-    props: [
-      { name: "composerId", type: "string", description: "Stable id for the tray atoms; unnamed composers use useId() and drop state on unmount." },
-      { name: "defaultAttachments", type: "ComposerAttachment[]", description: "Seeds the tray once." },
-      { name: "onSend", type: "(draft, mode, attachments) => void", description: "Send button or ⌘/Ctrl+↵." },
-      { name: "onAttach", type: "() => void", description: "The + button." },
-      { name: "commands / onCommand", type: "MenuCommandItem[] / (item) => void", description: "Turns the + button into a MenuCommand of sources and tools; replaces onAttach." },
-      { name: "useComposerAttachmentActions(id)", type: "{ add, remove, clear }", description: "Drive the tray from anywhere under ExegiaProvider." },
-    ],
-    usage: `import { Composer, useComposerAttachmentActions } from "@corpora/ui"
+      },
+      {
+        title: "Chat with attachments",
+        description: "A document above the sender bubble and a quoted passage inside the recipient bubble.",
+        preview: React.lazy(() =>
+          import("./demos/chat-examples-demo").then((m) => ({ default: m.AttachmentsChatExample })),
+        ),
+        code: `import { Bubble, Attachment } from "@corpora/ui"
 
-<Composer composerId="thread-1" onSend={send} />
-const { add } = useComposerAttachmentActions("thread-1")
-add({ id: "pdf", kind: "document", title: "Q3.pdf", meta: "PDF · 2.4 MB" })`,
-  },
-  {
-    slug: "ai-bubble",
-    name: "AI bubble",
-    titleStyle: "titlebar",
-    description:
-      "Agent reply on the ai Bubble atom: spark mark · name · Agent badge · time, then one of four content cards — Markdown, Research answer, Chart or Streaming text — typed as a discriminated union.",
-    category: "blocks",
-    status: "in-progress",
-    preview: React.lazy(() => import("./demos/ai-bubble-demo")),
-    registryDependencies: ["markdown", "research-answer", "chart", "streaming-text"],
-    props: [
-      { name: "content", type: '{ kind: "markdown" | "research" | "chart" | "streaming", …props }', required: true, description: "The content card and its own props." },
-      { name: "name / time / badge / avatar", type: "ReactNode", description: 'Header; defaults to "Exegia" and an "Agent" badge with a sparkles tile.' },
-    ],
-    usage: `import { AiBubble } from "@corpora/ui"
+<Bubble variant="sender">
+  <Bubble.Header name="You" time="10 min ago" />
+  <Attachment kind="document" variant="preview" title="Q3-financial-report.pdf" meta="PDF · 2.4 MB · 12 pages" />
+  <Bubble.Message>Here's the Q3 report.</Bubble.Message>
+</Bubble>
+<Bubble variant="recipient">
+  <Bubble.Header name="Researcher" time="5 min ago" />
+  <Bubble.Message>
+    Sure — the source passage is here. ¶12 stays inside the RC003 boundary:
+    <Attachment kind="text-selection" variant="preview" title="Iliad · Book 1, §12" quote="…" />
+  </Bubble.Message>
+</Bubble>`,
+      },
+      {
+        title: "Chat with AI",
+        description: "An AiBubble agent reply with a markdown content card.",
+        preview: React.lazy(() =>
+          import("./demos/chat-examples-demo").then((m) => ({ default: m.AiChatExample })),
+        ),
+        code: `import { AiBubble } from "@corpora/ui"
 
-<AiBubble time="2 min ago" content={{ kind: "markdown", source: answer }} />
-<AiBubble content={{ kind: "chart", type: "bar", title: "Sales by flavor", data, series }} />`,
+<AiBubble
+  time="2 min ago"
+  content={{
+    kind: "markdown",
+    markdownId: "thread-1",
+    source: "## Boundary check — ¶12\n\nThe walker keeps ¶12 inside **RC003**.",
+  }}
+/>`,
+      },
+    ],
   },
 ]

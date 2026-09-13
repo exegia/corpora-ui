@@ -1,6 +1,8 @@
 "use client"
 
 import { Copy, Maximize2 } from "lucide-react"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
+import { EASE_OUT } from "@/lib/ease"
 import * as React from "react"
 import ReactMarkdown, { type Components } from "react-markdown"
 import { cn } from "@/lib/utils"
@@ -126,6 +128,7 @@ export function Markdown({
   className,
   ...props
 }: MarkdownProps): React.ReactElement {
+  const reduceMotion = useReducedMotion()
   const generatedId = React.useId()
   const id = markdownId ?? generatedId
   const [stored, setStored] = useMarkdownView(id)
@@ -180,15 +183,29 @@ export function Markdown({
       </CardFrameHeader>
       <Card>
         <CardPanel className={current === "preview" ? "p-4" : "p-2"}>
-          {current === "preview" ? (
-            <div className="flex flex-col gap-2.5">
-              <ReactMarkdown components={COMPONENTS}>{source}</ReactMarkdown>
-            </div>
-          ) : (
-            <pre className="overflow-x-auto rounded-md bg-surface-code px-2.5 py-2 font-mono text-[11px] leading-[13px] whitespace-pre-wrap text-text-primary">
-              {source}
-            </pre>
-          )}
+          <AnimatePresence initial={false} mode="wait">
+            <motion.div
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+              key={current}
+              transition={
+                reduceMotion
+                  ? { duration: 0 }
+                  : { duration: 0.24, ease: EASE_OUT }
+              }
+            >
+              {current === "preview" ? (
+                <div className="flex flex-col gap-2.5">
+                  <ReactMarkdown components={COMPONENTS}>{source}</ReactMarkdown>
+                </div>
+              ) : (
+                <pre className="overflow-x-auto rounded-md bg-surface-code px-2.5 py-2 font-mono text-[11px] leading-[13px] whitespace-pre-wrap text-text-primary">
+                  {source}
+                </pre>
+              )}
+            </motion.div>
+          </AnimatePresence>
         </CardPanel>
       </Card>
     </CardFrame>
