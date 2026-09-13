@@ -1,18 +1,25 @@
+import { Button } from "@/components/ui/button"
+import type { ButtonProps } from "@/components/ui/button"
+import type { IComposerSubmitButtonProps } from "./type"
+import { ArrowUp, Squircle } from "lucide"
+import { cn } from "@/lib/utils"
+import { MorphIcon } from "morphicons/react"
 
-import { Button } from "@/components/ui/button";
-import type { ButtonProps } from "@/components/ui/button";
-import type { IComposerSubmitButtonProps } from "./type";
-import { ArrowUp, Squircle } from "lucide";
-import { cn } from "@/lib/utils";
-import { MorphIcon } from "morphicons/react";
-
-
-export function SendButton({ isStreaming, isExpanded, disabled, ...props }: IComposerSubmitButtonProps & ButtonProps): React.ReactElement {
+export function SendButton({
+  isStreaming,
+  isExpanded,
+  disabled,
+  onStop,
+  ...props
+}: IComposerSubmitButtonProps & ButtonProps): React.ReactElement {
   return (
     <Button
       {...props}
       aria-hidden={!isExpanded}
       aria-label={isStreaming ? "Stop" : "Send message"}
+      // Not streaming, the button is type="submit" and the form's onSubmit
+      // owns the send; the click handler only carries the stop.
+      onClick={isStreaming ? onStop : undefined}
       className={cn(
         "shrink-0 justify-self-center",
         !isExpanded && "pointer-events-none"
@@ -33,5 +40,5 @@ export function SendButton({ isStreaming, isExpanded, disabled, ...props }: ICom
         icon={isStreaming ? Squircle : ArrowUp}
       />
     </Button>
-  );
+  )
 }

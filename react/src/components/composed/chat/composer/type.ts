@@ -62,7 +62,7 @@ export interface ComposerBaseProps<
   /** Start in the tall, focused layout. */
   expanded?: E
   isStreaming?: S
-  /** Attach affordance — the "+" button. Hidden when omitted. */
+  disabled?: boolean
   safetyNote?: React.ReactNode
   placeholder?: string
   onSubmit?: (...args: TSubmitParams<TSubmitType, M, A>) => void
@@ -75,7 +75,8 @@ export interface IComposerProps<
   S extends boolean = boolean,
   E extends boolean = boolean,
 > extends ComposerBaseProps<S, E> {
-  SubmitButton: React.FC<IComposerSubmitButtonProps<S, E>>
+  /** Replaces the default `SendButton`. Receives the streaming/expanded state. */
+  SubmitButton?: React.FC<IComposerSubmitButtonProps<S, E>>
   ModeComponent?: React.FC<IMode>
   Suggestions?: React.FC<ComposerSuggestionsProps>
   ComposerMenu?: React.FC<IComposerMenuProps>

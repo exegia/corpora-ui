@@ -19,9 +19,14 @@ export {
   type MarkdownProps,
   type MarkdownView,
 } from "./markdown"
+// `SuggestedPrompts`, `SendButton` and `AddButton` stay off the barrel on
+// purpose: `blocks/ai-panel` and `ui/chat` already export those names, and
+// all the barrels flow into `src/index.ts`. Reach them as
+// `composed/chat/composer` — or hand the slots to `Composer`.
 export {
   addComposerAttachmentAtom,
   clearComposerAttachmentsAtom,
+  CommandMenu,
   Composer,
   composerAttachmentsAtom,
   removeComposerAttachmentAtom,
@@ -31,8 +36,12 @@ export {
 } from "./composer"
 export type {
   ComposerAttachment,
+  ComposerBaseProps,
   ComposerMode,
-  ComposerProps,
+  ComposerSuggestionsProps,
+  IComposerMenuProps,
+  IComposerProps,
+  IComposerSubmitButtonProps,
 } from "./composer"
 export { ResearchAnswer, type ResearchAnswerProps } from "./research-answer"
 export {

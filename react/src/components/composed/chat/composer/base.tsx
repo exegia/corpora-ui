@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "motion/react"
 import { useAtom } from "jotai"
-import { useCallback, useEffect, useId, useState } from "react"
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { BOUNCE_IN_OUT, EASE_OUT, SPRING_PANEL } from "@/lib/ease"
@@ -10,11 +10,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { Text } from "@/components/atoms"
 import { Attachment } from "../attachment"
 import { SendHint } from "@/components/composed/ai/shared"
-import type { ComposerMode, IComposerProps } from "./type"
+import type {
+  ComposerMode,
+  IComposerProps,
+  IComposerSubmitButtonProps,
+} from "./type"
 import { composerAttachmentsAtom, removeComposerInstance } from "./utils"
-import { SendButton } from "./send-button";
-
-const MotionButton = motion.create(SendButton)
+import { SendButton } from "./send-button"
 
 /**
  * Prompt field with two shapes: a pill at rest showing the "⌘ + ↵" hint,
@@ -25,10 +27,13 @@ export function Composer({
   value,
   onValueChange,
   composerId,
+  attachments: seedAttachments,
   isStreaming = false,
+  disabled = false,
   safetyNote,
   expanded = false,
   placeholder = "Ask about this selection…",
+  SubmitButton,
   ComposerMenu,
   Suggestions,
   defaultValue = "",
@@ -37,13 +42,10 @@ export function Composer({
 }: IComposerProps): React.ReactElement {
   const reduceMotion = useReducedMotion()
   const [internalValue, setInternalValue] = useState(defaultValue)
-  const [disabled] = useState(true)
   const [isFocused, setIsExpanded] = useState(expanded)
-  const [mode] = useState<ComposerMode>('answer')
+  const [mode] = useState<ComposerMode>("answer")
   // The prompts fold when the field expands: the two never stack open.
-  const [promptsOpen, setPromptsOpen] = useState(
-    true
-  )
+  const [promptsOpen, setPromptsOpen] = useState(true)
 
   const expand = (): void => {
     setIsExpanded(true)
@@ -54,11 +56,22 @@ export function Composer({
   const id = composerId ?? generatedId
   const [attachments, setAttachments] = useAtom(composerAttachmentsAtom(id))
 
+  // Seed once, then the atoms own the tray. A passive effect on purpose:
+  // jotai (v3) subscribes `useAtom` in its own `useEffect` with no
+  // post-subscription recheck, so a `useLayoutEffect` write would land before
+  // the subscription exists and the tray would never re-render.
+  const seeded = useRef(false)
+  useEffect(() => {
+    if (seeded.current) return
+    seeded.current = true
+    if (seedAttachments?.length) setAttachments(seedAttachments)
+  }, [seedAttachments, setAttachments])
+
   useEffect(() => {
     if (composerId) return
     return () => removeComposerInstance(id)
   }, [composerId, id])
-  const draft = defaultValue ?? internalValue
+  const draft = value ?? internalValue
   // The pill has no room for a tray: chips or a draft hold the tall shape open.
   const isExpanded = isFocused || draft.length > 0 || attachments.length > 0
   const isDisabled = disabled || isStreaming
@@ -76,22 +89,25 @@ export function Composer({
     if (value === undefined) setInternalValue("")
   }, [attachments, draft, isDisabled, onSubmit, mode, value])
 
-  const handleOnClick = useCallback(() => {
-    if (!isStreaming) send()
-    onSubmit?.("stop")
-  }, [isStreaming, send, onSubmit])
+  // The slot swaps rarely; memoise the motion wrapper so Motion does not see
+  // a brand-new component type (and remount the button) on every render.
+  const Submit: React.FC<IComposerSubmitButtonProps> =
+    SubmitButton ?? (SendButton as React.FC<IComposerSubmitButtonProps>)
+  const MotionSubmit = useMemo(() => motion.create(Submit), [Submit])
 
   // Always mounted: the fade in/out is driven by `animate` alone (opacity
   // tween + y spring), so there is no AnimatePresence exit to freeze mid-flight
   // or unmount early. Collapsed, it is inert and invisible but keeps its slot —
   // the hint's flex-1 absorbs it, so the pill shape never reflows.
   const sendButton = (
-    <MotionButton
+    <MotionSubmit
       // Empty-draft must NOT disable: the disabled:opacity-50! rule would
       // pin Motion's inline opacity at 0.5 and break the fade. send() guards
       // empty drafts, and the collapsed button is pointer-events-none.
       disabled={isDisabled && !isStreaming}
-      onClick={handleOnClick}
+      isExpanded={isExpanded}
+      isStreaming={isStreaming}
+      onStop={() => onSubmit?.("stop")}
       transition={{
         y: BOUNCE_IN_OUT,
         opacity: { duration: 0.16, ease: EASE_OUT },
@@ -100,6 +116,7 @@ export function Composer({
         opacity: isExpanded ? 1 : 0,
         y: isExpanded ? 0 : 10,
       }}
+      initial={false}
     />
   )
 
@@ -114,7 +131,7 @@ export function Composer({
         isExpanded
           ? "[&_textarea]:min-h-14 [&_textarea]:py-2"
           : "h-full [&_textarea]:min-h-0 [&_textarea]:py-0",
-        !isExpanded && (ComposerMenu) && "[&_textarea]:pr-12",
+        !isExpanded && ComposerMenu && "[&_textarea]:pr-12",
         // The rest state paints its own keycap hint over the field.
         showRestHint && "[&_textarea]:placeholder:text-transparent"
       )}
@@ -153,10 +170,7 @@ export function Composer({
           distort the field. The pill just paints over the panel's tucked
           bottom edge instead. */}
       {Suggestions ? (
-        <Suggestions
-          onOpenChange={setPromptsOpen}
-          open={promptsOpen}
-        />
+        <Suggestions onOpenChange={setPromptsOpen} open={promptsOpen} />
       ) : null}
       <motion.div
         // The textarea trades `absolute` for static between the two shapes, so

@@ -1,7 +1,8 @@
 import { describe, expect, mock, test } from "bun:test"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { Provider } from "jotai"
-import { Composer, type ComposerAttachment } from "..";
+
+import { Composer, type ComposerAttachment } from "../composer"
 
 const SEED: ComposerAttachment[] = [
   { id: "a", kind: "document", title: "Q3.pdf", meta: "PDF" },
@@ -10,18 +11,18 @@ const SEED: ComposerAttachment[] = [
 
 describe("Composer attachments", () => {
   test("renders the tray, removes a chip and sends with ⌘↵", async () => {
-    const onSend = mock(() => {})
+    const onSubmit = mock(() => {})
     render(
       <Provider>
         <Composer
-          defaultAttachments={SEED}
+          attachments={SEED}
           defaultValue="hello"
-          onSend={onSend}
+          onSubmit={onSubmit}
           safetyNote={null}
         />
       </Provider>
     )
-    // The tray seeds from a layout effect; flush the re-render it schedules.
+    // The tray seeds from a passive effect; flush the re-render it schedules.
     await act(async () => {})
     expect(screen.getAllByRole("button", { name: "Remove" }).length).toBe(2)
     fireEvent.click(screen.getAllByRole("button", { name: "Remove" })[0])
@@ -31,8 +32,8 @@ describe("Composer attachments", () => {
       key: "Enter",
       metaKey: true,
     })
-    expect(onSend).toHaveBeenCalledTimes(1)
-    const [draft, , attachments] = onSend.mock.calls[0] as unknown as [
+    expect(onSubmit).toHaveBeenCalledTimes(1)
+    const [draft, , attachments] = onSubmit.mock.calls[0] as unknown as [
       string,
       string,
       ComposerAttachment[],

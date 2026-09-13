@@ -26,11 +26,8 @@ export interface NodeSelection {
   wordCount: number
 }
 
-export type {
-  ComposerMode,
-  DiffRow,
-  SuggestionState,
-} from "@/components/composed/ai/types"
+export type { ComposerMode } from "@/components/composed/chat/composer"
+export type { DiffRow, SuggestionState } from "@/components/composed/ai/types"
 
 export interface VersionHistoryEntry {
   id?: string

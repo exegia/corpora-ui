@@ -1,63 +1,10 @@
 import { describe, expect, mock, test } from "bun:test"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { AiMessage, Composer, SuggestedPrompt, SuggestionCard } from "../index"
+import { AiMessage, SuggestionCard } from "../index"
 
-describe("Composer", () => {
-  test("rests as a pill with the send hint and expands on focus", async () => {
-    const user = userEvent.setup()
-    const onSend = mock(() => {})
-    const onAttach = mock(() => {})
-    render(<Composer onAttach={onAttach} onSend={onSend} safetyNote={null} />)
-
-    expect(screen.getByText("to send message")).toBeDefined()
-    expect(screen.queryByRole("button", { name: "Send message" })).toBeNull()
-
-    const field = screen.getByRole("textbox", { name: "Message" })
-    await user.click(field)
-    expect(await screen.findByRole("button", { name: "Send message" })).toBeDefined()
-
-    await user.type(field, "Validate ¶12")
-    await user.keyboard("{Meta>}{Enter}{/Meta}")
-    expect(onSend).toHaveBeenCalledWith("Validate ¶12", "answer", [])
-
-    await user.click(screen.getByRole("button", { name: "Attach" }))
-    expect(onAttach).toHaveBeenCalledTimes(1)
-  })
-
-  test("folds the suggested prompts behind the disclosure and routes a pick", async () => {
-    const user = userEvent.setup()
-    const onSelect = mock(() => {})
-    render(
-      <Composer
-        safetyNote={null}
-        suggestedPrompts={
-          <SuggestedPrompt onSelect={onSelect}>Check ¶12</SuggestedPrompt>
-        }
-      />
-    )
-
-    const trigger = screen.getByRole("button", { name: /Suggestions \(1\)/ })
-    expect(trigger.getAttribute("aria-expanded")).toBe("true")
-
-    await user.click(await screen.findByRole("button", { name: /Check ¶12/ }))
-    expect(onSelect).toHaveBeenCalledTimes(1)
-
-    // Only the disclosure state is asserted: the panel leaves through an
-    // AnimatePresence exit, and happy-dom's stubbed `Element.animate` never
-    // finishes it, so the row stays mounted here but not in a browser.
-    await user.click(trigger)
-    expect(trigger.getAttribute("aria-expanded")).toBe("false")
-  })
-
-  test("shows Stop while streaming and routes it to onStop", async () => {
-    const user = userEvent.setup()
-    const onStop = mock(() => {})
-    render(<Composer expanded isStreaming onStop={onStop} safetyNote={null} />)
-    await user.click(screen.getByRole("button", { name: "Stop" }))
-    expect(onStop).toHaveBeenCalledTimes(1)
-  })
-})
+// The Composer's own tests moved with it to
+// `composed/chat/__tests__/composer.test.tsx`.
 
 describe("SuggestionCard", () => {
   test("reveals the reference chip with the body and links it to the node", async () => {
@@ -193,6 +140,8 @@ describe("AiMessage", () => {
         Generated prose
       </AiMessage>
     )
-    expect(screen.getByRole("button", { name: "Suggestions (2)" })).toBeDefined()
+    expect(
+      screen.getByRole("button", { name: "Suggestions (2)" })
+    ).toBeDefined()
   })
 })
