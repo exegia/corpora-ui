@@ -1,5 +1,6 @@
 import type { ClassValue } from "class-variance-authority/types"
 import type { AvatarAudio, AvatarSize, UserType } from "./types"
+import type { AtomSize } from "../types";
 
 export function initialsFrom(user: string | UserType | undefined): string | undefined {
   // If the user is a string, use it directly to generate initials.
@@ -29,14 +30,25 @@ export const ringClasses: Record<NonNullable<AvatarAudio>, ClassValue> = {
 }
 
 export const sizeClasses: Record<AvatarSize, string> = {
-  small: "size-4",
-  medium: "size-6",
-  large: "size-8",
-  xlarge: "size-10",
+  sm: "size-6",
+  md: "size-8",
+  lg: "size-10",
+  xl: "size-14",
+  xxl: "size-16",
+}
+
+// Dot trio ≈ 45-55% of the disc: 3×dot + 2×4px gap.
+// 24px disc → 14px trio (xs), 40px → 20px (sm), 64px → 32px (md).
+export const loaderSizes: Record<AvatarSize, AtomSize> = {
+  sm: "xs",
+  md: "xs",
+  lg: "sm",
+  xl: "sm",
+  xxl: "md",
 }
 
 export const statusClasses = {
   online: "bg-success",
   idle: "bg-warning",
-  offline: "bg-danger",
+  offline: "bg-text-secondary",
 }

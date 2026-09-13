@@ -1,3 +1,5 @@
+import type { AtomSize } from "../types";
+
 export type UserType = {
   firstName?: string
   lastName?: string
@@ -8,7 +10,7 @@ export type UserType = {
   status?: AvatarStatus
 }
 
-export type AvatarSize = "small" | "medium" | "large" | "xlarge"
+export type AvatarSize = Exclude<AtomSize, "xs">
 export type AvatarStatus = "online" | "idle" | "offline"
 
 export type AvatarAudio = "muted" | "unmuted" | "speaking"

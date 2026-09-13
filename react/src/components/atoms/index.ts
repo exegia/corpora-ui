@@ -3,6 +3,7 @@ export { SelectChip, SourceChip as FlowchartSourceChip } from "./chip"
 export * from "./text"
 export * from "./background"
 export * from "./avatar"
+export * from "./loader"
 
 export {
   HighlightPopover,
@@ -45,3 +46,7 @@ export type {
   AvatarStatus,
   UserType,
 } from "./avatar/types"
+export type {
+  ILoaderProps,
+  TLoaderType
+} from "./loader"
