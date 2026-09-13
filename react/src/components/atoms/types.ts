@@ -1,6 +1,4 @@
-
-export type AtomSize = "xs" | "sm" | "md" | "lg" | "xl" | "xxl"
-
+export type AtomSize = "xs" | "sm" | "default" | "lg" | "xl" | "xxl"
 
 export interface ReferenceProps {
   /** With an href the chip renders as a link, otherwise as a button. */

@@ -1,11 +1,9 @@
 import * as React from "react"
 
 import {
-  AiMessage,
   AiPanel,
   ApplyToast,
   RecommendationStack,
-  UserMessage,
   type AiScope,
   type DiffRow,
 } from "@/components/blocks/ai-panel"
@@ -15,6 +13,7 @@ import {
 } from "@/components/composed/chat"
 import { DemoStage } from "@/components/docs/demo-controls"
 import { cn } from "@/lib/utils"
+import AI from "@/components/composed/ai";
 
 const SCOPE: AiScope = {
   kind: "passage",
@@ -106,12 +105,12 @@ export default function AiPanelDemo(): React.ReactElement {
               >
                 Validate this passage against the schema.
               </UserMessage>
-              <AiMessage
+              <AI.Message
                 time="2 min ago"
                 user={{ firstName: "Exegia", role: "Agent", verified: true }}
               >
                 The paragraph boundary is valid. Node p-17 has a label mismatch.
-              </AiMessage>
+              </AI.Message>
               <RecommendationStack>
                 <RecommendationCard
                   acceptLabel="Apply fix"

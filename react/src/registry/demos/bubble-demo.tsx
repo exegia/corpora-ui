@@ -111,7 +111,7 @@ export default function BubbleDemo(): React.ReactElement {
         <Bubble variant={variant} continued>
           {withHeader && (
             <Bubble.Header>
-              {variant === "ai" ? <AI.Avatar /> : <User.Info user={HEADER[variant].user} />}
+              {variant === "ai" ? <AI.Avatar /> : <User.Info user={HEADER[variant].user} direction={variant} variant="info" />}
             </Bubble.Header>
           )}
           <Bubble.Message>{COPY[variant]}</Bubble.Message>
