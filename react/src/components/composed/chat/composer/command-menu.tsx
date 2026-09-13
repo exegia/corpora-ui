@@ -1,4 +1,4 @@
-import type { IComposerMenuProps } from "./type"
+import type { IComposerMenuProps } from "../type"
 import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover"
 import {
   CommandItem,

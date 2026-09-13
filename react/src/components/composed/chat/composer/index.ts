@@ -1,6 +1,6 @@
 import { Composer } from "./base"
 
-export type * from "./type"
+export type * from "../type"
 
 export { Composer }
 export { SendButton } from "./send-button"

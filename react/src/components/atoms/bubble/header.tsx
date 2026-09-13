@@ -1,10 +1,12 @@
 "use client"
 
-
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { useBubbleVariant } from "./context"
 import type { BubbleHeaderProps } from "./types"
+import { Avatar } from "@/components/atoms/avatar"
+import { Badge } from "@/components/ui/badge"
+import OWLImage from "@/assets/owl-avatar.png"
 
 /**
  * Author row above a message: avatar, name, time and an optional role badge.
@@ -12,16 +14,29 @@ import type { BubbleHeaderProps } from "./types"
  * thread's edge, the same way its bubble does.
  */
 export function BubbleHeader({
-  time,
   className,
   children,
-  user,
-  UserInfo,
   ...props
 }: BubbleHeaderProps): React.ReactElement {
   const variant = useBubbleVariant()
   const reversed = variant === "sender"
 
+  const renderAIAvatar = () => {
+    return (
+      <div className="flex items-center gap-2">
+        <Avatar size="md" className="bg-indigo-950 dark:bg-indigo-300 p-0.5 scale-110" user={{ avatarUrl: OWLImage }} />
+        <div className="flex flex-col">
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-semibold">Exegia</span>
+            <Badge variant="default" size="xs">
+              Agent
+            </Badge>
+          </div>
+          <span className="text-xs text-muted-foreground">AI Scholar</span>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div
@@ -33,16 +48,7 @@ export function BubbleHeader({
       data-slot="bubble-header"
       {...props}
     >
-      {UserInfo && <UserInfo user={user} variant="info" />}
-      {children}
-      {time !== undefined && time !== null ? (
-        <span
-          className="text-[10px] leading-none font-semibold text-muted-foreground"
-          data-slot="bubble-time"
-        >
-          {time}
-        </span>
-      ) : null}
+      {variant === "ai" ? renderAIAvatar() : children}
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import type * as React from "react"
 
 import type { MenuCommandItem } from "@/components/ui/menu-command"
-import type { AttachmentProps } from "../attachment"
+import type { AttachmentProps } from "./attachment"
 import type { HTMLMotionProps } from "motion/react"
 
 export type ComposerMode = "answer" | "fix" | "ask"

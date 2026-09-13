@@ -3,7 +3,7 @@
  * so an app can add or remove chips without holding the component.
  */
 import { createKeyedFamilies } from "@/lib/keyed-atom"
-import type { ComposerAttachment } from "./type"
+import type { ComposerAttachment } from "../type"
 import { Children, Fragment, isValidElement } from "react";
 import type { Variants } from "motion";
 import { EASE_IN_OUT, SPRING_PANEL } from "@/lib/ease";

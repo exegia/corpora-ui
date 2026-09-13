@@ -9,12 +9,12 @@ import { BOUNCE_IN_OUT, EASE_OUT, SPRING_PANEL } from "@/lib/ease"
 import { Textarea } from "@/components/ui/textarea"
 import { Text } from "@/components/atoms"
 import { Attachment } from "../attachment"
-import { SendHint } from "@/components/composed/ai/shared"
+import { SendHint } from "@/components/composed/chat"
 import type {
   ComposerMode,
   IComposerProps,
   IComposerSubmitButtonProps,
-} from "./type"
+} from "../type"
 import { composerAttachmentsAtom, removeComposerInstance } from "./utils"
 import { SendButton } from "./send-button"
 

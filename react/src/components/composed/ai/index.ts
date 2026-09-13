@@ -1,3 +1,7 @@
+import { Message } from "./message"
+import { StreamingText } from "./streaming-text"
+import { ResearchAnswer } from "./research-answer"
+
 export { AiMessage } from "./ai-message"
 export type { AiMessageProps } from "./ai-message"
 export { GeneratedBlock } from "./generated-block"
@@ -26,9 +30,16 @@ export {
   SendHint,
   surface,
 } from "./shared"
+export {
+  StreamingText,
+  type StreamingTextProps,
+  type StreamingToken,
+} from "./streaming-text"
+export { ResearchAnswer, type ResearchAnswerProps } from "./research-answer"
 export type {
   AISuggestionBase,
   DiffRow,
   ReferenceBase,
   SuggestionState,
 } from "./types"
+

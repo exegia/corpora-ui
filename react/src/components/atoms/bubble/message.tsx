@@ -15,7 +15,6 @@ export function BubbleMessage({
     <div
       className={cn(
         "relative select-none",
-    //
         twBubbleMessageClasses["default"],
         twBubbleMessageClasses[variant],
         className

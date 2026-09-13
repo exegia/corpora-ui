@@ -1,7 +1,5 @@
-import type { UserInfoProps } from "@/components/composed/user"
 import type { HTMLMotionProps } from "motion/react"
-import type { ComponentPropsWithoutRef, ReactNode, FC } from "react"
-import type { UserType } from "../avatar/types"
+import type { ComponentPropsWithoutRef, ReactNode } from "react"
 
 /**
  * Who the bubble belongs to:
@@ -22,22 +20,7 @@ export interface BubbleProps extends ComponentPropsWithoutRef<"div"> {
 
 export type BubbleMessageProps = ComponentPropsWithoutRef<"div">
 
-export interface BubbleHeaderProps extends Omit<
-  ComponentPropsWithoutRef<"div">,
-  "children"
-> {
-  /** Relative or absolute time label, e.g. "5 min ago". */
-  time?: ReactNode | string
-  /**
-   * User. An identity object renders `User.Info`; a node is used as-is.
-   * Omitted, the ai variant falls back to the spark mark and people get
-   * initials derived from `name` when it is a string.
-   */
-  user: UserType
-  UserInfo?: FC<UserInfoProps>
-  /** Extra trailing content (a menu trigger, a status dot). */
-  children?: ReactNode
-}
+export type BubbleHeaderProps = ComponentPropsWithoutRef<"div">
 
 export interface BubbleReaction {
   /** Stable key; falls back to the label/emoji when omitted. */

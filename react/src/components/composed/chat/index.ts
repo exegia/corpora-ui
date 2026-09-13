@@ -43,12 +43,7 @@ export type {
   IComposerProps,
   IComposerSubmitButtonProps,
 } from "./composer"
-export { ResearchAnswer, type ResearchAnswerProps } from "./research-answer"
-export {
-  StreamingText,
-  type StreamingTextProps,
-  type StreamingToken,
-} from "./streaming-text"
+
 export { Recommendation, RecommendationCard } from "./recommendation"
 export type {
   RecommendationCardProps,
@@ -97,3 +92,5 @@ export {
   type InsightSegment,
   type InsightCardsProps,
 } from "./insight-cards"
+
+export { SendHint } from "./hint"

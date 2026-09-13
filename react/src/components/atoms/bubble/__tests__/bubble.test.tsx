@@ -8,30 +8,27 @@ describe("Bubble", () => {
   test("header renders the user's identity row, time and role badge", () => {
     render(
       <Bubble variant="sender">
-        <Bubble.Header
-          time="10 min ago"
-          user={{ firstName: "Sen", lastName: "Der", role: "Admin" }}
-          UserInfo={User.Info}
-        />
+        <Bubble.Header>
+          <User.Info user={{ firstName: "Sen", lastName: "Der", role: "Admin" }} variant="info" />
+        </Bubble.Header>
         <Bubble.Message>Hello</Bubble.Message>
       </Bubble>
     )
     expect(screen.getByText(/Sen\s+Der/)).toBeDefined()
-    expect(screen.getByText("10 min ago")).toBeDefined()
     expect(screen.getByText("Admin")).toBeDefined()
   })
 
   test("without a UserInfo slot the header only carries time and extras", () => {
     const { container } = render(
       <Bubble variant="ai">
-        <Bubble.Header time="2 min ago" user={{ firstName: "Exegia" }} />
+        <Bubble.Header />
         <Bubble.Message>Generated</Bubble.Message>
       </Bubble>
     )
     expect(
       container.querySelector('[data-slot="bubble-header"]')
     ).not.toBeNull()
-    expect(screen.getByText("2 min ago")).toBeDefined()
+    expect(screen.getByText("AI Scholar")).toBeDefined()
     expect(screen.queryByText("Exegia")).toBeNull()
   })
 

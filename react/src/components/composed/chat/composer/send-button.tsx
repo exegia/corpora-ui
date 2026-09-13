@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import type { ButtonProps } from "@/components/ui/button"
-import type { IComposerSubmitButtonProps } from "./type"
+import type { IComposerSubmitButtonProps } from "../type"
 import { ArrowUp, Squircle } from "lucide"
 import { cn } from "@/lib/utils"
 import { MorphIcon } from "morphicons/react"

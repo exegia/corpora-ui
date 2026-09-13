@@ -1,7 +1,7 @@
 import { useAtomValue, useSetAtom } from "jotai"
 import { useCallback } from "react"
 
-import type { ComposerAttachment } from "./type"
+import type { ComposerAttachment } from "../type"
 import {
   addComposerAttachmentAtom,
   clearComposerAttachmentsAtom,

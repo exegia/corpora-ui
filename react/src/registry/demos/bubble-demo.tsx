@@ -107,13 +107,11 @@ export default function BubbleDemo(): React.ReactElement {
       }
     >
       <div className="mx-auto w-full max-w-sm">
-        <Bubble variant={variant}>
+        <Bubble variant={variant} continued>
           {withHeader && (
-            <Bubble.Header
-              time={HEADER[variant].time}
-              user={HEADER[variant].user}
-              UserInfo={User.Info}
-            />
+            <Bubble.Header>
+              {variant === "ai" ?  : null}
+            </Bubble.Header>
           )}
           <Bubble.Message>{COPY[variant]}</Bubble.Message>
           {withReactions && variant !== "ai" && (
