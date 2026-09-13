@@ -4,6 +4,9 @@ export * from "./text"
 export * from "./background"
 export * from "./avatar"
 export * from "./loader"
+export * from "./reference"
+
+export type { ReferenceProps } from "./types"
 
 export {
   HighlightPopover,
@@ -46,7 +49,4 @@ export type {
   AvatarStatus,
   UserType,
 } from "./avatar/types"
-export type {
-  ILoaderProps,
-  TLoaderType
-} from "./loader"
+export type { ILoaderProps, TLoaderType } from "./loader"

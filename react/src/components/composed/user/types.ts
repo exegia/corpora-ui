@@ -1,11 +1,12 @@
 import type { UserType, AvatarProps } from "@/components/atoms";
+import type { BubbleVariant } from "@/components/atoms/bubble";
 
 
 export type TUserInfo<T extends UserType> = T & {
   description?: string
   audio?: AvatarProps<T>['audio']
   size?: AvatarProps<T>['size']
-  direction?: "left" | "right"
+  direction?: Exclude<BubbleVariant, "ai">
 }
 
 export type TUserVariant = "pill" | "info"

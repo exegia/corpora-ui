@@ -7,7 +7,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from "react"
  * - "recipient" — an incoming message from another person (left-aligned, muted)
  * - "ai"        — generated output (left-aligned, chrome-less prose)
  */
-export type BubbleVariant = "default" | "ai" | "sender" | "recipient"
+export type BubbleVariant = "ai" | "sender" | "recipient"
 
 export interface BubbleProps extends ComponentPropsWithoutRef<"div"> {
   variant?: BubbleVariant
@@ -77,19 +77,3 @@ export type BubbleReactionsButtonProps = Omit<
  * two elements). Declaring the anchor set wholesale only advertised props the
  * chip silently dropped.
  */
-export interface ReferenceProps {
-  /** With an href the chip renders as a link, otherwise as a button. */
-  href?: string
-  target?: React.HTMLAttributeAnchorTarget
-  rel?: string
-  id?: string
-  className?: string
-  children?: React.ReactNode
-  "aria-label"?: string
-  onClick?: React.MouseEventHandler<HTMLElement>
-  /**
-   * The passage the chip points at, shown in a preview card on hover or
-   * focus. Omitted, the chip is just a link.
-   */
-  preview?: React.ReactNode
-}

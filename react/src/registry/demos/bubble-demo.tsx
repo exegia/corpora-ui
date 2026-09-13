@@ -14,6 +14,7 @@ import {
   DemoStage,
   DemoToggle,
 } from "@/components/docs/demo-controls"
+import AI from "@/components/composed/ai";
 
 const VARIANTS = ["sender", "recipient", "ai"] as const
 
@@ -110,7 +111,7 @@ export default function BubbleDemo(): React.ReactElement {
         <Bubble variant={variant} continued>
           {withHeader && (
             <Bubble.Header>
-              {variant === "ai" ?  : null}
+              {variant === "ai" ? <AI.Avatar /> : <User.Info user={HEADER[variant].user} />}
             </Bubble.Header>
           )}
           <Bubble.Message>{COPY[variant]}</Bubble.Message>

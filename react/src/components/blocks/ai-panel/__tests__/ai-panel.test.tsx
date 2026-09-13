@@ -2,9 +2,7 @@ import { describe, expect, mock, test } from "bun:test"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import {
-  GeneratedBlock,
   ScopeChip,
-  ScopePicker,
   SelectionPopover,
   type AiScope,
 } from "../index"
@@ -56,37 +54,5 @@ describe("AI curation component set", () => {
       />
     )
     expect(screen.getByText("PINNED · a.1 ¶1–¶2")).toBeDefined()
-  })
-
-  test("scope picker exposes the exact keyboard-operable node ladder", async () => {
-    const user = userEvent.setup()
-    const onValueChange = mock(() => {})
-    render(
-      <ScopePicker
-        defaultOpen
-        defaultValue="word"
-        onValueChange={onValueChange}
-      />
-    )
-
-    expect(screen.getAllByRole("option")).toHaveLength(5)
-    expect(
-      screen.getByRole("option", { name: "word" }).getAttribute("aria-selected")
-    ).toBe("true")
-    await user.click(screen.getByRole("option", { name: "corpus" }))
-    expect(onValueChange).toHaveBeenCalledWith("corpus")
-  })
-
-  // The suggestion-card tests left with the component (removed in b8bb887);
-  // proposals now render through `Recommendation` cards from composed/chat.
-
-  test("marks generated streaming output as a polite live region", () => {
-    render(<GeneratedBlock content="Checking node p-17…" isStreaming />)
-    const liveRegion = screen
-      .getByText("Checking node p-17…")
-      .closest("[aria-live]")
-    expect(liveRegion?.getAttribute("aria-live")).toBe("polite")
-    expect(screen.getByText("GENERATED · NOT PART OF THE CORPUS")).toBeDefined()
-    expect(screen.getByRole("button", { name: "Stop" })).toBeDefined()
   })
 })

@@ -20,22 +20,7 @@ export {
   VersionHistoryRecord,
   type VersionHistoryRecordProps,
 } from "./version-history-record"
-// The thread's message components are reusable on their own and live in
-// `components/composed/ai`; the reader affordances (selection popover and
-// adornments) live in `components/composed/reader`. The block re-exports
-// both so its public surface is unchanged.
-export {
-  AiMessage,
-  GeneratedBlock,
-  ReferenceChip,
-  UserMessage,
-} from "@/components/composed/ai"
-export type {
-  AiMessageProps,
-  GeneratedBlockProps,
-  ReferenceChipProps,
-  UserMessageProps,
-} from "@/components/composed/ai"
+
 export {
   AppliedMark,
   ApplyToast,

@@ -1,9 +1,8 @@
 import { Children, Fragment, isValidElement } from "react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
-import { Kbd as KbdKey, KbdGroup } from "@/components/ui/kbd"
-import { motion, useReducedMotion, type Variants } from "motion/react"
-import { EASE_IN_OUT, SPRING_LAYOUT, SPRING_PANEL } from "@/lib/ease"
+import { EASE_IN_OUT, SPRING_PANEL } from "@/lib/ease"
+import type { Variants } from "motion";
 
 // The AI accent is a muted amber used sparingly — the ✦ icon, small labels
 // and the primary Apply action. Everything else reads from theme tokens so
@@ -33,122 +32,12 @@ export const mutedText = "text-[13px] leading-5 text-muted-foreground"
 // not a hard-coded dark panel.
 export const surface = "border bg-popover text-popover-foreground shadow-lg"
 
-export function CloseIcon(): React.ReactElement {
-  return (
-    <svg
-      aria-hidden="true"
-      className="size-4"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    >
-      <path d="m6 6 12 12M18 6 6 18" />
-    </svg>
-  )
-}
-
 // Frosted card used by suggestion cards: a translucent field with a lit top
 // edge and a light backdrop blur so the thread reads through it.
 export const glassCard =
   "rounded-md border-0 border-t-2 border-t-white/70 bg-neutral-200/45 shadow-none backdrop-blur-[3px] backdrop-saturate-125 before:hidden dark:border-t-neutral-700 dark:bg-neutral-800/50"
 
-export function AiIcon({
-  className,
-}: {
-  className?: string
-}): React.ReactElement {
-  return (
-    <span aria-hidden="true" className={cn(accentText, className)}>
-      ✦
-    </span>
-  )
-}
 
-export function ArrowUpIcon(): React.ReactElement {
-  return (
-    <svg
-      aria-hidden="true"
-      className="size-4"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    >
-      <path d="m6 12 6-6 6 6M12 18V7" />
-    </svg>
-  )
-}
-
-/** A keycap, for the "Press ⌘ + ↵" hints in the composer. */
-export function Kbd({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"kbd">): React.ReactElement {
-  return (
-    <KbdKey
-      className={cn(
-        "inline-flex h-[22px] min-w-[18px] items-center justify-center rounded-[6px] border border-b-2 border-black/10 border-b-black/10 bg-black/5 px-1 font-sans text-[14px] leading-none font-medium dark:border-b-black/25 dark:bg-white/10 dark:text-black dark:shadow-[inset_0_1px_0_rgb(0_0_0/0.25)]",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
-/** "Press ⌘ + ↵ to send message" — the composer's send hint. */
-export function SendHint({
-  className,
-  verbose = true,
-}: {
-  className?: string
-  /** Pin the keycaps to the end and drop the trailing "to send message". */
-  verbose?: boolean
-}): React.ReactElement {
-  const reduceMotion = useReducedMotion()
-  // `justify-content` and `display` are discrete — they snap rather than tween.
-  // A spacer whose flex-grow rises 0 → 1 buys the start → end shift, and it
-  // takes exactly the room the collapsing label gives back, so both halves ride
-  // the same spring.
-  const transition = reduceMotion ? { duration: 0 } : SPRING_LAYOUT
-
-  return (
-    <motion.span
-      className={cn(
-        "flex flex-1 items-center gap-1.5 text-sm whitespace-nowrap text-muted-foreground/60",
-        className
-      )}
-      data-slot="send-hint"
-    >
-      <motion.span
-        aria-hidden="true"
-        animate={{ flexGrow: verbose ? 1 : 0 }}
-        className="inline-flex shrink-0 basis-0 items-center"
-        initial={false}
-        transition={transition}
-      />
-      Press
-      <KbdGroup className="max-h-3 items-center">
-        <Kbd aria-label="Command">⌘</Kbd>
-        <Kbd aria-label="Enter" className="w-8">
-          ↵
-        </Kbd>
-      </KbdGroup>
-      <motion.span
-        animate={{
-          opacity: verbose ? 0 : 1,
-          width: verbose ? 0 : "auto",
-          x: verbose ? -8 : 0,
-        }}
-        className="inline-block shrink-0 overflow-hidden"
-        initial={false}
-        transition={transition}
-      >
-        to send message
-      </motion.span>
-    </motion.span>
-  )
-}
 
 // The suggestions fan-out: the list holds the stagger, each item springs up
 // into place. Shared by `AiMessage`'s disclosure and `SuggestedPrompts`, so

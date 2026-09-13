@@ -3,7 +3,7 @@ import { useBubbleVariant } from "./context"
 import { BubbleActions } from "./actions"
 import { BubbleHeader } from "./header"
 import { BubbleMessage } from "./message"
-import { Reference } from "./reference"
+import { Reference } from "../reference"
 import { BubbleReactionChip, BubbleReactions } from "./reactions"
 
 export const Bubble = Object.assign(BubbleRoot, {
@@ -33,6 +33,5 @@ export type {
   BubbleProps,
   BubbleReaction,
   BubbleReactionsProps,
-  BubbleVariant,
-  ReferenceProps,
+  BubbleVariant
 } from "./types"
