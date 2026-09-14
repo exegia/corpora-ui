@@ -25,7 +25,7 @@ if (!window.matchMedia) {
     addEventListener: () => {},
     removeEventListener: () => {},
     dispatchEvent: () => false,
-  })) as typeof window.matchMedia;
+  })) as typeof window.matchMedia
 }
 
 // happy-dom ships no Web Animations API. Defining `animate` makes motion take
@@ -60,9 +60,9 @@ if (!window.matchMedia) {
   }) as unknown as typeof Element.prototype.animate
 }
 
-const { afterEach } = await import("bun:test");
-const { cleanup } = await import("@testing-library/react");
+const { afterEach } = await import("bun:test")
+const { cleanup } = await import("@testing-library/react")
 
 afterEach(() => {
-  cleanup();
-});
+  cleanup()
+})

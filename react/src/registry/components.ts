@@ -83,71 +83,6 @@ export const components: RegistryEntry[] = [
 <SocialProviders action="login" onSelect={(provider) => signIn(provider)} />`,
   },
   {
-    slug: "user-avatar",
-    name: "User Avatar",
-    titleStyle: "titlebar",
-    description:
-      "Identity avatar: an image when one is given, initials otherwise, with an online/offline badge and a pointer-lit embossed bezel. A remote src holds a skeleton until it resolves instead of flashing initials. State lives in Jotai atoms keyed by avatarId.",
-    category: "components",
-    status: "in-progress",
-    preview: React.lazy(() => import("./demos/user-avatar-demo")),
-    registryDependencies: ["avatar", "skeleton"],
-    props: [
-      {
-        name: "src",
-        type: "string",
-        description:
-          "Image URL. Without one the initials show immediately — no skeleton. A failed load settles on the initials.",
-      },
-      {
-        name: "name",
-        type: "string",
-        default: '""',
-        description:
-          "Drives the initials (first + last word) and the alt text unless alt overrides it.",
-      },
-      {
-        name: "initials",
-        type: "string",
-        description: "Overrides the initials derived from name.",
-      },
-      {
-        name: "alt",
-        type: "string",
-        description:
-          'Alt text for the image. Pass "" when adjacent text already names the person.',
-      },
-      {
-        name: "loading",
-        type: "boolean",
-        description:
-          "Forces the skeleton, for when the identity itself is still being fetched. Omitted, it follows the image.",
-      },
-      {
-        name: "presence",
-        type: '"online" | "offline"',
-        description:
-          "Corner badge — a filled green dot for online, a hollow ring for offline, each named for assistive tech. Controlled when passed; omitted, the badge follows the store (see avatarId).",
-      },
-      {
-        name: "bezel",
-        type: "boolean",
-        default: "true",
-        description:
-          "Embossed rim whose highlight follows the pointer's bearing from the avatar (rAF-coalesced, one write per frame at most). Light/dark aware, and with a photo it samples the image's rim lightness (CORS permitting) to weight highlight against shadow — a softer white over a dark portrait, a lighter shadow over a pale one. Static under reduced motion. false renders a flat disc.",
-      },
-      {
-        name: "avatarId",
-        type: "string",
-        description:
-          "Names this avatar's slice of the Jotai store: useUserAvatarState(id) reads presence / bezelAngle / imageStatus / imageTone, useUserAvatarActions(id).setPresence() flips the badge from anywhere under ExegiaProvider. Unnamed avatars key off useId and are dropped on unmount.",
-      },
-    ],
-    usage: `import { UserAvatar } from "@corpora/ui"
-
-<UserAvatar name="Jenny Hamilton" src={avatarUrl} className="size-10" />`,
-  },
-  {
     slug: "tree",
     name: "Tree",
     titleStyle: "titlebar",
@@ -301,92 +236,61 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
 <Logo name="Corpora" href="/" mark={<BrandMark />} />
 <Logo name="Corpora" variant="mark" />  // icon rail: mark only`,
   },
+
   {
-    slug: "ai",
-    name: "AI",
-    titleStyle: "titlebar",
+    slug: "user",
+    name: "User",
     description:
-      "Reusable AI thread pieces: the person's message bubble, the agent turn with its fan-out suggestions disclosure, frosted suggestion cards with a gliding reference chip, and the pill-to-field prompt composer.",
+      "Identity pieces built on the atoms Avatar: User.Info is the avatar-plus-name row (role badge, optional description, audio ring) used by Bubble.Header and sidebar profiles; User.Pill is the compact mention chip.",
     category: "components",
     status: "in-progress",
-    preview: React.lazy(() => import("./demos/ai-demo")),
-    registryDependencies: ["bubble", "card", "button", "textarea"],
+    preview: React.lazy(() => import("./demos/user-demo")),
     props: [
       {
-        name: "UserMessage",
-        type: "children / author / time / badge / reactions",
+        name: "user",
+        type: "UserType",
+        required: true,
         description:
-          "Right-aligned chat bubble for the person's message; with an author it grows the Bubble.Header row, and reactions hang a glass pill off the corner.",
+          "The identity: firstName / lastName drive the name and initials, role the badge, avatarUrl the photo, status the presence dot, verified the check.",
       },
       {
-        name: "AiMessage",
-        type: "children / author / suggestions / isStreaming / onStop",
+        name: "description",
+        type: "string",
         description:
-          "The agent turn: spark avatar, Agent badge, prose body with a polite live-region caret while streaming, and a violet \"Suggestions (n)\" disclosure that fans its SuggestionCard children out with a staggered spring. Controllable via suggestionsOpen.",
+          "Info only — muted secondary line under the name (a handle, a status, a timestamp).",
       },
       {
-        name: "SuggestionCard",
-        type: "heading / description / reference / state / onUndo / children",
-        description:
-          "Frosted collapsible card per suggestion. The state mark morphs (hollow → violet check → grey cross), `reference` takes one or many `{ id, title, url }` and renders a Reference chip per entry in the open body, and the footer shows Ignore / \"Ok, fix them\" while pending (labels via rejectLabel / acceptLabel) — then an Undo, if onUndo is given.",
+        name: "size",
+        type: "AvatarSize",
+        default: '"sm"',
+        description: "Info only — avatar size for the row.",
       },
       {
-        name: "ReferenceChip",
-        type: "children / href / onClick",
+        name: "direction",
+        type: '"left" | "right"',
+        default: '"left"',
         description:
-          "\"Reference 1 ↗\" tag pointing at the grounding node. Renders as a link, a button or a plain tag depending on what it is given.",
+          "Info only — right mirrors the row so it reads inward from a sender bubble's edge.",
       },
       {
-        name: "GeneratedBlock",
-        type: "content / isStreaming / onStop / citations",
+        name: "audio",
+        type: '"muted" | "unmuted" | "speaking"',
         description:
-          "Lower-level AI output with a persistent GENERATED label, streaming caret + Stop and citation chips — for hosts that keep their own author row.",
-      },
-      {
-        name: "SuggestedPrompt",
-        type: "children / onSelect / layoutId",
-        description:
-          "One suggested prompt row — violet spark, the prompt, a `+` affordance. Pass them to Composer's suggestedPrompts and they fan out of a \"Suggestions (n)\" disclosure whose panel tucks behind the pill. Give the row and the resulting message bubble the same layoutId and picking it flies the row into the bubble.",
-      },
-      {
-        name: "Composer",
-        type: "value / onSend / onAttach / suggestedPrompts / isStreaming / disabled",
-        description:
-          "A pill at rest showing the ⌘ + ↵ hint that springs into a taller field on focus, with the attach (+) and amber Send controls entering along the bottom edge. ⌘↩ sends, Esc stops while streaming; a safety note slot sits underneath.",
+          "Info only — story-style ring around the avatar for live voice states.",
       },
     ],
-    usage: `import { AiMessage, Composer, SuggestedPrompt, SuggestionCard, UserMessage } from "@exegia/corpora-ui"
+    usage: `import User from "@corpora/ui"
 
-<UserMessage author="Sender" badge="Admin" time="10 min ago">
-  Validate this passage.
-</UserMessage>
-<AiMessage
-  author="Exegia"
-  suggestions={
-    <SuggestionCard
-      heading="Suggestion"
-      description="Label mismatch"
-      reference={{ id: "p-17", title: "Reference 1", url: "#p-17" }}
-      onAccept={apply}
-      onReject={dismiss}
-      onUndo={reset}
-    >
-      The canonical paragraph label is required by the schema.
-    </SuggestionCard>
-  }
->
-  The boundary is valid — one label drifted.
-</AiMessage>
-<Composer
-  onSend={(value, mode) => ask(value, mode)}
-  onAttach={pickFile}
-  suggestedPrompts={prompts.map((prompt) => (
-    <SuggestedPrompt key={prompt.id} layoutId={prompt.id} onSelect={() => ask(prompt.text, "answer")}>
-      {prompt.text}
-    </SuggestedPrompt>
-  ))}
-/>`,
+// The identity row — also the default header content of Bubble.Header.
+<User.Info user={{ firstName: "Jenny", lastName: "Hamilton", role: "Admin" }} />
+
+// A compact mention chip.
+<User.Pill user={{ firstName: "jenny" }} />
+
+// Inside a chat bubble header:
+<Bubble.Header time="10 min ago" user={user} UserInfo={User.Info} />`,
   },
+
   {
     slug: "verse",
     name: "Verse",
@@ -491,11 +395,36 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     preview: React.lazy(() => import("./demos/attachment-demo")),
     registryDependencies: ["chat-atoms"],
     props: [
-      { name: "kind", type: '"document" | "image" | "media" | "text-selection" | "chat-reply" | "username-handle" | "url-link"', required: true, description: "Which attachment; picks the leading icon and the preview layout." },
-      { name: "variant", type: '"default" | "preview"', default: '"default"', description: "Composer chip or in-bubble rendering." },
-      { name: "title / meta", type: "ReactNode", description: "Primary and secondary chip lines." },
-      { name: "onRemove / removable", type: "() => void / boolean", description: "The chip's ✕. Hidden when no handler is passed or removable is false." },
-      { name: "kind props", type: "src, poster, duration, audio, onPlay, quote, author, time, body, initials, domain, description, favicon, href, onAction", description: "Accepted per kind; the union type rejects props that don't belong to the chosen kind." },
+      {
+        name: "kind",
+        type: '"document" | "image" | "media" | "text-selection" | "chat-reply" | "username-handle" | "url-link"',
+        required: true,
+        description:
+          "Which attachment; picks the leading icon and the preview layout.",
+      },
+      {
+        name: "variant",
+        type: '"default" | "preview"',
+        default: '"default"',
+        description: "Composer chip or in-bubble rendering.",
+      },
+      {
+        name: "title / meta",
+        type: "ReactNode",
+        description: "Primary and secondary chip lines.",
+      },
+      {
+        name: "onRemove / removable",
+        type: "() => void / boolean",
+        description:
+          "The chip's ✕. Hidden when no handler is passed or removable is false.",
+      },
+      {
+        name: "kind props",
+        type: "src, poster, duration, audio, onPlay, quote, author, time, body, initials, domain, description, favicon, href, onAction",
+        description:
+          "Accepted per kind; the union type rejects props that don't belong to the chosen kind.",
+      },
     ],
     usage: `import { Attachment } from "@corpora/ui"
 
@@ -513,12 +442,40 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     preview: React.lazy(() => import("./demos/chart-demo")),
     registryDependencies: ["chat-presentation-atoms"],
     props: [
-      { name: "type", type: '"pie" | "area" | "line" | "bar"', required: true, description: "Plot kind." },
-      { name: "data", type: "{ label: string; [key]: number | string }[]", required: true, description: "One row per x label (or pie slice)." },
-      { name: "series", type: "{ key, label, color?, format? }[]", required: true, description: "Keys to plot; colour defaults to the series token by position. Pie uses the first. `format` renders the value in the legend and hover tooltip." },
-      { name: "title / subtitle / badge", type: "ReactNode", description: "Header row; badge defaults to the type name." },
-      { name: "center", type: "{ value, label? }", description: "Pie only: donut centre." },
-      { name: "headerless / plotHeight", type: "boolean / number", description: "Bare plot for embedding (InsightCards)." },
+      {
+        name: "type",
+        type: '"pie" | "area" | "line" | "bar"',
+        required: true,
+        description: "Plot kind.",
+      },
+      {
+        name: "data",
+        type: "{ label: string; [key]: number | string }[]",
+        required: true,
+        description: "One row per x label (or pie slice).",
+      },
+      {
+        name: "series",
+        type: "{ key, label, color?, format? }[]",
+        required: true,
+        description:
+          "Keys to plot; colour defaults to the series token by position. Pie uses the first. `format` renders the value in the legend and hover tooltip.",
+      },
+      {
+        name: "title / subtitle / badge",
+        type: "ReactNode",
+        description: "Header row; badge defaults to the type name.",
+      },
+      {
+        name: "center",
+        type: "{ value, label? }",
+        description: "Pie only: donut centre.",
+      },
+      {
+        name: "headerless / plotHeight",
+        type: "boolean / number",
+        description: "Bare plot for embedding (InsightCards).",
+      },
     ],
     usage: `import { Chart } from "@corpora/ui"
 
@@ -537,11 +494,34 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     preview: React.lazy(() => import("./demos/markdown-demo")),
     registryDependencies: ["chat-presentation-atoms"],
     props: [
-      { name: "source", type: "string", required: true, description: "Markdown text (headings, paragraphs, lists, inline and fenced code)." },
-      { name: "markdownId", type: "string", description: "Stable id for the view atom; unnamed cards use useId()." },
-      { name: "view / defaultView / onViewChange", type: '"preview" | "markup"', description: "Controlled or uncontrolled pane." },
-      { name: "onCopy / onExpand", type: "(source) => void / () => void", description: "Header icon buttons." },
-      { name: "bare", type: "boolean", default: "false", description: "Drop the card border." },
+      {
+        name: "source",
+        type: "string",
+        required: true,
+        description:
+          "Markdown text (headings, paragraphs, lists, inline and fenced code).",
+      },
+      {
+        name: "markdownId",
+        type: "string",
+        description: "Stable id for the view atom; unnamed cards use useId().",
+      },
+      {
+        name: "view / defaultView / onViewChange",
+        type: '"preview" | "markup"',
+        description: "Controlled or uncontrolled pane.",
+      },
+      {
+        name: "onCopy / onExpand",
+        type: "(source) => void / () => void",
+        description: "Header icon buttons.",
+      },
+      {
+        name: "bare",
+        type: "boolean",
+        default: "false",
+        description: "Drop the card border.",
+      },
     ],
     usage: `import { Markdown } from "@corpora/ui"
 
@@ -558,10 +538,28 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     preview: React.lazy(() => import("./demos/research-answer-demo")),
     registryDependencies: ["chat-presentation-atoms", "button"],
     props: [
-      { name: "content", type: "ReactNode", required: true, description: "The answer." },
-      { name: "kicker / kickerSub", type: "ReactNode", description: "Header row." },
-      { name: "source / date / authors", type: "ReactNode", description: "Meta columns; omitted ones are hidden." },
-      { name: "onCopyCitation / onShare / onAddToList", type: "() => void", description: "Actions. Add to list behaviour is not designed — the callback is all the card does." },
+      {
+        name: "content",
+        type: "ReactNode",
+        required: true,
+        description: "The answer.",
+      },
+      {
+        name: "kicker / kickerSub",
+        type: "ReactNode",
+        description: "Header row.",
+      },
+      {
+        name: "source / date / authors",
+        type: "ReactNode",
+        description: "Meta columns; omitted ones are hidden.",
+      },
+      {
+        name: "onCopyCitation / onShare / onAddToList",
+        type: "() => void",
+        description:
+          "Actions. Add to list behaviour is not designed — the callback is all the card does.",
+      },
     ],
     usage: `import { ResearchAnswer } from "@corpora/ui"
 
@@ -578,8 +576,20 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     preview: React.lazy(() => import("./demos/streaming-text-demo")),
     registryDependencies: ["chat-presentation-atoms"],
     props: [
-      { name: "paragraphs", type: '(string | StreamingToken[])[]', required: true, description: "Each paragraph is words or tokens; `{ cite, title?, description?, href? }` renders an InlineSource." },
-      { name: "streaming / wordMs", type: 'boolean / number', default: '55', description: "Animate the reveal; reduced motion shows everything at once." },
+      {
+        name: "paragraphs",
+        type: "(string | StreamingToken[])[]",
+        required: true,
+        description:
+          "Each paragraph is words or tokens; `{ cite, title?, description?, href? }` renders an InlineSource.",
+      },
+      {
+        name: "streaming / wordMs",
+        type: "boolean / number",
+        default: "55",
+        description:
+          "Animate the reveal; reduced motion shows everything at once.",
+      },
     ],
     usage: `import { StreamingText } from "@corpora/ui"
 
@@ -596,11 +606,33 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     preview: React.lazy(() => import("./demos/recommendation-card-demo")),
     registryDependencies: ["chat-presentation-atoms", "button"],
     props: [
-      { name: "title / description", type: 'ReactNode', required: true, description: "Header and the sentence before the entity pill." },
-      { name: "entity / descriptionSuffix / leadTime", type: '{ name, initials?, src? } / ReactNode / ReactNode', description: "Inline pills." },
-      { name: "options / onSelectOption", type: 'RecommendationOption[] / (index) => void', description: "Rows under Other options." },
-      { name: "confidence", type: '"high" | "medium" | "low"', default: '"high"', description: "Footer signal." },
-      { name: "onAccept / onAlternatives", type: '() => void', description: "Footer buttons." },
+      {
+        name: "title / description",
+        type: "ReactNode",
+        required: true,
+        description: "Header and the sentence before the entity pill.",
+      },
+      {
+        name: "entity / descriptionSuffix / leadTime",
+        type: "{ name, initials?, src? } / ReactNode / ReactNode",
+        description: "Inline pills.",
+      },
+      {
+        name: "options / onSelectOption",
+        type: "RecommendationOption[] / (index) => void",
+        description: "Rows under Other options.",
+      },
+      {
+        name: "confidence",
+        type: '"high" | "medium" | "low"',
+        default: '"high"',
+        description: "Footer signal.",
+      },
+      {
+        name: "onAccept / onAlternatives",
+        type: "() => void",
+        description: "Footer buttons.",
+      },
     ],
     usage: `import { RecommendationCard } from "@corpora/ui"
 
@@ -617,9 +649,22 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     preview: React.lazy(() => import("./demos/context-cards-demo")),
     registryDependencies: ["chat-presentation-atoms"],
     props: [
-      { name: "cards", type: 'ContextCard[]', required: true, description: "title, meta, snippet, file { name, type }." },
-      { name: "header / count", type: 'ReactNode', description: "Defaults to All chunks and cards.length." },
-      { name: "onOpen", type: '(card, index) => void', description: "File pill click." },
+      {
+        name: "cards",
+        type: "ContextCard[]",
+        required: true,
+        description: "title, meta, snippet, file { name, type }.",
+      },
+      {
+        name: "header / count",
+        type: "ReactNode",
+        description: "Defaults to All chunks and cards.length.",
+      },
+      {
+        name: "onOpen",
+        type: "(card, index) => void",
+        description: "File pill click.",
+      },
     ],
     usage: `import { ContextCards } from "@corpora/ui"
 
@@ -636,12 +681,29 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     preview: React.lazy(() => import("./demos/code-block-demo")),
     registryDependencies: ["chat-presentation-atoms", "button"],
     props: [
-      { name: "code", type: 'string', required: true, description: "Source; split on newlines." },
-      { name: "filename", type: 'ReactNode', description: "Header label." },
-      { name: "diff", type: '{ type?: "add" | "remove", text }[]', description: "Enables the Diff view." },
-      { name: "view / defaultView / onViewChange", type: '"code" | "diff"', description: "Controlled or uncontrolled." },
-      { name: "onCopy", type: '(code) => void', description: "Copy button." },
-      { name: "keywords", type: 'string[]', description: "Extra keywords to tint." },
+      {
+        name: "code",
+        type: "string",
+        required: true,
+        description: "Source; split on newlines.",
+      },
+      { name: "filename", type: "ReactNode", description: "Header label." },
+      {
+        name: "diff",
+        type: '{ type?: "add" | "remove", text }[]',
+        description: "Enables the Diff view.",
+      },
+      {
+        name: "view / defaultView / onViewChange",
+        type: '"code" | "diff"',
+        description: "Controlled or uncontrolled.",
+      },
+      { name: "onCopy", type: "(code) => void", description: "Copy button." },
+      {
+        name: "keywords",
+        type: "string[]",
+        description: "Extra keywords to tint.",
+      },
     ],
     usage: `import { CodeBlock } from "@corpora/ui"
 
@@ -658,10 +720,29 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     preview: React.lazy(() => import("./demos/filter-table-demo")),
     registryDependencies: ["chat-presentation-atoms"],
     props: [
-      { name: "statuses", type: '{ id, label, tone }[]', required: true, description: "Filter pills and status dot colours." },
-      { name: "columns", type: '{ key, header, className? }[]', required: true, description: "Table columns; the status column renders a dot." },
-      { name: "rows", type: '{ id, status, … }[]', required: true, description: "Rows; filtered by status." },
-      { name: "filter / onFilterChange", type: 'string | null', description: "Controlled filter; null is All." },
+      {
+        name: "statuses",
+        type: "{ id, label, tone }[]",
+        required: true,
+        description: "Filter pills and status dot colours.",
+      },
+      {
+        name: "columns",
+        type: "{ key, header, className? }[]",
+        required: true,
+        description: "Table columns; the status column renders a dot.",
+      },
+      {
+        name: "rows",
+        type: "{ id, status, … }[]",
+        required: true,
+        description: "Rows; filtered by status.",
+      },
+      {
+        name: "filter / onFilterChange",
+        type: "string | null",
+        description: "Controlled filter; null is All.",
+      },
     ],
     usage: `import { FilterTable } from "@corpora/ui"
 
@@ -678,10 +759,28 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     preview: React.lazy(() => import("./demos/records-table-demo")),
     registryDependencies: ["chat-presentation-atoms", "checkbox"],
     props: [
-      { name: "rows", type: 'RecordsRow[]', required: true, description: "id, name, initial, tags, lastInteraction, strength." },
-      { name: "selected / onSelectionChange", type: 'ReadonlySet<string>', description: "Controlled selection." },
-      { name: "onSortChange", type: '(column) => void', description: "Header sort control; the design shows no direction." },
-      { name: "maxTags", type: 'number', default: '2', description: "Tags shown before +N." },
+      {
+        name: "rows",
+        type: "RecordsRow[]",
+        required: true,
+        description: "id, name, initial, tags, lastInteraction, strength.",
+      },
+      {
+        name: "selected / onSelectionChange",
+        type: "ReadonlySet<string>",
+        description: "Controlled selection.",
+      },
+      {
+        name: "onSortChange",
+        type: "(column) => void",
+        description: "Header sort control; the design shows no direction.",
+      },
+      {
+        name: "maxTags",
+        type: "number",
+        default: "2",
+        description: "Tags shown before +N.",
+      },
     ],
     usage: `import { RecordsTable } from "@corpora/ui"
 
@@ -698,17 +797,71 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     preview: React.lazy(() => import("./demos/flowchart-demo")),
     registryDependencies: ["chat-presentation-atoms"],
     props: [
-      { name: "steps", type: 'StepNode[]', description: "Cards to lay out: { id, row, x (0–1 centre), w, kind?: { label, hue }, name?, hue?, title?, caption?, image?, icon?, condition?, children? }. Content-agnostic: `image` fills the tile, `children` replaces the body. Defaults to the Trigger → If / Else sample." },
-      { name: "edges", type: 'Edge[]', description: "Connectors { id, source, target, strokeWidth?, color? }. Defaults to a chain through steps in order." },
-      { name: "height", type: 'number', description: "Canvas min-height. The canvas fills its parent and floors at the content height it loaded with, so zooming out or removing a card never collapses it." },
-      { name: "zoomable", type: 'boolean', default: "false", description: "Ctrl / ⌘ + wheel and the +/− buttons scale the canvas (25–200%) about its centre with a 300ms ease. The world behind the frame is twice its size: drag empty canvas to pan, click it to clear the selection." },
-      { name: "onEdgeRemove / onEdgeConnect / onEdgeChange", type: '(id) / (edge) / (id, { strokeWidth?, color? }) => void', description: "Enable connector editing: click a connector for a toolbar (widths, colours, disconnect) and drag either end handle towards another card — it snaps to the nearest anchor and previews the card before you release." },
-      { name: "readOnly", type: 'boolean', default: "false", description: "No drag, no add / remove buttons. Selection still works." },
-      { name: "onDrag", type: '(id, { dx, dy }) => void', description: "A card was dragged; offset from its laid-out position." },
-      { name: "onAdd", type: '(id, side) => void', description: "\"Add child\" in the card's context menu (side is \"bottom\")." },
-      { name: "onRemove", type: '(id) => void', description: "\"Delete\" in the context menu or Delete on a selected card. Opens an AlertDialog first when children would be orphaned." },
-      { name: "onRename / onDuplicate", type: '(id, name) / (id) => void', description: "Double-click the pill to rename (commits on blur or Enter with a toast); \"Duplicate\" copies the card to the right. The context menu also offers \"Connect to…\", which previews the hovered card and fires onEdgeConnect." },
-      { name: "className", type: 'string', description: "Extra classes on the canvas." },
+      {
+        name: "steps",
+        type: "StepNode[]",
+        description:
+          "Cards to lay out: { id, row, x (0–1 centre), w, kind?: { label, hue }, name?, hue?, title?, caption?, image?, icon?, condition?, children? }. Content-agnostic: `image` fills the tile, `children` replaces the body. Defaults to the Trigger → If / Else sample.",
+      },
+      {
+        name: "edges",
+        type: "Edge[]",
+        description:
+          "Connectors { id, source, target, strokeWidth?, color? }. Defaults to a chain through steps in order.",
+      },
+      {
+        name: "height",
+        type: "number",
+        description:
+          "Canvas min-height. The canvas fills its parent and floors at the content height it loaded with, so zooming out or removing a card never collapses it.",
+      },
+      {
+        name: "zoomable",
+        type: "boolean",
+        default: "false",
+        description:
+          "Ctrl / ⌘ + wheel and the +/− buttons scale the canvas (25–200%) about its centre with a 300ms ease. The world behind the frame is twice its size: drag empty canvas to pan, click it to clear the selection.",
+      },
+      {
+        name: "onEdgeRemove / onEdgeConnect / onEdgeChange",
+        type: "(id) / (edge) / (id, { strokeWidth?, color? }) => void",
+        description:
+          "Enable connector editing: click a connector for a toolbar (widths, colours, disconnect) and drag either end handle towards another card — it snaps to the nearest anchor and previews the card before you release.",
+      },
+      {
+        name: "readOnly",
+        type: "boolean",
+        default: "false",
+        description: "No drag, no add / remove buttons. Selection still works.",
+      },
+      {
+        name: "onDrag",
+        type: "(id, { dx, dy }) => void",
+        description: "A card was dragged; offset from its laid-out position.",
+      },
+      {
+        name: "onAdd",
+        type: "(id, side) => void",
+        description:
+          '"Add child" in the card\'s context menu (side is "bottom").',
+      },
+      {
+        name: "onRemove",
+        type: "(id) => void",
+        description:
+          '"Delete" in the context menu or Delete on a selected card. Opens an AlertDialog first when children would be orphaned.',
+      },
+      {
+        name: "onRename / onDuplicate",
+        type: "(id, name) / (id) => void",
+        description:
+          'Double-click the pill to rename (commits on blur or Enter with a toast); "Duplicate" copies the card to the right. The context menu also offers "Connect to…", which previews the hovered card and fires onEdgeConnect.',
+      },
+      {
+        name: "className",
+        type: "string",
+        description: "Extra classes on the canvas.",
+      },
     ],
     usage: `import { Flowchart } from "@corpora/ui"
 
@@ -734,9 +887,23 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
     preview: React.lazy(() => import("./demos/insight-cards-demo")),
     registryDependencies: ["chat-presentation-atoms", "chart"],
     props: [
-      { name: "insights", type: 'Insight[]', required: true, description: "summary, stats (StatProps[]), snapshot { data, series }, allocation { label, value, initials, segments[] }, followUp." },
-      { name: "index / defaultIndex / onIndexChange", type: 'number', description: "Which insight is shown." },
-      { name: "onFollowUp", type: '(text) => void', description: "Follow-up pill." },
+      {
+        name: "insights",
+        type: "Insight[]",
+        required: true,
+        description:
+          "summary, stats (StatProps[]), snapshot { data, series }, allocation { label, value, initials, segments[] }, followUp.",
+      },
+      {
+        name: "index / defaultIndex / onIndexChange",
+        type: "number",
+        description: "Which insight is shown.",
+      },
+      {
+        name: "onFollowUp",
+        type: "(text) => void",
+        description: "Follow-up pill.",
+      },
     ],
     usage: `import { InsightCards, InsightEntity } from "@corpora/ui"
 

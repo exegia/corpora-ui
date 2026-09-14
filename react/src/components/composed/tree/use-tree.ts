@@ -152,39 +152,11 @@ export function useTree(options: UseTreeOptions): TreeController {
   const projectCollapsed = useSetAtom(projectTreeCollapsedAtom(treeId))
   const revealAncestors = useSetAtom(revealTreeAncestorsAtom(treeId))
 
-  // Handlers first — they must be in the store before any action can fire.
-  // Rewritten every commit; no read atom depends on them, so nobody
-  // re-renders for it.
-  React.useLayoutEffect(() => {
-    publishHandlers(handlers)
-  }, [publishHandlers, handlers])
-
-  // Before paint, so a seeded branch never paints closed for a frame.
-  React.useLayoutEffect(() => {
-    mount(config, seed)
-  }, [mount, config, seed])
-
-  // Controlled props stay the source of truth; the store carries a projection
-  // so the action atoms and remote readers see current data.
-  React.useLayoutEffect(() => {
-    if (options.items !== undefined) projectItems(options.items)
-  }, [options.items, projectItems])
-
-  React.useLayoutEffect(() => {
-    if (options.activeId !== undefined) projectActiveId(options.activeId)
-  }, [options.activeId, projectActiveId])
-
-  React.useLayoutEffect(() => {
-    if (options.collapsed !== undefined) projectCollapsed(options.collapsed)
-  }, [options.collapsed, projectCollapsed])
-
-  // A tree the hook keyed is scrap once its component goes. An explicit
-  // `treeId` is the app's key and outlives the mount.
-  React.useEffect(() => {
-    if (options.treeId !== undefined) return
-    return () => removeTreeInstance(treeId)
-  }, [treeId, options.treeId])
-
+  // Reads BEFORE the write effects, and the writes in passive effects: jotai
+  // (v3) subscribes `useAtomValue` in its own `useEffect` with no
+  // post-subscription recheck, so a write from a `useLayoutEffect` (or from
+  // any effect declared before the reads) lands before the subscription
+  // exists and the tree never re-renders with the seeded state.
   // Never `treeItemsAtom` — see the note on `treeOwnedItemsAtom`.
   const ownedItems = useAtomValue(treeOwnedItemsAtom(treeId))
   const items = options.items ?? ownedItems
@@ -194,6 +166,38 @@ export function useTree(options: UseTreeOptions): TreeController {
   const renamingId = useAtomValue(treeRenamingIdAtom(treeId))
   const canRename = useAtomValue(treeCanRenameAtom(treeId))
   const canMove = useAtomValue(treeCanMoveAtom(treeId))
+
+  // Handlers first — they must be in the store before any action can fire.
+  // Rewritten every commit; no read atom depends on them, so nobody
+  // re-renders for it.
+  React.useEffect(() => {
+    publishHandlers(handlers)
+  }, [publishHandlers, handlers])
+
+  React.useEffect(() => {
+    mount(config, seed)
+  }, [mount, config, seed])
+
+  // Controlled props stay the source of truth; the store carries a projection
+  // so the action atoms and remote readers see current data.
+  React.useEffect(() => {
+    if (options.items !== undefined) projectItems(options.items)
+  }, [options.items, projectItems])
+
+  React.useEffect(() => {
+    if (options.activeId !== undefined) projectActiveId(options.activeId)
+  }, [options.activeId, projectActiveId])
+
+  React.useEffect(() => {
+    if (options.collapsed !== undefined) projectCollapsed(options.collapsed)
+  }, [options.collapsed, projectCollapsed])
+
+  // A tree the hook keyed is scrap once its component goes. An explicit
+  // `treeId` is the app's key and outlives the mount.
+  React.useEffect(() => {
+    if (options.treeId !== undefined) return
+    return () => removeTreeInstance(treeId)
+  }, [treeId, options.treeId])
 
   // Navigating into a nested entry from elsewhere reveals its ancestors, even
   // ones the reader had collapsed. In a layout effect, so the branch is open

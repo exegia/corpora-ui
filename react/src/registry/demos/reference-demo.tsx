@@ -1,4 +1,4 @@
-import { Reference } from "@/components/atoms/bubble/reference"
+import { Reference } from "@/components/atoms/reference"
 import { DemoStage } from "@/components/docs/demo-controls"
 
 export default function ReferenceDemo() {

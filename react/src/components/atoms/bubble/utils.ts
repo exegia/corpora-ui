@@ -1,5 +1,6 @@
 import type { ClassValue } from "clsx"
 import type { BubbleReaction, BubbleVariant } from "./types"
+import { cn } from "@/lib/utils"
 
 /** Returns a stable key for a reaction, falling back to the emoji label if no ID is provided. */
 export function reactionKey(reaction: BubbleReaction, index: number): string {
@@ -8,7 +9,6 @@ export function reactionKey(reaction: BubbleReaction, index: number): string {
 
 /** Root alignment: outgoing hugs the right edge, everything else the left. */
 export const twBubbleAlignClasses: Record<BubbleVariant, ClassValue> = {
-  default: "items-start",
   sender: "items-end",
   recipient: "items-start",
   ai: "items-start",
@@ -20,10 +20,9 @@ export const twBubbleAlignClasses: Record<BubbleVariant, ClassValue> = {
  * thread's. Generated output stays full-bleed.
  */
 export const twBubbleColumnClasses: Record<BubbleVariant, ClassValue> = {
-  default: "max-w-[80%] min-w-0",
   sender: "items-end max-w-[80%] min-w-0 mr-4",
   recipient: "items-start max-w-[80%] min-w-0 ml-4",
-  ai: "w-full items-stretch max-w-[90%] min-w-0",
+  ai: "w-full items-stretch min-w-0",
 }
 
 /**
@@ -35,12 +34,13 @@ export const twBubbleColumnClasses: Record<BubbleVariant, ClassValue> = {
  * variant renders as plain prose so generated output never masquerades as
  * a person's message.
  */
+
+const defaultClasses = "w-fit  rounded-full text-xs leading-4 font-medium relative"
 export const twBubbleMessageClasses: Record<BubbleVariant, ClassValue> = {
-  default:
-    "w-fit  rounded-full text-xs leading-4 font-medium relative",
-  sender:
-    "inset-shadow-lit inset-shadow-dim inset-shadow-dim-b-1 inset-shadow-dim-r inset-shadow-lit-l-1 inset-shadow-lit-t-1 inset-shadow-blur-1 rounded-br-[8px] group-has-[+[data-continued]]/bubble:rounded-br-full has-[[data-slot=attachment]]:rounded-b-md has-[[data-slot=attachment]]:rounded-t-md bg-indigo-700 dark:bg-neutral-100 text-background chat-bubble bubble-sender text-left pl-6 pr-4 py-3",
-  recipient:
-    "inset-shadow-lit inset-shadow-dim/20 dark:inset-shadow-lit/20 dark:inset-shadow-dim/50 inset-shadow-dim-b-1 inset-shadow-dim-r inset-shadow-lit-t-1 inset-shadow-lit-l-1 inset-shadow-blur-1 rounded-bl-[8px] group-has-[+[data-continued]]/bubble:rounded-bl-full has-[[data-slot=attachment]]:rounded-b-md has-[[data-slot=attachment]]:rounded-t-md bg-neutral-100 dark:bg-neutral-800 text-foreground chat-bubble bubble-recipient text-right pl-4 pr-6 py-3",
-  ai: "text-xs leading-4 text-foreground w-full",
+  sender: cn(defaultClasses,
+    "inset-shadow-lit inset-shadow-dim inset-shadow-dim-b-1 inset-shadow-dim-r inset-shadow-lit-l-1 inset-shadow-lit-t-1 inset-shadow-blur-1 rounded-br-[8px] group-has-[+[data-continued]]/bubble:rounded-br-full has-[[data-slot=attachment]]:rounded-b-md has-[[data-slot=attachment]]:rounded-t-md bg-indigo-700 dark:bg-neutral-100 text-background chat-bubble bubble-sender text-left pl-6 pr-4 py-3"),
+  recipient: cn(defaultClasses,
+    "inset-shadow-lit inset-shadow-dim/20 dark:inset-shadow-lit/20 dark:inset-shadow-dim/50 inset-shadow-dim-b-1 inset-shadow-dim-r inset-shadow-lit-t-1 inset-shadow-lit-l-1 inset-shadow-blur-1 rounded-bl-[8px] group-has-[+[data-continued]]/bubble:rounded-bl-full has-[[data-slot=attachment]]:rounded-b-md has-[[data-slot=attachment]]:rounded-t-md bg-neutral-100 dark:bg-neutral-800 text-foreground chat-bubble bubble-recipient text-right pl-4 pr-6 py-3"),
+  ai: cn(defaultClasses,
+    "text-sm leading-5 my-1 text-foreground w-full"),
 }

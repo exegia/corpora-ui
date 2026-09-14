@@ -27,7 +27,7 @@ export function Group({
 }: RecommendationGroupProps): React.ReactElement {
   return (
     <Accordion
-      className={cn("flex w-full flex-col gap-2", className)}
+      className={cn("flex w-full flex-col gap-2 max-w-11/12", className)}
       data-slot="recommendation-group"
       multiple={multiple}
       render={

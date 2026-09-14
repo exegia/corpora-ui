@@ -226,8 +226,8 @@ function stubShellWidths() {
       Number.parseFloat(value),
     ])
   )
-  const original = HTMLElement.prototype.getBoundingClientRect
-  HTMLElement.prototype.getBoundingClientRect = function (this: HTMLElement) {
+  const original = Element.prototype.getBoundingClientRect
+  Element.prototype.getBoundingClientRect = function (this: HTMLElement) {
     const isProbe =
       this.style.visibility === "hidden" && this.style.position === "absolute"
     if (!isProbe) return original.call(this)
@@ -235,7 +235,7 @@ function stubShellWidths() {
     return { width: (variable && px[variable]) || 0 } as DOMRect
   }
   return () => {
-    HTMLElement.prototype.getBoundingClientRect = original
+    Element.prototype.getBoundingClientRect = original
   }
 }
 

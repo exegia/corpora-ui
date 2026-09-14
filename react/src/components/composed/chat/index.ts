@@ -1,4 +1,3 @@
-
 export {
   Attachment,
   type AttachmentKind,
@@ -20,16 +19,32 @@ export {
   type MarkdownProps,
   type MarkdownView,
 } from "./markdown"
-export { ResearchAnswer, type ResearchAnswerProps } from "./research-answer"
+// `SuggestedPrompts`, `SendButton` and `AddButton` stay off the barrel on
+// purpose: `blocks/ai-panel` and `ui/chat` already export those names, and
+// all the barrels flow into `src/index.ts`. Reach them as
+// `composed/chat/composer` — or hand the slots to `Composer`.
 export {
-  StreamingText,
-  type StreamingTextProps,
-  type StreamingToken,
-} from "./streaming-text"
-export {
-  Recommendation,
-  RecommendationCard,
-} from "./recommendation"
+  addComposerAttachmentAtom,
+  clearComposerAttachmentsAtom,
+  CommandMenu,
+  Composer,
+  composerAttachmentsAtom,
+  removeComposerAttachmentAtom,
+  removeComposerInstance,
+  useComposerAttachmentActions,
+  useComposerAttachments,
+} from "./composer"
+export type {
+  ComposerAttachment,
+  ComposerBaseProps,
+  ComposerMode,
+  ComposerSuggestionsProps,
+  IComposerMenuProps,
+  IComposerProps,
+  IComposerSubmitButtonProps,
+} from "./composer"
+
+export { Recommendation, RecommendationCard } from "./recommendation"
 export type {
   RecommendationCardProps,
   RecommendationCheckboxProps,
@@ -77,3 +92,5 @@ export {
   type InsightSegment,
   type InsightCardsProps,
 } from "./insight-cards"
+
+export { SendHint } from "./hint"
