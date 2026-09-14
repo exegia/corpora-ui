@@ -3,9 +3,12 @@ import { fumadocsMdx } from "fumapress/adapters/mdx"
 import { metaSchema, pageSchema } from "fumapress/adapters/mdx/schema"
 import { defineDocs } from "fumadocs-mdx/macro"
 
+const SITE_URL = process.env.SITE_URL ?? "http://localhost:3000"
+
 const docs = defineDocs({
-  dir: "content/docs",
+  dir: "docs/content",
   docs: {
+    files: ["**/*.mdx"],
     async: true,
     schema: pageSchema,
     lastModified: true,
@@ -19,9 +22,10 @@ const docs = defineDocs({
 })
 
 export default defineConfig({
-  content: docs.toFumadocsSource({ baseDir: "docs" }),
+  content: docs.toFumadocsSource(),
   site: {
     name: "corpora/ui",
+    baseUrl: SITE_URL,
     git: {
       user: "exegia",
       repo: "corpora-ui",

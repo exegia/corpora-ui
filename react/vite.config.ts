@@ -7,7 +7,7 @@ import { defineConfig } from "vite"
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [press(), fumadocsMdx(), tailwindcss(), story()],
+  plugins: [press({ basePath: "/" }), fumadocsMdx(), tailwindcss(), story()],
   server: {
     port: 3000,
     open: true,

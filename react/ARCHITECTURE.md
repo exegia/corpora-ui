@@ -1,92 +1,77 @@
 # corpora/ui — architecture
 
-A shadcn-ready UI library for the corpora apps (manuscript & codex research),
-plus a Fumapress documentation site built on Fumadocs.
+A shadcn-ready UI library for the corpora apps, plus a Fumapress
+documentation site built on Fumadocs.
 
-## Two things live in `src/`
+## Layout
 
-1. **The library** (published to npm as `@exegia/corpora-ui`, entry: `react/src/index.ts`)
-2. **The docs site** (Fumapress, config: `react/press.config.tsx`) — Markdown
-   documentation plus live, registry-driven component pages.
+The project has two roots under `react/`.
 
-```
-src/
-├── index.ts                  # npm library entry — exports all published components
-├── app.css                   # Fumapress + Fumadocs global styles
-├── pages/                    # Fumapress file-based routes
+- `src/` is the published component library and executable docs surface.
+- `docs/` is the Fumapress prose and story content root.
+
+```text
+react/
+├── docs/
+│   ├── content/   # Markdown and MDX pages at the site root
+│   └── stories/   # Interactive story playgrounds
 │
-├── components/               # ── THE LIBRARY ──
-│   ├── ui/                   # Atoms: primitives (button, input, text, …)
-│   │                         #   = what `shadcn add` installs into consumer apps
-│   ├── composed/             # Components: purposeful, unopinionated compositions
-│   │                         #   (e.g. search field w/ prefix icon + clear button)
-│   ├── blocks/               # Blocks: opinionated single-purpose assemblies
-│   │                         #   (login, signup, navbar, sidebar, …)
-│   ├── docs/                 # Docs-site-only widgets (preview shell, props table,
-│   │                         #   code block) — NOT exported to npm
-│   └── theme-provider.tsx    # Shared theme context
+├── src/
+│   ├── components/
+│   │   ├── ui/          # Atoms
+│   │   ├── composed/    # Components
+│   │   ├── blocks/      # Blocks
+│   │   ├── docs/        # Docs-site-only widgets
+│   │   └── icons/       # Icon atoms
+│   ├── lib/             # Hooks, state, and utilities
+│   ├── pages/           # Fumapress file-based routes
+│   ├── registry/        # Docs metadata and lazy demos
+│   └── app.css          # Global Fumapress styles
 │
-├── state/                    # ── SHARED STATE ──
-│   ├── store.ts              # exegiaStore (module-level Jotai store)
-│   ├── exegia-provider.tsx   # ExegiaProvider — the app's ONE provider
-│   └── index.ts
-│
-├── registry/                 # ── SINGLE SOURCE OF TRUTH for the docs ──
-│   ├── schema.ts             # RegistryEntry / CategoryDef / PropDef types
-│   ├── atoms.ts              # one metadata entry per atom
-│   ├── components.ts         # one metadata entry per component
-│   ├── blocks.ts             # one metadata entry per block
-│   ├── demos/                # lazy-loaded preview demos (one file per entry)
-│   └── index.ts              # categories, lookups (getCategory/getEntries/getEntry)
-│
-├── components/docs/pages/     # client page implementations used by the routes
-│
-└── lib/utils.ts              # cn() etc.
+├── press.config.tsx     # Fumapress configuration
+└── vite.config.ts       # Fumapress, MDX, Tailwind, Story
 ```
 
-Fumapress also uses:
+## Fumapress configuration
 
-- `content/docs/` — Markdown documentation under `/docs`
-- `press.config.tsx` — content source, site metadata, and layout defaults
-- `vite.config.ts` — Fumapress, MDX, Tailwind, and `@` alias plugins
+`press.config.tsx` is the site’s single source of truth.
+
+- It sets an absolute `site.baseUrl` so sitemap, RSS, Open Graph, and
+  canonical links are not relative.
+- Local builds use `http://localhost:3000`; set `SITE_URL` for production
+  or CI.
+- Vite serves the site from `/`.
+- `press.config.tsx` loads `docs/content` and mounts it at the site root.
+- Only `.mdx` files in `docs/content` become docs pages.
+
+## Source layers
+
+- `src/components/ui` — atoms.
+- `src/components/composed` — components.
+- `src/components/blocks` — blocks.
+- `src/components/docs` — docs-site-only widgets.
+- `src/lib` — hooks, state, and utilities.
+- `src/registry` — docs metadata and lazy demos.
 
 ## Routes
 
-| Path              | Page           |
-| ----------------- | -------------- |
-| `/`               | Home           |
-| `/atoms`          | Category index |
-| `/atoms/:slug`    | Entry detail   |
-| `/composed`       | Category index |
-| `/composed/:slug` | Entry detail   |
-| `/blocks`         | Category index |
-| `/blocks/:slug`   | Entry detail   |
-| `*`               | Not found      |
+| Path | Page |
+| ---- | ---- |
+| `/` | Fumapress documentation overview |
+| `/getting-started` | Getting started |
+| `/architecture` | Architecture |
+| `/story` | Story |
+| `/atoms` | Atoms category |
+| `/atoms/:slug` | Atom detail |
+| `/composed` | Composed category |
+| `/composed/:slug` | Composed detail |
+| `/blocks` | Blocks category |
+| `/blocks/:slug` | Block detail |
+| `*` | Not found |
 
-File-based routes live in `src/pages`. The category and component paths are
-generated from `registry/index.ts`, so adding a category or registry entry does
-not require another hand-written route.
+## Docs workflow
 
-## Adding a new component (the workflow)
-
-1. Implement it in `src/components/ui|composed|blocks/<name>.tsx`.
-   1b. If it holds state, put it in Jotai atom families in
-   `<name>-atom.ts` keyed by an instance id — never a new provider. See
-   the State section of `CLAUDE.md`.
-2. Export it from `src/index.ts` (npm surface).
-3. Add a demo in `src/registry/demos/<name>-demo.tsx`.
-4. Register it in `src/registry/{atoms,components,blocks}.ts` with slug, name,
-   description, `preview`, `props` and `usage`.
-
-That single registry entry produces the category card and the detail page with
-preview, props table, usage snippet, and examples.
-
-## Publishing (later)
-
-- **npm**: build `src/index.ts` in Vite library mode (config to be added when
-  the first components stabilize; externalize react/react-dom).
-- **shadcn registry**: the registry files mirror the shadcn `registry.json`
-  item shape (slug = registry name, `registryDependencies`), so generating
-  `registry.json` for `bunx shadcn add @exegia/corpora-ui/<name>` is a mechanical step.
-- **Documentation hosting**: Fumapress builds both static HTML and the server
-  bundle needed for its default search and content routes.
+1. Add prose under `docs/content`.
+2. Add registry metadata under `src/registry`.
+3. Add a lazy demo under `src/registry/demos`.
+4. Build with `bun run build:docs`.

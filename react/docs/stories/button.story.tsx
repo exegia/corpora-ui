@@ -1,6 +1,6 @@
 import { defineStory } from "@/registry/story"
 
-import { Button } from "../../components/ui/button"
+import { Button } from "@/components/ui/button"
 
 export const story = defineStory({
   Component: Button,

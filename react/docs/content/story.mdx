@@ -4,7 +4,7 @@ description: Interactive component playground powered by Fumadocs Story.
 icon: toy-brick
 ---
 
-import { story } from "@/components/ui/button.story"
+import { story } from "../stories/button.story"
 
 Stories are interactive playgrounds generated from a component's TypeScript
 props. Tweak the controls to explore the `Button` atom:
@@ -16,10 +16,10 @@ props. Tweak the controls to explore the `Button` atom:
 Create a `<name>.story.tsx` file next to the component and render it from any
 MDX page:
 
-```tsx title="src/components/ui/button.story.tsx"
-import { defineStory } from "@/lib/story"
+```tsx title="docs/stories/button.story.tsx"
+import { defineStory } from "@/registry/story"
 
-import { Button } from "./button"
+import { Button } from "../../components/ui/button"
 
 export const story = defineStory({
   Component: Button,
@@ -33,8 +33,8 @@ export const story = defineStory({
 })
 ```
 
-```mdx title="content/docs/my-page.mdx"
-import { story } from "@/components/ui/button.story"
+```mdx title="docs/content/my-page.mdx"
+import { story } from "../stories/button.story"
 
 <story.WithControl />
 ```
