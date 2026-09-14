@@ -4,6 +4,8 @@
 @import "fumapress/css/preset.css";
 @import "@fumadocs/story/css/preset.css";
 
+@import "./index.css";
+
 @theme {
   --font-mono: "JetBrains Mono", monospace;
   --default-font-family: "Geist", sans-serif;
