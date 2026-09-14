@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useMemo, useState } from "react"
 import type { ReactNode } from "react"
-import { useAtomValue, useSetAtom } from "jotai"
+import { useAtomValueRawSync, useSetAtom } from "jotai"
 
 import {
   removeShellFitInstance,
@@ -68,9 +68,9 @@ export function useShellPanels({
   // Reads false until the shell has measured itself — an unmeasured shell
   // fails open, so nothing out here stands down over a reading that has not
   // happened yet.
-  const fits = useAtomValue(shellFitFitsAtom(shellId))
+  const fits = useAtomValueRawSync(shellFitFitsAtom(shellId))
   const isNarrow = !fits
-  const panelWidth = useAtomValue(shellFitPanelWidthAtom(shellId))
+  const panelWidth = useAtomValueRawSync(shellFitPanelWidthAtom(shellId))
   const resizePanel = useSetAtom(resizeShellPanelAtom(shellId))
 
   // The shell drops the right panel when the viewport cannot hold it, so

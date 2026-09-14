@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useId, useMemo, useRef, useState } from "react"
-import { useAtomValue, useSetAtom } from "jotai"
+import { useAtomValueRawSync, useSetAtom } from "jotai"
 import { useIsomorphicLayoutEffect } from "motion/react"
 
 import {
@@ -126,7 +126,7 @@ export function useShellFit({
     return () => removeShellFitInstance(shellId)
   }, [shellId, explicitId])
 
-  const state = useAtomValue(shellFitStateAtom(shellId))
+  const state = useAtomValueRawSync(shellFitStateAtom(shellId))
 
   return useMemo<ShellFitController>(
     () => ({ shellId, ...state, resizePanel, resetPanelWidth }),

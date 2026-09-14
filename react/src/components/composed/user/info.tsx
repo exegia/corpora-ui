@@ -31,7 +31,7 @@ export function Info({
       <div className="flex flex-col">
         <div className={cn("flex items-center flex-row gap-1.5", { "flex-row-reverse": direction === "sender" })}>
           <span className="text-sm font-semibold">
-            {user.firstName}
+            {user.firstName} {user.lastName}
           </span>
           {user.role && (
             <Badge variant="invert" size="xs">

@@ -18,7 +18,7 @@ describe("Bubble", () => {
     expect(screen.getByText("Admin")).toBeDefined()
   })
 
-  test("without a UserInfo slot the header only carries time and extras", () => {
+  test("without children the header only carries the header slot", () => {
     const { container } = render(
       <Bubble variant="ai">
         <Bubble.Header />
@@ -28,8 +28,9 @@ describe("Bubble", () => {
     expect(
       container.querySelector('[data-slot="bubble-header"]')
     ).not.toBeNull()
-    expect(screen.getByText("AI Scholar")).toBeDefined()
+    expect(container.querySelector('[data-slot="bubble-header"]')?.textContent).toBe("")
     expect(screen.queryByText("Exegia")).toBeNull()
+    expect(screen.queryByText("AI Scholar")).toBeNull()
   })
 
   test("reaction chips expose aria-pressed and report toggles by index", async () => {
