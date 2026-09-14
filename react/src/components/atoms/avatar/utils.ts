@@ -31,7 +31,7 @@ export const ringClasses: Record<NonNullable<AvatarAudio>, ClassValue> = {
 
 export const sizeClasses: Record<AvatarSize, string> = {
   sm: "size-6",
-  md: "size-8",
+  default: "size-8",
   lg: "size-10",
   xl: "size-14",
   xxl: "size-16",
@@ -41,10 +41,10 @@ export const sizeClasses: Record<AvatarSize, string> = {
 // 24px disc → 14px trio (xs), 40px → 20px (sm), 64px → 32px (md).
 export const loaderSizes: Record<AvatarSize, AtomSize> = {
   sm: "xs",
-  md: "xs",
+  default: "xs",
   lg: "sm",
   xl: "sm",
-  xxl: "md",
+  xxl: "default",
 }
 
 export const statusClasses = {

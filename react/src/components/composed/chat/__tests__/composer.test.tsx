@@ -9,7 +9,7 @@ import {
   SuggestedPrompts,
   type ComposerSuggestionsProps,
 } from "../composer"
-import { SuggestedPrompt } from "@/components/composed/ai"
+import { SuggestedPrompt } from "@/components/composed/ai/suggested-prompt"
 
 describe("Composer", () => {
   test("rests as a pill with the send hint and expands on focus", async () => {

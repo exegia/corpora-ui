@@ -258,7 +258,7 @@ export function ProfileCardBlock({
               )}
             >
               <Avatar
-                size="md"
+                size="default"
                 user={{
                   // The atoms avatar derives initials from first + last name;
                   // explicit `user.initials` win by standing in for the pair.

@@ -6,11 +6,17 @@ import {
 } from "@/components/ui/avatar"
 import type { AvatarProps, UserType } from "./types"
 import { cn } from "@/lib/utils"
-import { initialsFrom, loaderSizes, ringClasses, sizeClasses, statusClasses } from "./utils"
+import {
+  initialsFrom,
+  loaderSizes,
+  ringClasses,
+  sizeClasses,
+  statusClasses,
+} from "./utils"
 import { User } from "lucide-react"
 import { VerifiedBadge } from "./verified"
-import { Skeleton } from "@/components/ui/skeleton";
-import { Loader } from "../loader";
+import { Skeleton } from "@/components/ui/skeleton"
+import { Loader } from "../loader"
 
 export default function Base<T extends UserType>({
   user,
@@ -37,7 +43,7 @@ export default function Base<T extends UserType>({
           />
         )
       }
-      <Avatar size={size} className={cn(sizeClasses[size], className)}>
+      <Avatar className={cn(sizeClasses[size], className)}>
         <AvatarImage src={user?.avatarUrl} alt={user?.firstName} />
         <AvatarFallback>
           {initialsFrom(user) ?? <User className="size-4" aria-hidden="true" />}
@@ -55,7 +61,6 @@ export default function Base<T extends UserType>({
         )}
       </Avatar>
       {loading && (
-         
         <div className="absolute inset-0 flex items-center justify-center">
           <Loader type="dots" size={loaderSizes[size]} />
         </div>

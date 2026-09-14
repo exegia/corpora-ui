@@ -27,7 +27,7 @@ export function Info({
         "flex-row-reverse": direction === "sender",
       })}
     >
-      <Avatar size={size ?? "md"} user={user} audio={audio} />
+      <Avatar size={size ?? "default"} user={user} audio={audio} />
       <div className="flex flex-col">
         <div className={cn("flex items-center flex-row gap-1.5", { "flex-row-reverse": direction === "sender" })}>
           <span className="text-sm font-semibold">

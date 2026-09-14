@@ -3,7 +3,7 @@ import type * as React from "react"
 import type { MenuCommandItem } from "@/components/ui/menu-command"
 import type { AttachmentProps } from "./attachment"
 import type { HTMLMotionProps } from "motion/react"
-import type { AtomSize } from "@/components/atoms/types";
+import type { AtomSize } from "@/components/atoms/types"
 
 export type ComposerMode = "answer" | "fix" | "ask"
 
@@ -93,9 +93,11 @@ export interface SuggestedPromptsProps extends Omit<
   onOpenChange?: (open: boolean) => void
 }
 
-export type TBubbleActionPayload = string | number | Record<string, unknown> | undefined
+export type TBubbleActionPayload =
+  string | number | Record<string, unknown> | undefined
 export type TBubbleActionSize = Extract<AtomSize, "sm" | "default" | "lg">
-export type TBubbleActionKey = "copy" | "edit" | "delete" | "share" | "retry" | "more" | "download"
+export type TBubbleActionKey =
+  "copy" | "edit" | "delete" | "share" | "retry" | "more" | "download"
 export interface IBubbleActionBaseProps<
   S extends TBubbleActionSize = TBubbleActionSize,
   K extends TBubbleActionKey = TBubbleActionKey,
@@ -107,8 +109,18 @@ export interface IBubbleActionBaseProps<
   tooltip?: string
   size?: S
 }
-export interface IBubbleActionsProps<S extends TBubbleActionSize = TBubbleActionSize, K extends TBubbleActionKey = TBubbleActionKey, P extends TBubbleActionPayload = TBubbleActionPayload> {
+
+export type IBubbleActionProps<
+  K extends TBubbleActionKey = TBubbleActionKey,
+  S extends TBubbleActionSize = TBubbleActionSize,
+  P extends TBubbleActionPayload = TBubbleActionPayload,
+> = IBubbleActionBaseProps<S, K, P>
+export interface IBubbleActionsProps<
+  K extends TBubbleActionKey = TBubbleActionKey,
+  S extends TBubbleActionSize = TBubbleActionSize,
+  P extends TBubbleActionPayload = TBubbleActionPayload,
+> {
   size?: S
   onClick?: (key: K, payload: P) => void
-  actions: { [key in K]?: IBubbleActionBaseProps<S, K, P> }
+  actions: { [key in K]?: IBubbleActionProps<K, S, P> }
 }

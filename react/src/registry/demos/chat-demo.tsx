@@ -13,7 +13,8 @@ import {
 } from "@/components/composed/chat"
 import { DemoStage } from "@/components/docs/demo-controls"
 import { cn } from "@/lib/utils"
-import AI from "@/components/composed/ai";
+import AI from "@/components/composed/ai"
+import User from "@/components/composed/user"
 
 const SCOPE: AiScope = {
   kind: "passage",
@@ -86,6 +87,37 @@ export default function AiPanelDemo(): React.ReactElement {
     []
   )
 
+  const renderRecommendations = () => {
+    return (
+      <RecommendationStack>
+        <RecommendationCard
+          acceptLabel="Apply fix"
+          confidence="high"
+          description="Change label from paragraph to p on"
+          entity={{ name: "p-17", initials: "P" }}
+          onAccept={approve}
+          onReject={reset("rejected")}
+          onUndo={reset("pending")}
+          rejectLabel="Ignore"
+          state={state}
+          title="Fix the label mismatch"
+        >
+          <DiffRows rows={DIFF} />
+        </RecommendationCard>
+        <RecommendationCard
+          acceptLabel="Re-validate"
+          confidence="medium"
+          defaultOpen={false}
+          description="Node p-18 changed from v3.3 to v3.4"
+          rejectLabel="Ignore"
+          title="Re-validate the boundary drift"
+        >
+          Re-validate this node before applying the corpus update.
+        </RecommendationCard>
+      </RecommendationStack>
+    )
+  }
+
   return (
     <DemoStage controls={null}>
       <div className="mx-auto h-[42rem] w-full max-w-[28rem] overflow-hidden rounded-sm border bg-background">
@@ -95,48 +127,22 @@ export default function AiPanelDemo(): React.ReactElement {
             <>
               {/* The header renders `User.Info` from composed/user: avatar
                   with initials, name and the role badge, all from `user`. */}
-              <UserMessage
-                time="10 min ago"
-                user={{
-                  firstName: "Jenny",
-                  lastName: "Hamilton",
-                  role: "Admin",
-                }}
+              <User.Message
+              // time="10 min ago"
+              // user={{
+              //   firstName: "Jenny",
+              //   lastName: "Hamilton",
+              //   role: "Admin",
+              // }}
               >
                 Validate this passage against the schema.
-              </UserMessage>
+              </User.Message>
               <AI.Message
-                time="2 min ago"
-                user={{ firstName: "Exegia", role: "Agent", verified: true }}
+                AttachedContent={renderRecommendations}
+                type="recommendation"
               >
                 The paragraph boundary is valid. Node p-17 has a label mismatch.
               </AI.Message>
-              <RecommendationStack>
-                <RecommendationCard
-                  acceptLabel="Apply fix"
-                  confidence="high"
-                  description="Change label from paragraph to p on"
-                  entity={{ name: "p-17", initials: "P" }}
-                  onAccept={approve}
-                  onReject={reset("rejected")}
-                  onUndo={reset("pending")}
-                  rejectLabel="Ignore"
-                  state={state}
-                  title="Fix the label mismatch"
-                >
-                  <DiffRows rows={DIFF} />
-                </RecommendationCard>
-                <RecommendationCard
-                  acceptLabel="Re-validate"
-                  confidence="medium"
-                  defaultOpen={false}
-                  description="Node p-18 changed from v3.3 to v3.4"
-                  rejectLabel="Ignore"
-                  title="Re-validate the boundary drift"
-                >
-                  Re-validate this node before applying the corpus update.
-                </RecommendationCard>
-              </RecommendationStack>
             </>
           }
           toast={
