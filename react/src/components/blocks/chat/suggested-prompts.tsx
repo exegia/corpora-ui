@@ -3,14 +3,10 @@
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { accentRing, AiIcon, mutedText } from "./shared"
+import { accentRing, mutedText } from "./shared"
+import { Sparkles } from "lucide-react"
+import type { SuggestedPromptsProps } from "./types";
 
-export interface SuggestedPromptsProps {
-  prompts?: string[]
-  onSelect?: (prompt: string) => void
-  emptyLabel?: string
-  className?: string
-}
 
 export function SuggestedPrompts({
   prompts = [],
@@ -21,7 +17,7 @@ export function SuggestedPrompts({
   if (!prompts.length) {
     return (
       <p className={cn("px-1 py-3", mutedText, className)} data-empty="true">
-        <AiIcon className="mr-1.5" />
+        <Sparkles className="mr-1.5" />
         {emptyLabel}
       </p>
     )
@@ -34,7 +30,7 @@ export function SuggestedPrompts({
       {prompts.map((prompt) => (
         <Button
           className={cn(
-            "h-auto justify-start whitespace-normal border bg-muted/30 px-3 py-2 text-left text-xs font-normal text-muted-foreground hover:border-amber-500/30 hover:text-foreground sm:h-auto sm:text-xs",
+            "h-auto justify-start border bg-muted/30 px-3 py-2 text-left text-xs font-normal whitespace-normal text-muted-foreground hover:border-amber-500/30 hover:text-foreground sm:h-auto sm:text-xs",
             accentRing
           )}
           key={prompt}

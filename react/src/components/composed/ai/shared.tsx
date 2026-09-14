@@ -2,7 +2,7 @@ import { Children, Fragment, isValidElement } from "react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { EASE_IN_OUT, SPRING_PANEL } from "@/lib/ease"
-import type { Variants } from "motion";
+import type { Variants } from "motion"
 
 // The AI accent is a muted amber used sparingly — the ✦ icon, small labels
 // and the primary Apply action. Everything else reads from theme tokens so
@@ -32,12 +32,38 @@ export const mutedText = "text-[13px] leading-5 text-muted-foreground"
 // not a hard-coded dark panel.
 export const surface = "border bg-popover text-popover-foreground shadow-lg"
 
+/** The AI spark — the accent-coloured ✦ that marks every AI affordance. */
+export function AiIcon({
+  className,
+}: {
+  className?: string
+}): React.ReactElement {
+  return (
+    <span aria-hidden="true" className={cn(accentText, className)}>
+      ✦
+    </span>
+  )
+}
+
+export function CloseIcon(): React.ReactElement {
+  return (
+    <svg
+      aria-hidden="true"
+      className="size-4"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="m6 6 12 12M18 6 6 18" />
+    </svg>
+  )
+}
+
 // Frosted card used by suggestion cards: a translucent field with a lit top
 // edge and a light backdrop blur so the thread reads through it.
 export const glassCard =
   "rounded-md border-0 border-t-2 border-t-white/70 bg-neutral-200/45 shadow-none backdrop-blur-[3px] backdrop-saturate-125 before:hidden dark:border-t-neutral-700 dark:bg-neutral-800/50"
-
-
 
 // The suggestions fan-out: the list holds the stagger, each item springs up
 // into place. Shared by `AiMessage`'s disclosure and `SuggestedPrompts`, so

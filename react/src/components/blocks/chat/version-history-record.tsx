@@ -3,12 +3,9 @@
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { accentText, mutedText } from "./shared"
-import type { VersionHistoryEntry } from "./types"
+import type { VersionHistoryRecordProps } from "./types"
 
-export interface VersionHistoryRecordProps {
-  entry: VersionHistoryEntry
-  className?: string
-}
+
 
 export function VersionHistoryRecord({
   entry,

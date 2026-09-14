@@ -6,7 +6,7 @@ import {
   RecommendationStack,
   type AiScope,
   type DiffRow,
-} from "@/components/blocks/ai-panel"
+} from "@/components/blocks/chat"
 import {
   RecommendationCard,
   type RecommendationState,

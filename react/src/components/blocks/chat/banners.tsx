@@ -4,11 +4,7 @@ import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertAction, AlertDescription } from "@/components/ui/alert"
-
-export interface LockedBannerProps {
-  children?: React.ReactNode
-  className?: string
-}
+import type { LockedBannerProps } from "./types"
 
 export function LockedBanner({
   children = "This published corpus is locked. Ask questions here, or continue in a working draft to make changes.",

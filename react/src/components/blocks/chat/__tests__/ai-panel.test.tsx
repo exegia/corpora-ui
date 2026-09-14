@@ -1,11 +1,9 @@
 import { describe, expect, mock, test } from "bun:test"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import {
-  ScopeChip,
-  SelectionPopover,
-  type AiScope,
-} from "../index"
+import { Provider } from "jotai"
+import { AiPanel, SelectionPopover, type AiScope } from "../index"
+import { formatScopeLabel } from "../shared"
 
 const passageScope: AiScope = {
   kind: "passage",
@@ -44,15 +42,24 @@ describe("AI curation component set", () => {
     expect(onAddToChat).toHaveBeenCalledTimes(1)
   })
 
-  test("renders range and pinned chip states", () => {
-    const { rerender } = render(<ScopeChip removable scope={passageScope} />)
-    expect(screen.getByText("a.1 ¶1–¶2 · passage")).toBeDefined()
+  test("formats range and pinned scope labels", () => {
+    expect(formatScopeLabel(passageScope)).toBe("a.1 ¶1–¶2 · passage")
+    expect(
+      formatScopeLabel({ kind: "passage", label: "a.1 ¶1–¶2", pinned: true })
+    ).toBe("PINNED · a.1 ¶1–¶2")
+  })
 
-    rerender(
-      <ScopeChip
-        scope={{ kind: "passage", label: "a.1 ¶1–¶2", pinned: true }}
-      />
+  test("panel is a named region carrying the thread and the composer", () => {
+    render(
+      <Provider>
+        <AiPanel scope={passageScope} thread={<p>Validate this passage.</p>} />
+      </Provider>
     )
-    expect(screen.getByText("PINNED · a.1 ¶1–¶2")).toBeDefined()
+
+    expect(
+      screen.getByRole("complementary", { name: "AI panel" })
+    ).toBeDefined()
+    expect(screen.getByText("Validate this passage.")).toBeDefined()
+    expect(screen.getByRole("textbox", { name: "Message" })).toBeDefined()
   })
 })
