@@ -18,19 +18,21 @@ bun run build        # docs site + publishable library
 - `src/components/ui` — atoms
 - `src/components/composed` — components
 - `src/components/blocks` — blocks
-- `src/registry` — component metadata, usage, props, and lazy demos
-- `content/docs` — Fumapress Markdown documentation
-- `src/pages` — Fumapress routes, including registry-driven component pages
+- `src/registry` — shared Story factory and worked demos
+- `content` — Fumapress Markdown/MDX documentation and navigation
+- `src/pages` — custom React routes only
 
 ## Adding a component
 
 1. Implement it in the appropriate `ui`, `composed`, or `blocks` directory.
 2. Export it from `src/index.ts`.
-3. Add a lazy demo in `src/registry/demos`.
-4. Register it in `src/registry/{atoms,components,blocks}.ts`.
+3. Add an adjacent `*.story.tsx` with `defineStory` from `@/registry/story`.
+4. Write a page in `content/{atoms,composed,blocks}` and render
+   `<story.WithControl />` from MDX. Keep usage and prop notes in that page.
+5. Add the slug to its category’s `meta.json`.
 
-The registry entry drives the category page, detail page, live preview, props
-table, usage snippet, and examples.
+Fumapress provides the page layout, navigation, and Markdown rendering.
+Story generates preview controls from the component’s TypeScript props.
 
 ## Pull a coss component
 

@@ -1,77 +1,47 @@
 # corpora/ui — architecture
 
-A shadcn-ready UI library for the corpora apps, plus a Fumapress
-documentation site built on Fumadocs.
+A React component library with a Fumapress documentation site.
 
 ## Layout
 
-The project has two roots under `react/`.
-
-- `src/` is the published component library and executable docs surface.
-- `docs/` is the Fumapress prose and story content root.
-
 ```text
 react/
-├── docs/
-│   ├── content/   # Markdown and MDX pages at the site root
-│   └── stories/   # Interactive story playgrounds
-│
+├── content/              # Markdown/MDX documentation and navigation metadata
+│   ├── atoms/
+│   ├── composed/
+│   └── blocks/
 ├── src/
-│   ├── components/
-│   │   ├── ui/          # Atoms
-│   │   ├── composed/    # Components
-│   │   ├── blocks/      # Blocks
-│   │   ├── docs/        # Docs-site-only widgets
-│   │   └── icons/       # Icon atoms
-│   ├── lib/             # Hooks, state, and utilities
-│   ├── pages/           # Fumapress file-based routes
-│   ├── registry/        # Docs metadata and lazy demos
-│   └── app.css          # Global Fumapress styles
-│
-├── press.config.tsx     # Fumapress configuration
-└── vite.config.ts       # Fumapress, MDX, Tailwind, Story
+│   ├── components/       # Library components and adjacent *.story.tsx files
+│   ├── lib/              # Hooks, state, and utilities
+│   ├── pages/            # Custom React routes only, when needed
+│   ├── registry/
+│   │   ├── demos/        # Worked examples imported by MDX
+│   │   └── story.ts      # Shared Fumadocs Story factory
+│   └── app.css           # Fumapress and Story styles
+├── press.config.tsx      # Content source, layout, and site configuration
+└── vite.config.ts        # Fumapress, MDX, Tailwind, and Story plugins
 ```
 
-## Fumapress configuration
+## Documentation
 
-`press.config.tsx` is the site’s single source of truth.
+Fumapress maps `.md` and `.mdx` files in `content/` directly to URLs.
+`content/index.mdx` serves `/`; `content/atoms/button.mdx` serves
+`/atoms/button`. Frontmatter owns titles and descriptions. `meta.json`
+files set sidebar order. Reserve `src/pages` for custom designs.
 
-- It sets an absolute `site.baseUrl` so sitemap, RSS, Open Graph, and
-  canonical links are not relative.
-- Local builds use `http://localhost:3000`; set `SITE_URL` for production
-  or CI.
-- Vite serves the site from `/`.
-- `press.config.tsx` loads `docs/content` and mounts it at the site root.
-- Only `.mdx` files in `docs/content` become docs pages.
+Component stories live beside their components and import `defineStory`
+from `@/registry/story`. MDX imports a story and renders
+`<story.WithControl />` for a preview and TypeScript-derived prop controls.
+Detailed examples reuse `src/registry/demos` where useful. Usage snippets
+and explanatory prop notes live in MDX, with no parallel TypeScript
+registry to update.
 
-## Source layers
+## Workflow
 
-- `src/components/ui` — atoms.
-- `src/components/composed` — components.
-- `src/components/blocks` — blocks.
-- `src/components/docs` — docs-site-only widgets.
-- `src/lib` — hooks, state, and utilities.
-- `src/registry` — docs metadata and lazy demos.
+1. Add or update a component and its adjacent `*.story.tsx` file.
+2. Write its page in `content/atoms`, `content/composed`, or `content/blocks`.
+3. Add the slug to the category's `meta.json`.
+4. Run `make check`, `make test`, and `make build` from the repository root.
 
-## Routes
-
-| Path | Page |
-| ---- | ---- |
-| `/` | Fumapress documentation overview |
-| `/getting-started` | Getting started |
-| `/architecture` | Architecture |
-| `/story` | Story |
-| `/atoms` | Atoms category |
-| `/atoms/:slug` | Atom detail |
-| `/composed` | Composed category |
-| `/composed/:slug` | Composed detail |
-| `/blocks` | Blocks category |
-| `/blocks/:slug` | Block detail |
-| `*` | Not found |
-
-## Docs workflow
-
-1. Add prose under `docs/content`.
-2. Add registry metadata under `src/registry`.
-3. Add a lazy demo under `src/registry/demos`.
-4. Build with `bun run build:docs`.
+Set `SITE_URL` to the deployed site URL for production builds. Local builds
+use `http://localhost:3000`.

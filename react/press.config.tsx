@@ -22,9 +22,9 @@ const DocsLayout = createDocsLayoutPage<typeof config.$context>({
 })
 
 const docs = defineDocs({
-  dir: "docs/content",
+  dir: "content",
   docs: {
-    files: ["**/*.mdx"],
+    files: ["**/*.md", "**/*.mdx"],
     async: true,
     schema: pageSchema,
     lastModified: true,
