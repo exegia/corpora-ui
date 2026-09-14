@@ -1,0 +1,78 @@
+---
+title: "Scaffold"
+description: "Composable desktop workspace: an icon rail on a soft gradient backdrop, a canvas of closable/swappable panels, a floating actions cluster, and an inspector drawer that slides in over the canvas."
+---
+
+import { story } from "@/components/blocks/scaffold/scaffold-root.story"
+import Demo from "@/registry/demos/scaffold-demo"
+
+## Preview and props
+
+Adjust the generated controls to explore the component's TypeScript props.
+
+<story.WithControl />
+
+## Usage
+
+```tsx
+import {
+  Scaffold,
+  SCAFFOLD_PANEL_CAPACITY,
+  useScaffold,
+} from "@exegia/corpora-ui"
+
+function App() {
+  const scaffold = useScaffold()
+
+  return (
+    <Scaffold.Root {...scaffold.providerProps} className="h-svh">
+      <Scaffold.Sidebar>{/* icon buttons */}</Scaffold.Sidebar>
+      <Scaffold.Main>
+        <Scaffold.Actions
+          onAdd={panels.length < SCAFFOLD_PANEL_CAPACITY ? addPanel : undefined}
+        >
+          <Scaffold.Tab
+            key="draft"
+            onClose={panels.length > 1 ? close : undefined}
+          >
+            Draft
+          </Scaffold.Tab>
+        </Scaffold.Actions>
+        <Scaffold.Canvas>
+          <Scaffold.Panel
+            key="draft"
+            SecondaryPanel={<PromptBar />}
+            onSwap={swap}
+            onCloseSecondary={hidePromptBar}
+          >
+            <Editor />
+          </Scaffold.Panel>
+        </Scaffold.Canvas>
+        <Scaffold.Inspector>
+          <Details />
+        </Scaffold.Inspector>
+      </Scaffold.Main>
+    </Scaffold.Root>
+  )
+}
+
+// scaffold.toggleInspector() from anywhere — a rail icon, a shortcut.
+// Or skip the hook: name the instance and drive it by id, no controller held.
+//   <Scaffold.Root scaffoldId="workspace" />
+//   useScaffoldActions("workspace").toggleInspector()
+//   useScaffoldState("workspace").hiddenPanelIds
+```
+
+## API notes
+
+| Prop                                                                             | Type                                                            | Default | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| -------------------------------------------------------------------------------- | --------------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Root · scaffoldId / inspectorOpen / defaultInspectorOpen / onInspectorOpenChange | <code>string / boolean / boolean / (open) =&gt; void</code>     | —       | State lives in Jotai atom families keyed by `scaffoldId` — omit it and the root keys off `useId`, dropping its state on unmount; name it and the state outlives the component, with `useScaffoldState(id)` / `useScaffoldActions(id)` reading and driving it from anywhere (title-bar buttons, a command palette, shortcuts). `useScaffold().providerProps` carries an id for you. A controlled `inspectorOpen` stays the source of truth: store writes are gated off and actions report through `onInspectorOpenChange`. `inspectorWidth` (px, default 272) sizes the drawer and how far Actions slides aside.                                                                                                                                           |
+| Panel · id / SecondaryPanel / onSwap / onCloseSecondary                          | <code>string / ReactNode / () =&gt; void / () =&gt; void</code> | —       | `id` opts the panel into responsive hiding: each id'd panel keeps at least `SCAFFOLD_PANEL_MIN_WIDTH` (320px), and when the canvas can't grant every panel that width the scaffold hides panels (least-recently-activated first) until the rest fit — pair with a `Scaffold.Tab` carrying the matching `panelId`. `SecondaryPanel` renders the utility strip as its own card below the primary surface, with the seam menu between the two — a ⋯ toggle that morphs into Expand &#124; Swap &#124; Close. `onSwap` powers Swap: a layout morph trades the two cards; flip the slot content in the callback. `onCloseSecondary` powers Close — remove `SecondaryPanel` there. Panels themselves close from the Actions tabs, and flex to share the canvas. |
+| Actions · onAdd / children                                                       | <code>() =&gt; void / ReactNode</code>                          | —       | The pill cluster in the top-right (the design's panel context menu). `onAdd` powers the Add segment, which renders only while present — omit it once the canvas holds `SCAFFOLD_PANEL_CAPACITY` (3) panels. Children render before Add: one `Scaffold.Tab` per open panel, plus any extra segments.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Tab · children / panelId / onClose / closeLabel                                  | <code>ReactNode / string / () =&gt; void / string</code>        | —       | A panel's tab inside the Actions pill — its label plus a close button. With `panelId` (a `Scaffold.Panel`'s `id`) the tab fronts that panel's visibility: a hidden panel dims its tab behind an eye-off icon, and pressing the label toggles it — showing one past capacity hides the least-recently-activated panel in its place. Hovering the tab spotlights its panel — every other id'd panel fades to 0.35 opacity. The close button renders only while `onClose` is present; omit it on the last remaining panel's tab so at least one panel stays open. Key each tab — closes animate out of the pill.                                                                                                                                             |
+| Inspector · name / children                                                      | <code>string / ReactNode</code>                                 | —       | Drawer content. Stays mounted and inert while closed so it can slide back out; opening also slides the Actions cluster leftward in step.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+
+## Examples
+
+<Demo />

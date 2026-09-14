@@ -1,0 +1,38 @@
+---
+title: Separator
+description: Visually separates content horizontally or vertically.
+ic: separator
+---
+
+import Demo from "@/registry/demos/separator-demo"
+import { story } from "@/components/ui/separator.story"
+
+Use the story controls to explore the `Separator` atom's properties.
+
+<story.WithControl />
+
+## Props
+
+### Orientation options
+
+- **horizontal**: Separates content horizontally (default).
+- **vertical**: Separates content vertically.
+
+## Usage
+
+```tsx
+import { Separator } from "@exegia/corpora-ui"
+
+<Separator />
+<Separator orientation="vertical" />
+```
+
+## API reference
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| orientation | "horizontal" &#124; "vertical" | "horizontal" | Direction of the separator. |
+
+## Examples
+
+<Demo />

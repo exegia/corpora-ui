@@ -1,0 +1,33 @@
+---
+title: "Chat atoms"
+description: "Attachment primitives from the exegia-ui Sketch library: IconTile, Thumbnail, AvatarHandle, Remove/Play/Send/Add buttons, FileTypeBadge, Favicon, Waveform, QuoteRail, DurationPill. Colours come from the chat tokens, so light and dark need no props."
+---
+
+import Demo from "@/registry/demos/chat-atoms-demo"
+import { story } from "@/components/ui/chat-atoms.story"
+
+<story.WithControl />
+
+## Usage
+
+```tsx
+import { IconTile, RemoveButton, SendButton } from "@exegia/corpora-ui"
+
+<IconTile><FileText /></IconTile>
+<RemoveButton onClick={remove} />
+<SendButton onClick={send} />
+```
+
+## API reference
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| IconTile size | 28 &#124; 32 &#124; 36 &#124; 40 | 40 | Tile edge; `tone="accent"` swaps the neutral fill for accent-subtle. |
+| Thumbnail size | "sm" &#124; "lg" | "sm" | 40px chip tile or 240×160 preview; gradient placeholder without `src`. |
+| AvatarHandle initials | string | — | Fallback initials when `src` is absent. |
+| Waveform bars / progress | number[] / number | — | Bar heights in 0…1; bars below `progress` render in accent. |
+| SendButton …props | ButtonProps | — | Brand-yellow pill; accepts every Button prop except variant. |
+
+## Examples
+
+<Demo />

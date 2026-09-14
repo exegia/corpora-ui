@@ -1,0 +1,14 @@
+import { defineStory } from "@/registry/story"
+
+import { SignupBlock } from "./signup-block"
+
+export const story = defineStory({
+  Component: SignupBlock,
+  args: {
+    initial: {
+      showNameField: true,
+      showTerms: true,
+      enforceStrongPassword: true,
+    },
+  },
+})

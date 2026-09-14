@@ -1,0 +1,37 @@
+---
+title: "Attachment"
+description: "One attachment in every shape the chat needs: a 240×52 composer chip with a remove button, or the in-bubble preview — for documents, images, media (and audio), corpus text selections, quoted replies, @-handles and URL cards."
+---
+
+import { story, examples } from "@/components/composed/attachment.story"
+
+## Preview
+
+Use the controls to explore the component's props.
+
+<story.WithControl />
+
+## Usage
+
+```tsx
+import { Attachment } from "@exegia/corpora-ui"
+
+<Attachment kind="document" title="Q3-financial-report.pdf" meta="PDF · 2.4 MB" onRemove={remove} />
+<Attachment kind="url-link" variant="preview" title="Exegia UI" domain="sketch.com" description="…" href="https://sketch.com" />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `kind` (required) | `"document" \| "image" \| "media" \| "text-selection" \| "chat-reply" \| "username-handle" \| "url-link"` | — | Which attachment; picks the leading icon and the preview layout. |
+| `variant` | `"default" \| "preview"` | `"default"` | Composer chip or in-bubble rendering. |
+| `title / meta` | `ReactNode` | — | Primary and secondary chip lines. |
+| `onRemove / removable` | `() => void / boolean` | — | The chip's ✕. Hidden when no handler is passed or removable is false. |
+| `kind props` | `src, poster, duration, audio, onPlay, quote, author, time, body, initials, domain, description, favicon, href, onAction` | — | Accepted per kind; the union type rejects props that don't belong to the chosen kind. |
+
+## Examples
+
+Explore the complete demo, including its additional variants and interactions.
+
+<examples.WithControl />

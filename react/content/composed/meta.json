@@ -1,0 +1,26 @@
+{
+  "title": "Composed",
+  "pages": [
+    "index",
+    "password-input",
+    "social-providers",
+    "tree",
+    "logo",
+    "user",
+    "verse",
+    "emoji-action-bar",
+    "search-field",
+    "attachment",
+    "chart",
+    "markdown",
+    "research-answer",
+    "streaming-text",
+    "recommendation-card",
+    "context-cards",
+    "code-block",
+    "filter-table",
+    "records-table",
+    "flowchart",
+    "insight-cards"
+  ]
+}

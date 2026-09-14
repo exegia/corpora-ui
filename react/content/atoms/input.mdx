@@ -1,0 +1,48 @@
+---
+title: Input
+description: Displays a form input field.
+ic: input
+---
+
+import Demo from "@/registry/demos/input-demo"
+import { story } from "@/components/ui/input.story"
+
+Use the story controls to explore the `Input` atom's properties.
+
+<story.WithControl />
+
+## Props
+
+### Size options
+
+- **sm**: Small input with reduced padding.
+- **default**: Standard input size.
+- **lg**: Large input with increased padding.
+
+### Variants
+
+The Input atom supports:
+
+- **unstyled**: Removes the default styled wrapper for custom styling.
+
+## Usage
+
+```tsx
+import { Input } from "@exegia/corpora-ui"
+
+<Input type="email" placeholder="you@example.com" />
+<Input size="sm" placeholder="Small input" />
+<Input size="lg" placeholder="Large input" />
+<Input unstyled className="custom-input" placeholder="Unstyled input" />
+```
+
+## API reference
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| size | "sm" &#124; "default" &#124; "lg" &#124; number | "default" | Size of the input. |
+| unstyled | boolean | false | Removes the styled wrapper. |
+
+## Examples
+
+<Demo />

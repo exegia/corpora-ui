@@ -1,0 +1,40 @@
+---
+title: Getting started
+description: Install corpora/ui and mount its single provider.
+icon: rocket
+---
+
+## Install
+
+```bash
+bun add @exegia/corpora-ui
+```
+
+## Mount the provider
+
+Mount `ExegiaProvider` once at the root of your app. Stateful components use Jotai atom families keyed by an instance id; the provider gives them one shared store.
+
+```tsx
+import { ExegiaProvider } from "@exegia/corpora-ui"
+
+export function App({ children }) {
+  return <ExegiaProvider>{children}</ExegiaProvider>
+}
+```
+
+## Use a component
+
+```tsx
+import { Button } from "@exegia/corpora-ui"
+
+export function SaveButton() {
+  return <Button>Save corpus</Button>
+}
+```
+
+## Verify your install
+
+```bash
+bun run typecheck
+bun test
+```

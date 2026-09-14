@@ -1,0 +1,39 @@
+---
+title: Field
+description: Form field wrapper wiring label, control, description and error together.
+ic: layout
+---
+
+import Demo from "@/registry/demos/field-demo"
+import { story } from "@/components/ui/field.story"
+
+Use the story controls to explore the `Field` atom's properties.
+
+<story.WithControl />
+
+## Props
+
+The Field atom wraps input controls with label, description and error states:
+
+### Basic structure
+
+- **FieldLabel**: Accessible label for the form field
+- **Input**: The actual input control
+- **FieldDescription**: Optional description text
+- **FieldError**: Error message display
+
+## Usage
+
+```tsx
+import { Field, FieldLabel, FieldDescription, Input } from "@exegia/corpora-ui"
+
+<Field>
+  <FieldLabel>Email</FieldLabel>
+  <Input type="email" />
+  <FieldDescription>We will never share your email.</FieldDescription>
+</Field>
+```
+
+## Examples
+
+<Demo />

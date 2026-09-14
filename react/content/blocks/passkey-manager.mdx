@@ -1,0 +1,39 @@
+---
+title: "Passkey manager"
+description: "Settings panel for the passkeys on an account: register, inline rename with validation, and delete behind a confirmation that warns when the last passkey is about to go."
+---
+
+import { story } from "@/components/blocks/auth/passkey-manager-block.story"
+import Demo from "@/registry/demos/passkey-manager-demo"
+
+## Preview and props
+
+Adjust the generated controls to explore the component's TypeScript props.
+
+<story.WithControl />
+
+## Usage
+
+```tsx
+import { PasskeyManagerBlock } from "@exegia/corpora-ui"
+
+;<PasskeyManagerBlock
+  passkeys={passkeys}
+  onRegister={register}
+  onDelete={remove}
+/>
+```
+
+## API notes
+
+| Prop                | Type                                                                               | Default            | Description                                                                                                    |
+| ------------------- | ---------------------------------------------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------- |
+| passkeys            | <code>PasskeyRecord[]</code>                                                       | <code>[]</code>    | The account's passkeys (&#123; id, name?, createdAt?, lastUsedAt? &#125;), newest first.                       |
+| available           | <code>boolean</code>                                                               | <code>true</code>  | Whether this device can register passkeys. false swaps the panel for an explanation.                           |
+| loading             | <code>boolean</code>                                                               | <code>false</code> | Shows the loading row instead of the list.                                                                     |
+| onRegister          | <code>() =&gt; Promise&lt;&#123; cancelled?: boolean &#125; &#124; void&gt;</code> | —                  | Reject (or throw) to show the error. Resolve with &#123; cancelled: true &#125; to return silently to idle.    |
+| onRename / onDelete | <code>(id, name?) =&gt; Promise&lt;void&gt;</code>                                 | —                  | Rename is validated to 1-120 characters before it fires; delete only fires after the confirmation is accepted. |
+
+## Examples
+
+<Demo />

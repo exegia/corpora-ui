@@ -1,0 +1,33 @@
+---
+title: Textarea
+description: Multi-line text input.
+ic: edit
+---
+
+import Demo from "@/registry/demos/textarea-demo"
+import { story } from "@/components/ui/textarea.story"
+
+Use the story controls to explore the `Textarea` atom's properties.
+
+<story.WithControl />
+
+## Props
+
+### Basic functionality
+
+- **placeholder**: Hint text shown when the field is empty
+- **disabled**: Disables the textarea
+- **value**: Current value (controlled component)
+
+## Usage
+
+```tsx
+import { Textarea } from "@exegia/corpora-ui"
+
+<Textarea placeholder="Add an annotation…" />
+<Textarea disabled placeholder="Disabled textarea" />
+```
+
+## Examples
+
+<Demo />

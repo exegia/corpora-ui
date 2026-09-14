@@ -1,0 +1,24 @@
+{
+  "title": "Atoms",
+  "pages": [
+    "index",
+    "button",
+    "input",
+    "label",
+    "field",
+    "checkbox",
+    "separator",
+    "card",
+    "frame",
+    "textarea",
+    "otp-field",
+    "input-group",
+    "reference",
+    "text",
+    "bubble",
+    "avatar",
+    "file-icons",
+    "chat-atoms",
+    "menu-command"
+  ]
+}

@@ -1,0 +1,24 @@
+---
+title: "Frame"
+description: "Muted wrapper that raises cards into framed panels, with header/footer strips."
+---
+
+import Demo from "@/registry/demos/frame-demo"
+import { story } from "@/components/ui/frame.story"
+
+<story.WithControl />
+
+## Usage
+
+```tsx
+import { Card, Frame, FrameFooter } from "@exegia/corpora-ui"
+
+<Frame>
+  <Card>…</Card>
+  <FrameFooter>Fine print below the card.</FrameFooter>
+</Frame>
+```
+
+## Examples
+
+<Demo />

@@ -1,0 +1,35 @@
+---
+title: Card
+description: Surface with header, panel and footer sections.
+ic: card
+---
+
+import Demo from "@/registry/demos/card-demo"
+import { story } from "@/components/ui/card.story"
+
+Use the story controls to explore the `Card` atom's properties.
+
+<story.WithControl />
+
+## Props
+
+The Card atom provides a structured surface with distinct sections:
+
+- **CardHeader**: Header section with title functionality
+- **CardPanel**: Main content area
+- **CardTitle**: Title component for the header
+
+## Usage
+
+```tsx
+import { Card, CardHeader, CardPanel, CardTitle } from "@exegia/corpora-ui"
+
+<Card>
+  <CardHeader><CardTitle>Title</CardTitle></CardHeader>
+  <CardPanel>Content</CardPanel>
+</Card>
+```
+
+## Examples
+
+<Demo />

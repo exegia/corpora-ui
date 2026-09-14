@@ -1,0 +1,75 @@
+---
+title: Button
+description: Displays a button or a component that looks like a button.
+ic: mouse-pointer
+---
+
+import Demo from "@/registry/demos/button-demo"
+import { story } from "@/components/ui/button.story"
+
+Use the story controls to explore the `Button` atom's props, variants, and sizes.
+
+<story.WithControl />
+
+## Props
+
+The Button supports multiple variants (`default`, `destructive`, `outline`, `secondary`, `ghost`, `link`), sizes (`default`, `sm`, `lg`, `xl`, `xs`, `icon`, `icon-sm`, `icon-lg`, `icon-xl`, `icon-xs`), states (`loading`, `disabled`), and a glass variant with its own styling options.
+
+### Variants
+
+- **default**: Primary button with shadow and hover effects.
+- **destructive**: Red destructive button for delete/dangerous actions.
+- **destructive-outline**: Outlined destructive button.
+- **outline**: Standard outlined button.
+- **secondary**: Secondary button with lighter background.
+- **ghost**: Minimal hover-only button.
+- **link**: Underlined link-style button.
+- **glass**: Transparent glass effect (requires `glassVariant` prop).
+
+### Size options
+
+- **default**: Standard size with padding.
+- **sm**: Small size with reduced padding.
+- **lg**: Large size with increased padding.
+- **xl**: Extra-large size.
+- **xs**: Extra-small size.
+- **icon**: Icon-only button size.
+- **icon-sm**, **icon-lg**, etc.: Specialized icon button sizes.
+
+### Special variants
+
+The `glass` variant supports:
+
+- **clear**: Transparent with border.
+- **frosted**: Blurred background.
+- **subtle**: Minimal glass effect.
+- **liquid**: Animated liquid effect.
+- **liquid-refract**: Refracting liquid effect (default).
+
+## Usage
+
+```tsx
+import { Button } from "@exegia/corpora-ui"
+
+<Button variant="default">Default Button</Button>
+<Button variant="destructive">Delete</Button>
+<Button variant="outline">Outline</Button>
+<Button variant="secondary">Secondary</Button>
+<Button variant="ghost">Ghost</Button>
+<Button variant="link">Link</Button>
+<Button variant="glass">Glass</Button>
+```
+
+## API reference
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| variant | "default" &#124; "destructive" &#124; "destructive-outline" &#124; "outline" &#124; "secondary" &#124; "ghost" &#124; "link" &#124; "glass" | "default" | Visual style of the button. |
+| glassVariant | "clear" &#124; "frosted" &#124; "subtle" &#124; "liquid" &#124; "liquid-refract" | "liquid-refract" | Glass finish. Only accepted when variant is "glass". |
+| sound | boolean | true | Emit cuelume press/release sound attributes. Silent until the app calls bindSounds(). |
+| size | "default" &#124; "sm" &#124; "lg" &#124; "xl" &#124; "xs" &#124; "icon" &#124; "icon-sm" &#124; "icon-lg" &#124; "icon-xl" &#124; "icon-xs" | "default" | Size of the button. |
+| loading | boolean | false | Shows a spinner (inline for text sizes, overlaid for icon sizes) and disables the button. |
+
+## Examples
+
+<Demo />

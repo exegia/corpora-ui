@@ -1,0 +1,51 @@
+---
+title: "Flowchart"
+description: "Dot-grid canvas of draggable, selectable step cards joined by bezier connectors (Beautiful-UI port)."
+---
+
+import { story, examples } from "@/components/composed/flowchart.story"
+
+## Preview
+
+Use the controls to explore the component's props.
+
+<story.WithControl />
+
+## Usage
+
+```tsx
+import { Flowchart } from "@exegia/corpora-ui"
+
+<Flowchart.Root
+  steps={[
+    { id: "trigger", row: 0, x: 0.5, w: 300, kind: { label: "Trigger", hue: "#9a5cff" }, hue: "#9a5cff", title: "New order created" },
+    { id: "cond", row: 1, x: 0.5, w: 356, kind: { label: "If / Else", hue: "#f09a2f" }, children: <MyBody /> },
+  ]}
+  edges={[{ id: "e1", source: "trigger", target: "cond" }]}
+  zoomable
+  onAdd={(id, side) => …}
+  onRemove={(id) => …}
+/>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `steps` | `StepNode[]` | — | Cards to lay out: &#123; id, row, x (0–1 centre), w, kind?: &#123; label, hue &#125;, name?, hue?, title?, caption?, image?, icon?, condition?, children? &#125;. Content-agnostic: `image` fills the tile, `children` replaces the body. Defaults to the Trigger → If / Else sample. |
+| `edges` | `Edge[]` | — | Connectors &#123; id, source, target, strokeWidth?, color? &#125;. Defaults to a chain through steps in order. |
+| `height` | `number` | — | Canvas min-height. The canvas fills its parent and floors at the content height it loaded with, so zooming out or removing a card never collapses it. |
+| `zoomable` | `boolean` | `false` | Ctrl / ⌘ + wheel and the +/− buttons scale the canvas (25–200%) about its centre with a 300ms ease. The world behind the frame is twice its size: drag empty canvas to pan, click it to clear the selection. |
+| `onEdgeRemove / onEdgeConnect / onEdgeChange` | `(id) / (edge) / (id, { strokeWidth?, color? }) => void` | — | Enable connector editing: click a connector for a toolbar (widths, colours, disconnect) and drag either end handle towards another card — it snaps to the nearest anchor and previews the card before you release. |
+| `readOnly` | `boolean` | `false` | No drag, no add / remove buttons. Selection still works. |
+| `onDrag` | `(id, { dx, dy }) => void` | — | A card was dragged; offset from its laid-out position. |
+| `onAdd` | `(id, side) => void` | — | "Add child" in the card's context menu (side is "bottom"). |
+| `onRemove` | `(id) => void` | — | "Delete" in the context menu or Delete on a selected card. Opens an AlertDialog first when children would be orphaned. |
+| `onRename / onDuplicate` | `(id, name) / (id) => void` | — | Double-click the pill to rename (commits on blur or Enter with a toast); "Duplicate" copies the card to the right. The context menu also offers "Connect to…", which previews the hovered card and fires onEdgeConnect. |
+| `className` | `string` | — | Extra classes on the canvas. |
+
+## Examples
+
+Explore the complete demo, including its additional variants and interactions.
+
+<examples.WithControl />

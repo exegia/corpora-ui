@@ -1,0 +1,36 @@
+---
+title: "Markdown"
+description: "Rendered markdown behind a Preview | Markup toggle, with copy and expand controls. The active pane lives in a keyed Jotai atom so an app can flip a card by id."
+---
+
+import { story, examples } from "@/components/composed/markdown.story"
+
+## Preview
+
+Use the controls to explore the component's props.
+
+<story.WithControl />
+
+## Usage
+
+```tsx
+import { Markdown } from "@exegia/corpora-ui"
+
+<Markdown source={answer} onCopy={(md) => navigator.clipboard.writeText(md)} />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `source` (required) | `string` | — | Markdown text (headings, paragraphs, lists, inline and fenced code). |
+| `markdownId` | `string` | — | Stable id for the view atom; unnamed cards use useId(). |
+| `view / defaultView / onViewChange` | `"preview" \| "markup"` | — | Controlled or uncontrolled pane. |
+| `onCopy / onExpand` | `(source) => void / () => void` | — | Header icon buttons. |
+| `bare` | `boolean` | `false` | Drop the card border. |
+
+## Examples
+
+Explore the complete demo, including its additional variants and interactions.
+
+<examples.WithControl />

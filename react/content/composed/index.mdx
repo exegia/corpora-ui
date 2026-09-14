@@ -1,0 +1,25 @@
+---
+title: Composed components
+description: Purposeful compositions of atoms with a clear intent.
+---
+
+- [Password Input](/composed/password-input) — Password field with visibility toggle and animated strength meter.
+- [Social Providers](/composed/social-providers) — Social auth buttons (Google, Apple, GitHub, X) in stacked or icon-row layout.
+- [Tree](/composed/tree) — Nested item tree in four shapes: app navigation with collapsible sections, a table of contents, an icon rail, and an editable file explorer. Every row is a Button; navigation flows through onNavigate.
+- [Logo](/composed/logo) — Brand lockup: a mark beside a wordmark. The mark is an SVG, an image, or a monogram tile derived from the name; variant="mark" folds the wordmark away with the same motion a collapsing rail uses. With href the whole lockup is a home link.
+- [User](/composed/user) — Identity pieces built on the atoms Avatar: User.Info is the avatar-plus-name row (role badge, optional description, audio ring) used by Bubble.Header and sidebar profiles; User.Pill is the compact mention chip.
+- [Verse](/composed/verse) — Corpus verse line: a chapter link plus inline spans and note markers, each opening a click popover.
+- [Emoji action bar](/composed/emoji-action-bar) — Compact reaction picker: a toolbar of quick reaction emoji built on the action-bar composed component, with a trailing More action that swaps the surface for the full frimousse picker. Designed to sit inside a glass popover.
+- [Search Field](/composed/search-field) — Input with a prefixed search icon and a trailing clear button.
+- [Attachment](/composed/attachment) — One attachment in every shape the chat needs: a 240×52 composer chip with a remove button, or the in-bubble preview — for documents, images, media (and audio), corpus text selections, quoted replies, @-handles and URL cards.
+- [Chart](/composed/chart) — 320×244 chart card — pie, area, line or bar — with title, subtitle, type pill, plot and legend. Series colours come from the --chart-series-1…5 tokens, grid from --chart-grid.
+- [Markdown](/composed/markdown) — Rendered markdown behind a Preview \| Markup toggle, with copy and expand controls. The active pane lives in a keyed Jotai atom so an app can flip a card by id.
+- [Research answer](/composed/research-answer) — Answer card with a kicker, the content, stacked Source / Date / Author(s) rows and an actions row: Copy citation, Share, Add to list.
+- [Streaming text](/composed/streaming-text) — Streamed answer: word-by-word reveal with a caret and inline source previews.
+- [Recommendation card](/composed/recommendation-card) — Human-in-the-loop proposal: title, description with entity and lead-time pills, other options with signal bars, confidence and Accept / Alternatives.
+- [Context cards](/composed/context-cards) — Retrieved chunks: header with a count pill, then a card per chunk with title, character count, snippet and the source file pill.
+- [Code block](/composed/code-block) — Code card with filename, Code \| Diff toggle and Copy; gutter line numbers and keyword / string tinting from the --code-* tokens. No highlighter dependency.
+- [Filter table](/composed/filter-table) — Status filter pills over a compact table. The active filter lives in a keyed atom (filterTableFilterAtom) so an app can set it by table id.
+- [Records table](/composed/records-table) — Selectable records with an initial avatar, tags with +N overflow, relative date and connection strength. Selection lives in recordsTableSelectionAtom(id); sorting is a callback only.
+- [Flowchart](/composed/flowchart) — Dot-grid canvas of draggable, selectable step cards joined by bezier connectors (Beautiful-UI port).
+- [Insight cards](/composed/insight-cards) — Paged insights: header with count and prev / next, summary, stats, a trend snapshot (line plot) or an allocation breakdown with selectable segments, and a follow-up prompt.

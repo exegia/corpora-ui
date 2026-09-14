@@ -1,0 +1,37 @@
+---
+title: "Signup"
+description: "Account creation with a progressively revealed password field, password strength, terms consent and social providers."
+---
+
+import { story } from "@/components/blocks/auth/signup-block.story"
+import Demo from "@/registry/demos/signup-demo"
+
+## Preview and props
+
+Adjust the generated controls to explore the component's TypeScript props.
+
+<story.WithControl />
+
+## Usage
+
+```tsx
+import { SignupBlock } from "@exegia/corpora-ui"
+
+;<SignupBlock onSubmit={async (data) => createAccount(data)} />
+```
+
+## API notes
+
+| Prop                                | Type                                                 | Default           | Description                                                                                                                                                                               |
+| ----------------------------------- | ---------------------------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| logo                                | <code>React.ReactNode</code>                         | —                 | Brand mark rendered above the title. Omitted leaves no logo row at all.                                                                                                                   |
+| accent                              | <code>"corpora" &#124; "exegia"</code>               | —                 | Brand accent for the primary action — corpora is a solid #E8B124, exegia a purple gradient. Omit to keep the default primary.                                                             |
+| showNameField / showTerms           | <code>boolean</code>                                 | <code>true</code> | Toggle the name field and terms checkbox.                                                                                                                                                 |
+| termsChecked / onTermsCheckedChange | <code>boolean / (checked: boolean) =&gt; void</code> | —                 | Control the terms checkbox from outside — an “I agree” action in your own terms dialog, say. Omit both to let the block own it; defaultTermsChecked sets the uncontrolled starting state. |
+| termsComponent                      | <code>React.ReactNode</code>                         | —                 | Replaces the built-in “terms” link inside the consent label — pass your own dialog trigger to render it inline instead of wiring onTerms.                                                 |
+| enforceStrongPassword               | <code>boolean</code>                                 | <code>true</code> | Block submission until all password requirements pass.                                                                                                                                    |
+| onSubmit                            | <code>(data) =&gt; Promise&lt;void&gt;</code>        | —                 | Reject to surface the error state.                                                                                                                                                        |
+
+## Examples
+
+<Demo />

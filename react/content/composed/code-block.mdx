@@ -1,0 +1,37 @@
+---
+title: "Code block"
+description: "Code card with filename, Code | Diff toggle and Copy; gutter line numbers and keyword / string tinting from the --code-* tokens. No highlighter dependency."
+---
+
+import { story, examples } from "@/components/composed/code-block.story"
+
+## Preview
+
+Use the controls to explore the component's props.
+
+<story.WithControl />
+
+## Usage
+
+```tsx
+import { CodeBlock } from "@exegia/corpora-ui"
+
+<CodeBlock filename="churn.ts" code={source} onCopy={copy} />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `code` (required) | `string` | — | Source; split on newlines. |
+| `filename` | `ReactNode` | — | Header label. |
+| `diff` | `{ type?: "add" \| "remove", text }[]` | — | Enables the Diff view. |
+| `view / defaultView / onViewChange` | `"code" \| "diff"` | — | Controlled or uncontrolled. |
+| `onCopy` | `(code) => void` | — | Copy button. |
+| `keywords` | `string[]` | — | Extra keywords to tint. |
+
+## Examples
+
+Explore the complete demo, including its additional variants and interactions.
+
+<examples.WithControl />
