@@ -3,7 +3,13 @@ import { blocks } from "./blocks"
 import { components } from "./components"
 import type { CategoryDef, RegistryCategory, RegistryEntry } from "./schema"
 
-export type { CategoryDef, PropDef, RegistryCategory, RegistryEntry, RegistryStatus } from "./schema"
+export type {
+  CategoryDef,
+  PropDef,
+  RegistryCategory,
+  RegistryEntry,
+  RegistryStatus,
+} from "./schema"
 
 export const categories: CategoryDef[] = [
   {
@@ -15,8 +21,8 @@ export const categories: CategoryDef[] = [
   },
   {
     category: "components",
-    path: "components",
-    title: "Components",
+    path: "composed",
+    title: "Composed",
     description:
       "Purposeful compositions of atoms with a clear intent, but not opinionated enough to be a block.",
   },

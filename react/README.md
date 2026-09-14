@@ -1,21 +1,41 @@
-# React + TypeScript + Vite + shadcn/ui
+# @exegia/corpora-ui
 
-This is a template for a new Vite project with React, TypeScript, and shadcn/ui.
+A React 19 + Tailwind v4 component library and Fumapress documentation site.
 
-## Adding components
-
-To add components to your app, run the following command:
+## Commands
 
 ```bash
-npx shadcn@latest add button
+bun install
+bun run dev          # Fumapress docs site
+bun run typecheck
+bun run lint
+bun test
+bun run build        # docs site + publishable library
 ```
 
-This will place the ui components in the `src/components` directory.
+## Project layout
 
-## Using components
+- `src/components/ui` — atoms
+- `src/components/composed` — components
+- `src/components/blocks` — blocks
+- `src/registry` — component metadata, usage, props, and lazy demos
+- `content/docs` — Fumapress Markdown documentation
+- `src/pages` — Fumapress routes, including registry-driven component pages
 
-To use the components in your app, import them as follows:
+## Adding a component
 
-```tsx
-import { Button } from "@/components/ui/button"
+1. Implement it in the appropriate `ui`, `composed`, or `blocks` directory.
+2. Export it from `src/index.ts`.
+3. Add a lazy demo in `src/registry/demos`.
+4. Register it in `src/registry/{atoms,components,blocks}.ts`.
+
+The registry entry drives the category page, detail page, live preview, props
+table, usage snippet, and examples.
+
+## Pull a coss component
+
+```bash
+bunx shadcn@latest add @coss/<name> --yes
 ```
+
+Adapt the imported component to the local token and API conventions.

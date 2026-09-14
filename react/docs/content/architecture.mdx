@@ -1,0 +1,30 @@
+---
+title: Architecture
+description: How the library, registry, and live docs are organized.
+icon: boxes
+---
+
+## Source layers
+
+- `src/components/ui` — atoms.
+- `src/components/composed` — components.
+- `src/components/blocks` — blocks.
+- `src/state` — the shared Jotai store and provider.
+
+## State model
+
+Stateful components never add a second provider. They use instance-keyed Jotai atom families and expose read/write hooks from the same module:
+
+- `use<Feature>State(id)` reads the component state.
+- `use<Feature>Actions(id)` writes without subscribing to unrelated changes.
+- unnamed instances are dropped on unmount; explicit ids survive route changes.
+
+## Documentation model
+
+Fumapress renders the Markdown pages in `content/docs`. The live component pages are file-based routes generated from `src/registry`, so adding a registry entry automatically adds:
+
+- a category listing,
+- a detail page with a live preview,
+- the documented props table,
+- the usage snippet,
+- and any named examples.

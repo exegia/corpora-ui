@@ -1,4 +1,4 @@
-import type { TitleStyleType } from "@/components/beste/piece/type"
+import type { TitleStyleType } from "@/registry/browser/type"
 import type * as React from "react"
 
 /**
