@@ -59,12 +59,12 @@ export default function UserDemo(): React.ReactElement {
 
       <Example
         title="User.Info — sizes, direction and the audio ring"
-        code={`<User.Info user={user} size="md" />
-<User.Info user={user} direction="right" />
+        code={`<User.Info user={user} size="default" />
+<User.Info user={user} direction="sender" />
 <User.Info user={user} audio="speaking" />`}
       >
-        <User.Info size="md" user={JENNY} variant="info" />
-        <User.Info direction="right" user={JENNY} variant="info" />
+        <User.Info size="default" user={JENNY} variant="info" />
+        <User.Info direction="sender" user={JENNY} variant="info" />
         <User.Info audio="speaking" user={JENNY} variant="info" />
       </Example>
 

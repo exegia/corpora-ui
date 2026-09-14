@@ -7,7 +7,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import type React from "react"
 import type {
   IBubbleActionsProps,
   TBubbleActionKey,

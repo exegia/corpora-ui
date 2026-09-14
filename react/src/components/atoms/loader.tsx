@@ -14,7 +14,7 @@ export interface ILoaderProps {
 const sizeMap: Record<AtomSize, string> = {
   xs: 'w-0.5 h-0.5',
   sm: 'w-1 h-1',
-  md: 'w-2 h-2',
+  default: 'w-2 h-2',
   lg: 'w-3 h-3',
   xl: 'w-4 h-4',
   xxl: 'w-5 h-5',
@@ -28,7 +28,7 @@ export function Loader({ type = "spinner", className, size }: ILoaderProps) {
         {[0, 1, 2].map((i) => (
           <span 
             key={i}
-            className={cn("bg-foreground animate-bounce rounded-full", sizeMap[size ?? 'md'])}
+            className={cn("bg-foreground animate-bounce rounded-full", sizeMap[size ?? 'default'])}
             style={{ animationDelay: `${i * 0.15}s` }}
           />
         ))}

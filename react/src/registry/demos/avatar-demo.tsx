@@ -16,7 +16,7 @@ import type {
 const AVATAR =
   "https://lh3.googleusercontent.com/a/ACg8ocID__S9qxuDKDy8eBAu4lT56ElP0cmi5y_FMFD4ALHPFuoquQxxEg=s120-c"
 
-const SIZES: AvatarSize[] = ["sm", "md", "lg", "xl", "xxl"] as const
+const SIZES: AvatarSize[] = ["sm", "default", "lg", "xl", "xxl"] as const
 const PRESENCE: AvatarStatus[] = ["idle", "online", "offline"] as const
 const AUDIO: AvatarAudio[] = ["muted", "unmuted", "speaking"] as const
 
