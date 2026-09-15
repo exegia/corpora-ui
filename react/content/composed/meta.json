@@ -1,7 +1,6 @@
 {
   "title": "Composed",
   "pages": [
-    "index",
     "password-input",
     "social-providers",
     "tree",
@@ -9,7 +8,6 @@
     "user",
     "verse",
     "emoji-action-bar",
-    "search-field",
     "attachment",
     "chart",
     "markdown",

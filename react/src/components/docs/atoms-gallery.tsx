@@ -2,19 +2,13 @@
 
 import * as React from "react"
 import { motion } from "motion/react"
-import { ArrowUpRight, FileText, Search } from "lucide-react"
+import { ArrowUpRight, Search } from "lucide-react"
 
 import { Avatar, Bubble, Reference, Text } from "@/components/atoms"
 import AI from "@/components/composed/ai"
 import User from "@/components/composed/user"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import {
-  DurationPill,
-  IconTile,
-  PlayButton,
-  Waveform,
-} from "@/components/ui/chat"
 import {
   InputGroup,
   InputGroupAddon,
@@ -256,23 +250,6 @@ export function AtomsGallery() {
 
       <Tile
         index={7}
-        href="/atoms/chat-atoms"
-        name="Chat atoms"
-        blurb="Attachment primitives from the Sketch library"
-        className="md:col-span-2"
-      >
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          <IconTile>
-            <FileText strokeWidth={1.5} />
-          </IconTile>
-          <PlayButton />
-          <Waveform />
-          <DurationPill>0:42</DurationPill>
-        </div>
-      </Tile>
-
-      <Tile
-        index={8}
         href="/atoms/checkbox"
         name="Checkbox"
         blurb="Sound-cued toggle with label"
@@ -289,7 +266,7 @@ export function AtomsGallery() {
       </Tile>
 
       <Tile
-        index={9}
+        index={8}
         href="/atoms/text"
         name="Text"
         blurb="Corpus prose with semantic variants"

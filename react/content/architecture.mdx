@@ -4,6 +4,43 @@ description: How the library, registry, and live docs are organized.
 icon: Boxes
 ---
 
+import { Mermaid } from "@/components/docs/mermaid"
+
+<Mermaid
+  chart={`flowchart LR
+    subgraph Source[Source layers]
+      Atoms[src/components/ui<br/>Atoms]
+      Components[src/components/composed<br/>Components]
+      Blocks[src/components/blocks<br/>Blocks]
+      State[src/state<br/>Shared Jotai state]
+    end
+
+    Public[src/index.ts<br/>Public API]
+
+    Atoms --> Public
+    Components --> Public
+    Blocks --> Public
+    State --> Public
+
+    subgraph Docs[Live documentation]
+      Content[content/**/*.mdx<br/>Pages]
+      Stories[*.story.tsx<br/>Live previews]
+      Demos[src/registry/demos<br/>Worked demos]
+      Meta[meta.json<br/>Sidebar order]
+      Fumapress[Fumapress]
+    end
+
+    Atoms -. documented by .-> Stories
+    Components -. documented by .-> Stories
+    Blocks -. documented by .-> Stories
+    Stories --> Content
+    Demos --> Content
+    Content --> Fumapress
+    Meta --> Fumapress
+    Fumapress --> Site[Documentation site]`}
+
+/>
+
 ## Source layers
 
 - `src/components/ui` — atoms.
@@ -23,9 +60,9 @@ Stateful components never add a second provider. They use instance-keyed Jotai a
 
 Fumapress renders `.md` and `.mdx` files in `content/` as pages. Frontmatter supplies titles and descriptions; `meta.json` controls sidebar ordering.
 
-- `content/atoms`, `content/composed`, and `content/blocks` own component documentation, usage examples, and prop notes.
+- `content/atoms`, `content/composed`, and `content/blocks` own component documentation, usage guidance, and prop notes.
 - `*.story.tsx` files beside components define previews and TypeScript-derived prop controls.
-- `src/registry/demos` supplies larger worked examples imported by MDX pages.
+- `src/registry/demos` supplies larger worked examples for composed components and blocks.
 - `src/pages` is reserved for custom designs that need a React route.
 
 To document a component, add its MDX page and a story, then list the page in the category's `meta.json`. No TypeScript documentation registry is needed.

@@ -6,14 +6,20 @@ import { Input } from "./input"
 
 type PreviewProps = Pick<
   ComponentProps<typeof Input>,
-  "placeholder" | "size" | "disabled" | "unstyled" | "type" | "readOnly"
->
+  "placeholder" | "size" | "disabled" | "type" | "readOnly"
+> & {
+  variant: "default" | "unstyled"
+}
 
-function InputPreview(props: PreviewProps) {
+function InputPreview({ variant, ...props }: PreviewProps) {
   return (
-    <div className="p-6">
-      <div className="max-w-sm">
-        <Input {...props} aria-label="Search the corpus" />
+    <div className="flex justify-center p-6">
+      <div className="w-full max-w-sm">
+        <Input
+          {...props}
+          aria-label="Search the corpus"
+          unstyled={variant === "unstyled"}
+        />
       </div>
     </div>
   )
@@ -26,7 +32,7 @@ export const story = defineStory({
       placeholder: "Search the corpus",
       size: "default",
       disabled: false,
-      unstyled: false,
+      variant: "default",
       type: "text",
       readOnly: false,
     },

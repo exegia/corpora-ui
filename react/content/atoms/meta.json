@@ -2,13 +2,10 @@
   "title": "Atoms",
   "pages": [
     "button",
-    "input",
-    "label",
     "field",
     "checkbox",
     "separator",
     "card",
-    "frame",
     "textarea",
     "otp-field",
     "input-group",
@@ -17,7 +14,6 @@
     "bubble",
     "avatar",
     "file-icons",
-    "chat-atoms",
     "menu-command"
   ]
 }

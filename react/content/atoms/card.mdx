@@ -1,10 +1,10 @@
 ---
 title: Card
-description: Surface with header, panel and footer sections.
+description: Surface with header, panel and footer sections, optionally raised in a frame.
 icon: Square
 ---
 
-import Demo from "@/registry/demos/card-demo"
+import FrameDemo from "@/registry/demos/frame-demo"
 import { Preview } from "@/components/ui/card.story"
 
 Use the story controls to explore the `Card` atom's properties.
@@ -18,18 +18,24 @@ The Card atom provides a structured surface with distinct sections:
 - **CardHeader**: Header section with title functionality
 - **CardPanel**: Main content area
 - **CardTitle**: Title component for the header
+- **Frame**: Optional muted wrapper for raising a card above a footer strip
 
 ## Usage
 
 ```tsx
-import { Card, CardHeader, CardPanel, CardTitle } from "@exegia/corpora-ui"
+import { Card, CardHeader, CardPanel, CardTitle, Frame, FrameFooter } from "@exegia/corpora-ui"
 
 <Card>
   <CardHeader><CardTitle>Title</CardTitle></CardHeader>
   <CardPanel>Content</CardPanel>
 </Card>
+
+<Frame>
+  <Card>…</Card>
+  <FrameFooter>Fine print below the card.</FrameFooter>
+</Frame>
 ```
 
-## Examples
+## Frame
 
-<Demo />
+<FrameDemo />

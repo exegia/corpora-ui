@@ -3,18 +3,52 @@ title: Blocks
 description: Opinionated assemblies for authentication, account settings, workspaces, and corpus chat.
 ---
 
-- [Login](/blocks/login) — Progressive login form: a valid email reveals the password field, a non-empty password reveals the submit button. Social providers, remember-me and animated success/error states.
-- [Signup](/blocks/signup) — Account creation with a progressively revealed password field, password strength, terms consent and social providers.
-- [Forgot Password](/blocks/forgot-password) — Password reset request that morphs into a check-your-inbox confirmation.
-- [Code Authentication](/blocks/code-auth) — SMS/email one-time-code verification with auto-submit, resend countdown and error shake.
-- [Update password](/blocks/update-password) — Password change for a signed-in user: a strength-metered new password reveals the confirm field, which reveals the submit button. Mismatches are caught before submit.
-- [Passkey sign-in](/blocks/passkey-sign-in) — Passkey entry point sized to sit inside a login card: one button plus its error state. Renders nothing when the device cannot use passkeys, and treats a cancelled OS prompt as a silent return to idle.
-- [Passkey manager](/blocks/passkey-manager) — Settings panel for the passkeys on an account: register, inline rename with validation, and delete behind a confirmation that warns when the last passkey is about to go.
-- [Linked accounts](/blocks/linked-accounts) — Settings panel for the sign-in identities on an account: lists the connected ones, offers connect buttons for the rest, and guards the last remaining method from being disconnected.
-- [Onboarding](/blocks/onboarding) — Multi-step profile onboarding driven by a declared steps config: progress-tracked forms with back/forward navigation, per-step validation, draft restore and a single completion signal.
-- [Auth flow](/blocks/auth-flow) — Orchestrator over the auth blocks: renders the right block for the flow's current step (login, signup, verify-code, forgot-password, update-password, onboarding, success) with the store wiring built in — the switchboard every host app was hand-rolling around `useAuthFlow`.
-- [Profile card](/blocks/profile-card) — Account card that opens an action menu: the trigger is a rich identity chip (avatar over name and handle), the popup a grouped menu ending in a destructive sign-out.
-- [Navbar](/blocks/navbar) — Application top navigation with branding and user menu.
-- [Shell](/blocks/shell) — Inset application shell with a collapsible sidebar, workspace header, command-style search affordance, top actions, and scrollable content area.
-- [Scaffold](/blocks/scaffold) — Composable desktop workspace: an icon rail on a soft gradient backdrop, a canvas of closable/swappable panels, a floating actions cluster, and an inspector drawer that slides in over the canvas.
-- [Chat](/blocks/chat) — The chat surface end to end: the chrome-less AiPanel rail (scoped selections, generated answers, recommendation cards) and the Bubble-atom messages that carry attachments and AI content. The panel is the main example; the examples below show message exchanges, attachments and an AI reply.
+import { Boxes } from "lucide-react"
+
+<Cards>
+  <Card icon={<Boxes />} title="Login" href="/blocks/login">
+    Progressive login with social providers and animated states.
+  </Card>
+  <Card icon={<Boxes />} title="Signup" href="/blocks/signup">
+    Account creation with password strength and terms consent.
+  </Card>
+  <Card icon={<Boxes />} title="Forgot Password" href="/blocks/forgot-password">
+    Password reset request and check-your-inbox confirmation.
+  </Card>
+  <Card icon={<Boxes />} title="Code Authentication" href="/blocks/code-auth">
+    SMS or email verification with auto-submit and resend countdown.
+  </Card>
+  <Card icon={<Boxes />} title="Update password" href="/blocks/update-password">
+    Validated password change for a signed-in user.
+  </Card>
+  <Card icon={<Boxes />} title="Passkey sign-in" href="/blocks/passkey-sign-in">
+    Passkey entry point with availability and cancellation handling.
+  </Card>
+  <Card icon={<Boxes />} title="Passkey manager" href="/blocks/passkey-manager">
+    Register, rename, and safely remove account passkeys.
+  </Card>
+  <Card icon={<Boxes />} title="Linked accounts" href="/blocks/linked-accounts">
+    Connect and disconnect sign-in identities with guardrails.
+  </Card>
+  <Card icon={<Boxes />} title="Onboarding" href="/blocks/onboarding">
+    Multi-step profile setup with validation and draft restoration.
+  </Card>
+  <Card icon={<Boxes />} title="Auth flow" href="/blocks/auth-flow">
+    Orchestrates every authentication step through one flow.
+  </Card>
+  <Card icon={<Boxes />} title="Profile card" href="/blocks/profile-card">
+    Account identity card with grouped actions and sign-out.
+  </Card>
+  <Card icon={<Boxes />} title="Navbar" href="/blocks/navbar">
+    Application navigation with branding and a user menu.
+  </Card>
+  <Card icon={<Boxes />} title="Shell" href="/blocks/shell">
+    Inset application shell with sidebar, header, and search.
+  </Card>
+  <Card icon={<Boxes />} title="Scaffold" href="/blocks/scaffold">
+    Composable desktop workspace with panels and an inspector.
+  </Card>
+  <Card icon={<Boxes />} title="Chat" href="/blocks/chat">
+    Complete corpus-chat surface with scoped context and AI answers.
+  </Card>
+</Cards>

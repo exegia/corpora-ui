@@ -3,7 +3,6 @@ title: "Avatar"
 description: "Identity avatar: an image when one is given, initials otherwise, with a presence badge, a loading skeleton, and story-ring audio states."
 ---
 
-import Demo from "@/registry/demos/avatar-demo"
 import { Preview } from "@/components/ui/avatar.story"
 
 <Preview />
@@ -13,18 +12,17 @@ import { Preview } from "@/components/ui/avatar.story"
 ```tsx
 import { Avatar } from "@exegia/corpora-ui"
 
-<Avatar size="lg" user={{ firstName: "John", lastName: "Doe", status: "online" }} />
+;<Avatar
+  size="lg"
+  user={{ firstName: "John", lastName: "Doe", status: "online" }}
+/>
 ```
 
 ## API reference
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| user | UserType | — | Identity: firstName/lastName drive the initials, avatarUrl the image, status the badge, verified the check. |
-| size | "sm" &#124; "md" &#124; "lg" &#124; "xl" &#124; "xxl" | "sm" | Disc size; the badge and its offset scale with it. |
-| loading | boolean | — | Forces the skeleton with a dots loader, for when the identity itself is still being fetched. |
-| audio | "muted" &#124; "unmuted" &#124; "speaking" | — | Story ring — "speaking" spins it, "unmuted" holds it dim, "muted" fades it. Omitted, no ring. |
-
-## Examples
-
-<Demo />
+| Prop    | Type                                                  | Default | Description                                                                                                 |
+| ------- | ----------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------- |
+| user    | UserType                                              | —       | Identity: firstName/lastName drive the initials, avatarUrl the image, status the badge, verified the check. |
+| size    | "sm" &#124; "md" &#124; "lg" &#124; "xl" &#124; "xxl" | "sm"    | Disc size; the badge and its offset scale with it.                                                          |
+| loading | boolean                                               | —       | Forces the skeleton with a dots loader, for when the identity itself is still being fetched.                |
+| audio   | "muted" &#124; "unmuted" &#124; "speaking"            | —       | Story ring — "speaking" spins it, "unmuted" holds it dim, "muted" fades it. Omitted, no ring.               |

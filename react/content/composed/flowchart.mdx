@@ -20,10 +20,10 @@ import { Flowchart } from "@exegia/corpora-ui"
 
 <Flowchart.Root
   steps={[
-    { id: "trigger", row: 0, x: 0.5, w: 300, kind: { label: "Trigger", hue: "#9a5cff" }, hue: "#9a5cff", title: "New order created" },
-    { id: "cond", row: 1, x: 0.5, w: 356, kind: { label: "If / Else", hue: "#f09a2f" }, children: <MyBody /> },
+    { id: "trigger", row: 0, x: 0.5, w: 300, kind: { label: "Trigger", hue: "#9a5cff" }, hue: "#9a5cff", title: "Iliad corpus loaded" },
+    { id: "text", row: 1, x: 0.5, w: 300, kind: { label: "Text node", hue: "#f09a2f" }, hue: "#f09a2f", title: "μῆνιν ἄειδε, θεά", caption: "Iliad 1.1 · 18 characters" },
   ]}
-  edges={[{ id: "e1", source: "trigger", target: "cond" }]}
+  edges={[{ id: "e1", source: "trigger", target: "text" }]}
   zoomable
   onAdd={(id, side) => …}
   onRemove={(id) => …}

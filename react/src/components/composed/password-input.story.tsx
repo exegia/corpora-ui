@@ -1,23 +1,31 @@
 "use client"
 
-import type { ComponentProps, FC } from "react"
+import type { ComponentProps } from "react"
 
 import { defineStory } from "@/registry/story"
 
 import { PasswordInput } from "./password-input"
 
+type PreviewProps = Pick<
+  ComponentProps<typeof PasswordInput>,
+  | "visibilityToggle"
+  | "showStrength"
+  | "sound"
+  | "placeholder"
+  | "disabled"
+  | "aria-label"
+>
+
+function PasswordInputPreview(props: PreviewProps) {
+  return (
+    <div className="flex justify-center p-6">
+      <PasswordInput {...props} className="w-full max-w-sm" />
+    </div>
+  )
+}
+
 export const story = defineStory({
-  Component: PasswordInput as FC<
-    Pick<
-      ComponentProps<typeof PasswordInput>,
-      | "visibilityToggle"
-      | "showStrength"
-      | "sound"
-      | "placeholder"
-      | "disabled"
-      | "aria-label"
-    >
-  >,
+  Component: PasswordInputPreview,
   args: {
     initial: {
       showStrength: true,

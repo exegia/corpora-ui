@@ -3,7 +3,6 @@ title: "Menu command"
 description: "Command rows for a menu popup: icon \u00b7 label \u00b7 description \u00b7 trailing status. MenuCommand wires a trigger to the popup; MenuCommandList drops into any MenuPopup."
 ---
 
-import Demo from "@/registry/demos/menu-command-demo"
 import { Preview } from "@/components/ui/menu-command.story"
 
 <Preview />
@@ -13,19 +12,28 @@ import { Preview } from "@/components/ui/menu-command.story"
 ```tsx
 import { MenuCommand } from "@exegia/corpora-ui"
 
-<MenuCommand items={[{ id: "web", label: "Web search", description: "Real-time news", icon: <Globe />, trailing: "Connected" }]} onSelect={run}>
-  <Button size="icon-lg" aria-label="Attach">+</Button>
+;<MenuCommand
+  items={[
+    {
+      id: "web",
+      label: "Web search",
+      description: "Real-time news",
+      icon: <Globe />,
+      trailing: "Connected",
+    },
+  ]}
+  onSelect={run}
+>
+  <Button size="icon-lg" aria-label="Attach">
+    +
+  </Button>
 </MenuCommand>
 ```
 
 ## API reference
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| items (required) | MenuCommandItem[] | — | &#123; id, label, description?, icon?, trailing?, href?, disabled?, onSelect? &#125;. |
-| onSelect | (item) =&gt; void | — | Fires after the row's own onSelect. |
-| side / align | Positioner side / align | "top" / "start" | MenuCommand only. |
-
-## Examples
-
-<Demo />
+| Prop             | Type                    | Default         | Description                                                                           |
+| ---------------- | ----------------------- | --------------- | ------------------------------------------------------------------------------------- |
+| items (required) | MenuCommandItem[]       | —               | &#123; id, label, description?, icon?, trailing?, href?, disabled?, onSelect? &#125;. |
+| onSelect         | (item) =&gt; void       | —               | Fires after the row's own onSelect.                                                   |
+| side / align     | Positioner side / align | "top" / "start" | MenuCommand only.                                                                     |

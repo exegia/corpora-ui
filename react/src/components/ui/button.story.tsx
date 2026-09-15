@@ -1,6 +1,7 @@
 "use client"
 
 import { defineStory } from "@/registry/story"
+import { BookOpen } from "lucide-react"
 import { Button, type ButtonProps } from "./button"
 
 type PreviewProps = Pick<
@@ -8,13 +9,37 @@ type PreviewProps = Pick<
   "variant" | "glassVariant" | "size" | "loading" | "disabled" | "sound"
 > & { children: string }
 
-function ButtonPreview({ variant, glassVariant, ...props }: PreviewProps) {
+function ButtonPreview({
+  variant,
+  glassVariant,
+  size,
+  children,
+  ...props
+}: PreviewProps) {
+  const isIconSize = size?.startsWith("icon")
+  const content = isIconSize ? <BookOpen aria-hidden /> : children
+
   return (
-    <div className="flex min-h-32 items-center justify-center p-6">
+    <div className="min-h-32 p-6 flex items-center justify-center">
       {variant === "glass" ? (
-        <Button {...props} variant="glass" glassVariant={glassVariant} />
+        <Button
+          {...props}
+          aria-label={isIconSize ? children : undefined}
+          variant="glass"
+          glassVariant={glassVariant}
+          size={size}
+        >
+          {content}
+        </Button>
       ) : (
-        <Button {...props} variant={variant} />
+        <Button
+          {...props}
+          aria-label={isIconSize ? children : undefined}
+          variant={variant}
+          size={size}
+        >
+          {content}
+        </Button>
       )}
     </div>
   )

@@ -1,11 +1,12 @@
 ---
 title: Field
 description: Form field wrapper wiring label, control, description and error together.
-icon: Layout
+icon: TextCursorInput
 ---
 
-import Demo from "@/registry/demos/field-demo"
 import { Preview } from "@/components/ui/field.story"
+import { Preview as InputPreview } from "@/components/ui/input.story"
+import { Preview as LabelPreview } from "@/components/ui/label.story"
 
 Use the story controls to explore the `Field` atom's properties.
 
@@ -22,18 +23,36 @@ The Field atom wraps input controls with label, description and error states:
 - **FieldDescription**: Optional description text
 - **FieldError**: Error message display
 
+## Input
+
+The input example includes size, type, state, and styled or unstyled variant controls.
+
+<InputPreview />
+
+## Label
+
+Labels stay paired with their input so the accessible relationship is visible in context.
+
+<LabelPreview />
+
 ## Usage
 
 ```tsx
 import { Field, FieldLabel, FieldDescription, Input } from "@exegia/corpora-ui"
 
-<Field>
+;<Field>
   <FieldLabel>Email</FieldLabel>
   <Input type="email" />
   <FieldDescription>We will never share your email.</FieldDescription>
 </Field>
 ```
 
-## Examples
+## API reference
 
-<Demo />
+| Component | Prop       | Type                                  | Default     | Description                                         |
+| --------- | ---------- | ------------------------------------- | ----------- | --------------------------------------------------- |
+| `Field`   | `disabled` | `boolean`                             | `false`     | Disables the grouped field controls.                |
+| `Field`   | `invalid`  | `boolean`                             | `false`     | Exposes the invalid state to field children.        |
+| `Input`   | `size`     | `"sm" \| "default" \| "lg" \| number` | `"default"` | Controls the input height and padding.              |
+| `Input`   | `unstyled` | `boolean`                             | `false`     | Removes the styled wrapper for custom compositions. |
+| `Label`   | `sound`    | `boolean`                             | `false`     | Opts into the label hover cue.                      |

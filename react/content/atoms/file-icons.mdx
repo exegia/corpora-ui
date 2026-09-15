@@ -3,7 +3,6 @@ title: "File icons"
 description: "Fourteen file-format icons \u2014 seven formats in badge and wordmark families. Each embeds light and dark artwork and switches on Tailwind's dark variant: pure CSS, no props, no hydration flash."
 ---
 
-import Demo from "@/registry/demos/file-icons-demo"
 import { Preview } from "@/components/ui/file-icons.story"
 
 <Preview />
@@ -23,12 +22,8 @@ import { FileBadgeTei, FileWordmarkPdf } from "@exegia/corpora-ui"
 
 ## API reference
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| size | number &#124; string | 64 | Rendered width and height. |
-| title | string &#124; null | e.g. "TEI file" | Accessible name (role=img + aria-label). Pass null to mark the icon decorative — it becomes aria-hidden with role=presentation. |
-| className / …props | SVGProps&lt;SVGSVGElement&gt; | — | Everything else is forwarded to the root &lt;svg&gt;. Theme switching needs no props: the light layer is `dark:hidden`, the dark layer `hidden dark:inline`, so the artwork follows whatever drives the app's `dark` variant — scope a `dark` class to force one theme. |
-
-## Examples
-
-<Demo />
+| Prop               | Type                          | Default         | Description                                                                                                                                                                                                                                                             |
+| ------------------ | ----------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| size               | number &#124; string          | 64              | Rendered width and height.                                                                                                                                                                                                                                              |
+| title              | string &#124; null            | e.g. "TEI file" | Accessible name (role=img + aria-label). Pass null to mark the icon decorative — it becomes aria-hidden with role=presentation.                                                                                                                                         |
+| className / …props | SVGProps&lt;SVGSVGElement&gt; | —               | Everything else is forwarded to the root &lt;svg&gt;. Theme switching needs no props: the light layer is `dark:hidden`, the dark layer `hidden dark:inline`, so the artwork follows whatever drives the app's `dark` variant — scope a `dark` class to force one theme. |

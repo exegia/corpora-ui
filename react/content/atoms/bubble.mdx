@@ -3,7 +3,6 @@ title: "Bubble"
 description: "Chat bubble atom: an inner-shadowed message surface with sender, recipient and ai variants, an author header (avatar, name, time, role badge), a glass reaction pill hanging off the corner and hover-revealed message actions."
 ---
 
-import Demo from "@/registry/demos/bubble-demo"
 import { Preview } from "@/components/ui/bubble.story"
 
 <Preview />
@@ -13,14 +12,16 @@ import { Preview } from "@/components/ui/bubble.story"
 ```tsx
 import { Bubble } from "@exegia/corpora-ui"
 
-<Bubble variant="sender">
+;<Bubble variant="sender">
   <Bubble.Header>
     <span>Jenny Hamilton</span>
     <span>10 min ago</span>
   </Bubble.Header>
   <Bubble.Message>Can you check whether ¶12 keeps the boundary?</Bubble.Message>
   <Bubble.Reactions
-    reactions={[{ id: "heart", emoji: "❤️", count: 4, reacted: true, label: "heart" }]}
+    reactions={[
+      { id: "heart", emoji: "❤️", count: 4, reacted: true, label: "heart" },
+    ]}
     onToggle={toggleReaction}
   />
   <Bubble.Actions>
@@ -33,15 +34,11 @@ import { Bubble } from "@exegia/corpora-ui"
 
 ## API reference
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| variant | "ai" &#124; "sender" &#124; "recipient" | "recipient" | Who the bubble belongs to. sender is right-aligned on a lit inverted surface with the bottom-right tail pinched, recipient is its dim mirror, ai renders chrome-less prose so generated output never masquerades as a person's message. Sub-components inherit the variant from context. |
-| continued | boolean | false | A follow-up in a run from the same author: tucks under the previous bubble. Render Bubble.Header on the first of the run only. |
-| Bubble.Header | children / HTML div props | — | Author row composed through children: name, avatar, time, and role badge. Use `User.Info` as a child for a full identity row. The sender variant mirrors the row. |
-| Bubble.Message | children | — | The message surface, styled by the inherited variant. |
-| Bubble.Reactions | reactions / onToggle / onEmojiSelect | — | Frosted reaction pill overlapping the bubble's bottom corner. Each chip carries aria-pressed, springs its emoji on toggle and rolls its count; onToggle(reaction, index) fires on click. The trailing add-reaction button opens a frimousse emoji picker in a frosted-glass popover — onEmojiSelect(&#123; emoji, label &#125;) fires on pick. Accepts children for custom chips. |
-| Bubble.Actions | children | — | role=toolbar row for per-message actions (copy, retry, …), hidden until the bubble is hovered or an action has focus. Compose with Button size=icon-xs. |
-
-## Examples
-
-<Demo />
+| Prop             | Type                                    | Default     | Description                                                                                                                                                                                                                                                                                                                                                                       |
+| ---------------- | --------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| variant          | "ai" &#124; "sender" &#124; "recipient" | "recipient" | Who the bubble belongs to. sender is right-aligned on a lit inverted surface with the bottom-right tail pinched, recipient is its dim mirror, ai renders chrome-less prose so generated output never masquerades as a person's message. Sub-components inherit the variant from context.                                                                                          |
+| continued        | boolean                                 | false       | A follow-up in a run from the same author: tucks under the previous bubble. Render Bubble.Header on the first of the run only.                                                                                                                                                                                                                                                    |
+| Bubble.Header    | children / HTML div props               | —           | Author row composed through children: name, avatar, time, and role badge. Use `User.Info` as a child for a full identity row. The sender variant mirrors the row.                                                                                                                                                                                                                 |
+| Bubble.Message   | children                                | —           | The message surface, styled by the inherited variant.                                                                                                                                                                                                                                                                                                                             |
+| Bubble.Reactions | reactions / onToggle / onEmojiSelect    | —           | Frosted reaction pill overlapping the bubble's bottom corner. Each chip carries aria-pressed, springs its emoji on toggle and rolls its count; onToggle(reaction, index) fires on click. The trailing add-reaction button opens a frimousse emoji picker in a frosted-glass popover — onEmojiSelect(&#123; emoji, label &#125;) fires on pick. Accepts children for custom chips. |
+| Bubble.Actions   | children                                | —           | role=toolbar row for per-message actions (copy, retry, …), hidden until the bubble is hovered or an action has focus. Compose with Button size=icon-xs.                                                                                                                                                                                                                           |

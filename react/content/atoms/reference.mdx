@@ -3,7 +3,6 @@ title: "Reference"
 description: "Reference chip pointing at the node, passage or source a suggestion is grounded in, with an optional hover preview of the passage."
 ---
 
-import Demo from "@/registry/demos/reference-demo"
 import { Preview } from "@/components/ui/reference.story"
 
 <Preview />
@@ -13,16 +12,14 @@ import { Preview } from "@/components/ui/reference.story"
 ```tsx
 import { Reference } from "@exegia/corpora-ui"
 
-<Reference href="/corpus/iliad/1.12" preview={passage}>Iliad 1.12</Reference>
+;<Reference href="/corpus/iliad/1.12" preview={passage}>
+  Iliad 1.12
+</Reference>
 ```
 
 ## API reference
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| href | string | — | Renders the chip as a link. |
-| preview | ReactNode | — | The passage, shown in a PreviewCard on hover / focus. Omitted, no card. |
-
-## Examples
-
-<Demo />
+| Prop    | Type      | Default | Description                                                             |
+| ------- | --------- | ------- | ----------------------------------------------------------------------- |
+| href    | string    | —       | Renders the chip as a link.                                             |
+| preview | ReactNode | —       | The passage, shown in a PreviewCard on hover / focus. Omitted, no card. |

@@ -3,7 +3,6 @@ title: "Input Group"
 description: "Input with leading/trailing addons (icons, text, buttons)."
 ---
 
-import Demo from "@/registry/demos/input-group-demo"
 import { Preview } from "@/components/ui/input-group.story"
 
 <Preview />
@@ -11,14 +10,16 @@ import { Preview } from "@/components/ui/input-group.story"
 ## Usage
 
 ```tsx
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@exegia/corpora-ui"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@exegia/corpora-ui"
 
-<InputGroup>
-  <InputGroupAddon><SearchIcon /></InputGroupAddon>
+;<InputGroup>
+  <InputGroupAddon>
+    <SearchIcon />
+  </InputGroupAddon>
   <InputGroupInput placeholder="Search…" />
 </InputGroup>
 ```
-
-## Examples
-
-<Demo />

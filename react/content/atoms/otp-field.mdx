@@ -4,7 +4,6 @@ description: One-time-passcode input with per-character slots.
 icon: Lock
 ---
 
-import Demo from "@/registry/demos/otp-field-demo"
 import { Preview } from "@/components/ui/otp-field.story"
 
 Use the story controls to explore the `OTPField` atom's properties.
@@ -24,19 +23,17 @@ Use the story controls to explore the `OTPField` atom's properties.
 ```tsx
 import { OTPField, OTPFieldInput } from "@exegia/corpora-ui"
 
-<OTPField length={6}>
-  {Array.from({ length: 6 }, (_, i) => <OTPFieldInput key={i} />)}
+;<OTPField length={6}>
+  {Array.from({ length: 6 }, (_, i) => (
+    <OTPFieldInput key={i} />
+  ))}
 </OTPField>
 ```
 
 ## API reference
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| length | number | — | Number of characters. |
-| value / onValueChange | string / (value: string) =&gt; void | — | Controlled code value. |
-| sound | boolean | true | Tick cue per entered character. Silent until the app calls bindSounds(). |
-
-## Examples
-
-<Demo />
+| Prop                  | Type                                | Default | Description                                                              |
+| --------------------- | ----------------------------------- | ------- | ------------------------------------------------------------------------ |
+| length                | number                              | —       | Number of characters.                                                    |
+| value / onValueChange | string / (value: string) =&gt; void | —       | Controlled code value.                                                   |
+| sound                 | boolean                             | true    | Tick cue per entered character. Silent until the app calls bindSounds(). |

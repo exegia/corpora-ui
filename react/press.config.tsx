@@ -74,7 +74,7 @@ const config = defineConfig({
         <span className="inline-flex items-center gap-2">
           <img src="/logo.svg" alt="" className="size-6" />
           <span className="font-serif text-xl font-medium tracking-tight">
-            Corpora
+            Corpora <span className="font-sans text-xs font-bold text-background px-1 py-[0.5px] rounded bg-foreground uppercase">UI</span>
           </span>
         </span>
       ),

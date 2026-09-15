@@ -4,7 +4,7 @@ import * as React from "react"
 import type { VariantProps } from "class-variance-authority"
 import { BookOpen } from "lucide-react"
 
-import { DemoSelect, DemoToggle } from "@/components/docs/demo-controls"
+import { DemoSelect } from "@/components/docs/demo-controls"
 import { Button, buttonVariants } from "@/components/ui/button"
 import type { FrostGlassVariant } from "@/lib/glass-variants"
 import { cn } from "@/lib/utils"
@@ -23,18 +23,18 @@ const VARIANTS: Variant[] = [
   "glass",
 ]
 
-const BASE_SIZES = ["xs", "sm", "default", "lg", "xl"] as const
-
-type BaseSize = (typeof BASE_SIZES)[number]
-
-// Each base size has an icon-only equivalent, toggled by the icon checkbox.
-const ICON_SIZE: Record<BaseSize, Size> = {
-  xs: "icon-xs",
-  sm: "icon-sm",
-  default: "icon",
-  lg: "icon-lg",
-  xl: "icon-xl",
-}
+const SIZES: Size[] = [
+  "xs",
+  "sm",
+  "default",
+  "lg",
+  "xl",
+  "icon-xs",
+  "icon-sm",
+  "icon",
+  "icon-lg",
+  "icon-xl",
+]
 
 const GLASS_VARIANTS: FrostGlassVariant[] = [
   "liquid-refract",
@@ -46,8 +46,7 @@ const GLASS_VARIANTS: FrostGlassVariant[] = [
 
 export default function ButtonDemo() {
   const [variant, setVariant] = React.useState<Variant>("outline")
-  const [size, setSize] = React.useState<BaseSize>("default")
-  const [iconOnly, setIconOnly] = React.useState(false)
+  const [size, setSize] = React.useState<Size>("default")
   const [glassVariant, setGlassVariant] =
     React.useState<FrostGlassVariant>("liquid-refract")
   const [loading, setLoading] = React.useState(false)
@@ -55,30 +54,31 @@ export default function ButtonDemo() {
   const [sound, setSound] = React.useState(true)
 
   const isGlass = variant === "glass"
-  const effectiveSize: Size = iconOnly ? ICON_SIZE[size] : size
+  const isIconSize = size.startsWith("icon")
 
   return (
-    <div className="flex w-full flex-col items-center gap-6">
+    <div className="gap-6 flex w-full flex-col items-center">
       <div
         className={cn(
-          "flex min-h-28 w-full items-center justify-center rounded-lg",
+          "min-h-28 flex w-full items-center justify-center rounded-lg",
           // glass finishes need a busy backdrop to show their blur/refraction
           isGlass &&
-            "bg-gradient-to-br from-indigo-400 via-rose-300 to-amber-200 dark:from-indigo-950 dark:via-fuchsia-900 dark:to-slate-800"
+            "from-indigo-400 via-rose-300 to-amber-200 dark:from-indigo-950 dark:via-fuchsia-900 dark:to-slate-800 bg-gradient-to-br"
         )}
       >
         <Button
           {...(isGlass ? { variant, glassVariant } : { variant })}
-          size={effectiveSize}
+          size={size}
           loading={loading}
           disabled={disabled}
           sound={sound}
+          aria-label={isIconSize ? "Open manuscript" : undefined}
         >
-          {iconOnly ? <BookOpen /> : "Button"}
+          {isIconSize ? <BookOpen aria-hidden /> : "Button"}
         </Button>
       </div>
 
-      <div className="flex flex-wrap items-end justify-center gap-x-4 gap-y-3">
+      <div className="gap-x-4 gap-y-3 flex flex-wrap items-end justify-center">
         <DemoSelect
           label="variant"
           value={variant}
@@ -96,22 +96,52 @@ export default function ButtonDemo() {
         <DemoSelect
           label="size"
           value={size}
-          options={BASE_SIZES}
+          options={SIZES}
           onChange={setSize}
         />
-        <DemoToggle
-          label="icon-only"
-          checked={iconOnly}
-          onChange={setIconOnly}
-        />
-        <DemoToggle label="loading" checked={loading} onChange={setLoading} />
-        <DemoToggle
+        <BooleanRadio label="loading" value={loading} onChange={setLoading} />
+        <BooleanRadio
           label="disabled"
-          checked={disabled}
+          value={disabled}
           onChange={setDisabled}
         />
-        <DemoToggle label="sound" checked={sound} onChange={setSound} />
+        <BooleanRadio label="sound" value={sound} onChange={setSound} />
       </div>
     </div>
+  )
+}
+
+function BooleanRadio({
+  label,
+  value,
+  onChange,
+}: {
+  label: string
+  value: boolean
+  onChange: (value: boolean) => void
+}) {
+  const name = React.useId()
+
+  return (
+    <fieldset className="min-w-32 gap-1 text-xs flex flex-col text-muted-foreground">
+      <legend className="capitalize">{label}</legend>
+      <div className="p-0.5 flex rounded-sm border bg-background">
+        {[true, false].map((option) => (
+          <label
+            className="rounded-xs px-2 py-1 cursor-pointer has-checked:bg-accent has-checked:text-accent-foreground"
+            key={String(option)}
+          >
+            <input
+              className="sr-only"
+              checked={value === option}
+              name={name}
+              onChange={() => onChange(option)}
+              type="radio"
+            />
+            {String(option)}
+          </label>
+        ))}
+      </div>
+    </fieldset>
   )
 }

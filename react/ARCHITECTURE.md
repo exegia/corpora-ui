@@ -12,11 +12,13 @@ react/
 │   └── blocks/
 ├── src/
 │   ├── components/       # Library components and adjacent *.story.tsx files
+│   ├── assets/css/        # Internal theme, base, shadow, and chat styles
 │   ├── lib/              # Hooks, state, and utilities
 │   ├── pages/            # Custom React routes only, when needed
 │   ├── registry/
 │   │   ├── demos/        # Worked examples imported by MDX
 │   │   └── story.ts      # Shared Fumadocs Story factory
+│   ├── index.css         # Public ordered stylesheet entrypoint
 │   └── app.css           # Fumapress and Story styles
 ├── press.config.tsx      # Content source, layout, and site configuration
 └── vite.config.ts        # Fumapress, MDX, Tailwind, and Story plugins

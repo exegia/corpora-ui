@@ -30,16 +30,18 @@ const NODES: StepNode[] = [
     w: 300,
     kind: { label: "Trigger", hue: PURPLE },
     hue: PURPLE,
-    title: "New order created",
-    caption: "Trigger when a new order is created",
+    title: "Iliad corpus loaded",
+    caption: "Homer · Greek epic corpus",
   },
   {
     id: "cond",
     row: 1,
     x: 0.5,
     w: 356,
-    kind: { label: "If / Else", hue: AMBER },
-    condition: true,
+    kind: { label: "Text node", hue: AMBER },
+    hue: AMBER,
+    title: "μῆνιν ἄειδε, θεά",
+    caption: "Iliad 1.1 · 18 characters",
   },
 ]
 
