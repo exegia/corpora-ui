@@ -28,7 +28,7 @@ bun run build        # docs site + publishable library
 2. Export it from `src/index.ts`.
 3. Add an adjacent `*.story.tsx` with `defineStory` from `@/registry/story`.
 4. Write a page in `content/{atoms,composed,blocks}` and render
-   `<story.WithControl />` from MDX. Keep usage and prop notes in that page.
+   `<Preview />` from MDX. Keep usage and prop notes in that page.
 5. Add the slug to its category’s `meta.json`.
 
 Fumapress provides the page layout, navigation, and Markdown rendering.

@@ -1,10 +1,15 @@
+"use client"
+
+import type { ComponentProps, FC } from "react"
+
 import { defineStory } from "@/registry/story"
 
 import { Verse } from "./verse"
-import Demo from "@/registry/demos/verse-demo"
 
 export const story = defineStory({
-  Component: Verse,
+  Component: Verse as FC<
+    Pick<ComponentProps<typeof Verse>, "chapter" | "href" | "size" | "children">
+  >,
   args: {
     initial: {
       chapter: "1:1",
@@ -13,4 +18,4 @@ export const story = defineStory({
   },
 })
 
-export const examples = defineStory({ Component: Demo })
+export const Preview = story.WithControl

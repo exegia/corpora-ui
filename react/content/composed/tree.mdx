@@ -3,13 +3,15 @@ title: "Tree"
 description: "Nested item tree in four shapes: app navigation with collapsible sections, a table of contents, an icon rail, and an editable file explorer. Every row is a Button; navigation flows through onNavigate."
 ---
 
-import { story, examples } from "@/components/composed/tree.story"
+import { Preview } from "@/components/composed/tree.story"
+
+import Demo from "@/registry/demos/tree-demo"
 
 ## Preview
 
 Use the controls to explore the component's props.
 
-<story.WithControl />
+<Preview />
 
 ## Usage
 
@@ -60,4 +62,4 @@ const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
 
 Explore the complete demo, including its additional variants and interactions.
 
-<examples.WithControl />
+<Demo />

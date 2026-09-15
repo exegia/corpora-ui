@@ -1,3 +1,5 @@
+"use client"
+
 import { defineStory } from "@/registry/story"
 
 import { CodeAuthBlock } from "./code-auth-block"
@@ -14,3 +16,5 @@ export const story = defineStory({
     },
   },
 })
+
+export const Preview = story.WithControl

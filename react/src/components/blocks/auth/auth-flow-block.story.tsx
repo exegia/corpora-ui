@@ -1,3 +1,5 @@
+"use client"
+
 import { defineStory } from "@/registry/story"
 
 import { AuthFlowBlock } from "./auth-flow-block"
@@ -11,3 +13,5 @@ export const story = defineStory({
     },
   },
 })
+
+export const Preview = story.WithControl

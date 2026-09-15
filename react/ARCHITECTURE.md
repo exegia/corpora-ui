@@ -30,8 +30,9 @@ Fumapress maps `.md` and `.mdx` files in `content/` directly to URLs.
 files set sidebar order. Reserve `src/pages` for custom designs.
 
 Component stories live beside their components and import `defineStory`
-from `@/registry/story`. MDX imports a story and renders
-`<story.WithControl />` for a preview and TypeScript-derived prop controls.
+from `@/registry/story`. Stories export `Preview = story.WithControl` from a `"use client"` module.
+MDX imports that preview component and renders
+`<Preview />` for a preview and TypeScript-derived prop controls.
 Detailed examples reuse `src/registry/demos` where useful. Usage snippets
 and explanatory prop notes live in MDX, with no parallel TypeScript
 registry to update.

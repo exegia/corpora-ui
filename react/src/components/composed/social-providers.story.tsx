@@ -1,10 +1,18 @@
+"use client"
+
+import type { ComponentProps, FC } from "react"
+
 import { defineStory } from "@/registry/story"
 
 import { SocialProviders } from "./social-providers"
-import Demo from "@/registry/demos/social-providers-demo"
 
 export const story = defineStory({
-  Component: SocialProviders,
+  Component: SocialProviders as FC<
+    Pick<
+      ComponentProps<typeof SocialProviders>,
+      "providers" | "action" | "layout" | "loadingProvider" | "disabled"
+    >
+  >,
   args: {
     initial: {
       action: "continue",
@@ -13,4 +21,4 @@ export const story = defineStory({
   },
 })
 
-export const examples = defineStory({ Component: Demo })
+export const Preview = story.WithControl

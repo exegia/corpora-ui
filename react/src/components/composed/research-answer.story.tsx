@@ -1,10 +1,24 @@
+"use client"
+
+import type { ComponentProps, FC } from "react"
+
 import { defineStory } from "@/registry/story"
 
 import { ResearchAnswer } from "./ai/research-answer"
-import Demo from "@/registry/demos/research-answer-demo"
 
 export const story = defineStory({
-  Component: ResearchAnswer,
+  Component: ResearchAnswer as FC<
+    Pick<
+      ComponentProps<typeof ResearchAnswer>,
+      | "content"
+      | "kicker"
+      | "kickerSub"
+      | "source"
+      | "date"
+      | "authors"
+      | "bare"
+    >
+  >,
   args: {
     initial: {
       content: "Homeric verse uses repeated formulas to fit the meter.",
@@ -15,4 +29,4 @@ export const story = defineStory({
   },
 })
 
-export const examples = defineStory({ Component: Demo })
+export const Preview = story.WithControl

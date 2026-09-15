@@ -1,10 +1,15 @@
+"use client"
+
+import type { ComponentProps, FC } from "react"
+
 import { defineStory } from "@/registry/story"
 
 import { Logo } from "./logo"
-import Demo from "@/registry/demos/logo-demo"
 
 export const story = defineStory({
-  Component: Logo,
+  Component: Logo as FC<
+    Pick<ComponentProps<typeof Logo>, "name" | "variant" | "href">
+  >,
   args: {
     initial: {
       name: "Corpora",
@@ -13,4 +18,4 @@ export const story = defineStory({
   },
 })
 
-export const examples = defineStory({ Component: Demo })
+export const Preview = story.WithControl

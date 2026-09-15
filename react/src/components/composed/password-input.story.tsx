@@ -1,10 +1,23 @@
+"use client"
+
+import type { ComponentProps, FC } from "react"
+
 import { defineStory } from "@/registry/story"
 
 import { PasswordInput } from "./password-input"
-import Demo from "@/registry/demos/password-input-demo"
 
 export const story = defineStory({
-  Component: PasswordInput,
+  Component: PasswordInput as FC<
+    Pick<
+      ComponentProps<typeof PasswordInput>,
+      | "visibilityToggle"
+      | "showStrength"
+      | "sound"
+      | "placeholder"
+      | "disabled"
+      | "aria-label"
+    >
+  >,
   args: {
     initial: {
       showStrength: true,
@@ -14,4 +27,4 @@ export const story = defineStory({
   },
 })
 
-export const examples = defineStory({ Component: Demo })
+export const Preview = story.WithControl

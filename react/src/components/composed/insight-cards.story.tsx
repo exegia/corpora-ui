@@ -1,10 +1,15 @@
+"use client"
+
+import type { ComponentProps, FC } from "react"
+
 import { defineStory } from "@/registry/story"
 
 import { InsightCards } from "./chat/insight-cards"
-import Demo from "@/registry/demos/insight-cards-demo"
 
 export const story = defineStory({
-  Component: InsightCards,
+  Component: InsightCards as FC<
+    Pick<ComponentProps<typeof InsightCards>, "insights" | "header" | "index">
+  >,
   args: {
     initial: {
       insights: [
@@ -43,4 +48,4 @@ export const story = defineStory({
   },
 })
 
-export const examples = defineStory({ Component: Demo })
+export const Preview = story.WithControl

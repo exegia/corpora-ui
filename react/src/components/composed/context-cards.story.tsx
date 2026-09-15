@@ -1,10 +1,15 @@
+"use client"
+
+import type { ComponentProps, FC } from "react"
+
 import { defineStory } from "@/registry/story"
 
 import { ContextCards } from "./chat/context-cards"
-import Demo from "@/registry/demos/context-cards-demo"
 
 export const story = defineStory({
-  Component: ContextCards,
+  Component: ContextCards as FC<
+    Pick<ComponentProps<typeof ContextCards>, "cards" | "header" | "count">
+  >,
   args: {
     initial: {
       cards: [
@@ -22,4 +27,4 @@ export const story = defineStory({
   },
 })
 
-export const examples = defineStory({ Component: Demo })
+export const Preview = story.WithControl

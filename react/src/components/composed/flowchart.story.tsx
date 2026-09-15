@@ -1,10 +1,18 @@
+"use client"
+
+import type { ComponentProps, FC } from "react"
+
 import { defineStory } from "@/registry/story"
 
 import { Flowchart } from "./chat/flowchart"
-import Demo from "@/registry/demos/flowchart-demo"
 
 export const story = defineStory({
-  Component: Flowchart.Root,
+  Component: Flowchart.Root as FC<
+    Pick<
+      ComponentProps<typeof Flowchart.Root>,
+      "height" | "zoomable" | "readOnly"
+    >
+  >,
   args: {
     initial: {
       zoomable: true,
@@ -13,4 +21,4 @@ export const story = defineStory({
   },
 })
 
-export const examples = defineStory({ Component: Demo })
+export const Preview = story.WithControl

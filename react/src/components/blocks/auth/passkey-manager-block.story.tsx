@@ -1,3 +1,5 @@
+"use client"
+
 import { defineStory } from "@/registry/story"
 
 import { PasskeyManagerBlock } from "./passkey-manager-block"
@@ -12,3 +14,5 @@ export const story = defineStory({
     },
   },
 })
+
+export const Preview = story.WithControl

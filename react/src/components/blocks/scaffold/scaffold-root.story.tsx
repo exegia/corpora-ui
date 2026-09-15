@@ -1,3 +1,5 @@
+"use client"
+
 import { defineStory } from "@/registry/story"
 
 import { ScaffoldCanvas } from "./scaffold-canvas"
@@ -30,3 +32,5 @@ export const story = defineStory({
     },
   },
 })
+
+export const Preview = story.WithControl

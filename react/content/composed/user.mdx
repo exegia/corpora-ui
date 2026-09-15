@@ -3,18 +3,22 @@ title: "User"
 description: "Identity pieces built on the atoms Avatar: User.Info is the avatar-plus-name row (role badge, optional description, audio ring) used by Bubble.Header and sidebar profiles; User.Pill is the compact mention chip."
 ---
 
-import { story, examples } from "@/components/composed/user.story"
+import { Preview } from "@/components/composed/user.story"
+
+import Demo from "@/registry/demos/user-demo"
 
 ## Preview
 
 Use the controls to explore the component's props.
 
-<story.WithControl />
+<Preview />
 
 ## Usage
 
+User currently uses a source import; it is not exported from the package entry point.
+
 ```tsx
-import User from "@exegia/corpora-ui"
+import User from "@/components/composed/user"
 
 // The identity row — also the default header content of Bubble.Header.
 <User.Info user={{ firstName: "Jenny", lastName: "Hamilton", role: "Admin" }} />
@@ -40,4 +44,4 @@ import User from "@exegia/corpora-ui"
 
 Explore the complete demo, including its additional variants and interactions.
 
-<examples.WithControl />
+<Demo />

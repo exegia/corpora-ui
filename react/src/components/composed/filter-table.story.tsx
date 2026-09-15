@@ -1,10 +1,20 @@
+"use client"
+
+import type { ComponentProps, FC } from "react"
+
 import { defineStory } from "@/registry/story"
 
 import { FilterTable } from "./chat/filter-table"
-import Demo from "@/registry/demos/filter-table-demo"
 
 export const story = defineStory({
-  Component: FilterTable<{ id: string; status: string; passage: string }>,
+  Component: FilterTable<{ id: string; status: string; passage: string }> as FC<
+    Pick<
+      ComponentProps<
+        typeof FilterTable<{ id: string; status: string; passage: string }>
+      >,
+      "statuses" | "columns" | "rows" | "filter" | "allLabel"
+    >
+  >,
   args: {
     initial: {
       statuses: [
@@ -45,4 +55,4 @@ export const story = defineStory({
   },
 })
 
-export const examples = defineStory({ Component: Demo })
+export const Preview = story.WithControl

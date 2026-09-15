@@ -1,10 +1,24 @@
+"use client"
+
+import type { ComponentProps, FC } from "react"
+
 import { defineStory } from "@/registry/story"
 
 import { Chart } from "./chat/chart"
-import Demo from "@/registry/demos/chart-demo"
 
 export const story = defineStory({
-  Component: Chart,
+  Component: Chart as FC<
+    Pick<
+      ComponentProps<typeof Chart>,
+      | "type"
+      | "title"
+      | "subtitle"
+      | "data"
+      | "series"
+      | "headerless"
+      | "plotHeight"
+    >
+  >,
   args: {
     initial: {
       type: "bar",
@@ -29,4 +43,4 @@ export const story = defineStory({
   },
 })
 
-export const examples = defineStory({ Component: Demo })
+export const Preview = story.WithControl

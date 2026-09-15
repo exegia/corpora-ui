@@ -1,15 +1,15 @@
 ---
 title: Story
 description: Interactive component playground powered by Fumadocs Story.
-icon: toy-brick
+icon: ToyBrick
 ---
 
-import { story } from "@/components/ui/button.story"
+import { Preview } from "@/components/ui/button.story"
 
 Stories are interactive playgrounds generated from a component's TypeScript
 props. Tweak the controls to explore the `Button` atom:
 
-<story.WithControl />
+<Preview />
 
 ## Write your own
 
@@ -17,6 +17,8 @@ Create a `<name>.story.tsx` file next to the component and render it from any
 MDX page:
 
 ```tsx title="src/components/ui/button.story.tsx"
+"use client"
+
 import { defineStory } from "@/registry/story"
 
 import { Button } from "./button"
@@ -31,13 +33,17 @@ export const story = defineStory({
     },
   },
 })
+
+export const Preview = story.WithControl
 ```
 
 ```mdx title="content/my-page.mdx"
-import { story } from "@/components/ui/button.story"
+import { Preview } from "@/components/ui/button.story"
 
-<story.WithControl />
+<Preview />
 ```
 
 The `.story` suffix is required — the Vite plugin only transforms files
 matching `*.story.{js,jsx,ts,tsx}`.
+
+Export the preview component directly from the client story module so Fumapress can render it from server-rendered MDX. Keep callbacks and interactive state in the story.

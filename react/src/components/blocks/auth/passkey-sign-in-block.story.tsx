@@ -1,3 +1,5 @@
+"use client"
+
 import { defineStory } from "@/registry/story"
 
 import { PasskeySignInBlock } from "./passkey-sign-in-block"
@@ -8,3 +10,5 @@ export const story = defineStory({
     initial: { available: true, label: "Sign in with a passkey" },
   },
 })
+
+export const Preview = story.WithControl

@@ -1,10 +1,18 @@
+"use client"
+
+import type { ComponentProps, FC } from "react"
+
 import { defineStory } from "@/registry/story"
 
 import { Info } from "./user/info"
-import Demo from "@/registry/demos/user-demo"
 
 export const story = defineStory({
-  Component: Info,
+  Component: Info as FC<
+    Pick<
+      ComponentProps<typeof Info>,
+      "variant" | "user" | "description" | "size" | "direction" | "audio"
+    >
+  >,
   args: {
     initial: {
       variant: "info",
@@ -18,4 +26,4 @@ export const story = defineStory({
   },
 })
 
-export const examples = defineStory({ Component: Demo })
+export const Preview = story.WithControl

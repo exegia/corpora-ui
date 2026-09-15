@@ -1,3 +1,5 @@
+"use client"
+
 import { defineStory } from "@/registry/story"
 
 import { LinkedAccountsBlock } from "./linked-accounts-block"
@@ -17,3 +19,5 @@ export const story = defineStory({
     },
   },
 })
+
+export const Preview = story.WithControl

@@ -1,10 +1,15 @@
+"use client"
+
+import type { ComponentProps, FC } from "react"
+
 import { defineStory } from "@/registry/story"
 
 import { RecordsTable } from "./chat/records-table"
-import Demo from "@/registry/demos/records-table-demo"
 
 export const story = defineStory({
-  Component: RecordsTable,
+  Component: RecordsTable as FC<
+    Pick<ComponentProps<typeof RecordsTable>, "rows" | "maxTags">
+  >,
   args: {
     initial: {
       rows: [
@@ -38,4 +43,4 @@ export const story = defineStory({
   },
 })
 
-export const examples = defineStory({ Component: Demo })
+export const Preview = story.WithControl
