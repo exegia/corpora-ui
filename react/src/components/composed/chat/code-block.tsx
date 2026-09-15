@@ -26,21 +26,48 @@ export interface CodeBlockProps extends Omit<React.ComponentPropsWithoutRef<"div
 }
 
 const KEYWORDS = new Set(["export", "import", "from", "async", "await", "function", "const", "let", "var", "return", "if", "else", "null", "true", "false", "new", "class", "type", "interface"])
-const TOKEN = /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)|\b([A-Za-z_$][\w$]*)\b/g
+function isIdentifierStart(char: string): boolean {
+  const code = char.charCodeAt(0)
+  return char === "$" || char === "_" || (code >= 65 && code <= 90) || (code >= 97 && code <= 122)
+}
+
+function isIdentifierPart(char: string): boolean {
+  const code = char.charCodeAt(0)
+  return isIdentifierStart(char) || (code >= 48 && code <= 57)
+}
 
 /** Minimal highlighter: string literals and keywords only, as in the design. */
 export function tokenize(line: string, keywords: ReadonlySet<string>): React.ReactNode[] {
   const out: React.ReactNode[] = []
-  let last = 0
-  for (const m of line.matchAll(TOKEN)) {
-    const i = m.index ?? 0
-    if (i > last) out.push(line.slice(last, i))
-    if (m[1]) out.push(<span key={i} className="text-code-string">{m[1]}</span>)
-    else if (keywords.has(m[2])) out.push(<span key={i} className="text-code-keyword">{m[2]}</span>)
-    else out.push(m[0])
-    last = i + m[0].length
+  let i = 0
+  while (i < line.length) {
+    const start = i
+    const quote = line[i]
+
+    if (quote === '"' || quote === "'" || quote === "`") {
+      for (i++; i < line.length; i++) {
+        if (line[i] === "\\") i++
+        else if (line[i] === quote) {
+          i++
+          break
+        }
+      }
+      out.push(<span key={start} className="text-code-string">{line.slice(start, i)}</span>)
+      continue
+    }
+
+    if (isIdentifierStart(line[i])) {
+      i++
+      while (i < line.length && isIdentifierPart(line[i])) i++
+      const word = line.slice(start, i)
+      out.push(keywords.has(word) ? <span key={start} className="text-code-keyword">{word}</span> : word)
+      continue
+    }
+
+    i++
+    while (i < line.length && line[i] !== '"' && line[i] !== "'" && line[i] !== "`" && !isIdentifierStart(line[i])) i++
+    out.push(line.slice(start, i))
   }
-  if (last < line.length) out.push(line.slice(last))
   return out
 }
 

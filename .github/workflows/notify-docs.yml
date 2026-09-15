@@ -9,6 +9,8 @@ on:
       - "docs/**"
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   dispatch:
     name: Trigger docs mirror
