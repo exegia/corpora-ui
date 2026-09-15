@@ -13,9 +13,7 @@ function ReferencePreview({ children, ...props }: PreviewProps) {
   return (
     <div className="p-6">
       <div className="">
-        <Reference {...props} preview="A passage preview from the manuscript.">
-          Iliad 1.12
-        </Reference>
+        <Reference {...props}>{children}</Reference>
       </div>
     </div>
   )

@@ -1,16 +1,14 @@
 "use client"
 
-import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
 
 import { Tree } from "./tree"
 
-function TreePreview(
-  props: Pick<ComponentProps<typeof Tree>, "variant" | "collapsed" | "sound">
-) {
+function TreePreview({ sound }: { sound: boolean }) {
   return (
     <Tree
-      {...props}
+      sound={sound}
+      variant="navigation"
       items={[
         {
           id: "corpora",
@@ -27,7 +25,7 @@ function TreePreview(
 
 export const story = defineStory({
   Component: TreePreview,
-  args: { initial: { variant: "navigation" } },
+  args: { initial: { sound: true } },
 })
 
 export const Preview = story.WithControl
