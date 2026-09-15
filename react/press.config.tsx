@@ -3,6 +3,7 @@ import { fumadocsMdx } from "fumapress/adapters/mdx"
 import { metaSchema, pageSchema } from "fumapress/adapters/mdx/schema"
 import { defineDocs } from "fumadocs-mdx/macro"
 import { createDocsLayoutPage } from "fumapress/layouts/docs"
+import { createHomeLayoutPage } from "fumapress/layouts/home"
 import { lucideIconsPlugin } from "fumadocs-core/source/plugins/lucide-icons"
 import { Link } from "fumapress/client"
 
@@ -16,6 +17,22 @@ const DocsLayout = createDocsLayoutPage<typeof config.$context>({
         tableOfContent: {
           style: "clerk",
         },
+      },
+    }
+  },
+})
+
+const HomeLayout = createHomeLayoutPage<typeof config.$context>({
+  async render() {
+    return {
+      layoutProps: {
+        nav: { transparentMode: "top" },
+        links: [
+          { text: "Atoms", url: "/atoms/button", active: "nested-url" },
+          { text: "Composed", url: "/composed", active: "nested-url" },
+          { text: "Blocks", url: "/blocks", active: "nested-url" },
+          { text: "Getting started", url: "/getting-started" },
+        ],
       },
     }
   },
@@ -53,8 +70,16 @@ const config = defineConfig({
   },
   defaultLayoutProps: {
     nav: {
-      title: "corpora/ui",
+      title: (
+        <span className="inline-flex items-center gap-2">
+          <img src="/logo.svg" alt="" className="size-6" />
+          <span className="font-serif text-xl font-medium tracking-tight">
+            Corpora
+          </span>
+        </span>
+      ),
     },
+    githubUrl: "https://github.com/exegia/corpora-ui",
   },
   renderNotFound: () => (
     <main>
@@ -62,7 +87,12 @@ const config = defineConfig({
       <Link href="/">Back to home</Link>
     </main>
   ),
-  renderPage: (props) => <DocsLayout {...props} />,
+  renderPage: (props) =>
+    props.page.url === "/" ? (
+      <HomeLayout {...props} />
+    ) : (
+      <DocsLayout {...props} />
+    ),
   meta: {
     root() {
       return (

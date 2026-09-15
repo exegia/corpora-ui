@@ -2,6 +2,7 @@
 
 import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
+import { Label } from "./label"
 import { OTPField, OTPFieldInput } from "./otp-field"
 
 type PreviewProps = Pick<
@@ -12,7 +13,10 @@ type PreviewProps = Pick<
 function OTPFieldPreview({ length, ...props }: PreviewProps) {
   return (
     <div className="overflow-x-auto p-6">
-      <OTPField {...props} key={length} length={length}>
+      <Label className="sr-only" htmlFor="otp-story">
+        One-time passcode
+      </Label>
+      <OTPField {...props} id="otp-story" key={length} length={length}>
         {Array.from({ length }, (_, i) => (
           <OTPFieldInput key={i} aria-label={`Digit ${i + 1}`} />
         ))}

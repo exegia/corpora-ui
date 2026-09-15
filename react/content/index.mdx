@@ -4,29 +4,77 @@ description: A shadcn-ready React component library for manuscript research inte
 icon: Layers
 ---
 
-`@exegia/corpora-ui` is a React 19 + Tailwind v4 component library for the [Corpora](https://corpora.exegia.co) apps. It ships three layers:
+import { AtomsGallery } from "@/components/docs/atoms-gallery"
+import { Hero } from "@/components/docs/hero"
+import { Atom, Boxes, Component, Network, Rocket } from "lucide-react"
 
-- **Atoms** — the primitives installed by shadcn.
-- **Components** — purposeful compositions that stay unopinionated.
-- **Blocks** — opinionated assemblies for complete product surfaces.
+<Hero>
+  <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+    <span>React 19</span>
+    <span>Tailwind v4</span>
+    <span>shadcn registry</span>
+    <span>Base UI</span>
+    <span>Motion</span>
+    <span>Dark mode</span>
+  </div>
+  <h1 className="text-5xl font-bold leading-[1.02] tracking-[-0.04em] text-foreground md:text-7xl">
+    Interfaces for reading, annotating and asking questions of a corpus.
+  </h1>
+  <div className="max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">
+    <code>@exegia/corpora-ui</code> ships three layers — atoms, composed components and
+    blocks — every one documented with a live story and prop controls.
+  </div>
+  <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+    <a href="/getting-started" className="inline-flex h-11 items-center rounded-lg bg-fd-primary px-5 text-sm font-medium text-fd-primary-foreground no-underline transition-colors hover:bg-fd-primary/90">
+      Get started →
+    </a>
+    <a href="/atoms/button" className="inline-flex h-11 items-center rounded-lg border border-fd-border bg-fd-background px-5 text-sm font-medium text-foreground no-underline transition-colors hover:bg-fd-accent">
+      Browse atoms
+    </a>
+  </div>
+</Hero>
 
-Every public component is exported from `@exegia/corpora-ui`, and documentation lives in Markdown and MDX, with interactive previews and prop controls powered by Fumadocs Story.
+```bash
+bun add @exegia/corpora-ui
+```
+
+<div aria-hidden className="h-16 md:h-24" />
+
+## Atoms, live
+
+<AtomsGallery />
+
+<div className="pt-6 text-sm text-muted-foreground">
+  Every tile above is the real component. <a href="/atoms/button">Browse all atoms →</a>
+</div>
+
+<div aria-hidden className="h-16 md:h-24" />
+
+## Three layers
 
 <Cards>
-  <Card title="Getting started" href="/getting-started">
+  <Card icon={<Atom />} title="Atoms" href="/atoms/button">
+    The primitive layer: buttons, fields, bubbles, avatars, references, file
+    icons and the chat attachment kit.
+  </Card>
+  <Card icon={<Component />} title="Composed" href="/composed">
+    Purposeful compositions that stay unopinionated: user chips, markdown,
+    charts, trees, streaming text.
+  </Card>
+  <Card icon={<Boxes />} title="Blocks" href="/blocks">
+    Opinionated assemblies for whole surfaces: auth flows, shells, scaffolds
+    and the corpus chat.
+  </Card>
+</Cards>
+
+## Start here
+
+<Cards>
+  <Card icon={<Rocket />} title="Getting started" href="/getting-started">
     Install the package, mount `ExegiaProvider`, and render your first
     component.
   </Card>
-  <Card title="Architecture" href="/architecture">
+  <Card icon={<Network />} title="Architecture" href="/architecture">
     How atoms, components, blocks, state, and the registry fit together.
-  </Card>
-  <Card title="Atoms" href="/atoms">
-    Browse the primitive layer.
-  </Card>
-  <Card title="Composed" href="/composed">
-    Browse purposeful compositions.
-  </Card>
-  <Card title="Blocks" href="/blocks">
-    Browse complete product surfaces.
   </Card>
 </Cards>
