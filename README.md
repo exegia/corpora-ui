@@ -3,6 +3,9 @@
 Repository for all UI related components and libraries. The publishable
 package lives in [`react/`](react/).
 
+The component documentation site is built with
+[Fumapress](https://press.fumadocs.dev) and lives in `react/`.
+
 ## Branching, CI, and releases
 
 Full details: [`.github/WORKFLOW.md`](.github/WORKFLOW.md).
@@ -26,3 +29,14 @@ checks. `dev` and `next` require `guard` and `check`.
 
 Every CI step is a `make` target, so anything CI does can be reproduced
 locally — `make ci` is what runs on a PR. `make help` lists the rest.
+
+## Documentation site
+
+```bash
+make serve          # Fumapress dev server
+make build          # typecheck + Fumapress build + library build
+make preview        # Fumapress production server
+```
+
+Documentation content lives in `react/content/docs`; live component pages are
+generated from `react/src/registry`.

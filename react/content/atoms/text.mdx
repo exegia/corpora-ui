@@ -1,0 +1,32 @@
+---
+title: "Text"
+description: "Typography primitive for body copy, labels and captions."
+---
+
+import { Preview } from "@/components/ui/text.story"
+
+<Preview />
+
+## Usage
+
+```tsx
+import { Text } from "@exegia/corpora-ui"
+import { TextClickPopover } from "@exegia/corpora-ui"
+
+<Text.Heading size="large">Corpus title</Text.Heading>
+<Text.Paragraph>Readable corpus prose belongs here.</Text.Paragraph>
+<Text.Root type="link" href="/activity">View activity</Text.Root>
+
+// Click-triggered popover — works for default (span), link and subscript
+<TextClickPopover type="subscript" popover={<p>Annotation</p>}>
+  Subscript note
+</TextClickPopover>
+```
+
+## API reference
+
+| Prop      | Type                                                                           | Default   | Description                                                               |
+| --------- | ------------------------------------------------------------------------------ | --------- | ------------------------------------------------------------------------- |
+| type      | "default" &#124; "heading" &#124; "paragraph" &#124; "link" &#124; "subscript" | "default" | Selects the semantic element and its typography treatment.                |
+| size      | "small" &#124; "medium" &#124; "large" &#124; number                           | "medium"  | Uses the type scale, or accepts a pixel font size when numeric.           |
+| selection | string &#124; boolean                                                          | —         | Adds a reader-selection treatment; a string is exposed as data-selection. |

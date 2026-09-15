@@ -1,0 +1,23 @@
+---
+title: "Checkbox"
+description: "Control for toggling a boolean, with indeterminate support."
+---
+
+import { Preview } from "@/components/ui/checkbox.story"
+
+<Preview />
+
+## Usage
+
+```tsx
+import { Checkbox } from "@exegia/corpora-ui"
+
+;<Checkbox defaultChecked />
+```
+
+## API reference
+
+| Prop          | Type    | Default | Description                                                           |
+| ------------- | ------- | ------- | --------------------------------------------------------------------- |
+| indeterminate | boolean | false   | Renders the mixed state.                                              |
+| sound         | boolean | true    | Emit the cuelume toggle cue. Silent until the app calls bindSounds(). |

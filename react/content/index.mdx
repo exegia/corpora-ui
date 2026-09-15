@@ -1,0 +1,108 @@
+---
+title: Overview
+description: A shadcn-ready React component library for manuscript research interfaces.
+icon: Layers
+---
+
+import { AtomsGallery } from "@/components/docs/atoms-gallery"
+import { Hero } from "@/components/docs/hero"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Atom, Boxes, Component, Network, Rocket } from "lucide-react"
+
+<Hero>
+  <div className="gap-x-5 gap-y-2 text-sm flex flex-wrap items-center justify-center text-muted-foreground">
+    <span>React 19</span>
+    <span>Tailwind v4</span>
+    <span>shadcn registry</span>
+    <span>Base UI</span>
+    <span>Motion</span>
+    <span>Dark mode</span>
+  </div>
+  <h1 className="text-5xl font-bold md:text-7xl leading-[1.02] tracking-[-0.04em] text-foreground">
+    Interfaces for reading, annotating and asking questions of a corpus.
+  </h1>
+  <div className="max-w-2xl text-lg leading-relaxed md:text-xl text-muted-foreground">
+    <code>@exegia/corpora-ui</code> ships three layers — atoms, composed
+    components and blocks — every one documented with a live story and prop
+    controls.
+  </div>
+  <div className="gap-3 pt-2 flex flex-wrap items-center justify-center">
+    <a
+      href="/getting-started"
+      className="h-11 bg-fd-primary px-5 text-sm font-semibold text-fd-primary-foreground hover:bg-fd-primary/90 inline-flex items-center rounded-xl no-underline transition-colors"
+    >
+      Get started →
+    </a>
+    <a
+      href="/atoms/button"
+      className="h-11 border-fd-border bg-fd-background px-5 text-sm font-medium hover:bg-fd-accent inline-flex items-center rounded-xl border text-foreground no-underline transition-colors"
+    >
+      Browse atoms
+    </a>
+  </div>
+</Hero>
+
+<Tabs defaultValue="bun" className="gap-3">
+  <div className="flex items-center justify-between">
+    <h2 id="quick-start" className="ml-4 my-0 text-base font-semibold tracking-tight">
+      <a href="#quick-start" className="no-underline">Quick start</a>
+    </h2>
+    <TabsList size="sm" aria-label="Package manager">
+      <TabsTrigger value="npm">npm</TabsTrigger>
+      <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+      <TabsTrigger value="bun">bun</TabsTrigger>
+    </TabsList>
+  </div>
+
+  <TabsContent value="npm" className="[&>figure]:my-0">
+
+```bash
+npm install @exegia/corpora-ui
+```
+
+  </TabsContent>
+  <TabsContent value="pnpm" className="[&>figure]:my-0">
+
+```bash
+pnpm add @exegia/corpora-ui
+```
+
+  </TabsContent>
+  <TabsContent value="bun" className="[&>figure]:my-0">
+
+```bash
+bun add @exegia/corpora-ui
+```
+
+  </TabsContent>
+</Tabs>
+
+<Cards className="my-4 flex flex-1 flex-row">
+  <Card icon={<Rocket />} className="flex-1" title="Getting started" href="/getting-started">
+    Install the package, mount `ExegiaProvider`, and render your first
+    component.
+  </Card>
+  <Card icon={<Network />} title="Architecture" href="/architecture">
+    How atoms, components, blocks, state, and the registry fit together.
+  </Card>
+</Cards>
+
+<div aria-hidden className="h-16 md:h-24 text-center flex flex-col items-center justify-center">
+    <h2 className="text-xl font-bold">Atoms</h2>
+    <p className="text-sm text-foreground/50">Buttons, fields, bubbles, avatars, references, file icons and the chat attachment kit.</p>
+</div>
+
+<AtomsGallery />
+
+<div className="pt-6 text-sm text-muted-foreground">
+  Every tile above is the real component.{" "}
+  <a href="/atoms/button">Browse all atoms →</a>
+</div>
+
+
+<div aria-hidden className="h-16 md:h-24 text-center flex flex-col items-center justify-center">
+    <h2 className="text-xl font-bold">Components</h2>
+    <p className="text-sm text-foreground/50">Composed of atoms: buttons, fields, bubbles, avatars, references, file icons and the chat attachment kit.</p>
+</div>
+
+Coming soon

@@ -73,7 +73,7 @@ export * from "./components/blocks/profile"
 export * from "./components/motion/shared-layout-bg"
 
 // state
-export * from "./state"
+export * from "./lib/state"
 
 // The v0.17 sidebar monolith became the shell block's AnimatedPanel parts.
 // `blocks/shell` above already exports every part under its new name; these

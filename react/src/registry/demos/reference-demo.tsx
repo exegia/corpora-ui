@@ -1,3 +1,5 @@
+"use client"
+
 import { Reference } from "@/components/atoms/reference"
 import { DemoStage } from "@/components/docs/demo-controls"
 

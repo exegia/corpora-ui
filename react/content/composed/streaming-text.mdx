@@ -1,0 +1,42 @@
+---
+title: "Streaming text"
+description: "Streamed answer: word-by-word reveal with a caret and inline source previews."
+---
+
+import { Preview } from "@/components/composed/streaming-text.story"
+
+import Demo from "@/registry/demos/streaming-text-demo"
+
+## Preview
+
+Use the controls to explore the component's props.
+
+<Preview />
+
+## Usage
+
+```tsx
+import { StreamingText } from "@exegia/corpora-ui"
+
+<StreamingText
+  streaming
+  paragraphs={[
+    "The Iliad opens with an invocation to the Muse.",
+    [{ cite: "Iliad 1.1", title: "Opening invocation" }],
+  ]}
+/>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `paragraphs` (required) | `(string \| StreamingToken[])[]` | — | Each paragraph is words or tokens; `{ cite, title?, description?, href? }` renders an InlineSource. |
+| `streaming` | `boolean` | `false` | Animate the reveal; reduced motion shows everything at once. |
+| `wordMs` | `number` | `--stream-gap` (60ms fallback) | Override the gap between revealed words in milliseconds. |
+
+## Examples
+
+Explore the complete demo, including its additional variants and interactions.
+
+<Demo />

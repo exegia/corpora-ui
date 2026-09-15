@@ -2,7 +2,7 @@
 
 Vite + React 19 + Tailwind v4 + shadcn (base-ui, style "base-mira"). Library
 source in `src/components/{ui,composed,blocks}`, docs site driven by
-`src/registry/`. See `ARCHITECTURE.md` for the full layout. Node dependencies
+Markdown/MDX in `content/` and adjacent component stories. See `ARCHITECTURE.md` for the full layout. Node dependencies
 are installed HERE (`cd react && bun add <pkg>`), never at the repo root. Verify with
 `make check` (runs `tsc -b --noEmit` + eslint) — plain `tsc --noEmit` checks
 nothing here (references-only root tsconfig).
@@ -202,7 +202,7 @@ Follow `ui/button.tsx` exactly:
 6. Emit `data-glass-variant={finish}` on the element.
 7. Never touch the `size` axis or other variants — glass composes with all
    existing sizes.
-8. Update the component's entry in `src/registry/` (props table: `variant`
+8. Update the component's MDX page in `content/` (props table: `variant`
    list + `glassVariant` row).
 
 ### Adding a new finish

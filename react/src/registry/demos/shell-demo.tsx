@@ -1,3 +1,5 @@
+"use client"
+
 import { ShellLayout } from "@/components/blocks/shell/shell-layout"
 import { useShellPanels } from "@/components/blocks/shell/use-shell-panels"
 import { DemoStage } from "@/components/docs/demo-controls"

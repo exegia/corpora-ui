@@ -1,0 +1,49 @@
+---
+title: "Chat"
+description: "The chat surface end to end: the chrome-less AiPanel rail (scoped selections, generated answers, recommendation cards) and the Bubble-atom messages that carry attachments and AI content. The panel is the main example; the examples below show message exchanges, attachments and an AI reply."
+---
+
+import { Preview } from "@/components/blocks/chat/base.story"
+import Demo from "@/registry/demos/chat-demo"
+
+## Preview and props
+
+Adjust the generated controls to explore the component's TypeScript props.
+
+<Preview />
+
+## Usage
+
+```tsx
+import { AiPanel, GeneratedBlock, RecommendationCard } from "@exegia/corpora-ui"
+
+;<AiPanel
+  scope={{ kind: "passage", label: "a.1", range: "¶1–¶2" }}
+  thread={
+    <>
+      <GeneratedBlock content="The boundary is valid." />
+      <RecommendationCard
+        title="Fix the label mismatch"
+        description="Change label from paragraph to p on"
+        entity={{ name: "p-17" }}
+        onAccept={applyFix}
+      />
+    </>
+  }
+  composerProps={{ onSend: askContextFabric }}
+/>
+```
+
+## API notes
+
+| Prop                                | Type                                                                            | Default | Description                                                                                                                                                                                                                                                  |
+| ----------------------------------- | ------------------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| AiPanel                             | <code>scope / thread / composerProps / callbacks</code>                         | —       | Full-height rail with no surface chrome or close affordance of its own — host it inside a container such as the shell's right panel. Keep data fetching, streaming and writes in the host application; the panel provides the stable focus order and layout. |
+| SelectionPopover                    | <code>"word" &#124; "node"</code>                                               | —       | One shell for word and node selections. Word details are preserved and both variants append exactly one Add to chat action (⌘J).                                                                                                                             |
+| ScopePicker                         | <code>word &#124; passage &#124; articulus &#124; quaestio &#124; corpus</code> | —       | Keyboard-operable listbox for the five corpus scope levels.                                                                                                                                                                                                  |
+| GeneratedBlock / RecommendationCard | <code>content and recommendation props</code>                                   | —       | Thread blocks with persistent generated labeling, polite live-region streaming, and direct human-in-the-loop recommendation cards with Reject/Accept actions.                                                                                                |
+| Bubble                              | <code>variant="sender" &#124; "recipient", Header, Message</code>               | —       | The message atom: sender hugs the right edge, recipient carries attachments inline. Render Bubble.Header on the first message of a run and mark follow-ups `continued`.                                                                                      |
+
+## Examples
+
+<Demo />

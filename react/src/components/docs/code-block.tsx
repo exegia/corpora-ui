@@ -1,3 +1,5 @@
+"use client"
+
 /** Plain code snippet shell — syntax highlighting can be layered in later. */
 export function CodeBlock({ code }: { code: string }) {
   return (

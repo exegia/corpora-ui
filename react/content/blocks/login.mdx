@@ -1,0 +1,53 @@
+---
+title: "Login"
+description: "Progressive login form: a valid email reveals the password field, a non-empty password reveals the submit button. Social providers, remember-me and animated success/error states."
+---
+
+import { Preview } from "@/components/blocks/auth/login-block.story"
+import Demo from "@/registry/demos/login-demo"
+
+## Preview and props
+
+Adjust the generated controls to explore the component's TypeScript props.
+
+<Preview />
+
+## Usage
+
+```tsx
+import { LoginBlock, useAuthFlow, useAuthFlowActions } from "@exegia/corpora-ui"
+
+;<LoginBlock onSubmit={async ({ email, password }) => login(email, password)} />
+
+// Wired into the shared auth flow (needs <ExegiaProvider> at the root):
+// the block keeps the password local; the flow tracks which step shows and
+// what identifier is in flight, so CodeAuthBlock can pick it up masked.
+const flow = useAuthFlow()
+const { beginVerification, complete } = useAuthFlowActions()
+
+{
+  flow.step === "login" && (
+    <LoginBlock
+      onSubmit={async ({ email, password }) => {
+        const result = await login(email, password)
+        if (result.needsCode) beginVerification({ identifier: email })
+        else complete(result.user) // signs the session in — see useAuthSession()
+      }}
+    />
+  )
+}
+```
+
+## API notes
+
+| Prop                                | Type                                          | Default                                    | Description                                                                                                                   |
+| ----------------------------------- | --------------------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| logo                                | <code>React.ReactNode</code>                  | —                                          | Brand mark rendered above the title. Omitted leaves no logo row at all.                                                       |
+| accent                              | <code>"corpora" &#124; "exegia"</code>        | —                                          | Brand accent for the primary action — corpora is a solid #E8B124, exegia a purple gradient. Omit to keep the default primary. |
+| providers                           | <code>SocialProvider[]</code>                 | <code>["google", "apple", "github"]</code> | Social providers; empty array hides the section.                                                                              |
+| showRememberMe / showForgotPassword | <code>boolean</code>                          | <code>true</code>                          | Toggle the secondary affordances.                                                                                             |
+| onSubmit                            | <code>(data) =&gt; Promise&lt;void&gt;</code> | —                                          | Reject (or throw) to show the shaking error state with the error message.                                                     |
+
+## Examples
+
+<Demo />

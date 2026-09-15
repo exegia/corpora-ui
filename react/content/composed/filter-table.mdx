@@ -1,0 +1,37 @@
+---
+title: "Filter table"
+description: "Status filter pills over a compact table. The active filter lives in a keyed atom (filterTableFilterAtom) so an app can set it by table id."
+---
+
+import { Preview } from "@/components/composed/filter-table.story"
+
+import Demo from "@/registry/demos/filter-table-demo"
+
+## Preview
+
+Use the controls to explore the component's props.
+
+<Preview />
+
+## Usage
+
+```tsx
+import { FilterTable } from "@exegia/corpora-ui"
+
+<FilterTable statuses={statuses} columns={columns} rows={rows} />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `statuses` (required) | `{ id, label, tone }[]` | — | Filter pills and status dot colours. |
+| `columns` (required) | `{ key, header, className? }[]` | — | Table columns; the status column renders a dot. |
+| `rows` (required) | `{ id, status, … }[]` | — | Rows; filtered by status. |
+| `filter / onFilterChange` | `string \| null` | — | Controlled filter; null is All. |
+
+## Examples
+
+Explore the complete demo, including its additional variants and interactions.
+
+<Demo />
