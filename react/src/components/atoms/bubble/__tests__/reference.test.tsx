@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 
-import { Reference } from "../reference"
+import { Reference } from "../../reference"
 
 describe("Reference", () => {
   test("shows the passage on hover / focus only when given", async () => {

@@ -54,7 +54,10 @@ export function ScaffoldCanvas({
     .filter((id): id is string => id !== undefined)
   const idsKey = panelIds.join(" ")
 
-  React.useLayoutEffect(() => {
+  // Passive on purpose: jotai (v3) readers subscribe in their own
+  // `useEffect`, so a layout-effect write at mount would land before any
+  // subscription exists and never notify them.
+  React.useEffect(() => {
     registerPanelIds(panelIds)
     // panelIds is rebuilt each render; idsKey carries its identity.
     // eslint-disable-next-line react-hooks/exhaustive-deps

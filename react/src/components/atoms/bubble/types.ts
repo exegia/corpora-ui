@@ -1,4 +1,4 @@
-import type { HTMLMotionProps } from "motion/react";
+import type { HTMLMotionProps } from "motion/react"
 import type { ComponentPropsWithoutRef, ReactNode } from "react"
 
 /**
@@ -7,7 +7,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from "react"
  * - "recipient" — an incoming message from another person (left-aligned, muted)
  * - "ai"        — generated output (left-aligned, chrome-less prose)
  */
-export type BubbleVariant = "default" | "ai" | "sender" | "recipient"
+export type BubbleVariant = "ai" | "sender" | "recipient"
 
 export interface BubbleProps extends ComponentPropsWithoutRef<"div"> {
   variant?: BubbleVariant
@@ -20,35 +20,7 @@ export interface BubbleProps extends ComponentPropsWithoutRef<"div"> {
 
 export type BubbleMessageProps = ComponentPropsWithoutRef<"div">
 
-/** Identity shown by `Bubble.Header` when no custom avatar node is passed. */
-export interface BubbleAvatarIdentity {
-  src?: string
-  name?: string
-  initials?: string
-}
-
-export interface BubbleHeaderProps extends Omit<
-  ComponentPropsWithoutRef<"div">,
-  "children"
-> {
-  /** Display name of the author. */
-  name: ReactNode
-  /** Relative or absolute time label, e.g. "5 min ago". */
-  time?: ReactNode
-  /**
-   * Role badge. A string renders the standard chip (neutral for people,
-   * accent for the ai variant); pass a node for anything custom.
-   */
-  badge?: ReactNode
-  /**
-   * Avatar. An identity object renders `UserAvatar`; a node is used as-is.
-   * Omitted, the ai variant falls back to the spark mark and people get
-   * initials derived from `name` when it is a string.
-   */
-  avatar?: ReactNode | BubbleAvatarIdentity
-  /** Extra trailing content (a menu trigger, a status dot). */
-  children?: ReactNode
-}
+export type BubbleHeaderProps = ComponentPropsWithoutRef<"div">
 
 export interface BubbleReaction {
   /** Stable key; falls back to the label/emoji when omitted. */
@@ -80,7 +52,6 @@ export interface BubbleReactionsProps extends Omit<
 
 export type BubbleActionsProps = ComponentPropsWithoutRef<"div">
 
-
 export interface BubbleReactionChipProps extends Omit<
   HTMLMotionProps<"button">,
   "onToggle" | "children"
@@ -99,7 +70,6 @@ export type BubbleReactionsButtonProps = Omit<
   onEmojiSelect?: (emoji: BubblePickedEmoji) => void
 }
 
-
 /**
  * Only what the chip actually forwards. It renders through `Button`, which is
  * either a `<button>` or — with an href — an `<a>`, so the full anchor prop
@@ -107,19 +77,3 @@ export type BubbleReactionsButtonProps = Omit<
  * two elements). Declaring the anchor set wholesale only advertised props the
  * chip silently dropped.
  */
-export interface ReferenceProps {
-  /** With an href the chip renders as a link, otherwise as a button. */
-  href?: string
-  target?: React.HTMLAttributeAnchorTarget
-  rel?: string
-  id?: string
-  className?: string
-  children?: React.ReactNode
-  "aria-label"?: string
-  onClick?: React.MouseEventHandler<HTMLElement>
-  /**
-   * The passage the chip points at, shown in a preview card on hover or
-   * focus. Omitted, the chip is just a link.
-   */
-  preview?: React.ReactNode
-}

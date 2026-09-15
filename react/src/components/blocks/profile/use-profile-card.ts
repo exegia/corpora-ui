@@ -56,7 +56,9 @@ export interface ProfileCardBinding {
  * `profileCardId` outlives its component, so a fold set from elsewhere
  * (`useProfileCardActions(id).collapse()`) survives a route change.
  */
-export function useProfileCard(options: UseProfileCardOptions): ProfileCardBinding {
+export function useProfileCard(
+  options: UseProfileCardOptions
+): ProfileCardBinding {
   const {
     variant: variantProp,
     defaultVariant = "expanded",
@@ -84,24 +86,32 @@ export function useProfileCard(options: UseProfileCardOptions): ProfileCardBindi
   const setMenuOpen = useSetAtom(setProfileCardMenuOpenAtom(profileCardId))
   const select = useSetAtom(selectProfileCardActionAtom(profileCardId))
 
+  // Reads BEFORE the write effects, and the writes in passive effects: jotai
+  // (v3) subscribes `useAtomValue` in its own `useEffect` with no
+  // post-subscription recheck, so a write from a `useLayoutEffect` (or from
+  // any effect declared before the reads) lands before the subscription
+  // exists and the card never re-renders with the seeded state.
+  const variant = useAtomValue(profileCardVariantAtom(profileCardId))
+  const menuOpen = useAtomValue(profileCardMenuOpenAtom(profileCardId))
+  const busy = useAtomValue(profileCardBusyAtom(profileCardId))
+
   // Seed the uncontrolled fold once per mount, before the projection — the
-  // `default*` options describe the mount, not every render. Layout effects
-  // so children read settled values in the same commit; primitive deps, so
-  // no loop guard is needed.
+  // `default*` options describe the mount, not every render. Primitive deps,
+  // so no loop guard is needed.
   const [seed] = React.useState(() => ({
     variant: variantProp ?? defaultVariant,
     open: openProp ?? options.defaultOpen ?? false,
   }))
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     if (!controlsVariant) seedVariant(seed.variant)
     if (!controlsMenuOpen) setMenuOpen(seed.open)
     // Mount-time seed only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     project(config, variantProp, openProp)
   }, [project, config, variantProp, openProp])
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     publishHandlers(handlers)
   }, [publishHandlers, handlers])
 
@@ -109,10 +119,6 @@ export function useProfileCard(options: UseProfileCardOptions): ProfileCardBindi
     if (options.profileCardId !== undefined) return
     return () => removeProfileCardInstance(profileCardId)
   }, [options.profileCardId, profileCardId])
-
-  const variant = useAtomValue(profileCardVariantAtom(profileCardId))
-  const menuOpen = useAtomValue(profileCardMenuOpenAtom(profileCardId))
-  const busy = useAtomValue(profileCardBusyAtom(profileCardId))
 
   return {
     profileCardId,
