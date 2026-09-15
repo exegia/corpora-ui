@@ -6,14 +6,16 @@ import type { Variants } from "motion/react"
 
 import { EASE_OUT } from "@/lib/ease.ts"
 import { cn } from "@/lib/utils"
-import { initialsFrom } from "@/components/user-avatar"
+import { initialsFrom } from "@/components/atoms/avatar/utils"
 
 /** `full` shows mark + wordmark; `mark` folds the wordmark away — an icon
  * rail, a favicon-sized corner. */
 export type LogoVariant = "full" | "mark"
 
-export interface LogoProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, "children"> {
+export interface LogoProps extends Omit<
+  React.HTMLAttributes<HTMLElement>,
+  "children"
+> {
   /**
    * Brand name. Labels the logo for AT (and the link, when `href` renders
    * one), drives the default wordmark, and the monogram tile when no mark
@@ -53,8 +55,18 @@ const WORDMARK_VARIANTS: Variants = {
 }
 
 const WORDMARK_VARIANTS_REDUCED: Variants = {
-  open: { width: "auto", opacity: 1, x: 0, transition: { duration: 0.16, ease: EASE_OUT } },
-  folded: { width: 0, opacity: 0, x: 0, transition: { duration: 0.16, ease: EASE_OUT } },
+  open: {
+    width: "auto",
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.16, ease: EASE_OUT },
+  },
+  folded: {
+    width: 0,
+    opacity: 0,
+    x: 0,
+    transition: { duration: 0.16, ease: EASE_OUT },
+  },
 }
 
 /**
@@ -81,26 +93,26 @@ export function Logo({
   const reduce = useReducedMotion()
   const folded = variant === "mark"
 
-  const markNode = mark ?? (
-    src !== undefined ? (
+  const markNode =
+    mark ??
+    (src !== undefined ? (
       // Decorative: the root's `name` (visible wordmark or aria-label)
       // already names the brand.
       <img alt="" className="size-full object-contain" src={src} />
     ) : (
       <span
         aria-hidden="true"
-        className="flex size-full items-center justify-center rounded-lg bg-foreground font-semibold text-background text-[45cqw]"
+        className="flex size-full items-center justify-center rounded-lg bg-foreground text-[45cqw] font-semibold text-background"
         data-slot="logo-monogram"
       >
         {initialsFrom(name)}
       </span>
-    )
-  )
+    ))
 
   const content = (
     <>
       <span
-        className="size-8 shrink-0 @container [&_svg]:size-full"
+        className="@container size-8 shrink-0 [&_svg]:size-full"
         data-slot="logo-mark"
       >
         {markNode}
@@ -112,7 +124,7 @@ export function Logo({
         // the brand on its own.
         aria-hidden={folded || undefined}
         className={cn(
-          "min-w-0 overflow-hidden font-semibold whitespace-nowrap tracking-tight",
+          "min-w-0 overflow-hidden font-semibold tracking-tight whitespace-nowrap",
           folded && "pointer-events-none",
           // 0px wide while folded, but the flex gap before it would still
           // offset the mark — pull it back by that gap.

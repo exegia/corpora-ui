@@ -7,7 +7,7 @@ import type { BubbleProps } from "./types"
 import { twBubbleAlignClasses, twBubbleColumnClasses } from "./utils"
 
 export function Bubble({
-  variant = "recipient",
+  variant = "sender",
   continued = false,
   className,
   children,

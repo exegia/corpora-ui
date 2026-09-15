@@ -14,9 +14,7 @@ export function BubbleMessage({
   return (
     <div
       className={cn(
-        "relative select-none",
-    //
-        twBubbleMessageClasses["default"],
+        "relative select-none flex-col gap-y-2",
         twBubbleMessageClasses[variant],
         className
       )}

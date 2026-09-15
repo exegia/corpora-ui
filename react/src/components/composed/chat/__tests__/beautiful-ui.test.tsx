@@ -2,7 +2,8 @@ import { describe, expect, mock, test } from "bun:test"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { Provider } from "jotai"
 
-import { FilterTable, RecordsTable, StreamingText } from "../index"
+import { FilterTable, RecordsTable } from "../index"
+import { StreamingText } from "../../ai/streaming-text"
 
 describe("StreamingText", () => {
   test("shows all text without streaming, with the inline source chip", () => {

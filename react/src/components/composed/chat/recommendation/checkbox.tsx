@@ -1,6 +1,6 @@
 "use client"
 
-import { Check, X } from "lucide-react"
+import { Check, Sparkle, X } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import type * as React from "react"
 import { EASE_OUT_STRONG } from "@/lib/ease"
@@ -20,9 +20,10 @@ const R = (SIZE - STROKE) / 2
 const C = 2 * Math.PI * R
 
 /**
- * Outcome mark after beautiful-ui's Task Rows: a spinning ring while pending
- * (with the step number inside), then a filled badge that pops in — green
- * check when accepted, red cross when rejected.
+ * Outcome mark after beautiful-ui's Task Rows: a Sparkle while the proposal
+ * waits for approval, a spinning ring once the agent is running (with the
+ * step number inside), then a filled badge that pops in — green check when
+ * accepted, red cross when rejected.
  */
 export function Checkbox({
   state,
@@ -36,7 +37,10 @@ export function Checkbox({
 
   return (
     <span
-      className={cn("relative inline-grid shrink-0 place-items-center", className)}
+      className={cn(
+        "relative inline-grid shrink-0 place-items-center",
+        className
+      )}
       data-slot="recommendation-state"
       data-state={state}
       style={{ width: SIZE, height: SIZE }}
@@ -46,6 +50,21 @@ export function Checkbox({
           <motion.span
             key="pending"
             animate={{ scale: 1, opacity: 1 }}
+            className="inline-grid place-items-center [grid-area:1/1]"
+            exit={{ scale: 0.4, opacity: 0 }}
+            initial={{ scale: 0.4, opacity: 0 }}
+            style={{ width: SIZE, height: SIZE }}
+            transition={transition}
+          >
+            <Sparkle
+              aria-hidden="true"
+              className="size-4 fill-indigo-500/25 stroke-[1.75] text-indigo-600 dark:text-indigo-400"
+            />
+          </motion.span>
+        ) : state === "running" ? (
+          <motion.span
+            key="running"
+            animate={{ scale: 1, opacity: 1 }}
             className="relative inline-grid place-items-center [grid-area:1/1]"
             exit={{ scale: 0.4, opacity: 0 }}
             initial={{ scale: 0.4, opacity: 0 }}
@@ -54,11 +73,21 @@ export function Checkbox({
           >
             <svg
               aria-hidden="true"
-              className={cn("absolute inset-0", !reduceMotion && "animate-spin [animation-duration:1.1s]")}
+              className={cn(
+                "absolute inset-0",
+                !reduceMotion && "animate-spin [animation-duration:1.1s]"
+              )}
               height={SIZE}
               width={SIZE}
             >
-              <circle className="stroke-border-default" cx={SIZE / 2} cy={SIZE / 2} fill="none" r={R} strokeWidth={STROKE} />
+              <circle
+                className="stroke-border-default"
+                cx={SIZE / 2}
+                cy={SIZE / 2}
+                fill="none"
+                r={R}
+                strokeWidth={STROKE}
+              />
               <circle
                 className="stroke-text-muted"
                 cx={SIZE / 2}
@@ -71,7 +100,9 @@ export function Checkbox({
               />
             </svg>
             {step !== undefined ? (
-              <span className="relative text-[9px] font-semibold tabular-nums text-text-primary">{step}</span>
+              <span className="relative text-[9px] font-semibold text-text-primary tabular-nums">
+                {step}
+              </span>
             ) : null}
           </motion.span>
         ) : (
@@ -80,7 +111,9 @@ export function Checkbox({
             animate={{ scale: 1, opacity: 1 }}
             className={cn(
               "inline-grid place-items-center rounded-full text-white [grid-area:1/1]",
-              state === "accepted" ? "bg-semantic-success" : "bg-semantic-danger"
+              state === "accepted"
+                ? "bg-semantic-success"
+                : "bg-semantic-danger"
             )}
             exit={{ scale: 0.4, opacity: 0 }}
             initial={{ scale: 0, opacity: 0 }}

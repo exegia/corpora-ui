@@ -1,6 +1,6 @@
 import type * as React from "react"
 
-import type { UserPresence } from "@/components/user-avatar"
+import type { AvatarStatus } from "@/components/atoms"
 
 /** The identity shown on the card. */
 export interface ProfileCardUser {
@@ -12,7 +12,7 @@ export interface ProfileCardUser {
   /** Fallback initials. Derived from `name` when omitted. */
   initials?: string
   /** Presence badge on the avatar. Omitted, no badge. */
-  presence?: UserPresence
+  presence?: AvatarStatus
 }
 
 /** An actionable row of the menu. */
@@ -45,9 +45,7 @@ export interface ProfileCardSeparator {
  * separators as its own menu group so a label actually names its section.
  */
 export type ProfileCardItem =
-  | ProfileCardAction
-  | ProfileCardLabel
-  | ProfileCardSeparator
+  ProfileCardAction | ProfileCardLabel | ProfileCardSeparator
 
 /** `expanded` shows avatar, name and handle; `collapsed` folds to the avatar
  * alone — for an icon-collapsed sidebar rail. */

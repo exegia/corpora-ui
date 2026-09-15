@@ -5,13 +5,16 @@ import {
   Bubble,
   type BubblePickedEmoji,
   type BubbleReaction,
+  type UserType,
 } from "@/components/atoms"
+import User from "@/components/composed/user"
 import { Button } from "@/components/ui/button"
 import {
   DemoSelect,
   DemoStage,
   DemoToggle,
 } from "@/components/docs/demo-controls"
+import AI from "@/components/composed/ai";
 
 const VARIANTS = ["sender", "recipient", "ai"] as const
 
@@ -24,18 +27,17 @@ const COPY: Record<DemoVariant, string> = {
   ai: "The paragraph boundary is valid. Node p-17 has a label mismatch — accept the suggested fix to align it with the schema.",
 }
 
-const HEADER: Record<
-  DemoVariant,
-  { name: string; time: string; badge?: string }
-> = {
-  sender: { name: "Sender", time: "10 min ago", badge: "Admin" },
-  recipient: { name: "Recipient", time: "5 min ago" },
-  ai: { name: "Exegia", time: "2 min ago", badge: "Agent" },
+const HEADER: Record<DemoVariant, { user: UserType; time: string }> = {
+  sender: {
+    user: { firstName: "Sen", lastName: "Der", role: "Admin" },
+    time: "10 min ago",
+  },
+  recipient: { user: { firstName: "Recipient" }, time: "5 min ago" },
+  ai: { user: { firstName: "Exegia", role: "Agent" }, time: "2 min ago" },
 }
 
 export default function BubbleDemo(): React.ReactElement {
-  const [variant, setVariant] =
-    React.useState<DemoVariant>("sender")
+  const [variant, setVariant] = React.useState<DemoVariant>("sender")
   const [withHeader, setWithHeader] = React.useState(true)
   const [withReactions, setWithReactions] = React.useState(true)
   const [withActions, setWithActions] = React.useState(false)
@@ -61,11 +63,18 @@ export default function BubbleDemo(): React.ReactElement {
     setReactions((previous) => {
       const at = previous.findIndex((reaction) => reaction.emoji === emoji)
       if (at === -1) {
-        return [...previous, { id: emoji, emoji, count: 1, reacted: true, label }]
+        return [
+          ...previous,
+          { id: emoji, emoji, count: 1, reacted: true, label },
+        ]
       }
       return previous.map((reaction, index) =>
         index === at
-          ? { ...reaction, reacted: true, count: (reaction.count ?? 0) + (reaction.reacted ? 0 : 1) }
+          ? {
+              ...reaction,
+              reacted: true,
+              count: (reaction.count ?? 0) + (reaction.reacted ? 0 : 1),
+            }
           : reaction
       )
     })
@@ -99,13 +108,11 @@ export default function BubbleDemo(): React.ReactElement {
       }
     >
       <div className="mx-auto w-full max-w-sm">
-        <Bubble variant={variant}>
+        <Bubble variant={variant} continued>
           {withHeader && (
-            <Bubble.Header
-              badge={HEADER[variant].badge}
-              name={HEADER[variant].name}
-              time={HEADER[variant].time}
-            />
+            <Bubble.Header>
+              {variant === "ai" ? <AI.Avatar /> : <User.Info user={HEADER[variant].user} direction={variant} variant="info" />}
+            </Bubble.Header>
           )}
           <Bubble.Message>{COPY[variant]}</Bubble.Message>
           {withReactions && variant !== "ai" && (

@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
-import { useAtomValue, useSetAtom } from "jotai"
+import { useAtomValueRawSync, useSetAtom } from "jotai"
 
 import {
   resetShellPanelWidthAtom,
@@ -23,7 +23,7 @@ import type { ShellFitActions, ShellFitInstanceId, ShellFitState } from "./type"
  * field's atom instead: `useAtomValue(shellFitFitsAtom("app-shell"))`.
  */
 export function useShellFitState(shellId: ShellFitInstanceId): ShellFitState {
-  return useAtomValue(shellFitStateAtom(shellId))
+  return useAtomValueRawSync(shellFitStateAtom(shellId))
 }
 
 /**

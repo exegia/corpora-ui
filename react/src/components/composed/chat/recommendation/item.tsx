@@ -142,14 +142,16 @@ export function Item({
               ) : null}
             </span>
           </div>
-          {state === "pending" ? null : (
+          {state === "accepted" || state === "rejected" ? (
             <Tag className="uppercase" tone={STATE_TONE[state]}>
               {STATE_LABEL[state]}
             </Tag>
-          )}
+          ) : null}
         </AccordionTrigger>
 
-        <AccordionPanel className="px-0 pb-0">
+        {/* `relative`: the frame's ::before veil is positioned, so an
+            unpositioned panel body would paint under it and look faded. */}
+        <AccordionPanel className="relative px-0 pb-0">
           {options.length ? (
             <Card className="mx-3 rounded-md before:rounded-[calc(var(--radius-md)-1px)]">
               <CardPanel className="flex flex-col gap-2 px-3.5 py-2.5">
@@ -188,7 +190,11 @@ export function Item({
             </span>
             <span className="ml-auto flex items-center gap-2">
               <AnimatePresence initial={false} mode="wait">
-                {state === "pending" ? (
+                {state === "running" ? (
+                  // The spinner in the heading already reports progress; the
+                  // approval actions are gone and Undo is not offered mid-run.
+                  <motion.div {...ACTION_MOTION} key="running" />
+                ) : state === "pending" ? (
                   <motion.div
                     {...ACTION_MOTION}
                     className="flex items-center gap-2"

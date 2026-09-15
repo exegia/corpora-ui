@@ -1,6 +1,13 @@
 export * from "./bubble"
 export { SelectChip, SourceChip as FlowchartSourceChip } from "./chip"
 export * from "./text"
+export * from "./background"
+export * from "./avatar"
+export * from "./loader"
+export * from "./reference"
+
+export type { ReferenceProps } from "./types"
+
 export {
   HighlightPopover,
   TextClickPopover,
@@ -35,3 +42,11 @@ export type {
   UseSelectionOptions,
   UseSelectionResult,
 } from "./text-selection/types"
+export type {
+  AvatarAudio,
+  AvatarProps,
+  AvatarSize,
+  AvatarStatus,
+  UserType,
+} from "./avatar/types"
+export type { ILoaderProps, TLoaderType } from "./loader"

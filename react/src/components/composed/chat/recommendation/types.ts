@@ -13,7 +13,12 @@ export interface RecommendationEntity {
   src?: string
 }
 
-export type RecommendationState = "accepted" | "rejected" | "pending"
+export type RecommendationState =
+  | "accepted"
+  | "rejected"
+  | "pending"
+  /** The proposal was approved and the agent is working on it. */
+  | "running"
 
 /** Shared fields of a human-in-the-loop proposal. */
 export interface RecommendationFields {
@@ -44,7 +49,8 @@ export interface RecommendationFields {
 }
 
 export interface RecommendationItemProps
-  extends RecommendationFields,
+  extends
+    RecommendationFields,
     Omit<React.ComponentPropsWithoutRef<"div">, "title" | "children"> {
   /** Accordion item identity. Required inside `Recommendation.Group`. */
   value: string
