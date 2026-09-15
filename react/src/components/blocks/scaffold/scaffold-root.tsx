@@ -63,23 +63,26 @@ export function ScaffoldRoot({
   const seedInspector = useSetAtom(seedScaffoldInspectorAtom(scaffoldId))
 
   // Seed the uncontrolled inspector once per mount, before the projection —
-  // `defaultInspectorOpen` describes the mount, not every render. Layout
-  // effects so children read settled values in the same commit; primitive
-  // deps, so no loop guard is needed.
+  // `defaultInspectorOpen` describes the mount, not every render. Passive
+  // effects on purpose: jotai (v3) subscribes readers in their own
+  // `useEffect` with no post-subscription recheck, and the children's
+  // subscription effects run before this parent's passive effects — a
+  // `useLayoutEffect` write would land before any subscription exists and
+  // the readers would never re-render with the seeded state.
   const [seed] = React.useState(
     () => inspectorOpenProp ?? defaultInspectorOpen ?? false
   )
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     if (!controlsInspector) seedInspector(seed)
     // Mount-time seed only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   // Handlers before the projection — they must be in the store before any
   // action can fire.
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     publishHandlers(handlers)
   }, [publishHandlers, handlers])
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     project(config, inspectorOpenProp)
   }, [project, config, inspectorOpenProp])
 

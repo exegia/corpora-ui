@@ -1,21 +1,19 @@
+"use client"
+
 import type * as React from "react"
 
+import { Card, CardContent } from "@/components/ui/card"
+import { Field, FieldLabel } from "@/components/ui/field"
+import { Switch } from "@/components/ui/switch"
 import {
   Select,
+  SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  SelectContent,
 } from "@/components/ui/select"
-import { Field, FieldLabel } from "@/components/ui/field"
-import { Card, CardContent } from "@/components/ui/card"
-import { Switch } from "../ui/switch"
 
-/**
- * Lightweight playground controls for registry demos — docs-only, never
- * part of the published library.
- */
-
+/** Lightweight controls for docs demos; never part of the npm surface. */
 export function DemoSelect<T extends string>({
   label,
   value,
@@ -27,11 +25,16 @@ export function DemoSelect<T extends string>({
   options: readonly T[]
   onChange: (value: T) => void
 }) {
-  const items = options.map((option) => ({ label: option, value: option }))
+  const items = options.map((option) => ({
+    label: option,
+    value: option,
+  }))
 
   return (
     <Field className="ml-0 flex w-full flex-1 flex-row items-center justify-between text-muted-foreground">
-      {label && <FieldLabel className="ml-0 capitalize">{label}</FieldLabel>}
+      {label ? (
+        <FieldLabel className="ml-0 capitalize">{label}</FieldLabel>
+      ) : null}
       <Select
         items={items}
         onValueChange={(next) => onChange(next as T)}
@@ -55,11 +58,7 @@ export function DemoSelect<T extends string>({
   )
 }
 
-/**
- * Stand-in brand mark for demos of the auth blocks' `logo` slot. Deliberately
- * unbranded — it exists to show the slot's spacing and default sizing, not to
- * represent a real product.
- */
+/** Stand-in brand mark for demos of a block's logo slot. */
 export function DemoBrandMark() {
   return (
     <svg
@@ -112,7 +111,7 @@ export function DemoToggle({
   )
 }
 
-/** Standard layout: centered preview canvas above a wrapping controls row. */
+/** Standard layout: centered preview canvas above a controls row. */
 export function DemoStage({
   controls,
   children,
@@ -124,16 +123,17 @@ export function DemoStage({
 }) {
   return (
     <div className="relative flex w-full flex-col items-center">
-      {controls && (
+      {controls ? (
         <Card className="absolute top-3 right-3 z-20 min-w-48 rounded-lg shadow-lg">
           <CardContent className="flex flex-col items-start gap-2">
             {controls}
           </CardContent>
         </Card>
-      )}
+      ) : null}
       <div
         className={
-          canvasClassName ?? "flex min-h-24 w-full items-center justify-center"
+          canvasClassName ??
+          "flex min-h-24 w-full items-center justify-center"
         }
       >
         {children}

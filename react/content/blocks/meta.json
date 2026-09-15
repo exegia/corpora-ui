@@ -1,0 +1,21 @@
+{
+  "title": "Blocks",
+  "pages": [
+    "index",
+    "login",
+    "signup",
+    "forgot-password",
+    "code-auth",
+    "update-password",
+    "passkey-sign-in",
+    "passkey-manager",
+    "linked-accounts",
+    "onboarding",
+    "auth-flow",
+    "profile-card",
+    "navbar",
+    "shell",
+    "scaffold",
+    "chat"
+  ]
+}

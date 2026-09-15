@@ -7,7 +7,16 @@
  */
 
 // atoms
-export * from "./components/ui/avatar"
+export * from "./components/atoms"
+// ui/avatar: named, not `export *` — the atoms barrel above owns the bare
+// `Avatar` name (the composed identity disc); these are the raw primitives.
+export {
+  AvatarBadge,
+  AvatarFallback,
+  AvatarGroup,
+  AvatarGroupCount,
+  AvatarImage,
+} from "./components/ui/avatar"
 export * from "./components/ui/button"
 export * from "./components/ui/card"
 export * from "./components/ui/checkbox"
@@ -17,6 +26,9 @@ export * from "./components/ui/input"
 export * from "./components/ui/input-group"
 export * from "./components/ui/label"
 export * from "./components/ui/menu"
+export * from "./components/ui/menu-command"
+export * from "./components/ui/context-menu"
+export * from "./components/ui/toast"
 export * from "./components/ui/otp-field"
 export * from "./components/ui/separator"
 export * from "./components/ui/skeleton"
@@ -27,39 +39,15 @@ export * from "./components/ui/textarea"
 export * from "./components/icons"
 
 // components
+export * from "./components/composed/ai"
 export * from "./components/composed/logo"
 export * from "./components/composed/password-input"
 export * from "./components/composed/social-providers"
+export * from "./components/composed/reader"
 export * from "./components/composed/tree"
-// user-avatar: named, not `export *` — its barrel also exports an `Avatar`
-// namespace object that would collide with ui/avatar's component above.
-export {
-  DEFAULT_BEZEL_ANGLE,
-  PresenceBadge,
-  UserAvatar,
-  initialsFrom,
-  removeUserAvatarInstance,
-  resetUserAvatarAtom,
-  setUserAvatarBezelAngleAtom,
-  setUserAvatarPresenceAtom,
-  toggleUserAvatarPresenceAtom,
-  useUserAvatar,
-  useUserAvatarActions,
-  useUserAvatarState,
-  userAvatarBezelAngleAtom,
-  userAvatarIsOnlineAtom,
-  userAvatarPresenceAtom,
-  userAvatarStateAtom,
-} from "./components/user-avatar"
-export type {
-  UseUserAvatarOptions,
-  UserAvatarActions,
-  UserAvatarBinding,
-  UserAvatarInstanceId,
-  UserAvatarProps,
-  UserAvatarState,
-  UserPresence,
-} from "./components/user-avatar"
+export * from "./components/composed/verse"
+// The old `components/user-avatar` module was removed (92f029c); the avatar
+// now lives in `components/atoms/avatar` and flows through the atoms barrel.
 
 // blocks
 export * from "./components/blocks/auth/auth-shell"
@@ -85,7 +73,7 @@ export * from "./components/blocks/profile"
 export * from "./components/motion/shared-layout-bg"
 
 // state
-export * from "./state"
+export * from "./lib/state"
 
 // The v0.17 sidebar monolith became the shell block's AnimatedPanel parts.
 // `blocks/shell` above already exports every part under its new name; these
@@ -104,3 +92,9 @@ export * from "./lib/auth-accent"
 export * from "./lib/ease"
 export * from "./lib/sound"
 export * from "./lib/utils"
+
+// chat (exegia-ui Sketch library)
+export * from "./components/ui/chat"
+export * from "./components/composed/chat"
+export * from "./components/blocks/chat"
+export * from "./lib/keyed-atom"

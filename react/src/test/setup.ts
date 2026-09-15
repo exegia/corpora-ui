@@ -25,7 +25,7 @@ if (!window.matchMedia) {
     addEventListener: () => {},
     removeEventListener: () => {},
     dispatchEvent: () => false,
-  })) as typeof window.matchMedia;
+  })) as typeof window.matchMedia
 }
 
 // happy-dom ships no Web Animations API. Defining `animate` makes motion take
@@ -33,7 +33,11 @@ if (!window.matchMedia) {
 // `onfinish` leave AnimatePresence holding removed children forever (the
 // element only unmounted when an entering sibling happened to flush it).
 // Finishing on a macrotask lets exit animations resolve instantly.
-if (!Element.prototype.animate) {
+// Installed unconditionally: happy-dom ≥20 ships a real `animate` whose
+// Animation runs on the wall clock and rejects `finished` with an AbortError
+// when motion cancels an in-flight spring — slow exits and a failed test on
+// every interrupted animation. The stub finishes on a macrotask instead.
+{
   Element.prototype.animate = (() => {
     const animation = {
       cancel: () => {},
@@ -56,9 +60,9 @@ if (!Element.prototype.animate) {
   }) as unknown as typeof Element.prototype.animate
 }
 
-const { afterEach } = await import("bun:test");
-const { cleanup } = await import("@testing-library/react");
+const { afterEach } = await import("bun:test")
+const { cleanup } = await import("@testing-library/react")
 
 afterEach(() => {
-  cleanup();
-});
+  cleanup()
+})

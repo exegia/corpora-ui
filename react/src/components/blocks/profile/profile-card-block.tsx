@@ -17,7 +17,7 @@ import {
   LABEL_EXIT_TRANSITION,
   REDUCED_TRANSITION,
 } from "@/components/blocks/shell/utils"
-import { UserAvatar } from "@/components/user-avatar"
+import { Avatar } from "@/components/atoms/avatar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -116,13 +116,8 @@ export interface ProfileCardBlockProps {
    * `useId` and are dropped on unmount.
    */
   profileCardId?: string
-  /**
-   * Presence badge on the avatar — overrides `user.presence`. Name the avatar
-   * with `avatarId` and `useUserAvatarActions(id).setPresence()` can flip it
-   * from a socket handler instead.
-   */
+  /** Presence badge on the avatar — overrides `user.presence`. */
   presence?: ProfileCardUser["presence"]
-  avatarId?: string
   /**
    * Emit cuelume press/release on the card and play the open/close cues.
    * Inert unless the app opts into interaction sound via `bindSounds()`.
@@ -178,7 +173,6 @@ export function ProfileCardBlock({
   onVariantChange,
   profileCardId,
   presence,
-  avatarId,
   open,
   defaultOpen,
   onOpenChange,
@@ -244,7 +238,7 @@ export function ProfileCardBlock({
               // `sm:h-10` because the base carries an `sm:h-auto` that an
               // unprefixed height would not beat.
               collapsed &&
-                "h-10 w-full shrink-0 justify-center rounded-xl p-0 sm:h-10",
+                "h-10 w-full shrink-0 justify-center rounded-md p-0 sm:h-10",
               className
             )}
             data-collapsed={collapsed ? "" : undefined}
@@ -263,14 +257,18 @@ export function ProfileCardBlock({
                 collapsed ? "w-auto gap-0" : "w-full gap-2"
               )}
             >
-              <UserAvatar
-                // Decorative: the name beside it already labels the card.
-                alt=""
-                avatarId={avatarId}
-                initials={user.initials}
-                name={user.name}
-                presence={presence ?? user.presence}
-                src={user.avatar}
+              <Avatar
+                size="default"
+                user={{
+                  // The atoms avatar derives initials from first + last name;
+                  // explicit `user.initials` win by standing in for the pair.
+                  firstName: user.initials?.[0] ?? user.name.split(/\s+/)[0],
+                  lastName:
+                    user.initials?.[1] ??
+                    user.name.split(/\s+/).slice(1).at(-1),
+                  avatarUrl: user.avatar,
+                  status: presence ?? user.presence,
+                }}
               />
               <motion.span
                 animate={{

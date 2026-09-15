@@ -1,0 +1,42 @@
+---
+title: "Verse"
+description: "Corpus verse line: a chapter link plus inline spans and note markers, each opening a click popover."
+---
+
+import { Preview } from "@/components/composed/verse.story"
+
+import Demo from "@/registry/demos/verse-demo"
+
+## Preview
+
+Use the controls to explore the component's props.
+
+<Preview />
+
+## Usage
+
+```tsx
+import { Verse, VerseNote, VerseSpan } from "@exegia/corpora-ui"
+
+<Verse chapter="1:1" href="#gen-1" chapterPopover={<p>Genesis 1</p>}>
+  In the beginning{" "}
+  <VerseSpan popover={<p>Hebrew bereshit.</p>}>God created</VerseSpan>{" "}
+  the heavens and the earth
+  <VerseNote popover={<p>Textual note.</p>}>a</VerseNote>.
+</Verse>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `chapter` | `ReactNode` | — | Chapter reference rendered as a leading superscript link. |
+| `href` | `string` | — | Destination of the chapter link. |
+| `chapterPopover / renderChapterPopover` | `ReactNode \| (props: TextPopoverRenderProps) => ReactNode` | — | Popover opened by clicking the chapter reference. Without it the chapter is a plain link. |
+| `size` | `"small" \| "medium" \| "large" \| number` | `"medium"` | Type scale for the verse. Nested VerseSpan/VerseNote inherit it unless they set their own. |
+
+## Examples
+
+Explore the complete demo, including its additional variants and interactions.
+
+<Demo />

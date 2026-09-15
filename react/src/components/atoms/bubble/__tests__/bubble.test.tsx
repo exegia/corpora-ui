@@ -1,0 +1,138 @@
+import { describe, expect, mock, test } from "bun:test"
+import { render, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
+import { Bubble, type BubbleReaction } from "../index"
+import User from "@/components/composed/user"
+
+describe("Bubble", () => {
+  test("header renders the user's identity row, time and role badge", () => {
+    render(
+      <Bubble variant="sender">
+        <Bubble.Header>
+          <User.Info user={{ firstName: "Sen", lastName: "Der", role: "Admin" }} variant="info" />
+        </Bubble.Header>
+        <Bubble.Message>Hello</Bubble.Message>
+      </Bubble>
+    )
+    expect(screen.getByText(/Sen\s+Der/)).toBeDefined()
+    expect(screen.getByText("Admin")).toBeDefined()
+  })
+
+  test("without children the header only carries the header slot", () => {
+    const { container } = render(
+      <Bubble variant="ai">
+        <Bubble.Header />
+        <Bubble.Message>Generated</Bubble.Message>
+      </Bubble>
+    )
+    expect(
+      container.querySelector('[data-slot="bubble-header"]')
+    ).not.toBeNull()
+    expect(container.querySelector('[data-slot="bubble-header"]')?.textContent).toBe("")
+    expect(screen.queryByText("Exegia")).toBeNull()
+    expect(screen.queryByText("AI Scholar")).toBeNull()
+  })
+
+  test("reaction chips expose aria-pressed and report toggles by index", async () => {
+    const user = userEvent.setup()
+    const onToggle = mock((_reaction: BubbleReaction, _index: number) => {})
+    render(
+      <Bubble variant="recipient">
+        <Bubble.Message>Hi</Bubble.Message>
+        <Bubble.Reactions
+          onToggle={onToggle}
+          reactions={[
+            {
+              id: "heart",
+              emoji: "❤️",
+              count: 4,
+              reacted: true,
+              label: "heart",
+            },
+            { id: "thumbs", emoji: "👍", count: 2, label: "thumbs up" },
+          ]}
+        />
+      </Bubble>
+    )
+    const heart = screen.getByRole("button", { name: "heart" })
+    expect(heart.getAttribute("aria-pressed")).toBe("true")
+    expect(heart.textContent).toContain("4")
+    const thumbs = screen.getByRole("button", { name: "thumbs up" })
+    expect(thumbs.getAttribute("aria-pressed")).toBe("false")
+    await user.click(thumbs)
+    expect(onToggle).toHaveBeenCalledTimes(1)
+    expect(onToggle.mock.calls[0]?.[1]).toBe(1)
+  })
+
+  test("the add-reaction button opens the quick reaction bar, not the full picker", async () => {
+    const user = userEvent.setup()
+    render(
+      <Bubble variant="recipient">
+        <Bubble.Message>Hi</Bubble.Message>
+        <Bubble.Reactions reactions={[]} />
+      </Bubble>
+    )
+    // The popup is `keepMounted`, so it is in the DOM from the start — closed
+    // is what matters, and base-ui hides it from the a11y tree until then.
+    const trigger = screen.getByRole("button", { name: "Add reaction" })
+    expect(trigger.getAttribute("aria-expanded")).toBe("false")
+    expect(screen.queryByRole("button", { name: "heart" })).toBeNull()
+    await user.click(trigger)
+
+    expect(await screen.findByRole("button", { name: "heart" })).toBeDefined()
+    // The full picker is what costs a CDN fetch, so it must stay unmounted
+    // until "More" is pressed.
+    expect(document.querySelector('[data-slot="emoji-picker"]')).toBeNull()
+    expect(screen.queryByRole("searchbox")).toBeNull()
+  })
+
+  test('"More emoji" swaps the quick bar for the full picker', async () => {
+    const user = userEvent.setup()
+    render(
+      <Bubble variant="recipient">
+        <Bubble.Message>Hi</Bubble.Message>
+        <Bubble.Reactions reactions={[]} />
+      </Bubble>
+    )
+    await user.click(screen.getByRole("button", { name: "Add reaction" }))
+    await user.click(await screen.findByRole("button", { name: "More emoji" }))
+
+    expect(await screen.findByRole("searchbox")).toBeDefined()
+    expect(document.querySelector('[data-slot="emoji-picker"]')).not.toBeNull()
+    expect(screen.queryByRole("button", { name: "heart" })).toBeNull()
+  })
+
+  test("picking a quick reaction reports the emoji and closes the popover", async () => {
+    const user = userEvent.setup()
+    const onEmojiSelect = mock(
+      (_picked: { emoji: string; label: string }) => {}
+    )
+    render(
+      <Bubble variant="recipient">
+        <Bubble.Message>Hi</Bubble.Message>
+        <Bubble.Reactions onEmojiSelect={onEmojiSelect} reactions={[]} />
+      </Bubble>
+    )
+    await user.click(screen.getByRole("button", { name: "Add reaction" }))
+    await user.click(await screen.findByRole("button", { name: "thumbs up" }))
+
+    expect(onEmojiSelect).toHaveBeenCalledTimes(1)
+    expect(onEmojiSelect.mock.calls[0]?.[0]).toEqual({
+      emoji: "\u{1F44D}",
+      label: "thumbs up",
+    })
+  })
+
+  test("root carries the variant for styling hooks", () => {
+    const { container } = render(
+      <Bubble variant="sender">
+        <Bubble.Message>Out</Bubble.Message>
+      </Bubble>
+    )
+    expect(
+      container
+        .querySelector('[data-slot="bubble"]')
+        ?.getAttribute("data-variant")
+    ).toBe("sender")
+  })
+})

@@ -1,0 +1,37 @@
+---
+title: "Records table"
+description: "Selectable records with an initial avatar, tags with +N overflow, relative date and connection strength. Selection lives in recordsTableSelectionAtom(id); sorting is a callback only."
+---
+
+import { Preview } from "@/components/composed/records-table.story"
+
+import Demo from "@/registry/demos/records-table-demo"
+
+## Preview
+
+Use the controls to explore the component's props.
+
+<Preview />
+
+## Usage
+
+```tsx
+import { RecordsTable } from "@exegia/corpora-ui"
+
+<RecordsTable rows={rows} onSortChange={sortBy} />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `rows` (required) | `RecordsRow[]` | — | id, name, initial, tags, lastInteraction, strength. |
+| `selected / onSelectionChange` | `ReadonlySet<string>` | — | Controlled selection. |
+| `onSortChange` | `(column) => void` | — | Header sort control; the design shows no direction. |
+| `maxTags` | `number` | `2` | Tags shown before +N. |
+
+## Examples
+
+Explore the complete demo, including its additional variants and interactions.
+
+<Demo />

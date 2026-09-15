@@ -1,6 +1,9 @@
+"use client"
+
 import * as React from "react"
 
 import { DemoSelect, DemoStage, DemoToggle } from "@/components/docs/demo-controls"
+import { Label } from "@/components/ui/label"
 import { OTPField, OTPFieldInput } from "@/components/ui/otp-field"
 
 const LENGTHS = ["4", "6"] as const
@@ -30,7 +33,11 @@ export default function OtpFieldDemo() {
         </>
       }
     >
+      <Label className="sr-only" htmlFor="otp-demo">
+        One-time passcode
+      </Label>
       <OTPField
+        id="otp-demo"
         length={count}
         value={value}
         onValueChange={setValue}

@@ -1,3 +1,5 @@
+"use client"
+
 import { LogOutIcon, SettingsIcon, UserIcon, UserPlusIcon, UsersIcon } from "lucide-react"
 import * as React from "react"
 

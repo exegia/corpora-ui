@@ -178,7 +178,7 @@ export function ProfileStep({
                 id={controlId}
                 aria-invalid={error ? true : undefined}
                 className={cn(
-                  "h-8.5 w-full rounded-lg border border-input bg-background px-[calc(--spacing(3)-1px)] text-base text-foreground shadow-xs/5 outline-none transition-[box-shadow,border-color] duration-150 ease-smooth-out focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/24 disabled:opacity-64 aria-invalid:border-destructive/36 sm:h-7.5 sm:text-sm dark:bg-input/32",
+                  "h-8.5 w-full rounded-md border border-input bg-background px-[calc(--spacing(3)-1px)] text-base text-foreground shadow-xs/5 outline-none transition-[box-shadow,border-color] duration-150 ease-smooth-out focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/24 disabled:opacity-64 aria-invalid:border-destructive/36 sm:h-7.5 sm:text-sm dark:bg-input/32",
                 )}
                 disabled={submitting}
                 value={String(value ?? "")}

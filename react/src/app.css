@@ -1,0 +1,40 @@
+@import "tailwindcss";
+@import "tailwind-animations";
+
+
+@import 'fumadocs-ui/css/shadcn.css';
+@import "fumadocs-ui/css/preset.css";
+@import "./index.css";
+@import "fumapress/css/preset.css";
+@import "@fumadocs/story/css/preset.css";
+
+
+
+@theme {
+  --font-mono: "JetBrains Mono", monospace;
+  --default-font-family: "Geist", sans-serif;
+
+  
+  
+}
+
+/* fumadocs' theme css re-sets its colors under `.dark`, so the accent is
+   set per mode here rather than in @theme. */
+:root {
+  /*--primary: var(--color-amber-600);*/
+  /*--primary-foreground: var(--color-amber-50);*/
+  --ring: var(--color-amber-600);
+  --color-fd-primary: var(--color-amber-500);
+  --color-fd-primary-foreground: var(--color-amber-50);
+  --color-fd-ring: var(--color-amber-600);
+  --color-fd-card: var(--color-sidebar);
+}
+
+.dark {
+  /*--primary: var(--color-amber-300);*/
+  /*--primary-foreground: var(--color-amber-950);*/
+  --ring: var(--color-amber-300);
+  --color-fd-primary: var(--color-amber-300);
+  --color-fd-primary-foreground: var(--color-amber-950);
+  --color-fd-ring: var(--color-amber-300);
+}

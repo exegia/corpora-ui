@@ -170,7 +170,7 @@ export function PasskeyManagerBlock({
                         <motion.li
                           key={passkey.id}
                           layout
-                          className="flex flex-col gap-2 rounded-lg border px-3 py-2"
+                          className="flex flex-col gap-2 rounded-md border px-3 py-2"
                           initial={{ opacity: 0, y: -4 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -4 }}
@@ -275,7 +275,7 @@ export function PasskeyManagerBlock({
 
                           <Reveal show={confirmingId === passkey.id}>
                             <div
-                              className="flex flex-col gap-2 rounded-lg bg-muted/50 p-2"
+                              className="flex flex-col gap-2 rounded-md bg-muted/50 p-2"
                               role="alertdialog"
                               aria-label={`Confirm deleting ${name}`}
                             >
