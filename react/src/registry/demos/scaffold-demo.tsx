@@ -1,3 +1,5 @@
+"use client"
+
 import {
   RiBook2Line,
   RiCompass3Line,

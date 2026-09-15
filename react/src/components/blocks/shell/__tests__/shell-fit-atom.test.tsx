@@ -3,7 +3,7 @@ import { act, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { createStore, getDefaultStore } from "jotai"
 
-import { ExegiaProvider } from "@/state"
+import { ExegiaProvider } from "@/lib/state"
 import { ShellLayout } from "../shell-layout"
 import {
   measureShellFitAtom,

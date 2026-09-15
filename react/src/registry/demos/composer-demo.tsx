@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 
 import { BarChart3, Globe, Layers, Paperclip } from "lucide-react"

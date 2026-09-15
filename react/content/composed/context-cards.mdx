@@ -1,0 +1,36 @@
+---
+title: "Context cards"
+description: "Retrieved chunks: header with a count pill, then a card per chunk with title, character count, snippet and the source file pill."
+---
+
+import { Preview } from "@/components/composed/context-cards.story"
+
+import Demo from "@/registry/demos/context-cards-demo"
+
+## Preview
+
+Use the controls to explore the component's props.
+
+<Preview />
+
+## Usage
+
+```tsx
+import { ContextCards } from "@exegia/corpora-ui"
+
+<ContextCards count={32} cards={[{ title: "Vendor onboarding rule", meta: "290 characters", snippet: "…", file: { name: "SOP.pdf", type: "PDF" } }]} />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `cards` (required) | `ContextCard[]` | — | title, meta, snippet, file &#123; name, type &#125;. |
+| `header / count` | `ReactNode` | — | Defaults to All chunks and cards.length. |
+| `onOpen` | `(card, index) => void` | — | File pill click. |
+
+## Examples
+
+Explore the complete demo, including its additional variants and interactions.
+
+<Demo />

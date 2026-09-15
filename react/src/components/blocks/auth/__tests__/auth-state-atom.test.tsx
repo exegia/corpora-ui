@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { createStore } from "jotai"
 
-import { ExegiaProvider } from "@/state"
+import { ExegiaProvider } from "@/lib/state"
 import {
   DEFAULT_AUTH_FLOW_ID,
   authFlowErrorAtom,

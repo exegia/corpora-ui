@@ -2,7 +2,7 @@ import { clsx, type ClassValue } from "clsx"
 import { extendTailwindMerge, validators } from "tailwind-merge"
 
 /**
- * The `inset-shadow-{lit,dim}-*` bezel family (defined in `index.css`) is
+ * The `inset-shadow-{lit,dim}-*` bezel family (exported by `index.css`) is
  * ours, not Tailwind's. Left to itself tailwind-merge files every one of them
  * under its built-in `inset-shadow` group — which holds a single `box-shadow`
  * — and keeps only the last, so a bezel written as

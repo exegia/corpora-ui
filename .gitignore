@@ -1,7 +1,9 @@
 .agents/
 .github/aw/logs/
 .DS_Store
+**/.DS_Store
 **/node_modules
+**/.remember
 dist-pack/
 /.idea/inspectionProfiles/Project_Default.xml
 /.idea/.gitignore
