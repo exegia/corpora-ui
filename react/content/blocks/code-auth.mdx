@@ -1,0 +1,56 @@
+---
+title: "Code Authentication"
+description: "SMS/email one-time-code verification with auto-submit, resend countdown and error shake."
+---
+
+import { Preview } from "@/components/blocks/auth/code-auth-block.story"
+import Demo from "@/registry/demos/code-auth-demo"
+
+## Preview and props
+
+Adjust the generated controls to explore the component's TypeScript props.
+
+<Preview />
+
+## Usage
+
+```tsx
+import {
+  CodeAuthBlock,
+  useAuthFlow,
+  useAuthFlowActions,
+} from "@exegia/corpora-ui"
+
+;<CodeAuthBlock channel="sms" destination="•••-1234" onVerify={verifyCode} />
+
+// From the shared auth flow: after beginVerification({ identifier, channel })
+// the flow exposes the identifier already masked (y•••@example.com, •••4567).
+const flow = useAuthFlow()
+const { complete } = useAuthFlowActions()
+
+{
+  flow.step === "verify-code" && (
+    <CodeAuthBlock
+      channel={flow.channel}
+      destination={flow.maskedIdentifier ?? undefined}
+      onVerify={async (code) => complete(await api.verify(code))}
+    />
+  )
+}
+```
+
+## API notes
+
+| Prop          | Type                                          | Default              | Description                                                                                                                   |
+| ------------- | --------------------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| logo          | <code>React.ReactNode</code>                  | —                    | Brand mark rendered above the title. Omitted leaves no logo row at all.                                                       |
+| accent        | <code>"corpora" &#124; "exegia"</code>        | —                    | Brand accent for the primary action — corpora is a solid #E8B124, exegia a purple gradient. Omit to keep the default primary. |
+| channel       | <code>"email" &#124; "sms"</code>             | <code>"email"</code> | Where the code was sent; drives copy and icon.                                                                                |
+| length        | <code>number</code>                           | <code>6</code>       | Code length.                                                                                                                  |
+| autoSubmit    | <code>boolean</code>                          | <code>true</code>    | Verify as soon as all digits are entered.                                                                                     |
+| resendSeconds | <code>number</code>                           | <code>30</code>      | Countdown before resend becomes available.                                                                                    |
+| onVerify      | <code>(code) =&gt; Promise&lt;void&gt;</code> | —                    | Reject to shake, clear the code and show the error.                                                                           |
+
+## Examples
+
+<Demo />

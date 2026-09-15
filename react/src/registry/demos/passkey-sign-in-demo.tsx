@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 
 import { DemoSelect, DemoStage, DemoToggle } from "@/components/docs/demo-controls"

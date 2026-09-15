@@ -1,0 +1,54 @@
+---
+title: Blocks
+description: Opinionated assemblies for authentication, account settings, workspaces, and corpus chat.
+---
+
+import { Boxes } from "lucide-react"
+
+<Cards>
+  <Card icon={<Boxes />} title="Login" href="/blocks/login">
+    Progressive login with social providers and animated states.
+  </Card>
+  <Card icon={<Boxes />} title="Signup" href="/blocks/signup">
+    Account creation with password strength and terms consent.
+  </Card>
+  <Card icon={<Boxes />} title="Forgot Password" href="/blocks/forgot-password">
+    Password reset request and check-your-inbox confirmation.
+  </Card>
+  <Card icon={<Boxes />} title="Code Authentication" href="/blocks/code-auth">
+    SMS or email verification with auto-submit and resend countdown.
+  </Card>
+  <Card icon={<Boxes />} title="Update password" href="/blocks/update-password">
+    Validated password change for a signed-in user.
+  </Card>
+  <Card icon={<Boxes />} title="Passkey sign-in" href="/blocks/passkey-sign-in">
+    Passkey entry point with availability and cancellation handling.
+  </Card>
+  <Card icon={<Boxes />} title="Passkey manager" href="/blocks/passkey-manager">
+    Register, rename, and safely remove account passkeys.
+  </Card>
+  <Card icon={<Boxes />} title="Linked accounts" href="/blocks/linked-accounts">
+    Connect and disconnect sign-in identities with guardrails.
+  </Card>
+  <Card icon={<Boxes />} title="Onboarding" href="/blocks/onboarding">
+    Multi-step profile setup with validation and draft restoration.
+  </Card>
+  <Card icon={<Boxes />} title="Auth flow" href="/blocks/auth-flow">
+    Orchestrates every authentication step through one flow.
+  </Card>
+  <Card icon={<Boxes />} title="Profile card" href="/blocks/profile-card">
+    Account identity card with grouped actions and sign-out.
+  </Card>
+  <Card icon={<Boxes />} title="Navbar" href="/blocks/navbar">
+    Application navigation with branding and a user menu.
+  </Card>
+  <Card icon={<Boxes />} title="Shell" href="/blocks/shell">
+    Inset application shell with sidebar, header, and search.
+  </Card>
+  <Card icon={<Boxes />} title="Scaffold" href="/blocks/scaffold">
+    Composable desktop workspace with panels and an inspector.
+  </Card>
+  <Card icon={<Boxes />} title="Chat" href="/blocks/chat">
+    Complete corpus-chat surface with scoped context and AI answers.
+  </Card>
+</Cards>

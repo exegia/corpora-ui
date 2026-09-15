@@ -13,8 +13,8 @@ afterEach(cleanup)
 describe("Flowchart", () => {
   it("lays out the default steps and draws a connector", () => {
     const { container } = render(<Flowchart.Root />)
-    expect(screen.getByText("New order created")).toBeTruthy()
-    expect(screen.getByText("Node 2")).toBeTruthy()
+    expect(screen.getByText("Iliad corpus loaded")).toBeTruthy()
+    expect(screen.getByText("Text node")).toBeTruthy()
     const path = container.querySelector("path[data-edge]")!
     expect(path.getAttribute("d")).toMatch(/^M \d/)
     const canvas = container.querySelector('[data-slot="flowchart"]') as HTMLElement
@@ -23,7 +23,7 @@ describe("Flowchart", () => {
 
   it("lights the connector when a step is selected", () => {
     const { container } = render(<Flowchart.Root />)
-    const step = screen.getByRole("button", { name: /New order created/ })
+    const step = screen.getByRole("button", { name: /Iliad corpus loaded/ })
     fireEvent.click(step)
     expect(step.getAttribute("aria-pressed")).toBe("true")
     expect(container.querySelector("path[data-edge]")!.getAttribute("stroke")).toContain("accent")

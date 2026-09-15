@@ -1,11 +1,13 @@
 import path from "path"
+import story from "@fumadocs/story/vite"
 import tailwindcss from "@tailwindcss/vite"
-import react from "@vitejs/plugin-react"
+import { fumadocsMdx } from "fumadocs-mdx/vite"
+import press from "fumapress/vite"
 import { defineConfig } from "vite"
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [press({ basePath: "/" }), fumadocsMdx(), tailwindcss(), story({ tsconfigPath: path.resolve(import.meta.dirname, "tsconfig.app.json") })],
   server: {
     port: 3000,
     open: true,
@@ -13,7 +15,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
 })

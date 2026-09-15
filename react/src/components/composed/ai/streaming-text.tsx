@@ -41,20 +41,20 @@ export function StreamingText({
   const [reveal, setReveal] = React.useState({ total, n: 0 })
   if (reveal.total !== total) setReveal({ total, n: 0 })
   const animate = streaming && !reduceMotion
-  // The JS cadence reads --stream-gap so the token stays the single source of
-  // truth; an explicit wordMs still wins.
-  const gapMs =
-    wordMs ??
-    (parseFloat(
-      getComputedStyle(document.documentElement).getPropertyValue("--stream-gap")
-    ) || 60)
   const shown = animate ? Math.min(reveal.n, total) : total
 
   React.useEffect(() => {
     if (!animate) return
+    // The JS cadence reads --stream-gap so the token stays the single source
+    // of truth; an explicit wordMs still wins. Reading it here keeps SSR safe.
+    const gapMs =
+      wordMs ??
+      (parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue("--stream-gap")
+      ) || 60)
     const timer = setInterval(() => setReveal((r) => (r.n >= r.total ? r : { ...r, n: r.n + 1 })), gapMs)
     return () => clearInterval(timer)
-  }, [animate, gapMs, total])
+  }, [animate, wordMs, total])
 
   const done = shown >= total
   let cursor = 0

@@ -1,0 +1,40 @@
+---
+title: "Logo"
+description: "Brand lockup: a mark beside a wordmark. The mark is an SVG, an image, or a monogram tile derived from the name; variant=\"mark\" folds the wordmark away with the same motion a collapsing rail uses. With href the whole lockup is a home link."
+---
+
+import { Preview } from "@/components/composed/logo.story"
+
+import Demo from "@/registry/demos/logo-demo"
+
+## Preview
+
+Use the controls to explore the component's props.
+
+<Preview />
+
+## Usage
+
+```tsx
+import { Logo } from "@exegia/corpora-ui"
+
+<Logo name="Corpora" href="/" mark={<BrandMark />} />
+<Logo name="Corpora" variant="mark" />  // icon rail: mark only
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` (required) | `string` | — | Brand name. Labels the logo for AT (and the link, when href renders one), drives the default wordmark, and the monogram tile when no mark is given. |
+| `mark` | `ReactNode` | — | Custom mark — an inline SVG sized to fill its box. Wins over src. |
+| `src` | `string` | — | Image URL for the mark. Decorative — name labels the logo. Without mark or src, a monogram tile derived from name renders instead. |
+| `wordmark` | `ReactNode` | — | Wordmark content. Defaults to name. |
+| `variant` | `"full" \| "mark"` | `"full"` | mark folds the wordmark away (width, opacity, slight x) and hides it from AT; the root keeps the accessible name. Reduced-motion aware. |
+| `href` | `string` | — | Renders the lockup as an anchor named by name — the usual "mark goes home" affordance. |
+
+## Examples
+
+Explore the complete demo, including its additional variants and interactions.
+
+<Demo />

@@ -1,0 +1,58 @@
+---
+title: Field
+description: Form field wrapper wiring label, control, description and error together.
+icon: TextCursorInput
+---
+
+import { Preview } from "@/components/ui/field.story"
+import { Preview as InputPreview } from "@/components/ui/input.story"
+import { Preview as LabelPreview } from "@/components/ui/label.story"
+
+Use the story controls to explore the `Field` atom's properties.
+
+<Preview />
+
+## Props
+
+The Field atom wraps input controls with label, description and error states:
+
+### Basic structure
+
+- **FieldLabel**: Accessible label for the form field
+- **Input**: The actual input control
+- **FieldDescription**: Optional description text
+- **FieldError**: Error message display
+
+## Input
+
+The input example includes size, type, state, and styled or unstyled variant controls.
+
+<InputPreview />
+
+## Label
+
+Labels stay paired with their input so the accessible relationship is visible in context.
+
+<LabelPreview />
+
+## Usage
+
+```tsx
+import { Field, FieldLabel, FieldDescription, Input } from "@exegia/corpora-ui"
+
+;<Field>
+  <FieldLabel>Email</FieldLabel>
+  <Input type="email" />
+  <FieldDescription>We will never share your email.</FieldDescription>
+</Field>
+```
+
+## API reference
+
+| Component | Prop       | Type                                  | Default     | Description                                         |
+| --------- | ---------- | ------------------------------------- | ----------- | --------------------------------------------------- |
+| `Field`   | `disabled` | `boolean`                             | `false`     | Disables the grouped field controls.                |
+| `Field`   | `invalid`  | `boolean`                             | `false`     | Exposes the invalid state to field children.        |
+| `Input`   | `size`     | `"sm" \| "default" \| "lg" \| number` | `"default"` | Controls the input height and padding.              |
+| `Input`   | `unstyled` | `boolean`                             | `false`     | Removes the styled wrapper for custom compositions. |
+| `Label`   | `sound`    | `boolean`                             | `false`     | Opts into the label hover cue.                      |

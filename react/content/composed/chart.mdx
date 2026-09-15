@@ -1,0 +1,41 @@
+---
+title: "Chart"
+description: "320×244 chart card — pie, area, line or bar — with title, subtitle, type pill, plot and legend. Series colours come from the --chart-series-1…5 tokens, grid from --chart-grid."
+---
+
+import { Preview } from "@/components/composed/chart.story"
+
+import Demo from "@/registry/demos/chart-demo"
+
+## Preview
+
+Use the controls to explore the component's props.
+
+<Preview />
+
+## Usage
+
+```tsx
+import { Chart } from "@exegia/corpora-ui"
+
+<Chart type="bar" title="Sales by flavor" subtitle="Units · last 6 months"
+  data={[{ label: "Pist.", units: 62 }, { label: "Vanilla", units: 88 }]}
+  series={[{ key: "units", label: "Units sold" }]} />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `type` (required) | `"pie" \| "area" \| "line" \| "bar"` | — | Plot kind. |
+| `data` (required) | `{ label: string; [key]: number \| string }[]` | — | One row per x label (or pie slice). |
+| `series` (required) | `{ key, label, color?, format? }[]` | — | Keys to plot; colour defaults to the series token by position. Pie uses the first. `format` renders the value in the legend and hover tooltip. |
+| `title / subtitle / badge` | `ReactNode` | — | Header row; badge defaults to the type name. |
+| `center` | `{ value, label? }` | — | Pie only: donut centre. |
+| `headerless / plotHeight` | `boolean / number` | — | Bare plot for embedding (InsightCards). |
+
+## Examples
+
+Explore the complete demo, including its additional variants and interactions.
+
+<Demo />

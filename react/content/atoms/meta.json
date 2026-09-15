@@ -1,0 +1,19 @@
+{
+  "title": "Atoms",
+  "pages": [
+    "button",
+    "field",
+    "checkbox",
+    "separator",
+    "card",
+    "textarea",
+    "otp-field",
+    "input-group",
+    "reference",
+    "text",
+    "bubble",
+    "avatar",
+    "file-icons",
+    "menu-command"
+  ]
+}
