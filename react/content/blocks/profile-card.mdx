@@ -8,9 +8,15 @@ import Demo from "@/registry/demos/profile-card-demo"
 
 ## Preview and props
 
-Adjust the generated controls to explore the component's TypeScript props.
+Expand **Props** below the centered preview to change the component’s properties.
 
 <Preview />
+
+## Examples
+
+Switch presentation variants and identity options, then explore the profile actions.
+
+<Demo />
 
 ## Usage
 
@@ -48,7 +54,3 @@ const { signOut } = useAuthSessionActions()
 | presence                          | <code>"online" &#124; "idle" &#124; "offline"</code>              | —                                    | Presence badge on the avatar (presence overrides user.presence).                                                                                                                                                                                                                                                                           |
 | open / defaultOpen / onOpenChange | <code>boolean / boolean / (open, details) =&gt; void</code>       | —                                    | Control the menu, or observe it.                                                                                                                                                                                                                                                                                                           |
 | sound                             | <code>boolean</code>                                              | <code>true</code>                    | Press/release cues on the card plus open/close cues on the menu. Inert until the app calls bindSounds().                                                                                                                                                                                                                                   |
-
-## Examples
-
-<Demo />

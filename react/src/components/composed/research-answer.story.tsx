@@ -25,6 +25,7 @@ export const story = defineStory({
       source: "Iliad · Homer corpus",
       authors: "Homer",
       date: "c. 750 BCE",
+      bare: false,
     },
   },
 })

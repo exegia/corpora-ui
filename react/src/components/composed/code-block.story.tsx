@@ -16,6 +16,7 @@ export const story = defineStory({
   args: {
     initial: {
       filename: "corpus.ts",
+      view: "code",
       diff: [
         { type: "context", text: 'const corpus = "Iliad";' },
         { type: "remove", text: "const book = 2;" },

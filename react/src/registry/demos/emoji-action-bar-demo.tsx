@@ -2,7 +2,7 @@
 
 import * as React from "react"
 
-import { DemoStage, DemoToggle } from "@/components/docs/demo-controls"
+import { DemoStage } from "@/components/docs/demo-controls"
 import { Button } from "@/components/ui/button"
 import {
   Popover,
@@ -19,8 +19,6 @@ import { ActionBar, QUICK_REACTIONS } from "@/components/composed/action-bar"
  */
 
 export default function EmojiActionBarDemo() {
-  const [glass, setGlass] = React.useState(true)
-  const [more, setMore] = React.useState(true)
   const [open, setOpen] = React.useState(false)
   const [picked, setPicked] = React.useState<Emoji | null>(null)
 
@@ -30,15 +28,8 @@ export default function EmojiActionBarDemo() {
   }
 
   return (
-    <DemoStage
-      controls={
-        <>
-          <DemoToggle checked={glass} label="glass" onChange={setGlass} />
-          <DemoToggle checked={more} label="more" onChange={setMore} />
-        </>
-      }
-    >
-      <div className="flex w-full flex-col items-center gap-6">
+    <DemoStage>
+      <div className="gap-6 flex w-full flex-col items-center">
         <Popover onOpenChange={setOpen} open={open}>
           <PopoverTrigger
             render={<Button variant="outline">Add reaction</Button>}
@@ -57,8 +48,8 @@ export default function EmojiActionBarDemo() {
             </>
           ) : (
             <>
-              {QUICK_REACTIONS.length} quick reactions
-              {more ? ", then More opens the full picker" : ""}
+              {QUICK_REACTIONS.length} quick reactions, then More opens the full
+              picker
             </>
           )}
         </p>

@@ -17,6 +17,7 @@ export const story = defineStory({
     initial: {
       paragraphs: ["The Iliad opens with an invocation to the Muse."],
       streaming: true,
+      wordMs: 60,
     },
   },
 })

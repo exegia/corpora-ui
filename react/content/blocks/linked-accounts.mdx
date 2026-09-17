@@ -8,9 +8,15 @@ import Demo from "@/registry/demos/linked-accounts-demo"
 
 ## Preview and props
 
-Adjust the generated controls to explore the component's TypeScript props.
+Expand **Props** below the centered preview to change the component’s properties.
 
 <Preview />
+
+## Examples
+
+Connect and disconnect demo identities, and explore loading and error states.
+
+<Demo />
 
 ## Usage
 
@@ -28,7 +34,3 @@ import { LinkedAccountsBlock } from "@exegia/corpora-ui"
 | providers         | <code>SocialProvider[]</code>                               | <code>["google", "apple", "github"]</code> | Connect candidates. Already-connected providers are filtered out.                               |
 | loading           | <code>boolean</code>                                        | <code>false</code>                         | Shows the loading row instead of the list.                                                      |
 | onLink / onUnlink | <code>(provider &#124; id) =&gt; Promise&lt;void&gt;</code> | —                                          | Reject (or throw) to show the inline error. Unlink never fires for the last remaining identity. |
-
-## Examples
-
-<Demo />

@@ -27,6 +27,20 @@ const STEPS: OnboardingStepConfig[] = [
 ];
 
 describe("OnboardingBlock", () => {
+  test("embedded previews do not steal focus", () => {
+    render(<OnboardingBlock steps={STEPS} autoFocus={false} />);
+    expect(document.activeElement).not.toBe(
+      screen.getByRole("heading", { name: "Your profile" }),
+    );
+  });
+
+  test("focuses the current step by default", () => {
+    render(<OnboardingBlock steps={STEPS} />);
+    expect(document.activeElement).toBe(
+      screen.getByRole("heading", { name: "Your profile" }),
+    );
+  });
+
   test("renders the declared steps as progress", () => {
     render(<OnboardingBlock steps={STEPS} />);
 

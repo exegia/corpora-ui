@@ -13,26 +13,22 @@ Use the controls to explore the component's props.
 
 <Preview />
 
-## Usage
+## Props
+
+| Prop                                | Type                            | Default | Description                                                          |
+| ----------------------------------- | ------------------------------- | ------- | -------------------------------------------------------------------- |
+| `source` (required)                 | `string`                        | —       | Markdown text (headings, paragraphs, lists, inline and fenced code). |
+| `markdownId`                        | `string`                        | —       | Stable id for the view atom; unnamed cards use useId().              |
+| `view / defaultView / onViewChange` | `"preview" \| "markup"`         | —       | Controlled or uncontrolled pane.                                     |
+| `onCopy / onExpand`                 | `(source) => void / () => void` | —       | Header icon buttons.                                                 |
+| `bare`                              | `boolean`                       | `false` | Drop the card border.                                                |
+
+## Example
+
+<Demo />
 
 ```tsx
 import { Markdown } from "@exegia/corpora-ui"
 
-<Markdown source={answer} onCopy={(md) => navigator.clipboard.writeText(md)} />
+;<Markdown source={answer} onCopy={(md) => navigator.clipboard.writeText(md)} />
 ```
-
-## Props
-
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `source` (required) | `string` | — | Markdown text (headings, paragraphs, lists, inline and fenced code). |
-| `markdownId` | `string` | — | Stable id for the view atom; unnamed cards use useId(). |
-| `view / defaultView / onViewChange` | `"preview" \| "markup"` | — | Controlled or uncontrolled pane. |
-| `onCopy / onExpand` | `(source) => void / () => void` | — | Header icon buttons. |
-| `bare` | `boolean` | `false` | Drop the card border. |
-
-## Examples
-
-Explore the complete demo, including its additional variants and interactions.
-
-<Demo />

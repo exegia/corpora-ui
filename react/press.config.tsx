@@ -4,10 +4,13 @@ import { metaSchema, pageSchema } from "fumapress/adapters/mdx/schema"
 import { defineDocs } from "fumadocs-mdx/macro"
 import { createDocsLayoutPage } from "fumapress/layouts/docs"
 import { createHomeLayoutPage } from "fumapress/layouts/home"
+import { createRootLayout } from "fumapress/layouts/root"
 import { lucideIconsPlugin } from "fumadocs-core/source/plugins/lucide-icons"
 import { Link } from "fumapress/client"
+import { ExegiaProvider } from "./src/lib/state/exegia-provider"
 
 const SITE_URL = process.env.SITE_URL ?? "http://localhost:3000"
+const RootLayout = createRootLayout()
 
 const DocsLayout = createDocsLayoutPage<typeof config.$context>({
   async render(page) {
@@ -55,6 +58,11 @@ const docs = defineDocs({
 })
 
 const config = defineConfig({
+  renderRoot: ({ children, ...props }) => (
+    <RootLayout {...props}>
+      <ExegiaProvider sound>{children}</ExegiaProvider>
+    </RootLayout>
+  ),
   content: docs.toFumadocsSource(),
   loaderOptions: {
     plugins: [lucideIconsPlugin()],

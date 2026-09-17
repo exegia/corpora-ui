@@ -45,7 +45,7 @@ const GLASS_VARIANTS: FrostGlassVariant[] = [
 ]
 
 export default function ButtonDemo() {
-  const [variant, setVariant] = React.useState<Variant>("outline")
+  const [variant, setVariant] = React.useState<Variant>("default")
   const [size, setSize] = React.useState<Size>("default")
   const [glassVariant, setGlassVariant] =
     React.useState<FrostGlassVariant>("liquid-refract")

@@ -25,6 +25,11 @@ export const story = defineStory({
       title: "Review these lemma links?",
       description: "Resolve ambiguous forms in the Iliad",
       confidence: "high",
+      state: "pending",
+      step: 1,
+      defaultOpen: true,
+      acceptLabel: "Accept",
+      rejectLabel: "Ignore",
     },
   },
 })

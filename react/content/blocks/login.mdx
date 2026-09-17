@@ -8,9 +8,15 @@ import Demo from "@/registry/demos/login-demo"
 
 ## Preview and props
 
-Adjust the generated controls to explore the component's TypeScript props.
+Expand **Props** below the centered preview to change the component’s properties.
 
 <Preview />
+
+## Examples
+
+Toggle social providers, branding and secondary actions. Submit the form to try success and error states.
+
+<Demo />
 
 ## Usage
 
@@ -47,7 +53,3 @@ const { beginVerification, complete } = useAuthFlowActions()
 | providers                           | <code>SocialProvider[]</code>                 | <code>["google", "apple", "github"]</code> | Social providers; empty array hides the section.                                                                              |
 | showRememberMe / showForgotPassword | <code>boolean</code>                          | <code>true</code>                          | Toggle the secondary affordances.                                                                                             |
 | onSubmit                            | <code>(data) =&gt; Promise&lt;void&gt;</code> | —                                          | Reject (or throw) to show the shaking error state with the error message.                                                     |
-
-## Examples
-
-<Demo />

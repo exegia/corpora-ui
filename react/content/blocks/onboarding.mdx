@@ -8,9 +8,15 @@ import Demo from "@/registry/demos/onboarding-demo"
 
 ## Preview and props
 
-Adjust the generated controls to explore the component's TypeScript props.
+Expand **Props** below the centered preview to change the component’s properties.
 
 <Preview />
+
+## Examples
+
+Explore the configured steps, branding and completion states.
+
+<Demo />
 
 ## Usage
 
@@ -31,6 +37,5 @@ import { OnboardingBlock } from "@exegia/corpora-ui"
 | onComplete         | <code>(profile) =&gt; Promise&lt;void&gt;</code>        | —                                     | Fires once, after the final step is accepted, with the merged profile.                                                        |
 | showCompleteScreen | <code>boolean</code>                                    | <code>true</code>                     | Brief success screen once onboarding completes. false renders nothing instead.                                                |
 
-## Examples
 
-<Demo />
+`autoFocus` defaults to `true` and moves focus to step headings. Set it to `false` for embedded previews that should preserve the surrounding page’s focus.

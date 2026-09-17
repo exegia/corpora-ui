@@ -23,6 +23,9 @@ export const story = defineStory({
     initial: {
       type: "bar",
       title: "Corpus coverage",
+      subtitle: "Resolved corpus tokens",
+      headerless: false,
+      plotHeight: 244,
       data: [
         {
           label: "Iliad",

@@ -23,13 +23,21 @@ export function Info({
   return (
     <div
       slot="info"
-      className={cn("flex flex-row items-center gap-1.5", {
+      className={cn("gap-1.5 flex flex-row items-center", {
         "flex-row-reverse": direction === "sender",
       })}
     >
       <Avatar size={size ?? "default"} user={user} audio={audio} />
-      <div className="flex flex-col">
-        <div className={cn("flex items-center flex-row gap-1.5", { "flex-row-reverse": direction === "sender" })}>
+      <div
+        className={cn("flex flex-col", {
+          "items-end text-right": direction === "sender",
+        })}
+      >
+        <div
+          className={cn("gap-1.5 flex flex-row items-center", {
+            "flex-row-reverse": direction === "sender",
+          })}
+        >
           <span className="text-sm font-semibold">
             {user.firstName} {user.lastName}
           </span>

@@ -8,9 +8,15 @@ import Demo from "@/registry/demos/signup-demo"
 
 ## Preview and props
 
-Adjust the generated controls to explore the component's TypeScript props.
+Expand **Props** below the centered preview to change the component’s properties.
 
 <Preview />
+
+## Examples
+
+Change the name, terms and password requirements, then try creating an account with either submit outcome.
+
+<Demo />
 
 ## Usage
 
@@ -31,7 +37,3 @@ import { SignupBlock } from "@exegia/corpora-ui"
 | termsComponent                      | <code>React.ReactNode</code>                         | —                 | Replaces the built-in “terms” link inside the consent label — pass your own dialog trigger to render it inline instead of wiring onTerms.                                                 |
 | enforceStrongPassword               | <code>boolean</code>                                 | <code>true</code> | Block submission until all password requirements pass.                                                                                                                                    |
 | onSubmit                            | <code>(data) =&gt; Promise&lt;void&gt;</code>        | —                 | Reject to surface the error state.                                                                                                                                                        |
-
-## Examples
-
-<Demo />

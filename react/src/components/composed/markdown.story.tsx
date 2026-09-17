@@ -14,6 +14,8 @@ export const story = defineStory({
     initial: {
       source:
         "# Corpus notes\n\nThe **Iliad** preserves several formulaic expressions.",
+      view: "preview",
+      bare: false,
     },
   },
 })

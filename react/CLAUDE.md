@@ -155,7 +155,7 @@ should reuse it, with `motion/react` for step morphs.
 Components emit inert `data-cuelume-*` attributes (Button: press/release,
 gated by its `sound` prop, default true). Nothing plays until an app calls
 `bindSounds()` (re-exported from `src/lib/sound.ts`; the docs site does this
-in `main.tsx`). Never call `bind()` at library-module scope — opting into
+through `<ExegiaProvider sound>` in `press.config.tsx`). Never call `bind()` at library-module scope — opting into
 sound is the consumer's decision. For keyboard-driven cues the attributes
 can't cover (OTP typing, visibility toggles), use `playCue()` from
 `lib/sound.ts` — it no-ops until bindSounds() has run; never call cuelume's

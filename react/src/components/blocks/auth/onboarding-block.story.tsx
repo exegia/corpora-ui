@@ -7,7 +7,7 @@ import { OnboardingBlock } from "./onboarding-block"
 export const story = defineStory({
   Component: OnboardingBlock,
   args: {
-    initial: { showCompleteScreen: true },
+    initial: { showCompleteScreen: true, autoFocus: false },
   },
 })
 

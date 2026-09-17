@@ -13,7 +13,25 @@ Use the controls to explore the component's props.
 
 <Preview />
 
-## Usage
+## Props
+
+| Prop             | Type                                                    | Default | Description                                                                                                                                                                                                                                                                                                                                                                                  |
+| ---------------- | ------------------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `variant`        | `"navigation" \| "toc" \| "sidebar" \| "files"`         | —       | navigation: app nav — 3-level data promotes the top level to collapsible section names. toc: top-level nodes are routes, deeper rows jump to #&#123;id&#125; after select; parents expand from an overlay chevron. sidebar: single-level icon rail that fills its container; collapsing folds labels to icon tiles. files: compact explorer with rename, drag-and-drop and trailing actions. |
+| `items`          | `TreeNode[]`                                            | —       | The tree data — id, label, icon, href (metadata for onNavigate; rows never render anchors, though toc rows below the route level still jump to #&#123;id&#125; or a #hash href), badge, defaultOpen, children.                                                                                                                                                                               |
+| `activeId`       | `string`                                                | —       | id of the current entry, any depth. Marks the row aria-current and expands its collapsed ancestors.                                                                                                                                                                                                                                                                                          |
+| `onNavigate`     | `(node: TreeNode) => void`                              | —       | Fires for every selection after the node's own onSelect. Rows are buttons, so this is the routing path — wire your router's navigate here. toc rows below the route level additionally jump to #&#123;id&#125; after it fires.                                                                                                                                                               |
+| `collapsed`      | `boolean`                                               | `false` | sidebar only — folds rows to their leading icon; the label moves into aria-label and a hover/focus tooltip.                                                                                                                                                                                                                                                                                  |
+| `onMove`         | `(id, parentId: string \| null, index: number) => void` | —       | files only — enables drag-and-drop. Reorder items yourself; the moveNode helper is exported.                                                                                                                                                                                                                                                                                                 |
+| `onRename`       | `(id, label: string) => void`                           | —       | files only — enables inline rename (double-click or F2).                                                                                                                                                                                                                                                                                                                                     |
+| `renderTrailing` | `(node: TreeNode) => ReactNode`                         | —       | files only — row actions revealed on hover/focus, e.g. a menu or delete button. Rendered beside the row, not inside it, so the content may be interactive; the row reserves ~36px for it, and a wider slot overlaps the truncated label.                                                                                                                                                     |
+| `sound`          | `boolean`                                               | `true`  | Expand/collapse cues. Silent until bindSounds().                                                                                                                                                                                                                                                                                                                                             |
+| `tree`           | `TreeController`                                        | —       | A useTree() controller, in place of items and the handler props. Every behaviour — expand, collapse, select, rename, reorder, fold the rail — becomes callable from outside the component.                                                                                                                                                                                                   |
+| `treeId`         | `string`                                                | —       | Names this instance in the shared store so useTreeState(id) / useTreeActions(id) can reach it from anywhere under ExegiaProvider. A named tree keeps its state across unmounts (a rail's fold survives a route change) — call removeTreeInstance(id) on teardown. Unnamed trees are dropped on unmount.                                                                                      |
+
+## Example
+
+<Demo />
 
 ```tsx
 import { Tree, useTree, useTreeActions, useTreeState } from "@exegia/corpora-ui"
@@ -41,25 +59,3 @@ const nav = useTreeActions("app-nav")          // writes only, never re-renders
 const { collapsed } = useTreeState("app-nav")  // subscribes to the tree
 <Button onClick={nav.toggleCollapsed}>{collapsed ? "Expand" : "Fold"} rail</Button>
 ```
-
-## Props
-
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `variant` | `"navigation" \| "toc" \| "sidebar" \| "files"` | — | navigation: app nav — 3-level data promotes the top level to collapsible section names. toc: top-level nodes are routes, deeper rows jump to #&#123;id&#125; after select; parents expand from an overlay chevron. sidebar: single-level icon rail that fills its container; collapsing folds labels to icon tiles. files: compact explorer with rename, drag-and-drop and trailing actions. |
-| `items` | `TreeNode[]` | — | The tree data — id, label, icon, href (metadata for onNavigate; rows never render anchors, though toc rows below the route level still jump to #&#123;id&#125; or a #hash href), badge, defaultOpen, children. |
-| `activeId` | `string` | — | id of the current entry, any depth. Marks the row aria-current and expands its collapsed ancestors. |
-| `onNavigate` | `(node: TreeNode) => void` | — | Fires for every selection after the node's own onSelect. Rows are buttons, so this is the routing path — wire your router's navigate here. toc rows below the route level additionally jump to #&#123;id&#125; after it fires. |
-| `collapsed` | `boolean` | `false` | sidebar only — folds rows to their leading icon; the label moves into aria-label and a hover/focus tooltip. |
-| `onMove` | `(id, parentId: string \| null, index: number) => void` | — | files only — enables drag-and-drop. Reorder items yourself; the moveNode helper is exported. |
-| `onRename` | `(id, label: string) => void` | — | files only — enables inline rename (double-click or F2). |
-| `renderTrailing` | `(node: TreeNode) => ReactNode` | — | files only — row actions revealed on hover/focus, e.g. a menu or delete button. Rendered beside the row, not inside it, so the content may be interactive; the row reserves ~36px for it, and a wider slot overlaps the truncated label. |
-| `sound` | `boolean` | `true` | Expand/collapse cues. Silent until bindSounds(). |
-| `tree` | `TreeController` | — | A useTree() controller, in place of items and the handler props. Every behaviour — expand, collapse, select, rename, reorder, fold the rail — becomes callable from outside the component. |
-| `treeId` | `string` | — | Names this instance in the shared store so useTreeState(id) / useTreeActions(id) can reach it from anywhere under ExegiaProvider. A named tree keeps its state across unmounts (a rail's fold survives a route change) — call removeTreeInstance(id) on teardown. Unnamed trees are dropped on unmount. |
-
-## Examples
-
-Explore the complete demo, including its additional variants and interactions.
-
-<Demo />

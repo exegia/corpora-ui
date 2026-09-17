@@ -8,9 +8,15 @@ import Demo from "@/registry/demos/chat-demo"
 
 ## Preview and props
 
-Adjust the generated controls to explore the component's TypeScript props.
+Expand **Props** below the centered preview to change the component’s properties.
 
 <Preview />
+
+## Examples
+
+Explore message exchanges, attachments and generated replies.
+
+<Demo />
 
 ## Usage
 
@@ -43,7 +49,3 @@ import { AiPanel, GeneratedBlock, RecommendationCard } from "@exegia/corpora-ui"
 | ScopePicker                         | <code>word &#124; passage &#124; articulus &#124; quaestio &#124; corpus</code> | —       | Keyboard-operable listbox for the five corpus scope levels.                                                                                                                                                                                                  |
 | GeneratedBlock / RecommendationCard | <code>content and recommendation props</code>                                   | —       | Thread blocks with persistent generated labeling, polite live-region streaming, and direct human-in-the-loop recommendation cards with Reject/Accept actions.                                                                                                |
 | Bubble                              | <code>variant="sender" &#124; "recipient", Header, Message</code>               | —       | The message atom: sender hugs the right edge, recipient carries attachments inline. Render Bubble.Header on the first message of a run and mark follow-ups `continued`.                                                                                      |
-
-## Examples
-
-<Demo />

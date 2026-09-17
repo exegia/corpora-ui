@@ -22,6 +22,9 @@ export const story = defineStory({
         role: "Editor",
       },
       description: "Corpus researcher",
+      size: "default",
+      direction: "sender",
+      audio: "muted",
     },
   },
 })

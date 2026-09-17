@@ -11,6 +11,7 @@ export const story = defineStory({
       variant: "Document chip",
       initial: {
         kind: "document",
+        variant: "default",
         title: "Iliad annotations.pdf",
         meta: "PDF · 2.4 MB",
       },

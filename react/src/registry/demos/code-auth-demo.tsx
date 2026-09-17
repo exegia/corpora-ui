@@ -2,7 +2,8 @@
 
 import * as React from "react"
 
-import { DemoBrandMark, DemoSelect, DemoStage, DemoToggle } from "@/components/docs/demo-controls"
+import { DemoBrandMark, DemoSelect, DemoToggle } from "@/components/docs/demo-controls"
+import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
 import { CodeAuthBlock } from "@/components/blocks/auth/code-auth-block"
 
 const CHANNELS = ["email", "sms"] as const

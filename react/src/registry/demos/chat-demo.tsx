@@ -13,10 +13,11 @@ import {
   RecommendationCard,
   type RecommendationState,
 } from "@/components/composed/chat"
-import { DemoStage } from "@/components/docs/demo-controls"
+import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
 import { cn } from "@/lib/utils"
 import AI from "@/components/composed/ai"
 import User from "@/components/composed/user"
+import { Bubble } from "@/components/atoms"
 
 const SCOPE: AiScope = {
   kind: "passage",
@@ -32,18 +33,18 @@ const DIFF: DiffRow[] = [
 
 function DiffRows({ rows }: { rows: DiffRow[] }): React.ReactElement {
   return (
-    <div className="mt-2 grid gap-1.5 p-2.5 font-mono text-xs">
+    <div className="mt-2 gap-1.5 p-2.5 font-mono text-xs grid">
       {rows.map((row, index) => (
         <div
           className={cn(
-            "flex gap-2 rounded px-1.5 py-1",
+            "gap-2 rounded px-1.5 py-1 flex",
             row.type === "add"
               ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-200"
               : "bg-red-500/10 text-red-700 dark:text-red-200"
           )}
           key={`${row.type}-${row.field ?? ""}-${index}`}
         >
-          <span aria-hidden="true" className="w-3 shrink-0 font-semibold">
+          <span aria-hidden="true" className="w-3 font-semibold shrink-0">
             {row.type === "add" ? "+" : "−"}
           </span>
           {row.type === "add" ? (
@@ -127,18 +128,38 @@ export default function AiPanelDemo(): React.ReactElement {
           scope={SCOPE}
           thread={
             <>
-              {/* The header renders `User.Info` from composed/user: avatar
-                  with initials, name and the role badge, all from `user`. */}
-              <User.Message
-              // time="10 min ago"
-              // user={{
-              //   firstName: "Jenny",
-              //   lastName: "Hamilton",
-              //   role: "Admin",
-              // }}
-              >
-                Validate this passage against the schema.
-              </User.Message>
+              <Bubble variant="sender">
+                <Bubble.Header>
+                  <User.Info
+                    direction="sender"
+                    user={{
+                      firstName: "Jenny",
+                      lastName: "Hamilton",
+                      role: "Editor",
+                    }}
+                    variant="info"
+                  />
+                </Bubble.Header>
+                <Bubble.Message>
+                  Validate this passage against the schema.
+                </Bubble.Message>
+              </Bubble>
+              <Bubble variant="recipient">
+                <Bubble.Header>
+                  <User.Info
+                    direction="recipient"
+                    user={{
+                      firstName: "Marcus",
+                      lastName: "Lee",
+                      role: "Reviewer",
+                    }}
+                    variant="info"
+                  />
+                </Bubble.Header>
+                <Bubble.Message>
+                  I’ll compare ¶12 with the latest corpus build.
+                </Bubble.Message>
+              </Bubble>
               <AI.Message
                 AttachedContent={renderRecommendations}
                 type="recommendation"

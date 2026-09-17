@@ -13,12 +13,22 @@ Use the controls to explore the component's props.
 
 <Preview />
 
-## Usage
+## Props
+
+| Prop                    | Type                             | Default                        | Description                                                                                         |
+| ----------------------- | -------------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------- |
+| `paragraphs` (required) | `(string \| StreamingToken[])[]` | —                              | Each paragraph is words or tokens; `{ cite, title?, description?, href? }` renders an InlineSource. |
+| `streaming`             | `boolean`                        | `false`                        | Animate the reveal; reduced motion shows everything at once.                                        |
+| `wordMs`                | `number`                         | `--stream-gap` (60ms fallback) | Override the gap between revealed words in milliseconds.                                            |
+
+## Example
+
+<Demo />
 
 ```tsx
 import { StreamingText } from "@exegia/corpora-ui"
 
-<StreamingText
+;<StreamingText
   streaming
   paragraphs={[
     "The Iliad opens with an invocation to the Muse.",
@@ -26,17 +36,3 @@ import { StreamingText } from "@exegia/corpora-ui"
   ]}
 />
 ```
-
-## Props
-
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `paragraphs` (required) | `(string \| StreamingToken[])[]` | — | Each paragraph is words or tokens; `{ cite, title?, description?, href? }` renders an InlineSource. |
-| `streaming` | `boolean` | `false` | Animate the reveal; reduced motion shows everything at once. |
-| `wordMs` | `number` | `--stream-gap` (60ms fallback) | Override the gap between revealed words in milliseconds. |
-
-## Examples
-
-Explore the complete demo, including its additional variants and interactions.
-
-<Demo />

@@ -16,6 +16,7 @@ export const story = defineStory({
   args: {
     initial: {
       zoomable: true,
+      readOnly: false,
       height: 500,
     },
   },

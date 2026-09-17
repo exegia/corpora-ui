@@ -13,7 +13,7 @@ import {
   SCAFFOLD_PANEL_CAPACITY,
   useScaffold,
 } from "@/components/blocks/scaffold"
-import { DemoStage } from "@/components/docs/demo-controls"
+import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
 import { cn } from "@/lib/utils"
 
 interface DemoPanel {

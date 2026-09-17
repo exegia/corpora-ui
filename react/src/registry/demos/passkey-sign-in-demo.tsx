@@ -2,7 +2,8 @@
 
 import * as React from "react"
 
-import { DemoSelect, DemoStage, DemoToggle } from "@/components/docs/demo-controls"
+import { DemoSelect, DemoToggle } from "@/components/docs/demo-controls"
+import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
 import { PasskeySignInBlock } from "@/components/blocks/auth/passkey-sign-in-block"
 
 const OUTCOMES = ["success", "cancelled", "error"] as const

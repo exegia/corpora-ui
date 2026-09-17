@@ -8,9 +8,15 @@ import Demo from "@/registry/demos/scaffold-demo"
 
 ## Preview and props
 
-Adjust the generated controls to explore the component's TypeScript props.
+Expand **Props** below the centered preview to change the component’s properties.
 
 <Preview />
+
+## Examples
+
+Add and switch workspace panels, then open the inspector to explore the layout.
+
+<Demo />
 
 ## Usage
 
@@ -72,7 +78,3 @@ function App() {
 | Actions · onAdd / children                                                       | <code>() =&gt; void / ReactNode</code>                          | —       | The pill cluster in the top-right (the design's panel context menu). `onAdd` powers the Add segment, which renders only while present — omit it once the canvas holds `SCAFFOLD_PANEL_CAPACITY` (3) panels. Children render before Add: one `Scaffold.Tab` per open panel, plus any extra segments.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | Tab · children / panelId / onClose / closeLabel                                  | <code>ReactNode / string / () =&gt; void / string</code>        | —       | A panel's tab inside the Actions pill — its label plus a close button. With `panelId` (a `Scaffold.Panel`'s `id`) the tab fronts that panel's visibility: a hidden panel dims its tab behind an eye-off icon, and pressing the label toggles it — showing one past capacity hides the least-recently-activated panel in its place. Hovering the tab spotlights its panel — every other id'd panel fades to 0.35 opacity. The close button renders only while `onClose` is present; omit it on the last remaining panel's tab so at least one panel stays open. Key each tab — closes animate out of the pill.                                                                                                                                             |
 | Inspector · name / children                                                      | <code>string / ReactNode</code>                                 | —       | Drawer content. Stays mounted and inert while closed so it can slide back out; opening also slides the Actions cluster leftward in step.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-
-## Examples
-
-<Demo />

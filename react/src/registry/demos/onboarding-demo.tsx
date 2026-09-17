@@ -2,7 +2,8 @@
 
 import * as React from "react"
 
-import { DemoBrandMark, DemoSelect, DemoStage, DemoToggle } from "@/components/docs/demo-controls"
+import { DemoBrandMark, DemoSelect, DemoToggle } from "@/components/docs/demo-controls"
+import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
 import {
   OnboardingBlock,
   type OnboardingStepConfig,
@@ -76,6 +77,7 @@ export default function OnboardingDemo() {
       }
     >
       <OnboardingBlock
+        autoFocus={false}
         key={resetKey}
         steps={STEPS}
         logo={logo ? <DemoBrandMark /> : undefined}

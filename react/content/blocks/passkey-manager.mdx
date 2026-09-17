@@ -8,9 +8,15 @@ import Demo from "@/registry/demos/passkey-manager-demo"
 
 ## Preview and props
 
-Adjust the generated controls to explore the component's TypeScript props.
+Expand **Props** below the centered preview to change the component’s properties.
 
 <Preview />
+
+## Examples
+
+Try registering, renaming and removing demo passkeys, or toggle loading and availability.
+
+<Demo />
 
 ## Usage
 
@@ -33,7 +39,3 @@ import { PasskeyManagerBlock } from "@exegia/corpora-ui"
 | loading             | <code>boolean</code>                                                               | <code>false</code> | Shows the loading row instead of the list.                                                                     |
 | onRegister          | <code>() =&gt; Promise&lt;&#123; cancelled?: boolean &#125; &#124; void&gt;</code> | —                  | Reject (or throw) to show the error. Resolve with &#123; cancelled: true &#125; to return silently to idle.    |
 | onRename / onDelete | <code>(id, name?) =&gt; Promise&lt;void&gt;</code>                                 | —                  | Rename is validated to 1-120 characters before it fires; delete only fires after the confirmation is accepted. |
-
-## Examples
-
-<Demo />

@@ -1,11 +1,22 @@
 "use client"
 
+import type { ComponentProps } from "react"
+
 import { defineStory } from "@/registry/story"
 
 import { AiPanel } from "./base"
 
+type PreviewProps = Pick<
+  ComponentProps<typeof AiPanel>,
+  "scope" | "headerTitle" | "className" | "thread" | "locked"
+>
+
+function BlockPreview(props: PreviewProps) {
+  return <AiPanel {...props} />
+}
+
 export const story = defineStory({
-  Component: AiPanel,
+  Component: BlockPreview,
   args: {
     initial: {
       scope: { kind: "passage", label: "a.1", range: "¶1–¶2" },

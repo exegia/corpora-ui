@@ -3,7 +3,8 @@
 import { LogOutIcon, SettingsIcon, UserIcon, UserPlusIcon, UsersIcon } from "lucide-react"
 import * as React from "react"
 
-import { DemoSelect, DemoStage, DemoToggle } from "@/components/docs/demo-controls"
+import { DemoSelect, DemoToggle } from "@/components/docs/demo-controls"
+import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
 import {
   ProfileCardBlock,
   type ProfileCardItem,

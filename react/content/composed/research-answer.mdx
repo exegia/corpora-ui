@@ -13,25 +13,27 @@ Use the controls to explore the component's props.
 
 <Preview />
 
-## Usage
+## Props
+
+| Prop                                     | Type         | Default | Description                                                                         |
+| ---------------------------------------- | ------------ | ------- | ----------------------------------------------------------------------------------- |
+| `content` (required)                     | `ReactNode`  | —       | The answer.                                                                         |
+| `kicker / kickerSub`                     | `ReactNode`  | —       | Header row.                                                                         |
+| `source / date / authors`                | `ReactNode`  | —       | Meta columns; omitted ones are hidden.                                              |
+| `onCopyCitation / onShare / onAddToList` | `() => void` | —       | Actions. Add to list behaviour is not designed — the callback is all the card does. |
+
+## Example
+
+<Demo />
 
 ```tsx
 import { ResearchAnswer } from "@exegia/corpora-ui"
 
-<ResearchAnswer content="…" source="Iliad · Homer corpus" date="c. 750 BCE" authors="Homer" onCopyCitation={copy} />
+;<ResearchAnswer
+  content="…"
+  source="Iliad · Homer corpus"
+  date="c. 750 BCE"
+  authors="Homer"
+  onCopyCitation={copy}
+/>
 ```
-
-## Props
-
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `content` (required) | `ReactNode` | — | The answer. |
-| `kicker / kickerSub` | `ReactNode` | — | Header row. |
-| `source / date / authors` | `ReactNode` | — | Meta columns; omitted ones are hidden. |
-| `onCopyCitation / onShare / onAddToList` | `() => void` | — | Actions. Add to list behaviour is not designed — the callback is all the card does. |
-
-## Examples
-
-Explore the complete demo, including its additional variants and interactions.
-
-<Demo />

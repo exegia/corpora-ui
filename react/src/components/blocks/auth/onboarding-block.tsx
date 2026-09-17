@@ -89,6 +89,8 @@ export interface OnboardingBlockProps {
   onComplete?: (profile: Record<string, OnboardingValue>) => Promise<void> | void;
   /** Shows a brief success screen once onboarding completes. */
   showCompleteScreen?: boolean;
+  /** Move focus to step headings. Disable when embedding a gallery preview. */
+  autoFocus?: boolean;
   className?: string;
 }
 
@@ -109,6 +111,7 @@ export function OnboardingBlock({
   onStepSubmit,
   onComplete,
   showCompleteScreen = true,
+  autoFocus = true,
   className,
 }: OnboardingBlockProps) {
   const headingRef = React.useRef<HTMLHeadingElement>(null);
@@ -136,9 +139,9 @@ export function OnboardingBlock({
   // Focus the step heading on advance; on error the alert carries the message
   // and stealing focus would talk over it.
   React.useEffect(() => {
-    if (error) return;
+    if (error || !autoFocus) return;
     headingRef.current?.focus();
-  }, [index, done, error]);
+  }, [index, done, error, autoFocus]);
 
   async function handleStepSubmit(stepValues: Record<string, OnboardingValue>) {
     if (!step) return;

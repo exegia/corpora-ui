@@ -8,9 +8,15 @@ import Demo from "@/registry/demos/passkey-sign-in-demo"
 
 ## Preview and props
 
-Adjust the generated controls to explore the component's TypeScript props.
+Expand **Props** below the centered preview to change the component’s properties.
 
 <Preview />
+
+## Examples
+
+Toggle availability and try the simulated sign-in outcomes.
+
+<Demo />
 
 ## Usage
 
@@ -31,7 +37,3 @@ import { PasskeySignInBlock } from "@exegia/corpora-ui"
 | label        | <code>string</code>                                                                | <code>"Sign in with a passkey"</code> | Button label.                                                                                                             |
 | onSignIn     | <code>() =&gt; Promise&lt;&#123; cancelled?: boolean &#125; &#124; void&gt;</code> | —                                     | Reject (or throw) to show the inline error. Resolve with &#123; cancelled: true &#125; to return silently to idle.        |
 | fallbackHint | <code>React.ReactNode</code>                                                       | —                                     | Shown under an error, pointing at the remaining sign-in methods.                                                          |
-
-## Examples
-
-<Demo />

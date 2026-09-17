@@ -13,7 +13,19 @@ Use the controls to explore the component's props.
 
 <Preview />
 
-## Usage
+## Props
+
+| Prop              | Type                                 | Default     | Description                                                                                                                                       |
+| ----------------- | ------------------------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `user` (required) | `UserType`                           | —           | The identity: firstName / lastName drive the name and initials, role the badge, avatarUrl the photo, status the presence dot, verified the check. |
+| `description`     | `string`                             | —           | Info only — muted secondary line under the name (a handle, a status, a timestamp).                                                                |
+| `size`            | `AvatarSize`                         | `"default"` | Info only — avatar size for the row.                                                                                                              |
+| `direction`       | `"sender" \| "recipient"`            | `"sender"`  | Info only — sender mirrors the row so it reads inward from a sender bubble's edge.                                                                |
+| `audio`           | `"muted" \| "unmuted" \| "speaking"` | —           | Info only — story-style ring around the avatar for live voice states.                                                                             |
+
+## Example
+
+<Demo />
 
 User currently uses a source import; it is not exported from the package entry point.
 
@@ -29,19 +41,3 @@ import User from "@/components/composed/user"
 // Inside a chat bubble header:
 <Bubble.Header time="10 min ago" user={user} UserInfo={User.Info} />
 ```
-
-## Props
-
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `user` (required) | `UserType` | — | The identity: firstName / lastName drive the name and initials, role the badge, avatarUrl the photo, status the presence dot, verified the check. |
-| `description` | `string` | — | Info only — muted secondary line under the name (a handle, a status, a timestamp). |
-| `size` | `AvatarSize` | `"default"` | Info only — avatar size for the row. |
-| `direction` | `"sender" \| "recipient"` | `"sender"` | Info only — sender mirrors the row so it reads inward from a sender bubble's edge. |
-| `audio` | `"muted" \| "unmuted" \| "speaking"` | — | Info only — story-style ring around the avatar for live voice states. |
-
-## Examples
-
-Explore the complete demo, including its additional variants and interactions.
-
-<Demo />

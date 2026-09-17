@@ -13,26 +13,28 @@ Use the controls to explore the component's props.
 
 <Preview />
 
-## Usage
+## Props
+
+| Prop                                    | Type                                                | Default  | Description                                     |
+| --------------------------------------- | --------------------------------------------------- | -------- | ----------------------------------------------- |
+| `title / description` (required)        | `ReactNode`                                         | —        | Header and the sentence before the entity pill. |
+| `entity / descriptionSuffix / leadTime` | `{ name, initials?, src? } / ReactNode / ReactNode` | —        | Inline pills.                                   |
+| `options / onSelectOption`              | `RecommendationOption[] / (index) => void`          | —        | Rows under Other options.                       |
+| `confidence`                            | `"high" \| "medium" \| "low"`                       | `"high"` | Footer signal.                                  |
+| `onAccept / onAlternatives`             | `() => void`                                        | —        | Footer buttons.                                 |
+
+## Example
+
+<Demo />
 
 ```tsx
 import { RecommendationCard } from "@exegia/corpora-ui"
 
-<RecommendationCard title="Want me to place this restock order?" description="Reorder waffle cones from" entity={{ name: "Cone King" }} leadTime="7 days" onAccept={accept} />
+;<RecommendationCard
+  title="Want me to place this restock order?"
+  description="Reorder waffle cones from"
+  entity={{ name: "Cone King" }}
+  leadTime="7 days"
+  onAccept={accept}
+/>
 ```
-
-## Props
-
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `title / description` (required) | `ReactNode` | — | Header and the sentence before the entity pill. |
-| `entity / descriptionSuffix / leadTime` | `{ name, initials?, src? } / ReactNode / ReactNode` | — | Inline pills. |
-| `options / onSelectOption` | `RecommendationOption[] / (index) => void` | — | Rows under Other options. |
-| `confidence` | `"high" \| "medium" \| "low"` | `"high"` | Footer signal. |
-| `onAccept / onAlternatives` | `() => void` | — | Footer buttons. |
-
-## Examples
-
-Explore the complete demo, including its additional variants and interactions.
-
-<Demo />

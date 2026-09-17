@@ -18,8 +18,8 @@ type PreviewProps = Pick<
 
 function PasswordInputPreview(props: PreviewProps) {
   return (
-    <div className="flex justify-center p-6">
-      <PasswordInput {...props} className="w-full max-w-sm" />
+    <div className="p-6 flex justify-center">
+      <PasswordInput {...props} className="max-w-sm w-full" />
     </div>
   )
 }
@@ -29,6 +29,9 @@ export const story = defineStory({
   args: {
     initial: {
       showStrength: true,
+      visibilityToggle: true,
+      sound: true,
+      disabled: false,
       placeholder: "Enter a password",
       "aria-label": "Password",
     },

@@ -5,6 +5,8 @@ icon: Layers
 ---
 
 import { AtomsGallery } from "@/components/docs/atoms-gallery"
+import { BlocksGallery } from "@/components/docs/blocks-gallery"
+import { ComponentsGallery } from "@/components/docs/components-gallery"
 import { Hero } from "@/components/docs/hero"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Atom, Boxes, Component, Network, Rocket } from "lucide-react"
@@ -102,7 +104,24 @@ bun add @exegia/corpora-ui
 
 <div aria-hidden className="h-16 md:h-24 text-center flex flex-col items-center justify-center">
     <h2 className="text-xl font-bold">Components</h2>
-    <p className="text-sm text-foreground/50">Composed of atoms: buttons, fields, bubbles, avatars, references, file icons and the chat attachment kit.</p>
+    <p className="text-sm text-foreground/50">Purposeful compositions of atoms for identity, corpus reading, research and review.</p>
 </div>
 
-Coming soon
+<ComponentsGallery />
+
+<div className="pt-6 text-sm text-muted-foreground">
+  Every tile above is the real component.{" "}
+  <a href="/composed">Browse all components →</a>
+</div>
+
+<section aria-labelledby="blocks-gallery-heading" className="mt-12">
+  <div className="mb-6 text-center">
+    <h2 id="blocks-gallery-heading" className="text-xl font-bold">Blocks</h2>
+    <p className="text-sm text-foreground/50">Authentication, account settings, workspaces and corpus chat — ready to assemble.</p>
+  </div>
+  <BlocksGallery />
+  <div className="pt-6 text-sm text-muted-foreground">
+    Explore every block, with live previews, prop controls and worked examples.{" "}
+    <a href="/blocks">Browse all blocks →</a>
+  </div>
+</section>

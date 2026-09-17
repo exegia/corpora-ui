@@ -13,25 +13,21 @@ Use the controls to explore the component's props.
 
 <Preview />
 
-## Usage
+## Props
+
+| Prop              | Type                                         | Default                         | Description                                          |
+| ----------------- | -------------------------------------------- | ------------------------------- | ---------------------------------------------------- |
+| `providers`       | `("google" \| "apple" \| "github" \| "x")[]` | `["google", "apple", "github"]` | Providers to render, in order.                       |
+| `action`          | `"login" \| "signup" \| "continue"`          | `"continue"`                    | Verb used in the button labels.                      |
+| `layout`          | `"stack" \| "row"`                           | `"stack"`                       | Full-width labeled buttons or an icon-only row.      |
+| `loadingProvider` | `SocialProvider \| null`                     | `null`                          | Marks one provider as loading and disables the rest. |
+
+## Example
+
+<Demo />
 
 ```tsx
 import { SocialProviders } from "@exegia/corpora-ui"
 
-<SocialProviders action="login" onSelect={(provider) => signIn(provider)} />
+;<SocialProviders action="login" onSelect={(provider) => signIn(provider)} />
 ```
-
-## Props
-
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `providers` | `("google" \| "apple" \| "github" \| "x")[]` | `["google", "apple", "github"]` | Providers to render, in order. |
-| `action` | `"login" \| "signup" \| "continue"` | `"continue"` | Verb used in the button labels. |
-| `layout` | `"stack" \| "row"` | `"stack"` | Full-width labeled buttons or an icon-only row. |
-| `loadingProvider` | `SocialProvider \| null` | `null` | Marks one provider as loading and disables the rest. |
-
-## Examples
-
-Explore the complete demo, including its additional variants and interactions.
-
-<Demo />

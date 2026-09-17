@@ -1,5 +1,7 @@
 "use client"
 
+import type { ComponentProps } from "react"
+
 import { defineStory } from "@/registry/story"
 
 import { ScaffoldCanvas } from "./scaffold-canvas"
@@ -8,8 +10,17 @@ import { ScaffoldMain } from "./scaffold-main"
 import { ScaffoldPanel } from "./scaffold-panel"
 import { ScaffoldRoot } from "./scaffold-root"
 
+type PreviewProps = Pick<
+  ComponentProps<typeof ScaffoldRoot>,
+  "className" | "inspectorOpen" | "inspectorWidth" | "children"
+>
+
+function BlockPreview(props: PreviewProps) {
+  return <ScaffoldRoot {...props} />
+}
+
 export const story = defineStory({
-  Component: ScaffoldRoot,
+  Component: BlockPreview,
   args: {
     initial: {
       className: "h-[28rem] w-full",

@@ -2,7 +2,8 @@
 
 import * as React from "react"
 
-import { DemoStage, DemoToggle } from "@/components/docs/demo-controls"
+import { DemoToggle } from "@/components/docs/demo-controls"
+import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
 import {
   PasskeyManagerBlock,
   type PasskeyRecord,
