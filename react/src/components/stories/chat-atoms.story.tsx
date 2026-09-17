@@ -3,11 +3,11 @@
 import type { ComponentProps } from "react"
 import { FileText } from "lucide-react"
 import { defineStory } from "@/registry/story"
-import { IconTile } from "./chat/icon-tile"
-import { Thumbnail } from "./chat/thumbnail"
-import { AvatarHandle } from "./chat/avatar-handle"
-import { Waveform } from "./chat/waveform"
-import { SendButton } from "./chat/buttons"
+import { IconTile } from "@/components/ui/chat/icon-tile"
+import { Thumbnail } from "@/components/ui/chat/thumbnail"
+import { AvatarHandle } from "@/components/ui/chat/avatar-handle"
+import { Waveform } from "@/components/ui/chat/waveform"
+import { SendButton } from "@/components/ui/chat/buttons"
 
 function IconTilePreview(
   props: Pick<ComponentProps<typeof IconTile>, "size" | "tone">
@@ -64,25 +64,25 @@ function SendButtonPreview(
   )
 }
 
-export const story = defineStory({
+const story = defineStory({
   Component: IconTilePreview,
   args: { initial: { size: 40, tone: "accent" } },
 })
-export const thumbnailStory = defineStory({
+const thumbnailStory = defineStory({
   Component: ThumbnailPreview,
   args: { initial: { size: "sm", alt: "Manuscript preview" } },
 })
-export const avatarHandleStory = defineStory({
+const avatarHandleStory = defineStory({
   Component: AvatarHandlePreview,
   args: { initial: { size: 20, initials: "JD" } },
 })
-export const waveformStory = defineStory({
+const waveformStory = defineStory({
   Component: WaveformPreview,
   args: {
     initial: { progress: 4, bars: [0.3, 0.6, 1, 0.75, 0.45, 0.9, 0.55, 0.35] },
   },
 })
-export const sendButtonStory = defineStory({
+const sendButtonStory = defineStory({
   Component: SendButtonPreview,
   args: { initial: { disabled: false, loading: false, sound: true } },
 })

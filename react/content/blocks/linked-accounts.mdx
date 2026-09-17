@@ -23,7 +23,7 @@ Connect and disconnect demo identities, and explore loading and error states.
 ```tsx
 import { LinkedAccountsBlock } from "@exegia/corpora-ui"
 
-;<LinkedAccountsBlock identities={identities} onLink={link} onUnlink={unlink} />
+<LinkedAccountsBlock identities={identities} onLink={link} onUnlink={unlink} />
 ```
 
 ## API notes
@@ -33,4 +33,4 @@ import { LinkedAccountsBlock } from "@exegia/corpora-ui"
 | identities        | <code>LinkedIdentity[]</code>                               | <code>[]</code>                            | Identities attached to the account (&#123; id, provider, email? &#125;).                        |
 | providers         | <code>SocialProvider[]</code>                               | <code>["google", "apple", "github"]</code> | Connect candidates. Already-connected providers are filtered out.                               |
 | loading           | <code>boolean</code>                                        | <code>false</code>                         | Shows the loading row instead of the list.                                                      |
-| onLink / onUnlink | <code>(provider &#124; id) =&gt; Promise&lt;void&gt;</code> | —                                          | Reject (or throw) to show the inline error. Unlink never fires for the last remaining identity. |
+| onLink / onUnlink | <code>(provider &#124; id) =&gt; Promise&lt;void&gt</code> | —                                          | Reject (or throw) to show the inline error. Unlink never fires for the last remaining identity. |

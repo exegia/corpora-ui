@@ -23,7 +23,7 @@ Toggle social providers, branding and secondary actions. Submit the form to try 
 ```tsx
 import { LoginBlock, useAuthFlow, useAuthFlowActions } from "@exegia/corpora-ui"
 
-;<LoginBlock onSubmit={async ({ email, password }) => login(email, password)} />
+<LoginBlock onSubmit={async ({ email, password }) => login(email, password)} />
 
 // Wired into the shared auth flow (needs <ExegiaProvider> at the root):
 // the block keeps the password local; the flow tracks which step shows and
@@ -52,4 +52,4 @@ const { beginVerification, complete } = useAuthFlowActions()
 | accent                              | <code>"corpora" &#124; "exegia"</code>        | —                                          | Brand accent for the primary action — corpora is a solid #E8B124, exegia a purple gradient. Omit to keep the default primary. |
 | providers                           | <code>SocialProvider[]</code>                 | <code>["google", "apple", "github"]</code> | Social providers; empty array hides the section.                                                                              |
 | showRememberMe / showForgotPassword | <code>boolean</code>                          | <code>true</code>                          | Toggle the secondary affordances.                                                                                             |
-| onSubmit                            | <code>(data) =&gt; Promise&lt;void&gt;</code> | —                                          | Reject (or throw) to show the shaking error state with the error message.                                                     |
+| onSubmit                            | <code>(data) =&gt; Promise&lt;void&gt</code> | —                                          | Reject (or throw) to show the shaking error state with the error message.                                                     |

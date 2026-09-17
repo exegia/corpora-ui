@@ -2,8 +2,8 @@
 
 import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
-import { Label } from "./label"
-import { OTPField, OTPFieldInput } from "./otp-field"
+import { Label } from "@/components/ui/label"
+import { OTPField, OTPFieldInput } from "@/components/ui/otp-field"
 
 type PreviewProps = Pick<
   ComponentProps<typeof OTPField>,
@@ -25,7 +25,7 @@ function OTPFieldPreview({ length, ...props }: PreviewProps) {
   )
 }
 
-export const story = defineStory({
+const story = defineStory({
   Component: OTPFieldPreview,
   args: {
     initial: { length: 6, size: "default", disabled: false, sound: true },

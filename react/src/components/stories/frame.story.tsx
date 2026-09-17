@@ -2,8 +2,8 @@
 
 import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
-import { Frame, FrameFooter } from "./frame"
-import { Card, CardPanel } from "./card"
+import { Frame, FrameFooter } from "@/components/ui/frame"
+import { Card, CardPanel } from "@/components/ui/card"
 
 type PreviewProps = Pick<ComponentProps<typeof Frame>, "className"> & {
   children: string
@@ -24,7 +24,7 @@ function FramePreview({ children, ...props }: PreviewProps) {
   )
 }
 
-export const story = defineStory({
+const story = defineStory({
   Component: FramePreview,
   args: { initial: { className: "", children: "Manuscript notes" } },
 })

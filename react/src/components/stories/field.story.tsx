@@ -2,15 +2,15 @@
 
 import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
-import { Field, FieldLabel, FieldDescription, FieldError } from "./field"
-import { Input } from "./input"
+import { Field, FieldLabel, FieldDescription, FieldError } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
 
 type PreviewProps = Pick<ComponentProps<typeof Field>, "disabled" | "invalid">
 
 function FieldPreview(props: PreviewProps) {
   return (
     <div className="p-6">
-      <div className="max-w-sm">
+      <div className="min-w-sm">
         <Field {...props}>
           <FieldLabel>Manuscript title</FieldLabel>
           <Input placeholder="Enter a title" />
@@ -24,7 +24,7 @@ function FieldPreview(props: PreviewProps) {
   )
 }
 
-export const story = defineStory({
+const story = defineStory({
   Component: FieldPreview,
   args: { initial: { disabled: false, invalid: false } },
 })

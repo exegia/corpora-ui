@@ -2,7 +2,7 @@
 
 import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
-import { Textarea } from "./textarea"
+import { Textarea } from "@/components/ui/textarea"
 
 type PreviewProps = Pick<
   ComponentProps<typeof Textarea>,
@@ -19,7 +19,7 @@ function TextareaPreview(props: PreviewProps) {
   )
 }
 
-export const story = defineStory({
+const story = defineStory({
   Component: TextareaPreview,
   args: {
     initial: {

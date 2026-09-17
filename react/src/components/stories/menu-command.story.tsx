@@ -2,8 +2,8 @@
 
 import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
-import { MenuCommand } from "./menu-command"
-import { Button } from "./button"
+import { MenuCommand } from "@/components/ui/menu-command"
+import { Button } from "@/components/ui/button"
 
 type PreviewProps = Pick<ComponentProps<typeof MenuCommand>, "side" | "align">
 
@@ -29,7 +29,7 @@ function MenuCommandPreview(props: PreviewProps) {
   )
 }
 
-export const story = defineStory({
+const story = defineStory({
   Component: MenuCommandPreview,
   args: { initial: { side: "top", align: "start" } },
 })

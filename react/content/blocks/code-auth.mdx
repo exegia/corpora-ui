@@ -27,7 +27,7 @@ import {
   useAuthFlowActions,
 } from "@exegia/corpora-ui"
 
-;<CodeAuthBlock channel="sms" destination="•••-1234" onVerify={verifyCode} />
+<CodeAuthBlock channel="sms" destination="•••-1234" onVerify={verifyCode} />
 
 // From the shared auth flow: after beginVerification({ identifier, channel })
 // the flow exposes the identifier already masked (y•••@example.com, •••4567).
@@ -55,4 +55,4 @@ const { complete } = useAuthFlowActions()
 | length        | <code>number</code>                           | <code>6</code>       | Code length.                                                                                                                  |
 | autoSubmit    | <code>boolean</code>                          | <code>true</code>    | Verify as soon as all digits are entered.                                                                                     |
 | resendSeconds | <code>number</code>                           | <code>30</code>      | Countdown before resend becomes available.                                                                                    |
-| onVerify      | <code>(code) =&gt; Promise&lt;void&gt;</code> | —                    | Reject to shake, clear the code and show the error.                                                                           |
+| onVerify      | <code>(code) =&gt; Promise&lt;void&gt</code> | —                    | Reject to shake, clear the code and show the error.                                                                           |

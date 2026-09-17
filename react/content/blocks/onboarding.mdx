@@ -23,7 +23,7 @@ Explore the configured steps, branding and completion states.
 ```tsx
 import { OnboardingBlock } from "@exegia/corpora-ui"
 
-;<OnboardingBlock steps={steps} onComplete={saveProfile} />
+<OnboardingBlock steps={steps} onComplete={saveProfile} />
 ```
 
 ## API notes
@@ -33,8 +33,8 @@ import { OnboardingBlock } from "@exegia/corpora-ui"
 | steps              | <code>OnboardingStepConfig[]</code>                     | <code>DEFAULT_ONBOARDING_STEPS</code> | Declared steps; each holds text, textarea, url, select and checkbox fields with optional required + validate rules.           |
 | logo               | <code>React.ReactNode</code>                            | —                                     | Brand mark rendered above the title. Omitted leaves no logo row at all.                                                       |
 | accent             | <code>"corpora" &#124; "exegia"</code>                  | —                                     | Brand accent for the primary action — corpora is a solid #E8B124, exegia a purple gradient. Omit to keep the default primary. |
-| onStepSubmit       | <code>(stepId, values) =&gt; Promise&lt;void&gt;</code> | —                                     | Fires per step. Reject (or throw) to keep the user on the step and show the error.                                            |
-| onComplete         | <code>(profile) =&gt; Promise&lt;void&gt;</code>        | —                                     | Fires once, after the final step is accepted, with the merged profile.                                                        |
+| onStepSubmit       | <code>(stepId, values) =&gt; Promise&lt;void&gt</code> | —                                     | Fires per step. Reject (or throw) to keep the user on the step and show the error.                                            |
+| onComplete         | <code>(profile) =&gt; Promise&lt;void&gt</code>        | —                                     | Fires once, after the final step is accepted, with the merged profile.                                                        |
 | showCompleteScreen | <code>boolean</code>                                    | <code>true</code>                     | Brief success screen once onboarding completes. false renders nothing instead.                                                |
 
 

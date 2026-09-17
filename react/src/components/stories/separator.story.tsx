@@ -2,7 +2,7 @@
 
 import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
-import { Separator } from "./separator"
+import { Separator } from "@/components/ui/separator"
 
 type PreviewProps = Pick<ComponentProps<typeof Separator>, "orientation">
 
@@ -26,7 +26,7 @@ function SeparatorPreview(props: PreviewProps) {
   )
 }
 
-export const story = defineStory({
+const story = defineStory({
   Component: SeparatorPreview,
   args: { initial: { orientation: "horizontal" } },
 })

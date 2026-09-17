@@ -19,7 +19,7 @@ function ReferencePreview({ children, ...props }: PreviewProps) {
   )
 }
 
-export const story = defineStory({
+const story = defineStory({
   Component: ReferencePreview,
   args: {
     initial: {

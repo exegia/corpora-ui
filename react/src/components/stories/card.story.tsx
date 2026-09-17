@@ -2,7 +2,7 @@
 
 import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
-import { Card, CardHeader, CardPanel, CardTitle } from "./card"
+import { Card, CardHeader, CardPanel, CardTitle } from "@/components/ui/card"
 
 type PreviewProps = Pick<ComponentProps<typeof Card>, "className"> & {
   children: string
@@ -23,7 +23,7 @@ function CardPreview({ children, ...props }: PreviewProps) {
   )
 }
 
-export const story = defineStory({
+const story = defineStory({
   Component: CardPreview,
   args: {
     initial: {

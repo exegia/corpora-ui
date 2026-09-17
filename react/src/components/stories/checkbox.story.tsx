@@ -2,7 +2,7 @@
 
 import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
-import { Checkbox } from "./checkbox"
+import { Checkbox } from "@/components/ui/checkbox"
 
 type PreviewProps = Pick<
   ComponentProps<typeof Checkbox>,
@@ -22,7 +22,7 @@ function CheckboxPreview(props: PreviewProps) {
   )
 }
 
-export const story = defineStory({
+const story = defineStory({
   Component: CheckboxPreview,
   args: { initial: { indeterminate: false, disabled: false, sound: true } },
 })

@@ -2,7 +2,7 @@
 
 import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
-import { InputGroup, InputGroupAddon, InputGroupInput } from "./input-group"
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
 
 type PreviewProps = Pick<ComponentProps<typeof InputGroup>, "className">
 
@@ -19,7 +19,7 @@ function InputGroupPreview(props: PreviewProps) {
   )
 }
 
-export const story = defineStory({
+const story = defineStory({
   Component: InputGroupPreview,
   args: { initial: { className: "" } },
 })

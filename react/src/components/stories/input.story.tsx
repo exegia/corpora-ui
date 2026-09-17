@@ -2,7 +2,7 @@
 
 import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
-import { Input } from "./input"
+import { Input } from "@/components/ui/input"
 
 type PreviewProps = Pick<
   ComponentProps<typeof Input>,
@@ -25,7 +25,7 @@ function InputPreview({ variant, ...props }: PreviewProps) {
   )
 }
 
-export const story = defineStory({
+const story = defineStory({
   Component: InputPreview,
   args: {
     initial: {
