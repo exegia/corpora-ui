@@ -36,6 +36,7 @@ export default defineConfig([
     // by design (buttonVariants, passwordRequirements, useCountdown, …).
     files: [
       'src/components/ui/**/*.tsx',
+      'src/components/stories/**/*.tsx',
       'src/components/composed/**/*.tsx',
       'src/components/blocks/**/*.tsx',
       'src/components/motion/**/*.tsx',

@@ -24,7 +24,7 @@ function FieldPreview(props: PreviewProps) {
   )
 }
 
-const story = defineStory({
+export const story = defineStory({
   Component: FieldPreview,
   args: { initial: { disabled: false, invalid: false } },
 })

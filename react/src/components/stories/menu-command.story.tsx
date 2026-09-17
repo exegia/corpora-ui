@@ -29,7 +29,7 @@ function MenuCommandPreview(props: PreviewProps) {
   )
 }
 
-const story = defineStory({
+export const story = defineStory({
   Component: MenuCommandPreview,
   args: { initial: { side: "top", align: "start" } },
 })

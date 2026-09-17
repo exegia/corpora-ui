@@ -1,6 +1,10 @@
 import { defineStoryFactory } from "@fumadocs/story/vite/client"
 import type { Story, StoryOptions } from "@fumadocs/story/vite/client"
-import { createElement, type ComponentPropsWithoutRef, type FC } from "react"
+import {
+  createElement,
+  type ComponentPropsWithoutRef,
+  type FC,
+} from "react"
 
 const { defineStory: createStory } = defineStoryFactory()
 

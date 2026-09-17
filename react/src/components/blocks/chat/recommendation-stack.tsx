@@ -3,11 +3,9 @@
 import type * as React from "react"
 import { Group } from "@/components/ui/group"
 import { cn } from "@/lib/utils"
+import type { RecommendationStackProps } from "./types"
 
-export interface RecommendationStackProps
-  extends React.ComponentPropsWithoutRef<"div"> {
-  children: React.ReactNode
-}
+
 
 /**
  * Fuses a run of RecommendationCards into one bordered stack for the thread.

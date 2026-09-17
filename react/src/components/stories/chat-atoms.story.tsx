@@ -64,25 +64,25 @@ function SendButtonPreview(
   )
 }
 
-const story = defineStory({
+export const story = defineStory({
   Component: IconTilePreview,
   args: { initial: { size: 40, tone: "accent" } },
 })
-const thumbnailStory = defineStory({
+export const thumbnailStory = defineStory({
   Component: ThumbnailPreview,
   args: { initial: { size: "sm", alt: "Manuscript preview" } },
 })
-const avatarHandleStory = defineStory({
+export const avatarHandleStory = defineStory({
   Component: AvatarHandlePreview,
   args: { initial: { size: 20, initials: "JD" } },
 })
-const waveformStory = defineStory({
+export const waveformStory = defineStory({
   Component: WaveformPreview,
   args: {
     initial: { progress: 4, bars: [0.3, 0.6, 1, 0.75, 0.45, 0.9, 0.55, 0.35] },
   },
 })
-const sendButtonStory = defineStory({
+export const sendButtonStory = defineStory({
   Component: SendButtonPreview,
   args: { initial: { disabled: false, loading: false, sound: true } },
 })

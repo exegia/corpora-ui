@@ -1,4 +1,5 @@
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react"
+import type { TextSelectionProps } from "../text-selection"
 
 export type TextVariant =
   "default" | "heading" | "paragraph" | "link" | "subscript"
@@ -19,6 +20,15 @@ export type TextProps = Omit<
   selection?: string | boolean
   style?: CSSProperties
 }
+
+export type HeadingProps = Omit<TextProps, "type"> &
+  Omit<TextSelectionProps, "children" | "className">
+
+
+export type SpanProps = Omit<TextProps, "type">
+export type ParagraphProps = Omit<TextProps, "type"> &
+  Omit<TextSelectionProps, "children" | "className">
+
 
 export type LabelLevel = "heading" | "title" | "caption" | "subtitle"
 

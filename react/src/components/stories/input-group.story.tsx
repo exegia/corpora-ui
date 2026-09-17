@@ -19,7 +19,7 @@ function InputGroupPreview(props: PreviewProps) {
   )
 }
 
-const story = defineStory({
+export const story = defineStory({
   Component: InputGroupPreview,
   args: { initial: { className: "" } },
 })

@@ -45,7 +45,7 @@ function ButtonPreview({
   )
 }
 
-const story = defineStory({
+export const story = defineStory({
   Component: ButtonPreview,
   args: {
     initial: {

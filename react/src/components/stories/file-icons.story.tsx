@@ -16,7 +16,7 @@ function FileBadgeTeiPreview(props: PreviewProps) {
   )
 }
 
-const story = defineStory({
+export const story = defineStory({
   Component: FileBadgeTeiPreview,
   args: { initial: { size: 64, title: "TEI file" } },
 })

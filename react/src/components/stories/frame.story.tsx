@@ -24,7 +24,7 @@ function FramePreview({ children, ...props }: PreviewProps) {
   )
 }
 
-const story = defineStory({
+export const story = defineStory({
   Component: FramePreview,
   args: { initial: { className: "", children: "Manuscript notes" } },
 })

@@ -24,7 +24,7 @@ import { Mermaid } from "@/components/docs/mermaid"
 
     subgraph Docs[Live documentation]
       Content[content/**/*.mdx<br/>Pages]
-      Stories[*.story.tsx<br/>Live previews]
+      Stories[src/components/stories<br/>Component previews]
       Demos[src/registry/demos<br/>Worked demos]
       Meta[meta.json<br/>Sidebar order]
       Fumapress[Fumapress]
@@ -61,7 +61,7 @@ Stateful components never add a second provider. They use instance-keyed Jotai a
 Fumapress renders `.md` and `.mdx` files in `content/` as pages. Frontmatter supplies titles and descriptions; `meta.json` controls sidebar ordering.
 
 - `content/atoms`, `content/composed`, and `content/blocks` own component documentation, usage guidance, and prop notes.
-- `*.story.tsx` files beside components define previews and TypeScript-derived prop controls.
+- `src/components/stories/*.story.tsx` files define atom, composed-component, and block previews with TypeScript-derived prop controls.
 - `src/registry/demos` supplies larger worked examples for composed components and blocks.
 - `src/pages` is reserved for custom designs that need a React route.
 

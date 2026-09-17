@@ -25,7 +25,7 @@ function OTPFieldPreview({ length, ...props }: PreviewProps) {
   )
 }
 
-const story = defineStory({
+export const story = defineStory({
   Component: OTPFieldPreview,
   args: {
     initial: { length: 6, size: "default", disabled: false, sound: true },

@@ -24,7 +24,7 @@ function LabelPreview({ children, ...props }: PreviewProps) {
   )
 }
 
-const story = defineStory({
+export const story = defineStory({
   Component: LabelPreview,
   args: { initial: { sound: false, children: "Manuscript title" } },
 })

@@ -26,7 +26,7 @@ function SeparatorPreview(props: PreviewProps) {
   )
 }
 
-const story = defineStory({
+export const story = defineStory({
   Component: SeparatorPreview,
   args: { initial: { orientation: "horizontal" } },
 })

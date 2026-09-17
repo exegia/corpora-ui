@@ -15,6 +15,21 @@ export interface AiScope {
   pinned?: boolean
 }
 
+export interface RecommendationStackProps
+  extends React.ComponentPropsWithoutRef<"div"> {
+  children: React.ReactNode
+}
+
+export interface PinnedThreadBannerProps {
+  className?: string
+}
+
+export interface DegradedBannerProps {
+  reason?: React.ReactNode
+  onRetry?: () => void
+  className?: string
+}
+
 // The reader selection shapes moved with `SelectionPopover` to
 // `composed/reader`; re-exported so the block's surface stays whole.
 export type { NodeSelection, WordSelection } from "@/components/composed/reader"

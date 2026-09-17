@@ -1,15 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
-import type { AtomSize } from "./types";
-
-
-export type TLoaderType = "spinner" | "dots";
-export interface ILoaderProps {
-  type?: TLoaderType;
-  className?: string;
-  size?: AtomSize;
-}
-
+import type { AtomSize, ILoaderProps } from "./types";
 
 const sizeMap: Record<AtomSize, string> = {
   xs: 'w-0.5 h-0.5',

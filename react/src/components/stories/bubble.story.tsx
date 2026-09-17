@@ -37,7 +37,7 @@ function BubblePreview(props: PreviewProps) {
   )
 }
 
-const story = defineStory({
+export const story = defineStory({
   Component: BubblePreview,
   args: { initial: { variant: "recipient", continued: false } },
 })

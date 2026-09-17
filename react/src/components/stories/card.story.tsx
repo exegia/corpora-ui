@@ -23,7 +23,7 @@ function CardPreview({ children, ...props }: PreviewProps) {
   )
 }
 
-const story = defineStory({
+export const story = defineStory({
   Component: CardPreview,
   args: {
     initial: {

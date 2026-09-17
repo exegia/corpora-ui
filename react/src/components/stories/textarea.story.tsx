@@ -19,7 +19,7 @@ function TextareaPreview(props: PreviewProps) {
   )
 }
 
-const story = defineStory({
+export const story = defineStory({
   Component: TextareaPreview,
   args: {
     initial: {

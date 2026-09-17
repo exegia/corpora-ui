@@ -31,3 +31,16 @@ export interface IInputFieldProps extends Omit<InputProps, "size"> {
   size?: TMacroAtomSize
   invalid?: boolean
 }
+
+export type TLoaderType = "spinner" | "dots";
+export interface ILoaderProps {
+  type?: TLoaderType;
+  className?: string;
+  size?: AtomSize;
+}
+
+export type * from "./avatar/types"
+export type * from "./background/type"
+export type * from "./bubble/types"
+export type * from "./text/types"
+export type * from "./text-selection/types"

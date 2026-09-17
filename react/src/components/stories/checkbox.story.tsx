@@ -22,7 +22,7 @@ function CheckboxPreview(props: PreviewProps) {
   )
 }
 
-const story = defineStory({
+export const story = defineStory({
   Component: CheckboxPreview,
   args: { initial: { indeterminate: false, disabled: false, sound: true } },
 })

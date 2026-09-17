@@ -19,7 +19,7 @@ function AvatarPreview(props: PreviewProps) {
   )
 }
 
-const story = defineStory({
+export const story = defineStory({
   Component: AvatarPreview,
   args: {
     initial: {

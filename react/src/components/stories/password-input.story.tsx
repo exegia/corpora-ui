@@ -4,7 +4,7 @@ import { defineStory } from "@/registry/story"
 
 import { PasswordInput } from "@/components/composed/password-input"
 
-const story = defineStory({
+export const story = defineStory({
   Component: PasswordInput,
   args: {
     initial: {

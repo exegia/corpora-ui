@@ -10,8 +10,8 @@ import type * as React from "react"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import type { SocialProvider } from "./types"
 
-export type SocialProvider = "google" | "apple" | "github" | "x"
 
 /** Google's four-color "G" — the only provider whose mark isn't monochrome. */
 function GoogleColorIcon(props: React.SVGProps<SVGSVGElement>) {

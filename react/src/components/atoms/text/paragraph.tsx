@@ -1,12 +1,9 @@
 import { TextSelection } from "../text-selection"
-import type { TextSelectionProps } from "../text-selection"
 import { Text } from "./default"
-import type { TextProps } from "./types"
+import type { ParagraphProps } from "./types"
 import { cn } from "@/lib/utils"
 import { twClasses } from "./utils"
 
-export type ParagraphProps = Omit<TextProps, "type"> &
-  Omit<TextSelectionProps, "children" | "className">
 
 export function Paragraph({
   children,

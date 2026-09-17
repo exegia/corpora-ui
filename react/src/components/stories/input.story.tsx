@@ -25,7 +25,7 @@ function InputPreview({ variant, ...props }: PreviewProps) {
   )
 }
 
-const story = defineStory({
+export const story = defineStory({
   Component: InputPreview,
   args: {
     initial: {

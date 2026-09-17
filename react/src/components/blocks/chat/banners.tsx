@@ -4,7 +4,7 @@ import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertAction, AlertDescription } from "@/components/ui/alert"
-import type { LockedBannerProps } from "./types"
+import type { DegradedBannerProps, LockedBannerProps, PinnedThreadBannerProps } from "./types"
 
 export function LockedBanner({
   children = "This published corpus is locked. Ask questions here, or continue in a working draft to make changes.",
@@ -22,10 +22,6 @@ export function LockedBanner({
   )
 }
 
-export interface PinnedThreadBannerProps {
-  className?: string
-}
-
 export function PinnedThreadBanner({
   className,
 }: PinnedThreadBannerProps): React.ReactElement {
@@ -38,11 +34,7 @@ export function PinnedThreadBanner({
   )
 }
 
-export interface DegradedBannerProps {
-  reason?: React.ReactNode
-  onRetry?: () => void
-  className?: string
-}
+
 
 export function DegradedBanner({
   reason = "The model is unavailable right now.",
