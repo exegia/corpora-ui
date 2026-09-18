@@ -1,6 +1,6 @@
 ---
 title: "Chart"
-description: "320×244 chart card — pie, area, line or bar — with title, subtitle, type pill, plot and legend. Series colours come from the --chart-series-1…5 tokens, grid from --chart-grid."
+description: "Pie, area, line and bar charts for corpus research, with a passage or Strong’s reference pill, plot and legend. Series colours come from the --chart-series-1…5 tokens, grid from --chart-grid."
 ---
 
 import { Preview } from "@/components/stories/chart.story"
@@ -15,30 +15,39 @@ Use the controls to explore the component's props.
 
 ## Props
 
-| Prop                       | Type                                           | Default | Description                                                                                                                                    |
-| -------------------------- | ---------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `type` (required)          | `"pie" \| "area" \| "line" \| "bar"`           | —       | Plot kind.                                                                                                                                     |
-| `data` (required)          | `{ label: string; [key]: number \| string }[]` | —       | One row per x label (or pie slice).                                                                                                            |
-| `series` (required)        | `{ key, label, color?, format? }[]`            | —       | Keys to plot; colour defaults to the series token by position. Pie uses the first. `format` renders the value in the legend and hover tooltip. |
-| `title / subtitle / badge` | `ReactNode`                                    | —       | Header row; badge defaults to the type name.                                                                                                   |
-| `center`                   | `{ value, label? }`                            | —       | Pie only: donut centre.                                                                                                                        |
-| `headerless / plotHeight`  | `boolean / number`                             | —       | Bare plot for embedding (InsightCards).                                                                                                        |
+| Prop                       | Type                                                            | Default | Description                                                                                                                                    |
+| -------------------------- | --------------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type` (required)          | `"pie" \| "area" \| "line" \| "bar"`                            | —       | Plot kind.                                                                                                                                     |
+| `data` (required)          | `{ label: string; [key]: number \| string }[]`                  | —       | One row per x label (or pie slice).                                                                                                            |
+| `series` (required)        | `{ key, label, color?, format? }[]`                             | —       | Keys to plot; colour defaults to the series token by position. Pie uses the first. `format` renders the value in the legend and hover tooltip. |
+| `title / subtitle / badge` | `ReactNode`                                                     | —       | Header row; badge defaults to the type name.                                                                                                   |
+| `reference`                | `Reference` props (`children`, `href?`, `preview?`, `onClick?`) | —       | Passage or Strong’s entry displayed as a reference pill instead of the type badge.                                                             |
+| `center`                   | `{ value, label? }`                                             | —       | Pie only: donut centre.                                                                                                                        |
+| `headerless / plotHeight`  | `boolean / number`                                              | —       | Bare plot for embedding (InsightCards).                                                                                                        |
 
 ## Example
+
+The four plots show commentary entries per author for John 3:16 (pie), cumulative cross-reference links through John 3:14–18 (area), cross-reference counts per verse and testament (line), and tokens matching Strong’s G26 in selected Bible books (bar). Counts are illustrative fixtures; connect `data` to your own indexed corpus for research results.
 
 <Demo />
 
 ```tsx
 import { Chart } from "@exegia/corpora-ui"
 
-<Chart
+;<Chart
   type="bar"
-  title="Sales by flavor"
-  subtitle="Units · last 6 months"
+  title="Word occurrences by book"
+  subtitle="Illustrative counts · selected Bible books"
+  reference={{
+    children: "Strong’s G26",
+    preview: "Tokens matching the selected Strong’s entry, grouped by book.",
+  }}
   data={[
-    { label: "Pist.", units: 62 },
-    { label: "Vanilla", units: 88 },
+    { label: "Romans", occurrences: 14 },
+    { label: "1 Cor.", occurrences: 13 },
+    { label: "Eph.", occurrences: 9 },
+    { label: "1 John", occurrences: 18 },
   ]}
-  series={[{ key: "units", label: "Units sold" }]}
+  series={[{ key: "occurrences", label: "Occurrences" }]}
 />
 ```

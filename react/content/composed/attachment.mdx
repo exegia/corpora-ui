@@ -11,25 +11,41 @@ import Demo from "@/registry/demos/attachment-demo"
 
 Use the controls to explore the component's props.
 
+Every attachment opens a preview on hover or keyboard focus, including documents, user handles, and sent attachments. Cards use the shared `rounded-lg` radius.
+
+Pass the original `file` to let the component detect its type and create a local preview. Images display their content; videos show a frame and playback controls; audio has a player; text documents show an excerpt. PDFs use the browser's document viewer in the hover card. Unsupported formats show their file information. No file is uploaded automatically.
+
+For uploaded files, supply `src`. You can also supply a `thumbnail`, `previewText`, or custom `preview` for a document or link whose content needs a server-generated preview. Object URLs are released when the attachment unmounts or its file changes.
+
 <Preview />
 
 ## Props
 
-| Prop                   | Type                                                                                                                      | Default     | Description                                                                           |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------- |
-| `kind` (required)      | `"document" \| "image" \| "media" \| "text-selection" \| "chat-reply" \| "username-handle" \| "url-link"`                 | —           | Which attachment; picks the leading icon and the preview layout.                      |
-| `variant`              | `"default" \| "preview"`                                                                                                  | `"default"` | Composer chip or in-bubble rendering.                                                 |
-| `title / meta`         | `ReactNode`                                                                                                               | —           | Primary and secondary chip lines.                                                     |
-| `onRemove / removable` | `() => void / boolean`                                                                                                    | —           | The chip's ✕. Hidden when no handler is passed or removable is false.                 |
-| `kind props`           | `src, poster, duration, audio, onPlay, quote, author, time, body, initials, domain, description, favicon, href, onAction` | —           | Accepted per kind; the union type rejects props that don't belong to the chosen kind. |
+| Prop                                | Type                                                                                                                      | Default        | Description                                                                            |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------- | -------------------------------------------------------------------------------------- |
+| `kind` (required)                   | `"document" \| "image" \| "media" \| "text-selection" \| "chat-reply" \| "username-handle" \| "url-link"`                 | —              | Which attachment; picks the leading icon and the preview layout.                       |
+| `variant`                           | `"default" \| "preview"`                                                                                                  | `"default"`    | Composer chip or in-bubble rendering.                                                  |
+| `title / meta`                      | `ReactNode`                                                                                                               | —              | Primary and secondary chip lines.                                                      |
+| `onRemove / removable`              | `() => void / boolean`                                                                                                    | —              | The chip's ✕. Hidden when no handler is passed or removable is false.                  |
+| `file / src`                        | `File / string`                                                                                                           | —              | Original local file or uploaded content URL. Local files are classified automatically. |
+| `thumbnail / previewText / preview` | `string / string / ReactNode`                                                                                             | —              | Supplied thumbnail, document excerpt, or custom hover content.                         |
+| `mimeType`                          | `string`                                                                                                                  | File MIME type | Content type for a URL, e.g. `application/pdf` for a document preview.                 |
+| `kind props`                        | `src, poster, duration, audio, onPlay, quote, author, time, body, initials, domain, description, favicon, href, onAction` | —              | Accepted per kind; the union type rejects props that don't belong to the chosen kind.  |
 
 ## Example
 
 <Demo />
 
 ```tsx
-import { Attachment } from "@exegia/corpora-ui"
+import { Attachment, Bubble } from "@exegia/corpora-ui"
 
-<Attachment kind="document" title="Q3-financial-report.pdf" meta="PDF · 2.4 MB" onRemove={remove} />
+<Attachment kind="document" title="Iliad annotations.pdf" meta="PDF · 2.4 MB" onRemove={remove} />
 <Attachment kind="url-link" variant="preview" title="Exegia UI" domain="sketch.com" description="…" href="https://sketch.com" />
+
+// Preserve file and kind-specific props when moving a tray item into the thread.
+<Bubble variant="sender">
+  <Bubble.Message unstyled>
+    <Attachment {...attachment} variant="preview" />
+  </Bubble.Message>
+</Bubble>
 ```

@@ -12,7 +12,7 @@ import { Preview } from "@/components/stories/bubble.story"
 ```tsx
 import { Bubble } from "@exegia/corpora-ui"
 
-<Bubble variant="sender">
+;<Bubble variant="sender">
   <Bubble.Header>
     <span>Jenny Hamilton</span>
     <span>10 min ago</span>
@@ -33,6 +33,8 @@ import { Bubble } from "@exegia/corpora-ui"
 ```
 
 ## API reference
+
+Attachment-only children automatically render without bubble padding, background, bezel, or tail, including attachments inside fragments. Use `<Bubble.Message unstyled>` explicitly for custom attachment wrappers. For a message with both text and attachments, put the text in a normal `Bubble.Message` and the attachments in a separate unstyled one.
 
 | Prop             | Type                                    | Default     | Description                                                                                                                                                                                                                                                                                                                                                                       |
 | ---------------- | --------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
