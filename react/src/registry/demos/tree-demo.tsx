@@ -13,12 +13,12 @@ import {
 } from "lucide-react"
 import * as React from "react"
 
-import { Tree, type TreeNode, useTree } from "@/components/composed/tree"
+import { Tree, type ITreeNode, useTree } from "@/components/composed/tree"
 import { DemoStage } from "@/components/docs/demo-controls"
 import { Button } from "@/components/ui/button"
 
 /** 3 levels — `navigation` promotes the top level to section names. */
-const NAVIGATION: TreeNode[] = [
+const NAVIGATION: ITreeNode[] = [
   {
     id: "research",
     label: "Research",
@@ -53,7 +53,7 @@ const NAVIGATION: TreeNode[] = [
   },
 ]
 
-const TOC: TreeNode[] = [
+const TOC: ITreeNode[] = [
   {
     id: "getting-started",
     label: "Getting started",
@@ -75,14 +75,14 @@ const TOC: TreeNode[] = [
   { id: "changelog", label: "Changelog", href: "#" },
 ]
 
-const RAIL: TreeNode[] = [
+const RAIL: ITreeNode[] = [
   { id: "search", label: "Search", icon: <SearchIcon />, href: "#" },
   { id: "reading", label: "Reading list", icon: <BookOpenIcon />, href: "#" },
   { id: "library", label: "Library", icon: <LibraryIcon />, href: "#" },
   { id: "settings", label: "Settings", icon: <SettingsIcon />, href: "#" },
 ]
 
-const FILES: TreeNode[] = [
+const FILES: ITreeNode[] = [
   {
     id: "src",
     label: "src",
@@ -104,10 +104,10 @@ const FILES: TreeNode[] = [
   { id: "readme", label: "README.md", icon: <FileTextIcon /> },
 ]
 
-type DemoVariant = "navigation" | "toc" | "sidebar" | "files"
+type TDemoVariant = "navigation" | "toc" | "sidebar" | "files"
 
 export default function TreeDemo() {
-  const [variant] = React.useState<DemoVariant>("navigation")
+  const [variant] = React.useState<TDemoVariant>("navigation")
   const [collapsed] = React.useState(false)
   const [activeId, setActiveId] = React.useState<string | undefined>("reading")
   // The `files` shape runs off a controller instead of props: it owns the

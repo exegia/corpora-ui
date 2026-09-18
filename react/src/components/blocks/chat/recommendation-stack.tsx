@@ -3,7 +3,7 @@
 import type * as React from "react"
 import { Group } from "@/components/ui/group"
 import { cn } from "@/lib/utils"
-import type { IRecommendationStackProps } from "./types"
+import type { IRecommendationStackProps } from "./type"
 
 
 

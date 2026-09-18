@@ -6,7 +6,7 @@ import type {
 } from "@/index"
 import type { TUserType } from "@/components/atoms/types"
 import type { ReactNode } from "react"
-import type { IRecommendationStackProps } from "@/components/types"
+import type { IRecommendationStackProps } from "@/components/blocks/types"
 
 export type TSuggestionState = "accepted" | "rejected" | "pending"
 

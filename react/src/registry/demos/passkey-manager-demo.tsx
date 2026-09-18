@@ -6,10 +6,10 @@ import { DemoToggle } from "@/components/docs/demo-controls"
 import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
 import {
   PasskeyManagerBlock,
-  type PasskeyRecord,
+  type IPasskeyRecord,
 } from "@/components/blocks/auth/passkey-manager-block"
 
-const INITIAL: PasskeyRecord[] = [
+const INITIAL: IPasskeyRecord[] = [
   {
     id: "pk-1",
     name: "MacBook Pro",

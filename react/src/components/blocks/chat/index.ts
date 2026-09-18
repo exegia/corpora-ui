@@ -32,6 +32,6 @@ export type {
   IVersionHistoryEntry,
   ISuggestedPromptsProps,
   IWordSelection,
-} from "./types"
+} from "./type"
 
 export default AiPanel

@@ -6,10 +6,10 @@ import { DemoBrandMark, DemoSelect, DemoToggle } from "@/components/docs/demo-co
 import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
 import {
   OnboardingBlock,
-  type OnboardingStepConfig,
+  type IOnboardingStepConfig,
 } from "@/components/blocks/auth/onboarding-block"
 
-const STEPS: OnboardingStepConfig[] = [
+const STEPS: IOnboardingStepConfig[] = [
   {
     id: "profile",
     title: "Profile",

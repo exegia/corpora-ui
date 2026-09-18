@@ -5,11 +5,11 @@ import * as React from "react"
 import { DemoStage } from "@/components/docs/demo-controls"
 import {
   SocialProviders,
-  type SocialProvider,
+  type TSocialProvider,
 } from "@/components/composed/social-providers"
 
 export default function SocialProvidersDemo() {
-  const [loading, setLoading] = React.useState<SocialProvider | null>(null)
+  const [loading, setLoading] = React.useState<TSocialProvider | null>(null)
 
   return (
     <DemoStage>

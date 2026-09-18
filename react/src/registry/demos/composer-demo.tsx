@@ -9,11 +9,11 @@ import { DemoStage } from "@/components/docs/demo-controls"
 import {
   CommandMenu,
   Composer,
-  type ComposerAttachment,
+  type TComposerAttachment,
 } from "@/components/composed/chat/composer"
-import type { MenuCommandItem } from "@/components/ui/menu-command"
+import type { IMenuCommandItem } from "@/components/ui/menu-command"
 
-const COMMANDS: MenuCommandItem[] = [
+const COMMANDS: IMenuCommandItem[] = [
   {
     id: "upload",
     label: "Add photos & files",
@@ -41,7 +41,7 @@ const COMMANDS: MenuCommandItem[] = [
   },
 ]
 
-const SEED: ComposerAttachment[] = [
+const SEED: TComposerAttachment[] = [
   {
     id: "pdf",
     kind: "document",

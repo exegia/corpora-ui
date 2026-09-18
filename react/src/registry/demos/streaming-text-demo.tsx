@@ -2,11 +2,11 @@
 
 import { DemoStage } from "@/components/docs/demo-controls"
 import AI from "@/components/composed/ai"
-import type { StreamingToken } from "@/components/composed/ai"
+import type { TStreamingToken } from "@/components/composed/ai"
 
 const P1 =
   "Pistachio is your fastest-growing flavor — sales are up 23% this month and margins beat vanilla by 8 points."
-const P2: StreamingToken[] = [
+const P2: TStreamingToken[] = [
   {
     cite: "scoopdata.io",
     title: "Scoop Data · Flavor report",

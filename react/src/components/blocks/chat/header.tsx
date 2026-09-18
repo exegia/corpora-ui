@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Lock, Plus } from "lucide-react"
 import { Tooltip, TooltipPopup, TooltipTrigger } from "@/components/ui/tooltip"
-import type { IAiPanelHeaderProps } from "./types"
+import type { IAiPanelHeaderProps } from "./type"
 
 function LockedHint({ locked }: { locked?: boolean }): React.ReactElement {
   return (

@@ -6,13 +6,13 @@ import { BookOpen } from "lucide-react"
 
 import { DemoSelect } from "@/components/docs/demo-controls"
 import { Button, buttonVariants } from "@/components/ui/button"
-import type { FrostGlassVariant } from "@/lib/glass-variants"
+import type { TFrostGlassVariant } from "@/lib/glass-variants"
 import { cn } from "@/lib/utils"
 
-type Variant = NonNullable<VariantProps<typeof buttonVariants>["variant"]>
-type Size = NonNullable<VariantProps<typeof buttonVariants>["size"]>
+type TVariant = NonNullable<VariantProps<typeof buttonVariants>["variant"]>
+type TSize = NonNullable<VariantProps<typeof buttonVariants>["size"]>
 
-const VARIANTS: Variant[] = [
+const VARIANTS: TVariant[] = [
   "default",
   "secondary",
   "outline",
@@ -23,7 +23,7 @@ const VARIANTS: Variant[] = [
   "glass",
 ]
 
-const SIZES: Size[] = [
+const SIZES: TSize[] = [
   "xs",
   "sm",
   "default",
@@ -36,7 +36,7 @@ const SIZES: Size[] = [
   "icon-xl",
 ]
 
-const GLASS_VARIANTS: FrostGlassVariant[] = [
+const GLASS_VARIANTS: TFrostGlassVariant[] = [
   "liquid-refract",
   "liquid",
   "frosted",
@@ -45,10 +45,10 @@ const GLASS_VARIANTS: FrostGlassVariant[] = [
 ]
 
 export default function ButtonDemo() {
-  const [variant, setVariant] = React.useState<Variant>("default")
-  const [size, setSize] = React.useState<Size>("default")
+  const [variant, setVariant] = React.useState<TVariant>("default")
+  const [size, setSize] = React.useState<TSize>("default")
   const [glassVariant, setGlassVariant] =
-    React.useState<FrostGlassVariant>("liquid-refract")
+    React.useState<TFrostGlassVariant>("liquid-refract")
   const [loading, setLoading] = React.useState(false)
   const [disabled, setDisabled] = React.useState(false)
   const [sound, setSound] = React.useState(true)

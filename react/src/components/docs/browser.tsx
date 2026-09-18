@@ -2,8 +2,37 @@
 
 import { Globe } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { IBrowserProps } from "./type"
-import { titleBarStyle } from "./utils"
+import type { ReactNode } from "react"
+import type { ClassNameValue } from "cn"
+
+export type TTitleStyleType = "hidden" | "titlebar" | "expanded"
+
+export interface IBrowserProps {
+  url?: string
+  title?: string
+  className?: string
+  children: ReactNode
+  titleStyle: TTitleStyleType
+}
+
+const titleBarStyle = (
+  style: TTitleStyleType,
+  component: "title" | "frame"
+): ClassNameValue => {
+  const titleBarClassName: Record<TTitleStyleType, ClassNameValue> = {
+    titlebar: "relative",
+    hidden: "top-0 left-0 absolute",
+    expanded: "relative",
+  }
+
+  const bodyClassName: Record<TTitleStyleType, ClassNameValue> = {
+    titlebar: "relative",
+    hidden: "",
+    expanded: "relative",
+  }
+
+  return component == "title" ? titleBarClassName[style] : bodyClassName[style]
+}
 
 export function BrowserFrame({
   url,

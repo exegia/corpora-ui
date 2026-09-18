@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import Background from "@/components/atoms/background"
 import { AiPanelHeader } from "./header"
 import { SuggestedPrompts } from "./suggested-prompts"
-import type { IAiPanelProps } from "./types"
+import type { IAiPanelProps } from "./type"
 
 /**
  * Full-height curation rail, designed to sit inside a host container such as

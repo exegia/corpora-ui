@@ -6,12 +6,12 @@ import {
   AiPanel,
   ApplyToast,
   RecommendationStack,
-  type AiScope,
-  type DiffRow,
+  type IAiScope,
+  type IDiffRow,
 } from "@/components/blocks/chat"
 import {
   RecommendationCard,
-  type RecommendationState,
+  type TRecommendationState,
 } from "@/components/composed/chat"
 import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
 import { cn } from "@/lib/utils"
@@ -19,19 +19,19 @@ import AI from "@/components/composed/ai"
 import User from "@/components/composed/user"
 import { Bubble } from "@/components/atoms"
 
-const SCOPE: AiScope = {
+const SCOPE: IAiScope = {
   kind: "passage",
   label: "a.1",
   range: "¶1–¶2",
   nodeIds: ["p-17", "p-18"],
 }
 
-const DIFF: DiffRow[] = [
+const DIFF: IDiffRow[] = [
   { type: "remove", field: "label", value: "paragraph" },
   { type: "add", field: "label", value: "p" },
 ]
 
-function DiffRows({ rows }: { rows: DiffRow[] }): React.ReactElement {
+function DiffRows({ rows }: { rows: IDiffRow[] }): React.ReactElement {
   return (
     <div className="mt-2 gap-1.5 p-2.5 font-mono text-xs grid">
       {rows.map((row, index) => (
@@ -71,7 +71,7 @@ function DiffRows({ rows }: { rows: DiffRow[] }): React.ReactElement {
  * stands in for that host.
  */
 export default function AiPanelDemo(): React.ReactElement {
-  const [state, setState] = React.useState<RecommendationState>("pending")
+  const [state, setState] = React.useState<TRecommendationState>("pending")
   const runTimer = React.useRef<ReturnType<typeof setTimeout>>(null)
 
   // Approve → the agent "works" for a beat → applied.
@@ -79,7 +79,7 @@ export default function AiPanelDemo(): React.ReactElement {
     setState("running")
     runTimer.current = setTimeout(() => setState("accepted"), 1600)
   }
-  const reset = (next: RecommendationState) => (): void => {
+  const reset = (next: TRecommendationState) => (): void => {
     if (runTimer.current) clearTimeout(runTimer.current)
     setState(next)
   }

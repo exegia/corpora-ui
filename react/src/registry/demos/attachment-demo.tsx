@@ -3,10 +3,10 @@
 import * as React from "react"
 
 import { DemoStage } from "@/components/docs/demo-controls"
-import { Attachment, type AttachmentVariant } from "@/components/composed/chat"
+import { Attachment, type TAttachmentVariant } from "@/components/composed/chat"
 
 export default function AttachmentDemo(): React.ReactElement {
-  const variant: AttachmentVariant = "preview"
+  const variant: TAttachmentVariant = "preview"
   const remove = () => {}
   return (
     <DemoStage canvasClassName="flex min-h-24 w-full flex-wrap items-start justify-center gap-4 p-6">

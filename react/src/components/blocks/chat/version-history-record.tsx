@@ -3,7 +3,7 @@
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { accentText, mutedText } from "./shared"
-import type { IVersionHistoryRecordProps } from "./types"
+import type { IVersionHistoryRecordProps } from "./type"
 
 
 

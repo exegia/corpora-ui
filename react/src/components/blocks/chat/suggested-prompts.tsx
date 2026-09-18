@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { accentRing, mutedText } from "./shared"
 import { Sparkles } from "lucide-react"
-import type { ISuggestedPromptsProps } from "./types";
+import type { ISuggestedPromptsProps } from "./type";
 
 
 export function SuggestedPrompts({

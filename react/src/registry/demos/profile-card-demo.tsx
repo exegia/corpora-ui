@@ -7,7 +7,7 @@ import { DemoSelect, DemoToggle } from "@/components/docs/demo-controls"
 import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
 import {
   ProfileCardBlock,
-  type ProfileCardItem,
+  type TProfileCardItem,
 } from "@/components/blocks/profile/profile-card-block"
 
 const USER = {
@@ -33,7 +33,7 @@ export default function ProfileCardDemo() {
   const [presence, setPresence] =
     React.useState<(typeof PRESENCE)[number]>("online")
 
-  const items: ProfileCardItem[] = [
+  const items: TProfileCardItem[] = [
     { type: "label", label: "Management" },
     {
       id: "profile",
