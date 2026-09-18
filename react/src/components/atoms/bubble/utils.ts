@@ -15,9 +15,9 @@ export const twBubbleAlignClasses: Record<TBubbleVariant, ClassValue> = {
 }
 
 /**
- * The inner column shrink-wraps the message so the header, reaction pill
- * and action row all align to the bubble's own edges rather than the
- * thread's. Generated output stays full-bleed.
+ * The inner column shrink-wraps the message, reactions and actions.
+ * Headers offset this inset to reach the thread edge. Generated output
+ * stays full-bleed.
  */
 export const twBubbleColumnClasses: Record<TBubbleVariant, ClassValue> = {
   sender: "items-end max-w-[80%] min-w-0 mr-4",

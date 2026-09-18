@@ -49,7 +49,7 @@ interface IAttachmentBase {
   id?: string
   className?: string
   style?: React.CSSProperties
-  /** `default` is the composer chip; `preview` is the sent attachment. */
+  /** `default` is a compact chip with a hover preview; `preview` displays the content directly. */
   variant?: TAttachmentVariant
   title: ReactNode
   meta?: ReactNode
@@ -114,7 +114,7 @@ const metaClasses = "truncate text-[11px] leading-3 text-text-secondary"
 const panelClasses =
   "w-[260px] max-w-full overflow-hidden rounded-lg border border-border-default bg-surface-card"
 
-/** Every attachment has a hover/focus preview, including documents and sent attachments. */
+/** Compact attachments open their content on hover/focus; expanded content has no nested preview. */
 export function Attachment(props: TAttachmentProps): ReactElement {
   const filePreview = useAttachmentFile(props.file)
   const resolved = {
@@ -126,6 +126,8 @@ export function Attachment(props: TAttachmentProps): ReactElement {
       props.mimeType ??
       (props.file ? attachmentMimeType(props.file) : undefined),
   } as TAttachmentProps
+  if (props.variant === "preview") return <AttachmentPreview {...resolved} />
+
   return (
     <PreviewCard>
       <PreviewCardTrigger
@@ -135,11 +137,7 @@ export function Attachment(props: TAttachmentProps): ReactElement {
           <div className="w-fit max-w-full rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring" />
         }
       >
-        {props.variant === "preview" ? (
-          <AttachmentPreview {...resolved} />
-        ) : (
-          <AttachmentChip {...resolved} />
-        )}
+        <AttachmentChip {...resolved} />
       </PreviewCardTrigger>
       <PreviewCardPopup
         className="p-1.5 w-fit max-w-[calc(100vw-2rem)] rounded-lg"
@@ -283,7 +281,6 @@ function AttachmentPreview(props: TAttachmentProps): ReactElement {
             {...shared}
             className={cn(panelClasses, "gap-2 p-2.5 flex flex-col", className)}
           >
-            <span className={titleClasses}>{title}</span>
             {props.src ? (
               <audio
                 controls

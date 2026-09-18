@@ -77,7 +77,7 @@ describe("Attachment", () => {
     expect(await screen.findByText("the will of Zeus")).toBeDefined()
   })
 
-  test("documents and sent user handles have keyboard-focus previews", async () => {
+  test("default documents and user handles have keyboard-focus previews", async () => {
     const document = render(
       <Attachment
         kind="document"
@@ -103,17 +103,57 @@ describe("Attachment", () => {
     const handle = render(
       <Attachment
         kind="username-handle"
-        variant="preview"
+        variant="default"
         title="@reviewer"
         meta="Corpus editor"
         initials="CE"
       />
     )
-    expect(screen.queryByText("Corpus editor")).toBeNull()
     fireEvent.focus(
       handle.container.querySelector('[data-slot="preview-card-trigger"]')!
     )
-    expect(await screen.findByText("Corpus editor")).toBeDefined()
+    await waitFor(() =>
+      expect(
+        handle.baseElement.querySelector(
+          '[data-slot="attachment-hover-preview"]'
+        )
+      ).not.toBeNull()
+    )
+    expect(screen.getAllByText("Corpus editor").length).toBe(2)
+  })
+
+  test("expanded previews render directly without another hover trigger", () => {
+    const { container } = render(
+      <Attachment
+        kind="image"
+        variant="preview"
+        title="scan.jpg"
+        src="/scan.jpg"
+        preview={<span>Nested preview</span>}
+      />
+    )
+    expect(
+      screen.getByRole("img", { name: "scan.jpg" }).getAttribute("src")
+    ).toBe("/scan.jpg")
+    expect(
+      container.querySelector('[data-slot="preview-card-trigger"]')
+    ).toBeNull()
+    expect(screen.queryByText("Nested preview")).toBeNull()
+  })
+
+  test("audio previews keep their controls and metadata without a duplicate title", () => {
+    render(
+      <Attachment
+        kind="media"
+        variant="preview"
+        audio
+        title="voice-note.m4a"
+        meta="0:42 · voice-note.m4a"
+      />
+    )
+    expect(screen.queryByText("voice-note.m4a", { exact: true })).toBeNull()
+    expect(screen.getByText("0:42 · voice-note.m4a")).toBeDefined()
+    expect(screen.getByRole("button", { name: "Play" })).toBeDefined()
   })
 
   test("local images get a real preview URL, release replaced URLs, and keep file data off the DOM", async () => {

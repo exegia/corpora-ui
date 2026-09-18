@@ -143,38 +143,28 @@ export default function AiPanelDemo(): React.ReactElement {
           scope={SCOPE}
           thread={
             <>
-              <Bubble variant="sender">
-                <Bubble.Header>
-                  <User.Info
-                    direction="sender"
-                    user={{
-                      firstName: "Jenny",
-                      lastName: "Hamilton",
-                      role: "Editor",
-                    }}
-                    variant="info"
-                  />
-                </Bubble.Header>
-                <Bubble.Message>
-                  Validate this passage against the schema.
-                </Bubble.Message>
-              </Bubble>
-              <Bubble variant="recipient">
-                <Bubble.Header>
-                  <User.Info
-                    direction="recipient"
-                    user={{
-                      firstName: "Marcus",
-                      lastName: "Lee",
-                      role: "Reviewer",
-                    }}
-                    variant="info"
-                  />
-                </Bubble.Header>
-                <Bubble.Message>
-                  I’ll compare ¶12 with the latest corpus build.
-                </Bubble.Message>
-              </Bubble>
+              <User.Message
+                variant="info"
+                user={{
+                  firstName: "Jenny",
+                  lastName: "Hamilton",
+                  role: "Editor",
+                  direction: "sender",
+                }}
+              >
+                Validate this passage against the schema.
+              </User.Message>
+              <User.Message
+                variant="info"
+                user={{
+                  firstName: "Marcus",
+                  lastName: "Lee",
+                  role: "Reviewer",
+                  direction: "recipient",
+                }}
+              >
+                I’ll compare ¶12 with the latest corpus build.
+              </User.Message>
               <AI.Message
                 AttachedContent={renderRecommendations}
                 type="recommendation"
@@ -192,7 +182,8 @@ export default function AiPanelDemo(): React.ReactElement {
                         <Attachment
                           key={attachment.id}
                           {...attachment}
-                          variant="preview"
+                          variant="default"
+                          removable={false}
                         />
                       ))}
                     </Bubble.Message>

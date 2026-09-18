@@ -1,6 +1,6 @@
 ---
 title: "Attachment"
-description: "One attachment in every shape the chat needs: a 240×52 composer chip with a remove button, or the in-bubble preview — for documents, images, media (and audio), corpus text selections, quoted replies, @-handles and URL cards."
+description: "A compact attachment chip with a hover preview, or expanded content for documents, images, media, corpus text selections, quoted replies, @-handles and URL cards."
 ---
 
 import { Preview } from "@/components/stories/attachment.story"
@@ -11,7 +11,7 @@ import Demo from "@/registry/demos/attachment-demo"
 
 Use the controls to explore the component's props.
 
-Every attachment opens a preview on hover or keyboard focus, including documents, user handles, and sent attachments. Cards use the shared `rounded-lg` radius.
+The `default` variant opens a preview on hover or keyboard focus for every attachment type. Use it in the composer and in sent messages; sent chips omit the remove button. The `preview` variant displays expanded content directly, without another hover preview. Both use the shared `rounded-lg` radius.
 
 Pass the original `file` to let the component detect its type and create a local preview. Images display their content; videos show a frame and playback controls; audio has a player; text documents show an excerpt. PDFs use the browser's document viewer in the hover card. Unsupported formats show their file information. No file is uploaded automatically.
 
@@ -24,7 +24,7 @@ For uploaded files, supply `src`. You can also supply a `thumbnail`, `previewTex
 | Prop                                | Type                                                                                                                      | Default        | Description                                                                            |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------- | -------------------------------------------------------------------------------------- |
 | `kind` (required)                   | `"document" \| "image" \| "media" \| "text-selection" \| "chat-reply" \| "username-handle" \| "url-link"`                 | —              | Which attachment; picks the leading icon and the preview layout.                       |
-| `variant`                           | `"default" \| "preview"`                                                                                                  | `"default"`    | Composer chip or in-bubble rendering.                                                  |
+| `variant`                           | `"default" \| "preview"`                                                                                                  | `"default"`    | Compact chip with hover/focus preview, or expanded content without a hover preview.     |
 | `title / meta`                      | `ReactNode`                                                                                                               | —              | Primary and secondary chip lines.                                                      |
 | `onRemove / removable`              | `() => void / boolean`                                                                                                    | —              | The chip's ✕. Hidden when no handler is passed or removable is false.                  |
 | `file / src`                        | `File / string`                                                                                                           | —              | Original local file or uploaded content URL. Local files are classified automatically. |
@@ -45,7 +45,7 @@ import { Attachment, Bubble } from "@exegia/corpora-ui"
 // Preserve file and kind-specific props when moving a tray item into the thread.
 <Bubble variant="sender">
   <Bubble.Message unstyled>
-    <Attachment {...attachment} variant="preview" />
+    <Attachment {...attachment} variant="default" removable={false} />
   </Bubble.Message>
 </Bubble>
 ```

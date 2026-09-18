@@ -36,7 +36,8 @@ function BlockPreview(props: TPreviewProps) {
                     <Attachment
                       key={attachment.id}
                       {...attachment}
-                      variant="preview"
+                      variant="default"
+                      removable={false}
                     />
                   ))}
                 </Bubble.Message>

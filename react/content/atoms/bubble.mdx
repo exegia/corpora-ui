@@ -10,27 +10,36 @@ import { Preview } from "@/components/stories/bubble.story"
 ## Usage
 
 ```tsx
-import { Bubble } from "@exegia/corpora-ui"
+import { Bubble, User } from "@exegia/corpora-ui"
 
-;<Bubble variant="sender">
-  <Bubble.Header>
-    <span>Jenny Hamilton</span>
-    <span>10 min ago</span>
-  </Bubble.Header>
-  <Bubble.Message>Can you check whether ¶12 keeps the boundary?</Bubble.Message>
-  <Bubble.Reactions
-    reactions={[
+;<User.Message
+  variant="info"
+  user={{
+    firstName: "Jenny",
+    lastName: "Hamilton",
+    role: "Editor",
+    direction: "sender",
+    description: "10 min ago",
+  }}
+  reactions={{
+    reactions: [
       { id: "heart", emoji: "❤️", count: 4, reacted: true, label: "heart" },
-    ]}
-    onToggle={toggleReaction}
-  />
-  <Bubble.Actions>
-    <Button aria-label="Copy" size="icon-xs" variant="ghost">
-      <CopyIcon />
-    </Button>
-  </Bubble.Actions>
-</Bubble>
+    ],
+    onToggle: toggleReaction,
+  }}
+  actions={
+    <Bubble.Actions>
+      <Button aria-label="Copy" size="icon-xs" variant="ghost">
+        <CopyIcon />
+      </Button>
+    </Bubble.Actions>
+  }
+>
+  Can you check whether ¶12 keeps the boundary?
+</User.Message>
 ```
+
+`User.Message` composes the identity header and bubble surface. Set `user.direction` to `sender` or `recipient`; it controls both the identity order and message alignment. Headers reach the thread edge while messages retain their inset. `continued` hides the repeated header. Reactions and actions remain outside the message surface. Use the underlying `Bubble` slots for custom layouts or AI content.
 
 ## API reference
 
