@@ -1,6 +1,7 @@
 import { describe, expect, mock, test } from "bun:test"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { Provider } from "jotai"
+import userEvent from "@testing-library/user-event"
 
 import { Composer, type TComposerAttachment } from "../composer"
 
@@ -49,5 +50,52 @@ describe("Composer attachments", () => {
       </Provider>
     )
     expect(container.querySelector('[data-slot="composer-tray"]')).toBeNull()
+  })
+
+  test("selects local files and submits an attachment-only message once", async () => {
+    const user = userEvent.setup()
+    const onSubmit = mock(() => {})
+    const onFilesChange = mock(() => {})
+    render(
+      <Provider>
+        <Composer onSubmit={onSubmit} onFilesChange={onFilesChange} />
+      </Provider>
+    )
+    const file = new File(["passage"], "passage.txt", { type: "text/plain" })
+    await user.upload(screen.getByLabelText("Attach files"), file)
+    expect(onFilesChange).toHaveBeenCalledWith([file])
+    expect(screen.getByText("passage.txt")).toBeDefined()
+    await user.click(screen.getByRole("button", { name: "Send message" }))
+    expect(onSubmit).toHaveBeenCalledWith("", "answer", [
+      expect.objectContaining({ file, title: "passage.txt" }),
+    ])
+    expect(screen.queryByText("passage.txt")).toBeNull()
+    expect(
+      screen
+        .getByRole("button", { name: "Send message" })
+        .hasAttribute("disabled")
+    ).toBe(true)
+  })
+
+  test("preserves image, video and audio file types when sending", async () => {
+    const user = userEvent.setup()
+    const onSubmit = mock(() => {})
+    render(
+      <Provider>
+        <Composer onSubmit={onSubmit} />
+      </Provider>
+    )
+    const files = [
+      new File(["image"], "scan.JPG"),
+      new File(["video"], "lecture.mp4", { type: "video/mp4" }),
+      new File(["audio"], "reading.m4a", { type: "audio/mp4" }),
+    ]
+    await user.upload(screen.getByLabelText("Attach files"), files)
+    await user.click(screen.getByRole("button", { name: "Send message" }))
+    expect(onSubmit).toHaveBeenCalledWith("", "answer", [
+      expect.objectContaining({ kind: "image", file: files[0] }),
+      expect.objectContaining({ kind: "media", audio: false, file: files[1] }),
+      expect.objectContaining({ kind: "media", audio: true, file: files[2] }),
+    ])
   })
 })

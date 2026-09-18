@@ -23,7 +23,7 @@ export function RecommendationStack({
   return (
     <Group
       className={cn(
-        "w-full *:before:content-none",
+        "w-full *:before:content-none mt-3",
         "[&>*:not(:last-child)_[data-slot=recommendation-card]]:rounded-b-none",
         "[&>*:not(:last-child)_[data-slot=recommendation-card]]:before:rounded-b-none",
         "[&>*+*_[data-slot=recommendation-card]]:rounded-t-none",

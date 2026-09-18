@@ -2,62 +2,16 @@
 
 import * as React from "react";
 
-import { cn } from "@/lib/utils";
-import type { TAuthAccent } from "@/lib/auth-accent";
+import { Select, SelectTrigger, SelectValue, SelectPopup, SelectItem } from "@/components/ui/select";
 import {
   AuthCard,
   AuthError,
   AuthSuccess,
   MorphStep,
-  type TAuthStatus,
 } from "./auth-shell";
 import { ProfileStep } from "./onboarding/profile-step";
+import type { IOnboardingBlockProps, IOnboardingStepConfig, TOnboardingValue, TAuthStatus } from "./type";
 
-/** Value a single onboarding field can hold. */
-export type TOnboardingValue = string | boolean;
-
-export interface IOnboardingSelectOption {
-  value: string;
-  label: string;
-}
-
-interface IOnboardingFieldBase {
-  /** Key the value is collected under; unique within the flow. */
-  name: string;
-  label: string;
-  /** Required fields gate the step's advance. */
-  required?: boolean;
-  placeholder?: string;
-  /** Extra validation; return a message to reject, `null` to accept. */
-  validate?: (value: string) => string | null;
-}
-
-export interface IOnboardingTextField extends IOnboardingFieldBase {
-  kind: "text" | "textarea" | "url";
-}
-
-export interface IOnboardingCheckboxField extends IOnboardingFieldBase {
-  kind: "checkbox";
-}
-
-export interface IOnboardingSelectField extends IOnboardingFieldBase {
-  kind: "select";
-  options: IOnboardingSelectOption[];
-}
-
-/** Discriminated on `kind`. */
-export type TOnboardingFieldConfig =
-  | IOnboardingTextField
-  | IOnboardingCheckboxField
-  | IOnboardingSelectField;
-
-export interface IOnboardingStepConfig {
-  /** Unique within the flow and stable across releases. */
-  id: string;
-  title: string;
-  description?: string;
-  fields: TOnboardingFieldConfig[];
-}
 
 /** Default configuration: a single required display-name step. */
 export const DEFAULT_ONBOARDING_STEPS: IOnboardingStepConfig[] = [
@@ -70,29 +24,7 @@ export const DEFAULT_ONBOARDING_STEPS: IOnboardingStepConfig[] = [
   },
 ];
 
-export interface IOnboardingBlockProps {
-  /** Declared profile steps. */
-  steps?: IOnboardingStepConfig[];
-  /** Brand mark rendered above the title. Omit for no logo row at all. */
-  logo?: React.ReactNode;
-  /** Brand accent for the primary action. Omit to keep the default primary. */
-  accent?: TAuthAccent;
-  /**
-   * Fires per step as it is submitted. Reject (or throw) to keep the user on
-   * the step and show the error.
-   */
-  onStepSubmit?: (
-    stepId: string,
-    values: Record<string, TOnboardingValue>,
-  ) => Promise<void> | void;
-  /** Fires once, after the final step is accepted, with the merged profile. */
-  onComplete?: (profile: Record<string, TOnboardingValue>) => Promise<void> | void;
-  /** Shows a brief success screen once onboarding completes. */
-  showCompleteScreen?: boolean;
-  /** Move focus to step headings. Disable when embedding a gallery preview. */
-  autoFocus?: boolean;
-  className?: string;
-}
+
 
 /**
  * Multi-step profile onboarding: a declared `steps` config renders as
@@ -126,6 +58,7 @@ export function OnboardingBlock({
   >({});
 
   const [index, setIndex] = React.useState(0);
+  const [furthestIndex, setFurthestIndex] = React.useState(0);
   const [values, setValues] = React.useState<Record<string, TOnboardingValue>>(
     {},
   );
@@ -155,7 +88,10 @@ export function OnboardingBlock({
       delete draftsRef.current[step.id];
       setDrafts({ ...draftsRef.current });
       setStatus(last ? "success" : "idle");
-      if (!last) setIndex((current) => current + 1);
+      if (!last) {
+        setFurthestIndex((current) => Math.max(current, index + 1));
+        setIndex((current) => current + 1);
+      }
     } catch (cause) {
       setStatus("idle");
       setError(
@@ -185,23 +121,27 @@ export function OnboardingBlock({
         ) : step ? (
           <div className="flex flex-col gap-4">
             <nav aria-label="Onboarding progress">
-              <ol className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
-                {steps.map((item, itemIndex) => (
-                  <li
-                    key={item.id}
-                    aria-current={itemIndex === index ? "step" : undefined}
-                    className={cn(
-                      "text-muted-foreground",
-                      itemIndex === index && "font-medium text-foreground",
-                    )}
-                  >
-                    {item.title}
-                    {itemIndex < index && (
-                      <span className="sr-only"> (completed)</span>
-                    )}
-                  </li>
-                ))}
-              </ol>
+              <Select
+                items={steps.map((item) => ({ value: item.id, label: item.title }))}
+                value={step.id}
+                disabled={status === "loading"}
+                onValueChange={(id) => {
+                  const next = steps.findIndex((item) => item.id === id);
+                  if (next < 0 || next > furthestIndex) return;
+                  setError(null);
+                  setDrafts({ ...draftsRef.current });
+                  setIndex(next);
+                }}
+              >
+                <SelectTrigger aria-label="Onboarding step"><SelectValue /></SelectTrigger>
+                <SelectPopup>
+                  {steps.map((item, itemIndex) => (
+                    <SelectItem key={item.id} value={item.id} disabled={itemIndex > furthestIndex}>
+                      {item.title}
+                    </SelectItem>
+                  ))}
+                </SelectPopup>
+              </Select>
             </nav>
 
             {/* The AuthCard title is the visible heading; this one exists to

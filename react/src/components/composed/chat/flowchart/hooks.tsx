@@ -145,7 +145,8 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
       baseDy: off?.dy ?? 0,
       moved: false,
     };
-    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+    // Capture only once a drag starts; capturing a still press retargets
+    // its click to the wrapper instead of the node selection button.
   };
 
   const onPointerMove = (node: TStepNode) => (event: React.PointerEvent<HTMLDivElement>) => {
@@ -154,6 +155,7 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
     const dx = d.baseDx + (event.clientX - d.startX) / scale;
     const dy = d.baseDy + (event.clientY - d.startY) / scale;
     if (!d.moved && Math.hypot(dx - d.baseDx, dy - d.baseDy) < 3) return;
+    if (!d.moved) event.currentTarget.setPointerCapture(event.pointerId);
     d.moved = true;
 
     // keep the card inside the canvas

@@ -1,53 +1,40 @@
 "use client"
 
-import { defineStory } from "@/registry/story"
+import type { ComponentProps } from "react"
+import { defineStory, type TStoryData } from "@/registry/story"
 
 import { Attachment } from "@/components/composed/chat/attachment"
 
+type TPreviewProps = TStoryData<
+  Pick<
+    ComponentProps<typeof Attachment>,
+    | "kind"
+    | "variant"
+    | "title"
+    | "meta"
+    | "removable"
+    | "src"
+    | "thumbnail"
+    | "previewText"
+  >
+>
+
+function AttachmentPreview(props: TPreviewProps) {
+  return <Attachment {...props} />
+}
+
 export const story = defineStory({
-  Component: Attachment,
-  args: [
-    {
-      variant: "Document chip",
-      initial: {
-        kind: "document",
-        variant: "default",
-        title: "Iliad annotations.pdf",
-        meta: "PDF · 2.4 MB",
-      },
+  Component: AttachmentPreview,
+  args: {
+    initial: {
+      kind: "document",
+      variant: "default",
+      title: "Iliad annotations.pdf",
+      meta: "PDF · 2.4 MB",
+      previewText:
+        "Iliad · Book 1\n\nAnnotation notes\n¶12 — Compare the paragraph boundary with the source edition.\n¶17 — Check the speaker attribution and lemma links.",
     },
-    {
-      variant: "Quoted passage",
-      initial: {
-        kind: "text-selection",
-        variant: "preview",
-        title: "Iliad 1.1",
-        quote: "Sing, goddess, the anger of Achilles.",
-      },
-    },
-    {
-      variant: "Reply",
-      initial: {
-        kind: "chat-reply",
-        variant: "preview",
-        title: "Annotation discussion",
-        author: "Jenny Hamilton",
-        time: "2 minutes ago",
-        body: "Compare the opening invocation with the Odyssey.",
-      },
-    },
-    {
-      variant: "Link preview",
-      initial: {
-        kind: "url-link",
-        variant: "preview",
-        title: "Corpora UI",
-        domain: "github.com",
-        description: "Components for corpus research applications.",
-        href: "https://github.com/exegia/corpora-ui",
-      },
-    },
-  ],
+  },
 })
 
 export const Preview = story.WithControl

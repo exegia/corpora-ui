@@ -3,28 +3,40 @@ import { act, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 
-import { Scaffold, useScaffold } from "../index"
+import {
+  Scaffold,
+  useScaffold,
+  useScaffoldActions,
+  useScaffoldState,
+} from "../index"
 import type { TScaffoldPanelChild } from "../type"
 import { getPanelCapacity } from "../utils"
 
 // The canvas measures itself through ResizeObserver; this stub hands the
 // callback to the test so it can drive the width deterministically.
-let observeCanvas: ResizeObserverCallback | undefined
+const canvasObservers = new Set<ResizeObserverCallback>()
 globalThis.ResizeObserver = class {
+  private callback: ResizeObserverCallback
   constructor(callback: ResizeObserverCallback) {
-    observeCanvas = callback
+    this.callback = callback
   }
-  observe() {}
+  observe(target: Element) {
+    if (target.getAttribute("data-slot") === "scaffold-canvas")
+      canvasObservers.add(this.callback)
+  }
   unobserve() {}
-  disconnect() {}
+  disconnect() {
+    canvasObservers.delete(this.callback)
+  }
 } as unknown as typeof ResizeObserver
 
 const resizeCanvas = (width: number) =>
   act(() => {
-    observeCanvas?.(
-      [{ contentRect: { width } }] as unknown as ResizeObserverEntry[],
-      undefined as unknown as ResizeObserver
-    )
+    for (const observe of canvasObservers)
+      observe(
+        [{ contentRect: { width } }] as unknown as ResizeObserverEntry[],
+        undefined as unknown as ResizeObserver
+      )
   })
 
 function Strip() {
@@ -368,7 +380,9 @@ describe("Scaffold responsive panels", () => {
 
     // Room returns — the auto-hidden panel comes back by itself.
     resizeCanvas(1200)
-    expect(await screen.findByRole("region", { name: "Panel one" })).toBeDefined()
+    expect(
+      await screen.findByRole("region", { name: "Panel one" })
+    ).toBeDefined()
     expect(tab("one").getAttribute("aria-pressed")).toBe("true")
   })
 
@@ -440,6 +454,71 @@ describe("Scaffold responsive panels", () => {
 
     // Its tab presses back to visible.
     await user.click(tab("two"))
-    expect(await screen.findByRole("region", { name: "Panel two" })).toBeDefined()
+    expect(
+      await screen.findByRole("region", { name: "Panel two" })
+    ).toBeDefined()
+  })
+})
+
+describe("scaffold app-wide panel controls", () => {
+  function RemoteControls() {
+    const actions = useScaffoldActions("shared-layout")
+    const state = useScaffoldState("shared-layout")
+    return (
+      <>
+        <button
+          onClick={() => {
+            actions.resizeSecondaryPanel("editor", 160)
+            actions.setSecondaryExpanded("editor", true)
+            actions.setPanelSwapped("editor", true)
+            actions.resizeInspector(360)
+            actions.setInspectorOpen(true)
+          }}
+        >
+          Arrange workspace
+        </button>
+        <output>{JSON.stringify(state.panelLayouts.editor)}</output>
+      </>
+    )
+  }
+
+  test("a sibling hook resizes, expands, and swaps the mounted workspace", async () => {
+    const user = userEvent.setup()
+    render(
+      <>
+        <Scaffold.Root scaffoldId="shared-layout">
+          <Scaffold.Main>
+            <Scaffold.Canvas>
+              <Scaffold.Panel
+                id="editor"
+                name="Editor"
+                SecondaryPanel={<span>Shared strip</span>}
+              >
+                Editor content
+              </Scaffold.Panel>
+            </Scaffold.Canvas>
+            <Scaffold.Inspector>Details</Scaffold.Inspector>
+          </Scaffold.Main>
+        </Scaffold.Root>
+        <RemoteControls />
+      </>
+    )
+    await user.click(screen.getByRole("button", { name: "Arrange workspace" }))
+    const panel = screen.getByRole("region", { name: "Editor" })
+    expect(panel.hasAttribute("data-swapped")).toBe(true)
+    expect(panel.firstElementChild?.textContent).toContain("Shared strip")
+    expect(panel.firstElementChild?.hasAttribute("data-expanded")).toBe(true)
+    expect(
+      screen.getByRole("complementary", { name: "Inspector" })
+    ).toBeTruthy()
+    const separator = screen.getByRole("separator", {
+      name: "Resize secondary panel",
+    })
+    expect(separator.getAttribute("aria-valuenow")).toBe("160")
+    separator.focus()
+    await user.keyboard("{Enter}")
+    expect(panel.firstElementChild?.hasAttribute("data-expanded")).toBe(false)
+    await user.keyboard("{Enter}")
+    expect(panel.firstElementChild?.hasAttribute("data-expanded")).toBe(true)
   })
 })

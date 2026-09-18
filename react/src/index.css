@@ -6,3 +6,5 @@
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/figtree";
 @import "motion-icons-react/style.css";
+
+@plugin "./specular.js";

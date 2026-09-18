@@ -1,33 +1,36 @@
 "use client"
 
 import type { ComponentProps } from "react"
-import { defineStory } from "@/registry/story"
 import { Separator } from "@/components/ui/separator"
+import { defineStory } from "@/registry/story"
 
-type TPreviewProps = Pick<ComponentProps<typeof Separator>, "orientation">
+type TPreviewProps = Pick<
+  ComponentProps<typeof Separator>,
+  "orientation" | "className"
+>
 
-function SeparatorPreview(props: TPreviewProps) {
-  return (
-    <div className="p-6">
-      <div className="max-w-sm">
-        <div
-          className={
-            props.orientation === "vertical"
-              ? "flex h-20 items-center gap-4"
-              : "flex flex-col gap-4"
-          }
-        >
-          <span>Manuscript</span>
-          <Separator {...props} />
-          <span>Annotations</span>
-        </div>
-      </div>
+function SeparatorPreview({
+  orientation = "horizontal",
+  ...props
+}: TPreviewProps) {
+  return orientation === "vertical" ? (
+    <div className="h-8 gap-3 text-sm flex items-center">
+      <span>Read</span>
+      <Separator {...props} orientation={orientation} />
+      <span>Annotate</span>
+    </div>
+  ) : (
+    <div className="max-w-64 gap-3 text-sm flex w-full flex-col">
+      <span>Manuscripts</span>
+      <Separator {...props} orientation={orientation} />
+      <span>Codices</span>
     </div>
   )
 }
 
 export const story = defineStory({
   Component: SeparatorPreview,
+  centered: true,
   args: { initial: { orientation: "horizontal" } },
 })
 

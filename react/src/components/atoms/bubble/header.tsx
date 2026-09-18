@@ -21,8 +21,10 @@ export function BubbleHeader({
   return (
     <div
       className={cn(
-        "flex items-center gap-2",
-        reversed && "flex-row-reverse",
+        "gap-2 flex items-center",
+        // The message column keeps its inset; only the identity reaches the thread edge.
+        reversed && "translate-x-4 flex-row-reverse",
+        variant === "recipient" && "-translate-x-4",
         className
       )}
       data-slot="bubble-header"

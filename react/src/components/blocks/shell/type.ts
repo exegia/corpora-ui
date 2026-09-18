@@ -7,7 +7,7 @@ import {
 } from "react"
 import type { HTMLMotionProps } from "motion/react"
 
-import type { IShellMetrics } from "./shell-metrics"
+import type { IShellMetrics, IShellSidebarFit } from "./shell-metrics"
 
 // ---------------------------------------------------------------------------
 // Shell fit — the shell's measurement of itself, kept in Jotai atoms keyed by
@@ -29,6 +29,8 @@ export interface IShellFitPanelBounds {
 /** What the shell measured of itself — readable by id through
  * `useShellFitState`. */
 export interface IShellFitState {
+  /** Actual rail layout after applying container constraints. */
+  sidebar: IShellSidebarFit | null
   /** The px the shell last measured, or null before its first measurement
    * (a server render, a host with no layout). */
   metrics: IShellMetrics | null
@@ -57,6 +59,7 @@ export interface IShellFitActions {
 /** What `useShellFit` hands the provider: the state, the actions and the id
  * they are filed under. */
 export interface IShellFitController extends IShellFitState, IShellFitActions {
+  defaultPanelWidth: number | null
   shellId: TShellFitInstanceId
 }
 
@@ -168,6 +171,10 @@ export interface IUseShellPanelsOptions {
 }
 
 export interface IShellPanelControls {
+  /** Rendered rail width and whether it can expand in the current container. */
+  sidebar: IShellSidebarFit | null
+  sidebarWidth: number | null
+  resizeSidebar: (width: number) => void
   /** The id the shell's fit state is filed under — hand it to
    * `useShellFitState` / `useShellFitActions` anywhere below `ExegiaProvider`. */
   shellId: TShellFitInstanceId
@@ -183,7 +190,7 @@ export interface IShellPanelControls {
   /** Resize the secondary panel from outside the shell — clamped to the room
    * the shell has. */
   resizePanel: (width: number) => void
-  /** Live desktop open state, keyed by side. */
+  /** Requested open state. `sidebar` reports the responsive rail layout. */
   open: Record<TSidebarSide, boolean>
   /** Live mobile overlay state, keyed by side. */
   openMobile: Record<TSidebarSide, boolean>
@@ -241,7 +248,7 @@ export interface IAnimatedSidebarContextValue {
   reduce: boolean
   setOpen: (open: boolean, side: TSidebarSide) => void
   setOpenMobile: (open: boolean, side: TSidebarSide) => void
-  /** Mobile-aware: toggles the overlay below md, the docked panel above. */
+  /** Toggle the docked panel when the container can accommodate it. */
   toggleSidebar: (side: TSidebarSide) => void
   triggerRefs: Record<TSidebarSide, React.RefObject<HTMLButtonElement | null>>
 }
@@ -282,6 +289,8 @@ export interface IAnimatedSidebarProviderProps extends HTMLAttributes<HTMLDivEle
 export type TSidebarProviderStyle = CSSProperties & {
   /** Left rail, expanded. */
   "--sidebar-width"?: string
+  /** Minimum expanded rail width before it folds to icons. Default 180px. */
+  "--sidebar-min-width"?: string
   /** Left rail, folded to icons. */
   "--sidebar-width-icon"?: string
   "--sidebar-width-mobile"?: string

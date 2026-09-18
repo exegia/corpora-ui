@@ -1,48 +1,18 @@
 "use client"
 
-import { defineStory } from "@/registry/story"
-import { BookOpen } from "lucide-react"
-import { Button, type TButtonProps } from "@/components/ui/button"
+import type { ComponentProps } from "react"
+import { defineStory, type TStoryData } from "@/registry/story"
+import { Button } from "@/components/ui/button"
 
-type TPreviewProps = Pick<
-  TButtonProps,
-  "variant" | "glassVariant" | "size" | "loading" | "disabled" | "sound"
-> & { children: string }
+type TPreviewProps = TStoryData<
+  Pick<
+    ComponentProps<typeof Button>,
+    "variant" | "size" | "loading" | "disabled" | "sound" | "children"
+  >
+>
 
-function ButtonPreview({
-  variant,
-  glassVariant,
-  size,
-  children,
-  ...props
-}: TPreviewProps) {
-  const isIconSize = size?.startsWith("icon")
-  const content = isIconSize ? <BookOpen aria-hidden /> : children
-
-  return (
-    <div className="min-h-32 p-6 flex items-center justify-center">
-      {variant === "glass" ? (
-        <Button
-          {...props}
-          aria-label={isIconSize ? children : undefined}
-          variant="glass"
-          glassVariant={glassVariant}
-          size={size}
-        >
-          {content}
-        </Button>
-      ) : (
-        <Button
-          {...props}
-          aria-label={isIconSize ? children : undefined}
-          variant={variant}
-          size={size}
-        >
-          {content}
-        </Button>
-      )}
-    </div>
-  )
+function ButtonPreview(props: TPreviewProps) {
+  return <Button {...props} />
 }
 
 export const story = defineStory({

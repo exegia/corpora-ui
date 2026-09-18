@@ -5,6 +5,8 @@ import { useAtomValue, useSetAtom } from "jotai"
 
 import {
   resetScaffoldAtom,
+  resizeScaffoldInspectorAtom,
+  updateScaffoldPanelLayoutAtom,
   scaffoldStateAtom,
   setScaffoldInspectorOpenAtom,
   toggleScaffoldInspectorAtom,
@@ -29,7 +31,9 @@ import type {
  * to that field's atom instead:
  * `useAtomValue(scaffoldInspectorOpenAtom("workspace"))`.
  */
-export function useScaffoldState(scaffoldId: TScaffoldInstanceId): IScaffoldState {
+export function useScaffoldState(
+  scaffoldId: TScaffoldInstanceId
+): IScaffoldState {
   return useAtomValue(scaffoldStateAtom(scaffoldId))
 }
 
@@ -49,10 +53,33 @@ export function useScaffoldActions(
   const setInspectorOpen = useSetAtom(setScaffoldInspectorOpenAtom(scaffoldId))
   const toggleInspector = useSetAtom(toggleScaffoldInspectorAtom(scaffoldId))
   const togglePanel = useSetAtom(toggleScaffoldPanelAtom(scaffoldId))
+  const updatePanel = useSetAtom(updateScaffoldPanelLayoutAtom(scaffoldId))
+  const resizeInspector = useSetAtom(resizeScaffoldInspectorAtom(scaffoldId))
   const reset = useSetAtom(resetScaffoldAtom(scaffoldId))
 
   return useMemo(
-    () => ({ setInspectorOpen, toggleInspector, togglePanel, reset }),
-    [setInspectorOpen, toggleInspector, togglePanel, reset]
+    () => ({
+      setInspectorOpen,
+      toggleInspector,
+      togglePanel,
+      reset,
+      resizeInspector,
+      resizePanel: (panelId: string, width: number) =>
+        updatePanel(panelId, { width }),
+      resizeSecondaryPanel: (panelId: string, secondarySize: number) =>
+        updatePanel(panelId, { secondarySize }),
+      setSecondaryExpanded: (panelId: string, secondaryExpanded: boolean) =>
+        updatePanel(panelId, { secondaryExpanded }),
+      setPanelSwapped: (panelId: string, swapped: boolean) =>
+        updatePanel(panelId, { swapped }),
+    }),
+    [
+      setInspectorOpen,
+      toggleInspector,
+      togglePanel,
+      reset,
+      resizeInspector,
+      updatePanel,
+    ]
   )
 }

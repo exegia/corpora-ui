@@ -176,7 +176,6 @@ export function Hero({ children }: { children: React.ReactNode }) {
             title="Validate the Iliad corpus before the walker runs?"
             description="Check otype, oslots and section features in"
             entity={{ name: "Iliad · Homer corpus", initials: "I" }}
-            descriptionSuffix="which takes about"
             leadTime="2 min"
             confidence="high"
           />

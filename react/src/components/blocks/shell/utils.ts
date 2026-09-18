@@ -1,3 +1,6 @@
+export const SHELL_BEZEL_CLASSES =
+  "bezel-lit-t-2 bezel-lit-blur-2 bezel-lit/57 bezel-dim-b-2 bezel-dim-blur-3 bezel-dim/11 dark:bezel-lit-blur-3 dark:bezel-lit/14 dark:bezel-dim/78"
+
 export const TITLE_BAR_HEIGHT = 48
 // The desktop rail settles at a hard zero-width boundary. Keep the spring
 // critically damped so it cannot overshoot, pause against that boundary, and
@@ -108,6 +111,7 @@ export const SIDEBAR_KEYBOARD_SHORTCUT = "b"
  * so an override wins over the value written here.
  */
 export const SHELL_WIDTHS = {
+  "--sidebar-min-width": "180px",
   "--sidebar-width": "256px",
   "--sidebar-width-icon": "56px",
   "--sidebar-width-mobile": "18rem",

@@ -45,6 +45,8 @@ export * from "./components/composed/password-input"
 export * from "./components/composed/social-providers"
 export * from "./components/composed/reader"
 export * from "./components/composed/tree"
+export { default as User } from "./components/composed/user"
+export type { IUserMessageProps, TUserInfoProps, TUserPillProps } from "./components/composed/user/types"
 export * from "./components/composed/verse"
 // The old `components/user-avatar` module was removed (92f029c); the avatar
 // now lives in `components/atoms/avatar` and flows through the atoms barrel.

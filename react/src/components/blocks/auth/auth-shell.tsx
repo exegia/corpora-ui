@@ -18,7 +18,6 @@ import { cn } from "@/lib/utils";
 /** transitions.dev motion scale, shared by all auth blocks. */
 export const EASE = [0.22, 1, 0.36, 1] as const;
 
-export type TAuthStatus = "idle" | "loading" | "success" | "error";
 
 /**
  * Frame shell shared by the auth blocks (coss particle p-card-8): a raised

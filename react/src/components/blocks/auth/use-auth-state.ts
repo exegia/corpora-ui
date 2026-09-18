@@ -27,7 +27,7 @@ import type {
   IAuthFlowState,
   IAuthSessionActions,
   IAuthSessionState,
-} from "./auth-state-type"
+} from "./type"
 
 /**
  * Read the auth flow registered under `flowId` from anywhere below

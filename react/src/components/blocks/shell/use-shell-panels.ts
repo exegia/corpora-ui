@@ -1,19 +1,20 @@
 "use client"
 
-import { useCallback, useEffect, useId, useMemo, useState } from "react"
+import { useCallback, useEffect, useId, useMemo } from "react"
 import type { ReactNode } from "react"
+import { shellPanelAtoms } from "./shell-panel-atom"
 import { useAtomValueRawSync, useSetAtom } from "jotai"
 
 import {
   removeShellFitInstance,
   resizeShellPanelAtom,
   shellFitFitsAtom,
+  shellFitStateAtom,
   shellFitPanelWidthAtom,
 } from "./shell-fit-atom"
 import type {
   TShellPanelControlProps,
   IShellPanelControls,
-  TSidebarComponentMap,
   TSidebarSide,
   IUseShellPanelsOptions,
 } from "./type"
@@ -54,63 +55,26 @@ export function useShellPanels({
     return () => removeShellFitInstance(shellId)
   }, [shellId, explicitId])
 
-  const [open, setOpenState] = useState<Record<TSidebarSide, boolean>>(() => ({
-    left: defaultOpen?.left ?? true,
-    right: defaultOpen?.right ?? false,
-  }))
-  const [openMobile, setOpenMobileState] = useState<
-    Record<TSidebarSide, boolean>
-  >(() => ({
-    left: defaultOpenMobile?.left ?? false,
-    right: defaultOpenMobile?.right ?? false,
-  }))
+  const atoms = shellPanelAtoms(shellId)
+  const sidebarWidth = useAtomValueRawSync(atoms.railWidth)
+  const resizeSidebar = useSetAtom(atoms.resizeSidebar)
+  const open = useAtomValueRawSync(atoms.open)
+  const openMobile = useAtomValueRawSync(atoms.mobile)
+  const setOpen = useSetAtom(atoms.setOpen)
+  const setOpenMobile = useSetAtom(atoms.setOpenMobile)
+  const toggle = useSetAtom(atoms.toggle)
+  const panelComponents = useAtomValueRawSync(atoms.components)
+  const setPanelComponents = useSetAtom(atoms.components)
 
   // Reads false until the shell has measured itself — an unmeasured shell
   // fails open, so nothing out here stands down over a reading that has not
   // happened yet.
   const fits = useAtomValueRawSync(shellFitFitsAtom(shellId))
   const isNarrow = !fits
+  const { sidebar } = useAtomValueRawSync(shellFitStateAtom(shellId))
   const panelWidth = useAtomValueRawSync(shellFitPanelWidthAtom(shellId))
   const resizePanel = useSetAtom(resizeShellPanelAtom(shellId))
 
-  // The shell drops the right panel when the viewport cannot hold it, so
-  // opening it from out here would only surface later as a panel nobody
-  // asked for. Closing always goes through — that is how state left over
-  // from a wider viewport clears.
-  const setOpen = useCallback(
-    (nextOpen: boolean, side: TSidebarSide) => {
-      if (nextOpen && side === "right" && isNarrow) return
-
-      setOpenState((prev) =>
-        prev[side] === nextOpen ? prev : { ...prev, [side]: nextOpen }
-      )
-      onPanelChange?.(nextOpen, side)
-    },
-    [isNarrow, onPanelChange]
-  )
-
-  const setOpenMobile = useCallback(
-    (nextOpen: boolean, side: TSidebarSide) => {
-      if (nextOpen && side === "right" && isNarrow) return
-
-      setOpenMobileState((prev) =>
-        prev[side] === nextOpen ? prev : { ...prev, [side]: nextOpen }
-      )
-      onPanelChange?.(nextOpen, side)
-    },
-    [isNarrow, onPanelChange]
-  )
-
-  const toggle = useCallback(
-    (side: TSidebarSide) => setOpen(!open[side], side),
-    [open, setOpen]
-  )
-
-  // The content sticks even when the open is refused (too narrow): it is
-  // what the panel shows whenever it next gets to open, not a one-shot.
-  const [panelComponents, setPanelComponents] = useState<TSidebarComponentMap>(
-    {}
-  )
   const openPanel = useCallback(
     (side: TSidebarSide, component?: ReactNode) => {
       if (component !== undefined) {
@@ -120,32 +84,34 @@ export function useShellPanels({
       }
       setOpen(true, side)
     },
-    [setOpen]
+    [setOpen, setPanelComponents]
   )
 
   const providerProps = useMemo<TShellPanelControlProps>(
     () => ({
       shellId,
       defaultPanelWidth,
-      open,
-      onOpenChange: setOpen,
-      openMobile,
-      onOpenMobileChange: setOpenMobile,
+      defaultOpen,
+      defaultOpenMobile,
+      onOpenChange: onPanelChange,
+      onOpenMobileChange: onPanelChange,
       panelComponents,
     }),
     [
       shellId,
       defaultPanelWidth,
-      open,
-      openMobile,
-      setOpen,
-      setOpenMobile,
+      defaultOpen,
+      defaultOpenMobile,
+      onPanelChange,
       panelComponents,
     ]
   )
 
   return {
     shellId,
+    sidebar,
+    sidebarWidth,
+    resizeSidebar,
     isNarrow,
     panelWidth,
     resizePanel,

@@ -6,26 +6,15 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { type TAuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
+import { authAccentActionStyles } from "@/lib/auth-accent";
 import { cn } from "@/lib/utils";
 import {
   AuthCard,
   AuthError,
   AuthSuccess,
   MorphStep,
-  type TAuthStatus,
 } from "./auth-shell";
-
-export interface IForgotPasswordBlockProps {
-  title?: string;
-  description?: string;
-  /** Brand mark rendered above the title. Omit for no logo row at all. */
-  logo?: React.ReactNode;
-  /** Brand accent for the primary action. Omit to keep the default primary. */
-  accent?: TAuthAccent;
-  onSubmit?: (data: { email: string }) => Promise<void> | void;
-  onBackToLogin?: () => void;
-}
+import type { IForgotPasswordBlockProps, TAuthStatus } from "./type";
 
 export function ForgotPasswordBlock({
   title = "Reset your password",

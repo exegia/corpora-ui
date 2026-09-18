@@ -10,22 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import type {
+    IProfileStepProps,
   TOnboardingFieldConfig,
-  IOnboardingStepConfig,
   TOnboardingValue,
-} from "../onboarding-block";
+} from "../type";
 
-export interface IProfileStepProps {
-  step: IOnboardingStepConfig;
-  /** Seed values, so drafts survive back/forward navigation. */
-  values: Record<string, TOnboardingValue>;
-  submitting?: boolean;
-  submitLabel: string;
-  onSubmit: (values: Record<string, TOnboardingValue>) => void | Promise<void>;
-  onBack?: () => void;
-  /** Reports every edit so the flow can restore drafts across navigation. */
-  onDraftChange?: (name: string, value: TOnboardingValue) => void;
-}
 
 function initialValue(
   field: TOnboardingFieldConfig,

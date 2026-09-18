@@ -1,29 +1,48 @@
-import type { TStoryComponentProps } from "@/components/types"
 import { defineStoryFactory } from "@fumadocs/story/vite/client"
 import type { Story, StoryOptions } from "@fumadocs/story/vite/client"
-import {
-  createElement,
-  type ComponentPropsWithoutRef,
-  type FC,
-} from "react"
+import { createElement, type FC, type ReactNode } from "react"
 
 const { defineStory: createStory } = defineStoryFactory()
 
+/** Editable text in docs should not expand ReactNode's recursive element tree. */
+export type TStoryData<T> = ReactNode extends T
+  ? string
+  : T extends string | number | boolean | bigint | symbol | null | undefined
+    ? T
+    : T extends readonly (infer Item)[]
+      ? TStoryData<Item>[]
+      : T extends (...args: never[]) => unknown
+        ? T
+        : T extends object
+          ? { [Key in keyof T]: TStoryData<T[Key]> }
+          : T
+
 /** Give every docs story the same centered canvas without constraining wide components. */
-// The upstream StoryOptions generic is constrained to FC<any>.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function defineStory<C extends FC<keyof TStoryComponentProps>>(
-  options: StoryOptions<C>
-): Story<C> {
-  const Component = options.Component
-  const CenteredComponent = (props: ComponentPropsWithoutRef<C>) => (
-    <div className="min-h-32 flex w-full items-center justify-center">
+// Infer each preview independently. The namespace props catalog also contains
+// unrelated components and does not cover every UI primitive or demo wrapper.
+type TStoryComponent<T extends object> = FC<T>
+type TStoryOptions<T extends object> = StoryOptions<TStoryComponent<T>> & {
+  centered?: boolean
+}
+export function defineStory<T extends object>(
+  options: TStoryOptions<T>
+): Story<TStoryComponent<T>> {
+  const { Component, centered, ...storyOptions } = options
+  const CenteredComponent = (props: T) => (
+    <div className="min-h-32 p-8 max-w-xs flex flex-1 mx-auto w-full items-center justify-center">
+      {createElement(Component, props)}
+    </div>
+  )
+
+  const WideComponent = (props: T) => (
+    <div className="min-h-32 p-8 flex w-full items-center justify-center">
       {createElement(Component, props)}
     </div>
   )
 
   return createStory({
-    ...options,
-    Component: CenteredComponent as C,
-  }) as Story<C>
+    // Preserve the metadata injected by the Vite story plugin, including _generated.
+    ...storyOptions,
+    Component: centered ? CenteredComponent : WideComponent,
+  })
 }

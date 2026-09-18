@@ -1,6 +1,5 @@
-import { type ComponentType, useMemo, useState } from "react"
+import { createContext, useMemo, useState } from "react"
 import { Tooltip } from "@base-ui/react/tooltip"
-import { TooltipCreateHandle } from "@/components/ui/tooltip"
 import type {
   TActionBarSegment,
   TActionEntry,
@@ -11,10 +10,10 @@ import type {
 } from "./types"
 import type { Emoji } from "frimousse"
 
-// Annotated, not inferred: the emitted .d.ts cannot name base-ui's
-// `TooltipHandle` on its own (TS2883).
-export const tooltipHandle: Tooltip.Handle<ComponentType> =
-  TooltipCreateHandle<ComponentType>()
+// Each toolbar owns its handle; a shared handle cannot control multiple roots.
+export const ActionTooltipContext = createContext<
+  Tooltip.Handle<string> | undefined
+>(undefined)
 
 export const isSeparator = (key: string): boolean => key.includes("separator")
 

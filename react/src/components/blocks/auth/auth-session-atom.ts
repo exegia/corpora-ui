@@ -19,7 +19,7 @@ import type {
   IAuthSessionState,
   TAuthSessionStatus,
   IAuthUser,
-} from "./auth-state-type"
+} from "./type"
 
 // ── primitives ───────────────────────────────────────────────────────────
 

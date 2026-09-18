@@ -1,5 +1,7 @@
 "use client"
 
+import { GlassSurface } from "@/components/ui/glasscn/liquid-glass"
+
 import { useEffect } from "react"
 import type * as React from "react"
 import { useHighlightPopover } from "@omsimos/react-highlight-popover"
@@ -88,12 +90,13 @@ export function HighlightPopover({
       {...props}
       {...componentContextProps}
       className={cn(
-        "max-w-52 rounded-md bg-white/50 shadow-lg inset-shadow-sm shadow-black/10 inset-shadow-popover backdrop-blur-md dark:bg-black/20",
+        "relative isolate max-w-52 rounded-md bg-transparent dark:bg-transparent",
         forwardedClassName,
         className
       )}
       data-selection-popover=""
     >
+      <GlassSurface glassVariant="frosted" />
       <CardPanel className="p-3">{content}</CardPanel>
     </Component>
   )

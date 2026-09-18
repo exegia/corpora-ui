@@ -24,7 +24,7 @@ export function Message<T extends TAIMessageType>({
 
   return (
     <Bubble
-      className={cn(className)}
+      className={cn("my-1.5", className)}
       data-slot="ai-message"
       data-streaming={isStreaming ? "" : undefined}
       variant="ai"
@@ -39,7 +39,7 @@ export function Message<T extends TAIMessageType>({
         aria-live="polite"
         data-slot="ai-message-body"
       >
-        {children}
+        <div className="ml-3">{children}</div>
         {Content && (
           <Content {...({ kind: type, ...contentProps } as TAIContentProps)} />
         )}

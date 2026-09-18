@@ -3,13 +3,46 @@ import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { Bubble, type IBubbleReaction } from "../index"
 import User from "@/components/composed/user"
+import { Attachment } from "@/components/composed/chat/attachment"
 
 describe("Bubble", () => {
+  test("detects attachment-only content through fragments without stripping mixed text bubbles", () => {
+    const view = render(
+      <Bubble variant="sender">
+        <Bubble.Message>
+          <>
+            <Attachment kind="document" title="notes.pdf" />
+          </>
+        </Bubble.Message>
+      </Bubble>
+    )
+    expect(
+      view.container
+        .querySelector('[data-slot="bubble-message"]')
+        ?.hasAttribute("data-unstyled")
+    ).toBe(true)
+    view.rerender(
+      <Bubble variant="sender">
+        <Bubble.Message>
+          Read these notes
+          <Attachment kind="document" title="notes.pdf" />
+        </Bubble.Message>
+      </Bubble>
+    )
+    expect(
+      view.container
+        .querySelector('[data-slot="bubble-message"]')
+        ?.hasAttribute("data-unstyled")
+    ).toBe(false)
+  })
   test("header renders the user's identity row, time and role badge", () => {
     render(
       <Bubble variant="sender">
         <Bubble.Header>
-          <User.Info user={{ firstName: "Sen", lastName: "Der", role: "Admin" }} variant="info" />
+          <User.Info
+            user={{ firstName: "Sen", lastName: "Der", role: "Admin" }}
+            variant="info"
+          />
         </Bubble.Header>
         <Bubble.Message>Hello</Bubble.Message>
       </Bubble>
@@ -28,7 +61,9 @@ describe("Bubble", () => {
     expect(
       container.querySelector('[data-slot="bubble-header"]')
     ).not.toBeNull()
-    expect(container.querySelector('[data-slot="bubble-header"]')?.textContent).toBe("")
+    expect(
+      container.querySelector('[data-slot="bubble-header"]')?.textContent
+    ).toBe("")
     expect(screen.queryByText("Exegia")).toBeNull()
     expect(screen.queryByText("AI Scholar")).toBeNull()
   })
@@ -129,6 +164,26 @@ describe("Bubble", () => {
         <Bubble.Message>Out</Bubble.Message>
       </Bubble>
     )
+    expect(
+      container
+        .querySelector('[data-slot="bubble"]')
+        ?.getAttribute("data-variant")
+    ).toBe("sender")
+  })
+
+  test("an attachment message keeps its alignment without a bubble surface", () => {
+    const { container } = render(
+      <Bubble variant="sender">
+        <Bubble.Message unstyled>
+          <div data-slot="attachment">scan.jpg</div>
+        </Bubble.Message>
+      </Bubble>
+    )
+    const message = container.querySelector('[data-slot="bubble-message"]')!
+    expect(message.hasAttribute("data-unstyled")).toBe(true)
+    expect(message.className).not.toContain("bubble-sender")
+    expect(message.className).not.toContain("bezel-")
+    expect(message.className).not.toContain("py-3")
     expect(
       container
         .querySelector('[data-slot="bubble"]')

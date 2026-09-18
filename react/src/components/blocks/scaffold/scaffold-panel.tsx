@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "motion/react"
 import * as React from "react"
-import { useState } from "react"
+import { useId } from "react"
 
 import { cn } from "@/lib/utils"
 import {
@@ -10,12 +10,18 @@ import {
   SCAFFOLD_MORPH_DURATION,
   SCAFFOLD_PANEL_MIN_WIDTH,
 } from "./constants"
-import { useAtomValue } from "jotai"
+import { useAtomValue, useSetAtom } from "jotai"
 
+import { useMotionPanel } from "@/lib/use-motion-panel"
 import { PanelMenuButton } from "./panel-menu-button.tsx"
-import { scaffoldPanelDimmedAtom } from "./scaffold-atom"
+import {
+  scaffoldPanelDimmedAtom,
+  scaffoldPanelLayoutsAtom,
+  updateScaffoldPanelLayoutAtom,
+  toggleScaffoldPanelAtom,
+} from "./scaffold-atom"
 import { useScaffoldContext } from "./scaffold-context"
-import type { IScaffoldPanelProps, TSubPanelPosition } from "./type"
+import type { IScaffoldPanelProps } from "./type"
 import { ScaffoldSubPanel } from "@/components/blocks/scaffold/scaffold-sub-panel.tsx"
 
 /**
@@ -27,6 +33,11 @@ import { ScaffoldSubPanel } from "@/components/blocks/scaffold/scaffold-sub-pane
  */
 export function ScaffoldPanel({
   id,
+  _panelHidden = false,
+  _panelFill = true,
+  _panelWidth = 320,
+  _panelMax = 640,
+  _panelEnd = true,
   children,
   SecondaryPanel,
   onSwap,
@@ -35,7 +46,13 @@ export function ScaffoldPanel({
   swapLabel = "Swap panel content",
   sound = true,
   className,
-}: IScaffoldPanelProps): React.ReactElement {
+}: IScaffoldPanelProps & {
+  _panelHidden?: boolean
+  _panelFill?: boolean
+  _panelWidth?: number
+  _panelMax?: number
+  _panelEnd?: boolean
+}): React.ReactElement {
   const { scaffoldId } = useScaffoldContext()
   const reducedMotion = useReducedMotion()
 
@@ -50,89 +67,120 @@ export function ScaffoldPanel({
     ease: SCAFFOLD_EASE,
   }
 
-  const [subPanelPosition, setSubPanelPosition] =
-    useState<TSubPanelPosition>("top")
-  const [isSwapped, setIsSwapped] = useState<boolean>(false)
+  const generatedId = useId()
+  const panelId = id ?? generatedId
+  const layouts = useAtomValue(scaffoldPanelLayoutsAtom(scaffoldId))
+  const updateLayout = useSetAtom(updateScaffoldPanelLayoutAtom(scaffoldId))
+  const togglePanel = useSetAtom(toggleScaffoldPanelAtom(scaffoldId))
+  const panelLayout = layouts[panelId] ?? {}
+  const isSwapped = panelLayout.swapped ?? false
+  const secondaryExpanded = panelLayout.secondaryExpanded ?? false
   const handleSwap = () => {
-    setIsSwapped((prev) => !prev)
+    updateLayout(panelId, { swapped: !isSwapped })
     onSwap?.()
   }
+  const handleExpand = () =>
+    updateLayout(panelId, { secondaryExpanded: !secondaryExpanded })
+  const { panelRef, gripRef } = useMotionPanel({
+    size: _panelWidth,
+    minSize: SCAFFOLD_PANEL_MIN_WIDTH,
+    maxSize: _panelMax,
 
-  // Trades which sub-panel holds the flexible slot — the collapsed card grows
-  // into `flex-1` while the expanded one shrinks to the `min-h-14` strip.
-  const handleExpand = () => {
-    setSubPanelPosition((prev) => (prev === "top" ? "bottom" : "top"))
-  }
+    enabled: !_panelFill,
+    collapsed: _panelHidden,
+    overshoot: false,
+    transition,
+    onSizeChange: (size) => updateLayout(panelId, { width: Number(size) }),
+    onCollapsedChange: id
+      ? (collapsed) => {
+          if (collapsed !== _panelHidden) togglePanel(id)
+        }
+      : undefined,
+  })
 
-  // Enter/exit grow and shrink the panel's slot in the flex row: flexGrow
-  // carries the width (the panel is basis-0, so `width` itself is inert on
-  // the main axis) and minWidth releases the 320px floor so the slot can
-  // reach zero. scaleX pins the visual anchor to the panel's center —
-  // flexbox collapses a slot toward whichever edge its neighbors grow
-  // from, so without it the panel would wipe from one side.
-  const hidden = { flexGrow: 0, minWidth: 0, scaleX: 0, opacity: 0 }
+  const primaryPanel = (
+    <ScaffoldSubPanel
+      key="top"
+      id="top"
+      expanded={!secondaryExpanded}
+      primary
+      panelId={panelId}
+    >
+      {children}
+    </ScaffoldSubPanel>
+  )
+  const secondaryPanel = SecondaryPanel ? (
+    <ScaffoldSubPanel
+      key="bottom"
+      id="bottom"
+      expanded={secondaryExpanded}
+      panelId={panelId}
+      swapped={isSwapped}
+    >
+      {SecondaryPanel}
+    </ScaffoldSubPanel>
+  ) : null
+  const seam = (onSwap || onCloseSecondary) && SecondaryPanel && (
+    // `layout` keeps the seam glued to the moving boundary while the
+    // cards trade places around it.
+    <motion.div
+      key="seam"
+      layout="position"
+      data-motion-panels-separator=""
+      transition={transition}
+      className="h-2 relative flex items-center justify-center"
+    >
+      <PanelMenuButton
+        label={swapLabel}
+        onClick={handleSwap}
+        onExpand={handleExpand}
+        onCloseSecondary={onCloseSecondary}
+        secondaryExpanded={secondaryExpanded}
+        swapped={isSwapped}
+        sound={sound}
+      />
+    </motion.div>
+  )
 
   return (
     <motion.section
+      initial={false}
       id={id ?? "scaffold-panel"}
-      animate={{
-        flexGrow: 1,
-        // id panels opt into responsive hiding, so each visible one can
-        // hold the 320px floor — the canvas hides siblings before this
-        // floor would overflow it.
-        minWidth: id !== undefined ? SCAFFOLD_PANEL_MIN_WIDTH : 0,
-        scaleX: 1,
-        // The hovered tab's panel keeps full opacity; the rest fade back
-        // so the tab↔panel pairing reads at a glance. Inline (not a
-        // class) because motion owns this element's opacity.
-        opacity: dimmed ? 0.35 : 1,
+      ref={panelRef}
+      data-motion-panels-fill={_panelFill ? "" : undefined}
+      data-motion-panels-separator={_panelHidden ? "" : undefined}
+      aria-hidden={_panelHidden || undefined}
+      inert={_panelHidden || undefined}
+      animate={{ opacity: dimmed ? 0.35 : 1 }}
+      style={{
+        flex: _panelFill ? "1 1 0%" : "0 0 auto",
+        minWidth: 0,
+        marginRight: _panelHidden ? -8 : 0,
+        overflow: _panelHidden ? "clip" : undefined,
       }}
-      initial={hidden}
-      exit={hidden}
-      style={{ originX: 0.5 }}
       aria-label={name}
-      className={cn(
-        "group/panel relative flex w-full min-w-0 flex-1",
-        // Swap flips the direction as a class, NOT an animate target:
-        // flex-direction is discrete, so motion would apply it instantly —
-        // the flip lands in one commit and the children's `layout` FLIP is
-        // what glides the cards past each other.
-        isSwapped ? "flex-col-reverse" : "flex-col",
-        className
-      )}
-      layout
+      className={cn("group/panel min-w-0 relative flex", "flex-col", className)}
       data-slot="scaffold-panel"
       data-dimmed={dimmed ? "" : undefined}
       data-swapped={isSwapped ? "" : undefined}
       transition={transition}
     >
-      <ScaffoldSubPanel id="top" expanded={subPanelPosition === "top"} primary>
-        {children}
-      </ScaffoldSubPanel>
-      {(onSwap || onCloseSecondary) && SecondaryPanel && (
-        // `layout` keeps the seam glued to the moving boundary while the
-        // cards trade places around it.
-        <motion.div
-          layout
-          transition={transition}
-          className="relative flex h-2 items-center justify-center"
-        >
-          <PanelMenuButton
-            label={swapLabel}
-            onClick={handleSwap}
-            onExpand={handleExpand}
-            onCloseSecondary={onCloseSecondary}
-            secondaryExpanded={subPanelPosition === "bottom"}
-            swapped={isSwapped}
-            sound={sound}
-          />
-        </motion.div>
+      {!_panelFill && (
+        <div
+          ref={gripRef}
+          role="separator"
+          aria-label={`Resize ${name ?? "panel"}`}
+          aria-orientation="vertical"
+          tabIndex={_panelHidden ? -1 : 0}
+          className={cn(
+            "inset-y-0 w-2 absolute z-10 cursor-col-resize touch-none focus-visible:outline-2 focus-visible:outline-ring",
+            _panelEnd ? "-right-1" : "-left-1"
+          )}
+        />
       )}
-      {SecondaryPanel && (
-        <ScaffoldSubPanel id="bottom" expanded={subPanelPosition === "bottom"}>
-          {SecondaryPanel}
-        </ScaffoldSubPanel>
-      )}
+      {isSwapped ? secondaryPanel : primaryPanel}
+      {seam}
+      {isSwapped ? primaryPanel : secondaryPanel}
     </motion.section>
   )
 }

@@ -9,14 +9,13 @@ import {
 } from "@/components/composed/password-input";
 import {
   SocialProviders,
-  type TSocialProvider,
 } from "@/components/composed/social-providers";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { type TAuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
+import { authAccentActionStyles } from "@/lib/auth-accent";
 import { cn } from "@/lib/utils";
 import {
   AuthCard,
@@ -25,46 +24,10 @@ import {
   AuthSuccess,
   MorphStep,
   Reveal,
-  type TAuthStatus,
 } from "./auth-shell";
+import type { ISignupBlockProps, TAuthStatus } from "./type";
+import type { TSocialProvider } from "@/components/composed/types";
 
-export interface ISignupBlockProps {
-  title?: string;
-  description?: string;
-  /**
-   * Replaces the built-in "terms" link inside the consent label — pass your
-   * own dialog trigger to render it inline instead of wiring `onTerms`.
-   */
-  termsComponent?: React.ReactNode;
-  /** Brand mark rendered above the title. Omit for no logo row at all. */
-  logo?: React.ReactNode;
-  /** Brand accent for the primary action. Omit keeping the default primary. */
-  accent?: TAuthAccent;
-  providers?: TSocialProvider[];
-  showNameField?: boolean;
-  /** Require the term checkbox before submitting. */
-  showTerms?: boolean;
-  /**
-   * Controls the term checkbox. Pass it with `onTermsCheckedChange` when
-   * something outside the block has to tick the box — an "I agree" action in
-   * your own terms dialog, say. Omit letting the block own the state.
-   */
-  termsChecked?: boolean;
-  /** Starting state of the term checkbox while it is uncontrolled. */
-  defaultTermsChecked?: boolean;
-  /** Fires on every change, controlled or not. */
-  onTermsCheckedChange?: (checked: boolean) => void;
-  /** Block submission until every password requirement is met. */
-  enforceStrongPassword?: boolean;
-  onSubmit?: (data: {
-    name: string;
-    email: string;
-    password: string;
-  }) => Promise<void> | void;
-  onProviderSelect?: (provider: TSocialProvider) => Promise<void> | void;
-  onLogin?: () => void;
-  onTerms?: () => void;
-}
 
 export function SignupBlock({
   title = "Create your account",

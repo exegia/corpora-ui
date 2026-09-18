@@ -1,29 +1,20 @@
 "use client"
 // beui.dev/components/motion/animated-sidebar
 
-import { motion, type PanInfo } from "motion/react"
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type KeyboardEvent,
-} from "react"
-import { EASE_OUT } from "@/lib/ease.ts"
+import { motion } from "motion/react"
+import { useCallback } from "react"
 import { cn } from "@/lib/utils"
+import { useSetAtom } from "jotai"
+import { shellPanelAtoms } from "./shell-panel-atom"
+import { useMotionPanel } from "@/lib/use-motion-panel"
 import type { IAnimatedSidebarProps } from "./type"
 import {
   AnimatedSidebarPanelContext,
-  expandedWidthVar,
+  useAnimatedSidebar,
   SIDEBAR_MORPH_TRANSITION,
   PANEL_TRANSITION,
   REDUCED_TRANSITION,
-  useAnimatedSidebar,
 } from "./utils"
-
-/** How far one arrow key moves the panel edge (shift = coarse step). */
-const RESIZE_STEP = 16
-const RESIZE_STEP_COARSE = 64
 
 export function AnimatedPanel({
   side = "left",
@@ -38,84 +29,64 @@ export function AnimatedPanel({
   ...props
 }: IAnimatedSidebarProps) {
   const context = useAnimatedSidebar()
-  const { bounds, panelWidth, resetPanelWidth, resizePanel } = context.fit
+  const resizeSidebar = useSetAtom(
+    shellPanelAtoms(context.fit.shellId).resizeSidebar
+  )
+  const { bounds, panelWidth, resizePanel } = context.fit
+  const sidebar = context.fit.sidebar
   const sideOpen = context.open[side]
-  const collapsed = collapsible !== "none" && !sideOpen
-  const offcanvas = collapsed && collapsible === "offcanvas"
-
-  // Only the expanded secondary panel is resizable: the rail is pinned to its
-  // own columns, and a collapsed panel has no edge left to grab.
-  const resizable =
-    side === "right" && collapsible === "offcanvas" && !collapsed
-
-  const resizeStartRef = useRef(0)
-  const [resizing, setResizing] = useState(false)
-
-  const baseWidth = offcanvas
-    ? 0
-    : collapsed
-      ? "var(--sidebar-width-icon)"
-      : expandedWidthVar(side)
-  // The secondary panel's width is shell state, not panel state: the shell
-  // measured it, re-clamps it when the room changes, and hands back the same
-  // width after a collapse. Everything else rides the CSS variables, which
-  // also covers the server render, where nothing has been measured yet.
-  const width = resizable && panelWidth !== null ? panelWidth : baseWidth
-
+  const collapsed =
+    side === "left" && sidebar
+      ? sidebar.mode !== "expanded"
+      : collapsible !== "none" && !sideOpen
+  const offcanvas =
+    side === "left" && sidebar
+      ? sidebar.mode === "hidden"
+      : collapsed && collapsible === "offcanvas"
+  const visible = side !== "right" || context.fit.fits
+  const width =
+    side === "right"
+      ? (panelWidth ?? 320)
+      : (sidebar?.width ?? (collapsed ? 56 : 256))
+  const { panelRef, gripRef } = useMotionPanel({
+    size: width,
+    defaultSize:
+      side === "right"
+        ? (context.fit.defaultPanelWidth ?? (bounds.min || 320))
+        : 256,
+    minSize:
+      side === "right"
+        ? bounds.min || 320
+        : collapsed
+          ? width
+          : (sidebar?.minWidth ?? 180),
+    maxSize:
+      side === "right"
+        ? bounds.max || 640
+        : collapsed
+          ? width
+          : (sidebar?.maxWidth ?? 480),
+    collapsed: offcanvas,
+    enabled: visible,
+    overshoot: false,
+    transition: context.reduce ? { duration: 0 } : SIDEBAR_MORPH_TRANSITION,
+    onSizeChange: (size) =>
+      side === "right"
+        ? resizePanel(Number(size))
+        : resizeSidebar(Number(size)),
+    onCollapsedChange:
+      collapsible !== "none"
+        ? (value) => context.setOpen(!value, side)
+        : undefined,
+  })
   const setPanelRef = useCallback(
     (node: HTMLElement | null) => {
+      panelRef.current = node
       if (typeof ref === "function") ref(node)
       else if (ref) ref.current = node
     },
-    [ref]
+    [panelRef, ref]
   )
-
-  const handleResizeStart = useCallback(() => {
-    resizeStartRef.current = panelWidth ?? bounds.min
-    setResizing(true)
-  }, [bounds.min, panelWidth])
-
-  const handleResize = useCallback(
-    (_event: PointerEvent, info: PanInfo) => {
-      // The handle rides the panel's inner edge, so the panel grows as the
-      // pointer travels left. `offset` is measured from the pointer-down
-      // point, so the edge tracks it 1:1 instead of accumulating rounding.
-      resizePanel(resizeStartRef.current - info.offset.x)
-    },
-    [resizePanel]
-  )
-
-  const handleResizeEnd = useCallback(() => setResizing(false), [])
-
-  const handleResizeKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      const direction =
-        event.key === "ArrowLeft" ? 1 : event.key === "ArrowRight" ? -1 : 0
-      if (!direction) return
-
-      event.preventDefault()
-      const step = event.shiftKey ? RESIZE_STEP_COARSE : RESIZE_STEP
-      resizePanel((panelWidth ?? bounds.min) + direction * step)
-    },
-    [bounds.min, panelWidth, resizePanel]
-  )
-
-  // The pointer leaves the 2px handle the moment the drag starts, so the
-  // cursor and the text selection have to be held on the document instead.
-  useEffect(() => {
-    if (!resizing) return
-
-    const { body } = document
-    const previousCursor = body.style.cursor
-    const previousUserSelect = body.style.userSelect
-    body.style.cursor = "col-resize"
-    body.style.userSelect = "none"
-
-    return () => {
-      body.style.cursor = previousCursor
-      body.style.userSelect = previousUserSelect
-    }
-  }, [resizing])
 
   // A secondary panel exists only while the viewport can carry it beside the
   // rail and the body at their own floors. Below that there is nothing to dock
@@ -123,22 +94,20 @@ export function AnimatedPanel({
   // and its trigger stands down with it.
   if (side === "right" && !context.fit.fits) return null
 
-  if (context.isMobile) return <div>TODO: Create Mobile nav experience</div>
-
   return (
     <motion.aside
       {...props}
       ref={setPanelRef}
       initial={false}
       aria-label={ariaLabel}
+      aria-hidden={offcanvas || undefined}
+      inert={offcanvas || undefined}
       data-slot="sidebar"
       data-state={collapsed ? "collapsed" : "expanded"}
       data-collapsible={collapsible}
       data-variant={variant}
       data-side={side}
-      data-resizing={resizing ? "" : undefined}
       animate={{
-        width,
         // Swallow the shell's gap-x-2 column gap while off canvas so the
         // shell edge keeps a constant spacing-2 inset whether the panel is
         // open (gap + panel + margin) or collapsed (gap + this).
@@ -148,50 +117,29 @@ export function AnimatedPanel({
       }}
       // A drag has to land on the frame it happened — the morph spring would
       // trail the pointer and keep settling after the handle is released.
-      transition={
-        resizing || context.reduce ? { duration: 0 } : SIDEBAR_MORPH_TRANSITION
-      }
-      style={style}
+      transition={context.reduce ? { duration: 0 } : SIDEBAR_MORPH_TRANSITION}
+      style={{ ...style, flexShrink: 0 }}
       className={cn(
-        "group/sidebar relative hidden h-full shrink-0 will-change-[width] md:block",
+        "group/sidebar relative h-full shrink-0 will-change-[width]",
         "peer flex!",
         side === "right" && "order-last",
         className
       )}
     >
-      {resizable && (
-        // The handle occupies the shell's gap-x-2 column gap. It must stay
-        // outside the clipping mask below or the gap would never receive
-        // hover — clipping cuts hit-testing, not just painting.
-        <motion.div
+      {collapsible !== "none" && (
+        <div
+          ref={gripRef}
           role="separator"
           aria-label={`Resize ${ariaLabel}`}
           aria-orientation="vertical"
-          tabIndex={0}
-          className="absolute inset-y-0 -left-2 z-10 w-2 cursor-col-resize touch-none"
-          initial="idle"
-          // Hover alone would drop the glow the instant the drag leaves the
-          // handle, so the gesture pins it open for the whole drag.
-          animate={resizing ? "hover" : "idle"}
-          whileHover="hover"
-          whileFocus="hover"
-          onPanStart={handleResizeStart}
-          onPan={handleResize}
-          onPanEnd={handleResizeEnd}
-          onKeyDown={handleResizeKeyDown}
-          // The usual escape hatch out of a width you dragged to.
-          onDoubleClick={resetPanelWidth}
-        >
-          <motion.div
-            variants={{ idle: { scaleY: 0 }, hover: { scaleY: 1 } }}
-            transition={
-              context.reduce
-                ? { duration: 0 }
-                : { duration: 0.2, ease: EASE_OUT }
-            }
-            className="h-full w-full bg-radial/decreasing from-amber-300/70 to-amber-500/0 to-40%"
-          />
-        </motion.div>
+          tabIndex={collapsed ? -1 : 0}
+          aria-hidden={collapsed || undefined}
+          className={cn(
+            "inset-y-0 w-2 hover:bg-amber-300/20 data-resizing:bg-amber-300/20 absolute z-10 cursor-col-resize touch-none focus-visible:outline-2 focus-visible:outline-ring",
+            collapsed && "pointer-events-none",
+            side === "right" ? "-left-2" : "-right-2"
+          )}
+        />
       )}
       {/* The aside's own width animation is the whole layout story: the
           inner panel just fills it and fades, so it is masked to the aside's
@@ -203,7 +151,7 @@ export function AnimatedPanel({
           animate={{ opacity: offcanvas ? 0 : 1 }}
           transition={context.reduce ? REDUCED_TRANSITION : PANEL_TRANSITION}
           className={cn(
-            "sticky top-0 flex w-full flex-col overflow-hidden",
+            "top-0 sticky flex w-full flex-col overflow-hidden",
             // Pin the right panel to the aside's trailing edge so the aside's
             // width animation expands the panel out of it instead of
             // revealing a detached strip.

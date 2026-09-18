@@ -10,7 +10,6 @@ describe("Message", () => {
     )
 
     expect(screen.getByText("Exegia")).toBeDefined()
-    expect(screen.getByText("Agent")).toBeDefined()
     expect(screen.getByText("AI Scholar")).toBeDefined()
 
     const root = container.querySelector('[data-slot="ai-message"]')

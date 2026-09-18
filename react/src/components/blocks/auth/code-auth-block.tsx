@@ -5,8 +5,9 @@ import { motion } from "motion/react";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { OTPField, OTPFieldInput } from "@/components/ui/otp-field";
-import { type TAuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
+import { authAccentActionStyles } from "@/lib/auth-accent";
 import { cn } from "@/lib/utils";
 import {
   AuthCard,
@@ -15,28 +16,8 @@ import {
   EASE,
   MorphStep,
   useCountdown,
-  type TAuthStatus,
 } from "./auth-shell";
-
-export interface ICodeAuthBlockProps {
-  /** Brand mark rendered above the title. Omit for no logo row at all. */
-  logo?: React.ReactNode;
-  /** Brand accent for the primary action. Omit to keep the default primary. */
-  accent?: TAuthAccent;
-  /** Where the code was sent; drives copy and icon. */
-  channel?: "email" | "sms";
-  /** Masked destination shown in the description, e.g. "y•••@example.com". */
-  destination?: string;
-  length?: number;
-  /** Submit automatically once all digits are entered. */
-  autoSubmit?: boolean;
-  /** Seconds before "Resend code" becomes available. 0 disables the wait. */
-  resendSeconds?: number;
-  /** Reject (or throw) to show the error shake and clear the code. */
-  onVerify?: (code: string) => Promise<void> | void;
-  onResend?: () => Promise<void> | void;
-  onBack?: () => void;
-}
+import type { ICodeAuthBlockProps, TAuthStatus } from "./type";
 
 export function CodeAuthBlock({
   channel = "email",
@@ -50,6 +31,7 @@ export function CodeAuthBlock({
   onResend,
   onBack,
 }: ICodeAuthBlockProps) {
+  const codeFieldId = React.useId();
   const [status, setStatus] = React.useState<TAuthStatus>("idle");
   const [error, setError] = React.useState<string | null>(null);
   const [code, setCode] = React.useState("");
@@ -72,7 +54,7 @@ export function CodeAuthBlock({
         setError(cause instanceof Error ? cause.message : "Invalid code.");
       }
     },
-    [onVerify],
+    [onVerify]
   );
 
   function handleChange(value: string) {
@@ -93,10 +75,11 @@ export function CodeAuthBlock({
   return (
     <AuthCard
       title="Enter verification code"
+      className="[&_[data-slot=card-header]]:gap-3 [&_[data-slot=card-header]]:pb-8 [&_[data-slot=card-description]]:text-xs [&_[data-slot=card-description]]:leading-relaxed"
       logo={logo}
       accent={accent}
       description={
-        <span className="inline-flex items-center gap-1.5">
+        <span className="gap-1.5 inline-flex items-center">
           <ChannelIcon className="size-3.5 shrink-0" />
           <span>
             We sent a {length}-digit code to your {channelLabel}
@@ -127,14 +110,18 @@ export function CodeAuthBlock({
             description="Your identity has been confirmed."
           />
         ) : (
-          <div className="flex flex-col items-center gap-4">
+          <div className="gap-4 flex flex-col items-center">
             <motion.div
               // Shake the whole field on error; keying by message replays it.
               key={error ?? "steady"}
               animate={error ? { x: [0, -8, 8, -5, 5, 0] } : { x: 0 }}
               transition={{ duration: 0.4, ease: "easeInOut" }}
             >
+              <Label className="sr-only" htmlFor={codeFieldId}>
+                Verification code
+              </Label>
               <OTPField
+                id={codeFieldId}
                 length={length}
                 value={code}
                 onValueChange={handleChange}
@@ -144,7 +131,6 @@ export function CodeAuthBlock({
                   <OTPFieldInput
                     key={`slot-${index}`}
                     aria-invalid={error ? true : undefined}
-                    aria-label={`Digit ${index + 1} of ${length}`}
                   />
                 ))}
               </OTPField>
@@ -163,12 +149,12 @@ export function CodeAuthBlock({
             <motion.p
               layout
               transition={{ duration: 0.25, ease: EASE }}
-              className="text-center text-sm text-muted-foreground"
+              className="text-sm text-center text-muted-foreground"
             >
               {remaining > 0 ? (
                 <>
                   Resend code in{" "}
-                  <span className="font-medium tabular-nums text-foreground">
+                  <span className="font-medium text-foreground tabular-nums">
                     {remaining}s
                   </span>
                 </>

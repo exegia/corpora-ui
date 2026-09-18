@@ -2,11 +2,14 @@
 
 import { MotionIcon } from "motion-icons-react"
 import * as React from "react"
+import { useAtomValueRawSync } from "jotai"
+import { removeShellFitInstance } from "./shell-fit-atom"
+import { shellPanelAtoms } from "./shell-panel-atom"
 
 import { AnimatedPanel } from "./animated-panel.tsx"
 import { cn } from "@/lib/utils"
 import type { IShellLayoutProps, TShellPanelControlProps } from "./type"
-import { TITLE_BAR_HEIGHT } from "./utils"
+import { SHELL_BEZEL_CLASSES, TITLE_BAR_HEIGHT } from "./utils"
 import type { ClassNameValue } from "tailwind-merge"
 import { AnimatedPanelProvider } from "./animated-panel-provider.tsx"
 import { AnimatedPanelTrigger } from "./animated-panel-trigger.tsx"
@@ -25,10 +28,22 @@ export function ShellLayout({
 }: IShellLayoutProps): React.ReactElement {
   const background: ClassNameValue = `bg-linear-to-tr/increasing from-neutral-200 via-neutral-100 to-stone-200 dark:from-neutral-900 dark:via-neutral-950 dark:to-stone-950`
 
+  const generatedId = React.useId()
+  const shellId = panelControlProps.shellId ?? generatedId
+  React.useEffect(() => {
+    if (panelControlProps.shellId !== undefined) return
+    return () => removeShellFitInstance(shellId)
+  }, [shellId, panelControlProps.shellId])
+  const sharedComponents = useAtomValueRawSync(
+    shellPanelAtoms(shellId).components
+  )
+
   // Content pushed through `openPanel(side, component)` wins over the static
   // `panels` entry; a side renders its panel when either supplies content.
-  const leftContent = panelComponents?.left ?? panels?.left?.component
-  const rightContent = panelComponents?.right ?? panels?.right?.component
+  const leftContent =
+    sharedComponents.left ?? panelComponents?.left ?? panels?.left?.component
+  const rightContent =
+    sharedComponents.right ?? panelComponents?.right ?? panels?.right?.component
 
   // Each panel seeds its own side's initial state (`defaultOpen ?? open`);
   // an explicit `defaultOpen` record — usually from useShellPanels — wins
@@ -46,9 +61,10 @@ export function ShellLayout({
   return (
     <AnimatedPanelProvider
       {...panelControlProps}
+      shellId={shellId}
       defaultOpen={initialOpen}
       className={cn(
-        "relative h-full min-h-0 px-2 pb-2",
+        "min-h-0 px-2 pb-2 relative h-full",
         variant === "web" && "pt-2",
         className,
         background
@@ -69,21 +85,21 @@ export function ShellLayout({
       )}
 
       <AnimatedPanelInset>
-        <header className="flex h-12 flex-row! items-center justify-between gap-2 border-b px-2">
+        <header className="h-12 gap-2 px-2 flex flex-row! items-center justify-between border-b">
           {leftContent && (
-            <div className="flex min-w-0 shrink-0 items-center justify-start gap-2">
+            <div className="min-w-0 gap-2 flex shrink-0 items-center justify-start">
               <AnimatedPanelTrigger side="left">
                 <MotionIcon name="PanelLeft" size={24} animation="press" />
               </AnimatedPanelTrigger>
             </div>
           )}
           {header && (
-            <div className="flex min-w-0 flex-1 items-center">{header}</div>
+            <div className="min-w-0 flex flex-1 items-center">{header}</div>
           )}
           {(trailing || rightContent) && (
             // ml-auto, not flex-fill: the cluster hugs the trailing edge even
             // when there is no header (or left trigger) to push against.
-            <div className="ml-auto flex shrink-0 items-center justify-end gap-2">
+            <div className="gap-2 ml-auto flex shrink-0 items-center justify-end">
               {trailing}
               {rightContent && (
                 <AnimatedPanelTrigger aria-label="Toggle panel" side="right">
@@ -107,8 +123,8 @@ export function ShellLayout({
           // surface itself; the desktop rail keeps it on the inner panel.
           className={cn(
             "bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900",
-            "outline-offset-0.5 border-t-3 border-white outline-neutral-100 dark:inset-ring-black",
-            "rounded-md shadow-md shadow-neutral-200 dark:shadow-neutral-950"
+            "rounded-md",
+            SHELL_BEZEL_CLASSES
           )}
           collapsible="offcanvas"
           role="complementary"

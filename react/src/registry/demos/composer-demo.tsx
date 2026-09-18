@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { composerDemoOptions } from "./composer-options"
 
 import { BarChart3, Globe, Layers, Paperclip } from "lucide-react"
 
@@ -66,9 +67,9 @@ function Example({
   children: React.ReactNode
 }) {
   return (
-    <section className="flex w-full flex-col gap-2">
+    <section className="gap-2 flex w-full flex-col">
       <h3 className="text-xs font-medium text-muted-foreground">{title}</h3>
-      <div className="flex w-full flex-col items-center rounded-lg border border-border-default bg-background/40 p-6">
+      <div className="p-6 flex w-full flex-col items-center rounded-lg border border-border-default bg-background/40">
         {children}
       </div>
       <CodeBlock code={code} />
@@ -88,6 +89,7 @@ export default function ComposerDemo(): React.ReactElement {
 <Composer onSubmit={(draft) => send(draft)} />`}
       >
         <Composer
+          {...composerDemoOptions}
           onSubmit={(draft) => setSent(draft)}
           placeholder="Ask about this selection…"
         />
@@ -115,6 +117,7 @@ const attachments: ComposerAttachment[] = [
 />`}
       >
         <Composer
+          {...composerDemoOptions}
           composerId="demo"
           attachments={SEED}
           defaultValue="Look at the context fabric api to validate the nodes."
@@ -131,12 +134,12 @@ const attachments: ComposerAttachment[] = [
         />
       </Example>
       {sent ? (
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-xs text-center text-muted-foreground">
           Sent: {sent}
         </p>
       ) : null}
       {picked ? (
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-xs text-center text-muted-foreground">
           Command: {picked}
         </p>
       ) : null}

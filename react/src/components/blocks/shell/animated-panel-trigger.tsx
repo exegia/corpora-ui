@@ -11,9 +11,10 @@ export const AnimatedPanelTrigger = forwardRef<
   forwardedRef
 ) {
   const context = useAnimatedSidebar()
-  const expanded = context.isMobile
-    ? context.openMobile[side]
-    : context.open[side]
+  const expanded =
+    side === "left" && context.fit.sidebar
+      ? context.fit.sidebar.mode === "expanded"
+      : context.open[side]
   const triggerRef = context.triggerRefs[side]
 
   // The right panel drops out of a viewport too narrow to hold it, so its
@@ -28,6 +29,10 @@ export const AnimatedPanelTrigger = forwardRef<
         if (typeof forwardedRef === "function") forwardedRef(node)
         else if (forwardedRef) forwardedRef.current = node
       }}
+      disabled={
+        props.disabled ||
+        (side === "left" && context.fit.sidebar?.canExpand === false)
+      }
       type={type}
       variant="ghost"
       size="icon-xl"

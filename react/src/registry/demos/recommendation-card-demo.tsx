@@ -71,7 +71,6 @@ export default function RecommendationCardDemo(): React.ReactElement {
           title="Want me to validate the Iliad corpus before the walker runs?"
           description="Check otype, oslots and the section features in"
           entity={{ name: "Iliad · Homer corpus", initials: "I" }}
-          descriptionSuffix="which takes about"
           leadTime="2 min"
           options={[
             { label: "Reconcile against the source TEI first", status: "Needs review", signal: "medium" },

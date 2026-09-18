@@ -1,4 +1,7 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
+import { useAtomValueRawSync, useSetAtom } from "jotai"
+import { removeShellFitInstance } from "./shell-fit-atom"
+import { shellPanelAtoms } from "./shell-panel-atom"
+import { useCallback, useEffect, useId, useMemo, useRef } from "react"
 import { useIsomorphicLayoutEffect, useReducedMotion } from "motion/react"
 import { cn } from "@/lib/utils.ts"
 import type { IAnimatedSidebarProviderProps, TSidebarSide } from "./type"
@@ -27,21 +30,25 @@ export function AnimatedPanelProvider({
   style,
   ...props
 }: IAnimatedSidebarProviderProps) {
-  const [internalOpen, setInternalOpen] = useState<
-    Record<TSidebarSide, boolean>
-  >(() => ({
-    left: defaultOpen?.left ?? true,
-    right: defaultOpen?.right ?? false,
-  }))
-  const [internalOpenMobile, setInternalOpenMobile] = useState<
-    Record<TSidebarSide, boolean>
-  >(() => ({
-    left: defaultOpenMobile?.left ?? false,
-    right: defaultOpenMobile?.right ?? false,
-  }))
+  const generatedId = useId()
+  const resolvedId = shellId ?? generatedId
+  useEffect(() => {
+    if (shellId !== undefined) return
+    return () => removeShellFitInstance(resolvedId)
+  }, [resolvedId, shellId])
+  const atoms = shellPanelAtoms(resolvedId)
+  const railWidth = useAtomValueRawSync(atoms.railWidth)
+  const internalOpen = useAtomValueRawSync(atoms.open)
+  const internalOpenMobile = useAtomValueRawSync(atoms.mobile)
+  const setInternalOpen = useSetAtom(atoms.open)
+  const setInternalOpenMobile = useSetAtom(atoms.mobile)
+  const seed = useSetAtom(atoms.seed)
+  const publish = useSetAtom(atoms.handlers)
+  useEffect(() => {
+    seed(defaultOpen, defaultOpenMobile)
+  }, [seed, defaultOpen, defaultOpenMobile])
   const isMobile = useIsMobile()
   const reduce = useReducedMotion() ?? false
-  const generatedId = useId()
   const leftTriggerRef = useRef<HTMLButtonElement>(null)
   const rightTriggerRef = useRef<HTMLButtonElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -50,6 +57,7 @@ export function AnimatedPanelProvider({
   // the panel. A ref unwinds the cycle: a setter only ever runs from an event,
   // by which time the layout effect has published the current verdict.
   const fitsRef = useRef(true)
+  const sidebarCanExpandRef = useRef(true)
 
   // Per-side controlled/uncontrolled merge — a side is controlled exactly
   // when its key is present on the controlled record.
@@ -80,6 +88,7 @@ export function AnimatedPanelProvider({
   const setOpen = useCallback(
     (nextOpen: boolean, side: TSidebarSide) => {
       if (nextOpen && side === "right" && !fitsRef.current) return
+      if (nextOpen && side === "left" && !sidebarCanExpandRef.current) return
 
       const controlled = side === "left" ? controlledLeft : controlledRight
       if (controlled === undefined) {
@@ -89,12 +98,13 @@ export function AnimatedPanelProvider({
       }
       onOpenChange?.(nextOpen, side)
     },
-    [controlledLeft, controlledRight, onOpenChange]
+    [controlledLeft, controlledRight, onOpenChange, setInternalOpen]
   )
 
   const setOpenMobile = useCallback(
     (nextOpen: boolean, side: TSidebarSide) => {
       if (nextOpen && side === "right" && !fitsRef.current) return
+      if (nextOpen && side === "left" && !sidebarCanExpandRef.current) return
 
       const controlled =
         side === "left" ? controlledMobileLeft : controlledMobileRight
@@ -105,15 +115,41 @@ export function AnimatedPanelProvider({
       }
       onOpenMobileChange?.(nextOpen, side)
     },
-    [controlledMobileLeft, controlledMobileRight, onOpenMobileChange]
+    [
+      controlledMobileLeft,
+      controlledMobileRight,
+      onOpenMobileChange,
+      setInternalOpenMobile,
+    ]
   )
+
+  useEffect(() => {
+    publish({ setOpen, setOpenMobile })
+    return () => publish(null)
+  }, [publish, setOpen, setOpenMobile])
+  useEffect(() => {
+    if (controlledLeft !== undefined || controlledRight !== undefined)
+      setInternalOpen((previous) => ({ ...previous, ...open }))
+  }, [controlledLeft, controlledRight, open, setInternalOpen])
+  useEffect(() => {
+    if (
+      controlledMobileLeft !== undefined ||
+      controlledMobileRight !== undefined
+    )
+      setInternalOpenMobile((previous) => ({ ...previous, ...openMobile }))
+  }, [
+    controlledMobileLeft,
+    controlledMobileRight,
+    openMobile,
+    setInternalOpenMobile,
+  ])
 
   const toggleSidebar = useCallback(
     (side: TSidebarSide) => {
-      if (isMobile) setOpenMobile(!openMobileState[side], side)
-      else setOpen(!openState[side], side)
+      if (side === "left" && !sidebarCanExpandRef.current) return
+      setOpen(!openState[side], side)
     },
-    [isMobile, openMobileState, openState, setOpen, setOpenMobile]
+    [openState, setOpen]
   )
 
   const triggerRefs = useMemo(
@@ -144,7 +180,7 @@ export function AnimatedPanelProvider({
   // in the shell-fit atoms it writes to under `shellId`. The rail's fold is an
   // input because its column is part of the room the panel needs.
   const fit = useShellFit({
-    shellId,
+    shellId: resolvedId,
     hostRef: wrapperRef,
     railOpen: openState.left,
     defaultPanelWidth,
@@ -153,6 +189,7 @@ export function AnimatedPanelProvider({
   const isNarrow = !fit.fits
   useIsomorphicLayoutEffect(() => {
     fitsRef.current = fit.fits
+    sidebarCanExpandRef.current = fit.sidebar?.canExpand ?? true
   })
 
   // The verdict has to travel up to whoever renders the provider —
@@ -208,11 +245,20 @@ export function AnimatedPanelProvider({
         ref={wrapperRef}
         data-slot="sidebar-wrapper"
         data-narrow={isNarrow ? "" : undefined}
-        data-state-left={openState.left ? "expanded" : "collapsed"}
+        data-sidebar-mode={fit.sidebar?.mode}
+        data-state-left={
+          (fit.sidebar ? fit.sidebar.mode === "expanded" : openState.left)
+            ? "expanded"
+            : "collapsed"
+        }
         data-state-right={openState.right ? "expanded" : "collapsed"}
-        style={{ ...SHELL_WIDTHS, ...style }}
+        style={{
+          ...SHELL_WIDTHS,
+          ...style,
+          ...(railWidth !== null && { "--sidebar-width": `${railWidth}px` }),
+        }}
         className={cn(
-          "group/sidebar-wrapper flex w-full min-w-0 gap-x-2",
+          "group/sidebar-wrapper min-w-0 gap-x-2 flex w-full overflow-hidden",
           className
         )}
       >

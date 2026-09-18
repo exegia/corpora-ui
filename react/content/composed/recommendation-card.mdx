@@ -11,17 +11,19 @@ import Demo from "@/registry/demos/recommendation-card-demo"
 
 Use the controls to explore the component's props.
 
+The collapsed header shows the title and state. Expand it to reveal the description, entity and lead-time pills, other options, and actions.
+
 <Preview />
 
 ## Props
 
-| Prop                                    | Type                                                | Default  | Description                                     |
-| --------------------------------------- | --------------------------------------------------- | -------- | ----------------------------------------------- |
-| `title / description` (required)        | `ReactNode`                                         | —        | Header and the sentence before the entity pill. |
-| `entity / descriptionSuffix / leadTime` | `{ name, initials?, src? } / ReactNode / ReactNode` | —        | Inline pills.                                   |
-| `options / onSelectOption`              | `IRecommendationOption[] / (index) => void`          | —        | Rows under Other options.                       |
-| `confidence`                            | `"high" \| "medium" \| "low"`                       | `"high"` | Footer signal.                                  |
-| `onAccept / onAlternatives`             | `() => void`                                        | —        | Footer buttons.                                 |
+| Prop                                    | Type                                                | Default  | Description                                                   |
+| --------------------------------------- | --------------------------------------------------- | -------- | ------------------------------------------------------------- |
+| `title / description` (required)        | `ReactNode`                                         | —        | Title in the header; description inside the collapsible body. |
+| `entity / descriptionSuffix / leadTime` | `{ name, initials?, src? } / ReactNode / ReactNode` | —        | Inline details within the collapsible description.            |
+| `options / onSelectOption`              | `IRecommendationOption[] / (index) => void`         | —        | Rows under Other options.                                     |
+| `confidence`                            | `"high" \| "medium" \| "low"`                       | `"high"` | Footer signal.                                                |
+| `onAccept / onAlternatives`             | `() => void`                                        | —        | Footer buttons.                                               |
 
 ## Example
 
@@ -30,11 +32,11 @@ Use the controls to explore the component's props.
 ```tsx
 import { RecommendationCard } from "@exegia/corpora-ui"
 
-<RecommendationCard
-  title="Want me to place this restock order?"
-  description="Reorder waffle cones from"
-  entity={{ name: "Cone King" }}
-  leadTime="7 days"
+;<RecommendationCard
+  title="Validate the Iliad corpus before the walker runs?"
+  description="Check otype, oslots and the section features in"
+  entity={{ name: "Iliad · Homer corpus", initials: "I" }}
+  leadTime="2 min"
   onAccept={accept}
 />
 ```

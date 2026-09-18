@@ -48,32 +48,34 @@ export const SOCIAL_PROVIDERS: Record<
     label: string
     Icon: React.ComponentType<{ className?: string }>
     BrandIcon: React.ComponentType<{ className?: string }>
-    brandClassName: string
+    brandClassName?: string
+    buttonClassName?: string
+    labelClassName?: string
   }
 > = {
   google: {
     label: "Google",
     Icon: RiGoogleFill,
     BrandIcon: GoogleColorIcon,
-    brandClassName: "",
+    brandClassName: "fill-black dark:fill-white"
   },
   apple: {
     label: "Apple",
     Icon: RiAppleFill,
     BrandIcon: RiAppleFill,
-    brandClassName: "text-foreground",
+    brandClassName: "fill-white! dark:fill-black!",
+    buttonClassName: "bg-neutral-950 hover:bg-black dark:bg-white dark:hover:bg-neutral-100 shadow-bezel dark:shadow-bubble-dim border-border dark:border-muted",
+    labelClassName: "text-white dark:text-black"
   },
   github: {
     label: "GitHub",
     Icon: RiGithubFill,
-    BrandIcon: RiGithubFill,
-    brandClassName: "text-foreground",
+    BrandIcon: RiGithubFill
   },
   x: {
     label: "X",
     Icon: RiTwitterXFill,
-    BrandIcon: RiTwitterXFill,
-    brandClassName: "text-foreground",
+    BrandIcon: RiTwitterXFill
   },
 }
 
@@ -117,13 +119,19 @@ export function SocialProviders({
       )}
     >
       {providers.map((provider) => {
-        const { label, Icon } = SOCIAL_PROVIDERS[provider]
+        const {
+          label,
+          BrandIcon,
+          brandClassName,
+          buttonClassName,
+          labelClassName,
+        } = SOCIAL_PROVIDERS[provider]
         return (
           <Button
             key={provider}
             variant="outline"
             size={row ? "icon" : "default"}
-            className={row ? undefined : "w-full"}
+            className={cn(buttonClassName, row ? undefined : "w-full")}
             aria-label={`${ACTION_LABELS[action]} ${label}`}
             loading={loadingProvider === provider}
             disabled={
@@ -132,9 +140,9 @@ export function SocialProviders({
             }
             onClick={() => onSelect?.(provider)}
           >
-            <Icon aria-hidden="true" />
+            <BrandIcon aria-hidden="true" className={brandClassName} />
             {!row && (
-              <span className="flex-1">
+              <span className={cn("flex-1", labelClassName)}>
                 {ACTION_LABELS[action]} {label}
               </span>
             )}

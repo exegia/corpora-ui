@@ -41,12 +41,14 @@ The Button supports multiple variants (`default`, `destructive`, `outline`, `sec
 
 ### Special variants
 
+All glass finishes use `@samasante/liquid-glass`. The material sits inside the interactive element, preserving button sizing, focus, and link rendering. Chrome and Edge refract the live backdrop; Safari and Firefox retain frost, tint, and edge lighting.
+
 | Glass variant    | Description                            |
 | ---------------- | -------------------------------------- |
-| `clear`          | Transparent with a border.             |
+| `clear`          | Light tint with edge lighting.             |
 | `frosted`        | Blurred background.                    |
 | `subtle`         | Minimal glass effect.                  |
-| `liquid`         | Animated liquid effect.                |
+| `liquid`         | Stronger refraction with a light frost.                |
 | `liquid-refract` | Refracting liquid effect; the default. |
 
 ## Usage

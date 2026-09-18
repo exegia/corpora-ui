@@ -31,3 +31,5 @@ import { RecordsTable } from "@exegia/corpora-ui"
 
 <RecordsTable rows={rows} onSortChange={sortBy} />
 ```
+
+The selection and company columns stay pinned during horizontal scrolling. Set `stickyHeader` and constrain the height (for example, `className="max-h-64"`) to keep the header visible while scrolling vertically. Scrollbars are hidden; trackpad, wheel, touch, and keyboard scrolling remain available.

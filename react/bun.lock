@@ -26,6 +26,7 @@
         "morphicons": "^1.7.1",
         "motion": "^13.2.0",
         "motion-icons-react": "^1.1.0",
+        "motion-panels": "^0.5.2",
         "react-markdown": "^10.1.0",
         "recharts": "^3.10.1",
         "tailwind-animations": "^1.0.2",
@@ -1419,6 +1420,8 @@
     "motion-dom": ["motion-dom@13.2.0", "", { "dependencies": { "motion-utils": "^13.0.0" } }, "sha512-N6gdSoWRDk0Rh/fVtlqUtLs+fEN3ELFZI3cn3IQE9Mnf3E+Mh8wjO6MstzCOPFh4Yf0L1as5m2eUyYWj8ylVSQ=="],
 
     "motion-icons-react": ["motion-icons-react@1.1.0", "", { "peerDependencies": { "lucide-react": ">=0.200.0", "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" } }, "sha512-JWlTHEBm+7Y/GFNki+4LDFoO7Ksn6+lvqEhazhlqzWqxDHM6G8QFb7A/ztuxGJEr6oHdWQNfe2NT2/QoLkZoBw=="],
+
+    "motion-panels": ["motion-panels@0.5.2", "", { "peerDependencies": { "motion": ">=12", "react": ">=18" }, "optionalPeers": ["react"] }, "sha512-1uADco/umHHWyy+iV8HXgP1v3LZRpbmU7LfAWhM2tHx9JU1RRBpnmxcEZfdsJAp6zCS1sJlb5xKi2GYm94nz8Q=="],
 
     "motion-utils": ["motion-utils@13.0.0", "", {}, "sha512-7DnN7TmbLcYXcG4RVadXIihWlyuM9afoUww8Y5Agg431kGKiuL2/OMyP4mJ5wLz+pvN3t5ySClLOaVXJ+wekRQ=="],
 

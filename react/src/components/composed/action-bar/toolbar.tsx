@@ -4,9 +4,14 @@ import {
   Toolbar as ToolbarPrimitive,
   ToolbarGroup,
 } from "@/components/ui/toolbar"
-import { Tooltip, TooltipPopup } from "@/components/ui/tooltip"
+import { useState } from "react"
+import {
+  Tooltip,
+  TooltipCreateHandle,
+  TooltipPopup,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { tooltipHandle, useActionBar } from "./utils"
+import { ActionTooltipContext, useActionBar } from "./utils"
 import type { IActionBarProps } from "./types"
 
 /**
@@ -27,34 +32,35 @@ export default function Toolbar({
   className,
 }: IActionBarProps) {
   const { segments, entries, hasGroups } = useActionBar({ actions })
+  const [tooltipHandle] = useState(() => TooltipCreateHandle<string>())
 
   return (
-    <ToolbarPrimitive
-      className={cn(toolbarVariants[variant], className)}
-      data-slot="action-bar"
-      data-variant={variant}
-      id={id}
-    >
-      {hasGroups
-        ? segments.map((segment) =>
-            segment.type === "separator" ? (
-              <segment.Separator key={segment.key} />
-            ) : (
-              <ToolbarGroup key={segment.key}>
-                {segment.items.map(([key, Action]) => (
-                  <Action key={key} />
-                ))}
-              </ToolbarGroup>
+    <ActionTooltipContext value={tooltipHandle}>
+      <ToolbarPrimitive
+        className={cn(toolbarVariants[variant], className)}
+        data-slot="action-bar"
+        data-variant={variant}
+        id={id}
+      >
+        {hasGroups
+          ? segments.map((segment) =>
+              segment.type === "separator" ? (
+                <segment.Separator key={segment.key} />
+              ) : (
+                <ToolbarGroup key={segment.key}>
+                  {segment.items.map(([key, Action]) => (
+                    <Action key={key} />
+                  ))}
+                </ToolbarGroup>
+              )
             )
-          )
-        : entries.map(([key, Action]) => <Action key={key} />)}
-      <Tooltip handle={tooltipHandle}>
-        {({ payload: Payload, ...props }) => (
-          <TooltipPopup {...props}>
-            {Payload !== undefined && <Payload />}
-          </TooltipPopup>
-        )}
-      </Tooltip>
-    </ToolbarPrimitive>
+          : entries.map(([key, Action]) => <Action key={key} />)}
+        <Tooltip handle={tooltipHandle}>
+          {({ payload, ...props }) => (
+            <TooltipPopup {...props}>{payload}</TooltipPopup>
+          )}
+        </Tooltip>
+      </ToolbarPrimitive>
+    </ActionTooltipContext>
   )
 }

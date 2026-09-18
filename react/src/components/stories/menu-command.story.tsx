@@ -5,33 +5,39 @@ import { defineStory } from "@/registry/story"
 import { MenuCommand } from "@/components/ui/menu-command"
 import { Button } from "@/components/ui/button"
 
-type TPreviewProps = Pick<ComponentProps<typeof MenuCommand>, "side" | "align">
-
+type TPreviewProps = Pick<
+  ComponentProps<typeof MenuCommand>,
+  "side" | "align"
+> & {
+  items: {
+    id: string
+    label: string
+    description?: string
+    trailing?: string
+  }[]
+}
 function MenuCommandPreview(props: TPreviewProps) {
   return (
-    <div className="p-6">
-      <div className="">
-        <MenuCommand
-          {...props}
-          items={[
-            {
-              id: "search",
-              label: "Search corpus",
-              description: "Find a passage",
-              trailing: "Connected",
-            },
-          ]}
-        >
-          <Button variant="outline">Corpus actions</Button>
-        </MenuCommand>
-      </div>
-    </div>
+    <MenuCommand {...props}>
+      <Button variant="outline">Corpus actions</Button>
+    </MenuCommand>
   )
 }
 
 export const story = defineStory({
   Component: MenuCommandPreview,
-  args: { initial: { side: "top", align: "start" } },
+  args: {
+    initial: {
+      items: [
+        {
+          id: "search",
+          label: "Search corpus",
+          description: "Find a passage",
+          trailing: "Connected",
+        },
+      ],
+    },
+  },
 })
 
 export const Preview = story.WithControl

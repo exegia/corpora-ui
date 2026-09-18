@@ -4,8 +4,8 @@ import userEvent from "@testing-library/user-event";
 
 import {
   PasskeyManagerBlock,
-  type IPasskeyRecord,
 } from "../passkey-manager-block";
+import type { IPasskeyRecord } from "../type";
 
 const PASSKEYS: IPasskeyRecord[] = [
   { id: "pk-1", name: "MacBook", createdAt: "2026-01-05T00:00:00.000Z" },
@@ -44,7 +44,7 @@ describe("PasskeyManagerBlock", () => {
     const onRegister = mock(async () => {});
     render(<PasskeyManagerBlock onRegister={onRegister} />);
 
-    await user.click(screen.getByRole("button", { name: "Add a passkey" }));
+    await user.click(screen.getByRole("button", { name: "Add" }));
 
     expect(onRegister).toHaveBeenCalledTimes(1);
   });
@@ -122,7 +122,7 @@ describe("PasskeyManagerBlock", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: "Add a passkey" }));
+    await user.click(screen.getByRole("button", { name: "Add" }));
 
     expect((await screen.findByRole("alert")).textContent).toBe(
       "Passkey registration is disabled.",

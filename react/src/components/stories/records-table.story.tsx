@@ -1,15 +1,20 @@
 "use client"
 
-import type { ComponentProps, FC } from "react"
-
-import { defineStory } from "@/registry/story"
+import type { ComponentProps } from "react"
+import { defineStory, type TStoryData } from "@/registry/story"
 
 import { RecordsTable } from "@/components/composed/chat/records-table"
 
+type TPreviewProps = TStoryData<
+  Pick<ComponentProps<typeof RecordsTable>, "rows" | "headers" | "maxTags" | "stickyHeader">
+>
+
+function RecordsTablePreview(props: TPreviewProps) {
+  return <RecordsTable {...props} />
+}
+
 export const story = defineStory({
-  Component: RecordsTable as FC<
-    Pick<ComponentProps<typeof RecordsTable>, "rows" | "maxTags">
-  >,
+  Component: RecordsTablePreview,
   args: {
     initial: {
       rows: [
@@ -39,6 +44,7 @@ export const story = defineStory({
         },
       ],
       maxTags: 2,
+      stickyHeader: false,
     },
   },
 })

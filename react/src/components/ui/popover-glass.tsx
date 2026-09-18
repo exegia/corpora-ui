@@ -12,7 +12,7 @@ const popupStructuralClasses =
 
 /**
  * Neutral base for the glass treatment — the finish itself (blur, tint,
- * bevel) comes from `glassVariantStyles` keyed by `glassVariant`, which is
+ * bevel) comes from the library material keyed by `glassVariant`, which is
  * only accepted when `variant` is "glass".
  */
 const popupGlassBaseClasses =
@@ -104,17 +104,14 @@ export function PopoverGlass({
           <PopoverPrimitive.Viewport
             className={cn(
               "relative size-full max-h-(--available-height) px-(--viewport-inline-padding) [--viewport-inline-padding:--spacing(4)] has-data-[slot=calendar]:p-2 **:data-current:w-[calc(var(--popup-width)-2*var(--viewport-inline-padding)-2px)] **:data-current:opacity-100 **:data-current:transition-opacity **:data-current:data-ending-style:opacity-0 data-instant:transition-none **:data-previous:w-[calc(var(--popup-width)-2*var(--viewport-inline-padding)-2px)] **:data-previous:opacity-100 **:data-previous:transition-opacity **:data-previous:data-ending-style:opacity-0 **:data-current:data-starting-style:opacity-0 **:data-previous:data-starting-style:opacity-0",
-              "bg-background/40 px-0 backdrop-blur-md"
+              "px-0"
             )}
             data-slot="popover-viewport"
             render={
               <GlassContainer
-                refraction={8}
-                bezel={50}
-                blur={10}
-                saturation={-4}
+                optics={{ strength: 0.08, bendWidth: 0.5, frost: 10, saturate: 1 }}
                 className={cn("shadow-md shadow-black/10 rounded-lg")}
-                glassVariant="liquid-refract"
+                glassVariant={resolvedGlassVariant}
               />
             }
           >
