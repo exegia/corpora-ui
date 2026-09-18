@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { Minus, Plus } from "lucide-react"
-import type { FlowchartProps, StepNode } from "./types"
+import type { IFlowchartProps, TStepNode } from "./types"
 import { FlowchartContext, useFlowchart } from "./hooks"
 import { AMBER, PURPLE } from "./constant"
 import { Connector } from "./connector"
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 
-const NODES: StepNode[] = [
+const NODES: TStepNode[] = [
   {
     id: "trigger",
     row: 0,
@@ -50,7 +50,7 @@ const NODES: StepNode[] = [
  *
  * @sketch "Component / Flowchart"
  */
-export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, height, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, onRename, onDuplicate, className, children }: FlowchartProps) {
+export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, height, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, onRename, onDuplicate, className, children }: IFlowchartProps) {
   const canvasRef = useRef<HTMLDivElement>(null)
   const nodeRefs = useRef(new Map<string, HTMLElement>())
   const chart = useFlowchart({ steps, edges, readOnly, zoomable, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, onRename, onDuplicate, canvasRef })

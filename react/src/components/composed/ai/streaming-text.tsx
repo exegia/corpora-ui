@@ -6,13 +6,13 @@ import { cn } from "@/lib/utils"
 import { InlineSource } from "@/components/ui/chat"
 
 /** A word, or an inline citation; extra fields turn the chip into a hover preview. */
-export type StreamingToken =
+export type TStreamingToken =
   | { text: string }
   | { cite: string; favicon?: string; title?: string; description?: string; href?: string }
 
-export interface StreamingTextProps extends React.ComponentPropsWithoutRef<"div"> {
+export interface IStreamingTextProps extends React.ComponentPropsWithoutRef<"div"> {
   /** Paragraphs, each a token list; a string is split on spaces. */
-  paragraphs: (string | StreamingToken[])[]
+  paragraphs: (string | TStreamingToken[])[]
   /** Reveal words over time and show the caret. */
   streaming?: boolean
   /** Reveal gap in ms; defaults to the --stream-gap token (60ms). */
@@ -21,7 +21,7 @@ export interface StreamingTextProps extends React.ComponentPropsWithoutRef<"div"
 
 
 
-const toTokens = (p: string | StreamingToken[]): StreamingToken[] => (typeof p === "string" ? p.split(" ").map((text) => ({ text })) : p)
+const toTokens = (p: string | TStreamingToken[]): TStreamingToken[] => (typeof p === "string" ? p.split(" ").map((text) => ({ text })) : p)
 
 /**
  * Streamed answer: paragraphs with inline source previews and a caret.
@@ -31,7 +31,7 @@ const toTokens = (p: string | StreamingToken[]): StreamingToken[] => (typeof p =
  */
 export function StreamingText({
   paragraphs, streaming = false, wordMs, className, ...props
-}: StreamingTextProps): React.ReactElement {
+}: IStreamingTextProps): React.ReactElement {
   const reduceMotion = useReducedMotion()
   const tokens = React.useMemo(() => paragraphs.map(toTokens), [paragraphs])
   const total = tokens.reduce((n, p) => n + p.length, 0)

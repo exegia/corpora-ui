@@ -3,18 +3,18 @@
 import * as React from "react"
 
 import User from "@/components/composed/user"
-import type { UserType } from "@/components/atoms"
+import type { TUserType } from "@/components/atoms/types"
 import { CodeBlock } from "@/components/docs/code-block"
 import { DemoStage } from "@/components/docs/demo-controls"
 
-const JENNY: UserType = {
+const JENNY: TUserType = {
   firstName: "Jenny",
   lastName: "Hamilton",
   role: "Admin",
   status: "online",
 }
 
-const EXEGIA: UserType = {
+const EXEGIA: TUserType = {
   firstName: "Exegia",
   lastName: "Agent",
   role: "Agent",

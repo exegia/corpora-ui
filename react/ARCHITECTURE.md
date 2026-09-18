@@ -11,7 +11,7 @@ react/
 │   ├── composed/
 │   └── blocks/
 ├── src/
-│   ├── components/       # Library components and adjacent *.story.tsx files
+│   ├── components/       # Library components and centralized stories/
 │   ├── assets/css/        # Internal theme, base, shadow, and chat styles
 │   ├── lib/              # Hooks, state, and utilities
 │   ├── pages/            # Custom React routes only, when needed
@@ -31,7 +31,7 @@ Fumapress maps `.md` and `.mdx` files in `content/` directly to URLs.
 `/atoms/button`. Frontmatter owns titles and descriptions. `meta.json`
 files set sidebar order. Reserve `src/pages` for custom designs.
 
-Component stories live beside their components and import `defineStory`
+Atom, composed-component, and block stories live in `src/components/stories` and import `defineStory`
 from `@/registry/story`. Stories export `Preview = story.WithControl` from a `"use client"` module.
 MDX imports that preview component and renders
 `<Preview />` for a preview and TypeScript-derived prop controls.
@@ -41,7 +41,7 @@ registry to update.
 
 ## Workflow
 
-1. Add or update a component and its adjacent `*.story.tsx` file.
+1. Add or update a component and its `src/components/stories/*.story.tsx` file.
 2. Write its page in `content/atoms`, `content/composed`, or `content/blocks`.
 3. Add the slug to the category's `meta.json`.
 4. Run `make check`, `make test`, and `make build` from the repository root.

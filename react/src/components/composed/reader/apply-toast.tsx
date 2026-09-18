@@ -5,14 +5,14 @@ import type * as React from "react"
 import { EASE_OUT_STRONG } from "@/lib/ease"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import type { ApplyToastProps } from "./type"
+import type { IApplyToastProps } from "./type"
 
 export function ApplyToast({
   open = true,
   message = "Change applied and recorded in version history.",
   onUndo,
   className,
-}: ApplyToastProps): React.ReactElement | null {
+}: IApplyToastProps): React.ReactElement | null {
   const reduceMotion = useReducedMotion()
   if (!open) return null
   return (

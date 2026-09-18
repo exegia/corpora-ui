@@ -3,14 +3,14 @@
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { accentText, mutedText } from "./shared"
-import type { VersionHistoryRecordProps } from "./types"
+import type { IVersionHistoryRecordProps } from "./type"
 
 
 
 export function VersionHistoryRecord({
   entry,
   className,
-}: VersionHistoryRecordProps): React.ReactElement {
+}: IVersionHistoryRecordProps): React.ReactElement {
   const timestamp =
     entry.timestamp instanceof Date
       ? entry.timestamp.toLocaleString()

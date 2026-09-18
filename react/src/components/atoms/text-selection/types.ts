@@ -7,25 +7,25 @@ import type {
 } from "react"
 import type { HighlightPopover as HighlightPopoverPrimitive } from "@omsimos/react-highlight-popover"
 import type { PopoverPopup } from "@/components/ui/popover"
-import type { TextProps } from "../text/types"
+import type { TTextProps } from "../text/types"
 
-export interface SelectionPosition {
+export interface ISelectionPosition {
   top: number
   left: number
 }
 
-export interface SelectionState {
+export interface ISelectionState {
   selected: boolean
   currentSelection: string
   showPopover: boolean
-  popoverPosition: SelectionPosition | null
+  popoverPosition: ISelectionPosition | null
 }
 
-export type SelectionStateUpdate =
-  Partial<SelectionState> | ((state: SelectionState) => Partial<SelectionState>)
+export type TSelectionStateUpdate =
+  Partial<ISelectionState> | ((state: ISelectionState) => Partial<ISelectionState>)
 
-export interface SelectionRenderProps {
-  position: SelectionPosition
+export interface ISelectionRenderProps {
+  position: ISelectionPosition
   selection: string
   selected: boolean
   showPopover: boolean
@@ -34,13 +34,13 @@ export interface SelectionRenderProps {
   close: () => void
 }
 
-export type SelectionPopoverComponent = ComponentType<SelectionRenderProps>
+export type TSelectionPopoverComponent = ComponentType<ISelectionRenderProps>
 
-export type HighlightPopoverPrimitiveProps = ComponentProps<
+export type THighlightPopoverPrimitiveProps = ComponentProps<
   typeof HighlightPopoverPrimitive
 >
 
-export interface HighlightPopoverProps extends Omit<
+export interface IHighlightPopoverProps extends Omit<
   HTMLAttributes<HTMLElement>,
   "children"
 > {
@@ -50,11 +50,11 @@ export interface HighlightPopoverProps extends Omit<
   /** Props forwarded to the custom component. */
   componentProps?: Record<string, unknown>
   /** Render function for applications that need full control of the markup. */
-  render?: (props: SelectionRenderProps) => ReactNode
+  render?: (props: ISelectionRenderProps) => ReactNode
 }
 
-export interface TextSelectionProps extends Omit<
-  HighlightPopoverPrimitiveProps,
+export interface ITextSelectionProps extends Omit<
+  THighlightPopoverPrimitiveProps,
   | "children"
   | "renderPopover"
   | "onSelectionStart"
@@ -69,7 +69,7 @@ export interface TextSelectionProps extends Omit<
   componentProps?: Record<string, unknown>
   popoverComponent?: ElementType
   popoverProps?: Record<string, unknown>
-  renderPopover?: (props: SelectionRenderProps) => ReactNode
+  renderPopover?: (props: ISelectionRenderProps) => ReactNode
   onSelectionStart?: () => void
   onSelectionEnd?: (selection: string) => void
   onPopoverShow?: () => void
@@ -77,17 +77,17 @@ export interface TextSelectionProps extends Omit<
 }
 
 
-export interface TextPopoverRenderProps {
+export interface ITextPopoverRenderProps {
   open: boolean
   setOpen: (open: boolean) => void
   close: () => void
 }
 
-export interface TextClickPopoverProps extends Omit<TextProps, "popover"> {
+export interface ITextClickPopoverProps extends Omit<TTextProps, "popover"> {
   /** Popover content rendered when the text is clicked. */
   popover?: ReactNode
   /** Render function for applications that need full control of the markup. */
-  renderPopover?: (props: TextPopoverRenderProps) => ReactNode
+  renderPopover?: (props: ITextPopoverRenderProps) => ReactNode
   /** Props forwarded to the popup (side, align, className, …). */
   popoverProps?: ComponentProps<typeof PopoverPopup>
   open?: boolean
@@ -95,7 +95,7 @@ export interface TextClickPopoverProps extends Omit<TextProps, "popover"> {
   onOpenChange?: (open: boolean) => void
 }
 
-export interface UseSelectionOptions {
+export interface IUseSelectionOptions {
   selected?: boolean
   onSelectionStart?: () => void
   onSelectionEnd?: (selection: string) => void
@@ -103,18 +103,18 @@ export interface UseSelectionOptions {
   onPopoverHide?: () => void
 }
 
-export interface UseSelectionResult {
-  state: SelectionState
+export interface IUseSelectionResult {
+  state: ISelectionState
   selected: boolean
   currentSelection: string
   showPopover: boolean
-  popoverPosition: SelectionState["popoverPosition"]
+  popoverPosition: ISelectionState["popoverPosition"]
   setSelection: (selection: string) => void
   setPosition: (
-    position: NonNullable<SelectionState["popoverPosition"]>
+    position: NonNullable<ISelectionState["popoverPosition"]>
   ) => void
   setShowPopover: (show: boolean) => void
-  update: (update: SelectionStateUpdate) => void
+  update: (update: TSelectionStateUpdate) => void
   reset: () => void
   selectionProps: {
     onSelectionStart: () => void

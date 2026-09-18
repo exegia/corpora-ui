@@ -1,8 +1,8 @@
 import { createElement } from "react"
 import { cn } from "@/lib/utils"
-import type { TextProps, TextSize, TextVariant } from "./types"
+import type { TTextProps, TTextSize, TTextVariant } from "./types"
 
-const variantClasses: Record<TextVariant, string> = {
+const variantClasses: Record<TTextVariant, string> = {
   default: "text-foreground",
   heading: "font-heading text-2xl font-semibold tracking-tight text-foreground",
   paragraph: "leading-7 text-foreground",
@@ -10,13 +10,13 @@ const variantClasses: Record<TextVariant, string> = {
   subscript: "align-sub text-xs text-muted-foreground",
 }
 
-const sizeClasses: Record<Exclude<TextSize, number>, string> = {
+const sizeClasses: Record<Exclude<TTextSize, number>, string> = {
   small: "text-sm",
   medium: "text-base",
   large: "text-lg",
 }
 
-const defaultTags: Record<TextVariant, keyof HTMLElementTagNameMap> = {
+const defaultTags: Record<TTextVariant, keyof HTMLElementTagNameMap> = {
   default: "span",
   heading: "h2",
   paragraph: "p",
@@ -33,7 +33,7 @@ export function Text({
   style,
   type = "default",
   ...props
-}: TextProps) {
+}: TTextProps) {
   const tag = defaultTags[type]
   const fontSize = typeof size === "number" ? `${size}px` : undefined
   const selectionValue =

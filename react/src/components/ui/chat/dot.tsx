@@ -1,11 +1,11 @@
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 
-export type DotTone =
+export type TDotTone =
   | "success" | "warning" | "info" | "danger" | "neutral" | "accent" | "brand"
   | "series-1" | "series-2" | "series-3" | "series-4" | "series-5"
 
-export const DOT_TONE_CLASSES: Record<DotTone, string> = {
+export const DOT_TONE_CLASSES: Record<TDotTone, string> = {
   success: "bg-semantic-success",
   warning: "bg-semantic-warning",
   info: "bg-semantic-info",
@@ -20,8 +20,8 @@ export const DOT_TONE_CLASSES: Record<DotTone, string> = {
   "series-5": "bg-chart-series-5",
 }
 
-export interface DotProps extends React.ComponentPropsWithoutRef<"span"> {
-  tone?: DotTone
+export interface IDotProps extends React.ComponentPropsWithoutRef<"span"> {
+  tone?: TDotTone
   size?: 6 | 8
 }
 
@@ -30,7 +30,7 @@ export interface DotProps extends React.ComponentPropsWithoutRef<"span"> {
  *
  * @sketch "Atom / Dot / {Success, Warning, Info, Danger, Neutral, Accent, Brand, Series 3, Series 4}"
  */
-export function Dot({ tone = "neutral", size = 8, className, ...props }: DotProps): React.ReactElement {
+export function Dot({ tone = "neutral", size = 8, className, ...props }: IDotProps): React.ReactElement {
   return (
     <span
       aria-hidden="true"
@@ -42,8 +42,8 @@ export function Dot({ tone = "neutral", size = 8, className, ...props }: DotProp
   )
 }
 
-export interface LegendItemProps extends React.ComponentPropsWithoutRef<"span"> {
-  tone?: DotTone
+export interface ILegendItemProps extends React.ComponentPropsWithoutRef<"span"> {
+  tone?: TDotTone
   /** Optional trailing value ("42%"). */
   value?: React.ReactNode
 }
@@ -53,7 +53,7 @@ export interface LegendItemProps extends React.ComponentPropsWithoutRef<"span"> 
  *
  * @sketch "Atom / Legend Item"
  */
-export function LegendItem({ tone = "series-1", value, className, children, ...props }: LegendItemProps): React.ReactElement {
+export function LegendItem({ tone = "series-1", value, className, children, ...props }: ILegendItemProps): React.ReactElement {
   return (
     <span data-slot="legend-item" className={cn("inline-flex h-4 items-center gap-2 text-[11px] leading-none text-text-secondary", className)} {...props}>
       <Dot tone={tone} />

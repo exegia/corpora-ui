@@ -13,10 +13,10 @@ import {
   SCAFFOLD_PANEL_CAPACITY,
   useScaffold,
 } from "@/components/blocks/scaffold"
-import { DemoStage } from "@/components/docs/demo-controls"
+import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
 import { cn } from "@/lib/utils"
 
-interface DemoPanel {
+interface IDemoPanel {
   id: number
   title: string
   /** The seam menu's Close action hides the strip; the panel body offers
@@ -35,7 +35,7 @@ const PANEL_TITLES = [
 export default function ScaffoldDemo() {
   const scaffold = useScaffold()
   const nextId = React.useRef(2)
-  const [panels, setPanels] = React.useState<DemoPanel[]>([
+  const [panels, setPanels] = React.useState<IDemoPanel[]>([
     { id: 1, title: PANEL_TITLES[0] },
   ])
 

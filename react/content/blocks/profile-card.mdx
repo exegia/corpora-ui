@@ -3,21 +3,27 @@ title: "Profile card"
 description: "Account card that opens an action menu: the trigger is a rich identity chip (avatar over name and handle), the popup a grouped menu ending in a destructive sign-out."
 ---
 
-import { Preview } from "@/components/blocks/profile/profile-card-block.story"
+import { Preview } from "@/components/stories/profile-card-block.story"
 import Demo from "@/registry/demos/profile-card-demo"
 
 ## Preview and props
 
-Adjust the generated controls to explore the component's TypeScript props.
+Expand **Props** below the centered preview to change the component’s properties.
 
 <Preview />
+
+## Examples
+
+Switch presentation variants and identity options, then explore the profile actions.
+
+<Demo />
 
 ## Usage
 
 ```tsx
 import { ProfileCardBlock, useAuthSession, useAuthSessionActions } from "@exegia/corpora-ui"
 
-// The signed-in AuthUser from the shared session drops straight in, and
+// The signed-in IAuthUser from the shared session drops straight in, and
 // signOut clears the session and returns the auth flow to the login step.
 const { user } = useAuthSession()
 const { signOut } = useAuthSessionActions()
@@ -37,9 +43,9 @@ const { signOut } = useAuthSessionActions()
 
 | Prop                              | Type                                                              | Default                              | Description                                                                                                                                                                                                                                                                                                                                |
 | --------------------------------- | ----------------------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| user (required)                   | <code>ProfileCardUser</code>                                      | —                                    | Identity on the card (&#123; name, username?, avatar?, initials?, presence? &#125;). Initials fall back to the name's first and last word.                                                                                                                                                                                                 |
-| items                             | <code>ProfileCardItem[]</code>                                    | <code>defaultProfileCardItems</code> | The whole menu, flat: actions (&#123; id, label, icon?, shortcut?, disabled?, variant?, onSelect? &#125;) plus &#123; type: “separator” &#125; and &#123; type: “label”, label &#125; entries. Each run between separators becomes its own group, headed by the label inside it.                                                           |
-| onSelect                          | <code>() =&gt; void &#124; Promise&lt;void&gt;</code>             | —                                    | Per item. Returning a promise puts the card in its loading state until it settles; a rejection goes to onError.                                                                                                                                                                                                                            |
+| user (required)                   | <code>IProfileCardUser</code>                                      | —                                    | Identity on the card (&#123; name, username?, avatar?, initials?, presence? &#125;). Initials fall back to the name's first and last word.                                                                                                                                                                                                 |
+| items                             | <code>TProfileCardItem[]</code>                                    | <code>defaultProfileCardItems</code> | The whole menu, flat: actions (&#123; id, label, icon?, shortcut?, disabled?, variant?, onSelect? &#125;) plus &#123; type: “separator” &#125; and &#123; type: “label”, label &#125; entries. Each run between separators becomes its own group, headed by the label inside it.                                                           |
+| onSelect                          | <code>() =&gt; void &#124; Promise&lt;void&gt</code>             | —                                    | Per item. Returning a promise puts the card in its loading state until it settles; a rejection goes to onError.                                                                                                                                                                                                                            |
 | align / side / sideOffset         | <code>"center" &#124; "start" &#124; "end" / Side / number</code> | <code>"center" / "bottom" / 8</code> | Menu placement relative to the card.                                                                                                                                                                                                                                                                                                       |
 | menuWidth                         | <code>"content" &#124; "card"</code>                              | <code>"content"</code>               | “content” sizes the menu to its items; “card” locks it to the trigger's width.                                                                                                                                                                                                                                                             |
 | variant                           | <code>"expanded" &#124; "collapsed"</code>                        | —                                    | collapsed folds the card to its avatar for an icon rail — name, handle and chevron animate to zero width, the avatar stays, title names the tile on hover, the accessible name is unchanged. Controlled when passed; unset, it follows the AnimatedPanel it sits in (a SidebarBlock footer folds with ⌘B on its own), else defaultVariant. |
@@ -48,7 +54,3 @@ const { signOut } = useAuthSessionActions()
 | presence                          | <code>"online" &#124; "idle" &#124; "offline"</code>              | —                                    | Presence badge on the avatar (presence overrides user.presence).                                                                                                                                                                                                                                                                           |
 | open / defaultOpen / onOpenChange | <code>boolean / boolean / (open, details) =&gt; void</code>       | —                                    | Control the menu, or observe it.                                                                                                                                                                                                                                                                                                           |
 | sound                             | <code>boolean</code>                                              | <code>true</code>                    | Press/release cues on the card plus open/close cues on the menu. Inert until the app calls bindSounds().                                                                                                                                                                                                                                   |
-
-## Examples
-
-<Demo />

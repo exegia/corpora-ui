@@ -3,7 +3,7 @@ title: "Emoji action bar"
 description: "Compact reaction picker: a toolbar of quick reaction emoji built on the action-bar composed component, with a trailing More action that swaps the surface for the full frimousse picker. Designed to sit inside a glass popover."
 ---
 
-import { Preview } from "@/components/composed/emoji-action-bar.story"
+import { Preview } from "@/components/stories/emoji-action-bar.story"
 
 import Demo from "@/registry/demos/emoji-action-bar-demo"
 
@@ -13,7 +13,17 @@ Use the controls to explore the component's props.
 
 <Preview />
 
-## Usage
+## Props
+
+| Prop            | Type                                | Default           | Description                                                                                                                                                                                                                                                                                                                        |
+| --------------- | ----------------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `onEmojiSelect` | `(emoji: { emoji, label }) => void` | —                 | Fires for both a quick reaction and a pick from the full picker, so a caller wires one handler.                                                                                                                                                                                                                                    |
+| `reactions`     | `readonly Emoji[]`                  | `QUICK_REACTIONS` | The quick row. frimousse cannot render a subset — EmojiPicker.Root exposes only columns/skinTone/locale/emojiVersion/emojibaseUrl/sticky, and its list is virtualized on fixed-height rows, so a fixed list is the only way to show just a few. It also costs no network request: the emoji CDN is fetched only if More is opened. |
+| `hideMore`      | `boolean`                           | `false`           | Drops the trailing More action, leaving the quick row only — nothing then loads emoji data at all.                                                                                                                                                                                                                                 |
+
+## Example
+
+<Demo />
 
 ```tsx
 import { EmojiActionBar } from "@exegia/corpora-ui"
@@ -22,17 +32,3 @@ import { EmojiActionBar } from "@exegia/corpora-ui"
   <EmojiActionBar onEmojiSelect={({ emoji, label }) => react(emoji, label)} />
 </PopoverGlass>
 ```
-
-## Props
-
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `onEmojiSelect` | `(emoji: { emoji, label }) => void` | — | Fires for both a quick reaction and a pick from the full picker, so a caller wires one handler. |
-| `reactions` | `readonly Emoji[]` | `QUICK_REACTIONS` | The quick row. frimousse cannot render a subset — EmojiPicker.Root exposes only columns/skinTone/locale/emojiVersion/emojibaseUrl/sticky, and its list is virtualized on fixed-height rows, so a fixed list is the only way to show just a few. It also costs no network request: the emoji CDN is fetched only if More is opened. |
-| `hideMore` | `boolean` | `false` | Drops the trailing More action, leaving the quick row only — nothing then loads emoji data at all. |
-
-## Examples
-
-Explore the complete demo, including its additional variants and interactions.
-
-<Demo />

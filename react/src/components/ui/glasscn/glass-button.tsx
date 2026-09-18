@@ -1,17 +1,17 @@
 "use client";
 
-import type { FrostGlassVariantProp } from "@/lib/glass-variants";
+import type { TFrostGlassVariantProp } from "@/lib/glass-variants";
 
-import { Button, type ButtonProps } from "../button";
+import { Button, type TButtonProps } from "../button";
 
-type GlassButtonProps = Omit<ButtonProps, "variant" | "glassVariant"> &
-  FrostGlassVariantProp;
+type TGlassButtonProps = Omit<TButtonProps, "variant" | "glassVariant"> &
+  TFrostGlassVariantProp;
 
 /** @deprecated Use `<Button variant="glass" glassVariant="…">` instead. */
 function GlassButton({
   glassVariant = "liquid-refract",
   ...props
-}: GlassButtonProps) {
+}: TGlassButtonProps) {
   return (
     <Button
       data-slot="glass-button"

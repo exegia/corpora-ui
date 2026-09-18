@@ -7,9 +7,9 @@ import { EASE_IN_OUT, SPRING_PRESS, SPRING_SWAP } from "@/lib/ease"
 import { useBubbleVariant } from "./context"
 import { MorphIcon } from "morphicons/react";
 import type {
-  BubbleReactionsProps,
-  BubbleReactionChipProps,
-  BubbleReactionsButtonProps,
+  IBubbleReactionsProps,
+  IBubbleReactionChipProps,
+  TBubbleReactionsButtonProps,
 } from "./types"
 import { reactionKey } from "./utils"
 import { GlassContainer } from "@/components/ui/glasscn/glass-container"
@@ -32,7 +32,7 @@ export function BubbleReactionChip({
   onToggle,
   className,
   ...props
-}: BubbleReactionChipProps): React.ReactElement {
+}: IBubbleReactionChipProps): React.ReactElement {
   const reduceMotion = useReducedMotion()
   const showCount = reaction.count != null && reaction.count > 0
 
@@ -41,7 +41,7 @@ export function BubbleReactionChip({
       aria-label={reaction.label}
       aria-pressed={reaction.reacted ?? false}
       className={cn(
-        "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-1.5 font-bold text-neutral-600 transition-colors duration-150 ease-smooth-out outline-none hover:bg-black/6 focus-visible:ring-0 focus-visible:ring-ring dark:text-neutral-300 dark:hover:bg-white/8",
+        "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-1.5 font-bold text-neutral-600 transition-[colors,scale] duration-150 ease-smooth-out outline-none hover:scale-105 focus-visible:ring-0 focus-visible:ring-ring dark:text-neutral-300",
         reaction.reacted && "text-foreground",
         className
       )}
@@ -93,7 +93,7 @@ export function BubbleReactionsButton({
   className,
   onClick,
   onEmojiSelect
-}: BubbleReactionsButtonProps): React.ReactElement {
+}: TBubbleReactionsButtonProps): React.ReactElement {
 
   const [open, setOpen] = useState(false)
   return (
@@ -103,7 +103,7 @@ export function BubbleReactionsButton({
           <button
             aria-label="Add reaction"
             className={cn(
-              "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-2 font-bold text-neutral-600 duration-150 ease-smooth-out outline-none hover:bg-black/6 focus-visible:ring-0 dark:text-neutral-300 dark:hover:bg-white/8",
+              "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-2 font-bold text-neutral-600 duration-150 ease-smooth-out outline-none hover:scale-105 focus-visible:ring-0 dark:text-neutral-300",
               className
             )}
             data-slot="bubble-reaction-button"
@@ -153,22 +153,19 @@ export function BubbleReactions({
   className,
   children,
   ...props
-}: BubbleReactionsProps): React.ReactElement {
+}: IBubbleReactionsProps): React.ReactElement {
   const variant = useBubbleVariant()
   return (
     <div
       className={cn(
-        "absolute -bottom-5 z-[1] flex max-h-8 w-fit flex-1 items-center",
+        "absolute -bottom-5 z-1 flex max-h-8 w-fit flex-1 items-center",
         variant === "sender" ? "left-4" : "right-4",
         className
       )}
     >
       <GlassContainer
-        glassVariant="frosted"
-        refraction={3}
-        bezel={12}
-        blur={5}
-        saturation={2}
+        glassVariant="liquid"
+        optics={{ strength: 0.5, depth: 0.5, bendWidth: 0.4, frost: 1.5 }}
         className={cn(
           "inline-flex h-full w-fit items-center rounded-xl",
           className

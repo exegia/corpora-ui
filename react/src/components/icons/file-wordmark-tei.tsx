@@ -1,4 +1,4 @@
-import type { FileIconProps } from "./types"
+import type { IFileIconProps } from "./types"
 
 /**
  * TEI file icon — wordmark variant.
@@ -9,7 +9,7 @@ export function FileWordmarkTei({
   title = "TEI file",
   className,
   ...props
-}: FileIconProps) {
+}: IFileIconProps) {
   return (
     <svg
       viewBox="0 -48 1024 1114"

@@ -22,7 +22,7 @@ export function FileTypeBadge({ className, children, ...props }: React.Component
   )
 }
 
-export interface FaviconProps extends React.ComponentPropsWithoutRef<"span"> {
+export interface IFaviconProps extends React.ComponentPropsWithoutRef<"span"> {
   src?: string
   size?: 14 | 16
 }
@@ -32,7 +32,7 @@ export interface FaviconProps extends React.ComponentPropsWithoutRef<"span"> {
  *
  * @sketch "Atom / Favicon"
  */
-export function Favicon({ src, size = 16, className, ...props }: FaviconProps): React.ReactElement {
+export function Favicon({ src, size = 16, className, ...props }: IFaviconProps): React.ReactElement {
   return (
     <span
       data-slot="favicon"

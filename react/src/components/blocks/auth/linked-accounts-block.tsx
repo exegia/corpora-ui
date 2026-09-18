@@ -5,7 +5,6 @@ import * as React from "react"
 
 import {
   SOCIAL_PROVIDERS,
-  type SocialProvider,
 } from "@/components/composed/social-providers"
 import { Button } from "@/components/ui/button"
 import {
@@ -18,35 +17,10 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 import { AuthError, EASE } from "./auth-shell"
+import type { ILinkedAccountsBlockProps } from "./type"
+import type { TSocialProvider } from "@/components/composed/types"
+import { Users2 } from "lucide-react"
 
-/** One sign-in identity attached to the account. */
-export interface LinkedIdentity {
-  id: string
-  provider: SocialProvider
-  /** Account address shown under the provider name, when known. */
-  email?: string | null
-}
-
-export interface LinkedAccountsBlockProps {
-  title?: string
-  description?: string
-  /** Identities already attached to the account. */
-  identities?: LinkedIdentity[]
-  /** Providers offered as connect candidates; connected ones are filtered out. */
-  providers?: SocialProvider[]
-  /** Shows the loading row instead of the list. */
-  loading?: boolean
-  /**
-   * The account can also sign in through a method that has no row in this
-   * list — an email/password credential, say. Lifts the last-method guard,
-   * which otherwise refuses to disconnect the final listed identity.
-   */
-  hasOtherSignInMethods?: boolean
-  /** Reject (or throw) to show the inline error. */
-  onLink?: (provider: SocialProvider) => Promise<void> | void
-  onUnlink?: (id: string) => Promise<void> | void
-  className?: string
-}
 
 const LAST_METHOD_EXPLANATION =
   "This is your only way to sign in, so it can't be disconnected."
@@ -67,10 +41,10 @@ export function LinkedAccountsBlock({
   onLink,
   onUnlink,
   className,
-}: LinkedAccountsBlockProps) {
+}: ILinkedAccountsBlockProps) {
   const noteId = React.useId()
   const [error, setError] = React.useState<string | null>(null)
-  const [linking, setLinking] = React.useState<SocialProvider | null>(null)
+  const [linking, setLinking] = React.useState<TSocialProvider | null>(null)
   const [unlinking, setUnlinking] = React.useState<string | null>(null)
 
   const connected = new Set(identities.map((identity) => identity.provider))
@@ -81,7 +55,7 @@ export function LinkedAccountsBlock({
   // the account reachable, so it lifts the guard.
   const lastMethod = !hasOtherSignInMethods && identities.length <= 1
 
-  async function connect(provider: SocialProvider) {
+  async function connect(provider: TSocialProvider) {
     if (busy) return
     setError(null)
     setLinking(provider)
@@ -115,7 +89,7 @@ export function LinkedAccountsBlock({
     <MotionConfig reducedMotion="user">
       <Card className={cn("w-full", className)} data-slot="auth-block">
         <CardHeader>
-          <CardTitle>{title}</CardTitle>
+          <CardTitle className="inline-flex items-center gap-1"><Users2 size={18} /> {title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardPanel>
@@ -203,12 +177,12 @@ export function LinkedAccountsBlock({
               )}
 
               {connectable.map((provider) => {
-                const { label, BrandIcon, brandClassName } =
+                const { label, BrandIcon, brandClassName, buttonClassName, labelClassName } =
                   SOCIAL_PROVIDERS[provider]
                 return (
                   <Button
                     key={provider}
-                    className="w-full"
+                    className={cn("w-full", buttonClassName)}
                     type="button"
                     variant="outline"
                     disabled={busy}
@@ -216,7 +190,7 @@ export function LinkedAccountsBlock({
                     onClick={() => void connect(provider)}
                   >
                     <BrandIcon aria-hidden="true" className={brandClassName} />
-                    <span className="flex-1">Connect {label}</span>
+                    <span className={cn("flex-1", labelClassName)}>Connect {label}</span>
                   </Button>
                 )
               })}

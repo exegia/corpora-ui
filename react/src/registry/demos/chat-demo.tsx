@@ -1,49 +1,53 @@
 "use client"
 
 import * as React from "react"
+import { composerDemoOptions } from "./composer-options"
 
 import {
   AiPanel,
   ApplyToast,
   RecommendationStack,
-  type AiScope,
-  type DiffRow,
+  type IAiScope,
+  type IDiffRow,
 } from "@/components/blocks/chat"
 import {
+  Attachment,
   RecommendationCard,
-  type RecommendationState,
+  type TComposerAttachment,
+  type TRecommendationState,
 } from "@/components/composed/chat"
-import { DemoStage } from "@/components/docs/demo-controls"
+import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
 import { cn } from "@/lib/utils"
 import AI from "@/components/composed/ai"
 import User from "@/components/composed/user"
+import { Bubble } from "@/components/atoms"
 
-const SCOPE: AiScope = {
+const SCOPE: IAiScope = {
   kind: "passage",
   label: "a.1",
   range: "¶1–¶2",
   nodeIds: ["p-17", "p-18"],
 }
 
-const DIFF: DiffRow[] = [
+const DIFF: IDiffRow[] = [
   { type: "remove", field: "label", value: "paragraph" },
   { type: "add", field: "label", value: "p" },
 ]
 
-function DiffRows({ rows }: { rows: DiffRow[] }): React.ReactElement {
+function DiffRows({ rows }: { rows: IDiffRow[] }): React.ReactElement {
   return (
-    <div className="mt-2 grid gap-1.5 p-2.5 font-mono text-xs">
+    <div className="mt-2 gap-1.5 p-2.5 font-mono text-xs grid">
       {rows.map((row, index) => (
         <div
           className={cn(
-            "flex gap-2 rounded px-1.5 py-1",
+            "gap-2 rounded px-1.5 py-1 flex",
             row.type === "add"
               ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-200"
               : "bg-red-500/10 text-red-700 dark:text-red-200"
           )}
           key={`${row.type}-${row.field ?? ""}-${index}`}
         >
-          <span aria-hidden="true" className="w-3 shrink-0 font-semibold">
+          <span aria-hidden="true" className="w-3 font-semibold shrink-0">
             {row.type === "add" ? "+" : "−"}
           </span>
           {row.type === "add" ? (
@@ -70,7 +74,11 @@ function DiffRows({ rows }: { rows: DiffRow[] }): React.ReactElement {
  * stands in for that host.
  */
 export default function AiPanelDemo(): React.ReactElement {
-  const [state, setState] = React.useState<RecommendationState>("pending")
+  const [messages, setMessages] = React.useState<
+    { text: string; attachments: TComposerAttachment[] }[]
+  >([])
+  const [model, setModel] = React.useState("auto")
+  const [state, setState] = React.useState<TRecommendationState>("pending")
   const runTimer = React.useRef<ReturnType<typeof setTimeout>>(null)
 
   // Approve → the agent "works" for a beat → applied.
@@ -78,7 +86,7 @@ export default function AiPanelDemo(): React.ReactElement {
     setState("running")
     runTimer.current = setTimeout(() => setState("accepted"), 1600)
   }
-  const reset = (next: RecommendationState) => (): void => {
+  const reset = (next: TRecommendationState) => (): void => {
     if (runTimer.current) clearTimeout(runTimer.current)
     setState(next)
   }
@@ -124,20 +132,38 @@ export default function AiPanelDemo(): React.ReactElement {
     <DemoStage controls={null}>
       <div className="mx-auto h-[42rem] w-full max-w-[28rem] overflow-hidden rounded-sm border bg-background">
         <AiPanel
+          onNewThread={() => setMessages([])}
+          composerProps={{
+            ...composerDemoOptions,
+            model,
+            onModelChange: setModel,
+            onSubmit: (text, _mode, attachments) =>
+              setMessages((items) => [...items, { text, attachments }]),
+          }}
           scope={SCOPE}
           thread={
             <>
-              {/* The header renders `User.Info` from composed/user: avatar
-                  with initials, name and the role badge, all from `user`. */}
               <User.Message
-              // time="10 min ago"
-              // user={{
-              //   firstName: "Jenny",
-              //   lastName: "Hamilton",
-              //   role: "Admin",
-              // }}
+                variant="info"
+                user={{
+                  firstName: "Jenny",
+                  lastName: "Hamilton",
+                  role: "Editor",
+                  direction: "sender",
+                }}
               >
                 Validate this passage against the schema.
+              </User.Message>
+              <User.Message
+                variant="info"
+                user={{
+                  firstName: "Marcus",
+                  lastName: "Lee",
+                  role: "Reviewer",
+                  direction: "recipient",
+                }}
+              >
+                I’ll compare ¶12 with the latest corpus build.
               </User.Message>
               <AI.Message
                 AttachedContent={renderRecommendations}
@@ -145,6 +171,25 @@ export default function AiPanelDemo(): React.ReactElement {
               >
                 The paragraph boundary is valid. Node p-17 has a label mismatch.
               </AI.Message>
+              {messages.map((message, index) => (
+                <Bubble key={index} variant="sender">
+                  {message.text && (
+                    <Bubble.Message>{message.text}</Bubble.Message>
+                  )}
+                  {message.attachments.length > 0 && (
+                    <Bubble.Message unstyled>
+                      {message.attachments.map((attachment) => (
+                        <Attachment
+                          key={attachment.id}
+                          {...attachment}
+                          variant="default"
+                          removable={false}
+                        />
+                      ))}
+                    </Bubble.Message>
+                  )}
+                </Bubble>
+              ))}
             </>
           }
           toast={

@@ -18,11 +18,11 @@ import {
   treeItemsAtom,
   treeRailCollapsedAtom,
 } from "../tree-atom"
-import type { TreeConfig, TreeNode } from "../type"
+import type { ITreeConfig, ITreeNode } from "../type"
 
-type Store = ReturnType<typeof createStore>
+type TStore = ReturnType<typeof createStore>
 
-const FILES: TreeNode[] = [
+const FILES: ITreeNode[] = [
   {
     id: "src",
     label: "src",
@@ -32,10 +32,10 @@ const FILES: TreeNode[] = [
 ]
 
 function mount(
-  store: Store,
+  store: TStore,
   id: string,
-  config: Partial<TreeConfig>,
-  items: TreeNode[] = FILES
+  config: Partial<ITreeConfig>,
+  items: ITreeNode[] = FILES
 ) {
   store.set(
     mountTreeAtom(id),
@@ -89,7 +89,7 @@ describe("tree atoms · write gates", () => {
 
   test("a controlled items prop is never overwritten, only reported", () => {
     const store = createStore()
-    const onItemsChange = mock((items: TreeNode[]) => void items)
+    const onItemsChange = mock((items: ITreeNode[]) => void items)
     mount(store, "controlled", {
       variant: "files",
       controlsItems: true,
@@ -172,7 +172,7 @@ describe("Tree · render granularity", () => {
     // `renderTrailing` runs inside a row's render, so counting calls per id is
     // a proxy for counting that row's renders.
     const renders = new Map<string, number>()
-    const items: TreeNode[] = [
+    const items: ITreeNode[] = [
       { id: "a", label: "a", children: [{ id: "a-1", label: "a-1" }] },
       { id: "b", label: "b", children: [{ id: "b-1", label: "b-1" }] },
     ]

@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { accentRing, mutedText } from "./shared"
 import { Sparkles } from "lucide-react"
-import type { SuggestedPromptsProps } from "./types";
+import type { ISuggestedPromptsProps } from "./type";
 
 
 export function SuggestedPrompts({
@@ -13,7 +13,7 @@ export function SuggestedPrompts({
   onSelect,
   emptyLabel = "Ask about this selection or validate it against the schema.",
   className,
-}: SuggestedPromptsProps): React.ReactElement | null {
+}: ISuggestedPromptsProps): React.ReactElement | null {
   if (!prompts.length) {
     return (
       <p className={cn("px-1 py-3", mutedText, className)} data-empty="true">

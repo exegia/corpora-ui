@@ -16,18 +16,18 @@
 import { atom } from "jotai"
 
 import type {
-  AuthSessionState,
-  AuthSessionStatus,
-  AuthUser,
-} from "./auth-state-type"
+  IAuthSessionState,
+  TAuthSessionStatus,
+  IAuthUser,
+} from "./type"
 
 // ── primitives ───────────────────────────────────────────────────────────
 
 /** `"unknown"` until the app restores or rejects a session at boot. */
-export const authSessionStatusAtom = atom<AuthSessionStatus>("unknown")
+export const authSessionStatusAtom = atom<TAuthSessionStatus>("unknown")
 authSessionStatusAtom.debugLabel = "auth-session/status"
 
-export const authUserAtom = atom<AuthUser | null>(null)
+export const authUserAtom = atom<IAuthUser | null>(null)
 authUserAtom.debugLabel = "auth-session/user"
 
 // ── derived ──────────────────────────────────────────────────────────────
@@ -37,7 +37,7 @@ export const isAuthenticatedAtom = atom(
 )
 isAuthenticatedAtom.debugLabel = "auth-session/isAuthenticated"
 
-export const authSessionStateAtom = atom<AuthSessionState>((get) => ({
+export const authSessionStateAtom = atom<IAuthSessionState>((get) => ({
   status: get(authSessionStatusAtom),
   user: get(authUserAtom),
 }))
@@ -45,7 +45,7 @@ authSessionStateAtom.debugLabel = "auth-session/state"
 
 // ── actions ──────────────────────────────────────────────────────────────
 
-export const signInAtom = atom(null, (_get, set, user: AuthUser) => {
+export const signInAtom = atom(null, (_get, set, user: IAuthUser) => {
   set(authUserAtom, user)
   set(authSessionStatusAtom, "authenticated")
 })
@@ -53,7 +53,7 @@ signInAtom.debugLabel = "auth-session/signIn"
 
 export const updateAuthUserAtom = atom(
   null,
-  (get, set, patch: Partial<AuthUser>) => {
+  (get, set, patch: Partial<IAuthUser>) => {
     const user = get(authUserAtom)
     // No-op when signed out: there is no user to merge into, and inventing
     // one from a partial patch would fabricate an identity.

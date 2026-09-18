@@ -10,35 +10,24 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import type {
-  OnboardingFieldConfig,
-  OnboardingStepConfig,
-  OnboardingValue,
-} from "../onboarding-block";
+    IProfileStepProps,
+  TOnboardingFieldConfig,
+  TOnboardingValue,
+} from "../type";
 
-export interface ProfileStepProps {
-  step: OnboardingStepConfig;
-  /** Seed values, so drafts survive back/forward navigation. */
-  values: Record<string, OnboardingValue>;
-  submitting?: boolean;
-  submitLabel: string;
-  onSubmit: (values: Record<string, OnboardingValue>) => void | Promise<void>;
-  onBack?: () => void;
-  /** Reports every edit so the flow can restore drafts across navigation. */
-  onDraftChange?: (name: string, value: OnboardingValue) => void;
-}
 
 function initialValue(
-  field: OnboardingFieldConfig,
-  saved: OnboardingValue | undefined,
-): OnboardingValue {
+  field: TOnboardingFieldConfig,
+  saved: TOnboardingValue | undefined,
+): TOnboardingValue {
   if (field.kind === "checkbox") return typeof saved === "boolean" ? saved : false;
   return typeof saved === "string" ? saved : "";
 }
 
 /** Built-in validation, mirroring the declared `FieldConfig` contract. */
 function validateField(
-  field: OnboardingFieldConfig,
-  value: OnboardingValue,
+  field: TOnboardingFieldConfig,
+  value: TOnboardingValue,
 ): string | null {
   const required = field.required === true;
 
@@ -81,9 +70,9 @@ export function ProfileStep({
   onSubmit,
   onBack,
   onDraftChange,
-}: ProfileStepProps) {
+}: IProfileStepProps) {
   const idPrefix = React.useId();
-  const [draft, setDraft] = React.useState<Record<string, OnboardingValue>>(
+  const [draft, setDraft] = React.useState<Record<string, TOnboardingValue>>(
     () =>
       Object.fromEntries(
         step.fields.map((field) => [
@@ -94,7 +83,7 @@ export function ProfileStep({
   );
   const [errors, setErrors] = React.useState<Record<string, string>>({});
 
-  function setValue(name: string, value: OnboardingValue) {
+  function setValue(name: string, value: TOnboardingValue) {
     setDraft((current) => ({ ...current, [name]: value }));
     onDraftChange?.(name, value);
     // Clear a field's error as soon as it is edited; re-validation happens on
@@ -119,7 +108,7 @@ export function ProfileStep({
     }
     setErrors({});
 
-    const submitted: Record<string, OnboardingValue> = {};
+    const submitted: Record<string, TOnboardingValue> = {};
     for (const field of step.fields) {
       const value = draft[field.name];
       submitted[field.name] = typeof value === "string" ? value.trim() : value;

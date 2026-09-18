@@ -7,16 +7,16 @@ import { Card, CardFrame, CardFrameHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { SegmentedToggle } from "@/components/ui/chat"
 
-export interface CodeDiffLine {
+export interface ICodeDiffLine {
   type?: "add" | "remove" | "context"
   text: string
 }
 
-export interface CodeBlockProps extends Omit<React.ComponentPropsWithoutRef<"div">, "onCopy"> {
+export interface ICodeBlockProps extends Omit<React.ComponentPropsWithoutRef<"div">, "onCopy"> {
   filename?: React.ReactNode
   code: string
   /** Optional diff view; when absent the toggle is hidden. */
-  diff?: CodeDiffLine[]
+  diff?: ICodeDiffLine[]
   view?: "code" | "diff"
   defaultView?: "code" | "diff"
   onViewChange?: (view: "code" | "diff") => void
@@ -79,11 +79,11 @@ const VIEWS = [{ value: "code", label: "Code" }, { value: "diff", label: "Diff" 
  *
  * @sketch "Component / Code Block"
  */
-export function CodeBlock({ filename, code, diff, view, defaultView = "code", onViewChange, onCopy, keywords, className, ...props }: CodeBlockProps): React.ReactElement {
+export function CodeBlock({ filename, code, diff, view, defaultView = "code", onViewChange, onCopy, keywords, className, ...props }: ICodeBlockProps): React.ReactElement {
   const [internal, setInternal] = React.useState<"code" | "diff">(defaultView)
   const current = view ?? internal
   const kw = React.useMemo(() => (keywords ? new Set([...KEYWORDS, ...keywords]) : KEYWORDS), [keywords])
-  const lines: CodeDiffLine[] = current === "diff" && diff ? diff : code.split("\n").map((text) => ({ text }))
+  const lines: ICodeDiffLine[] = current === "diff" && diff ? diff : code.split("\n").map((text) => ({ text }))
 
   return (
     <CardFrame data-slot="code-block" data-view={current} className={cn("w-[420px] max-w-full", className)} {...props}>

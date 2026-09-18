@@ -9,7 +9,7 @@ import AI from "@/components/composed/ai"
 import {
   Flowchart,
   RecommendationCard,
-  type StepNode,
+  type TStepNode,
 } from "@/components/composed/chat"
 import { Verse, VerseNote, VerseSpan } from "@/components/composed/verse"
 import {
@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils"
 
 const EASE = [0.32, 0.72, 0, 1] as const
 
-const FLOW_NODES: StepNode[] = [
+const FLOW_NODES: TStepNode[] = [
   {
     id: "corpus",
     row: 0,
@@ -176,7 +176,6 @@ export function Hero({ children }: { children: React.ReactNode }) {
             title="Validate the Iliad corpus before the walker runs?"
             description="Check otype, oslots and section features in"
             entity={{ name: "Iliad · Homer corpus", initials: "I" }}
-            descriptionSuffix="which takes about"
             leadTime="2 min"
             confidence="high"
           />

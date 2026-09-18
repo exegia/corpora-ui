@@ -1,7 +1,7 @@
 import { createStore } from "jotai"
 
 /** A Jotai store as created by `createStore()`. */
-export type ExegiaStore = ReturnType<typeof createStore>
+export type TExegiaStore = ReturnType<typeof createStore>
 
 /**
  * The library's default store — the one `ExegiaProvider` mounts unless it is
@@ -16,4 +16,4 @@ export type ExegiaStore = ReturnType<typeof createStore>
  * requests — so render-per-request apps pass a fresh `createStore()` to
  * `ExegiaProvider` instead.
  */
-export const exegiaStore: ExegiaStore = createStore()
+export const exegiaStore: TExegiaStore = createStore()

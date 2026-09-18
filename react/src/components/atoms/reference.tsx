@@ -3,7 +3,7 @@
 import { Link2 } from "lucide-react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
-import type { ReferenceProps } from "./types";
+import type { IReferenceProps } from "./types";
 import { Button } from "@/components/ui/button";
 import { PreviewCard, PreviewCardPopup, PreviewCardTrigger } from "@/components/ui/preview-card"
 
@@ -18,7 +18,7 @@ export function Reference({
   children,
   preview,
   ...props
-}: ReferenceProps): React.ReactElement {
+}: IReferenceProps): React.ReactElement {
 
   // The rest is forwarded: `ReferenceProps` is anchor props, so `target`,
   // `rel`, `aria-label` and friends type-check and have to land somewhere.

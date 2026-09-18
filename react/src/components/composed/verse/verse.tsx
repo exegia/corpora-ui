@@ -5,10 +5,10 @@ import type { ReactElement } from "react"
 import { cn } from "@/lib/utils"
 import { Text } from "../../atoms/text/default"
 import { TextClickPopover } from "../../atoms/text-selection/click-popover"
-import type { TextSize } from "../../atoms/text/types"
-import type { VerseNoteProps, VerseProps, VerseSpanProps } from "./types"
+import type { TTextSize } from "../../atoms/text/types"
+import type { TVerseNoteProps, IVerseProps, TVerseSpanProps } from "./types"
 
-const VerseSizeContext = createContext<TextSize | undefined>(undefined)
+const VerseSizeContext = createContext<TTextSize | undefined>(undefined)
 
 const chapterClassName =
   "mr-1.5 align-super text-[0.7em] font-medium no-underline hover:underline"
@@ -22,7 +22,7 @@ export function Verse({
   renderChapterPopover,
   size = "medium",
   ...props
-}: VerseProps): ReactElement {
+}: IVerseProps): ReactElement {
   const hasChapterPopover =
     renderChapterPopover !== undefined ||
     (chapterPopover !== undefined && chapterPopover !== null)
@@ -69,7 +69,7 @@ export function VerseSpan({
   className,
   size,
   ...props
-}: VerseSpanProps): ReactElement {
+}: TVerseSpanProps): ReactElement {
   const verseSize = useContext(VerseSizeContext)
   return (
     <TextClickPopover
@@ -87,7 +87,7 @@ export function VerseNote({
   className,
   size,
   ...props
-}: VerseNoteProps): ReactElement {
+}: TVerseNoteProps): ReactElement {
   const verseSize = useContext(VerseSizeContext)
   return (
     <TextClickPopover

@@ -41,7 +41,7 @@ export function DemoSelect<T extends string>({
         value={value}
       >
         <SelectTrigger
-          className="h-7 min-w-0 rounded-sm text-xs capitalize"
+          className="h-7 min-w-0 text-xs rounded-sm capitalize"
           size="sm"
         >
           <SelectValue />
@@ -111,7 +111,7 @@ export function DemoToggle({
   )
 }
 
-/** Standard layout: centered preview canvas above a controls row. */
+/** Standard layout for live examples. */
 export function DemoStage({
   controls,
   children,
@@ -122,18 +122,17 @@ export function DemoStage({
   canvasClassName?: string
 }) {
   return (
-    <div className="relative flex w-full flex-col items-center">
+    <div className="not-prose relative flex w-full flex-col items-center">
       {controls ? (
-        <Card className="absolute top-3 right-3 z-20 min-w-48 rounded-lg shadow-lg">
-          <CardContent className="flex flex-col items-start gap-2">
+        <Card className="top-3 right-3 min-w-48 shadow-lg absolute z-20 rounded-lg">
+          <CardContent className="gap-2 flex flex-col items-start">
             {controls}
           </CardContent>
         </Card>
       ) : null}
       <div
         className={
-          canvasClassName ??
-          "flex min-h-24 w-full items-center justify-center"
+          canvasClassName ?? "min-h-24 flex w-full items-center justify-center"
         }
       >
         {children}

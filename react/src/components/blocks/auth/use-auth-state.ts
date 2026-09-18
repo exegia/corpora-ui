@@ -22,12 +22,12 @@ import {
   updateAuthUserAtom,
 } from "./auth-session-atom"
 import type {
-  AuthFlowActions,
-  AuthFlowId,
-  AuthFlowState,
-  AuthSessionActions,
-  AuthSessionState,
-} from "./auth-state-type"
+  IAuthFlowActions,
+  TAuthFlowId,
+  IAuthFlowState,
+  IAuthSessionActions,
+  IAuthSessionState,
+} from "./type"
 
 /**
  * Read the auth flow registered under `flowId` from anywhere below
@@ -60,8 +60,8 @@ import type {
  * atom instead: `useAtomValue(authFlowStepAtom(flowId))`.
  */
 export function useAuthFlow(
-  flowId: AuthFlowId = DEFAULT_AUTH_FLOW_ID
-): AuthFlowState {
+  flowId: TAuthFlowId = DEFAULT_AUTH_FLOW_ID
+): IAuthFlowState {
   return useAtomValue(authFlowStateAtom(flowId))
 }
 
@@ -72,8 +72,8 @@ export function useAuthFlow(
  * `beginAttempt()` → the API call → `complete(user)` or `fail(message)`.
  */
 export function useAuthFlowActions(
-  flowId: AuthFlowId = DEFAULT_AUTH_FLOW_ID
-): AuthFlowActions {
+  flowId: TAuthFlowId = DEFAULT_AUTH_FLOW_ID
+): IAuthFlowActions {
   const goToStep = useSetAtom(goToAuthStepAtom(flowId))
   const beginVerification = useSetAtom(beginAuthVerificationAtom(flowId))
   const beginAttempt = useSetAtom(beginAuthAttemptAtom(flowId))
@@ -98,7 +98,7 @@ export function useAuthFlowActions(
  * Read the session: `status` (`"unknown"` until the app restores or rejects
  * a session at boot), the signed-in `user`, and derived `isAuthenticated`.
  */
-export function useAuthSession(): AuthSessionState & {
+export function useAuthSession(): IAuthSessionState & {
   isAuthenticated: boolean
 } {
   const state = useAtomValue(authSessionStateAtom)
@@ -114,7 +114,7 @@ export function useAuthSession(): AuthSessionState & {
  * `endAuthSessionAtom`: it clears the session AND returns the default flow
  * to the login step — the one to wire to a logout button.
  */
-export function useAuthSessionActions(): AuthSessionActions {
+export function useAuthSessionActions(): IAuthSessionActions {
   const signIn = useSetAtom(signInAtom)
   const updateUser = useSetAtom(updateAuthUserAtom)
   const markUnauthenticated = useSetAtom(markUnauthenticatedAtom)

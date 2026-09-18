@@ -10,7 +10,7 @@ import {
   useProfileCardActions,
   useProfileCardState,
 } from "../use-profile-card-state"
-import type { ProfileCardActions, ProfileCardState } from "../type"
+import type { IProfileCardActions, IProfileCardState } from "../type"
 
 const USER = { name: "Jenny Hamilton", username: "@jennycodes" }
 
@@ -227,8 +227,8 @@ describe("ProfileCardBlock", () => {
   })
   test("data-variant mirrors the fold and onVariantChange reports store-driven changes", () => {
     const onVariantChange = mock(() => {})
-    let actions!: ProfileCardActions
-    let state!: ProfileCardState
+    let actions!: IProfileCardActions
+    let state!: IProfileCardState
     function Probe() {
       actions = useProfileCardActions("account")
       state = useProfileCardState("account")
@@ -260,7 +260,7 @@ describe("ProfileCardBlock", () => {
   })
 
   test("a controlled variant is never overwritten by the store", () => {
-    let actions!: ProfileCardActions
+    let actions!: IProfileCardActions
     function Probe() {
       actions = useProfileCardActions("locked")
       return null
@@ -286,7 +286,7 @@ describe("ProfileCardBlock", () => {
   })
 
   test("openMenu / closeMenu from outside drive the menu through the store", async () => {
-    let actions!: ProfileCardActions
+    let actions!: IProfileCardActions
     function Probe() {
       actions = useProfileCardActions("menu")
       return null
@@ -309,7 +309,7 @@ describe("ProfileCardBlock", () => {
   test("busy tracks a pending action in the store", async () => {
     const user = userEvent.setup()
     let resolve!: () => void
-    let state!: ProfileCardState
+    let state!: IProfileCardState
     function Probe() {
       state = useProfileCardState("busy")
       return null

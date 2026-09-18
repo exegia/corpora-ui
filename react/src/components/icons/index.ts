@@ -1,4 +1,4 @@
-export type { FileIconProps } from './types';
+export type { IFileIconProps } from './types';
 
 export { FileBadgeCfm } from './file-badge-cfm';
 export { FileBadgeCorpus } from './file-badge-corpus';

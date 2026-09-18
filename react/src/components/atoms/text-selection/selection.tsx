@@ -4,7 +4,7 @@ import type { ReactElement } from "react"
 import { HighlightPopover as HighlightPopoverPrimitive } from "@omsimos/react-highlight-popover"
 import { HighlightPopover } from "./popover"
 import { useSelection } from "./use-selection"
-import type { TextSelectionProps } from "./types"
+import type { ITextSelectionProps } from "./types"
 
 export function TextSelection({
   children,
@@ -20,7 +20,7 @@ export function TextSelection({
   onPopoverShow,
   onPopoverHide,
   ...props
-}: TextSelectionProps): ReactElement {
+}: ITextSelectionProps): ReactElement {
   const selection = useSelection({
     selected,
     onSelectionStart,

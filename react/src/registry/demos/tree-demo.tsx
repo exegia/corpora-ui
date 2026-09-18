@@ -13,18 +13,12 @@ import {
 } from "lucide-react"
 import * as React from "react"
 
-import {
-  Tree,
-  type TreeNode,
-  useTree,
-  useTreeActions,
-} from "@/components/composed/tree"
-import { DemoSelect, DemoStage } from "@/components/docs/demo-controls"
-import { Badge } from "@/components/ui/badge"
+import { Tree, type ITreeNode, useTree } from "@/components/composed/tree"
+import { DemoStage } from "@/components/docs/demo-controls"
 import { Button } from "@/components/ui/button"
 
 /** 3 levels — `navigation` promotes the top level to section names. */
-const NAVIGATION: TreeNode[] = [
+const NAVIGATION: ITreeNode[] = [
   {
     id: "research",
     label: "Research",
@@ -59,7 +53,7 @@ const NAVIGATION: TreeNode[] = [
   },
 ]
 
-const TOC: TreeNode[] = [
+const TOC: ITreeNode[] = [
   {
     id: "getting-started",
     label: "Getting started",
@@ -81,14 +75,14 @@ const TOC: TreeNode[] = [
   { id: "changelog", label: "Changelog", href: "#" },
 ]
 
-const RAIL: TreeNode[] = [
+const RAIL: ITreeNode[] = [
   { id: "search", label: "Search", icon: <SearchIcon />, href: "#" },
   { id: "reading", label: "Reading list", icon: <BookOpenIcon />, href: "#" },
   { id: "library", label: "Library", icon: <LibraryIcon />, href: "#" },
   { id: "settings", label: "Settings", icon: <SettingsIcon />, href: "#" },
 ]
 
-const FILES: TreeNode[] = [
+const FILES: ITreeNode[] = [
   {
     id: "src",
     label: "src",
@@ -110,12 +104,11 @@ const FILES: TreeNode[] = [
   { id: "readme", label: "README.md", icon: <FileTextIcon /> },
 ]
 
-const VARIANTS = ["navigation", "toc", "sidebar", "files"] as const
+type TDemoVariant = "navigation" | "toc" | "sidebar" | "files"
 
 export default function TreeDemo() {
-  const [variant, setVariant] =
-    React.useState<(typeof VARIANTS)[number]>("navigation")
-  const [collapsed, setCollapsed] = React.useState(false)
+  const [variant] = React.useState<TDemoVariant>("navigation")
+  const [collapsed] = React.useState(false)
   const [activeId, setActiveId] = React.useState<string | undefined>("reading")
   // The `files` shape runs off a controller instead of props: it owns the
   // data, so rename and drag-and-drop apply themselves, and the buttons
@@ -126,69 +119,13 @@ export default function TreeDemo() {
     activeId,
     onNavigate: (node) => setActiveId(node.id),
   })
-  // The `navigation` shape is named instead: `treeId="demo-nav"` registers it
-  // in the shared store, so these actions reach it by id — no controller in
-  // hand, and this component never re-renders when the tree changes.
-  const nav = useTreeActions("demo-nav")
-
   return (
-    <DemoStage
-      controls={
-        <>
-          <DemoSelect
-            label="variant"
-            value={variant}
-            options={VARIANTS}
-            onChange={setVariant}
-          />
-          {variant === "navigation" && (
-            <>
-              <Button onClick={nav.expandAll} size="sm" variant="outline">
-                Expand all
-              </Button>
-              <Button onClick={nav.collapseAll} size="sm" variant="outline">
-                Collapse all
-              </Button>
-            </>
-          )}
-          {variant === "sidebar" && (
-            <DemoSelect
-              label="rail"
-              value={collapsed ? "collapsed" : "expanded"}
-              options={["expanded", "collapsed"] as const}
-              onChange={(value) => setCollapsed(value === "collapsed")}
-            />
-          )}
-          {variant === "files" && (
-            <>
-              <Button onClick={files.expandAll} size="sm" variant="outline">
-                Expand all
-              </Button>
-              <Button onClick={files.collapseAll} size="sm" variant="outline">
-                Collapse all
-              </Button>
-              <Button
-                disabled={activeId === undefined}
-                onClick={() => activeId && files.startRename(activeId)}
-                size="sm"
-                variant="outline"
-              >
-                Rename
-              </Button>
-            </>
-          )}
-          {activeId !== undefined && (
-            <Badge variant="outline">{activeId}</Badge>
-          )}
-        </>
-      }
-      canvasClassName="flex w-full justify-center"
-    >
+    <DemoStage canvasClassName="flex w-full justify-center">
       <div
         className={
           variant === "sidebar" && collapsed
-            ? "w-16 rounded-lg border p-2"
-            : "w-full max-w-64 rounded-lg border p-2"
+            ? "w-16 p-2 rounded-lg border"
+            : "max-w-64 p-2 w-full rounded-lg border"
         }
       >
         {variant === "navigation" && (

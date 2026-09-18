@@ -5,9 +5,9 @@ import { CopyIcon, PencilIcon, RotateCcwIcon } from "lucide-react"
 
 import {
   Bubble,
-  type BubblePickedEmoji,
-  type BubbleReaction,
-  type UserType,
+  type IBubblePickedEmoji,
+  type IBubbleReaction,
+  type TUserType,
 } from "@/components/atoms"
 import User from "@/components/composed/user"
 import { Button } from "@/components/ui/button"
@@ -20,16 +20,16 @@ import AI from "@/components/composed/ai";
 
 const VARIANTS = ["sender", "recipient", "ai"] as const
 
-type DemoVariant = (typeof VARIANTS)[number]
+type TDemoVariant = (typeof VARIANTS)[number]
 
-const COPY: Record<DemoVariant, string> = {
+const COPY: Record<TDemoVariant, string> = {
   sender:
     "Can you check whether ¶12 keeps the RC003 boundary? The walker looks like it split it.",
   recipient: "Sounds good — I'll take a look at ¶12 today.",
   ai: "The paragraph boundary is valid. Node p-17 has a label mismatch — accept the suggested fix to align it with the schema.",
 }
 
-const HEADER: Record<DemoVariant, { user: UserType; time: string }> = {
+const HEADER: Record<TDemoVariant, { user: TUserType; time: string }> = {
   sender: {
     user: { firstName: "Sen", lastName: "Der", role: "Admin" },
     time: "10 min ago",
@@ -39,16 +39,16 @@ const HEADER: Record<DemoVariant, { user: UserType; time: string }> = {
 }
 
 export default function BubbleDemo(): React.ReactElement {
-  const [variant, setVariant] = React.useState<DemoVariant>("sender")
+  const [variant, setVariant] = React.useState<TDemoVariant>("sender")
   const [withHeader, setWithHeader] = React.useState(true)
   const [withReactions, setWithReactions] = React.useState(true)
   const [withActions, setWithActions] = React.useState(false)
-  const [reactions, setReactions] = React.useState<BubbleReaction[]>([
+  const [reactions, setReactions] = React.useState<IBubbleReaction[]>([
     { id: "heart", emoji: "❤️", count: 4, reacted: true, label: "heart" },
     { id: "thumbs", emoji: "👍", count: 2, label: "thumbs up" },
   ])
 
-  const toggleReaction = (_: BubbleReaction, index: number): void =>
+  const toggleReaction = (_: IBubbleReaction, index: number): void =>
     setReactions((previous) =>
       previous.map((reaction, at) =>
         at === index
@@ -61,7 +61,7 @@ export default function BubbleDemo(): React.ReactElement {
       )
     )
 
-  const addReaction = ({ emoji, label }: BubblePickedEmoji): void =>
+  const addReaction = ({ emoji, label }: IBubblePickedEmoji): void =>
     setReactions((previous) => {
       const at = previous.findIndex((reaction) => reaction.emoji === emoji)
       if (at === -1) {

@@ -2,7 +2,7 @@ import type * as React from "react"
 
 /** One node in the tree. Nesting depth carries meaning per variant — see
  * `TreeProps["variant"]`. */
-export interface TreeNode {
+export interface ITreeNode {
   id: string
   label: string
   /** Leading icon. Required in practice for `sidebar` — it is all that
@@ -22,31 +22,31 @@ export interface TreeNode {
   badge?: React.ReactNode
   /** Fires on selection, before the tree-level `onNavigate`. */
   onSelect?: () => void
-  children?: TreeNode[]
+  children?: ITreeNode[]
 }
 
-export type TreeVariant = "navigation" | "toc" | "sidebar" | "files"
+export type TTreeVariant = "navigation" | "toc" | "sidebar" | "files"
 
 /** Where a dragged row lands relative to its drop target. */
-export type TreeDropPosition = "before" | "after" | "inside"
+export type TTreeDropPosition = "before" | "after" | "inside"
 
 /** Key for one tree’s state in the store. Any stable string; `useTree`
  * generates one when you don't pass it. */
-export type TreeInstanceId = string
+export type TTreeInstanceId = string
 
 /** Row a drag hovers, and where the drop would land. */
-export interface TreeDropTarget {
+export interface ITreeDropTarget {
   id: string
-  position: TreeDropPosition
+  position: TTreeDropPosition
 }
 
-interface TreeBaseProps {
-  items: TreeNode[]
+interface ITreeBaseProps {
+  items: ITreeNode[]
   /** Key this tree's state under a name your app can address —
    * `useTreeState("app-nav")` / `useTreeActions("app-nav")` reach it from
    * anywhere under `ExegiaProvider`. Without one the tree generates a key
    * and its state is dropped when it unmounts. */
-  treeId?: TreeInstanceId
+  treeId?: TTreeInstanceId
   /** Never set on the data form — `tree` selects the controller form. */
   tree?: never
   /** `id` of the current entry — matches any depth. Its ancestors expand. */
@@ -55,14 +55,14 @@ interface TreeBaseProps {
    * own `onSelect`. Rows are buttons, so this is the routing path — wire
    * your router's navigate here. `toc` rows below the route level still jump
    * to `#{id}` natively, after this fires. */
-  onNavigate?: (node: TreeNode) => void
+  onNavigate?: (node: ITreeNode) => void
   /** Expand/collapse cues. Silent until `bindSounds()`. */
   sound?: boolean
   ariaLabel?: string
   className?: string
 }
 
-interface TreeReadonlyProps {
+interface ITreeReadonlyProps {
   collapsed?: never
   onMove?: never
   onRename?: never
@@ -72,42 +72,42 @@ interface TreeReadonlyProps {
 /** Drive the tree from a `useTree` controller instead of raw props. The
  * controller carries the variant, the data and every handler; only the
  * presentational props stay here. */
-export interface TreeControllerProps {
-  tree: TreeController
+export interface ITreeControllerProps {
+  tree: ITreeController
   items?: never
   ariaLabel?: string
   className?: string
   /** Row actions revealed on hover/focus (`files` only — ignored by the
    * other variants, which the controller form cannot type-gate). */
-  renderTrailing?: (node: TreeNode) => React.ReactNode
+  renderTrailing?: (node: ITreeNode) => React.ReactNode
 }
 
 /** Either form: raw props, or a `useTree` controller via `tree`. */
-export type TreeProps = TreeDataProps | TreeControllerProps
+export type TTreeProps = TTreeDataProps | ITreeControllerProps
 
 /** The four shapes a Tree takes. Editing props only exist on `files`;
  * `collapsed` only on `sidebar` — the union is the contract. */
-export type TreeDataProps = TreeBaseProps &
+export type TTreeDataProps = ITreeBaseProps &
   (
     | ({
         /** Nested app navigation. With 3 levels of nodes the top level
          * becomes collapsible section names (styled as headings, not
          * rows); with 2 it renders plain selectable rows. */
         variant: "navigation"
-      } & TreeReadonlyProps)
+      } & ITreeReadonlyProps)
     | ({
         /** Table of contents: top-level nodes are routes (handled in
          * `onNavigate`); rows below jump to `#{id}` after select, like an
          * anchor would. Parents select on the row and expand from a
          * separate overlay chevron. */
         variant: "toc"
-      } & TreeReadonlyProps)
+      } & ITreeReadonlyProps)
     | ({
         /** Single-level icon rail. `collapsed` shrinks rows to their
          * leading icon; nested children are ignored. */
         variant: "sidebar"
         collapsed?: boolean
-      } & Omit<TreeReadonlyProps, "collapsed">)
+      } & Omit<ITreeReadonlyProps, "collapsed">)
     | {
         /** File explorer: only leaves navigate, folders toggle. Compact
          * spacing; rename, drag-and-drop and trailing actions enabled. */
@@ -119,7 +119,7 @@ export type TreeDataProps = TreeBaseProps &
         /** Enables inline rename (double-click or F2). */
         onRename?: (id: string, label: string) => void
         /** Row actions revealed on hover/focus — a menu, a delete icon. */
-        renderTrailing?: (node: TreeNode) => React.ReactNode
+        renderTrailing?: (node: ITreeNode) => React.ReactNode
         collapsed?: never
       }
   )
@@ -127,29 +127,29 @@ export type TreeDataProps = TreeBaseProps &
 /** Options for `useTree`. Each of `items`, `activeId` and `collapsed` is
  * controlled when passed and hook-owned when its `default*` twin is used
  * instead. */
-export interface UseTreeOptions {
+export interface IUseTreeOptions {
   /** Key this tree's state under a name your app can address —
    * `useTreeState("app-nav")` / `useTreeActions("app-nav")` reach it from
    * anywhere under `ExegiaProvider`. Without one the hook generates a key
    * and the state is dropped when the component unmounts. */
-  treeId?: TreeInstanceId
+  treeId?: TTreeInstanceId
   /** Which shape the tree takes — gates rename/reorder (`files`) and the
    * collapsible rail (`sidebar`). */
-  variant: TreeVariant
+  variant: TTreeVariant
   /** Controlled data. With it, `rename`/`move` only report the edit unless
    * you also pass `onItemsChange`. */
-  items?: TreeNode[]
+  items?: ITreeNode[]
   /** Hook-owned data — `rename` and `move` apply the edit themselves. */
-  defaultItems?: TreeNode[]
+  defaultItems?: ITreeNode[]
   /** Next tree after a `rename`/`move`. Also enables self-applying edits
    * on top of controlled `items`. */
-  onItemsChange?: (items: TreeNode[]) => void
+  onItemsChange?: (items: ITreeNode[]) => void
   /** Controlled selection. Ancestors of the active node expand. */
   activeId?: string
   defaultActiveId?: string
   /** Fires for every selection (rows and leaves alike), after the node's
    * own `onSelect` — wire your router's navigate here. */
-  onNavigate?: (node: TreeNode) => void
+  onNavigate?: (node: ITreeNode) => void
   /** Start with these ids expanded instead of the `defaultOpen` set. */
   defaultExpandedIds?: Iterable<string>
   onExpandedChange?: (ids: string[]) => void
@@ -169,18 +169,18 @@ export interface UseTreeOptions {
 
 /** Everything the tree can do, callable from outside the component.
  * Returned by `useTree` and accepted by `<Tree tree={…} />`. */
-export interface TreeController {
+export interface ITreeController {
   /** The key this tree's state is stored under. */
-  treeId: TreeInstanceId
-  variant: TreeVariant
-  items: TreeNode[]
+  treeId: TTreeInstanceId
+  variant: TTreeVariant
+  items: ITreeNode[]
   /** `navigation` with 3 levels of nodes — depth 0 renders as sections. */
   sectioned: boolean
   /** Ids of the section headings, empty unless `sectioned`. Pass one to
    * `expand`/`collapse`/`toggleExpanded` to work a whole section. */
   sectionIds: string[]
   sound: boolean
-  getNode: (id: string) => TreeNode | null
+  getNode: (id: string) => ITreeNode | null
 
   expandedIds: ReadonlySet<string>
   isExpanded: (id: string) => boolean
@@ -219,7 +219,7 @@ export interface TreeController {
   /** Back to the values the tree mounted with. */
   reset: () => void
 
-  dnd: TreeDndContextValue
+  dnd: ITreeDndContextValue
 }
 
 /** @internal What a row needs from the root, threaded through context so
@@ -228,36 +228,36 @@ export interface TreeController {
  * Deliberately free of tree state. Rows read state from per-node atoms, so
  * this value keeps its identity for the life of the tree and expanding one
  * branch no longer re-renders every row through context. */
-export interface TreeContextValue {
-  treeId: TreeInstanceId
-  renderTrailing?: (node: TreeNode) => React.ReactNode
-  dnd: TreeDndHandlers
+export interface ITreeContextValue {
+  treeId: TTreeInstanceId
+  renderTrailing?: (node: ITreeNode) => React.ReactNode
+  dnd: ITreeDndHandlers
 }
 
 /** @internal The drag event handlers, stable for the life of the tree —
  * they read drag state out of the store instead of closing over it, so
  * handing them to every row costs no re-renders. */
-export interface TreeDndHandlers {
+export interface ITreeDndHandlers {
   enabled: boolean
   onRowDragStart: (event: React.DragEvent, id: string) => void
-  onRowDragOver: (event: React.DragEvent, node: TreeNode) => void
+  onRowDragOver: (event: React.DragEvent, node: ITreeNode) => void
   onRowDragLeave: (event: React.DragEvent) => void
-  onRowDrop: (event: React.DragEvent, node: TreeNode) => void
+  onRowDrop: (event: React.DragEvent, node: ITreeNode) => void
   onRowDragEnd: () => void
 }
 
 /** @internal Handlers plus live drag state — what `TreeController.dnd`
  * exposes (all `null`/no-op outside `files`). */
-export interface TreeDndContextValue extends TreeDndHandlers {
+export interface ITreeDndContextValue extends ITreeDndHandlers {
   draggedId: string | null
   /** Row the pointer is over and where the drop would land. */
-  dropTarget: TreeDropTarget | null
+  dropTarget: ITreeDropTarget | null
 }
 
 /** Everything observable about one tree, for consumers reading it by id. */
-export interface TreeState {
-  variant: TreeVariant
-  items: TreeNode[]
+export interface ITreeState {
+  variant: TTreeVariant
+  items: ITreeNode[]
   activeId?: string
   expandedIds: ReadonlySet<string>
   collapsed: boolean
@@ -267,11 +267,11 @@ export interface TreeState {
   canRename: boolean
   canMove: boolean
   draggedId: string | null
-  dropTarget: TreeDropTarget | null
+  dropTarget: ITreeDropTarget | null
 }
 
 /** Everything doable to one tree from outside its component. */
-export interface TreeActions {
+export interface ITreeActions {
   expand: (id: string) => void
   collapse: (id: string) => void
   toggleExpanded: (id: string) => void
@@ -285,14 +285,14 @@ export interface TreeActions {
   cancelRename: () => void
   rename: (id: string, label: string) => void
   move: (id: string, parentId: string | null, index: number) => void
-  setItems: (items: TreeNode[]) => void
+  setItems: (items: ITreeNode[]) => void
   reset: () => void
 }
 
 /** @internal Projection of `useTree`'s options — primitives only, so the
  * store write runs once per real change instead of once per render. */
-export interface TreeConfig {
-  variant: TreeVariant
+export interface ITreeConfig {
+  variant: TTreeVariant
   sound: boolean
   controlsItems: boolean
   controlsActiveId: boolean
@@ -304,9 +304,9 @@ export interface TreeConfig {
 
 /** @internal Latest option callbacks. Only write atoms read this, so it
  * can be refreshed every commit without re-rendering anything. */
-export interface TreeHandlers {
-  onNavigate?: (node: TreeNode) => void
-  onItemsChange?: (items: TreeNode[]) => void
+export interface ITreeHandlers {
+  onNavigate?: (node: ITreeNode) => void
+  onItemsChange?: (items: ITreeNode[]) => void
   onExpandedChange?: (ids: string[]) => void
   onCollapsedChange?: (collapsed: boolean) => void
   onRename?: (id: string, label: string) => void
@@ -314,8 +314,8 @@ export interface TreeHandlers {
 }
 
 /** @internal What an instance starts from, replayed by `resetTreeAtom`. */
-export interface TreeSeed {
-  items: TreeNode[]
+export interface ITreeSeed {
+  items: ITreeNode[]
   activeId?: string
   collapsed: boolean
   expandedIds?: string[]

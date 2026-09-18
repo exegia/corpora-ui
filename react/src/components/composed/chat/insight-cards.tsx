@@ -6,39 +6,39 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Card, CardFrame, CardFrameHeader, CardPanel } from "@/components/ui/card"
 import { SPRING_SWAP } from "@/lib/ease"
-import { DOT_TONE_CLASSES, Dot, FollowUpRow, IconButton, Pill, Stat, type DotTone, type StatProps } from "@/components/ui/chat"
-import { Chart, type ChartDatum, type ChartSeries } from "./chart"
+import { DOT_TONE_CLASSES, Dot, FollowUpRow, IconButton, Pill, Stat, type TDotTone, type IStatProps } from "@/components/ui/chat"
+import { Chart, type TChartDatum, type IChartSeries } from "./chart"
 
-export interface Insight {
+export interface IInsight {
   /** Sentence; `entity` is highlighted with a dot in front. */
   summary: React.ReactNode
-  stats?: StatProps[]
-  snapshot?: { label?: React.ReactNode; badge?: React.ReactNode; data: ChartDatum[]; series: ChartSeries[] }
+  stats?: IStatProps[]
+  snapshot?: { label?: React.ReactNode; badge?: React.ReactNode; data: TChartDatum[]; series: IChartSeries[] }
   /** Share breakdown: tile + big value, a segmented bar, selectable legend pills and a detail panel. */
-  allocation?: InsightAllocation
+  allocation?: IInsightAllocation
   followUp?: string
 }
 
-export interface InsightSegment {
+export interface IInsightSegment {
   key: string
   label: React.ReactNode
   value: number
-  tone?: DotTone
+  tone?: TDotTone
   /** Detail panel heading; falls back to `label`. */
   title?: React.ReactNode
   description?: React.ReactNode
 }
 
-export interface InsightAllocation {
+export interface IInsightAllocation {
   label: React.ReactNode
   value: React.ReactNode
   /** Letter in the tile; takes the first segment's tone. */
   initials?: string
-  segments: InsightSegment[]
+  segments: IInsightSegment[]
   defaultSelected?: string
 }
 
-const TONE_TEXT: Record<DotTone, string> = {
+const TONE_TEXT: Record<TDotTone, string> = {
   success: "text-semantic-success", warning: "text-semantic-warning", info: "text-semantic-info", danger: "text-semantic-danger",
   neutral: "text-text-muted", accent: "text-accent-default", brand: "text-brand",
   "series-1": "text-chart-series-1", "series-2": "text-chart-series-2", "series-3": "text-chart-series-3", "series-4": "text-chart-series-4", "series-5": "text-chart-series-5",
@@ -47,12 +47,12 @@ const TONE_TEXT: Record<DotTone, string> = {
 const pct = (n: number, total: number) => `${Math.round((n / total) * 1000) / 10}%`
 
 /** @sketch beautiful-ui "Insight Cards / allocation" — segment selection changes the inspected group without moving the card. */
-function Allocation({ label, value, initials, segments, defaultSelected }: InsightAllocation): React.ReactElement {
+function Allocation({ label, value, initials, segments, defaultSelected }: IInsightAllocation): React.ReactElement {
   const reduceMotion = useReducedMotion()
   const [selected, setSelected] = React.useState(defaultSelected ?? segments[0]?.key)
   const total = segments.reduce((n, s) => n + s.value, 0) || 1
   const active = segments.find((s) => s.key === selected) ?? segments[0]
-  const tone = (s?: InsightSegment) => s?.tone ?? "series-1"
+  const tone = (s?: IInsightSegment) => s?.tone ?? "series-1"
 
   return (
     <CardPanel data-slot="insight-allocation" className="flex flex-col gap-3 p-3">
@@ -115,9 +115,9 @@ function Allocation({ label, value, initials, segments, defaultSelected }: Insig
   )
 }
 
-export interface InsightCardsProps extends React.ComponentPropsWithoutRef<"div"> {
+export interface IInsightCardsProps extends React.ComponentPropsWithoutRef<"div"> {
   header?: React.ReactNode
-  insights: Insight[]
+  insights: IInsight[]
   index?: number
   defaultIndex?: number
   onIndexChange?: (index: number) => void
@@ -130,7 +130,7 @@ export interface InsightCardsProps extends React.ComponentPropsWithoutRef<"div">
  *
  * @sketch "Component / Insight Cards"
  */
-export function InsightCards({ header = "Insights", insights, index, defaultIndex = 0, onIndexChange, onFollowUp, className, ...props }: InsightCardsProps): React.ReactElement {
+export function InsightCards({ header = "Insights", insights, index, defaultIndex = 0, onIndexChange, onFollowUp, className, ...props }: IInsightCardsProps): React.ReactElement {
   const reduceMotion = useReducedMotion()
   const [internal, setInternal] = React.useState(defaultIndex)
   const current = Math.min(index ?? internal, Math.max(insights.length - 1, 0))
@@ -193,7 +193,7 @@ export function InsightCards({ header = "Insights", insights, index, defaultInde
 }
 
 /** Inline entity marker for `Insight.summary`: dot + name. */
-export function InsightEntity({ tone = "neutral", children }: { tone?: DotTone; children: React.ReactNode }): React.ReactElement {
+export function InsightEntity({ tone = "neutral", children }: { tone?: TDotTone; children: React.ReactNode }): React.ReactElement {
   return <><Dot tone={tone} size={8} /> {children}</>
 }
 

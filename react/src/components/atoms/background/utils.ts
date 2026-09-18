@@ -1,8 +1,8 @@
-import type { TextureVariant } from "./type";
+import type { TTextureVariant } from "./type";
 import fabricBackground from "@/assets/fabric.png";
 import paperBackground from "@/assets/paper.png";
 
-export const textureMap: Record<Exclude<TextureVariant, "none">, string> = {
+export const textureMap: Record<Exclude<TTextureVariant, "none">, string> = {
   fabric: fabricBackground,
   paper: paperBackground,
 }

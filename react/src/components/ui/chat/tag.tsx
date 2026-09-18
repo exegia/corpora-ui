@@ -1,17 +1,17 @@
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 
-export type TagTone = "amber" | "purple" | "blue" | "green"
+export type TTagTone = "amber" | "purple" | "blue" | "green"
 
-const TONE: Record<TagTone, string> = {
+const TONE: Record<TTagTone, string> = {
   amber: "border-tag-amber-border bg-tag-amber-fill text-tag-amber-text",
   purple: "border-tag-purple-border bg-tag-purple-fill text-tag-purple-text",
   blue: "border-tag-blue-border bg-tag-blue-fill text-tag-blue-text",
   green: "border-tag-green-border bg-tag-green-fill text-tag-green-text",
 }
 
-export interface TagProps extends React.ComponentPropsWithoutRef<"span"> {
-  tone?: TagTone
+export interface ITagProps extends React.ComponentPropsWithoutRef<"span"> {
+  tone?: TTagTone
 }
 
 /**
@@ -19,7 +19,7 @@ export interface TagProps extends React.ComponentPropsWithoutRef<"span"> {
  *
  * @sketch "Atom / Tag / {Amber, Purple, Blue, Green}"
  */
-export function Tag({ tone = "blue", className, children, ...props }: TagProps): React.ReactElement {
+export function Tag({ tone = "blue", className, children, ...props }: ITagProps): React.ReactElement {
   return (
     <span
       data-slot="tag"
@@ -32,16 +32,16 @@ export function Tag({ tone = "blue", className, children, ...props }: TagProps):
   )
 }
 
-export type SignalLevel = "high" | "medium" | "low"
+export type TSignalLevel = "high" | "medium" | "low"
 
-const SIGNAL: Record<SignalLevel, { lit: number; color: string }> = {
+const SIGNAL: Record<TSignalLevel, { lit: number; color: string }> = {
   high: { lit: 3, color: "bg-semantic-success" },
   medium: { lit: 2, color: "bg-semantic-warning" },
   low: { lit: 1, color: "bg-text-muted" },
 }
 
-export interface SignalProps extends React.ComponentPropsWithoutRef<"span"> {
-  level?: SignalLevel
+export interface ISignalProps extends React.ComponentPropsWithoutRef<"span"> {
+  level?: TSignalLevel
 }
 
 /**
@@ -49,7 +49,7 @@ export interface SignalProps extends React.ComponentPropsWithoutRef<"span"> {
  *
  * @sketch "Atom / Signal / {High, Medium, Low}"
  */
-export function Signal({ level = "high", className, ...props }: SignalProps): React.ReactElement {
+export function Signal({ level = "high", className, ...props }: ISignalProps): React.ReactElement {
   const { lit, color } = SIGNAL[level]
   return (
     <span role="img" aria-label={`${level} signal`} data-slot="signal" data-level={level} className={cn("inline-flex h-2.5 items-end gap-0.5", className)} {...props}>

@@ -17,15 +17,15 @@ import type { Atom, Getter, Setter } from "jotai"
 
 import { playCue } from "@/lib/sound"
 import type {
-  TreeConfig,
-  TreeDropPosition,
-  TreeDropTarget,
-  TreeHandlers,
-  TreeInstanceId,
-  TreeNode,
-  TreeSeed,
-  TreeState,
-  TreeVariant,
+  ITreeConfig,
+  TTreeDropPosition,
+  ITreeDropTarget,
+  ITreeHandlers,
+  TTreeInstanceId,
+  ITreeNode,
+  ITreeSeed,
+  ITreeState,
+  TTreeVariant,
 } from "./type"
 import {
   ancestorIdsOf,
@@ -37,12 +37,12 @@ import {
   renameNode,
 } from "./utils"
 
-const NO_ITEMS: TreeNode[] = []
+const NO_ITEMS: ITreeNode[] = []
 const NO_IDS: ReadonlySet<string> = new Set<string>()
-const NO_HANDLERS: TreeHandlers = {}
+const NO_HANDLERS: ITreeHandlers = {}
 
 /** What a tree reads as before `useTree` publishes its options. */
-export const DEFAULT_TREE_CONFIG: TreeConfig = {
+export const DEFAULT_TREE_CONFIG: ITreeConfig = {
   variant: "navigation",
   sound: true,
   controlsItems: false,
@@ -53,7 +53,7 @@ export const DEFAULT_TREE_CONFIG: TreeConfig = {
   hasMoveHandler: false,
 }
 
-const DEFAULT_TREE_SEED: TreeSeed = { items: NO_ITEMS, collapsed: false }
+const DEFAULT_TREE_SEED: ITreeSeed = { items: NO_ITEMS, collapsed: false }
 
 /**
  * A string-keyed atom family.
@@ -63,24 +63,24 @@ const DEFAULT_TREE_SEED: TreeSeed = { items: NO_ITEMS, collapsed: false }
  * adding `jotai-family` as a second Jotai package to keep version-aligned.
  * Dropping a key lets the store's WeakMap release that instance's state.
  */
-type Family<AtomType> = ((id: TreeInstanceId) => AtomType) & {
-  remove: (id: TreeInstanceId) => void
+type TFamily<AtomType> = ((id: TTreeInstanceId) => AtomType) & {
+  remove: (id: TTreeInstanceId) => void
 }
 
 /** Every family, so `removeTreeInstance` can drop an id from all of them. */
-const families: { remove: (id: TreeInstanceId) => void }[] = []
+const families: { remove: (id: TTreeInstanceId) => void }[] = []
 
-function keyed<AtomType>(create: (id: TreeInstanceId) => AtomType) {
-  const cache = new Map<TreeInstanceId, AtomType>()
-  const family = ((id: TreeInstanceId) => {
+function keyed<AtomType>(create: (id: TTreeInstanceId) => AtomType) {
+  const cache = new Map<TTreeInstanceId, AtomType>()
+  const family = ((id: TTreeInstanceId) => {
     let instance = cache.get(id)
     if (instance === undefined) {
       instance = create(id)
       cache.set(id, instance)
     }
     return instance
-  }) as Family<AtomType>
-  family.remove = (id: TreeInstanceId) => {
+  }) as TFamily<AtomType>
+  family.remove = (id: TTreeInstanceId) => {
     cache.delete(id)
   }
   families.push(family)
@@ -97,7 +97,7 @@ function stateFamily<Value>(name: string, initialValue: Value) {
 
 function readFamily<Value>(
   name: string,
-  read: (get: Getter, id: TreeInstanceId) => Value
+  read: (get: Getter, id: TTreeInstanceId) => Value
 ) {
   return keyed((id) => {
     const instance = atom((get) => read(get, id))
@@ -108,7 +108,7 @@ function readFamily<Value>(
 
 function actionFamily<Args extends unknown[]>(
   name: string,
-  write: (get: Getter, set: Setter, id: TreeInstanceId, ...args: Args) => void
+  write: (get: Getter, set: Setter, id: TTreeInstanceId, ...args: Args) => void
 ) {
   return keyed((id) => {
     const instance = atom(null, (get, set, ...args: Args) =>
@@ -132,9 +132,9 @@ function actionFamily<Args extends unknown[]>(
  */
 function nodeFamily<Value>(
   name: string,
-  read: (get: Getter, id: TreeInstanceId, nodeId: string) => Value
+  read: (get: Getter, id: TTreeInstanceId, nodeId: string) => Value
 ) {
-  const outer = keyed((id: TreeInstanceId) => {
+  const outer = keyed((id: TTreeInstanceId) => {
     const inner = new Map<string, Atom<Value>>()
     return (nodeId: string) => {
       let instance = inner.get(nodeId)
@@ -146,27 +146,27 @@ function nodeFamily<Value>(
       return instance
     }
   })
-  return (id: TreeInstanceId, nodeId: string) => outer(id)(nodeId)
+  return (id: TTreeInstanceId, nodeId: string) => outer(id)(nodeId)
 }
 
 // ── state ──────────────────────────────────────────────────────────────────
 
 /** @internal */
-export const treeConfigAtom = stateFamily<TreeConfig>(
+export const treeConfigAtom = stateFamily<ITreeConfig>(
   "config",
   DEFAULT_TREE_CONFIG
 )
 /** @internal Refreshed every commit; nothing subscribes, so it is free. */
-export const treeHandlersAtom = stateFamily<TreeHandlers>(
+export const treeHandlersAtom = stateFamily<ITreeHandlers>(
   "handlers",
   NO_HANDLERS
 )
-const treeSeedAtom = stateFamily<TreeSeed>("seed", DEFAULT_TREE_SEED)
+const treeSeedAtom = stateFamily<ITreeSeed>("seed", DEFAULT_TREE_SEED)
 const treeInitializedAtom = stateFamily<boolean>("initialized", false)
 
 /** The tree's current data — hook-owned, or the projection of a controlled
  * `items` prop. */
-export const treeItemsAtom = stateFamily<TreeNode[]>("items", NO_ITEMS)
+export const treeItemsAtom = stateFamily<ITreeNode[]>("items", NO_ITEMS)
 export const treeActiveIdAtom = stateFamily<string | undefined>(
   "activeId",
   undefined
@@ -182,7 +182,7 @@ export const treeRailCollapsedAtom = stateFamily<boolean>(
 )
 export const treeRenamingIdAtom = stateFamily<string | null>("renamingId", null)
 export const treeDraggedIdAtom = stateFamily<string | null>("draggedId", null)
-export const treeDropTargetAtom = stateFamily<TreeDropTarget | null>(
+export const treeDropTargetAtom = stateFamily<ITreeDropTarget | null>(
   "dropTarget",
   null
 )
@@ -266,7 +266,7 @@ export const treeNodeDraggingAtom = nodeFamily(
 )
 
 /** Where a drop on this one node would land, `null` when it is not hovered. */
-export const treeNodeDropAtom = nodeFamily<TreeDropPosition | null>(
+export const treeNodeDropAtom = nodeFamily<TTreeDropPosition | null>(
   "drop",
   (get, id, nodeId) => {
     const target = get(treeDropTargetAtom(id))
@@ -276,7 +276,7 @@ export const treeNodeDropAtom = nodeFamily<TreeDropPosition | null>(
 
 /** The whole state of one tree. Components reading a single field should
  * subscribe to that field's atom instead — this one changes on every edit. */
-export const treeStateAtom = readFamily<TreeState>("state", (get, id) => ({
+export const treeStateAtom = readFamily<ITreeState>("state", (get, id) => ({
   variant: get(treeConfigAtom(id)).variant,
   items: get(treeItemsAtom(id)),
   activeId: get(treeActiveIdAtom(id)),
@@ -293,14 +293,14 @@ export const treeStateAtom = readFamily<TreeState>("state", (get, id) => ({
 
 // ── shared write helpers ───────────────────────────────────────────────────
 
-function cue(get: Getter, id: TreeInstanceId): void {
+function cue(get: Getter, id: TTreeInstanceId): void {
   if (get(treeConfigAtom(id)).sound) playCue("toggle")
 }
 
 function commitExpanded(
   get: Getter,
   set: Setter,
-  id: TreeInstanceId,
+  id: TTreeInstanceId,
   next: Set<string>
 ): void {
   set(treeExpandedIdsAtom(id), next)
@@ -311,8 +311,8 @@ function commitExpanded(
 function commitItems(
   get: Getter,
   set: Setter,
-  id: TreeInstanceId,
-  next: TreeNode[]
+  id: TTreeInstanceId,
+  next: ITreeNode[]
 ): void {
   if (!get(treeConfigAtom(id)).controlsItems) set(treeItemsAtom(id), next)
   get(treeHandlersAtom(id)).onItemsChange?.(next)
@@ -321,7 +321,7 @@ function commitItems(
 /** `null` when every ancestor of `nodeId` is already open. */
 function withAncestors(
   get: Getter,
-  id: TreeInstanceId,
+  id: TTreeInstanceId,
   nodeId: string
 ): Set<string> | null {
   const ancestors = ancestorIdsOf(get(treeItemsAtom(id)), nodeId)
@@ -332,9 +332,9 @@ function withAncestors(
 
 function seedInstance(
   set: Setter,
-  id: TreeInstanceId,
-  seed: TreeSeed,
-  variant: TreeVariant
+  id: TTreeInstanceId,
+  seed: ITreeSeed,
+  variant: TTreeVariant
 ): void {
   set(treeItemsAtom(id), seed.items)
   set(treeActiveIdAtom(id), seed.activeId)
@@ -518,7 +518,7 @@ export const moveTreeNodeAtom = actionFamily<
 
 /** Replace the data. Reports through `onItemsChange`; writes the atom only
  * when no controlled `items` prop owns it. */
-export const setTreeItemsAtom = actionFamily<[items: TreeNode[]]>(
+export const setTreeItemsAtom = actionFamily<[items: ITreeNode[]]>(
   "setItems",
   (get, set, id, items) => {
     commitItems(get, set, id, items)
@@ -535,7 +535,7 @@ export const endTreeDragAtom = actionFamily<[]>("endDrag", (_get, set, id) => {
 // ── lifecycle ──────────────────────────────────────────────────────────────
 
 /** @internal Publish the latest options; seed the instance once. */
-export const mountTreeAtom = actionFamily<[config: TreeConfig, seed: TreeSeed]>(
+export const mountTreeAtom = actionFamily<[config: ITreeConfig, seed: ITreeSeed]>(
   "mount",
   (get, set, id, config, seed) => {
     set(treeConfigAtom(id), config)
@@ -547,7 +547,7 @@ export const mountTreeAtom = actionFamily<[config: TreeConfig, seed: TreeSeed]>(
 )
 
 /** @internal */
-export const setTreeHandlersAtom = actionFamily<[handlers: TreeHandlers]>(
+export const setTreeHandlersAtom = actionFamily<[handlers: ITreeHandlers]>(
   "setHandlers",
   (_get, set, id, handlers) => {
     set(treeHandlersAtom(id), handlers)
@@ -555,7 +555,7 @@ export const setTreeHandlersAtom = actionFamily<[handlers: TreeHandlers]>(
 )
 
 /** @internal One-way projections of controlled props — no callbacks fire. */
-export const projectTreeItemsAtom = actionFamily<[items: TreeNode[]]>(
+export const projectTreeItemsAtom = actionFamily<[items: ITreeNode[]]>(
   "projectItems",
   (_get, set, id, items) => {
     set(treeItemsAtom(id), items)
@@ -585,6 +585,6 @@ export const resetTreeAtom = actionFamily<[]>("reset", (get, set, id) => {
 /** Drop every atom for `id`. `useTree` calls this on unmount for trees it
  * keyed itself; an explicit `treeId` outlives its component, so a rail's fold
  * survives a route change. */
-export function removeTreeInstance(id: TreeInstanceId): void {
+export function removeTreeInstance(id: TTreeInstanceId): void {
   for (const family of families) family.remove(id)
 }

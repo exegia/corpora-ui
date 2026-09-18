@@ -3,9 +3,9 @@ import { act, render, renderHook, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 
 import { Tree, useTree } from "../index"
-import type { TreeController, TreeNode } from "../type"
+import type { ITreeController, ITreeNode } from "../type"
 
-const NAV: TreeNode[] = [
+const NAV: ITreeNode[] = [
   {
     id: "research",
     label: "Research",
@@ -20,7 +20,7 @@ const NAV: TreeNode[] = [
   },
 ]
 
-const FILES: TreeNode[] = [
+const FILES: ITreeNode[] = [
   {
     id: "src",
     label: "src",
@@ -70,7 +70,7 @@ describe("useTree · expansion", () => {
   })
 
   test("expandAll counts empty folders in files, not empty leaves elsewhere", () => {
-    const items: TreeNode[] = [{ id: "empty", label: "empty", children: [] }]
+    const items: ITreeNode[] = [{ id: "empty", label: "empty", children: [] }]
     const { result } = renderHook(() =>
       useTree({ variant: "files", items })
     )
@@ -161,7 +161,7 @@ describe("useTree · rail", () => {
 describe("useTree · selection", () => {
   test("select runs onSelect then onNavigate and holds the active id", () => {
     const order: string[] = []
-    const items: TreeNode[] = [
+    const items: ITreeNode[] = [
       { id: "a", label: "Alpha", onSelect: () => order.push("onSelect") },
       { id: "off", label: "Off", disabled: true },
     ]
@@ -264,7 +264,7 @@ describe("useTree · reorder", () => {
   })
 
   test("controlled data with onItemsChange gets the next tree", () => {
-    const onItemsChange = mock((items: TreeNode[]) => void items)
+    const onItemsChange = mock((items: ITreeNode[]) => void items)
     const { result } = renderHook(() =>
       useTree({ variant: "files", items: FILES, onItemsChange })
     )
@@ -291,7 +291,7 @@ describe("Tree · controller form", () => {
   function Harness({
     onReady,
   }: {
-    onReady: (tree: TreeController) => void
+    onReady: (tree: ITreeController) => void
   }): React.ReactElement {
     const tree = useTree({ variant: "files", defaultItems: FILES })
     onReady(tree)
@@ -299,7 +299,7 @@ describe("Tree · controller form", () => {
   }
 
   test("renders from the controller and reacts to calls made outside it", async () => {
-    let tree!: TreeController
+    let tree!: ITreeController
     render(<Harness onReady={(next) => (tree = next)} />)
 
     expect(screen.getByText("index.ts")).toBeDefined()
@@ -313,7 +313,7 @@ describe("Tree · controller form", () => {
 
   test("a row press routes through the controller's select", async () => {
     const user = userEvent.setup()
-    let tree!: TreeController
+    let tree!: ITreeController
     render(<Harness onReady={(next) => (tree = next)} />)
 
     await user.click(screen.getByRole("button", { name: "README.md" }))
@@ -321,7 +321,7 @@ describe("Tree · controller form", () => {
   })
 
   test("startRename from outside opens the row's rename input", async () => {
-    let tree!: TreeController
+    let tree!: ITreeController
     render(<Harness onReady={(next) => (tree = next)} />)
 
     await act(async () => tree.startRename("readme"))

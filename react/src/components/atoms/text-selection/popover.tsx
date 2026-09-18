@@ -1,12 +1,14 @@
 "use client"
 
+import { GlassSurface } from "@/components/ui/glasscn/liquid-glass"
+
 import { useEffect } from "react"
 import type * as React from "react"
 import { useHighlightPopover } from "@omsimos/react-highlight-popover"
 import { Card, CardPanel } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { useSelection } from "./use-selection"
-import type { HighlightPopoverProps, SelectionRenderProps } from "./types"
+import type { IHighlightPopoverProps, ISelectionRenderProps } from "./types"
 
 export function HighlightPopover({
   children,
@@ -15,7 +17,7 @@ export function HighlightPopover({
   render,
   className,
   ...props
-}: HighlightPopoverProps): React.ReactElement {
+}: IHighlightPopoverProps): React.ReactElement {
   const primitive = useHighlightPopover()
   const selection = useSelection()
   const currentSelection =
@@ -56,7 +58,7 @@ export function HighlightPopover({
     stateSelection,
   ])
 
-  const renderProps: SelectionRenderProps = {
+  const renderProps: ISelectionRenderProps = {
     position,
     selection: currentSelection,
     selected,
@@ -88,12 +90,13 @@ export function HighlightPopover({
       {...props}
       {...componentContextProps}
       className={cn(
-        "max-w-52 rounded-md bg-white/50 shadow-lg inset-shadow-sm shadow-black/10 inset-shadow-popover backdrop-blur-md dark:bg-black/20",
+        "relative isolate max-w-52 rounded-md bg-transparent dark:bg-transparent",
         forwardedClassName,
         className
       )}
       data-selection-popover=""
     >
+      <GlassSurface glassVariant="frosted" />
       <CardPanel className="p-3">{content}</CardPanel>
     </Component>
   )

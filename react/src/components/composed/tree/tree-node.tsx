@@ -37,26 +37,26 @@ import {
   treeVariantAtom,
 } from "./tree-atom"
 import { useTreeContext } from "./tree-context"
-import type { TreeNode } from "./type"
+import type { ITreeNode } from "./type"
 import { EASE_OUT } from "@/lib/ease.ts"
 import { Button } from "@/components/ui/button"
 
 /** How a row behaves, resolved from variant + depth + shape. */
-type RowKind =
+type TRowKind =
   | "section" // navigation depth 0 with 3-level data — heading, toggles
   | "toggle" // expands/collapses on row press (nav parents, files folders)
   | "link" // navigates; may still carry a chevron that toggles separately
-export interface TreeRowProps {
-  node: TreeNode
+export interface ITreeRowProps {
+  node: ITreeNode
   depth: number
 }
 
 function rowKindOf(
-  node: TreeNode,
+  node: ITreeNode,
   depth: number,
   variant: string,
   sectioned: boolean
-): RowKind {
+): TRowKind {
   if (variant === "sidebar") return "link"
   const branch =
     variant === "files" ? node.children !== undefined : !!node.children?.length
@@ -67,7 +67,7 @@ function rowKindOf(
   return variant === "toc" ? "link" : "toggle"
 }
 
-function TreeRowImpl({ node, depth }: TreeRowProps): React.ReactElement {
+function TreeRowImpl({ node, depth }: ITreeRowProps): React.ReactElement {
   const { treeId, renderTrailing, dnd } = useTreeContext()
   const reduce = useReducedMotion()
 

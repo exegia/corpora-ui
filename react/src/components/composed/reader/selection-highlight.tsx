@@ -2,14 +2,14 @@
 
 import type * as React from "react"
 import { cn } from "@/lib/utils"
-import type { SelectionHighlightProps } from "./type"
+import type { ISelectionHighlightProps } from "./type"
 
 export function SelectionHighlight({
   range,
   className,
   children,
   ...props
-}: SelectionHighlightProps): React.ReactElement {
+}: ISelectionHighlightProps): React.ReactElement {
   return (
     <span
       aria-label={range ? `Selected ${range}` : "Selected text"}

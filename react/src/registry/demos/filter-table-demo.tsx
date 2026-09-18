@@ -5,9 +5,9 @@ import * as React from "react"
 import { DemoStage } from "@/components/docs/demo-controls"
 import { FilterTable } from "@/components/composed/chat"
 
-type Row = { id: string; task: string; date: string; status: string; advisor: string }
+type TRow = { id: string; task: string; date: string; status: string; advisor: string }
 
-const ROWS: Row[] = [
+const ROWS: TRow[] = [
   { id: "1", task: "Restock mango sorbet", date: "Dec 03", status: "todo", advisor: "Mango Moon" },
   { id: "2", task: "Churn black sesame", date: "Sep 22", status: "progress", advisor: "Kumo Creamery" },
   { id: "3", task: "Print summer menu", date: "Jan 02", status: "todo", advisor: "Coral Coast" },
@@ -18,7 +18,7 @@ const ROWS: Row[] = [
 export default function FilterTableDemo(): React.ReactElement {
   return (
     <DemoStage canvasClassName="flex min-h-24 w-full justify-center p-6">
-      <FilterTable<Row>
+      <FilterTable<TRow>
         tableId="demo"
         statuses={[
           { id: "todo", label: "To do", tone: "warning" },

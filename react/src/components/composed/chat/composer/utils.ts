@@ -3,7 +3,7 @@
  * so an app can add or remove chips without holding the component.
  */
 import { createKeyedFamilies } from "@/lib/keyed-atom"
-import type { ComposerAttachment } from "../type"
+import type { TComposerAttachment } from "../type"
 import { Children, Fragment, isValidElement } from "react";
 import type { Variants } from "motion";
 import { EASE_IN_OUT, SPRING_PANEL } from "@/lib/ease";
@@ -11,16 +11,16 @@ import { EASE_IN_OUT, SPRING_PANEL } from "@/lib/ease";
 const { stateFamily, actionFamily, removeInstance } =
   createKeyedFamilies("composer")
 
-const NO_ITEMS: ComposerAttachment[] = []
+const NO_ITEMS: TComposerAttachment[] = []
 
-export const composerAttachmentsAtom = stateFamily<ComposerAttachment[]>(
+export const composerAttachmentsAtom = stateFamily<TComposerAttachment[]>(
   "attachments",
   NO_ITEMS
 )
 
 export const addComposerAttachmentAtom = actionFamily(
   "add",
-  (get, set, id, item: ComposerAttachment) => {
+  (get, set, id, item: TComposerAttachment) => {
     const items = get(composerAttachmentsAtom(id))
     if (items.some((i) => i.id === item.id)) return
     set(composerAttachmentsAtom(id), [...items, item])

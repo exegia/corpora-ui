@@ -1,37 +1,37 @@
 /* eslint-disable react-refresh/only-export-components */
 import * as React from "react"
 
-type Theme = "dark" | "light" | "system"
-type ResolvedTheme = "dark" | "light"
+type TTheme = "dark" | "light" | "system"
+type TResolvedTheme = "dark" | "light"
 
-type ThemeProviderProps = {
+type TThemeProviderProps = {
   children: React.ReactNode
-  defaultTheme?: Theme
+  defaultTheme?: TTheme
   storageKey?: string
   disableTransitionOnChange?: boolean
 }
 
-type ThemeProviderState = {
-  theme: Theme
-  setTheme: (theme: Theme) => void
+type TThemeProviderState = {
+  theme: TTheme
+  setTheme: (theme: TTheme) => void
 }
 
 const COLOR_SCHEME_QUERY = "(prefers-color-scheme: dark)"
-const THEME_VALUES: Theme[] = ["dark", "light", "system"]
+const THEME_VALUES: TTheme[] = ["dark", "light", "system"]
 
 const ThemeProviderContext = React.createContext<
-  ThemeProviderState | undefined
+  TThemeProviderState | undefined
 >(undefined)
 
-function isTheme(value: string | null): value is Theme {
+function isTheme(value: string | null): value is TTheme {
   if (value === null) {
     return false
   }
 
-  return THEME_VALUES.includes(value as Theme)
+  return THEME_VALUES.includes(value as TTheme)
 }
 
-function getSystemTheme(): ResolvedTheme {
+function getSystemTheme(): TResolvedTheme {
   if (window.matchMedia(COLOR_SCHEME_QUERY).matches) {
     return "dark"
   }
@@ -83,8 +83,8 @@ export function ThemeProvider({
   storageKey = "theme",
   disableTransitionOnChange = true,
   ...props
-}: ThemeProviderProps) {
-  const [theme, setThemeState] = React.useState<Theme>(() => {
+}: TThemeProviderProps) {
+  const [theme, setThemeState] = React.useState<TTheme>(() => {
     const storedTheme = localStorage.getItem(storageKey)
     if (isTheme(storedTheme)) {
       return storedTheme
@@ -94,7 +94,7 @@ export function ThemeProvider({
   })
 
   const setTheme = React.useCallback(
-    (nextTheme: Theme) => {
+    (nextTheme: TTheme) => {
       localStorage.setItem(storageKey, nextTheme)
       setThemeState(nextTheme)
     },
@@ -102,7 +102,7 @@ export function ThemeProvider({
   )
 
   const applyTheme = React.useCallback(
-    (nextTheme: Theme) => {
+    (nextTheme: TTheme) => {
       const root = document.documentElement
       const resolvedTheme =
         nextTheme === "system" ? getSystemTheme() : nextTheme

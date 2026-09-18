@@ -6,7 +6,7 @@ import { More } from "iconsax-reactjs"
 import { LucideArrowUpDown, LucideChevronDown, LucideX } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import type { PanelMenuButtonProps } from "./type"
+import type { IPanelMenuButtonProps } from "./type"
 import { floatingButtonClass, revealOnPanelHoverClass } from "./utils"
 import { Button } from "@/components/ui/button"
 import { GlassButtonGroup } from "@/components/ui/glasscn/glass-button-group.tsx"
@@ -34,7 +34,7 @@ export function PanelMenuButton({
   label,
   sound = true,
   className,
-}: PanelMenuButtonProps): React.ReactElement {
+}: IPanelMenuButtonProps): React.ReactElement {
   const canHover = useHoverCapable()
   const actionsId = React.useId()
   const groupRef = React.useRef<HTMLDivElement>(null)

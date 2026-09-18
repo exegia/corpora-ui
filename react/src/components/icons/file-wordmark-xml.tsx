@@ -1,4 +1,4 @@
-import type { FileIconProps } from "./types"
+import type { IFileIconProps } from "./types"
 
 /**
  * XML file icon — wordmark variant.
@@ -9,7 +9,7 @@ export function FileWordmarkXml({
   title = "XML file",
   className,
   ...props
-}: FileIconProps) {
+}: IFileIconProps) {
   return (
     <svg
       viewBox="0 -48 1024 1114"

@@ -1,8 +1,8 @@
 import type { HTMLAttributes, ReactNode } from "react"
-import type { TextSize } from "../../atoms/text/types"
-import type { TextClickPopoverProps } from "../../atoms/text-selection/types"
+import type { TTextSize } from "../../atoms/text/types"
+import type { ITextClickPopoverProps } from "../../atoms/text-selection/types"
 
-export interface VerseProps extends Omit<
+export interface IVerseProps extends Omit<
   HTMLAttributes<HTMLElement>,
   "children"
 > {
@@ -13,12 +13,12 @@ export interface VerseProps extends Omit<
   /** Destination of the chapter link. */
   href?: string
   /** Popover content opened by clicking the chapter link. */
-  chapterPopover?: TextClickPopoverProps["popover"]
-  renderChapterPopover?: TextClickPopoverProps["renderPopover"]
+  chapterPopover?: ITextClickPopoverProps["popover"]
+  renderChapterPopover?: ITextClickPopoverProps["renderPopover"]
   /** Type scale shared with nested verse spans and notes. */
-  size?: TextSize
+  size?: TTextSize
 }
 
-export type VerseSpanProps = Omit<TextClickPopoverProps, "type">
+export type TVerseSpanProps = Omit<ITextClickPopoverProps, "type">
 
-export type VerseNoteProps = Omit<TextClickPopoverProps, "type">
+export type TVerseNoteProps = Omit<ITextClickPopoverProps, "type">

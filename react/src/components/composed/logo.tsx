@@ -10,9 +10,9 @@ import { initialsFrom } from "@/components/atoms/avatar/utils"
 
 /** `full` shows mark + wordmark; `mark` folds the wordmark away — an icon
  * rail, a favicon-sized corner. */
-export type LogoVariant = "full" | "mark"
+export type TLogoVariant = "full" | "mark"
 
-export interface LogoProps extends Omit<
+export interface ILogoProps extends Omit<
   React.HTMLAttributes<HTMLElement>,
   "children"
 > {
@@ -29,7 +29,7 @@ export interface LogoProps extends Omit<
   /** Wordmark content. Defaults to `name`. */
   wordmark?: React.ReactNode
   /** `full` (default) or `mark` — the wordmark folds away, animated. */
-  variant?: LogoVariant
+  variant?: TLogoVariant
   /** Renders the logo as a link — the usual "mark goes home" affordance. */
   href?: string
 }
@@ -89,7 +89,7 @@ export function Logo({
   href,
   className,
   ...props
-}: LogoProps): React.ReactElement {
+}: ILogoProps): React.ReactElement {
   const reduce = useReducedMotion()
   const folded = variant === "mark"
 

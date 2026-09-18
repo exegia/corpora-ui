@@ -4,7 +4,7 @@ import { RiCloseLine } from "@remixicon/react"
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
-import type { PanelFloatingButtonProps } from "./type"
+import type { IPanelFloatingButtonProps } from "./type"
 import { floatingButtonClass, revealOnPanelHoverClass } from "./utils"
 
 /** Floating close affordance in a panel's top-right corner. */
@@ -13,7 +13,7 @@ export function PanelCloseButton({
   label,
   sound = true,
   className,
-}: PanelFloatingButtonProps): React.ReactElement {
+}: IPanelFloatingButtonProps): React.ReactElement {
   return (
     <button
       id="scaffold-panel-close-button"

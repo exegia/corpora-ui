@@ -1,9 +1,9 @@
 import { cva } from "class-variance-authority";
 
-export type SegmentedControlSize = "default" | "lg" | "sm" | "xs";
+export type TSegmentedControlSize = "default" | "lg" | "sm" | "xs";
 
 export const segmentedControlItemSizeClassNames: Record<
-  SegmentedControlSize,
+  TSegmentedControlSize,
   string
 > = {
   default: "h-8.5 px-[calc(--spacing(2.5)-1px)] sm:h-7.5",

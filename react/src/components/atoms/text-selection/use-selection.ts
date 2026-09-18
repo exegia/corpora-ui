@@ -10,7 +10,7 @@ import {
   setSelectionPositionAtom,
   updateSelectionAtom,
 } from "./selection-atom"
-import type { UseSelectionOptions, UseSelectionResult } from "./types"
+import type { IUseSelectionOptions, IUseSelectionResult } from "./types"
 
 /**
  * Coordinates the third-party highlight popover callbacks with the shared
@@ -18,8 +18,8 @@ import type { UseSelectionOptions, UseSelectionResult } from "./types"
  * `@omsimos/react-highlight-popover`.
  */
 export function useSelection(
-  options: UseSelectionOptions = {}
-): UseSelectionResult {
+  options: IUseSelectionOptions = {}
+): IUseSelectionResult {
   const {
     selected: selectedProp,
     onSelectionStart: onSelectionStartProp,

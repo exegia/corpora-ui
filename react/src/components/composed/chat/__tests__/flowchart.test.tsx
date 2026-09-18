@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, mock } from "bun:test"
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 
-import { Flowchart, type StepNode } from "../flowchart"
+import { Flowchart, type TStepNode } from "../flowchart"
 
-const STEPS: StepNode[] = [
+const STEPS: TStepNode[] = [
   { id: "a", row: 0, x: 0.5, w: 200, title: "A" },
   { id: "b", row: 1, x: 0.5, w: 200, title: "B" },
 ]
@@ -27,6 +27,19 @@ describe("Flowchart", () => {
     fireEvent.click(step)
     expect(step.getAttribute("aria-pressed")).toBe("true")
     expect(container.querySelector("path[data-edge]")!.getAttribute("stroke")).toContain("accent")
+  })
+
+  it("does not capture a stationary press away from the selection button", () => {
+    const { container } = render(<Flowchart.Root steps={STEPS} />)
+    const wrapper = container.querySelector('[data-node="a"]') as HTMLElement
+    const capture = mock(() => {})
+    wrapper.setPointerCapture = capture
+    const button = screen.getByRole("button", { name: "A" })
+    fireEvent.pointerDown(button, { button: 0, pointerId: 1, clientX: 20, clientY: 20 })
+    expect(capture).not.toHaveBeenCalled()
+    fireEvent.pointerUp(button, { pointerId: 1 })
+    fireEvent.click(button)
+    expect(button.getAttribute("aria-pressed")).toBe("true")
   })
 
   it("renders custom children and chains edges by default", () => {

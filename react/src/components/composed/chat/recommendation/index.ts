@@ -4,8 +4,6 @@ import { Group } from "./group"
 import { Item } from "./item"
 
 export type * from "./types"
-export type { RecommendationCheckboxProps } from "./checkbox"
-export type { RecommendationGroupProps } from "./group"
 
 export { RecommendationCard }
 

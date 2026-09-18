@@ -4,17 +4,10 @@ import { motion } from "motion/react"
 import type * as React from "react"
 import {
   Accordion,
-  AccordionPrimitive,
 } from "@/components/ui/accordion"
 import { cn } from "@/lib/utils"
-
-export type RecommendationGroupProps = AccordionPrimitive.Root.Props
-
-/** Rows enter staggered 80ms apart; each Item picks up `row` from `ROW_VARIANTS`. */
-const GROUP_VARIANTS = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
-} as const
+import type { TRecommendationGroupProps } from "./types"
+import { GROUP_VARIANTS } from "./constant"
 
 /**
  * Accordion root for a stack of recommendation items. Defaults to `multiple`
@@ -24,10 +17,10 @@ export function Group({
   className,
   multiple = true,
   ...props
-}: RecommendationGroupProps): React.ReactElement {
+}: TRecommendationGroupProps): React.ReactElement {
   return (
     <Accordion
-      className={cn("flex w-full flex-col gap-2 max-w-11/12", className)}
+      className={cn("flex w-full flex-col gap-2 max-w-11/12 overflow-clip rounded-md", className)}
       data-slot="recommendation-group"
       multiple={multiple}
       render={

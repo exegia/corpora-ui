@@ -4,7 +4,7 @@ import { Input as InputPrimitive } from "@base-ui/react/input";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 
-export type InputProps = Omit<
+export type TInputProps = Omit<
   InputPrimitive.Props & React.RefAttributes<HTMLInputElement>,
   "size"
 > & {
@@ -20,7 +20,7 @@ export function Input({
   nativeInput = false,
   style,
   ...props
-}: InputProps): React.ReactElement {
+}: TInputProps): React.ReactElement {
   const inputClassName = cn(
     // The 5000000s background-color entry is the autofill-flash suppression
     // hack; height/line-height/padding tween size-prop changes.

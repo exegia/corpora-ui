@@ -1,19 +1,21 @@
 import type * as React from "react"
-import type { SignalLevel } from "@/components/ui/chat"
+import type { TSignalLevel } from "@/components/ui/chat"
+import type { AccordionPrimitive } from "@/components/ui/accordion"
+import type { IReferenceProps } from "@/components/atoms/types"
 
-export interface RecommendationOption {
+export interface IRecommendationOption {
   label: React.ReactNode
   status?: React.ReactNode
-  signal?: SignalLevel
+  signal?: TSignalLevel
 }
 
-export interface RecommendationEntity {
+export interface IRecommendationEntity {
   name: React.ReactNode
   initials?: string
   src?: string
 }
 
-export type RecommendationState =
+export type TRecommendationState =
   | "accepted"
   | "rejected"
   | "pending"
@@ -21,21 +23,21 @@ export type RecommendationState =
   | "running"
 
 /** Shared fields of a human-in-the-loop proposal. */
-export interface RecommendationFields {
+export interface IRecommendationFields {
   title: React.ReactNode
-  /** Sentence fragments around the entity and lead-time pills. */
+  /** Collapsible body text around the entity and lead-time pills. */
   description: React.ReactNode
-  entity?: RecommendationEntity
-  descriptionSuffix?: React.ReactNode
+  entity?: IRecommendationEntity
+  reference?: IReferenceProps
   leadTime?: React.ReactNode
-  options?: RecommendationOption[]
+  options?: IRecommendationOption[]
   optionsLabel?: React.ReactNode
-  confidence?: SignalLevel
+  confidence?: TSignalLevel
   confidenceLabel?: React.ReactNode
   acceptLabel?: React.ReactNode
   rejectLabel?: React.ReactNode
   alternativesLabel?: React.ReactNode
-  state?: RecommendationState
+  state?: TRecommendationState
   /** Number inside the pending ring, e.g. the item's position in its group. */
   step?: number
   onAccept?: () => void
@@ -48,18 +50,27 @@ export interface RecommendationFields {
   children?: React.ReactNode
 }
 
-export interface RecommendationItemProps
+export interface IRecommendationItemProps
   extends
-    RecommendationFields,
+    IRecommendationFields,
     Omit<React.ComponentPropsWithoutRef<"div">, "title" | "children"> {
   /** Accordion item identity. Required inside `Recommendation.Group`. */
   value: string
 }
 
-export interface RecommendationCardProps extends RecommendationFields {
+export interface IRecommendationCardProps extends IRecommendationFields {
   /** Accordion item identity. Auto-generated when omitted. */
   value?: string
   /** Uncontrolled initial open state. Default true — Accept lives in the body. */
   defaultOpen?: boolean
+  className?: string
+}
+
+export type TRecommendationGroupProps = AccordionPrimitive.Root.Props
+
+export interface IRecommendationCheckboxProps {
+  state: TRecommendationState
+  /** Number shown inside the pending ring (its position in the group). */
+  step?: number
   className?: string
 }

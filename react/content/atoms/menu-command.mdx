@@ -1,9 +1,9 @@
 ---
 title: "Menu command"
-description: "Command rows for a menu popup: icon \u00b7 label \u00b7 description \u00b7 trailing status. MenuCommand wires a trigger to the popup; MenuCommandList drops into any MenuPopup."
+description: "Command rows for a menu popup: icon \u00b7 label \u00b7 description \u00b7 trailing status. MenuCommand wires a trigger to the popup; MenuCommandList uses the shared Command components for searchable, keyboard-accessible rows."
 ---
 
-import { Preview } from "@/components/ui/menu-command.story"
+import { Preview } from "@/components/stories/menu-command.story"
 
 <Preview />
 
@@ -12,7 +12,7 @@ import { Preview } from "@/components/ui/menu-command.story"
 ```tsx
 import { MenuCommand } from "@exegia/corpora-ui"
 
-;<MenuCommand
+<MenuCommand
   items={[
     {
       id: "web",
@@ -34,6 +34,6 @@ import { MenuCommand } from "@exegia/corpora-ui"
 
 | Prop             | Type                    | Default         | Description                                                                           |
 | ---------------- | ----------------------- | --------------- | ------------------------------------------------------------------------------------- |
-| items (required) | MenuCommandItem[]       | —               | &#123; id, label, description?, icon?, trailing?, href?, disabled?, onSelect? &#125;. |
+| items (required) | IMenuCommandItem[]       | —               | &#123; id, label, description?, icon?, trailing?, href?, disabled?, onSelect? &#125;. |
 | onSelect         | (item) =&gt; void       | —               | Fires after the row's own onSelect.                                                   |
 | side / align     | Positioner side / align | "top" / "start" | MenuCommand only.                                                                     |

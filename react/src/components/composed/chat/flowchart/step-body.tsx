@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { SelectChip, SourceChip } from "@/components/atoms/chip";
 import { FLAVORS, PROPERTIES, TOPPINGS } from "./constant";
-import type { StepNode } from "./types";
+import type { TStepNode } from "./types";
 import { mix } from "./utils";
 
 /* ── icons ── */
@@ -15,7 +15,7 @@ function ConeIcon({ size = 16 }: { size?: number }) {
   );
 }
 
-export function StepBody({ node }: { node: StepNode }) {
+export function StepBody({ node }: { node: TStepNode }) {
   const hue = node.hue ?? "var(--accent-default)";
   return (
     <div className="flex items-center gap-2.5 p-2.5">

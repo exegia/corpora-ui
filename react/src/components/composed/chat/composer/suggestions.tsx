@@ -1,5 +1,5 @@
 import { isValidElement, useId, useState } from "react"
-import type { SuggestedPromptsProps } from "../type"
+import type { ISuggestedPromptsProps } from "../type"
 import { useReducedMotion, motion, AnimatePresence } from "motion/react"
 import { flattenChildren, ITEM_VARIANTS, LIST_VARIANTS } from "./utils"
 import { cn } from "@/lib/utils"
@@ -20,7 +20,7 @@ export function SuggestedPrompts({
   onOpenChange,
   className,
   ...props
-}: SuggestedPromptsProps): React.ReactElement | null {
+}: ISuggestedPromptsProps): React.ReactElement | null {
   const panelId = useId()
   const reduceMotion = useReducedMotion()
   const [internalOpen, setInternalOpen] = useState(defaultOpen)

@@ -1,5 +1,7 @@
+import { mergeConfig } from "@exegia/specular/merge"
+import { surfaces } from "./specular"
 import { clsx, type ClassValue } from "clsx"
-import { extendTailwindMerge, validators } from "tailwind-merge"
+import { extendTailwindMerge, mergeConfigs, validators } from "tailwind-merge"
 
 /**
  * The `inset-shadow-{lit,dim}-*` bezel family (exported by `index.css`) is
@@ -15,7 +17,7 @@ import { extendTailwindMerge, validators } from "tailwind-merge"
  * `inset-shadow-blur-*` spans layers — it writes both blurs — so it alone
  * conflicts across them.
  */
-type InsetShadowGroupId =
+type TInsetShadowGroupId =
   | "inset-shadow-bezel"
   | "inset-shadow-lit-x"
   | "inset-shadow-lit-y"
@@ -46,13 +48,13 @@ const INSET_SHADOW_GROUPS = [
   "inset-shadow-dim-blur",
   "inset-shadow-dim-alpha",
   "inset-shadow-blur",
-] as const satisfies readonly InsetShadowGroupId[]
+] as const satisfies readonly TInsetShadowGroupId[]
 
 const displacesTailwindShadows = Object.fromEntries(
   INSET_SHADOW_GROUPS.map((id) => [id, ["shadow", "inset-shadow"]])
 )
 
-const twMerge = extendTailwindMerge<InsetShadowGroupId>({
+const twMerge = extendTailwindMerge<TInsetShadowGroupId | import("@exegia/specular/merge").BezelGroupId<typeof surfaces>>({
   extend: {
     classGroups: {
       // The shared base every other utility in the family `@apply`s. Grouped
@@ -91,7 +93,7 @@ const twMerge = extendTailwindMerge<InsetShadowGroupId>({
       ],
     },
   },
-})
+}, (config) => mergeConfigs(config, mergeConfig(surfaces)))
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))

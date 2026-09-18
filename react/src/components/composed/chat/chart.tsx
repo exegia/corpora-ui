@@ -3,15 +3,33 @@
 import { useReducedMotion } from "motion/react"
 import type * as React from "react"
 import {
-  Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis,
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
 } from "recharts"
 import { cn } from "@/lib/utils"
-import { Card, CardFrame, CardFrameHeader, CardPanel } from "@/components/ui/card"
-import { Dot, LegendItem, Pill, type DotTone } from "@/components/ui/chat"
+import {
+  Card,
+  CardFrame,
+  CardFrameHeader,
+  CardPanel,
+} from "@/components/ui/card"
+import { Dot, LegendItem, Pill, type TDotTone } from "@/components/ui/chat"
+import { Reference } from "@/components/atoms/reference"
 
-export type ChartType = "pie" | "area" | "line" | "bar"
+export type TChartType = "pie" | "area" | "line" | "bar"
 
-export interface ChartSeries {
+export interface IChartSeries {
   /** Key into each data row. */
   key: string
   label: React.ReactNode
@@ -21,17 +39,22 @@ export interface ChartSeries {
   format?: (value: number) => React.ReactNode
 }
 
-export type ChartDatum = { label: string; [key: string]: string | number }
+export type TChartDatum = { label: string; [key: string]: string | number }
 
-export interface ChartProps extends Omit<React.ComponentPropsWithoutRef<"div">, "title"> {
-  type: ChartType
+export interface IChartProps extends Omit<
+  React.ComponentPropsWithoutRef<"div">,
+  "title"
+> {
+  type: TChartType
   title?: React.ReactNode
   subtitle?: React.ReactNode
   /** Pill text; defaults to the capitalised type. */
   badge?: React.ReactNode
-  data: ChartDatum[]
+  /** The passage or Strong's entry behind the data. Replaces the type badge. */
+  reference?: React.ComponentProps<typeof Reference>
+  data: TChartDatum[]
   /** Series to plot; pie uses the first one. */
-  series: ChartSeries[]
+  series: IChartSeries[]
   /** Pie only: big number and caption in the donut's centre. */
   center?: { value: React.ReactNode; label?: React.ReactNode }
   /** Drop the title row (InsightCards embeds a bare plot). */
@@ -40,33 +63,76 @@ export interface ChartProps extends Omit<React.ComponentPropsWithoutRef<"div">, 
   plotHeight?: number
 }
 
-const TYPE_LABEL: Record<ChartType, string> = { pie: "Pie", area: "Area", line: "Line", bar: "Bar" }
+const TYPE_LABEL: Record<TChartType, string> = {
+  pie: "Pie",
+  area: "Area",
+  line: "Line",
+  bar: "Bar",
+}
 
-const seriesColor = (s: ChartSeries, i: number) => s.color ?? `var(--chart-series-${(i % 5) + 1})`
-const seriesTone = (i: number) => `series-${(i % 5) + 1}` as DotTone
+const seriesColor = (s: IChartSeries, i: number) =>
+  s.color ?? `var(--chart-series-${(i % 5) + 1})`
+const seriesTone = (i: number) => `series-${(i % 5) + 1}` as TDotTone
 
-const fmt = (s: ChartSeries | undefined, v: unknown): React.ReactNode =>
+const fmt = (s: IChartSeries | undefined, v: unknown): React.ReactNode =>
   typeof v === "number" && s?.format ? s.format(v) : String(v)
 
-interface TooltipRow { name?: unknown; value?: unknown; color?: string; payload?: ChartDatum }
+interface ITooltipRow {
+  name?: unknown
+  value?: unknown
+  color?: string
+  payload?: TChartDatum
+}
 
 /** Hover card: category label, then one dot · series · value row per series. */
-function ChartTooltip({ active, payload, label, series }: { active?: boolean; payload?: TooltipRow[]; label?: unknown; series: ChartSeries[] }): React.ReactElement | null {
+function ChartTooltip({
+  active,
+  payload,
+  label,
+  series,
+}: {
+  active?: boolean
+  payload?: ITooltipRow[]
+  label?: unknown
+  series: IChartSeries[]
+}): React.ReactElement | null {
   if (!active || !payload?.length) return null
   // Pie rows already carry the category as their name, so no heading there.
-  const heading = series.length > 1 || label !== undefined ? (label ?? payload[0].payload?.label) : undefined
+  const heading =
+    series.length > 1 || label !== undefined
+      ? (label ?? payload[0].payload?.label)
+      : undefined
   return (
-    <div data-slot="chart-tooltip" className="min-w-28 rounded-md border border-border-default bg-surface-card px-2.5 py-2 shadow-md">
-      {heading !== undefined ? <div className="mb-1.5 text-[11px] font-medium leading-3 text-text-secondary">{String(heading)}</div> : null}
-      <ul className="flex flex-col gap-1">
+    <div
+      data-slot="chart-tooltip"
+      className="min-w-28 px-2.5 py-2 shadow-md rounded-md border border-border-default bg-surface-card"
+    >
+      {heading !== undefined ? (
+        <div className="mb-1.5 font-medium leading-3 text-[11px] text-text-secondary">
+          {String(heading)}
+        </div>
+      ) : null}
+      <ul className="gap-1 flex flex-col">
         {payload.map((row, i) => {
-          const si = Math.max(0, series.findIndex((s) => s.key === row.name))
+          const si = Math.max(
+            0,
+            series.findIndex((s) => s.key === row.name)
+          )
           const s = series[si]
           return (
-            <li key={i} className="flex items-center gap-2 text-[11px] leading-3">
+            <li
+              key={i}
+              className="gap-2 leading-3 flex items-center text-[11px]"
+            >
               <Dot tone={seriesTone(series.length > 1 ? si : i)} />
-              <span className="truncate text-text-secondary">{series.length > 1 ? s?.label : (row.payload?.label ?? s?.label)}</span>
-              <span className="ml-auto pl-3 font-medium text-text-primary">{fmt(s, row.value)}</span>
+              <span className="truncate text-text-secondary">
+                {series.length > 1
+                  ? s?.label
+                  : (row.payload?.label ?? s?.label)}
+              </span>
+              <span className="pl-3 font-medium ml-auto text-text-primary">
+                {fmt(s, row.value)}
+              </span>
             </li>
           )
         })}
@@ -75,50 +141,110 @@ function ChartTooltip({ active, payload, label, series }: { active?: boolean; pa
   )
 }
 
-const AXIS = { tick: { fontSize: 11, fill: "var(--text-secondary)" }, axisLine: false, tickLine: false, dataKey: "label", interval: 0 as const }
+const AXIS = {
+  tick: { fontSize: 11, fill: "var(--text-secondary)" },
+  axisLine: false,
+  tickLine: false,
+  dataKey: "label",
+  padding: { left: 12, right: 12 },
+  interval: 0 as const,
+}
 
 /**
- * 320×244 chart card: title, subtitle, type pill, plot, x labels, legend.
+ * Compact chart card: title, subtitle, reference or type pill, plot and legend.
  * Series colours are the `--chart-series-*` tokens, grid is `--chart-grid`.
  *
  * @sketch "Component / Chart / {Pie, Area, Line, Bar}"
  */
 export function Chart({
-  type, title, subtitle, badge, data, series, center, headerless = false, plotHeight, className, ...props
-}: ChartProps): React.ReactElement {
+  type,
+  title,
+  subtitle,
+  badge,
+  reference,
+  data,
+  series,
+  center,
+  headerless = false,
+  plotHeight,
+  className,
+  ...props
+}: IChartProps): React.ReactElement {
   const height = plotHeight ?? (type === "pie" ? 140 : 150)
   const empty = data.length === 0 || series.length === 0
   const reduceMotion = useReducedMotion()
-  const anim = { isAnimationActive: !reduceMotion, animationDuration: 700, animationEasing: "ease-out" as const }
-  const tooltip = <Tooltip content={<ChartTooltip series={series} />} cursor={{ stroke: "var(--chart-grid)", fill: "var(--chart-grid)", fillOpacity: 0.4 }} isAnimationActive={!reduceMotion} animationDuration={150} />
+  const anim = {
+    isAnimationActive: !reduceMotion,
+    animationDuration: 700,
+    animationEasing: "ease-out" as const,
+  }
+  const tooltip = (
+    <Tooltip
+      content={<ChartTooltip series={series} />}
+      cursor={{
+        stroke: "var(--chart-grid)",
+        fill: "var(--chart-grid)",
+        fillOpacity: 0.4,
+      }}
+      isAnimationActive={!reduceMotion}
+      animationDuration={150}
+    />
+  )
 
   const plot = (
     <>
       {type === "pie" ? (
-        <div className="flex items-center gap-6">
+        <div className="gap-6 flex flex-wrap items-center justify-center">
           <div className="relative shrink-0" style={{ width: height, height }}>
             {empty ? null : (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   {tooltip}
-                  <Pie data={data} dataKey={series[0].key} nameKey="label" innerRadius="66%" outerRadius="100%" paddingAngle={2} stroke="none" {...anim}>
-                    {data.map((_, i) => <Cell key={i} fill={`var(--chart-series-${(i % 5) + 1})`} className="transition-opacity duration-200 hover:opacity-80" />)}
+                  <Pie
+                    data={data}
+                    dataKey={series[0].key}
+                    nameKey="label"
+                    innerRadius="66%"
+                    outerRadius="100%"
+                    paddingAngle={2}
+                    stroke="none"
+                    {...anim}
+                  >
+                    {data.map((_, i) => (
+                      <Cell
+                        key={i}
+                        fill={`var(--chart-series-${(i % 5) + 1})`}
+                        className="transition-opacity duration-200 hover:opacity-80"
+                      />
+                    ))}
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
             )}
             {center ? (
-              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-[17px] font-semibold leading-5 text-text-primary">{center.value}</span>
-                {center.label ? <span className="text-[11px] leading-3 text-text-secondary">{center.label}</span> : null}
+              <div className="inset-0 pointer-events-none absolute flex flex-col items-center justify-center">
+                <span className="font-semibold leading-5 text-[17px] text-text-primary">
+                  {center.value}
+                </span>
+                {center.label ? (
+                  <span className="leading-3 text-[11px] text-text-secondary">
+                    {center.label}
+                  </span>
+                ) : null}
               </div>
             ) : null}
           </div>
           {empty ? null : (
-            <ul className="flex min-w-0 flex-1 flex-col gap-3.5">
+            <ul className="min-w-24 gap-3.5 flex flex-1 flex-col">
               {data.map((d, i) => (
                 <li key={d.label} className="flex">
-                  <LegendItem tone={seriesTone(i)} value={fmt(series[0], d[series[0].key])} className="w-full">{d.label}</LegendItem>
+                  <LegendItem
+                    tone={seriesTone(i)}
+                    value={fmt(series[0], d[series[0].key])}
+                    className="w-full"
+                  >
+                    {d.label}
+                  </LegendItem>
                 </li>
               ))}
             </ul>
@@ -130,28 +256,80 @@ export function Chart({
             {empty ? null : (
               <ResponsiveContainer width="100%" height="100%">
                 {type === "bar" ? (
-                  <BarChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 4 }} barCategoryGap="30%">
-                    <CartesianGrid vertical={false} stroke="var(--chart-grid)" />
-                    <XAxis {...AXIS} />
-                    {tooltip}
-                    {series.map((s, i) => <Bar key={s.key} dataKey={s.key} fill={seriesColor(s, i)} radius={[4, 4, 0, 0]} {...anim} />)}
-                  </BarChart>
-                ) : type === "line" ? (
-                  <LineChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: 8 }}>
-                    <CartesianGrid vertical={false} stroke="var(--chart-grid)" />
+                  <BarChart
+                    data={data}
+                    margin={{ top: 4, right: 4, bottom: 0, left: 4 }}
+                    barCategoryGap="30%"
+                  >
+                    <CartesianGrid
+                      vertical={false}
+                      stroke="var(--chart-grid)"
+                    />
                     <XAxis {...AXIS} />
                     {tooltip}
                     {series.map((s, i) => (
-                      <Line key={s.key} type="monotone" dataKey={s.key} stroke={seriesColor(s, i)} strokeWidth={2} dot={{ r: 3, strokeWidth: 2, fill: "var(--surface-card)" }} activeDot={{ r: 5, strokeWidth: 0 }} {...anim} />
+                      <Bar
+                        key={s.key}
+                        dataKey={s.key}
+                        fill={seriesColor(s, i)}
+                        radius={[4, 4, 0, 0]}
+                        {...anim}
+                      />
+                    ))}
+                  </BarChart>
+                ) : type === "line" ? (
+                  <LineChart
+                    data={data}
+                    margin={{ top: 4, right: 8, bottom: 0, left: 8 }}
+                  >
+                    <CartesianGrid
+                      vertical={false}
+                      stroke="var(--chart-grid)"
+                    />
+                    <XAxis {...AXIS} />
+                    {tooltip}
+                    {series.map((s, i) => (
+                      <Line
+                        key={s.key}
+                        type="monotone"
+                        dataKey={s.key}
+                        stroke={seriesColor(s, i)}
+                        strokeWidth={2}
+                        dot={{
+                          r: 3,
+                          strokeWidth: 2,
+                          fill: "var(--surface-card)",
+                        }}
+                        activeDot={{ r: 5, strokeWidth: 0 }}
+                        {...anim}
+                      />
                     ))}
                   </LineChart>
                 ) : (
-                  <AreaChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: 8 }}>
-                    <CartesianGrid vertical={false} stroke="var(--chart-grid)" />
+                  <AreaChart
+                    data={data}
+                    margin={{ top: 4, right: 8, bottom: 0, left: 8 }}
+                  >
+                    <CartesianGrid
+                      vertical={false}
+                      stroke="var(--chart-grid)"
+                    />
                     <XAxis {...AXIS} />
                     {tooltip}
                     {series.map((s, i) => (
-                      <Area key={s.key} type="monotone" dataKey={s.key} stroke={seriesColor(s, i)} strokeWidth={2} fill={i === 0 ? "var(--chart-area-fill)" : seriesColor(s, i)} fillOpacity={1} activeDot={{ r: 5, strokeWidth: 0 }} {...anim} />
+                      <Area
+                        key={s.key}
+                        type="monotone"
+                        dataKey={s.key}
+                        stroke={seriesColor(s, i)}
+                        strokeWidth={2}
+                        fill={
+                          i === 0 ? "var(--chart-area-fill)" : seriesColor(s, i)
+                        }
+                        fillOpacity={1}
+                        activeDot={{ r: 5, strokeWidth: 0 }}
+                        {...anim}
+                      />
                     ))}
                   </AreaChart>
                 )}
@@ -159,8 +337,12 @@ export function Chart({
             )}
           </div>
           {empty ? null : (
-            <div className="flex flex-wrap gap-4">
-              {series.map((s, i) => <LegendItem key={s.key} tone={seriesTone(i)}>{s.label}</LegendItem>)}
+            <div className="gap-4 flex flex-wrap">
+              {series.map((s, i) => (
+                <LegendItem key={s.key} tone={seriesTone(i)}>
+                  {s.label}
+                </LegendItem>
+              ))}
             </div>
           )}
         </>
@@ -171,22 +353,48 @@ export function Chart({
   // Embedded (InsightCards) plots stay bare; a titled chart is a framed card.
   if (headerless) {
     return (
-      <div data-slot="chart" data-type={type} className={cn("flex w-80 max-w-full flex-col gap-2", className)} {...props}>
+      <div
+        data-slot="chart"
+        data-type={type}
+        className={cn("w-80 gap-2 flex max-w-full flex-col", className)}
+        {...props}
+      >
         {plot}
       </div>
     )
   }
   return (
-    <CardFrame data-slot="chart" data-type={type} className={cn("w-80 max-w-full [--frame-radius:var(--radius-md)]", className)} {...props}>
-      <CardFrameHeader className="flex flex-row items-start justify-between gap-3 px-3.5 py-3">
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <span className="truncate text-[13px] font-semibold leading-4 text-text-primary">{title}</span>
-          {subtitle ? <span className="truncate text-[11px] leading-3 text-text-secondary">{subtitle}</span> : null}
+    <CardFrame
+      data-slot="chart"
+      data-type={type}
+      className={cn(
+        "w-80 max-w-full [--frame-radius:var(--radius-md)]",
+        className
+      )}
+      {...props}
+    >
+      <CardFrameHeader className="gap-x-3 gap-y-2 px-3.5 py-3 flex flex-row flex-wrap items-start justify-between">
+        <div className="min-w-0 basis-36 gap-0.5 flex flex-1 flex-col">
+          <span className="font-semibold leading-4 text-[13px] text-text-primary">
+            {title}
+          </span>
+          {subtitle ? (
+            <span className="leading-3 text-[11px] text-text-secondary">
+              {subtitle}
+            </span>
+          ) : null}
         </div>
-        <Pill>{badge ?? TYPE_LABEL[type]}</Pill>
+        {reference ? (
+          <Reference
+            {...reference}
+            className={cn("max-w-full shrink-0", reference.className)}
+          />
+        ) : (
+          <Pill>{badge ?? TYPE_LABEL[type]}</Pill>
+        )}
       </CardFrameHeader>
       <Card>
-        <CardPanel className="flex flex-col gap-3 p-3.5">{plot}</CardPanel>
+        <CardPanel className="gap-3 p-3.5 flex flex-col">{plot}</CardPanel>
       </Card>
     </CardFrame>
   )

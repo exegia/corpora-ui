@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { IconTile, InlineSource } from "@/components/ui/chat"
 
-export interface ResearchReference {
+export interface IResearchReference {
   /** Pill label, e.g. "Iliad · Homer corpus". */
   label: React.ReactNode
   /** Preview-card content shown on hover. */
@@ -23,7 +23,7 @@ export interface ResearchReference {
   href?: string
 }
 
-export interface ResearchAnswerProps extends Omit<
+export interface IResearchAnswerProps extends Omit<
   React.ComponentPropsWithoutRef<"div">,
   "content"
 > {
@@ -31,9 +31,9 @@ export interface ResearchAnswerProps extends Omit<
   /** "Answered from 3 passages · 0.8 s" */
   kickerSub?: React.ReactNode
   content: React.ReactNode
-  source?: React.ReactNode | ResearchReference
+  source?: React.ReactNode | IResearchReference
   date?: React.ReactNode
-  authors?: React.ReactNode | ResearchReference
+  authors?: React.ReactNode | IResearchReference
   onCopyCitation?: () => void
   onShare?: () => void
   /** TODO(spec 003): the design shows the control only; behaviour is the caller's. */
@@ -62,14 +62,14 @@ export function ResearchAnswer({
   bare = false,
   className,
   ...props
-}: ResearchAnswerProps): React.ReactElement {
+}: IResearchAnswerProps): React.ReactElement {
   // A structured value renders as a reference pill with a hover preview;
   // plain strings stay plain text.
   const asPill = (
-    value: React.ReactNode | ResearchReference
+    value: React.ReactNode | IResearchReference
   ): React.ReactNode => {
     if (value && typeof value === "object" && "label" in value) {
-      const { label, ...preview } = value as ResearchReference
+      const { label, ...preview } = value as IResearchReference
       return <InlineSource domain={label} {...preview} />
     }
     return value

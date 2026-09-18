@@ -5,7 +5,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Card } from "@/components/ui/card"
 import { createKeyedFamilies } from "@/lib/keyed-atom"
-import { Dot, type DotTone } from "@/components/ui/chat"
+import { Dot, type TDotTone } from "@/components/ui/chat"
 
 const { stateFamily, removeInstance } = createKeyedFamilies("filterTable")
 
@@ -13,22 +13,22 @@ const { stateFamily, removeInstance } = createKeyedFamilies("filterTable")
 export const filterTableFilterAtom = stateFamily<string | null>("filter", null)
 export const removeFilterTableInstance = removeInstance
 
-export interface FilterTableStatus {
+export interface IFilterTableStatus {
   id: string
   label: React.ReactNode
-  tone: DotTone
+  tone: TDotTone
 }
 
-export interface FilterTableColumn<Row> {
+export interface IFilterTableColumn<Row> {
   key: keyof Row & string
   header: React.ReactNode
   className?: string
 }
 
-export interface FilterTableProps<Row extends { id: string; status: string }> extends React.ComponentPropsWithoutRef<"div"> {
+export interface IFilterTableProps<Row extends { id: string; status: string }> extends React.ComponentPropsWithoutRef<"div"> {
   tableId?: string
-  statuses: FilterTableStatus[]
-  columns: FilterTableColumn<Row>[]
+  statuses: IFilterTableStatus[]
+  columns: IFilterTableColumn<Row>[]
   /** Column key rendered with the status dot (defaults to "status"). */
   statusKey?: keyof Row & string
   rows: Row[]
@@ -44,7 +44,7 @@ export interface FilterTableProps<Row extends { id: string; status: string }> ex
  */
 export function FilterTable<Row extends { id: string; status: string }>({
   tableId, statuses, columns, statusKey = "status" as keyof Row & string, rows, allLabel = "All", filter, onFilterChange, className, ...props
-}: FilterTableProps<Row>): React.ReactElement {
+}: IFilterTableProps<Row>): React.ReactElement {
   const generatedId = React.useId()
   const id = tableId ?? generatedId
   const [stored, setStored] = useAtom(filterTableFilterAtom(id))

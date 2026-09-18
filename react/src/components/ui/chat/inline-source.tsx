@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils"
 import { Favicon } from "./badges"
 import { SourceChip } from "./chips"
 
-export interface InlineSourceProps
+export interface IInlineSourceProps
   extends Omit<React.ComponentPropsWithoutRef<"span">, "title"> {
   /** Domain shown in the chip ("scoopdata.io"). */
   domain: React.ReactNode
@@ -41,7 +41,7 @@ export function InlineSource({
   openLabel = "Open source",
   className,
   ...props
-}: InlineSourceProps): React.ReactElement {
+}: IInlineSourceProps): React.ReactElement {
   const chip = (
     <SourceChip
       className={cn(href || title || description ? "cursor-default" : null, className)}

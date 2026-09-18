@@ -4,7 +4,7 @@ description: One-time-passcode input with per-character slots.
 icon: Lock
 ---
 
-import { Preview } from "@/components/ui/otp-field.story"
+import { Preview } from "@/components/stories/otp-field.story"
 
 Use the story controls to explore the `OTPField` atom's properties.
 
@@ -23,7 +23,7 @@ Use the story controls to explore the `OTPField` atom's properties.
 ```tsx
 import { OTPField, OTPFieldInput } from "@exegia/corpora-ui"
 
-;<OTPField length={6}>
+<OTPField length={6}>
   {Array.from({ length: 6 }, (_, i) => (
     <OTPFieldInput key={i} />
   ))}

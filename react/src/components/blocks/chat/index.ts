@@ -4,9 +4,7 @@ export { AiPanel }
 export { AiPanelHeader } from "./header"
 export { SuggestedPrompts } from "./suggested-prompts"
 export { RecommendationStack } from "./recommendation-stack"
-export type { RecommendationStackProps } from "./recommendation-stack"
 export { DegradedBanner, LockedBanner, PinnedThreadBanner } from "./banners"
-export type { DegradedBannerProps, PinnedThreadBannerProps } from "./banners"
 export { VersionHistoryRecord } from "./version-history-record"
 
 export {
@@ -16,24 +14,24 @@ export {
   SelectionPopover,
 } from "@/components/composed/reader"
 export type {
-  AppliedMarkProps,
-  ApplyToastProps,
-  SelectionHighlightProps,
-  SelectionPopoverProps,
+  IAppliedMarkProps,
+  IApplyToastProps,
+  ISelectionHighlightProps,
+  ISelectionPopoverProps,
 } from "@/components/composed/reader"
 export type {
-  AiPanelHeaderProps,
-  AiPanelProps,
-  LockedBannerProps,
-  AiScope,
-  AiScopeKind,
-  ComposerMode,
-  DiffRow,
-  NodeSelection,
-  SuggestionState,
-  VersionHistoryEntry,
-  SuggestedPromptsProps,
-  WordSelection,
-} from "./types"
+  IAiPanelHeaderProps,
+  IAiPanelProps,
+  ILockedBannerProps,
+  IAiScope,
+  TAiScopeKind,
+  TComposerMode,
+  IDiffRow,
+  INodeSelection,
+  TSuggestionState,
+  IVersionHistoryEntry,
+  ISuggestedPromptsProps,
+  IWordSelection,
+} from "./type"
 
 export default AiPanel
