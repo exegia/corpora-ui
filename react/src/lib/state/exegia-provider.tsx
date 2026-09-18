@@ -35,26 +35,26 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { ToastProvider } from "@/components/ui/toast"
 import { bindSounds } from "@/lib/sound"
 import { exegiaStore } from "./store"
-import type { ExegiaStore } from "./store"
+import type { TExegiaStore } from "./store"
 
 /** Options forwarded to the library's `ThemeProvider`. */
-export interface ExegiaThemeOptions {
+export interface IExegiaThemeOptions {
   defaultTheme?: "dark" | "light" | "system"
   storageKey?: string
   disableTransitionOnChange?: boolean
 }
 
-export interface ExegiaProviderProps {
+export interface IExegiaProviderProps {
   children: React.ReactNode
   /** Store to mount. Defaults to the library's `exegiaStore`. */
-  store?: ExegiaStore
+  store?: TExegiaStore
   /** Opt into interaction sound. Off unless the app asks for it. */
   sound?: boolean
   /** Mount `ThemeProvider` with these options. Omit it and none is mounted —
    * it reads `localStorage` in its state initializer, so an unconditional
    * mount would break SSR consumers, and `useTheme` already throws without
    * one. */
-  theme?: ExegiaThemeOptions
+  theme?: IExegiaThemeOptions
 }
 
 export function ExegiaProvider({
@@ -62,7 +62,7 @@ export function ExegiaProvider({
   store,
   sound = false,
   theme,
-}: ExegiaProviderProps): React.ReactElement {
+}: IExegiaProviderProps): React.ReactElement {
   React.useEffect(() => {
     // Idempotent, and deliberately not at module scope: opting into sound is
     // the consuming app's decision, not an import side effect.

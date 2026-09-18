@@ -1,9 +1,9 @@
-export type FrostGlassVariant = "clear" | "frosted" | "subtle" | "liquid" | "liquid-refract";
-export type FrostGlassVariantProp = { glassVariant?: FrostGlassVariant };
+export type TFrostGlassVariant = "clear" | "frosted" | "subtle" | "liquid" | "liquid-refract";
+export type TFrostGlassVariantProp = { glassVariant?: TFrostGlassVariant };
 
 export const liquidRefractStyles = "bg-transparent border-0 shadow-none";
 
-export const glassVariantStyles: Record<FrostGlassVariant, string> = {
+export const glassVariantStyles: Record<TFrostGlassVariant, string> = {
   clear: [
     "backdrop-blur-[2px] backdrop-saturate-[1.9]",
     "bg-white/[0.25] dark:bg-black/[0.25]",

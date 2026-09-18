@@ -10,12 +10,12 @@
 import { atom } from "jotai"
 import type { Getter, Setter } from "jotai"
 
-export type Family<AtomType> = ((id: string) => AtomType) & { remove: (id: string) => void }
+export type TFamily<AtomType> = ((id: string) => AtomType) & { remove: (id: string) => void }
 
 export function createKeyedFamilies(feature: string) {
   const families: { remove: (id: string) => void }[] = []
 
-  function keyed<AtomType>(create: (id: string) => AtomType): Family<AtomType> {
+  function keyed<AtomType>(create: (id: string) => AtomType): TFamily<AtomType> {
     const cache = new Map<string, AtomType>()
     const family = ((id: string) => {
       let instance = cache.get(id)
@@ -24,7 +24,7 @@ export function createKeyedFamilies(feature: string) {
         cache.set(id, instance)
       }
       return instance
-    }) as Family<AtomType>
+    }) as TFamily<AtomType>
     family.remove = (id) => {
       cache.delete(id)
     }

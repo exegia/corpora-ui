@@ -15,7 +15,7 @@ import { extendTailwindMerge, validators } from "tailwind-merge"
  * `inset-shadow-blur-*` spans layers — it writes both blurs — so it alone
  * conflicts across them.
  */
-type InsetShadowGroupId =
+type TInsetShadowGroupId =
   | "inset-shadow-bezel"
   | "inset-shadow-lit-x"
   | "inset-shadow-lit-y"
@@ -46,13 +46,13 @@ const INSET_SHADOW_GROUPS = [
   "inset-shadow-dim-blur",
   "inset-shadow-dim-alpha",
   "inset-shadow-blur",
-] as const satisfies readonly InsetShadowGroupId[]
+] as const satisfies readonly TInsetShadowGroupId[]
 
 const displacesTailwindShadows = Object.fromEntries(
   INSET_SHADOW_GROUPS.map((id) => [id, ["shadow", "inset-shadow"]])
 )
 
-const twMerge = extendTailwindMerge<InsetShadowGroupId>({
+const twMerge = extendTailwindMerge<TInsetShadowGroupId>({
   extend: {
     classGroups: {
       // The shared base every other utility in the family `@apply`s. Grouped
