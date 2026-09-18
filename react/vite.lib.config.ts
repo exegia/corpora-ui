@@ -1,4 +1,5 @@
 import path from "path"
+import { access, readFile } from "node:fs/promises"
 import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 import dts from "vite-plugin-dts"
@@ -11,6 +12,8 @@ export default defineConfig({
     dts({
       tsconfigPath: "./tsconfig.app.json",
       outDirs: "dist-lib",
+      // The docs config lives outside src; keep it from shifting the declaration root.
+      entryRoot: "src",
       include: [
         "src/assets/**",
         "src/index.ts",
@@ -18,6 +21,18 @@ export default defineConfig({
         "src/lib/**",
         "src/state/**",
       ],
+      afterBuild: async () => {
+        const manifest = JSON.parse(
+          await readFile(path.resolve(__dirname, "package.json"), "utf8")
+        )
+        // Fail the build if the published type entry points at a missing file.
+        for (const entry of new Set<string>([
+          manifest.types,
+          manifest.exports["."].types,
+        ])) {
+          await access(path.resolve(__dirname, entry))
+        }
+      },
     }),
   ],
   resolve: {
