@@ -1,24 +1,11 @@
 "use client"
 
-import type { ComponentProps, FC } from "react"
-
 import { defineStory } from "@/registry/story"
 
 import { Chart } from "@/components/composed/chat/chart"
 
 export const story = defineStory({
-  Component: Chart as FC<
-    Pick<
-      ComponentProps<typeof Chart>,
-      | "type"
-      | "title"
-      | "subtitle"
-      | "data"
-      | "series"
-      | "headerless"
-      | "plotHeight"
-    >
-  >,
+  Component: Chart,
   args: {
     initial: {
       type: "bar",

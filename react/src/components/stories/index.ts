@@ -6,13 +6,6 @@ export { Preview as AvatarStory } from "./avatar.story"
 export { Preview as BubbleStory } from "./bubble.story"
 export { Preview as ButtonStory } from "./button.story"
 export { Preview as CardStory } from "./card.story"
-export {
-  AvatarHandlePreviewControl,
-  Preview as ChatAtomsStory,
-  SendButtonPreviewControl,
-  ThumbnailPreviewControl,
-  WaveformPreviewControl,
-} from "./chat-atoms.story"
 export { Preview as CheckboxStory } from "./checkbox.story"
 export { Preview as FieldStory } from "./field.story"
 export { Preview as FileIconsStory } from "./file-icons.story"
@@ -24,7 +17,6 @@ export { Preview as MenuCommandStory } from "./menu-command.story"
 export { Preview as OTPFieldStory } from "./otp-field.story"
 export { Preview as PasswordInputStory } from "./password-input.story"
 export { Preview as ReferenceStory } from "./reference.story"
-export { Preview as SeparatorStory } from "./separator.story"
 export {
   Preview as TextStory,
 } from "./text.story"

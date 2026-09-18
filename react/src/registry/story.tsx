@@ -1,29 +1,38 @@
+
 import type { TStoryComponentProps } from "@/components/types"
 import { defineStoryFactory } from "@fumadocs/story/vite/client"
-import type { Story, StoryOptions } from "@fumadocs/story/vite/client"
+import type { Story, ArgsOptions } from "@fumadocs/story/vite/client"
 import {
   createElement,
-  type ComponentPropsWithoutRef,
   type FC,
 } from "react"
 
 const { defineStory: createStory } = defineStoryFactory()
 
 /** Give every docs story the same centered canvas without constraining wide components. */
-// The upstream StoryOptions generic is constrained to FC<any>.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function defineStory<C extends FC<keyof TStoryComponentProps>>(
-  options: StoryOptions<C>
-): Story<C> {
-  const Component = options.Component
-  const CenteredComponent = (props: ComponentPropsWithoutRef<C>) => (
+// Match the upstream constraint while retaining C for per-component args inference.
+// The props catalog is not a call signature: Pick previews and UI components
+// need not accept (or extend) the complete namespace-exported props union.
+type TStoryComponent<T extends TStoryComponentProps> = FC<T>
+type TStoryOptions<T extends TStoryComponentProps> = {
+  displayName?: string
+  Component: TStoryComponent<T>,
+  centered?: boolean,
+  args?: ArgsOptions<TStoryComponent<T>>
+}
+export function defineStory<T extends TStoryComponentProps>(
+  options: TStoryOptions<T>,
+): Story {
+  const { Component, centered, args, displayName } = options
+  const CenteredComponent = (props: T) => (
     <div className="min-h-32 flex w-full items-center justify-center">
       {createElement(Component, props)}
     </div>
   )
 
   return createStory({
-    ...options,
-    Component: CenteredComponent as C,
-  }) as Story<C>
+    displayName,
+    args,
+    Component: centered ? CenteredComponent : Component,
+  })
 }

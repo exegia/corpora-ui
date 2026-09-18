@@ -1,15 +1,11 @@
 "use client"
 
-import type { ComponentProps, FC } from "react"
-
 import { defineStory } from "@/registry/story"
 
 import { RecordsTable } from "@/components/composed/chat/records-table"
 
 export const story = defineStory({
-  Component: RecordsTable as FC<
-    Pick<ComponentProps<typeof RecordsTable>, "rows" | "maxTags">
-  >,
+  Component: RecordsTable,
   args: {
     initial: {
       rows: [
