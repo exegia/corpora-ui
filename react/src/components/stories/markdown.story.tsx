@@ -1,11 +1,23 @@
 "use client"
 
-import { defineStory } from "@/registry/story"
+import type { ComponentProps } from "react"
+import { defineStory, type TStoryData } from "@/registry/story"
 
 import { Markdown } from "@/components/composed/chat/markdown"
 
+type TPreviewProps = TStoryData<
+  Pick<
+    ComponentProps<typeof Markdown>,
+    "source" | "view" | "defaultView" | "bare"
+  >
+>
+
+function MarkdownPreview(props: TPreviewProps) {
+  return <Markdown {...props} />
+}
+
 export const story = defineStory({
-  Component: Markdown,
+  Component: MarkdownPreview,
   args: {
     initial: {
       source:

@@ -1,11 +1,22 @@
 "use client"
 
-import { defineStory } from "@/registry/story"
+import type { ComponentProps } from "react"
+import { defineStory, type TStoryData } from "@/registry/story"
 import { Button } from "@/components/ui/button"
 
+type TPreviewProps = TStoryData<
+  Pick<
+    ComponentProps<typeof Button>,
+    "variant" | "size" | "loading" | "disabled" | "sound" | "children"
+  >
+>
+
+function ButtonPreview(props: TPreviewProps) {
+  return <Button {...props} />
+}
 
 export const story = defineStory({
-  Component: Button,
+  Component: ButtonPreview,
   args: {
     initial: {
       children: "Consult manuscript",

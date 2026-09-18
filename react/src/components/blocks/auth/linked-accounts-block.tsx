@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils"
 import { AuthError, EASE } from "./auth-shell"
 import type { ILinkedAccountsBlockProps } from "./type"
 import type { TSocialProvider } from "@/components/composed/types"
+import { Users2 } from "lucide-react"
 
 
 const LAST_METHOD_EXPLANATION =
@@ -88,7 +89,7 @@ export function LinkedAccountsBlock({
     <MotionConfig reducedMotion="user">
       <Card className={cn("w-full", className)} data-slot="auth-block">
         <CardHeader>
-          <CardTitle>{title}</CardTitle>
+          <CardTitle className="inline-flex items-center gap-1"><Users2 size={18} /> {title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardPanel>

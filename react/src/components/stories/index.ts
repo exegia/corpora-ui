@@ -17,9 +17,8 @@ export { Preview as MenuCommandStory } from "./menu-command.story"
 export { Preview as OTPFieldStory } from "./otp-field.story"
 export { Preview as PasswordInputStory } from "./password-input.story"
 export { Preview as ReferenceStory } from "./reference.story"
-export {
-  Preview as TextStory,
-} from "./text.story"
+export { Preview as SeparatorStory } from "./separator.story"
+export { Preview as TextStory } from "./text.story"
 export { Preview as TextareaStory } from "./textarea.story"
 
 export { Preview as AttachmentStory } from "./attachment.story"

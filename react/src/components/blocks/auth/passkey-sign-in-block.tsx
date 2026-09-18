@@ -52,7 +52,10 @@ export function PasskeySignInBlock({
         loading={loading}
         onClick={() => void handleClick()}
       >
-        <FingerprintIcon aria-hidden="true" />
+        <FingerprintIcon
+          className="stroke-pink-700 dark:stroke-pink-400"
+          aria-hidden="true"
+        />
         <span className="flex-1">{label}</span>
       </Button>
       <AuthError message={error} />

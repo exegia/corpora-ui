@@ -1,11 +1,31 @@
 "use client"
 
-import { defineStory } from "@/registry/story"
+import type { ComponentProps } from "react"
+import { defineStory, type TStoryData } from "@/registry/story"
 
 import { Chart } from "@/components/composed/chat/chart"
 
+type TPreviewProps = TStoryData<
+  Pick<
+    ComponentProps<typeof Chart>,
+    | "type"
+    | "title"
+    | "subtitle"
+    | "badge"
+    | "data"
+    | "series"
+    | "center"
+    | "headerless"
+    | "plotHeight"
+  >
+>
+
+function ChartPreview(props: TPreviewProps) {
+  return <Chart {...props} />
+}
+
 export const story = defineStory({
-  Component: Chart,
+  Component: ChartPreview,
   args: {
     initial: {
       type: "bar",

@@ -1,6 +1,6 @@
 "use client"
 
-import { KeyRoundIcon } from "lucide-react"
+import { Fingerprint, KeyRoundIcon, Plus } from "lucide-react"
 import { AnimatePresence, MotionConfig, motion } from "motion/react"
 import * as React from "react"
 
@@ -111,7 +111,7 @@ export function PasskeyManagerBlock({
     <MotionConfig reducedMotion="user">
       <Card className={cn("w-full", className)} data-slot="auth-block">
         <CardHeader>
-          <CardTitle>{title}</CardTitle>
+          <CardTitle className="inline-flex items-center gap-1"><Fingerprint size={18} /> {title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardPanel>
@@ -299,12 +299,13 @@ export function PasskeyManagerBlock({
               <Button
                 className="w-full"
                 type="button"
-                variant="outline"
+                variant="ghost"
                 disabled={busy}
                 loading={registering}
                 onClick={() => void handleRegister()}
               >
-                Add a passkey
+                <Plus />
+                Add
               </Button>
             </motion.div>
           )}

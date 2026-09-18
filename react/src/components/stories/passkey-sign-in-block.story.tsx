@@ -6,6 +6,7 @@ import { PasskeySignInBlock } from "@/components/blocks/auth/passkey-sign-in-blo
 
 export const story = defineStory({
   Component: PasskeySignInBlock,
+  centered: true,
   args: {
     initial: { available: true, label: "Sign in with a passkey" },
   },

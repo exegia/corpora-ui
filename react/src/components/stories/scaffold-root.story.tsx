@@ -30,12 +30,12 @@ export const story = defineStory({
     fixed: {
       children: (
         <ScaffoldMain>
-          <ScaffoldCanvas>
+          <ScaffoldCanvas key="canvas">
             <ScaffoldPanel>
               <div className="p-6">Corpus workspace</div>
             </ScaffoldPanel>
           </ScaffoldCanvas>
-          <ScaffoldInspector name="Passage details">
+          <ScaffoldInspector key="inspector" name="Passage details">
             <div className="p-4">Selected passage: a.1, ¶1–¶2</div>
           </ScaffoldInspector>
         </ScaffoldMain>

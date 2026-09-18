@@ -1,15 +1,31 @@
 "use client"
 
-import type { ComponentProps, FC } from "react"
+import type { ComponentProps } from "react"
+import { defineStory, type TStoryData } from "@/registry/story"
 
-import { defineStory } from "@/registry/story"
+import {
+  InsightCards,
+  type IInsight,
+} from "@/components/composed/chat/insight-cards"
+import type { IStatProps } from "@/components/ui/chat"
 
-import { InsightCards } from "@/components/composed/chat/insight-cards"
+type TPreviewProps = TStoryData<
+  Pick<
+    ComponentProps<typeof InsightCards>,
+    "header" | "index" | "defaultIndex"
+  > & {
+    insights: (Omit<IInsight, "stats"> & {
+      stats?: Pick<IStatProps, "label" | "value" | "delta" | "tone" | "trend">[]
+    })[]
+  }
+>
+
+function InsightCardsPreview(props: TPreviewProps) {
+  return <InsightCards {...props} />
+}
 
 export const story = defineStory({
-  Component: InsightCards as FC<
-    Pick<ComponentProps<typeof InsightCards>, "insights" | "header" | "index">
-  >,
+  Component: InsightCardsPreview,
   args: {
     initial: {
       insights: [

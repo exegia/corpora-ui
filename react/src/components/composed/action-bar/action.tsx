@@ -1,24 +1,20 @@
 import { ToolbarButton, ToolbarSeparator } from "@/components/ui/toolbar"
 import type { IActionButtonProps } from "./types"
 import { TooltipTrigger } from "@/components/ui/tooltip"
-import { Text } from "@/components/atoms"
-import type { TSpanProps } from "@/components/atoms/text"
-import { tooltipHandle } from "./utils"
+import { useContext } from "react"
+import { ActionTooltipContext } from "./utils"
 import type { ToolbarSeparatorProps } from "@base-ui/react"
-
-function Payload({ children }: TSpanProps) {
-  return <Text.Span>{children}</Text.Span>
-}
 
 export function Action({
   tooltip,
   action,
   Icon,
 }: Omit<IActionButtonProps<string>, "children">) {
+  const tooltipHandle = useContext(ActionTooltipContext)
   return (
     <TooltipTrigger
       handle={tooltipHandle}
-      payload={Payload}
+      payload={tooltip}
       // The icon is aria-hidden, so without this the button has no accessible
       // name at all — `data-tooltip` is not exposed to assistive tech.
       render={
@@ -60,14 +56,15 @@ export function EmojiAction({
   label: string
   action: () => void
 }) {
+  const tooltipHandle = useContext(ActionTooltipContext)
   return (
     <TooltipTrigger
       handle={tooltipHandle}
-      payload={Payload}
+      payload={label}
       render={
         <ToolbarButton
           aria-label={label}
-          className="size-8 cursor-pointer rounded-full text-base leading-none outline-0! transition-[background-color,scale] duration-150 ease-smooth-out hover:bg-black/6 focus-visible:bg-transparent active:scale-90 motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-white/10"
+          className="size-8 text-base hover:bg-black/6 dark:hover:bg-white/10 cursor-pointer rounded-full leading-none outline-0! transition-[background-color,scale] duration-150 ease-smooth-out focus-visible:bg-transparent active:scale-90 motion-reduce:transition-none motion-reduce:active:scale-100"
           data-emoji={emoji}
           data-tooltip={label}
           onClick={action}
