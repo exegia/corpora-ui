@@ -3,6 +3,8 @@ import { createStore } from "jotai"
 
 import {
   measureScaffoldCanvasAtom,
+  updateScaffoldPanelLayoutAtom,
+  resizeScaffoldInspectorAtom,
   projectScaffoldPropsAtom,
   registerScaffoldPanelIdsAtom,
   removeScaffoldInstance,
@@ -195,6 +197,8 @@ describe("scaffold instance lifecycle", () => {
     store.set(resetScaffoldAtom(id))
     expect(store.get(scaffoldStateAtom(id))).toEqual({
       inspectorOpen: false,
+      inspectorWidth: null,
+      panelLayouts: {},
       panelCapacity: 3,
       hiddenPanelIds: [],
       hoveredPanelId: null,
@@ -207,4 +211,26 @@ describe("scaffold instance lifecycle", () => {
     expect(store.get(scaffoldPanelCapacityAtom(id))).toBe(3)
     expect(store.get(scaffoldHiddenPanelIdsAtom(id))).toEqual([])
   })
+})
+
+test("panel geometry and expansion persist per scaffold and reset together", () => {
+  const store = createStore()
+  store.set(updateScaffoldPanelLayoutAtom("first"), "editor", {
+    width: 480,
+    secondarySize: 160,
+    secondaryExpanded: true,
+    swapped: true,
+  })
+  store.set(resizeScaffoldInspectorAtom("first"), 360)
+  expect(store.get(scaffoldStateAtom("first")).panelLayouts.editor).toEqual({
+    width: 480,
+    secondarySize: 160,
+    secondaryExpanded: true,
+    swapped: true,
+  })
+  expect(store.get(scaffoldStateAtom("first")).inspectorWidth).toBe(360)
+  expect(store.get(scaffoldStateAtom("second")).panelLayouts).toEqual({})
+  store.set(resetScaffoldAtom("first"))
+  expect(store.get(scaffoldStateAtom("first")).panelLayouts).toEqual({})
+  expect(store.get(scaffoldStateAtom("first")).inspectorWidth).toBeNull()
 })

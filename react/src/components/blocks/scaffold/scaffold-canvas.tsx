@@ -1,6 +1,5 @@
 "use client"
 
-import { AnimatePresence } from "motion/react"
 import * as React from "react"
 import { useAtomValue, useSetAtom } from "jotai"
 
@@ -9,6 +8,8 @@ import {
   measureScaffoldCanvasAtom,
   registerScaffoldPanelIdsAtom,
   scaffoldHiddenPanelIdsAtom,
+  scaffoldPanelLayoutsAtom,
+  scaffoldActiveResizeAtom,
 } from "./scaffold-atom"
 import { useScaffoldContext } from "./scaffold-context"
 import type { TScaffoldCanvasProps, IScaffoldPanelProps } from "./type"
@@ -33,17 +34,21 @@ export function ScaffoldCanvas({
   ...rest
 }: TScaffoldCanvasProps): React.ReactElement {
   const { scaffoldId } = useScaffoldContext()
+  const layouts = useAtomValue(scaffoldPanelLayoutsAtom(scaffoldId))
+  const activeResize = useAtomValue(scaffoldActiveResizeAtom(scaffoldId))
   const hiddenPanelIds = useAtomValue(scaffoldHiddenPanelIdsAtom(scaffoldId))
   const registerPanelIds = useSetAtom(registerScaffoldPanelIdsAtom(scaffoldId))
   const measureCanvas = useSetAtom(measureScaffoldCanvasAtom(scaffoldId))
+  const [width, setWidth] = React.useState(0)
   const ref = React.useRef<HTMLDivElement>(null)
 
   React.useLayoutEffect(() => {
     const element = ref.current
     if (!element || typeof ResizeObserver === "undefined") return
-    const observer = new ResizeObserver(([entry]) =>
+    const observer = new ResizeObserver(([entry]) => {
       measureCanvas(entry.contentRect.width)
-    )
+      setWidth(entry.contentRect.width)
+    })
     observer.observe(element)
     return () => observer.disconnect()
   }, [measureCanvas])
@@ -68,16 +73,90 @@ export function ScaffoldCanvas({
     return id === undefined || !hiddenPanelIds.includes(id)
   })
 
+  // With three columns, the center consumes the flexible space so Motion
+  // Panels has at most one sized surface on either side.
+  const fillChild =
+    visibleChildren.length > 2
+      ? visibleChildren[Math.floor(visibleChildren.length / 2)]
+      : ([...visibleChildren]
+          .reverse()
+          .find((child) => panelIdOf(child) !== activeResize) ??
+        visibleChildren.at(-1))
+  const count = visibleChildren.length
+  const equalWidth =
+    width > 0 ? (width - Math.max(0, count - 1) * 8) / Math.max(1, count) : 320
+  const sized = visibleChildren.filter((child) => child !== fillChild)
+  const fillRequest =
+    panelIdOf(fillChild) === activeResize
+      ? (layouts[activeResize ?? ""]?.width ?? 320)
+      : 320
+  const fillReserve = Math.max(
+    320,
+    Math.min(fillRequest, width - Math.max(0, count - 1) * 328)
+  )
+  const availableExtra = Math.max(
+    0,
+    width - Math.max(0, count - 1) * 8 - (count - 1) * 320 - fillReserve
+  )
+  const requestedExtra = sized.reduce<number>(
+    (sum, child) =>
+      sum +
+      Math.max(0, (layouts[panelIdOf(child) ?? ""]?.width ?? equalWidth) - 320),
+    0
+  )
+  const resizingFill = panelIdOf(fillChild) === activeResize
+  const ratio =
+    requestedExtra > 0 && (resizingFill || requestedExtra > availableExtra)
+      ? availableExtra / requestedExtra
+      : 1
+  const widths = new Map(
+    sized.map((child) => [
+      child,
+      320 +
+        (resizingFill && requestedExtra === 0
+          ? availableExtra / Math.max(1, sized.length)
+          : Math.max(
+              0,
+              (layouts[panelIdOf(child) ?? ""]?.width ?? equalWidth) - 320
+            ) * ratio),
+    ])
+  )
+
   return (
     <div
-      className={cn("relative flex min-h-0 w-full flex-1 gap-2", className)}
+      className={cn("min-h-0 gap-2 relative flex w-full flex-1", className)}
       data-slot="scaffold-canvas"
+      data-motion-panels-fill=""
       ref={ref}
       {...rest}
     >
-      {/* Sync mode (no `mode="wait"`): an exiting panel shrinks in place
-          while its siblings grow into the freed room in the same beat. */}
-      <AnimatePresence initial={false}>{visibleChildren}</AnimatePresence>
+      {/* Keep folded panels mounted to preserve their content state. */}
+      {childArray.map((child) => {
+        if (!React.isValidElement(child)) return child
+        const hidden = !visibleChildren.includes(child)
+        return React.cloneElement(
+          child as React.ReactElement<Record<string, unknown>>,
+          {
+            _panelHidden: hidden,
+            _panelFill: child === fillChild,
+            _panelEnd:
+              childArray.indexOf(child) < childArray.indexOf(fillChild!),
+            _panelMax: Math.max(
+              320,
+              width -
+                Math.max(0, count - 1) * 8 -
+                320 -
+                sized
+                  .filter((other) => other !== child)
+                  .reduce<number>(
+                    (sum, other) => sum + (widths.get(other) ?? 320),
+                    0
+                  )
+            ),
+            _panelWidth: widths.get(child) ?? equalWidth,
+          }
+        )
+      })}
     </div>
   )
 }

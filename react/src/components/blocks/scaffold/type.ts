@@ -1,4 +1,8 @@
-import React, { type ComponentProps, type ReactElement, type ReactNode, } from "react"
+import React, {
+  type ComponentProps,
+  type ReactElement,
+  type ReactNode,
+} from "react"
 
 /** Key of one scaffold's slice of the store. */
 export type TScaffoldInstanceId = string
@@ -12,9 +16,18 @@ export interface IScaffoldContextValue {
   inspectorWidth: number
 }
 
+export interface IScaffoldPanelLayout {
+  width?: number
+  secondarySize?: number
+  secondaryExpanded?: boolean
+  swapped?: boolean
+}
+
 /** One scaffold's whole state, as `useScaffoldState` returns it. A component
  * that watches one field should subscribe to that field's atom instead. */
 export interface IScaffoldState {
+  inspectorWidth: number | null
+  panelLayouts: Record<string, IScaffoldPanelLayout>
   /** Whether the inspector drawer is currently shown. */
   inspectorOpen: boolean
   /** How many panels currently fit side by side, from the measured canvas
@@ -30,6 +43,11 @@ export interface IScaffoldState {
 
 /** Drive a scaffold by id from anywhere, as `useScaffoldActions` returns it. */
 export interface IScaffoldStateActions {
+  resizePanel: (panelId: string, width: number) => void
+  resizeInspector: (width: number) => void
+  resizeSecondaryPanel: (panelId: string, height: number) => void
+  setSecondaryExpanded: (panelId: string, expanded: boolean) => void
+  setPanelSwapped: (panelId: string, swapped: boolean) => void
   setInspectorOpen: (open: boolean) => void
   toggleInspector: () => void
   /** Show/hide an id'd panel. Showing past capacity auto-hides the

@@ -16,6 +16,7 @@
  * the old `usePanelVisibility` hook needed has no equivalent here.
  */
 
+import type { IScaffoldPanelLayout } from "./type"
 import { atom } from "jotai"
 import type { Atom, Getter, Setter } from "jotai"
 
@@ -179,8 +180,7 @@ export const scaffoldHandlersAtom = stateFamily<IScaffoldHandlers>(
 /** How many panels fit side by side; the cap while the canvas is unmeasured. */
 export const scaffoldPanelCapacityAtom = readFamily(
   "panelCapacity",
-  (get, id) =>
-    get(scaffoldMeasuredCapacityAtom(id)) ?? SCAFFOLD_PANEL_CAPACITY
+  (get, id) => get(scaffoldMeasuredCapacityAtom(id)) ?? SCAFFOLD_PANEL_CAPACITY
 )
 
 /** Ids of panels currently hidden (auto + user), for tabs to reflect. */
@@ -218,6 +218,45 @@ export const scaffoldPanelDimmedAtom = panelFamily(
   }
 )
 
+export const scaffoldPanelLayoutsAtom = stateFamily<
+  Record<string, IScaffoldPanelLayout>
+>("panel-layouts", {})
+export const scaffoldActiveResizeAtom = stateFamily<string | null>(
+  "active-resize",
+  null
+)
+export const scaffoldInspectorWidthAtom = stateFamily<number | null>(
+  "inspector-width",
+  null
+)
+export const resizeScaffoldInspectorAtom = actionFamily<[number]>(
+  "resize-inspector",
+  (_get, set, id, width) => {
+    if (Number.isFinite(width))
+      set(scaffoldInspectorWidthAtom(id), Math.max(180, width))
+  }
+)
+export const updateScaffoldPanelLayoutAtom = actionFamily<
+  [string, Partial<IScaffoldPanelLayout>]
+>("update-panel-layout", (get, set, id, panelId, patch) => {
+  const layouts = get(scaffoldPanelLayoutsAtom(id))
+  const safe = { ...patch }
+  if (safe.width !== undefined && Number.isFinite(safe.width))
+    set(scaffoldActiveResizeAtom(id), panelId)
+  if (safe.width !== undefined)
+    safe.width = Number.isFinite(safe.width)
+      ? Math.max(320, safe.width)
+      : undefined
+  if (safe.secondarySize !== undefined)
+    safe.secondarySize = Number.isFinite(safe.secondarySize)
+      ? Math.max(56, safe.secondarySize)
+      : undefined
+  set(scaffoldPanelLayoutsAtom(id), {
+    ...layouts,
+    [panelId]: { ...layouts[panelId], ...safe },
+  })
+})
+
 /** The whole state of one scaffold. This changes on every hover move, so a
  * component that reads one field should subscribe to that field's atom
  * instead: `useAtomValue(scaffoldInspectorOpenAtom("workspace"))`. */
@@ -225,6 +264,8 @@ export const scaffoldStateAtom = readFamily<IScaffoldState>(
   "state",
   (get, id) => ({
     inspectorOpen: get(scaffoldInspectorOpenAtom(id)),
+    inspectorWidth: get(scaffoldInspectorWidthAtom(id)),
+    panelLayouts: get(scaffoldPanelLayoutsAtom(id)),
     panelCapacity: get(scaffoldPanelCapacityAtom(id)),
     hiddenPanelIds: get(scaffoldHiddenPanelIdsAtom(id)),
     hoveredPanelId: get(scaffoldHoveredPanelIdAtom(id)),
@@ -368,6 +409,9 @@ export const seedScaffoldInspectorAtom = actionFamily<[open: boolean]>(
 
 export const resetScaffoldAtom = actionFamily<[]>("reset", (_get, set, id) => {
   set(scaffoldInspectorOpenAtom(id), false)
+  set(scaffoldInspectorWidthAtom(id), null)
+  set(scaffoldPanelLayoutsAtom(id), {})
+  set(scaffoldActiveResizeAtom(id), null)
   set(scaffoldPanelIdsAtom(id), NO_PANEL_IDS)
   set(scaffoldMeasuredCapacityAtom(id), null)
   set(scaffoldVisibilityAtom(id), EMPTY_SCAFFOLD_VISIBILITY)
