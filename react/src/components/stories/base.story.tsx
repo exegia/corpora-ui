@@ -1,9 +1,15 @@
 "use client"
 
-import type { ComponentProps } from "react"
+import { useState, type ComponentProps } from "react"
 
 import { defineStory } from "@/registry/story"
 
+import { composerDemoOptions } from "@/registry/demos/composer-options"
+import { Bubble } from "@/components/atoms"
+import {
+  Attachment,
+  type TComposerAttachment,
+} from "@/components/composed/chat"
 import { AiPanel } from "@/components/blocks/chat/base"
 
 type TPreviewProps = Pick<
@@ -12,7 +18,40 @@ type TPreviewProps = Pick<
 >
 
 function BlockPreview(props: TPreviewProps) {
-  return <AiPanel {...props} />
+  const [messages, setMessages] = useState<
+    { text: string; attachments: TComposerAttachment[] }[]
+  >([])
+  return (
+    <AiPanel
+      {...props}
+      thread={
+        <>
+          {props.thread}
+          {messages.map((message, index) => (
+            <Bubble key={index} variant="sender">
+              {message.text && <Bubble.Message>{message.text}</Bubble.Message>}
+              {message.attachments.length > 0 && (
+                <Bubble.Message unstyled>
+                  {message.attachments.map((attachment) => (
+                    <Attachment
+                      key={attachment.id}
+                      {...attachment}
+                      variant="preview"
+                    />
+                  ))}
+                </Bubble.Message>
+              )}
+            </Bubble>
+          ))}
+        </>
+      }
+      composerProps={{
+        ...composerDemoOptions,
+        onSubmit: (text, _mode, attachments) =>
+          setMessages((items) => [...items, { text, attachments }]),
+      }}
+    />
+  )
 }
 
 export const story = defineStory({
