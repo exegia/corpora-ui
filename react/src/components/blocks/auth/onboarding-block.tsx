@@ -3,61 +3,15 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
-import type { TAuthAccent } from "@/lib/auth-accent";
 import {
   AuthCard,
   AuthError,
   AuthSuccess,
   MorphStep,
-  type TAuthStatus,
 } from "./auth-shell";
 import { ProfileStep } from "./onboarding/profile-step";
+import type { IOnboardingBlockProps, IOnboardingStepConfig, TOnboardingValue, TAuthStatus } from "./type";
 
-/** Value a single onboarding field can hold. */
-export type TOnboardingValue = string | boolean;
-
-export interface IOnboardingSelectOption {
-  value: string;
-  label: string;
-}
-
-interface IOnboardingFieldBase {
-  /** Key the value is collected under; unique within the flow. */
-  name: string;
-  label: string;
-  /** Required fields gate the step's advance. */
-  required?: boolean;
-  placeholder?: string;
-  /** Extra validation; return a message to reject, `null` to accept. */
-  validate?: (value: string) => string | null;
-}
-
-export interface IOnboardingTextField extends IOnboardingFieldBase {
-  kind: "text" | "textarea" | "url";
-}
-
-export interface IOnboardingCheckboxField extends IOnboardingFieldBase {
-  kind: "checkbox";
-}
-
-export interface IOnboardingSelectField extends IOnboardingFieldBase {
-  kind: "select";
-  options: IOnboardingSelectOption[];
-}
-
-/** Discriminated on `kind`. */
-export type TOnboardingFieldConfig =
-  | IOnboardingTextField
-  | IOnboardingCheckboxField
-  | IOnboardingSelectField;
-
-export interface IOnboardingStepConfig {
-  /** Unique within the flow and stable across releases. */
-  id: string;
-  title: string;
-  description?: string;
-  fields: TOnboardingFieldConfig[];
-}
 
 /** Default configuration: a single required display-name step. */
 export const DEFAULT_ONBOARDING_STEPS: IOnboardingStepConfig[] = [
@@ -70,29 +24,7 @@ export const DEFAULT_ONBOARDING_STEPS: IOnboardingStepConfig[] = [
   },
 ];
 
-export interface IOnboardingBlockProps {
-  /** Declared profile steps. */
-  steps?: IOnboardingStepConfig[];
-  /** Brand mark rendered above the title. Omit for no logo row at all. */
-  logo?: React.ReactNode;
-  /** Brand accent for the primary action. Omit to keep the default primary. */
-  accent?: TAuthAccent;
-  /**
-   * Fires per step as it is submitted. Reject (or throw) to keep the user on
-   * the step and show the error.
-   */
-  onStepSubmit?: (
-    stepId: string,
-    values: Record<string, TOnboardingValue>,
-  ) => Promise<void> | void;
-  /** Fires once, after the final step is accepted, with the merged profile. */
-  onComplete?: (profile: Record<string, TOnboardingValue>) => Promise<void> | void;
-  /** Shows a brief success screen once onboarding completes. */
-  showCompleteScreen?: boolean;
-  /** Move focus to step headings. Disable when embedding a gallery preview. */
-  autoFocus?: boolean;
-  className?: string;
-}
+
 
 /**
  * Multi-step profile onboarding: a declared `steps` config renders as

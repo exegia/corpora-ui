@@ -5,7 +5,6 @@ import * as React from "react"
 
 import {
   SOCIAL_PROVIDERS,
-  type TSocialProvider,
 } from "@/components/composed/social-providers"
 import { Button } from "@/components/ui/button"
 import {
@@ -18,35 +17,9 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 import { AuthError, EASE } from "./auth-shell"
+import type { ILinkedAccountsBlockProps } from "./type"
+import type { TSocialProvider } from "@/components/composed/types"
 
-/** One sign-in identity attached to the account. */
-export interface ILinkedIdentity {
-  id: string
-  provider: TSocialProvider
-  /** Account address shown under the provider name, when known. */
-  email?: string | null
-}
-
-export interface ILinkedAccountsBlockProps {
-  title?: string
-  description?: string
-  /** Identities already attached to the account. */
-  identities?: ILinkedIdentity[]
-  /** Providers offered as connect candidates; connected ones are filtered out. */
-  providers?: TSocialProvider[]
-  /** Shows the loading row instead of the list. */
-  loading?: boolean
-  /**
-   * The account can also sign in through a method that has no row in this
-   * list — an email/password credential, say. Lifts the last-method guard,
-   * which otherwise refuses to disconnect the final listed identity.
-   */
-  hasOtherSignInMethods?: boolean
-  /** Reject (or throw) to show the inline error. */
-  onLink?: (provider: TSocialProvider) => Promise<void> | void
-  onUnlink?: (id: string) => Promise<void> | void
-  className?: string
-}
 
 const LAST_METHOD_EXPLANATION =
   "This is your only way to sign in, so it can't be disconnected."

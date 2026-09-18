@@ -20,15 +20,15 @@ import { atom } from "jotai"
 import type { Getter, Setter } from "jotai"
 
 import { signInAtom, signOutAtom } from "./auth-session-atom"
-import type { TAuthStatus } from "./auth-shell"
 import type {
+  TAuthStatus,
   TAuthFlowChannel,
   TAuthFlowId,
   IAuthFlowState,
   TAuthFlowStep,
   IAuthUser,
   IBeginAuthVerificationOptions,
-} from "./auth-state-type"
+} from "./type"
 
 export const DEFAULT_AUTH_FLOW_ID: TAuthFlowId = "default"
 

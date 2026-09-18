@@ -5,14 +5,13 @@ import * as React from "react";
 import { PasswordInput } from "@/components/composed/password-input";
 import {
   SocialProviders,
-  type TSocialProvider,
 } from "@/components/composed/social-providers";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { type TAuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
+import { authAccentActionStyles } from "@/lib/auth-accent";
 import { cn } from "@/lib/utils";
 import {
   AuthCard,
@@ -21,30 +20,9 @@ import {
   AuthSuccess,
   MorphStep,
   Reveal,
-  type TAuthStatus,
 } from "./auth-shell";
-
-export interface ILoginBlockProps {
-  title?: string;
-  description?: string;
-  /** Brand mark rendered above the title. Omit for no logo row at all. */
-  logo?: React.ReactNode;
-  /** Brand accent for the primary action. Omit to keep the default primary. */
-  accent?: TAuthAccent;
-  /** Social providers to offer; empty array hides the social section. */
-  providers?: TSocialProvider[];
-  showRememberMe?: boolean;
-  showForgotPassword?: boolean;
-  /** Reject (or throw) to show the error state with the error's message. */
-  onSubmit?: (data: {
-    email: string;
-    password: string;
-    remember: boolean;
-  }) => Promise<void> | void;
-  onProviderSelect?: (provider: TSocialProvider) => Promise<void> | void;
-  onForgotPassword?: () => void;
-  onSignup?: () => void;
-}
+import type { ILoginBlockProps, TAuthStatus } from "./type";
+import type { TSocialProvider } from "@/components/composed/types";
 
 export function LoginBlock({
   title = "Login to your account",

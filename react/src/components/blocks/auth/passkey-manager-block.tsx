@@ -17,35 +17,9 @@ import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 import { AuthError, EASE, Reveal } from "./auth-shell"
+import type { IPasskeyManagerBlockProps, IPasskeyRecord } from "./type"
 
-/** One registered passkey, as rendered by {@link PasskeyManagerBlock}. */
-export interface IPasskeyRecord {
-  id: string
-  /** Server-derived name; falls back to "Passkey" when absent. */
-  name?: string | null
-  /** ISO timestamps. Unparseable values are simply not shown. */
-  createdAt?: string | null
-  lastUsedAt?: string | null
-}
 
-export interface IPasskeyManagerBlockProps {
-  title?: string
-  description?: string
-  /** The account's passkeys, newest first. */
-  passkeys?: IPasskeyRecord[]
-  /** Whether this device can register passkeys at all. */
-  available?: boolean
-  /** Shows the loading row instead of the list. */
-  loading?: boolean
-  /**
-   * Reject (or throw) to show the error. Resolving with `{ cancelled: true }`
-   * returns silently to idle — a dismissed OS prompt is not a failure.
-   */
-  onRegister?: () => Promise<{ cancelled?: boolean } | void> | void
-  onRename?: (id: string, name: string) => Promise<void> | void
-  onDelete?: (id: string) => Promise<void> | void
-  className?: string
-}
 
 const NAME_MAX = 120
 

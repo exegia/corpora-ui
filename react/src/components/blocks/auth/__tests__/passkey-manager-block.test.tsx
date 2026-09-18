@@ -4,8 +4,8 @@ import userEvent from "@testing-library/user-event";
 
 import {
   PasskeyManagerBlock,
-  type IPasskeyRecord,
 } from "../passkey-manager-block";
+import type { IPasskeyRecord } from "../type";
 
 const PASSKEYS: IPasskeyRecord[] = [
   { id: "pk-1", name: "MacBook", createdAt: "2026-01-05T00:00:00.000Z" },

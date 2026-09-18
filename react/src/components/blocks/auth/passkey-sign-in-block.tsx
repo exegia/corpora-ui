@@ -6,25 +6,8 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AuthError, Reveal } from "./auth-shell";
+import type { IPasskeySignInBlockProps } from "./type";
 
-export interface IPasskeySignInBlockProps {
-  /**
-   * Whether this device can use passkeys. `false` renders nothing at all —
-   * a passkey button that is guaranteed to fail is worse than no button.
-   */
-  available?: boolean;
-  /** Button label. */
-  label?: string;
-  /**
-   * Reject (or throw) to show the inline error. Resolving with
-   * `{ cancelled: true }` returns silently to idle — a dismissed OS prompt is
-   * not a failure and must not surface an error.
-   */
-  onSignIn?: () => Promise<{ cancelled?: boolean } | void> | void;
-  /** Hint shown under an error, pointing at the remaining sign-in methods. */
-  fallbackHint?: React.ReactNode;
-  className?: string;
-}
 
 /**
  * Passkey sign-in entry point — a single button plus its error state, sized

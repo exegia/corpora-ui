@@ -4,9 +4,8 @@ import userEvent from "@testing-library/user-event";
 
 import {
   OnboardingBlock,
-  type IOnboardingBlockProps,
-  type IOnboardingStepConfig,
 } from "../onboarding-block";
+import type { IOnboardingBlockProps, IOnboardingStepConfig } from "../type";
 
 const STEPS: IOnboardingStepConfig[] = [
   {

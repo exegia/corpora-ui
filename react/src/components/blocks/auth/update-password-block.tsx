@@ -8,7 +8,7 @@ import {
 } from "@/components/composed/password-input";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { type TAuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
+import { authAccentActionStyles } from "@/lib/auth-accent";
 import { cn } from "@/lib/utils";
 import {
   AuthCard,
@@ -16,26 +16,8 @@ import {
   AuthSuccess,
   MorphStep,
   Reveal,
-  type TAuthStatus,
 } from "./auth-shell";
-
-export interface IUpdatePasswordBlockProps {
-  title?: string;
-  description?: string;
-  /** Brand mark rendered above the title. Omit for no logo row at all. */
-  logo?: React.ReactNode;
-  /** Brand accent for the primary action. Omit to keep the default primary. */
-  accent?: TAuthAccent;
-  /**
-   * Minimum strength (0-4, as scored by `getPasswordStrength`) the new
-   * password must reach before the confirm field is revealed. 0 disables the
-   * gate.
-   */
-  minStrength?: number;
-  /** Reject (or throw) to show the error state with the error's message. */
-  onSubmit?: (data: { password: string }) => Promise<void> | void;
-  onDone?: () => void;
-}
+import type { IUpdatePasswordBlockProps, TAuthStatus } from "./type";
 
 /**
  * Password change form for an already-authenticated user: a strength-metered

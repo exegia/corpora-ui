@@ -6,7 +6,7 @@ import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import { OTPField, OTPFieldInput } from "@/components/ui/otp-field";
-import { type TAuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
+import { authAccentActionStyles } from "@/lib/auth-accent";
 import { cn } from "@/lib/utils";
 import {
   AuthCard,
@@ -15,28 +15,8 @@ import {
   EASE,
   MorphStep,
   useCountdown,
-  type TAuthStatus,
 } from "./auth-shell";
-
-export interface ICodeAuthBlockProps {
-  /** Brand mark rendered above the title. Omit for no logo row at all. */
-  logo?: React.ReactNode;
-  /** Brand accent for the primary action. Omit to keep the default primary. */
-  accent?: TAuthAccent;
-  /** Where the code was sent; drives copy and icon. */
-  channel?: "email" | "sms";
-  /** Masked destination shown in the description, e.g. "y•••@example.com". */
-  destination?: string;
-  length?: number;
-  /** Submit automatically once all digits are entered. */
-  autoSubmit?: boolean;
-  /** Seconds before "Resend code" becomes available. 0 disables the wait. */
-  resendSeconds?: number;
-  /** Reject (or throw) to show the error shake and clear the code. */
-  onVerify?: (code: string) => Promise<void> | void;
-  onResend?: () => Promise<void> | void;
-  onBack?: () => void;
-}
+import type { ICodeAuthBlockProps, TAuthStatus } from "./type";
 
 export function CodeAuthBlock({
   channel = "email",

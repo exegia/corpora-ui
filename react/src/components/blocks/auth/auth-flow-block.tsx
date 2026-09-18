@@ -3,35 +3,22 @@
 import * as React from "react"
 import { MotionConfig } from "motion/react"
 
-import type { TSocialProvider } from "@/components/composed/social-providers"
-import type { TAuthAccent } from "@/lib/auth-accent"
 import { cn } from "@/lib/utils"
 import { AuthCard, AuthSuccess, MorphStep } from "./auth-shell"
-import { CodeAuthBlock, type ICodeAuthBlockProps } from "./code-auth-block"
+import { CodeAuthBlock } from "./code-auth-block"
 import {
   ForgotPasswordBlock,
-  type IForgotPasswordBlockProps,
 } from "./forgot-password-block"
-import { LoginBlock, type ILoginBlockProps } from "./login-block"
+import { LoginBlock } from "./login-block"
 import {
   OnboardingBlock,
-  type IOnboardingBlockProps,
-  type IOnboardingStepConfig,
-  type TOnboardingValue,
 } from "./onboarding-block"
-import { SignupBlock, type ISignupBlockProps } from "./signup-block"
+import { SignupBlock } from "./signup-block"
 import {
   UpdatePasswordBlock,
-  type IUpdatePasswordBlockProps,
 } from "./update-password-block"
-import type {
-  TAuthFlowId,
-  IAuthFlowState,
-  TAuthFlowStep,
-  IAuthUser,
-  IBeginAuthVerificationOptions,
-} from "./auth-state-type"
 import { useAuthFlow, useAuthFlowActions } from "./use-auth-state"
+import type { IAuthFlowBlockProps, TAuthFlowDirective, TAuthFlowHandler } from "./type"
 
 /**
  * Where the flow goes after a step callback resolves. Returned from every
@@ -48,78 +35,6 @@ import { useAuthFlow, useAuthFlowActions } from "./use-auth-state"
  * which owns its transient error/shake state (see `react/CLAUDE.md`,
  * "Third implementation: auth").
  */
-export type TAuthFlowDirective =
-  | { user: IAuthUser }
-  | { verify: IBeginAuthVerificationOptions }
-  | { step: TAuthFlowStep }
-  | void
-
-export type TAuthFlowHandler<Data = void> = (
-  data: Data
-) => Promise<TAuthFlowDirective> | TAuthFlowDirective
-
-/** Per-step prop overrides, merged over the orchestrator's wiring — spread
- * last, so an app can restyle a block or unhook a default navigation link
- * (`{ login: { onSignup: undefined } }` removes the sign-up hand-off). */
-export interface IAuthFlowStepOverrides {
-  login?: Partial<ILoginBlockProps>
-  signup?: Partial<ISignupBlockProps>
-  "verify-code"?: Partial<ICodeAuthBlockProps>
-  "forgot-password"?: Partial<IForgotPasswordBlockProps>
-  "update-password"?: Partial<IUpdatePasswordBlockProps>
-  onboarding?: Partial<IOnboardingBlockProps>
-}
-
-export interface IAuthFlowBlockProps {
-  /** Which flow instance to orchestrate. The default flow unless a re-auth
-   * modal or a second surface needs its own. */
-  flowId?: TAuthFlowId
-  /** Brand mark handed to every step's card. */
-  logo?: React.ReactNode
-  /** Brand accent handed to every step's card. */
-  accent?: TAuthAccent
-  /** Social providers offered on the login and signup steps. */
-  providers?: TSocialProvider[]
-  /** The login attempt. Resolve with a directive; reject to show the error
-   * in the block. */
-  onLogin?: TAuthFlowHandler<{
-    email: string
-    password: string
-    remember: boolean
-  }>
-  /** The signup attempt. */
-  onSignup?: TAuthFlowHandler<{ name: string; email: string; password: string }>
-  /** A social provider chosen on the login or signup step. */
-  onProviderSelect?: TAuthFlowHandler<TSocialProvider>
-  /** The forgot-password request. Resolving without a directive stays on the
-   * step (the block shows its own "link sent" state). */
-  onRequestReset?: TAuthFlowHandler<{ email: string }>
-  /** The code entered on the verification step. */
-  onVerifyCode?: TAuthFlowHandler<string>
-  /** "Resend code" on the verification step. */
-  onResendCode?: TAuthFlowHandler
-  /** The update-password submit. */
-  onUpdatePassword?: TAuthFlowHandler<{ password: string }>
-  /** Onboarding finished, with the merged profile. */
-  onOnboardingComplete?: TAuthFlowHandler<Record<string, TOnboardingValue>>
-  /** Declared onboarding steps, handed to `OnboardingBlock`. */
-  onboardingSteps?: IOnboardingStepConfig[]
-  /** Per-step prop overrides, merged over the orchestrator's wiring. */
-  steps?: IAuthFlowStepOverrides
-  /** Replace any step's UI entirely; return `undefined` to keep the default
-   * for that step. Receives the flow state for destination copy etc. */
-  renderStep?: (
-    step: TAuthFlowStep,
-    flow: IAuthFlowState
-  ) => React.ReactNode | undefined
-  /** Replaces the whole default success card. */
-  success?: React.ReactNode
-  /** Card title of the default success step. */
-  successTitle?: string
-  /** Body under the default success step's "You're signed in" check. */
-  successDescription?: string
-  className?: string
-}
 
 /**
  * Renders the right auth block for the flow's current step with the store
