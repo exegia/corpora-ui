@@ -46,6 +46,8 @@ export function MenuCommandList({
   return (
     <Command
       items={items}
+      autoHighlight
+      
       itemToStringValue={(value) => {
         const item = value as IMenuCommandItem
         return typeof item.label === "string" ? item.label : item.id
@@ -57,7 +59,7 @@ export function MenuCommandList({
           placeholder="Search commands…"
         />
         <CommandEmpty>No commands found.</CommandEmpty>
-        <CommandList>
+        <CommandList className="">
           {(item: IMenuCommandItem) => {
             const body = (
               <>
@@ -126,7 +128,7 @@ export function MenuCommand({
   items,
   onSelect,
   side = "top",
-  align = "start",
+  align = "center",
   className,
   popupClassName,
 }: IMenuCommandProps): React.ReactElement {
@@ -136,7 +138,7 @@ export function MenuCommand({
       <PopoverTrigger render={children} />
       <PopoverPopup
         align={align}
-        className={cn("w-[28rem] max-w-[calc(100vw-2rem)]", popupClassName)}
+        className={cn("w-[28rem] max-w-[calc(100vw-2rem)] bg-transparent border-none", popupClassName)}
         side={side}
         sideOffset={8}
       >
