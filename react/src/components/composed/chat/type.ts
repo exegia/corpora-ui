@@ -8,12 +8,29 @@ import type { TAtomSize } from "@/components/atoms/types"
 export type TComposerMode = "answer" | "fix" | "ask"
 
 /** A tray chip: any Attachment kind plus a stable id. */
-export type TComposerAttachment = Omit<
-  TAttachmentProps,
-  "variant" | "onRemove" | "removable"
-> & { id: string }
+type ComposerAttachment<T> = T extends TAttachmentProps
+  ? Omit<T, "variant" | "onRemove" | "removable"> & { id: string }
+  : never
+export type TComposerAttachment = ComposerAttachment<TAttachmentProps>
+
+export interface IComposerModel {
+  id: string
+  label: string
+  description?: string
+}
+
+export interface IComposerOption {
+  id: string
+  label: string
+  description?: string
+  icon?: React.ReactNode
+  /** Text to insert instead of @label or /id. */
+  insertText?: string
+  onSelect?: () => void
+}
 
 export interface IComposerMenuProps {
+  disabled?: boolean
   items?: IMenuCommandItem[]
   onCommand?: (item: IMenuCommandItem) => void
   onAttach?: () => void
@@ -48,12 +65,26 @@ export interface IComposerBaseProps<
   M extends TComposerMode = TComposerMode,
   A extends TComposerAttachment = TComposerAttachment,
 > {
+  shape?: "rounded" | "pill"
+  sources?: IComposerOption[]
+  commands?: IComposerOption[]
+  models?: IComposerModel[]
+  model?: string
+  defaultModel?: string
+  onModelChange?: (model: string) => void
+  onSourceSelect?: (source: IComposerOption) => void
+  onCommand?: (command: IComposerOption) => void
+  /** Receives local files; uploading remains the consuming app's responsibility. */
+  onFilesChange?: (files: File[]) => void
+  accept?: string
+  /** Hide the microphone. Unsupported browsers show it disabled otherwise. */
+  dictation?: boolean
   value?: string
   onValueChange?: (value: string) => void
   composerId?: string
   /** Seeds the tray once on mount; the atoms own it from then on. */
   attachments?: A[]
-  /** Start in the tall, focused layout. */
+  /** Keep the text above the controls even for a short message. */
   expanded?: E
   isStreaming?: S
   disabled?: boolean

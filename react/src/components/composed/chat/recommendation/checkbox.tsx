@@ -5,19 +5,8 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import type * as React from "react"
 import { EASE_OUT_STRONG } from "@/lib/ease"
 import { cn } from "@/lib/utils"
-import type { TRecommendationState } from "./types"
-
-export interface IRecommendationCheckboxProps {
-  state: TRecommendationState
-  /** Number shown inside the pending ring (its position in the group). */
-  step?: number
-  className?: string
-}
-
-const SIZE = 18
-const STROKE = 1.5
-const R = (SIZE - STROKE) / 2
-const C = 2 * Math.PI * R
+import type { IRecommendationCheckboxProps } from "./types"
+import { SIZE, STROKE, R, C } from "./constant"
 
 /**
  * Outcome mark after beautiful-ui's Task Rows: a Sparkle while the proposal

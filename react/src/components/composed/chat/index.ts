@@ -36,6 +36,8 @@ export {
 } from "./composer"
 export type {
   TComposerAttachment,
+  IComposerModel,
+  IComposerOption,
   IComposerBaseProps,
   TComposerMode,
   IComposerSuggestionsProps,

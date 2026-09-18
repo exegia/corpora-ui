@@ -1,5 +1,7 @@
 import type * as React from "react"
 import type { TSignalLevel } from "@/components/ui/chat"
+import type { AccordionPrimitive } from "@/components/ui/accordion"
+import type { IReferenceProps } from "@/components/atoms/types"
 
 export interface IRecommendationOption {
   label: React.ReactNode
@@ -23,10 +25,10 @@ export type TRecommendationState =
 /** Shared fields of a human-in-the-loop proposal. */
 export interface IRecommendationFields {
   title: React.ReactNode
-  /** Sentence fragments around the entity and lead-time pills. */
+  /** Collapsible body text around the entity and lead-time pills. */
   description: React.ReactNode
   entity?: IRecommendationEntity
-  descriptionSuffix?: React.ReactNode
+  reference?: IReferenceProps
   leadTime?: React.ReactNode
   options?: IRecommendationOption[]
   optionsLabel?: React.ReactNode
@@ -61,5 +63,14 @@ export interface IRecommendationCardProps extends IRecommendationFields {
   value?: string
   /** Uncontrolled initial open state. Default true — Accept lives in the body. */
   defaultOpen?: boolean
+  className?: string
+}
+
+export type TRecommendationGroupProps = AccordionPrimitive.Root.Props
+
+export interface IRecommendationCheckboxProps {
+  state: TRecommendationState
+  /** Number shown inside the pending ring (its position in the group). */
+  step?: number
   className?: string
 }
