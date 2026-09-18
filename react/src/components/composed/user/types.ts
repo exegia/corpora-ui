@@ -17,10 +17,10 @@ export interface IUserBaseProps<T extends TUserType, Variant extends TUserVarian
   variant: Variant
 }
 
-export interface IUserMessageProps<T extends TUserType> extends IUserBaseProps<T> {
+export interface IUserMessageProps<T extends TUserType = TUserType> extends Omit<IUserBaseProps<T>, "user"> {
   children: React.ReactNode
   size?: IAvatarProps<T>['size']
-  
+  user?: TUserInfo<T>
 }
 
 export type TUserInfoProps<T extends TUserType = TUserType> = Exclude<IUserBaseProps<T, "info">, "variant"> & TUserInfo<T>
