@@ -13,16 +13,20 @@ export default function AttachmentDemo(): React.ReactElement {
       <Attachment
         kind="document"
         variant={variant}
-        title="Q3-financial-report.pdf"
+        title="Iliad annotations.pdf"
         meta="PDF · 2.4 MB · 12 pages"
         onRemove={remove}
         onAction={() => {}}
+        previewText={
+          "Iliad · Book 1\n\nAnnotation notes\n¶12 — Compare the paragraph boundary with the source edition.\n¶17 — Check the speaker attribution and lemma links."
+        }
       />
       <Attachment
         kind="image"
         variant={variant}
-        title="IMG_2048.jpg"
-        meta="JPG · 1.2 MB · 4032×3024"
+        title="Chat attachments.png"
+        meta="PNG · component reference"
+        src="/images/chat-attachments-dark.png"
         onRemove={remove}
       />
       <Attachment

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { composerDemoOptions } from "./composer-options"
 
 import {
   AiPanel,
@@ -10,7 +11,9 @@ import {
   type IDiffRow,
 } from "@/components/blocks/chat"
 import {
+  Attachment,
   RecommendationCard,
+  type TComposerAttachment,
   type TRecommendationState,
 } from "@/components/composed/chat"
 import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
@@ -71,6 +74,10 @@ function DiffRows({ rows }: { rows: IDiffRow[] }): React.ReactElement {
  * stands in for that host.
  */
 export default function AiPanelDemo(): React.ReactElement {
+  const [messages, setMessages] = React.useState<
+    { text: string; attachments: TComposerAttachment[] }[]
+  >([])
+  const [model, setModel] = React.useState("auto")
   const [state, setState] = React.useState<TRecommendationState>("pending")
   const runTimer = React.useRef<ReturnType<typeof setTimeout>>(null)
 
@@ -125,6 +132,14 @@ export default function AiPanelDemo(): React.ReactElement {
     <DemoStage controls={null}>
       <div className="mx-auto h-[42rem] w-full max-w-[28rem] overflow-hidden rounded-sm border bg-background">
         <AiPanel
+          onNewThread={() => setMessages([])}
+          composerProps={{
+            ...composerDemoOptions,
+            model,
+            onModelChange: setModel,
+            onSubmit: (text, _mode, attachments) =>
+              setMessages((items) => [...items, { text, attachments }]),
+          }}
           scope={SCOPE}
           thread={
             <>
@@ -166,6 +181,24 @@ export default function AiPanelDemo(): React.ReactElement {
               >
                 The paragraph boundary is valid. Node p-17 has a label mismatch.
               </AI.Message>
+              {messages.map((message, index) => (
+                <Bubble key={index} variant="sender">
+                  {message.text && (
+                    <Bubble.Message>{message.text}</Bubble.Message>
+                  )}
+                  {message.attachments.length > 0 && (
+                    <Bubble.Message unstyled>
+                      {message.attachments.map((attachment) => (
+                        <Attachment
+                          key={attachment.id}
+                          {...attachment}
+                          variant="preview"
+                        />
+                      ))}
+                    </Bubble.Message>
+                  )}
+                </Bubble>
+              ))}
             </>
           }
           toast={
