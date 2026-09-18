@@ -228,6 +228,8 @@ function stubShellWidths() {
   )
   const original = Element.prototype.getBoundingClientRect
   Element.prototype.getBoundingClientRect = function (this: HTMLElement) {
+    if (this.getAttribute("data-slot") === "sidebar-wrapper")
+      return { width: window.innerWidth } as DOMRect
     const isProbe =
       this.style.visibility === "hidden" && this.style.position === "absolute"
     if (!isProbe) return original.call(this)

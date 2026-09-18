@@ -12,12 +12,13 @@ import {
   resizeShellPanelAtom,
   shellFitStateAtom,
 } from "./shell-fit-atom"
-import { fitsPanel, type IShellMetrics } from "./shell-metrics"
+import { fitsPanel, fitSidebar, type IShellMetrics } from "./shell-metrics"
 import type {
   IShellFitController,
   IShellFitSeed,
   IUseShellFitOptions,
 } from "./type"
+import { shellPanelAtoms } from "./shell-panel-atom"
 import { resolveLength } from "./utils"
 
 /** Read the shell's columns out of the DOM. The widths come from CSS
@@ -30,26 +31,33 @@ function readMetrics(host: HTMLElement, railOpen: boolean): IShellMetrics {
   const rail = host.querySelector<HTMLElement>(
     '[data-slot="sidebar"][data-side="left"]'
   )
-  const collapsible = rail?.dataset.collapsible
-
   const frame = getComputedStyle(host)
   const gap = Number.parseFloat(frame.columnGap) || 0
-
+  const padding =
+    (Number.parseFloat(frame.paddingLeft) || 0) +
+    (Number.parseFloat(frame.paddingRight) || 0)
+  const width = host.clientWidth || host.getBoundingClientRect().width
+  const insetMin = resolveLength(host, "var(--inset-min-width)")
+  const sidebar = fitSidebar({
+    width,
+    padding,
+    gap,
+    insetMin,
+    expanded: resolveLength(host, "var(--sidebar-width)") || 256,
+    icon: resolveLength(host, "var(--sidebar-width-icon)") || 56,
+    minimum: resolveLength(host, "var(--sidebar-min-width)") || 180,
+    open: railOpen,
+    collapsible: rail?.dataset.collapsible ?? "icon",
+    present: Boolean(rail),
+  })
   return {
-    rail: !rail
-      ? 0
-      : railOpen || collapsible === "none"
-        ? resolveLength(host, "var(--sidebar-width)")
-        : collapsible === "offcanvas"
-          ? 0
-          : resolveLength(host, "var(--sidebar-width-icon)"),
-    insetMin: resolveLength(host, "var(--inset-min-width)"),
+    rail: sidebar.width,
+    sidebar,
+    insetMin,
     panelMin: resolveLength(host, "var(--panel-width)"),
-    viewport: window.innerWidth,
-    chrome:
-      (Number.parseFloat(frame.paddingLeft) || 0) +
-      (Number.parseFloat(frame.paddingRight) || 0) +
-      gap * Math.max(0, host.children.length - 1),
+    viewport: width,
+    // Measure the space a prospective inspector needs, even while absent.
+    chrome: padding + gap * (sidebar.width > 0 ? 2 : 1),
   }
 }
 
@@ -57,9 +65,8 @@ function readMetrics(host: HTMLElement, railOpen: boolean): IShellMetrics {
  * Measures the shell and decides what the secondary panel may do: whether it
  * exists at all, and how wide it may be dragged.
  *
- * The three things that move the answer are all observed here — the viewport
- * (`resize`), the rail's fold (`railOpen`, a render input) and the user's own
- * drag (`resizePanel`) — so no caller has to re-derive it. The measurement is
+ * Container resizing, rail folding, and user resizing are observed here,
+ * so embedded shells obey the same bounds as full-page layouts. The measurement is
  * the only thing this hook keeps to itself: the numbers land in the shell-fit
  * atoms keyed by `shellId`, so anything under `ExegiaProvider` can read the
  * verdict (`useShellFitState`) or move the panel (`useShellFitActions`)
@@ -76,6 +83,7 @@ export function useShellFit({
   // `shellId` is the app's handle on this one.
   const generatedId = useId()
   const shellId = explicitId ?? generatedId
+  const railWidth = useAtomValueRawSync(shellPanelAtoms(shellId).railWidth)
 
   // Read once: `defaultPanelWidth` describes the mount, not every render.
   const [seed] = useState<IShellFitSeed>(() => ({
@@ -110,13 +118,17 @@ export function useShellFit({
       if (!fitsPanel(next)) onUnfitRef.current?.()
     }
 
-    // Measured before paint so a shell that cannot hold the panel never
-    // flashes one, and re-measured on every fold because the rail's column is
-    // part of the room the panel needs.
+    // Observe the host, including changes from a split view or surrounding
+    // navigation that never trigger a window resize.
     takeMeasurement()
+    const observer = new ResizeObserver(takeMeasurement)
+    observer.observe(host)
     window.addEventListener("resize", takeMeasurement)
-    return () => window.removeEventListener("resize", takeMeasurement)
-  }, [hostRef, railOpen, measure])
+    return () => {
+      observer.disconnect()
+      window.removeEventListener("resize", takeMeasurement)
+    }
+  }, [hostRef, railOpen, railWidth, measure])
 
   // A shell the hook keyed is scrap once its component goes. An explicit
   // `shellId` is the app's key and outlives the mount — that is what lets a
@@ -129,7 +141,13 @@ export function useShellFit({
   const state = useAtomValueRawSync(shellFitStateAtom(shellId))
 
   return useMemo<IShellFitController>(
-    () => ({ shellId, ...state, resizePanel, resetPanelWidth }),
-    [shellId, state, resizePanel, resetPanelWidth]
+    () => ({
+      shellId,
+      ...state,
+      defaultPanelWidth: seed.panelWidth,
+      resizePanel,
+      resetPanelWidth,
+    }),
+    [shellId, state, seed.panelWidth, resizePanel, resetPanelWidth]
   )
 }

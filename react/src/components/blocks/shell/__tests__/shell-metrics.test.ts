@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test"
 import {
   clampPanelWidth,
   fitsPanel,
+  fitSidebar,
   metricsEqual,
   panelBounds,
   requiredWidth,
@@ -30,9 +31,9 @@ describe("fitsPanel", () => {
     expect(fitsPanel(shell({ viewport: 800 }))).toBe(false)
   })
 
-  test("is strict — a viewport that fits exactly has nothing left to give", () => {
-    expect(fitsPanel(shell({ viewport: 936 }))).toBe(false)
-    expect(fitsPanel(shell({ viewport: 937 }))).toBe(true)
+  test("requires space for all columns including padding and gaps", () => {
+    expect(fitsPanel(shell({ viewport: 967 }))).toBe(false)
+    expect(fitsPanel(shell({ viewport: 968 }))).toBe(true)
   })
 
   test("a folded rail hands its column back", () => {
@@ -40,7 +41,7 @@ describe("fitsPanel", () => {
   })
 
   test("a shell with no rail spends nothing on one", () => {
-    expect(fitsPanel(shell({ rail: 0, viewport: 700 }))).toBe(true)
+    expect(fitsPanel(shell({ rail: 0, viewport: 720 }))).toBe(true)
   })
 
   test("an unmeasurable shell fails open rather than hiding the panel", () => {
@@ -56,10 +57,9 @@ describe("fitsPanel", () => {
     expect(fitsPanel(shell({ panelMin: 0 }))).toBe(true)
   })
 
-  test("ignores the shell's own frame — the rule is stated on the viewport", () => {
-    expect(fitsPanel(shell({ chrome: 0 }))).toBe(
-      fitsPanel(shell({ chrome: 300 }))
-    )
+  test("includes the frame when deciding whether the inspector fits", () => {
+    expect(fitsPanel(shell({ chrome: 0 }))).toBe(true)
+    expect(fitsPanel(shell({ chrome: 300 }))).toBe(false)
   })
 })
 
@@ -104,5 +104,51 @@ describe("metricsEqual", () => {
     expect(metricsEqual(shell(), shell())).toBe(true)
     expect(metricsEqual(shell(), shell({ viewport: 1025 }))).toBe(false)
     expect(metricsEqual(shell(), shell({ rail: 56 }))).toBe(false)
+  })
+})
+
+describe("responsive sidebar", () => {
+  const options = {
+    width: 1000,
+    padding: 16,
+    gap: 8,
+    insetMin: 360,
+    expanded: 256,
+    icon: 56,
+    minimum: 180,
+    open: true,
+    collapsible: "icon",
+    present: true,
+  }
+  test("shrinks to its minimum, folds, then hides to preserve the body", () => {
+    expect(fitSidebar(options).width).toBe(256)
+    expect(fitSidebar({ ...options, width: 600 }).width).toBe(216)
+    expect(fitSidebar({ ...options, width: 564 }).width).toBe(180)
+    expect(fitSidebar({ ...options, width: 563 })).toMatchObject({
+      width: 56,
+      canExpand: false,
+      mode: "icon",
+    })
+    expect(fitSidebar({ ...options, width: 439 })).toMatchObject({
+      width: 0,
+      canExpand: false,
+      mode: "hidden",
+    })
+  })
+  test("keeps an explicitly collapsed rail folded when space returns", () => {
+    expect(fitSidebar({ ...options, open: false })).toMatchObject({
+      width: 56,
+      canExpand: true,
+      mode: "icon",
+    })
+    expect(
+      fitSidebar({ ...options, open: false, collapsible: "offcanvas" }).width
+    ).toBe(0)
+  })
+  test("honors custom minimums and rails that are absent", () => {
+    expect(fitSidebar({ ...options, width: 600, minimum: 220 }).canExpand).toBe(
+      false
+    )
+    expect(fitSidebar({ ...options, present: false }).width).toBe(0)
   })
 })

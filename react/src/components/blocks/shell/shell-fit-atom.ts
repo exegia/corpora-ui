@@ -1,3 +1,4 @@
+import { removeShellPanelInstance } from "./shell-panel-atom"
 /**
  * Per-instance Jotai state for the shell's layout fit.
  *
@@ -182,6 +183,7 @@ export const shellFitPanelWidthAtom = readFamily<number | null>(
 export const shellFitStateAtom = readFamily<IShellFitState>(
   "state",
   (get, id) => ({
+    sidebar: get(shellFitMetricsAtom(id)).sidebar ?? null,
     metrics: get(shellFitMeasuredAtom(id)),
     fits: get(shellFitFitsAtom(id)),
     panelWidth: get(shellFitPanelWidthAtom(id)),
@@ -239,5 +241,6 @@ export const mountShellFitAtom = actionFamily<[seed: IShellFitSeed]>(
  * keyed itself; an explicit `shellId` is the app's key and outlives its
  * component, so a resized panel survives a route change. */
 export function removeShellFitInstance(id: TShellFitInstanceId): void {
+  removeShellPanelInstance(id)
   for (const family of families) family.remove(id)
 }

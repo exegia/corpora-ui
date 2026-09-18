@@ -32,7 +32,7 @@ const PANELS: TPanelMap = {
  *   rail 256 (56 folded) + body 360 + panel 320
  *
  * Only probes are intercepted; every other box keeps happy-dom's answer. */
-function stubShellWidths() {
+function stubShellWidths(containerWidth = () => window.innerWidth) {
   const px = Object.fromEntries(
     Object.entries(SHELL_WIDTHS).map(([name, value]) => [
       name,
@@ -41,6 +41,8 @@ function stubShellWidths() {
   )
   const original = Element.prototype.getBoundingClientRect
   Element.prototype.getBoundingClientRect = function (this: HTMLElement) {
+    if (this.getAttribute("data-slot") === "sidebar-wrapper")
+      return { width: containerWidth() } as DOMRect
     const isProbe =
       this.style.visibility === "hidden" && this.style.position === "absolute"
     if (!isProbe) return original.call(this)
@@ -92,7 +94,7 @@ function leftRail() {
 }
 
 function rightDrawer(name = "Inspector") {
-  return screen.getByRole("complementary", { name })
+  return document.querySelector(`[data-slot="sidebar"][aria-label="${name}"]`)!
 }
 
 describe("ShellLayout", () => {
@@ -136,7 +138,10 @@ describe("ShellLayout", () => {
 
   test("trailing renders the cluster even with no right panel", () => {
     render(
-      <ShellLayout trailing={<button type="button">Upload</button>} variant="web" />
+      <ShellLayout
+        trailing={<button type="button">Upload</button>}
+        variant="web"
+      />
     )
 
     expect(screen.getByRole("button", { name: "Upload" })).toBeDefined()
@@ -447,5 +452,145 @@ describe("useShellPanels", () => {
     // The external toggle sees that state, so it closes rather than opens.
     await user.click(screen.getByRole("button", { name: "External toggle" }))
     expect(rightDrawer().getAttribute("data-state")).toBe("collapsed")
+  })
+})
+
+describe("shell app-wide panel state", () => {
+  function RemoteControls() {
+    const panels = useShellPanels({ shellId: "shared-shell" })
+    return (
+      <>
+        <button onClick={() => panels.toggle("right")}>Remote inspector</button>
+        <button onClick={() => panels.resizeSidebar(280)}>Resize rail</button>
+        <output aria-label="Rail width">{panels.sidebarWidth}</output>
+        <button
+          onClick={() => panels.openPanel("right", <div>Remote details</div>)}
+        >
+          Remote content
+        </button>
+        <output>{panels.open.right ? "Remote open" : "Remote closed"}</output>
+      </>
+    )
+  }
+
+  test("separate hooks drive the same named shell and dynamic content", async () => {
+    const user = userEvent.setup()
+    const restore = shellViewport(WIDE_VIEWPORT)
+    try {
+      render(
+        <>
+          <ShellLayout shellId="shared-shell" panels={PANELS}>
+            Workspace
+          </ShellLayout>
+          <RemoteControls />
+        </>
+      )
+      await user.click(screen.getByRole("button", { name: "Resize rail" }))
+      expect(screen.getByLabelText("Rail width").textContent).toBe("280")
+      expect(
+        document
+          .querySelector<HTMLElement>('[data-slot="sidebar-wrapper"]')
+          ?.style.getPropertyValue("--sidebar-width")
+      ).toBe("280px")
+      await user.click(screen.getByRole("button", { name: "Remote inspector" }))
+      expect(rightDrawer().getAttribute("data-state")).toBe("expanded")
+      expect(screen.getByText("Remote open")).toBeTruthy()
+      await user.click(screen.getByRole("button", { name: "Toggle panel" }))
+      expect(screen.getByText("Remote closed")).toBeTruthy()
+      await user.click(screen.getByRole("button", { name: "Remote content" }))
+      expect(screen.getByText("Remote details")).toBeTruthy()
+      expect(rightDrawer().getAttribute("data-state")).toBe("expanded")
+    } finally {
+      restore()
+    }
+  })
+})
+
+describe("shell container responsiveness", () => {
+  test("shrinks, folds, hides, and restores from container-only resizes", async () => {
+    let width = 1100
+    const restoreWidths = stubShellWidths(() => width)
+    const originalObserver = globalThis.ResizeObserver
+    const callbacks = new Set<ResizeObserverCallback>()
+    globalThis.ResizeObserver = class {
+      callback: ResizeObserverCallback
+      constructor(callback: ResizeObserverCallback) {
+        this.callback = callback
+      }
+      observe(node: Element) {
+        if (node.getAttribute("data-slot") === "sidebar-wrapper")
+          callbacks.add(this.callback)
+      }
+      unobserve() {}
+      disconnect() {
+        callbacks.delete(this.callback)
+      }
+    } as unknown as typeof ResizeObserver
+    const resizeContainer = (next: number) =>
+      act(() => {
+        width = next
+        for (const callback of callbacks) callback([], {} as ResizeObserver)
+      })
+    const user = userEvent.setup()
+    function RemoteState() {
+      const { sidebar } = useShellPanels({ shellId: "responsive-shell" })
+      return (
+        <output data-testid="sidebar-fit">{JSON.stringify(sidebar)}</output>
+      )
+    }
+    const currentFit = () =>
+      JSON.parse(screen.getByTestId("sidebar-fit").textContent ?? "{}")
+    try {
+      render(
+        <>
+          <ShellLayout shellId="responsive-shell" panels={PANELS}>
+            Main content
+          </ShellLayout>
+          <RemoteState />
+        </>
+      )
+      expect(currentFit().width).toBe(256)
+      await user.click(screen.getByRole("button", { name: "Toggle panel" }))
+      resizeContainer(570)
+      expect(currentFit()).toMatchObject({
+        width: 210,
+        mode: "expanded",
+        canExpand: true,
+      })
+      expect(screen.queryByRole("button", { name: "Toggle panel" })).toBeNull()
+      resizeContainer(539)
+      expect(currentFit()).toMatchObject({
+        width: 56,
+        mode: "icon",
+        canExpand: false,
+      })
+      expect(
+        screen
+          .getByRole("button", { name: "Toggle sidebar" })
+          .hasAttribute("disabled")
+      ).toBe(true)
+      await user.keyboard("{Meta>}b{/Meta}")
+      expect(currentFit().mode).toBe("icon")
+      resizeContainer(390)
+      expect(currentFit().mode).toBe("hidden")
+      expect(
+        screen.queryByRole("navigation", { name: "Primary navigation" })
+      ).toBeNull()
+      expect(screen.getByRole("main").textContent).toContain("Main content")
+      resizeContainer(1100)
+      expect(currentFit()).toMatchObject({
+        width: 256,
+        mode: "expanded",
+        canExpand: true,
+      })
+      expect(rightDrawer().getAttribute("data-state")).toBe("collapsed")
+      await user.click(screen.getByRole("button", { name: "Toggle sidebar" }))
+      resizeContainer(390)
+      resizeContainer(1100)
+      expect(currentFit().mode).toBe("icon")
+    } finally {
+      restoreWidths()
+      globalThis.ResizeObserver = originalObserver
+    }
   })
 })

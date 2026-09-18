@@ -111,6 +111,7 @@ export const SIDEBAR_KEYBOARD_SHORTCUT = "b"
  * so an override wins over the value written here.
  */
 export const SHELL_WIDTHS = {
+  "--sidebar-min-width": "180px",
   "--sidebar-width": "256px",
   "--sidebar-width-icon": "56px",
   "--sidebar-width-mobile": "18rem",
