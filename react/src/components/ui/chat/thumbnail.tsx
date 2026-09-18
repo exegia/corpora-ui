@@ -1,7 +1,7 @@
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 
-export interface ThumbnailProps extends React.ComponentPropsWithoutRef<"span"> {
+export interface IThumbnailProps extends React.ComponentPropsWithoutRef<"span"> {
   src?: string
   alt?: string
   /** `sm` is the 40px chip tile (radius 10); `lg` the 240×160 preview (radius 14). */
@@ -13,7 +13,7 @@ export interface ThumbnailProps extends React.ComponentPropsWithoutRef<"span"> {
  *
  * @sketch "Atom / Thumbnail / Small", "Atom / Thumbnail / Large"
  */
-export function Thumbnail({ src, alt = "", size = "sm", className, children, ...props }: ThumbnailProps): React.ReactElement {
+export function Thumbnail({ src, alt = "", size = "sm", className, children, ...props }: IThumbnailProps): React.ReactElement {
   return (
     <span
       data-slot="thumbnail"

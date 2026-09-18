@@ -1,21 +1,21 @@
 import { EASE_OUT } from "@/lib/ease.ts"
-import type { FlatResource, SidebarResource, SidebarResourceDropPosition, SidebarResourceMove } from "./type.ts"
+import type { IFlatResource, ISidebarResource, TSidebarResourceDropPosition, ISidebarResourceMove } from "./type.ts"
 
 export const ROW_REVEAL = {
   duration: 0.16,
   ease: EASE_OUT,
 } as const
 
-export function canContain(item: SidebarResource) {
+export function canContain(item: ISidebarResource) {
   return item.kind === "folder" || item.kind === "project"
 }
 
 export function flattenResources(
-  items: SidebarResource[],
+  items: ISidebarResource[],
   expanded: ReadonlySet<string>,
   depth = 0,
   parentId: string | null = null
-): FlatResource[] {
+): IFlatResource[] {
   return items.flatMap((item) => {
     const row = { item, depth, parentId }
     if (!item.children?.length || !expanded.has(item.id)) return [row]
@@ -27,9 +27,9 @@ export function flattenResources(
 }
 
 export function findResource(
-  items: SidebarResource[],
+  items: ISidebarResource[],
   id: string
-): SidebarResource | undefined {
+): ISidebarResource | undefined {
   for (const item of items) {
     if (item.id === id) return item
     const child = item.children ? findResource(item.children, id) : undefined
@@ -40,10 +40,10 @@ export function findResource(
 
 /** Ids of every ancestor of `id` (nearest last); empty when absent. */
 export function ancestorIdsOf(
-  items: SidebarResource[],
+  items: ISidebarResource[],
   id: string
 ): string[] {
-  const walk = (nodes: SidebarResource[], trail: string[]): string[] | null => {
+  const walk = (nodes: ISidebarResource[], trail: string[]): string[] | null => {
     for (const node of nodes) {
       if (node.id === id) return trail
       if (node.children) {
@@ -58,7 +58,7 @@ export function ancestorIdsOf(
 
 /** Ids of every row that can hold children and has some — the set
  * `expandAll` opens. */
-export function expandableIdsOf(items: SidebarResource[]): string[] {
+export function expandableIdsOf(items: ISidebarResource[]): string[] {
   return items.flatMap((item) =>
     item.children?.length && canContain(item)
       ? [item.id, ...expandableIdsOf(item.children)]
@@ -66,7 +66,7 @@ export function expandableIdsOf(items: SidebarResource[]): string[] {
   )
 }
 
-export function containsResource(item: SidebarResource, id: string): boolean {
+export function containsResource(item: ISidebarResource, id: string): boolean {
   return (
     item.id === id ||
     item.children?.some((child) => containsResource(child, id)) === true
@@ -74,11 +74,11 @@ export function containsResource(item: SidebarResource, id: string): boolean {
 }
 
 export function removeResource(
-  items: SidebarResource[],
+  items: ISidebarResource[],
   id: string,
-): { items: SidebarResource[]; removed?: SidebarResource } {
-  let removed: SidebarResource | undefined;
-  const next: SidebarResource[] = [];
+): { items: ISidebarResource[]; removed?: ISidebarResource } {
+  let removed: ISidebarResource | undefined;
+  const next: ISidebarResource[] = [];
 
   for (const item of items) {
     if (item.id === id) {
@@ -102,14 +102,14 @@ export function removeResource(
 }
 
 export function insertResource(
-  items: SidebarResource[],
-  resource: SidebarResource,
+  items: ISidebarResource[],
+  resource: ISidebarResource,
   targetId: string | null,
-  position: SidebarResourceDropPosition,
-): SidebarResource[] {
+  position: TSidebarResourceDropPosition,
+): ISidebarResource[] {
   if (targetId === null) return [...items, resource];
 
-  const next: SidebarResource[] = [];
+  const next: ISidebarResource[] = [];
   for (const item of items) {
     if (item.id === targetId) {
       if (position === "before") next.push(resource, item);
@@ -131,9 +131,9 @@ export function insertResource(
 }
 
 export function moveResource(
-  items: SidebarResource[],
-  move: SidebarResourceMove,
-): SidebarResource[] | null {
+  items: ISidebarResource[],
+  move: ISidebarResourceMove,
+): ISidebarResource[] | null {
   const source = findResource(items, move.itemId);
   if (!source || source.disabled) return null;
   if (move.targetId && containsResource(source, move.targetId)) return null;
@@ -156,10 +156,10 @@ export function moveResource(
 }
 
 export function renameResource(
-  items: SidebarResource[],
+  items: ISidebarResource[],
   id: string,
   label: string,
-): SidebarResource[] {
+): ISidebarResource[] {
   return items.map((item) => ({
     ...item,
     label: item.id === id ? label : item.label,

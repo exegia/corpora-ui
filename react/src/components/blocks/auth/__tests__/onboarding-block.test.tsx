@@ -4,11 +4,11 @@ import userEvent from "@testing-library/user-event";
 
 import {
   OnboardingBlock,
-  type OnboardingBlockProps,
-  type OnboardingStepConfig,
+  type IOnboardingBlockProps,
+  type IOnboardingStepConfig,
 } from "../onboarding-block";
 
-const STEPS: OnboardingStepConfig[] = [
+const STEPS: IOnboardingStepConfig[] = [
   {
     id: "profile",
     title: "Your profile",
@@ -78,9 +78,9 @@ describe("OnboardingBlock", () => {
   test("walks the steps and reports the merged profile once", async () => {
     const user = userEvent.setup();
     const onStepSubmit =
-      mock<NonNullable<OnboardingBlockProps["onStepSubmit"]>>(async () => {});
+      mock<NonNullable<IOnboardingBlockProps["onStepSubmit"]>>(async () => {});
     const onComplete =
-      mock<NonNullable<OnboardingBlockProps["onComplete"]>>(async () => {});
+      mock<NonNullable<IOnboardingBlockProps["onComplete"]>>(async () => {});
     render(
       <OnboardingBlock
         steps={STEPS}

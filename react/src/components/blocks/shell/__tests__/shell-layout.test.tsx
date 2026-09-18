@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event"
 import { ShellLayout } from "../shell-layout"
 import { useShellPanels } from "../use-shell-panels"
 import { SHELL_WIDTHS } from "../utils"
-import type { TPanelMap, UseShellPanelsOptions } from "../type"
+import type { TPanelMap, IUseShellPanelsOptions } from "../type"
 
 const PANELS: TPanelMap = {
   left: {
@@ -53,7 +53,7 @@ function stubShellWidths() {
   }
 }
 
-interface HappyDOMWindow {
+interface IHappyDOMWindow {
   happyDOM?: { setViewport: (viewport: { width: number }) => void }
 }
 
@@ -61,7 +61,7 @@ interface HappyDOMWindow {
  * plus the `resize` event, inside `act` so the remeasure lands in this tick. */
 function resizeViewport(width: number) {
   act(() => {
-    ;(globalThis as HappyDOMWindow).happyDOM?.setViewport({ width })
+    ;(globalThis as IHappyDOMWindow).happyDOM?.setViewport({ width })
     window.dispatchEvent(new Event("resize"))
   })
 }
@@ -75,11 +75,11 @@ const WIDE_VIEWPORT = 1024
  * cleanup) remeasures on it. */
 function shellViewport(width: number) {
   const restoreWidths = stubShellWidths()
-  ;(globalThis as HappyDOMWindow).happyDOM?.setViewport({ width })
+  ;(globalThis as IHappyDOMWindow).happyDOM?.setViewport({ width })
   return () => {
     restoreWidths()
     act(() => {
-      ;(globalThis as HappyDOMWindow).happyDOM?.setViewport({
+      ;(globalThis as IHappyDOMWindow).happyDOM?.setViewport({
         width: WIDE_VIEWPORT,
       })
     })
@@ -299,7 +299,7 @@ describe("ShellLayout", () => {
 function HookedShell({
   onPanelChange,
 }: {
-  onPanelChange?: UseShellPanelsOptions["onPanelChange"]
+  onPanelChange?: IUseShellPanelsOptions["onPanelChange"]
 }) {
   const panels = useShellPanels({ onPanelChange })
 

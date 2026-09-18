@@ -4,14 +4,14 @@ import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
 import { Input } from "@/components/ui/input"
 
-type PreviewProps = Pick<
+type TPreviewProps = Pick<
   ComponentProps<typeof Input>,
   "placeholder" | "size" | "disabled" | "type" | "readOnly"
 > & {
   variant: "default" | "unstyled"
 }
 
-function InputPreview({ variant, ...props }: PreviewProps) {
+function InputPreview({ variant, ...props }: TPreviewProps) {
   return (
     <div className="flex justify-center p-6">
       <div className="w-full max-w-sm">

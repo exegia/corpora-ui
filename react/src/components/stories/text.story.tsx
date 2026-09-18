@@ -4,12 +4,12 @@ import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
 import { Text } from "@/components/atoms/text/default"
 
-type PreviewProps = Pick<
+type TPreviewProps = Pick<
   ComponentProps<typeof Text>,
   "type" | "size" | "selection"
 > & { children: string }
 
-function TextPreview(props: PreviewProps) {
+function TextPreview(props: TPreviewProps) {
   return (
     <div className="p-6">
       <Text {...props} />

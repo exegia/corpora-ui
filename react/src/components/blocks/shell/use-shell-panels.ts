@@ -11,11 +11,11 @@ import {
   shellFitPanelWidthAtom,
 } from "./shell-fit-atom"
 import type {
-  ShellPanelControlProps,
-  ShellPanelControls,
-  SidebarComponentMap,
-  SidebarSide,
-  UseShellPanelsOptions,
+  TShellPanelControlProps,
+  IShellPanelControls,
+  TSidebarComponentMap,
+  TSidebarSide,
+  IUseShellPanelsOptions,
 } from "./type"
 
 /**
@@ -42,7 +42,7 @@ export function useShellPanels({
   defaultOpenMobile,
   defaultPanelWidth,
   onPanelChange,
-}: UseShellPanelsOptions = {}): ShellPanelControls {
+}: IUseShellPanelsOptions = {}): IShellPanelControls {
   // The hook, not the provider, keys the shell: it renders above the provider
   // and has to read the same atoms the provider writes. Whoever generates the
   // key drops it — the provider treats a passed-in id as the app's and leaves
@@ -54,12 +54,12 @@ export function useShellPanels({
     return () => removeShellFitInstance(shellId)
   }, [shellId, explicitId])
 
-  const [open, setOpenState] = useState<Record<SidebarSide, boolean>>(() => ({
+  const [open, setOpenState] = useState<Record<TSidebarSide, boolean>>(() => ({
     left: defaultOpen?.left ?? true,
     right: defaultOpen?.right ?? false,
   }))
   const [openMobile, setOpenMobileState] = useState<
-    Record<SidebarSide, boolean>
+    Record<TSidebarSide, boolean>
   >(() => ({
     left: defaultOpenMobile?.left ?? false,
     right: defaultOpenMobile?.right ?? false,
@@ -78,7 +78,7 @@ export function useShellPanels({
   // asked for. Closing always goes through — that is how state left over
   // from a wider viewport clears.
   const setOpen = useCallback(
-    (nextOpen: boolean, side: SidebarSide) => {
+    (nextOpen: boolean, side: TSidebarSide) => {
       if (nextOpen && side === "right" && isNarrow) return
 
       setOpenState((prev) =>
@@ -90,7 +90,7 @@ export function useShellPanels({
   )
 
   const setOpenMobile = useCallback(
-    (nextOpen: boolean, side: SidebarSide) => {
+    (nextOpen: boolean, side: TSidebarSide) => {
       if (nextOpen && side === "right" && isNarrow) return
 
       setOpenMobileState((prev) =>
@@ -102,17 +102,17 @@ export function useShellPanels({
   )
 
   const toggle = useCallback(
-    (side: SidebarSide) => setOpen(!open[side], side),
+    (side: TSidebarSide) => setOpen(!open[side], side),
     [open, setOpen]
   )
 
   // The content sticks even when the open is refused (too narrow): it is
   // what the panel shows whenever it next gets to open, not a one-shot.
-  const [panelComponents, setPanelComponents] = useState<SidebarComponentMap>(
+  const [panelComponents, setPanelComponents] = useState<TSidebarComponentMap>(
     {}
   )
   const openPanel = useCallback(
-    (side: SidebarSide, component?: ReactNode) => {
+    (side: TSidebarSide, component?: ReactNode) => {
       if (component !== undefined) {
         setPanelComponents((prev) =>
           prev[side] === component ? prev : { ...prev, [side]: component }
@@ -123,7 +123,7 @@ export function useShellPanels({
     [setOpen]
   )
 
-  const providerProps = useMemo<ShellPanelControlProps>(
+  const providerProps = useMemo<TShellPanelControlProps>(
     () => ({
       shellId,
       defaultPanelWidth,

@@ -8,7 +8,7 @@ import {
 } from "@/components/composed/password-input";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { type AuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
+import { type TAuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
 import { cn } from "@/lib/utils";
 import {
   AuthCard,
@@ -16,16 +16,16 @@ import {
   AuthSuccess,
   MorphStep,
   Reveal,
-  type AuthStatus,
+  type TAuthStatus,
 } from "./auth-shell";
 
-export interface UpdatePasswordBlockProps {
+export interface IUpdatePasswordBlockProps {
   title?: string;
   description?: string;
   /** Brand mark rendered above the title. Omit for no logo row at all. */
   logo?: React.ReactNode;
   /** Brand accent for the primary action. Omit to keep the default primary. */
-  accent?: AuthAccent;
+  accent?: TAuthAccent;
   /**
    * Minimum strength (0-4, as scored by `getPasswordStrength`) the new
    * password must reach before the confirm field is revealed. 0 disables the
@@ -51,10 +51,10 @@ export function UpdatePasswordBlock({
   minStrength = 4,
   onSubmit,
   onDone,
-}: UpdatePasswordBlockProps) {
+}: IUpdatePasswordBlockProps) {
   const passwordId = React.useId();
   const confirmId = React.useId();
-  const [status, setStatus] = React.useState<AuthStatus>("idle");
+  const [status, setStatus] = React.useState<TAuthStatus>("idle");
   const [error, setError] = React.useState<string | null>(null);
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");

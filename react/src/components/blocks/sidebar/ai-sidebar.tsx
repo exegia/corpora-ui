@@ -4,12 +4,12 @@ import { useMemo } from "react"
 import { AnimatePresence } from "motion/react"
 import { cn } from "@/lib/utils"
 import type {
-  AISidebarComponentProps,
-  AISidebarContextValue,
-  AISidebarController,
-  AISidebarProps,
-  AISidebarViewProps,
-  FlatResource,
+  TAISidebarComponentProps,
+  IAISidebarContextValue,
+  IAISidebarController,
+  IAISidebarProps,
+  TAISidebarViewProps,
+  IFlatResource,
 } from "./type"
 import { useAISidebar } from "./use-ai-sidebar"
 import { AISidebarContext } from "./sidebar-context"
@@ -24,7 +24,7 @@ import { ResourceRow } from "./sidebar-row"
  * `controller` — the same rendering, but select, expand, rename, reorder
  * and menu state are then callable from anywhere in your app.
  */
-export function AISidebar(props: AISidebarComponentProps) {
+export function AISidebar(props: TAISidebarComponentProps) {
   // Two components rather than one: hooks may not be called conditionally,
   // and the controller form has no options to build a fallback controller
   // from. Nobody switches a sidebar between the two forms at runtime.
@@ -36,7 +36,7 @@ export function AISidebar(props: AISidebarComponentProps) {
 }
 
 /** The props form: builds its own controller and renders through it. */
-function UncontrolledAISidebar(props: AISidebarProps) {
+function UncontrolledAISidebar(props: IAISidebarProps) {
   const {
     renderIcon: _icon,
     renderMenu: _menu,
@@ -50,7 +50,7 @@ function UncontrolledAISidebar(props: AISidebarProps) {
   return <AISidebarView {...viewProps(props)} controller={controller} />
 }
 
-function viewProps(props: AISidebarComponentProps): AISidebarViewProps {
+function viewProps(props: TAISidebarComponentProps): TAISidebarViewProps {
   return {
     renderIcon: props.renderIcon,
     renderMenu: props.renderMenu,
@@ -68,7 +68,7 @@ function AISidebarView({
   renderActionsTrigger,
   ariaLabel = "Resources",
   className,
-}: AISidebarViewProps & { controller: AISidebarController }) {
+}: TAISidebarViewProps & { controller: IAISidebarController }) {
   const { dnd, hover } = controller
   const { draggingId, dropTarget } = dnd
 
@@ -76,7 +76,7 @@ function AISidebarView({
   // — so this value keeps its identity and a hover or a toggle re-renders
   // only the rows whose own atoms changed. Deps name each function because
   // `dnd` itself carries live drag state and changes identity with it.
-  const context = useMemo<AISidebarContextValue>(
+  const context = useMemo<IAISidebarContextValue>(
     () => ({
       sidebarId: controller.sidebarId,
       hoverLayoutId: hover.layoutId,
@@ -127,7 +127,7 @@ function AISidebarView({
         )}
       >
         <AnimatePresence initial={false}>
-          {controller.flat.map((row: FlatResource) => (
+          {controller.flat.map((row: IFlatResource) => (
             <ResourceRow key={row.item.id} row={row} />
           ))}
         </AnimatePresence>

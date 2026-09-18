@@ -28,9 +28,9 @@ import {
   useAuthFlow,
   useAuthFlowActions,
 } from "../auth-state"
-import type { AuthUser } from "../auth-state"
+import type { IAuthUser } from "../auth-state"
 
-const USER: AuthUser = {
+const USER: IAuthUser = {
   id: "u-1",
   name: "Yona Appletree",
   email: "yo@example.com",

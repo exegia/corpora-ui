@@ -2,9 +2,9 @@ import { CornerDownLeft } from "lucide-react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { Favicon } from "./badges"
-import { Dot, type DotTone } from "./dot"
+import { Dot, type TDotTone } from "./dot"
 
-export interface SourceChipProps extends React.ComponentPropsWithoutRef<"span"> {
+export interface ISourceChipProps extends React.ComponentPropsWithoutRef<"span"> {
   favicon?: string
   /** Domain in mono ("scoopdata.io"). */
   children: React.ReactNode
@@ -15,7 +15,7 @@ export interface SourceChipProps extends React.ComponentPropsWithoutRef<"span"> 
  *
  * @sketch "Atom / Source Chip"
  */
-export function SourceChip({ favicon, className, children, ...props }: SourceChipProps): React.ReactElement {
+export function SourceChip({ favicon, className, children, ...props }: ISourceChipProps): React.ReactElement {
   return (
     <span
       data-slot="source-chip"
@@ -28,9 +28,9 @@ export function SourceChip({ favicon, className, children, ...props }: SourceChi
   )
 }
 
-export interface AvatarStackProps extends React.ComponentPropsWithoutRef<"span"> {
+export interface IAvatarStackProps extends React.ComponentPropsWithoutRef<"span"> {
   /** Up to three tones or image urls, rendered overlapping. */
-  items?: (DotTone | { src: string })[]
+  items?: (TDotTone | { src: string })[]
 }
 
 /**
@@ -38,7 +38,7 @@ export interface AvatarStackProps extends React.ComponentPropsWithoutRef<"span">
  *
  * @sketch "Atom / Avatar Stack"
  */
-export function AvatarStack({ items = ["series-1", "series-3", "series-4"], className, ...props }: AvatarStackProps): React.ReactElement {
+export function AvatarStack({ items = ["series-1", "series-3", "series-4"], className, ...props }: IAvatarStackProps): React.ReactElement {
   return (
     <span aria-hidden="true" data-slot="avatar-stack" className={cn("inline-flex items-center", className)} {...props}>
       {items.slice(0, 3).map((item, i) => (
@@ -50,8 +50,8 @@ export function AvatarStack({ items = ["series-1", "series-3", "series-4"], clas
   )
 }
 
-export interface StatProps extends React.ComponentPropsWithoutRef<"div"> {
-  tone?: DotTone
+export interface IStatProps extends React.ComponentPropsWithoutRef<"div"> {
+  tone?: TDotTone
   label: React.ReactNode
   value: React.ReactNode
   /** Secondary mono line ("−$2,377.66"). */
@@ -64,7 +64,7 @@ export interface StatProps extends React.ComponentPropsWithoutRef<"div"> {
  *
  * @sketch "Atom / Stat / {Positive, Negative}"
  */
-export function Stat({ tone = "series-1", label, value, delta, trend = "positive", className, ...props }: StatProps): React.ReactElement {
+export function Stat({ tone = "series-1", label, value, delta, trend = "positive", className, ...props }: IStatProps): React.ReactElement {
   const color = trend === "positive" ? "text-semantic-success" : "text-semantic-danger"
   return (
     <div data-slot="stat" data-trend={trend} className={cn("flex w-[152px] flex-col gap-1", className)} {...props}>
@@ -78,7 +78,7 @@ export function Stat({ tone = "series-1", label, value, delta, trend = "positive
   )
 }
 
-export interface FollowUpRowProps extends Omit<React.ComponentPropsWithoutRef<"button">, "onSelect"> {
+export interface IFollowUpRowProps extends Omit<React.ComponentPropsWithoutRef<"button">, "onSelect"> {
   onSelect?: () => void
 }
 
@@ -87,7 +87,7 @@ export interface FollowUpRowProps extends Omit<React.ComponentPropsWithoutRef<"b
  *
  * @sketch "Atom / Follow-up Row"
  */
-export function FollowUpRow({ onSelect, className, children, ...props }: FollowUpRowProps): React.ReactElement {
+export function FollowUpRow({ onSelect, className, children, ...props }: IFollowUpRowProps): React.ReactElement {
   return (
     <button
       type="button"

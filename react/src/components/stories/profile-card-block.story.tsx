@@ -6,12 +6,12 @@ import { defineStory } from "@/registry/story"
 
 import { ProfileCardBlock } from "@/components/blocks/profile/profile-card-block"
 
-type PreviewProps = Pick<
+type TPreviewProps = Pick<
   ComponentProps<typeof ProfileCardBlock>,
   "user" | "variant" | "sound" | "presence" | "menuWidth" | "align" | "side"
 >
 
-function BlockPreview(props: PreviewProps) {
+function BlockPreview(props: TPreviewProps) {
   return <ProfileCardBlock {...props} />
 }
 

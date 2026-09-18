@@ -5,7 +5,7 @@ import * as React from "react"
 
 import {
   SOCIAL_PROVIDERS,
-  type SocialProvider,
+  type TSocialProvider,
 } from "@/components/composed/social-providers"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,20 +20,20 @@ import { cn } from "@/lib/utils"
 import { AuthError, EASE } from "./auth-shell"
 
 /** One sign-in identity attached to the account. */
-export interface LinkedIdentity {
+export interface ILinkedIdentity {
   id: string
-  provider: SocialProvider
+  provider: TSocialProvider
   /** Account address shown under the provider name, when known. */
   email?: string | null
 }
 
-export interface LinkedAccountsBlockProps {
+export interface ILinkedAccountsBlockProps {
   title?: string
   description?: string
   /** Identities already attached to the account. */
-  identities?: LinkedIdentity[]
+  identities?: ILinkedIdentity[]
   /** Providers offered as connect candidates; connected ones are filtered out. */
-  providers?: SocialProvider[]
+  providers?: TSocialProvider[]
   /** Shows the loading row instead of the list. */
   loading?: boolean
   /**
@@ -43,7 +43,7 @@ export interface LinkedAccountsBlockProps {
    */
   hasOtherSignInMethods?: boolean
   /** Reject (or throw) to show the inline error. */
-  onLink?: (provider: SocialProvider) => Promise<void> | void
+  onLink?: (provider: TSocialProvider) => Promise<void> | void
   onUnlink?: (id: string) => Promise<void> | void
   className?: string
 }
@@ -67,10 +67,10 @@ export function LinkedAccountsBlock({
   onLink,
   onUnlink,
   className,
-}: LinkedAccountsBlockProps) {
+}: ILinkedAccountsBlockProps) {
   const noteId = React.useId()
   const [error, setError] = React.useState<string | null>(null)
-  const [linking, setLinking] = React.useState<SocialProvider | null>(null)
+  const [linking, setLinking] = React.useState<TSocialProvider | null>(null)
   const [unlinking, setUnlinking] = React.useState<string | null>(null)
 
   const connected = new Set(identities.map((identity) => identity.provider))
@@ -81,7 +81,7 @@ export function LinkedAccountsBlock({
   // the account reachable, so it lifts the guard.
   const lastMethod = !hasOtherSignInMethods && identities.length <= 1
 
-  async function connect(provider: SocialProvider) {
+  async function connect(provider: TSocialProvider) {
     if (busy) return
     setError(null)
     setLinking(provider)

@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils"
 import { TextSelection } from "../text-selection"
 import { Text } from "./default"
-import type { HeadingProps } from "./types"
+import type { THeadingProps } from "./types"
 import { twClasses } from "./utils";
 
 
@@ -24,7 +24,7 @@ export function Heading({
   alignment,
   minSelectionLength,
   ...textProps
-}: HeadingProps) {
+}: THeadingProps) {
   return (
     <TextSelection
       alignment={alignment}

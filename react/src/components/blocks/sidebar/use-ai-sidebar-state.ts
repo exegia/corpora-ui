@@ -23,9 +23,9 @@ import {
   toggleAISidebarRowAtom,
 } from "./ai-sidebar-atom.ts";
 import type {
-  AISidebarActions,
-  AISidebarInstanceId,
-  AISidebarState,
+  IAISidebarActions,
+  TAISidebarInstanceId,
+  IAISidebarState,
 } from "./type.ts";
 
 /**
@@ -41,8 +41,8 @@ import type {
  * atom instead: `useAtomValue(aiSidebarActiveIdAtom("app-resources"))`.
  */
 export function useAISidebarState(
-  sidebarId: AISidebarInstanceId
-): AISidebarState {
+  sidebarId: TAISidebarInstanceId
+): IAISidebarState {
   return useAtomValue(aiSidebarStateAtom(sidebarId));
 }
 
@@ -61,8 +61,8 @@ export function useAISidebarState(
  * ```
  */
 export function useAISidebarActions(
-  sidebarId: AISidebarInstanceId
-): AISidebarActions {
+  sidebarId: TAISidebarInstanceId
+): IAISidebarActions {
   const select = useSetAtom(selectAISidebarRowAtom(sidebarId));
   const expand = useSetAtom(expandAISidebarRowAtom(sidebarId));
   const collapse = useSetAtom(collapseAISidebarRowAtom(sidebarId));

@@ -8,7 +8,7 @@ import {
   resizeShellPanelAtom,
   shellFitStateAtom,
 } from "./shell-fit-atom"
-import type { ShellFitActions, ShellFitInstanceId, ShellFitState } from "./type"
+import type { IShellFitActions, TShellFitInstanceId, IShellFitState } from "./type"
 
 /**
  * Read the fit of the shell registered under `shellId` from anywhere below
@@ -22,7 +22,7 @@ import type { ShellFitActions, ShellFitInstanceId, ShellFitState } from "./type"
  * measurement. A component that reads one field should subscribe to that
  * field's atom instead: `useAtomValue(shellFitFitsAtom("app-shell"))`.
  */
-export function useShellFitState(shellId: ShellFitInstanceId): ShellFitState {
+export function useShellFitState(shellId: TShellFitInstanceId): IShellFitState {
   return useAtomValueRawSync(shellFitStateAtom(shellId))
 }
 
@@ -37,8 +37,8 @@ export function useShellFitState(shellId: ShellFitInstanceId): ShellFitState {
  * ```
  */
 export function useShellFitActions(
-  shellId: ShellFitInstanceId
-): ShellFitActions {
+  shellId: TShellFitInstanceId
+): IShellFitActions {
   const resizePanel = useSetAtom(resizeShellPanelAtom(shellId))
   const resetPanelWidth = useSetAtom(resetShellPanelWidthAtom(shellId))
 

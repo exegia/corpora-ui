@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { useIsomorphicLayoutEffect, useReducedMotion } from "motion/react"
 import { cn } from "@/lib/utils.ts"
-import type { AnimatedSidebarProviderProps, SidebarSide } from "./type"
+import type { IAnimatedSidebarProviderProps, TSidebarSide } from "./type"
 import { useShellFit } from "./use-shell-fit"
 import {
   AnimatedSidebarContext,
@@ -26,15 +26,15 @@ export function AnimatedPanelProvider({
   className,
   style,
   ...props
-}: AnimatedSidebarProviderProps) {
+}: IAnimatedSidebarProviderProps) {
   const [internalOpen, setInternalOpen] = useState<
-    Record<SidebarSide, boolean>
+    Record<TSidebarSide, boolean>
   >(() => ({
     left: defaultOpen?.left ?? true,
     right: defaultOpen?.right ?? false,
   }))
   const [internalOpenMobile, setInternalOpenMobile] = useState<
-    Record<SidebarSide, boolean>
+    Record<TSidebarSide, boolean>
   >(() => ({
     left: defaultOpenMobile?.left ?? false,
     right: defaultOpenMobile?.right ?? false,
@@ -58,14 +58,14 @@ export function AnimatedPanelProvider({
   const controlledMobileLeft = openMobile?.left
   const controlledMobileRight = openMobile?.right
 
-  const openState = useMemo<Record<SidebarSide, boolean>>(
+  const openState = useMemo<Record<TSidebarSide, boolean>>(
     () => ({
       left: controlledLeft ?? internalOpen.left,
       right: controlledRight ?? internalOpen.right,
     }),
     [controlledLeft, controlledRight, internalOpen]
   )
-  const openMobileState = useMemo<Record<SidebarSide, boolean>>(
+  const openMobileState = useMemo<Record<TSidebarSide, boolean>>(
     () => ({
       left: controlledMobileLeft ?? internalOpenMobile.left,
       right: controlledMobileRight ?? internalOpenMobile.right,
@@ -78,7 +78,7 @@ export function AnimatedPanelProvider({
   // for. Closing always goes through — that is how state left over from a
   // wider viewport clears.
   const setOpen = useCallback(
-    (nextOpen: boolean, side: SidebarSide) => {
+    (nextOpen: boolean, side: TSidebarSide) => {
       if (nextOpen && side === "right" && !fitsRef.current) return
 
       const controlled = side === "left" ? controlledLeft : controlledRight
@@ -93,7 +93,7 @@ export function AnimatedPanelProvider({
   )
 
   const setOpenMobile = useCallback(
-    (nextOpen: boolean, side: SidebarSide) => {
+    (nextOpen: boolean, side: TSidebarSide) => {
       if (nextOpen && side === "right" && !fitsRef.current) return
 
       const controlled =
@@ -109,7 +109,7 @@ export function AnimatedPanelProvider({
   )
 
   const toggleSidebar = useCallback(
-    (side: SidebarSide) => {
+    (side: TSidebarSide) => {
       if (isMobile) setOpenMobile(!openMobileState[side], side)
       else setOpen(!openState[side], side)
     },

@@ -2,7 +2,7 @@
 
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
 import type React from "react"
-import { type FrostGlassVariant } from "@/lib/glass-variants"
+import { type TFrostGlassVariant } from "@/lib/glass-variants"
 import { cn } from "@/lib/utils"
 import { GlassContainer } from "@/components/ui/glasscn/glass-container"
 
@@ -25,7 +25,7 @@ const popupGlassBaseClasses =
  * four pure-class finishes only, and defaults to "frosted" rather than to
  * Button's "liquid-refract".
  */
-type PopoverGlassVariant = Exclude<FrostGlassVariant, "liquid-refract">
+type TPopoverGlassVariant = Exclude<TFrostGlassVariant, "liquid-refract">
 
 export const PopoverCreateHandle: typeof PopoverPrimitive.createHandle =
   PopoverPrimitive.createHandle
@@ -48,7 +48,7 @@ export function PopoverTrigger({
   )
 }
 
-type PopoverPopupBaseProps = PopoverPrimitive.Popup.Props & {
+type TPopoverPopupBaseProps = PopoverPrimitive.Popup.Props & {
   portalProps?: PopoverPrimitive.Portal.Props
   side?: PopoverPrimitive.Positioner.Props["side"]
   align?: PopoverPrimitive.Positioner.Props["align"]
@@ -58,9 +58,9 @@ type PopoverPopupBaseProps = PopoverPrimitive.Popup.Props & {
   anchor?: PopoverPrimitive.Positioner.Props["anchor"]
 }
 
-export type PopoverGlassProps = PopoverPopupBaseProps & {
+export type TPopoverGlassProps = TPopoverPopupBaseProps & {
   /** Glass finish. Either "frosted" or "glass". Defaults to "frosted". */
-  glassVariant?: PopoverGlassVariant
+  glassVariant?: TPopoverGlassVariant
 }
 
 export function PopoverGlass({
@@ -74,8 +74,8 @@ export function PopoverGlass({
   portalProps,
   glassVariant,
   ...props
-}: PopoverGlassProps): React.ReactElement {
-  const resolvedGlassVariant: PopoverGlassVariant = glassVariant ?? "frosted"
+}: TPopoverGlassProps): React.ReactElement {
+  const resolvedGlassVariant: TPopoverGlassVariant = glassVariant ?? "frosted"
 
   return (
     <PopoverPrimitive.Portal {...portalProps} keepMounted>

@@ -3,16 +3,16 @@
 import { Play, Plus, X } from "lucide-react"
 import type * as React from "react"
 import { cn } from "@/lib/utils"
-import { Button, type ButtonProps } from "@/components/ui/button"
+import { Button, type TButtonProps } from "@/components/ui/button"
 
-type IconButtonProps = Omit<ButtonProps, "variant" | "size" | "glassVariant" | "children">
+type TIconButtonProps = Omit<TButtonProps, "variant" | "size" | "glassVariant" | "children">
 
 /**
  * 18px filled circle with an inverse ✕, used on composer chips.
  *
  * @sketch "Atom / Button / Remove"
  */
-export function RemoveButton({ className, ...props }: IconButtonProps): React.ReactElement {
+export function RemoveButton({ className, ...props }: TIconButtonProps): React.ReactElement {
   return (
     <Button
       aria-label="Remove"
@@ -34,7 +34,7 @@ export function RemoveButton({ className, ...props }: IconButtonProps): React.Re
  *
  * @sketch "Atom / Button / Play"
  */
-export function PlayButton({ className, ...props }: IconButtonProps): React.ReactElement {
+export function PlayButton({ className, ...props }: TIconButtonProps): React.ReactElement {
   return (
     <Button
       aria-label="Play"
@@ -56,7 +56,7 @@ export function PlayButton({ className, ...props }: IconButtonProps): React.Reac
  *
  * @sketch "Atom / Button / Add"
  */
-export function AddButton({ className, ...props }: IconButtonProps): React.ReactElement {
+export function AddButton({ className, ...props }: TIconButtonProps): React.ReactElement {
   return (
     <Button
       aria-label="Add attachment"
@@ -70,14 +70,14 @@ export function AddButton({ className, ...props }: IconButtonProps): React.React
   )
 }
 
-export type SendButtonProps = Omit<ButtonProps, "variant" | "glassVariant">
+export type TSendButtonProps = Omit<TButtonProps, "variant" | "glassVariant">
 
 /**
  * Brand-yellow 61×31 pill, radius 8, dark label.
  *
  * @sketch "Atom / Button / Send"
  */
-export function SendButton({ className, children = "Send", ...props }: SendButtonProps): React.ReactElement {
+export function SendButton({ className, children = "Send", ...props }: TSendButtonProps): React.ReactElement {
   return (
     <Button
       variant="ghost"

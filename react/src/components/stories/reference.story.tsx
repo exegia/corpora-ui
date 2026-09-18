@@ -4,12 +4,12 @@ import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
 import { Reference } from "@/components/atoms/reference"
 
-type PreviewProps = Pick<ComponentProps<typeof Reference>, "href"> & {
+type TPreviewProps = Pick<ComponentProps<typeof Reference>, "href"> & {
   children: string
   preview?: string
 }
 
-function ReferencePreview({ children, ...props }: PreviewProps) {
+function ReferencePreview({ children, ...props }: TPreviewProps) {
   return (
     <div className="p-6">
       <div className="">

@@ -4,12 +4,12 @@ import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
 import { Textarea } from "@/components/ui/textarea"
 
-type PreviewProps = Pick<
+type TPreviewProps = Pick<
   ComponentProps<typeof Textarea>,
   "placeholder" | "disabled" | "readOnly" | "rows"
 >
 
-function TextareaPreview(props: PreviewProps) {
+function TextareaPreview(props: TPreviewProps) {
   return (
     <div className="p-6">
       <div className="max-w-sm">

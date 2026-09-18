@@ -5,7 +5,7 @@ import type { ReactElement } from "react"
 import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { Text } from "../text/default"
-import type { TextClickPopoverProps, TextPopoverRenderProps } from "./types"
+import type { ITextClickPopoverProps, ITextPopoverRenderProps } from "./types"
 
 export function TextClickPopover({
   children,
@@ -17,7 +17,7 @@ export function TextClickPopover({
   onOpenChange,
   className,
   ...textProps
-}: TextClickPopoverProps): ReactElement {
+}: ITextClickPopoverProps): ReactElement {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen)
   const open = controlledOpen ?? uncontrolledOpen
   const setOpen = (next: boolean) => {
@@ -25,7 +25,7 @@ export function TextClickPopover({
     onOpenChange?.(next)
   }
 
-  const renderProps: TextPopoverRenderProps = {
+  const renderProps: ITextPopoverRenderProps = {
     open,
     setOpen,
     close: () => setOpen(false),

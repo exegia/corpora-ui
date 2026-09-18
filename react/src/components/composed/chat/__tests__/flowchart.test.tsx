@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, mock } from "bun:test"
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 
-import { Flowchart, type StepNode } from "../flowchart"
+import { Flowchart, type TStepNode } from "../flowchart"
 
-const STEPS: StepNode[] = [
+const STEPS: TStepNode[] = [
   { id: "a", row: 0, x: 0.5, w: 200, title: "A" },
   { id: "b", row: 1, x: 0.5, w: 200, title: "B" },
 ]

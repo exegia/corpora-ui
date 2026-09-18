@@ -1,12 +1,12 @@
 import type { SVGProps } from "react"
 
-export type FlowchartSide = "top" | "right" | "bottom" | "left"
+export type TFlowchartSide = "top" | "right" | "bottom" | "left"
 
-export interface FlowchartProps {
+export interface IFlowchartProps {
   /** Cards to lay out. Defaults to the Trigger → If / Else sample. */
-  steps?: StepNode[]
+  steps?: TStepNode[]
   /** Connectors. Defaults to a chain through `steps` in order. */
-  edges?: Edge[]
+  edges?: TEdge[]
   /** No drag, no add / remove buttons. Selection still works. */
   readOnly?: boolean
   /** Ctrl/⌘ + wheel and the +/− buttons scale the canvas. */
@@ -14,7 +14,7 @@ export interface FlowchartProps {
   /** A card was dragged; `offset` is its displacement from the laid-out position. */
   onDrag?: (id: string, offset: { dx: number; dy: number }) => void
   /** The add button on one side of a card was pressed. */
-  onAdd?: (id: string, side: FlowchartSide) => void
+  onAdd?: (id: string, side: TFlowchartSide) => void
   /** The remove button was pressed (already confirmed when children would be orphaned). */
   onRemove?: (id: string) => void
   /**
@@ -26,9 +26,9 @@ export interface FlowchartProps {
   /** Disconnect was pressed on a selected connector. Enables connector editing. */
   onEdgeRemove?: (id: string) => void
   /** A connector end was dropped on another card; `edge` carries the new source / target. */
-  onEdgeConnect?: (edge: Edge) => void
+  onEdgeConnect?: (edge: TEdge) => void
   /** Stroke width or colour picked from the connector toolbar. */
-  onEdgeChange?: (id: string, patch: Pick<Edge, "strokeWidth" | "color">) => void
+  onEdgeChange?: (id: string, patch: Pick<TEdge, "strokeWidth" | "color">) => void
   /** The pill was renamed inline (double-click, then click away or Enter). */
   onRename?: (id: string, name: string) => void
   /** "Duplicate" in the context menu: copy the card to a new node on its right. */
@@ -38,7 +38,7 @@ export interface FlowchartProps {
   className?: string
 }
 
-export type StepNode = {
+export type TStepNode = {
   id: string
   row: number
   x: number // 0–1 center of the node
@@ -58,7 +58,7 @@ export type StepNode = {
   children?: React.ReactNode
 }
 
-export type Edge = {
+export type TEdge = {
   id: string
   source: string
   target: string
@@ -68,10 +68,10 @@ export type Edge = {
   color?: string
 }
 
-export type EdgeEnd = "source" | "target"
+export type TEdgeEnd = "source" | "target"
 
-export interface ConnectorProps extends Omit<SVGProps<SVGPathElement>, "strokeWidth"> {
-  edge: Edge
+export interface IConnectorProps extends Omit<SVGProps<SVGPathElement>, "strokeWidth"> {
+  edge: TEdge
   isLit: boolean
   strokeWidth?: number
   /** Selected for editing: bolder hit, toolbar and end handles render in Root. */
@@ -80,8 +80,8 @@ export interface ConnectorProps extends Omit<SVGProps<SVGPathElement>, "strokeWi
   onPick?: (id: string) => void
 }
 
-export interface ChartNodeProps {
-  node: StepNode
+export interface IChartNodeProps {
+  node: TStepNode
   /** Position in `steps`, for the generated "Node n" label. */
   index?: number
   onRef: (el: HTMLDivElement | null) => void

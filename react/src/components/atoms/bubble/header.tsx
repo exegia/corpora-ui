@@ -3,7 +3,7 @@
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { useBubbleVariant } from "./context"
-import type { BubbleHeaderProps } from "./types"
+import type { TBubbleHeaderProps } from "./types"
 
 /**
  * Author row above a message: avatar, name, time and an optional role badge.
@@ -14,7 +14,7 @@ export function BubbleHeader({
   className,
   children,
   ...props
-}: BubbleHeaderProps): React.ReactElement {
+}: TBubbleHeaderProps): React.ReactElement {
   const variant = useBubbleVariant()
   const reversed = variant === "sender"
 

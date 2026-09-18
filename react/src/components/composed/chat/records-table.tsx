@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import { Card } from "@/components/ui/card"
 import { createKeyedFamilies } from "@/lib/keyed-atom"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Tag, type TagTone } from "@/components/ui/chat"
+import { Tag, type TTagTone } from "@/components/ui/chat"
 
 const { stateFamily, removeInstance } = createKeyedFamilies("recordsTable")
 
@@ -15,31 +15,31 @@ const { stateFamily, removeInstance } = createKeyedFamilies("recordsTable")
 export const recordsTableSelectionAtom = stateFamily<ReadonlySet<string>>("selection", new Set<string>())
 export const removeRecordsTableInstance = removeInstance
 
-export interface RecordsRow {
+export interface IRecordsRow {
   id: string
   name: React.ReactNode
   initial?: string
   avatarSrc?: string
-  tags?: { label: React.ReactNode; tone?: TagTone }[]
+  tags?: { label: React.ReactNode; tone?: TTagTone }[]
   /** Max tags shown inline; the rest collapse to "+N". */
   lastInteraction?: React.ReactNode
   strength?: React.ReactNode
 }
 
-export type RecordsColumnKey = "name" | "tags" | "lastInteraction" | "strength"
+export type TRecordsColumnKey = "name" | "tags" | "lastInteraction" | "strength"
 
-export interface RecordsTableProps extends React.ComponentPropsWithoutRef<"div"> {
+export interface IRecordsTableProps extends React.ComponentPropsWithoutRef<"div"> {
   tableId?: string
-  rows: RecordsRow[]
-  headers?: Partial<Record<RecordsColumnKey, React.ReactNode>>
+  rows: IRecordsRow[]
+  headers?: Partial<Record<TRecordsColumnKey, React.ReactNode>>
   maxTags?: number
   selected?: ReadonlySet<string>
   onSelectionChange?: (selected: ReadonlySet<string>) => void
   /** Sort is the caller's: the design shows the control only. */
-  onSortChange?: (column: RecordsColumnKey) => void
+  onSortChange?: (column: TRecordsColumnKey) => void
 }
 
-const HEADERS: Record<RecordsColumnKey, string> = { name: "Company", tags: "Categories", lastInteraction: "Last interaction", strength: "Connection" }
+const HEADERS: Record<TRecordsColumnKey, string> = { name: "Company", tags: "Categories", lastInteraction: "Last interaction", strength: "Connection" }
 
 /**
  * Selectable records table: index, initial avatar, name, tag row with
@@ -47,7 +47,7 @@ const HEADERS: Record<RecordsColumnKey, string> = { name: "Company", tags: "Cate
  *
  * @sketch "Component / Records Table"
  */
-export function RecordsTable({ tableId, rows, headers, maxTags = 2, selected, onSelectionChange, onSortChange, className, ...props }: RecordsTableProps): React.ReactElement {
+export function RecordsTable({ tableId, rows, headers, maxTags = 2, selected, onSelectionChange, onSortChange, className, ...props }: IRecordsTableProps): React.ReactElement {
   const generatedId = React.useId()
   const id = tableId ?? generatedId
   const [stored, setStored] = useAtom(recordsTableSelectionAtom(id))
@@ -71,7 +71,7 @@ export function RecordsTable({ tableId, rows, headers, maxTags = 2, selected, on
     update(next)
   }
   const h = { ...HEADERS, ...headers }
-  const sortable = (key: RecordsColumnKey, label: React.ReactNode) => (
+  const sortable = (key: TRecordsColumnKey, label: React.ReactNode) => (
     <button type="button" onClick={() => onSortChange?.(key)} className="inline-flex items-center gap-1.5 text-left outline-none hover:text-text-primary focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-3 [&_svg]:text-text-muted">
       {label}<ChevronsUpDown />
     </button>

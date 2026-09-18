@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Lock, Plus } from "lucide-react"
 import { Tooltip, TooltipPopup, TooltipTrigger } from "@/components/ui/tooltip"
-import type { AiPanelHeaderProps } from "./types"
+import type { IAiPanelHeaderProps } from "./types"
 
 function LockedHint({ locked }: { locked?: boolean }): React.ReactElement {
   return (
@@ -38,7 +38,7 @@ export function AiPanelHeader({
   title,
   locked = false,
   onNewThread,
-}: AiPanelHeaderProps): React.ReactElement {
+}: IAiPanelHeaderProps): React.ReactElement {
   return (
     <header className="sticky top-0 flex shrink-0 flex-col items-center gap-2 border-b border-border bg-sidebar p-3.5">
       <div className="flex w-full flex-row items-center justify-between">

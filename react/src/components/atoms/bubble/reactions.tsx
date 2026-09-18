@@ -7,9 +7,9 @@ import { EASE_IN_OUT, SPRING_PRESS, SPRING_SWAP } from "@/lib/ease"
 import { useBubbleVariant } from "./context"
 import { MorphIcon } from "morphicons/react";
 import type {
-  BubbleReactionsProps,
-  BubbleReactionChipProps,
-  BubbleReactionsButtonProps,
+  IBubbleReactionsProps,
+  IBubbleReactionChipProps,
+  TBubbleReactionsButtonProps,
 } from "./types"
 import { reactionKey } from "./utils"
 import { GlassContainer } from "@/components/ui/glasscn/glass-container"
@@ -32,7 +32,7 @@ export function BubbleReactionChip({
   onToggle,
   className,
   ...props
-}: BubbleReactionChipProps): React.ReactElement {
+}: IBubbleReactionChipProps): React.ReactElement {
   const reduceMotion = useReducedMotion()
   const showCount = reaction.count != null && reaction.count > 0
 
@@ -93,7 +93,7 @@ export function BubbleReactionsButton({
   className,
   onClick,
   onEmojiSelect
-}: BubbleReactionsButtonProps): React.ReactElement {
+}: TBubbleReactionsButtonProps): React.ReactElement {
 
   const [open, setOpen] = useState(false)
   return (
@@ -153,12 +153,12 @@ export function BubbleReactions({
   className,
   children,
   ...props
-}: BubbleReactionsProps): React.ReactElement {
+}: IBubbleReactionsProps): React.ReactElement {
   const variant = useBubbleVariant()
   return (
     <div
       className={cn(
-        "absolute -bottom-5 z-[1] flex max-h-8 w-fit flex-1 items-center",
+        "absolute -bottom-5 z-1 flex max-h-8 w-fit flex-1 items-center",
         variant === "sender" ? "left-4" : "right-4",
         className
       )}

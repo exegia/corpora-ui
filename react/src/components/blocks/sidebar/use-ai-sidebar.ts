@@ -54,12 +54,12 @@ import {
   toggleAISidebarRowAtom,
 } from "./ai-sidebar-atom.ts"
 import type {
-  AISidebarConfig,
-  AISidebarController,
-  AISidebarHandlers,
-  AISidebarSeed,
-  FlatResource,
-  UseAISidebarOptions,
+  IAISidebarConfig,
+  IAISidebarController,
+  IAISidebarHandlers,
+  IAISidebarSeed,
+  IFlatResource,
+  IUseAISidebarOptions,
 } from "./type.ts"
 import {
   canContain,
@@ -68,7 +68,7 @@ import {
   flattenResources,
 } from "./utils.ts"
 
-export type { UseAISidebarOptions }
+export type { IUseAISidebarOptions }
 
 /**
  * The AI sidebar's headless controller — every behaviour the block
@@ -95,8 +95,8 @@ export type { UseAISidebarOptions }
  * `useAISidebarActions(sidebarId)` elsewhere.
  */
 export function useAISidebar(
-  options: UseAISidebarOptions
-): AISidebarController {
+  options: IUseAISidebarOptions
+): IAISidebarController {
   const {
     items,
     defaultItems = [],
@@ -124,12 +124,12 @@ export function useAISidebar(
 
   // Primitives only, so this object is stable and the store write below runs
   // once per real change rather than once per render.
-  const config = useMemo<AISidebarConfig>(
+  const config = useMemo<IAISidebarConfig>(
     () => ({ controlsItems, controlsActiveId, controlsExpandedIds }),
     [controlsActiveId, controlsExpandedIds, controlsItems]
   )
 
-  const handlers = useMemo<AISidebarHandlers>(
+  const handlers = useMemo<IAISidebarHandlers>(
     () => ({
       onItemsChange,
       onMove,
@@ -149,7 +149,7 @@ export function useAISidebar(
   )
 
   // Read once: the `default*` options describe the mount, not every render.
-  const [seed] = useState<AISidebarSeed>(() => ({
+  const [seed] = useState<IAISidebarSeed>(() => ({
     items: items ?? defaultItems,
     activeId: defaultActiveId,
     focusedId: activeId ?? defaultActiveId,
@@ -322,7 +322,7 @@ export function useAISidebar(
   )
 
   const onRowKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>, row: FlatResource) => {
+    (event: KeyboardEvent<HTMLDivElement>, row: IFlatResource) => {
       const flatRows = readFlat()
       const expanded = store.get(aiSidebarExpandedIdsAtom(sidebarId))
       const index = flatRows.findIndex(({ item }) => item.id === row.item.id)
@@ -491,7 +491,7 @@ export function useAISidebar(
   )
 
   const onRowDragOver = useCallback(
-    (event: DragEvent<HTMLDivElement>, targetRow: FlatResource) => {
+    (event: DragEvent<HTMLDivElement>, targetRow: IFlatResource) => {
       const dragging = store.get(aiSidebarDraggingIdAtom(sidebarId))
       if (!dragging || dragging === targetRow.item.id) return
       const source = findResource(
@@ -548,7 +548,7 @@ export function useAISidebar(
     [clearHover, hoverLayoutId, hoveredId, onRowHover]
   )
 
-  return useMemo<AISidebarController>(
+  return useMemo<IAISidebarController>(
     () => ({
       sidebarId,
       items: renderedItems,

@@ -1,4 +1,4 @@
-import type { FileIconProps } from "./types"
+import type { IFileIconProps } from "./types"
 
 /**
  * CFM file icon — wordmark variant.
@@ -9,7 +9,7 @@ export function FileWordmarkCfm({
   title = "CFM file",
   className,
   ...props
-}: FileIconProps) {
+}: IFileIconProps) {
   return (
     <svg
       viewBox="0 -48 1024 1114"

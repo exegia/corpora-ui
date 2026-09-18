@@ -5,10 +5,10 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import type * as React from "react"
 import { EASE_OUT_STRONG } from "@/lib/ease"
 import { cn } from "@/lib/utils"
-import type { RecommendationState } from "./types"
+import type { TRecommendationState } from "./types"
 
-export interface RecommendationCheckboxProps {
-  state: RecommendationState
+export interface IRecommendationCheckboxProps {
+  state: TRecommendationState
   /** Number shown inside the pending ring (its position in the group). */
   step?: number
   className?: string
@@ -29,7 +29,7 @@ export function Checkbox({
   state,
   step,
   className,
-}: RecommendationCheckboxProps): React.ReactElement {
+}: IRecommendationCheckboxProps): React.ReactElement {
   const reduceMotion = useReducedMotion()
   const transition = reduceMotion
     ? { duration: 0 }

@@ -4,9 +4,9 @@ import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
 import { Separator } from "@/components/ui/separator"
 
-type PreviewProps = Pick<ComponentProps<typeof Separator>, "orientation">
+type TPreviewProps = Pick<ComponentProps<typeof Separator>, "orientation">
 
-function SeparatorPreview(props: PreviewProps) {
+function SeparatorPreview(props: TPreviewProps) {
   return (
     <div className="p-6">
       <div className="max-w-sm">

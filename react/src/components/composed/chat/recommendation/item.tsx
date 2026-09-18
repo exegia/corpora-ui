@@ -20,7 +20,7 @@ import { EASE_IN_OUT, EASE_OUT_STRONG } from "@/lib/ease"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "./checkbox"
 import { CONFIDENCE, STATE_LABEL, STATE_TONE } from "./constant"
-import type { RecommendationItemProps } from "./types"
+import type { IRecommendationItemProps } from "./types"
 
 const ACTION_MOTION = {
   animate: { opacity: 1, y: 0 },
@@ -72,7 +72,7 @@ export function Item({
   children,
   className,
   ...props
-}: RecommendationItemProps): React.ReactElement {
+}: IRecommendationItemProps): React.ReactElement {
   const declined = state === "rejected"
   const decline = onReject ?? onAlternatives
   const declineLabel = rejectLabel ?? alternativesLabel

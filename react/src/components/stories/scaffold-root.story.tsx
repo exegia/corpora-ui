@@ -10,12 +10,12 @@ import { ScaffoldMain } from "@/components/blocks/scaffold/scaffold-main"
 import { ScaffoldPanel } from "@/components/blocks/scaffold/scaffold-panel"
 import { ScaffoldRoot } from "@/components/blocks/scaffold/scaffold-root"
 
-type PreviewProps = Pick<
+type TPreviewProps = Pick<
   ComponentProps<typeof ScaffoldRoot>,
   "className" | "inspectorOpen" | "inspectorWidth" | "children"
 >
 
-function BlockPreview(props: PreviewProps) {
+function BlockPreview(props: TPreviewProps) {
   return <ScaffoldRoot {...props} />
 }
 

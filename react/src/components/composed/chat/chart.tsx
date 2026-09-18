@@ -7,11 +7,11 @@ import {
 } from "recharts"
 import { cn } from "@/lib/utils"
 import { Card, CardFrame, CardFrameHeader, CardPanel } from "@/components/ui/card"
-import { Dot, LegendItem, Pill, type DotTone } from "@/components/ui/chat"
+import { Dot, LegendItem, Pill, type TDotTone } from "@/components/ui/chat"
 
-export type ChartType = "pie" | "area" | "line" | "bar"
+export type TChartType = "pie" | "area" | "line" | "bar"
 
-export interface ChartSeries {
+export interface IChartSeries {
   /** Key into each data row. */
   key: string
   label: React.ReactNode
@@ -21,17 +21,17 @@ export interface ChartSeries {
   format?: (value: number) => React.ReactNode
 }
 
-export type ChartDatum = { label: string; [key: string]: string | number }
+export type TChartDatum = { label: string; [key: string]: string | number }
 
-export interface ChartProps extends Omit<React.ComponentPropsWithoutRef<"div">, "title"> {
-  type: ChartType
+export interface IChartProps extends Omit<React.ComponentPropsWithoutRef<"div">, "title"> {
+  type: TChartType
   title?: React.ReactNode
   subtitle?: React.ReactNode
   /** Pill text; defaults to the capitalised type. */
   badge?: React.ReactNode
-  data: ChartDatum[]
+  data: TChartDatum[]
   /** Series to plot; pie uses the first one. */
-  series: ChartSeries[]
+  series: IChartSeries[]
   /** Pie only: big number and caption in the donut's centre. */
   center?: { value: React.ReactNode; label?: React.ReactNode }
   /** Drop the title row (InsightCards embeds a bare plot). */
@@ -40,18 +40,18 @@ export interface ChartProps extends Omit<React.ComponentPropsWithoutRef<"div">, 
   plotHeight?: number
 }
 
-const TYPE_LABEL: Record<ChartType, string> = { pie: "Pie", area: "Area", line: "Line", bar: "Bar" }
+const TYPE_LABEL: Record<TChartType, string> = { pie: "Pie", area: "Area", line: "Line", bar: "Bar" }
 
-const seriesColor = (s: ChartSeries, i: number) => s.color ?? `var(--chart-series-${(i % 5) + 1})`
-const seriesTone = (i: number) => `series-${(i % 5) + 1}` as DotTone
+const seriesColor = (s: IChartSeries, i: number) => s.color ?? `var(--chart-series-${(i % 5) + 1})`
+const seriesTone = (i: number) => `series-${(i % 5) + 1}` as TDotTone
 
-const fmt = (s: ChartSeries | undefined, v: unknown): React.ReactNode =>
+const fmt = (s: IChartSeries | undefined, v: unknown): React.ReactNode =>
   typeof v === "number" && s?.format ? s.format(v) : String(v)
 
-interface TooltipRow { name?: unknown; value?: unknown; color?: string; payload?: ChartDatum }
+interface ITooltipRow { name?: unknown; value?: unknown; color?: string; payload?: TChartDatum }
 
 /** Hover card: category label, then one dot · series · value row per series. */
-function ChartTooltip({ active, payload, label, series }: { active?: boolean; payload?: TooltipRow[]; label?: unknown; series: ChartSeries[] }): React.ReactElement | null {
+function ChartTooltip({ active, payload, label, series }: { active?: boolean; payload?: ITooltipRow[]; label?: unknown; series: IChartSeries[] }): React.ReactElement | null {
   if (!active || !payload?.length) return null
   // Pie rows already carry the category as their name, so no heading there.
   const heading = series.length > 1 || label !== undefined ? (label ?? payload[0].payload?.label) : undefined
@@ -85,7 +85,7 @@ const AXIS = { tick: { fontSize: 11, fill: "var(--text-secondary)" }, axisLine: 
  */
 export function Chart({
   type, title, subtitle, badge, data, series, center, headerless = false, plotHeight, className, ...props
-}: ChartProps): React.ReactElement {
+}: IChartProps): React.ReactElement {
   const height = plotHeight ?? (type === "pie" ? 140 : 150)
   const empty = data.length === 0 || series.length === 0
   const reduceMotion = useReducedMotion()

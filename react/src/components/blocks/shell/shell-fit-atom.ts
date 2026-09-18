@@ -23,18 +23,18 @@ import {
   fitsPanel,
   metricsEqual,
   panelBounds,
-  type ShellMetrics,
+  type IShellMetrics,
 } from "./shell-metrics"
 import type {
-  ShellFitInstanceId,
-  ShellFitPanelBounds,
-  ShellFitSeed,
-  ShellFitState,
+  TShellFitInstanceId,
+  IShellFitPanelBounds,
+  IShellFitSeed,
+  IShellFitState,
 } from "./type"
 
 /** An unmeasured shell. Zeroes read as "no layout yet", which the rule fails
  * open on rather than hiding a panel over a reading it never took. */
-const NO_METRICS: ShellMetrics = {
+const NO_METRICS: IShellMetrics = {
   rail: 0,
   insetMin: 0,
   panelMin: 0,
@@ -43,9 +43,9 @@ const NO_METRICS: ShellMetrics = {
 }
 
 /** A panel that mounts at `--panel-width`. */
-const DEFAULT_SHELL_FIT_SEED: ShellFitSeed = { panelWidth: null }
+const DEFAULT_SHELL_FIT_SEED: IShellFitSeed = { panelWidth: null }
 
-const NO_BOUNDS: ShellFitPanelBounds = { min: 0, max: 0 }
+const NO_BOUNDS: IShellFitPanelBounds = { min: 0, max: 0 }
 
 /**
  * A string-keyed atom family.
@@ -55,24 +55,24 @@ const NO_BOUNDS: ShellFitPanelBounds = { min: 0, max: 0 }
  * adding `jotai-family` as a second Jotai package to keep version-aligned.
  * Dropping a key lets the store's WeakMap release that instance's state.
  */
-type Family<AtomType> = ((id: ShellFitInstanceId) => AtomType) & {
-  remove: (id: ShellFitInstanceId) => void
+type TFamily<AtomType> = ((id: TShellFitInstanceId) => AtomType) & {
+  remove: (id: TShellFitInstanceId) => void
 }
 
 /** Every family, so `removeShellFitInstance` can drop an id from all of them. */
-const families: { remove: (id: ShellFitInstanceId) => void }[] = []
+const families: { remove: (id: TShellFitInstanceId) => void }[] = []
 
-function keyed<AtomType>(create: (id: ShellFitInstanceId) => AtomType) {
-  const cache = new Map<ShellFitInstanceId, AtomType>()
-  const family = ((id: ShellFitInstanceId) => {
+function keyed<AtomType>(create: (id: TShellFitInstanceId) => AtomType) {
+  const cache = new Map<TShellFitInstanceId, AtomType>()
+  const family = ((id: TShellFitInstanceId) => {
     let instance = cache.get(id)
     if (instance === undefined) {
       instance = create(id)
       cache.set(id, instance)
     }
     return instance
-  }) as Family<AtomType>
-  family.remove = (id: ShellFitInstanceId) => {
+  }) as TFamily<AtomType>
+  family.remove = (id: TShellFitInstanceId) => {
     cache.delete(id)
   }
   families.push(family)
@@ -89,7 +89,7 @@ function stateFamily<Value>(name: string, initialValue: Value) {
 
 function readFamily<Value>(
   name: string,
-  read: (get: Getter, id: ShellFitInstanceId) => Value
+  read: (get: Getter, id: TShellFitInstanceId) => Value
 ) {
   return keyed((id) => {
     const instance = atom((get) => read(get, id))
@@ -103,7 +103,7 @@ function actionFamily<Args extends unknown[]>(
   write: (
     get: Getter,
     set: Setter,
-    id: ShellFitInstanceId,
+    id: TShellFitInstanceId,
     ...args: Args
   ) => void
 ) {
@@ -119,7 +119,7 @@ function actionFamily<Args extends unknown[]>(
 /** The shell's own measurement of its columns. `useShellFit` is the only
  * writer; read `shellFitMeasuredAtom` to get it with the "no layout yet" case
  * already resolved. */
-export const shellFitMetricsAtom = stateFamily<ShellMetrics>(
+export const shellFitMetricsAtom = stateFamily<IShellMetrics>(
   "metrics",
   NO_METRICS
 )
@@ -133,7 +133,7 @@ export const shellFitRequestedWidthAtom = stateFamily<number | null>(
   null
 )
 
-const shellFitSeedAtom = stateFamily<ShellFitSeed>(
+const shellFitSeedAtom = stateFamily<IShellFitSeed>(
   "seed",
   DEFAULT_SHELL_FIT_SEED
 )
@@ -142,7 +142,7 @@ const shellFitInitializedAtom = stateFamily<boolean>("initialized", false)
 /** The metrics, or null when the shell has no layout to report — a server
  * render, a `display: none` host, a test with no layout engine. A zero is not
  * a width, and treating it as one would pin the panel to nothing. */
-export const shellFitMeasuredAtom = readFamily<ShellMetrics | null>(
+export const shellFitMeasuredAtom = readFamily<IShellMetrics | null>(
   "measured",
   (get, id) => {
     const metrics = get(shellFitMetricsAtom(id))
@@ -156,7 +156,7 @@ export const shellFitFitsAtom = readFamily("fits", (get, id) =>
 )
 
 /** The range a resize may land in. */
-export const shellFitPanelBoundsAtom = readFamily<ShellFitPanelBounds>(
+export const shellFitPanelBoundsAtom = readFamily<IShellFitPanelBounds>(
   "panelBounds",
   (get, id) => {
     const measured = get(shellFitMeasuredAtom(id))
@@ -179,7 +179,7 @@ export const shellFitPanelWidthAtom = readFamily<number | null>(
 /** The whole fit of one shell. This changes on every measurement, so a
  * component that reads one field should subscribe to that field's atom
  * instead: `useAtomValue(shellFitFitsAtom("app-shell"))`. */
-export const shellFitStateAtom = readFamily<ShellFitState>(
+export const shellFitStateAtom = readFamily<IShellFitState>(
   "state",
   (get, id) => ({
     metrics: get(shellFitMeasuredAtom(id)),
@@ -191,7 +191,7 @@ export const shellFitStateAtom = readFamily<ShellFitState>(
 
 /** @internal The measurement's way in. Silent, and inert when the numbers did
  * not move — a resize event that changes nothing must not re-render a shell. */
-export const measureShellFitAtom = actionFamily<[metrics: ShellMetrics]>(
+export const measureShellFitAtom = actionFamily<[metrics: IShellMetrics]>(
   "measure",
   (get, set, id, metrics) => {
     if (metricsEqual(get(shellFitMetricsAtom(id)), metrics)) return
@@ -225,7 +225,7 @@ export const resetShellPanelWidthAtom = actionFamily<[]>(
 /** @internal Seed the instance once. A seed describes the mount, not every
  * render, so a `defaultPanelWidth` that arrives later never overwrites a
  * width the user dragged to. */
-export const mountShellFitAtom = actionFamily<[seed: ShellFitSeed]>(
+export const mountShellFitAtom = actionFamily<[seed: IShellFitSeed]>(
   "mount",
   (get, set, id, seed) => {
     if (get(shellFitInitializedAtom(id))) return
@@ -238,6 +238,6 @@ export const mountShellFitAtom = actionFamily<[seed: ShellFitSeed]>(
 /** Drop every atom for `id`. `useShellFit` calls this on unmount for shells it
  * keyed itself; an explicit `shellId` is the app's key and outlives its
  * component, so a resized panel survives a route change. */
-export function removeShellFitInstance(id: ShellFitInstanceId): void {
+export function removeShellFitInstance(id: TShellFitInstanceId): void {
   for (const family of families) family.remove(id)
 }

@@ -1,7 +1,7 @@
 import * as React from "react"
 import { motion, useReducedMotion } from "motion/react"
 import { cn } from "@/lib/utils"
-import type { ScaffoldSubPanelProps } from "./type"
+import type { IScaffoldSubPanelProps } from "./type"
 import { subPanelVariant } from "@/components/blocks/scaffold/utils.ts"
 import { SCAFFOLD_EASE, SCAFFOLD_MORPH_DURATION } from "./constants"
 
@@ -12,7 +12,7 @@ export function ScaffoldSubPanel({
   primary = false,
   expanded,
   ...rest
-}: ScaffoldSubPanelProps): React.ReactElement {
+}: IScaffoldSubPanelProps): React.ReactElement {
   const reduce = useReducedMotion()
   // The primary card holds the flexible slot unless the panel says otherwise.
   const isExpanded = expanded ?? primary

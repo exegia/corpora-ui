@@ -19,12 +19,12 @@ import {
   resetAISidebarAtom,
   setAISidebarHandlersAtom,
 } from "../ai-sidebar-atom"
-import type { AISidebarConfig, AISidebarSeed, SidebarResource } from "../type"
+import type { IAISidebarConfig, IAISidebarSeed, ISidebarResource } from "../type"
 import { useAISidebarActions, useAISidebarState } from "../use-ai-sidebar-state"
 
-type Store = ReturnType<typeof createStore>
+type TStore = ReturnType<typeof createStore>
 
-const RESOURCES: SidebarResource[] = [
+const RESOURCES: ISidebarResource[] = [
   {
     id: "corpora",
     label: "Corpora",
@@ -39,10 +39,10 @@ const RESOURCES: SidebarResource[] = [
 ]
 
 function mount(
-  store: Store,
+  store: TStore,
   id: string,
-  config: Partial<AISidebarConfig> = {},
-  seed: Partial<AISidebarSeed> = {}
+  config: Partial<IAISidebarConfig> = {},
+  seed: Partial<IAISidebarSeed> = {}
 ) {
   store.set(
     mountAISidebarAtom(id),
@@ -57,7 +57,7 @@ function mount(
   )
 }
 
-const ids = (items: SidebarResource[]) => items.map((item) => item.id)
+const ids = (items: ISidebarResource[]) => items.map((item) => item.id)
 
 describe("ai-sidebar atoms · instance isolation", () => {
   test("two ids never share state", () => {
@@ -107,7 +107,7 @@ describe("ai-sidebar atoms · write gates", () => {
 
   test("a controlled items prop is never overwritten, only reported", () => {
     const store = createStore()
-    const onItemsChange = mock((items: SidebarResource[]) => void items)
+    const onItemsChange = mock((items: ISidebarResource[]) => void items)
     mount(store, "controlled", { controlsItems: true })
     store.set(setAISidebarHandlersAtom("controlled"), { onItemsChange })
 

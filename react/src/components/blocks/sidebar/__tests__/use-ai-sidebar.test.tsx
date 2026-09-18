@@ -2,10 +2,10 @@ import { describe, expect, mock, test } from "bun:test"
 import { act, render, renderHook, screen } from "@testing-library/react"
 
 import { AISidebar } from "../ai-sidebar"
-import type { AISidebarController, SidebarResource } from "../type.ts"
+import type { IAISidebarController, ISidebarResource } from "../type.ts"
 import { useAISidebar } from "../use-ai-sidebar"
 
-const RESOURCES: SidebarResource[] = [
+const RESOURCES: ISidebarResource[] = [
   {
     id: "corpora",
     label: "Corpora",
@@ -24,7 +24,7 @@ const RESOURCES: SidebarResource[] = [
   { id: "archive", label: "Archive", kind: "folder", disabled: true },
 ]
 
-const labels = (controller: AISidebarController) =>
+const labels = (controller: IAISidebarController) =>
   controller.flat.map((row) => row.item.id)
 
 describe("useAISidebar · expansion", () => {
@@ -265,7 +265,7 @@ describe("AISidebar · controller form", () => {
   function Harness({
     onReady,
   }: {
-    onReady: (controller: AISidebarController) => void
+    onReady: (controller: IAISidebarController) => void
   }) {
     const controller = useAISidebar({ defaultItems: RESOURCES })
     onReady(controller)
@@ -273,7 +273,7 @@ describe("AISidebar · controller form", () => {
   }
 
   test("renders from the controller and reacts to calls made outside it", async () => {
-    let sidebar!: AISidebarController
+    let sidebar!: IAISidebarController
     render(<Harness onReady={(next) => (sidebar = next)} />)
     expect(screen.queryByRole("treeitem", { name: /Field notes/ })).toBeNull()
 
@@ -292,7 +292,7 @@ describe("AISidebar · controller form", () => {
   // tests above cover the state; the browser covers the rendering.
 
   test("a move made from outside reorders the rendered rows", async () => {
-    let sidebar!: AISidebarController
+    let sidebar!: IAISidebarController
     render(<Harness onReady={(next) => (sidebar = next)} />)
 
     await act(async () =>

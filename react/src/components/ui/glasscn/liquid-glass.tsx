@@ -14,7 +14,7 @@ import {
 
 import { cn } from "@/lib/utils"
 
-type MapGeometry = {
+type TMapGeometry = {
   width: number // element width, CSS px, integer
   height: number // element height, CSS px, integer
   radius: number // corner radius, CSS px, already clamped to min(width, height) / 2
@@ -44,7 +44,7 @@ function supportsSvgBackdropFilter() {
 // NOTE: Map regeneration renders a ≤480 px texture and encodes a PNG for
 // each unique (width, height, radius, bezel). Continuously animating the
 // element's SIZE will thrash the cache; animate transform: scale instead.
-function createDisplacementMap({ width, height, radius, bezel }: MapGeometry) {
+function createDisplacementMap({ width, height, radius, bezel }: TMapGeometry) {
   const cacheKey = `${width}:${height}:${radius}:${bezel}`
   const cached = displacementMapCache.get(cacheKey)
   if (cached !== undefined) return cached
@@ -123,7 +123,7 @@ function convexSquircle(x: number) {
   return Math.pow(1 - Math.pow(1 - x, 4), 0.25)
 }
 
-export type LiquidGlassProps = HTMLAttributes<HTMLDivElement> & {
+export type TLiquidGlassProps = HTMLAttributes<HTMLDivElement> & {
   /** Extra blur mixed into the backdrop-filter after the SVG refraction. */
   blur?: number
   /** SVG displacement strength. Higher values bend the sampled backdrop more. */
@@ -139,7 +139,7 @@ export type LiquidGlassProps = HTMLAttributes<HTMLDivElement> & {
   saturation?: number
 }
 
-export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(
+export const LiquidGlass = forwardRef<HTMLDivElement, TLiquidGlassProps>(
   function LiquidGlass(
     {
       blur = 2,
@@ -179,7 +179,7 @@ export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(
     // Geometry measurement via ResizeObserver
     // -------------------------------------------------------------------------
 
-    const [geometry, setGeometry] = useState<MapGeometry | null>(null)
+    const [geometry, setGeometry] = useState<TMapGeometry | null>(null)
 
     useEffect(() => {
       const el = localRef.current

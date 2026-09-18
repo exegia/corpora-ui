@@ -12,11 +12,11 @@ import {
   resizeShellPanelAtom,
   shellFitStateAtom,
 } from "./shell-fit-atom"
-import { fitsPanel, type ShellMetrics } from "./shell-metrics"
+import { fitsPanel, type IShellMetrics } from "./shell-metrics"
 import type {
-  ShellFitController,
-  ShellFitSeed,
-  UseShellFitOptions,
+  IShellFitController,
+  IShellFitSeed,
+  IUseShellFitOptions,
 } from "./type"
 import { resolveLength } from "./utils"
 
@@ -24,7 +24,7 @@ import { resolveLength } from "./utils"
  * variables; the rail's share comes from its own state, not its box, so a
  * fold counts the moment React commits it rather than a frame later when the
  * width animation has moved. */
-function readMetrics(host: HTMLElement, railOpen: boolean): ShellMetrics {
+function readMetrics(host: HTMLElement, railOpen: boolean): IShellMetrics {
   // Whether a shell has a rail at all is the caller's composition, so it is
   // read off the DOM rather than tracked in state.
   const rail = host.querySelector<HTMLElement>(
@@ -71,14 +71,14 @@ export function useShellFit({
   railOpen,
   defaultPanelWidth,
   onUnfit,
-}: UseShellFitOptions): ShellFitController {
+}: IUseShellFitOptions): IShellFitController {
   // A generated key isolates unnamed shells from each other; an explicit
   // `shellId` is the app's handle on this one.
   const generatedId = useId()
   const shellId = explicitId ?? generatedId
 
   // Read once: `defaultPanelWidth` describes the mount, not every render.
-  const [seed] = useState<ShellFitSeed>(() => ({
+  const [seed] = useState<IShellFitSeed>(() => ({
     panelWidth: defaultPanelWidth ?? null,
   }))
 
@@ -128,7 +128,7 @@ export function useShellFit({
 
   const state = useAtomValueRawSync(shellFitStateAtom(shellId))
 
-  return useMemo<ShellFitController>(
+  return useMemo<IShellFitController>(
     () => ({ shellId, ...state, resizePanel, resetPanelWidth }),
     [shellId, state, resizePanel, resetPanelWidth]
   )

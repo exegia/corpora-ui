@@ -1,11 +1,11 @@
 import { forwardRef } from "react"
 import { motion } from "motion/react"
 import { cn } from "@/lib/utils.ts"
-import type { AnimatedSidebarInsetProps } from "./type"
+import type { TAnimatedSidebarInsetProps } from "./type"
 
 export const AnimatedPanelInset = forwardRef<
   HTMLElement,
-  AnimatedSidebarInsetProps
+  TAnimatedSidebarInsetProps
 >(function AnimatedSidebarInset({ className, ...props }, forwardedRef) {
   return (
     <motion.main

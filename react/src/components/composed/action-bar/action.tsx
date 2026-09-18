@@ -1,12 +1,12 @@
 import { ToolbarButton, ToolbarSeparator } from "@/components/ui/toolbar"
-import type { ActionButtonProps } from "./types"
+import type { IActionButtonProps } from "./types"
 import { TooltipTrigger } from "@/components/ui/tooltip"
 import { Text } from "@/components/atoms"
-import type { SpanProps } from "@/components/atoms/text"
+import type { TSpanProps } from "@/components/atoms/text"
 import { tooltipHandle } from "./utils"
 import type { ToolbarSeparatorProps } from "@base-ui/react"
 
-function Payload({ children }: SpanProps) {
+function Payload({ children }: TSpanProps) {
   return <Text.Span>{children}</Text.Span>
 }
 
@@ -14,7 +14,7 @@ export function Action({
   tooltip,
   action,
   Icon,
-}: Omit<ActionButtonProps<string>, "children">) {
+}: Omit<IActionButtonProps<string>, "children">) {
   return (
     <TooltipTrigger
       handle={tooltipHandle}

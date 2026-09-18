@@ -3,9 +3,9 @@ import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 
 import { AISidebar } from "../ai-sidebar"
-import type { SidebarResource } from "../type.ts"
+import type { ISidebarResource } from "../type.ts"
 
-const RESOURCES: SidebarResource[] = [
+const RESOURCES: ISidebarResource[] = [
   {
     id: "corpora",
     label: "Corpora",

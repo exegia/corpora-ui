@@ -9,9 +9,9 @@ first; this file only holds what is specific to the tree.
 
 | File                | Owns                                                                                                    |
 | ------------------- | ------------------------------------------------------------------------------------------------------- |
-| `type.ts`           | `TreeNode`, `TreeProps` (data form × controller form), `TreeState`/`TreeActions`, `@internal` config/handlers/seed. No imports besides React types. |
+| `type.ts`           | `ITreeNode`, `TTreeProps` (data form × controller form), `ITreeState`/`ITreeActions`, `@internal` config/handlers/seed. No imports besides React types. |
 | `tree-atom.ts`      | Every atom, keyed by `treeId` (`keyed()` families) and per node (`nodeFamily`). All mutations are write-only action atoms. `debugLabel` = `tree/<id>/<name>`. |
-| `use-tree.ts`       | `useTree(options)` — mounts an instance, projects controlled props into the store, returns the `TreeController`. |
+| `use-tree.ts`       | `useTree(options)` — mounts an instance, projects controlled props into the store, returns the `ITreeController`. |
 | `use-tree-state.ts` | `useTreeState(id)` (reads, re-renders on any change) and `useTreeActions(id)` (writes only, never re-renders). |
 | `use-tree-dnd.ts`   | Stable drag handlers for `files`; they read `draggedId`/`dropTarget` out of the store at call time.       |
 | `tree-context.ts`   | Context value = `{ treeId, renderTrailing, dnd }` only. Never the controller.                            |
@@ -28,7 +28,7 @@ first; this file only holds what is specific to the tree.
   or `"secondary"` for the active sidebar row). Section headings in a 3-level
   `navigation` tree stay a plain `<button>`. **Nothing renders an `<a>` any
   more.**
-- `TreeNode.href` / `target` are **metadata** — they ride along on the node
+- `ITreeNode.href` / `target` are **metadata** — they ride along on the node
   handed to `onNavigate`. Routing has exactly one path:
   `selectTreeNodeAtom` → `node.onSelect?.()` → `handlers.onNavigate?.(node)`.
   One native behaviour survives the anchor removal: `toc` rows below the

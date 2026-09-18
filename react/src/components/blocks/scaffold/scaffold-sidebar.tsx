@@ -3,7 +3,7 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
-import type { ScaffoldSidebarProps } from "./type"
+import type { TScaffoldSidebarProps } from "./type"
 
 /**
  * The 64px icon rail on the left edge. Transparent — it sits directly on
@@ -13,7 +13,7 @@ export function ScaffoldSidebar({
   className,
   children,
   ...rest
-}: ScaffoldSidebarProps): React.ReactElement {
+}: TScaffoldSidebarProps): React.ReactElement {
   return (
     <nav
       id="scaffold-sidebar"

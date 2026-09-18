@@ -5,11 +5,11 @@ import { defineStory } from "@/registry/story"
 import { Frame, FrameFooter } from "@/components/ui/frame"
 import { Card, CardPanel } from "@/components/ui/card"
 
-type PreviewProps = Pick<ComponentProps<typeof Frame>, "className"> & {
+type TPreviewProps = Pick<ComponentProps<typeof Frame>, "className"> & {
   children: string
 }
 
-function FramePreview({ children, ...props }: PreviewProps) {
+function FramePreview({ children, ...props }: TPreviewProps) {
   return (
     <div className="p-6">
       <div className="max-w-sm">

@@ -34,11 +34,11 @@ import {
   treeRenamingIdAtom,
 } from "./tree-atom"
 import type {
-  TreeConfig,
-  TreeController,
-  TreeHandlers,
-  TreeSeed,
-  UseTreeOptions,
+  ITreeConfig,
+  ITreeController,
+  ITreeHandlers,
+  ITreeSeed,
+  IUseTreeOptions,
 } from "./type"
 import { useTreeDnd } from "./use-tree-dnd"
 import { findNode, hasThreeLevels } from "./utils"
@@ -65,7 +65,7 @@ import { findNode, hasThreeLevels } from "./utils"
  * `ExegiaProvider` can drive this tree without the controller — name it and
  * reach for `useTreeState(treeId)` / `useTreeActions(treeId)` elsewhere.
  */
-export function useTree(options: UseTreeOptions): TreeController {
+export function useTree(options: IUseTreeOptions): ITreeController {
   const {
     variant,
     onNavigate,
@@ -93,7 +93,7 @@ export function useTree(options: UseTreeOptions): TreeController {
 
   // Primitives only, so this object is stable and the store write below runs
   // once per real change rather than once per render.
-  const config = React.useMemo<TreeConfig>(
+  const config = React.useMemo<ITreeConfig>(
     () => ({
       variant,
       sound,
@@ -116,7 +116,7 @@ export function useTree(options: UseTreeOptions): TreeController {
     ]
   )
 
-  const handlers = React.useMemo<TreeHandlers>(
+  const handlers = React.useMemo<ITreeHandlers>(
     () => ({
       onNavigate,
       onItemsChange,
@@ -136,7 +136,7 @@ export function useTree(options: UseTreeOptions): TreeController {
   )
 
   // Read once: the `default*` options describe the mount, not every render.
-  const [seed] = React.useState<TreeSeed>(() => ({
+  const [seed] = React.useState<ITreeSeed>(() => ({
     items: options.items ?? options.defaultItems ?? [],
     activeId: options.activeId ?? options.defaultActiveId,
     collapsed: options.collapsed ?? options.defaultCollapsed ?? false,
@@ -244,7 +244,7 @@ export function useTree(options: UseTreeOptions): TreeController {
 
   const dnd = useTreeDnd(treeId)
 
-  return React.useMemo<TreeController>(
+  return React.useMemo<ITreeController>(
     () => ({
       treeId,
       variant,

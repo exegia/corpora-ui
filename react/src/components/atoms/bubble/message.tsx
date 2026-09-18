@@ -3,13 +3,13 @@
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { useBubbleVariant } from "./context"
-import type { BubbleMessageProps } from "./types"
+import type { TBubbleMessageProps } from "./types"
 import { twBubbleMessageClasses } from "./utils"
 
 export function BubbleMessage({
   className,
   ...props
-}: BubbleMessageProps): React.ReactElement {
+}: TBubbleMessageProps): React.ReactElement {
   const variant = useBubbleVariant()
   return (
     <div

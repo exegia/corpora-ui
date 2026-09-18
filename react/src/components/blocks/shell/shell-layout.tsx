@@ -5,7 +5,7 @@ import * as React from "react"
 
 import { AnimatedPanel } from "./animated-panel.tsx"
 import { cn } from "@/lib/utils"
-import type { ShellLayoutProps, ShellPanelControlProps } from "./type"
+import type { IShellLayoutProps, TShellPanelControlProps } from "./type"
 import { TITLE_BAR_HEIGHT } from "./utils"
 import type { ClassNameValue } from "tailwind-merge"
 import { AnimatedPanelProvider } from "./animated-panel-provider.tsx"
@@ -22,7 +22,7 @@ export function ShellLayout({
   defaultOpen,
   panelComponents,
   ...panelControlProps
-}: ShellLayoutProps): React.ReactElement {
+}: IShellLayoutProps): React.ReactElement {
   const background: ClassNameValue = `bg-linear-to-tr/increasing from-neutral-200 via-neutral-100 to-stone-200 dark:from-neutral-900 dark:via-neutral-950 dark:to-stone-950`
 
   // Content pushed through `openPanel(side, component)` wins over the static
@@ -33,7 +33,7 @@ export function ShellLayout({
   // Each panel seeds its own side's initial state (`defaultOpen ?? open`);
   // an explicit `defaultOpen` record — usually from useShellPanels — wins
   // per side.
-  const initialOpen: ShellPanelControlProps["defaultOpen"] = {
+  const initialOpen: TShellPanelControlProps["defaultOpen"] = {
     ...(panels?.left && {
       left: panels.left.defaultOpen ?? true,
     }),

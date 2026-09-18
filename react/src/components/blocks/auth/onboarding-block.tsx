@@ -3,25 +3,25 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
-import type { AuthAccent } from "@/lib/auth-accent";
+import type { TAuthAccent } from "@/lib/auth-accent";
 import {
   AuthCard,
   AuthError,
   AuthSuccess,
   MorphStep,
-  type AuthStatus,
+  type TAuthStatus,
 } from "./auth-shell";
 import { ProfileStep } from "./onboarding/profile-step";
 
 /** Value a single onboarding field can hold. */
-export type OnboardingValue = string | boolean;
+export type TOnboardingValue = string | boolean;
 
-export interface OnboardingSelectOption {
+export interface IOnboardingSelectOption {
   value: string;
   label: string;
 }
 
-interface OnboardingFieldBase {
+interface IOnboardingFieldBase {
   /** Key the value is collected under; unique within the flow. */
   name: string;
   label: string;
@@ -32,35 +32,35 @@ interface OnboardingFieldBase {
   validate?: (value: string) => string | null;
 }
 
-export interface OnboardingTextField extends OnboardingFieldBase {
+export interface IOnboardingTextField extends IOnboardingFieldBase {
   kind: "text" | "textarea" | "url";
 }
 
-export interface OnboardingCheckboxField extends OnboardingFieldBase {
+export interface IOnboardingCheckboxField extends IOnboardingFieldBase {
   kind: "checkbox";
 }
 
-export interface OnboardingSelectField extends OnboardingFieldBase {
+export interface IOnboardingSelectField extends IOnboardingFieldBase {
   kind: "select";
-  options: OnboardingSelectOption[];
+  options: IOnboardingSelectOption[];
 }
 
 /** Discriminated on `kind`. */
-export type OnboardingFieldConfig =
-  | OnboardingTextField
-  | OnboardingCheckboxField
-  | OnboardingSelectField;
+export type TOnboardingFieldConfig =
+  | IOnboardingTextField
+  | IOnboardingCheckboxField
+  | IOnboardingSelectField;
 
-export interface OnboardingStepConfig {
+export interface IOnboardingStepConfig {
   /** Unique within the flow and stable across releases. */
   id: string;
   title: string;
   description?: string;
-  fields: OnboardingFieldConfig[];
+  fields: TOnboardingFieldConfig[];
 }
 
 /** Default configuration: a single required display-name step. */
-export const DEFAULT_ONBOARDING_STEPS: OnboardingStepConfig[] = [
+export const DEFAULT_ONBOARDING_STEPS: IOnboardingStepConfig[] = [
   {
     id: "profile",
     title: "Your profile",
@@ -70,23 +70,23 @@ export const DEFAULT_ONBOARDING_STEPS: OnboardingStepConfig[] = [
   },
 ];
 
-export interface OnboardingBlockProps {
+export interface IOnboardingBlockProps {
   /** Declared profile steps. */
-  steps?: OnboardingStepConfig[];
+  steps?: IOnboardingStepConfig[];
   /** Brand mark rendered above the title. Omit for no logo row at all. */
   logo?: React.ReactNode;
   /** Brand accent for the primary action. Omit to keep the default primary. */
-  accent?: AuthAccent;
+  accent?: TAuthAccent;
   /**
    * Fires per step as it is submitted. Reject (or throw) to keep the user on
    * the step and show the error.
    */
   onStepSubmit?: (
     stepId: string,
-    values: Record<string, OnboardingValue>,
+    values: Record<string, TOnboardingValue>,
   ) => Promise<void> | void;
   /** Fires once, after the final step is accepted, with the merged profile. */
-  onComplete?: (profile: Record<string, OnboardingValue>) => Promise<void> | void;
+  onComplete?: (profile: Record<string, TOnboardingValue>) => Promise<void> | void;
   /** Shows a brief success screen once onboarding completes. */
   showCompleteScreen?: boolean;
   /** Move focus to step headings. Disable when embedding a gallery preview. */
@@ -113,23 +113,23 @@ export function OnboardingBlock({
   showCompleteScreen = true,
   autoFocus = true,
   className,
-}: OnboardingBlockProps) {
+}: IOnboardingBlockProps) {
   const headingRef = React.useRef<HTMLHeadingElement>(null);
   // Unsubmitted per-step drafts. Accumulated in a ref so a keystroke does not
   // re-render the whole flow, then published to state at each navigation —
   // the only moment the seed values are actually read.
   const draftsRef = React.useRef<
-    Record<string, Record<string, OnboardingValue>>
+    Record<string, Record<string, TOnboardingValue>>
   >({});
   const [drafts, setDrafts] = React.useState<
-    Record<string, Record<string, OnboardingValue>>
+    Record<string, Record<string, TOnboardingValue>>
   >({});
 
   const [index, setIndex] = React.useState(0);
-  const [values, setValues] = React.useState<Record<string, OnboardingValue>>(
+  const [values, setValues] = React.useState<Record<string, TOnboardingValue>>(
     {},
   );
-  const [status, setStatus] = React.useState<AuthStatus>("idle");
+  const [status, setStatus] = React.useState<TAuthStatus>("idle");
   const [error, setError] = React.useState<string | null>(null);
 
   const done = status === "success";
@@ -143,7 +143,7 @@ export function OnboardingBlock({
     headingRef.current?.focus();
   }, [index, done, error, autoFocus]);
 
-  async function handleStepSubmit(stepValues: Record<string, OnboardingValue>) {
+  async function handleStepSubmit(stepValues: Record<string, TOnboardingValue>) {
     if (!step) return;
     const merged = { ...values, ...stepValues };
     setError(null);

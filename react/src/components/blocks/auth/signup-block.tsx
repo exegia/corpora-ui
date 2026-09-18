@@ -9,14 +9,14 @@ import {
 } from "@/components/composed/password-input";
 import {
   SocialProviders,
-  type SocialProvider,
+  type TSocialProvider,
 } from "@/components/composed/social-providers";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { type AuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
+import { type TAuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
 import { cn } from "@/lib/utils";
 import {
   AuthCard,
@@ -25,10 +25,10 @@ import {
   AuthSuccess,
   MorphStep,
   Reveal,
-  type AuthStatus,
+  type TAuthStatus,
 } from "./auth-shell";
 
-export interface SignupBlockProps {
+export interface ISignupBlockProps {
   title?: string;
   description?: string;
   /**
@@ -39,8 +39,8 @@ export interface SignupBlockProps {
   /** Brand mark rendered above the title. Omit for no logo row at all. */
   logo?: React.ReactNode;
   /** Brand accent for the primary action. Omit keeping the default primary. */
-  accent?: AuthAccent;
-  providers?: SocialProvider[];
+  accent?: TAuthAccent;
+  providers?: TSocialProvider[];
   showNameField?: boolean;
   /** Require the term checkbox before submitting. */
   showTerms?: boolean;
@@ -61,7 +61,7 @@ export interface SignupBlockProps {
     email: string;
     password: string;
   }) => Promise<void> | void;
-  onProviderSelect?: (provider: SocialProvider) => Promise<void> | void;
+  onProviderSelect?: (provider: TSocialProvider) => Promise<void> | void;
   onLogin?: () => void;
   onTerms?: () => void;
 }
@@ -83,15 +83,15 @@ export function SignupBlock({
   onProviderSelect,
   onLogin,
   onTerms,
-}: SignupBlockProps) {
+}: ISignupBlockProps) {
   const nameId = React.useId();
   const emailId = React.useId();
   const passwordId = React.useId();
   const termsId = React.useId();
-  const [status, setStatus] = React.useState<AuthStatus>("idle");
+  const [status, setStatus] = React.useState<TAuthStatus>("idle");
   const [error, setError] = React.useState<string | null>(null);
   const [loadingProvider, setLoadingProvider] =
-    React.useState<SocialProvider | null>(null);
+    React.useState<TSocialProvider | null>(null);
   const [password, setPassword] = React.useState("");
   // Controlled when `termsChecked` is passed, uncontrolled otherwise. The
   // internal state is kept either way, so a block that switches between the
@@ -150,7 +150,7 @@ export function SignupBlock({
     }
   }
 
-  async function handleProvider(provider: SocialProvider) {
+  async function handleProvider(provider: TSocialProvider) {
     setError(null);
     setLoadingProvider(provider);
     try {

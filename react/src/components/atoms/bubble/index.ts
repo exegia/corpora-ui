@@ -25,13 +25,13 @@ export {
 }
 
 export type {
-  BubbleActionsProps,
-  BubblePickedEmoji,
-  BubbleHeaderProps,
-  BubbleMessageProps,
-  BubbleReactionChipProps,
-  BubbleProps,
-  BubbleReaction,
-  BubbleReactionsProps,
-  BubbleVariant
+  TBubbleActionsProps,
+  IBubblePickedEmoji,
+  TBubbleHeaderProps,
+  TBubbleMessageProps,
+  IBubbleReactionChipProps,
+  IBubbleProps,
+  IBubbleReaction,
+  IBubbleReactionsProps,
+  TBubbleVariant
 } from "./types"

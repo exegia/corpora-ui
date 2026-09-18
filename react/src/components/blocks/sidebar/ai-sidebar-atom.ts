@@ -19,16 +19,16 @@ import { atom } from "jotai";
 import type { Atom, Getter, Setter } from "jotai";
 
 import type {
-  AISidebarConfig,
-  AISidebarHandlers,
-  AISidebarInstanceId,
-  AISidebarSeed,
-  AISidebarState,
-  DropTarget,
-  FlatResource,
-  SidebarResource,
-  SidebarResourceDropPosition,
-  SidebarResourceMove,
+  IAISidebarConfig,
+  IAISidebarHandlers,
+  TAISidebarInstanceId,
+  IAISidebarSeed,
+  IAISidebarState,
+  IDropTarget,
+  IFlatResource,
+  ISidebarResource,
+  TSidebarResourceDropPosition,
+  ISidebarResourceMove,
 } from "./type.ts";
 import {
   ancestorIdsOf,
@@ -39,19 +39,19 @@ import {
   renameResource,
 } from "./utils.ts";
 
-const NO_ITEMS: SidebarResource[] = [];
-const NO_ROWS: FlatResource[] = [];
+const NO_ITEMS: ISidebarResource[] = [];
+const NO_ROWS: IFlatResource[] = [];
 const NO_IDS: ReadonlySet<string> = new Set<string>();
-const NO_HANDLERS: AISidebarHandlers = {};
+const NO_HANDLERS: IAISidebarHandlers = {};
 
 /** What a sidebar reads as before `useAISidebar` publishes its options. */
-export const DEFAULT_AI_SIDEBAR_CONFIG: AISidebarConfig = {
+export const DEFAULT_AI_SIDEBAR_CONFIG: IAISidebarConfig = {
   controlsItems: false,
   controlsActiveId: false,
   controlsExpandedIds: false,
 };
 
-const DEFAULT_AI_SIDEBAR_SEED: AISidebarSeed = {
+const DEFAULT_AI_SIDEBAR_SEED: IAISidebarSeed = {
   items: NO_ITEMS,
   activeId: null,
   focusedId: null,
@@ -66,24 +66,24 @@ const DEFAULT_AI_SIDEBAR_SEED: AISidebarSeed = {
  * adding `jotai-family` as a second Jotai package to keep version-aligned.
  * Dropping a key lets the store's WeakMap release that instance's state.
  */
-type Family<AtomType> = ((id: AISidebarInstanceId) => AtomType) & {
-  remove: (id: AISidebarInstanceId) => void;
+type TFamily<AtomType> = ((id: TAISidebarInstanceId) => AtomType) & {
+  remove: (id: TAISidebarInstanceId) => void;
 };
 
 /** Every family, so `removeAISidebarInstance` can drop an id from all. */
-const families: { remove: (id: AISidebarInstanceId) => void }[] = [];
+const families: { remove: (id: TAISidebarInstanceId) => void }[] = [];
 
-function keyed<AtomType>(create: (id: AISidebarInstanceId) => AtomType) {
-  const cache = new Map<AISidebarInstanceId, AtomType>();
-  const family = ((id: AISidebarInstanceId) => {
+function keyed<AtomType>(create: (id: TAISidebarInstanceId) => AtomType) {
+  const cache = new Map<TAISidebarInstanceId, AtomType>();
+  const family = ((id: TAISidebarInstanceId) => {
     let instance = cache.get(id);
     if (instance === undefined) {
       instance = create(id);
       cache.set(id, instance);
     }
     return instance;
-  }) as Family<AtomType>;
-  family.remove = (id: AISidebarInstanceId) => {
+  }) as TFamily<AtomType>;
+  family.remove = (id: TAISidebarInstanceId) => {
     cache.delete(id);
   };
   families.push(family);
@@ -100,7 +100,7 @@ function stateFamily<Value>(name: string, initialValue: Value) {
 
 function readFamily<Value>(
   name: string,
-  read: (get: Getter, id: AISidebarInstanceId) => Value
+  read: (get: Getter, id: TAISidebarInstanceId) => Value
 ) {
   return keyed((id) => {
     const instance = atom((get) => read(get, id));
@@ -114,7 +114,7 @@ function actionFamily<Args extends unknown[], Result = void>(
   write: (
     get: Getter,
     set: Setter,
-    id: AISidebarInstanceId,
+    id: TAISidebarInstanceId,
     ...args: Args
   ) => Result
 ) {
@@ -140,9 +140,9 @@ function actionFamily<Args extends unknown[], Result = void>(
  */
 function rowFamily<Value>(
   name: string,
-  read: (get: Getter, id: AISidebarInstanceId, rowId: string) => Value
+  read: (get: Getter, id: TAISidebarInstanceId, rowId: string) => Value
 ) {
-  const outer = keyed((id: AISidebarInstanceId) => {
+  const outer = keyed((id: TAISidebarInstanceId) => {
     const inner = new Map<string, Atom<Value>>();
     return (rowId: string) => {
       let instance = inner.get(rowId);
@@ -154,22 +154,22 @@ function rowFamily<Value>(
       return instance;
     };
   });
-  return (id: AISidebarInstanceId, rowId: string) => outer(id)(rowId);
+  return (id: TAISidebarInstanceId, rowId: string) => outer(id)(rowId);
 }
 
 // ── state ──────────────────────────────────────────────────────────────────
 
 /** @internal */
-export const aiSidebarConfigAtom = stateFamily<AISidebarConfig>(
+export const aiSidebarConfigAtom = stateFamily<IAISidebarConfig>(
   "config",
   DEFAULT_AI_SIDEBAR_CONFIG
 );
 /** @internal Refreshed every commit; nothing subscribes, so it is free. */
-export const aiSidebarHandlersAtom = stateFamily<AISidebarHandlers>(
+export const aiSidebarHandlersAtom = stateFamily<IAISidebarHandlers>(
   "handlers",
   NO_HANDLERS
 );
-const aiSidebarSeedAtom = stateFamily<AISidebarSeed>(
+const aiSidebarSeedAtom = stateFamily<IAISidebarSeed>(
   "seed",
   DEFAULT_AI_SIDEBAR_SEED
 );
@@ -177,7 +177,7 @@ const aiSidebarInitializedAtom = stateFamily<boolean>("initialized", false);
 
 /** The sidebar's current data — hook-owned, or the projection of a
  * controlled `items` prop. */
-export const aiSidebarItemsAtom = stateFamily<SidebarResource[]>(
+export const aiSidebarItemsAtom = stateFamily<ISidebarResource[]>(
   "items",
   NO_ITEMS
 );
@@ -209,7 +209,7 @@ export const aiSidebarDraggingIdAtom = stateFamily<string | null>(
   "draggingId",
   null
 );
-export const aiSidebarDropTargetAtom = stateFamily<DropTarget | null>(
+export const aiSidebarDropTargetAtom = stateFamily<IDropTarget | null>(
   "dropTarget",
   null
 );
@@ -325,7 +325,7 @@ export const aiSidebarRowDraggingAtom = rowFamily(
 /** Where a drop on this one row would land, `null` when it is not hovered
  * by a drag. */
 export const aiSidebarRowDropAtom =
-  rowFamily<SidebarResourceDropPosition | null>("rowDrop", (get, id, rowId) => {
+  rowFamily<TSidebarResourceDropPosition | null>("rowDrop", (get, id, rowId) => {
     const target = get(aiSidebarDropTargetAtom(id));
     return target?.id === rowId ? target.position : null;
   });
@@ -340,7 +340,7 @@ export const aiSidebarRowHoveredAtom = rowFamily(
 
 /** The whole state of one sidebar. Components reading a single field should
  * subscribe to that field's atom instead — this one changes on every edit. */
-export const aiSidebarStateAtom = readFamily<AISidebarState>(
+export const aiSidebarStateAtom = readFamily<IAISidebarState>(
   "state",
   (get, id) => ({
     items: get(aiSidebarItemsAtom(id)),
@@ -364,8 +364,8 @@ export const aiSidebarStateAtom = readFamily<AISidebarState>(
 function commitItems(
   get: Getter,
   set: Setter,
-  id: AISidebarInstanceId,
-  next: SidebarResource[]
+  id: TAISidebarInstanceId,
+  next: ISidebarResource[]
 ): void {
   if (!get(aiSidebarConfigAtom(id)).controlsItems)
     set(aiSidebarItemsAtom(id), next);
@@ -375,7 +375,7 @@ function commitItems(
 function commitExpanded(
   get: Getter,
   set: Setter,
-  id: AISidebarInstanceId,
+  id: TAISidebarInstanceId,
   next: Set<string>
 ): void {
   if (!get(aiSidebarConfigAtom(id)).controlsExpandedIds)
@@ -385,8 +385,8 @@ function commitExpanded(
 
 function seedInstance(
   set: Setter,
-  id: AISidebarInstanceId,
-  seed: AISidebarSeed
+  id: TAISidebarInstanceId,
+  seed: IAISidebarSeed
 ): void {
   set(aiSidebarItemsAtom(id), seed.items);
   set(aiSidebarOwnActiveIdAtom(id), seed.activeId);
@@ -572,7 +572,7 @@ export const closeAISidebarMenuAtom = actionFamily<[], string | null>(
  * is visible to the next call immediately, not after a commit.
  */
 export const moveAISidebarRowAtom = actionFamily<
-  [move: SidebarResourceMove],
+  [move: ISidebarResourceMove],
   Promise<void>
 >("move", async (get, set, id, move) => {
   if (get(aiSidebarMovePendingAtom(id))) {
@@ -612,7 +612,7 @@ export const moveAISidebarRowAtom = actionFamily<
 
 /** Replace the data. Reports through `onItemsChange`; writes the atom only
  * when no controlled `items` prop owns it. */
-export const setAISidebarItemsAtom = actionFamily<[items: SidebarResource[]]>(
+export const setAISidebarItemsAtom = actionFamily<[items: ISidebarResource[]]>(
   "setItems",
   (get, set, id, items) => {
     commitItems(get, set, id, items);
@@ -648,7 +648,7 @@ export const endAISidebarDragAtom = actionFamily<[]>(
 
 /** @internal Publish the latest options; seed the instance once. */
 export const mountAISidebarAtom = actionFamily<
-  [config: AISidebarConfig, seed: AISidebarSeed]
+  [config: IAISidebarConfig, seed: IAISidebarSeed]
 >("mount", (get, set, id, config, seed) => {
   set(aiSidebarConfigAtom(id), config);
   if (get(aiSidebarInitializedAtom(id))) return;
@@ -659,14 +659,14 @@ export const mountAISidebarAtom = actionFamily<
 
 /** @internal */
 export const setAISidebarHandlersAtom = actionFamily<
-  [handlers: AISidebarHandlers]
+  [handlers: IAISidebarHandlers]
 >("setHandlers", (_get, set, id, handlers) => {
   set(aiSidebarHandlersAtom(id), handlers);
 });
 
 /** @internal One-way projections of controlled props — no callbacks fire. */
 export const projectAISidebarItemsAtom = actionFamily<
-  [items: SidebarResource[]]
+  [items: ISidebarResource[]]
 >("projectItems", (_get, set, id, items) => {
   set(aiSidebarItemsAtom(id), items);
 });
@@ -693,6 +693,6 @@ export const resetAISidebarAtom = actionFamily<[]>("reset", (get, set, id) => {
 /** Drop every atom for `id`. `useAISidebar` calls this on unmount for
  * sidebars it keyed itself; an explicit `sidebarId` outlives its component,
  * so an app-named sidebar keeps its open rows across a route change. */
-export function removeAISidebarInstance(id: AISidebarInstanceId): void {
+export function removeAISidebarInstance(id: TAISidebarInstanceId): void {
   for (const family of families) family.remove(id);
 }

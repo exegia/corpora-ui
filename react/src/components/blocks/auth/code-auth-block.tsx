@@ -6,7 +6,7 @@ import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import { OTPField, OTPFieldInput } from "@/components/ui/otp-field";
-import { type AuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
+import { type TAuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
 import { cn } from "@/lib/utils";
 import {
   AuthCard,
@@ -15,14 +15,14 @@ import {
   EASE,
   MorphStep,
   useCountdown,
-  type AuthStatus,
+  type TAuthStatus,
 } from "./auth-shell";
 
-export interface CodeAuthBlockProps {
+export interface ICodeAuthBlockProps {
   /** Brand mark rendered above the title. Omit for no logo row at all. */
   logo?: React.ReactNode;
   /** Brand accent for the primary action. Omit to keep the default primary. */
-  accent?: AuthAccent;
+  accent?: TAuthAccent;
   /** Where the code was sent; drives copy and icon. */
   channel?: "email" | "sms";
   /** Masked destination shown in the description, e.g. "y•••@example.com". */
@@ -49,8 +49,8 @@ export function CodeAuthBlock({
   onVerify,
   onResend,
   onBack,
-}: CodeAuthBlockProps) {
-  const [status, setStatus] = React.useState<AuthStatus>("idle");
+}: ICodeAuthBlockProps) {
+  const [status, setStatus] = React.useState<TAuthStatus>("idle");
   const [error, setError] = React.useState<string | null>(null);
   const [code, setCode] = React.useState("");
   const [resendCount, setResendCount] = React.useState(0);

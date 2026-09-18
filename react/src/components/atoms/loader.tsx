@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
-import type { AtomSize, ILoaderProps } from "./types";
+import type { TAtomSize, ILoaderProps } from "./types";
 
-const sizeMap: Record<AtomSize, string> = {
+const sizeMap: Record<TAtomSize, string> = {
   xs: 'w-0.5 h-0.5',
   sm: 'w-1 h-1',
   default: 'w-2 h-2',

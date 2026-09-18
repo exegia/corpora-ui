@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
 import { LiquidGlass } from "@/components/ui/glasscn/liquid-glass";
 import {
-  type FrostGlassVariant,
+  type TFrostGlassVariant,
   glassVariantStyles,
   liquidRefractStyles,
 } from "@/lib/glass-variants";
@@ -81,9 +81,9 @@ export const buttonVariants = cva(
   },
 );
 
-type ButtonVariant = VariantProps<typeof buttonVariants>["variant"];
+type TButtonVariant = VariantProps<typeof buttonVariants>["variant"];
 
-interface ButtonBaseProps extends useRender.ComponentProps<"button"> {
+interface IButtonBaseProps extends useRender.ComponentProps<"button"> {
   size?: VariantProps<typeof buttonVariants>["size"];
   loading?: boolean;
   /**
@@ -93,15 +93,15 @@ interface ButtonBaseProps extends useRender.ComponentProps<"button"> {
   sound?: boolean;
 }
 
-export type ButtonProps = ButtonBaseProps &
+export type TButtonProps = IButtonBaseProps &
   (
     | {
         variant: "glass";
         /** Glass finish. Only available when `variant` is "glass". */
-        glassVariant?: FrostGlassVariant;
+        glassVariant?: TFrostGlassVariant;
       }
     | {
-        variant?: Exclude<ButtonVariant, "glass">;
+        variant?: Exclude<TButtonVariant, "glass">;
         glassVariant?: never;
       }
   );
@@ -117,12 +117,12 @@ export function Button({
   glassVariant,
   sound = true,
   ...props
-}: ButtonProps): React.ReactElement {
+}: TButtonProps): React.ReactElement {
   const isDisabled: boolean = Boolean(loading || disabledProp);
   const typeValue: React.ButtonHTMLAttributes<HTMLButtonElement>["type"] =
     render ? undefined : "button";
 
-  const resolvedGlassVariant: FrostGlassVariant | undefined =
+  const resolvedGlassVariant: TFrostGlassVariant | undefined =
     variant === "glass" ? (glassVariant ?? "liquid-refract") : undefined;
   const isLiquidRefract = resolvedGlassVariant === "liquid-refract";
 

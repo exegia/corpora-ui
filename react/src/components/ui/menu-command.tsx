@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/menu"
 import { cn } from "@/lib/utils"
 
-export interface MenuCommandItem {
+export interface IMenuCommandItem {
   id: string
   label: React.ReactNode
   /** Muted copy after the label ("Upload from your computer"). */
@@ -25,9 +25,9 @@ export interface MenuCommandItem {
   onSelect?: () => void
 }
 
-export interface MenuCommandListProps {
-  items: MenuCommandItem[]
-  onSelect?: (item: MenuCommandItem) => void
+export interface IMenuCommandListProps {
+  items: IMenuCommandItem[]
+  onSelect?: (item: IMenuCommandItem) => void
   className?: string
 }
 
@@ -42,7 +42,7 @@ export function MenuCommandList({
   items,
   onSelect,
   className,
-}: MenuCommandListProps): React.ReactElement {
+}: IMenuCommandListProps): React.ReactElement {
   return (
     <MenuGroup className={cn("flex flex-col", className)} data-slot="menu-command-list">
       {items.map((item) => {
@@ -94,7 +94,7 @@ export function MenuCommandList({
   )
 }
 
-export interface MenuCommandProps extends MenuCommandListProps {
+export interface IMenuCommandProps extends IMenuCommandListProps {
   /** The trigger element; receives the menu's trigger props. */
   children: React.ReactElement
   side?: React.ComponentProps<typeof MenuPopup>["side"]
@@ -111,7 +111,7 @@ export function MenuCommand({
   align = "start",
   className,
   popupClassName,
-}: MenuCommandProps): React.ReactElement {
+}: IMenuCommandProps): React.ReactElement {
   return (
     <Menu>
       <MenuTrigger render={children} />

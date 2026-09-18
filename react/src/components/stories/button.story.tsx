@@ -2,10 +2,10 @@
 
 import { defineStory } from "@/registry/story"
 import { BookOpen } from "lucide-react"
-import { Button, type ButtonProps } from "@/components/ui/button"
+import { Button, type TButtonProps } from "@/components/ui/button"
 
-type PreviewProps = Pick<
-  ButtonProps,
+type TPreviewProps = Pick<
+  TButtonProps,
   "variant" | "glassVariant" | "size" | "loading" | "disabled" | "sound"
 > & { children: string }
 
@@ -15,7 +15,7 @@ function ButtonPreview({
   size,
   children,
   ...props
-}: PreviewProps) {
+}: TPreviewProps) {
   const isIconSize = size?.startsWith("icon")
   const content = isIconSize ? <BookOpen aria-hidden /> : children
 

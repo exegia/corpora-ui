@@ -1,7 +1,7 @@
-import type { LabelProps } from "./types"
+import type { TLabelProps } from "./types"
 import { cn } from "@/lib/utils"
 import { twLabelClasses } from "./utils"
-export function Label({ children, level = "title", className }: LabelProps) {
+export function Label({ children, level = "title", className }: TLabelProps) {
   return (
     <div
       className={cn(

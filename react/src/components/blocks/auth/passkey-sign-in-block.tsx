@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AuthError, Reveal } from "./auth-shell";
 
-export interface PasskeySignInBlockProps {
+export interface IPasskeySignInBlockProps {
   /**
    * Whether this device can use passkeys. `false` renders nothing at all —
    * a passkey button that is guaranteed to fail is worse than no button.
@@ -37,7 +37,7 @@ export function PasskeySignInBlock({
   onSignIn,
   fallbackHint = "You can still sign in with your other methods below.",
   className,
-}: PasskeySignInBlockProps) {
+}: IPasskeySignInBlockProps) {
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
 

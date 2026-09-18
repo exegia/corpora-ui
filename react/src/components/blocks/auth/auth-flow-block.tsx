@@ -3,33 +3,33 @@
 import * as React from "react"
 import { MotionConfig } from "motion/react"
 
-import type { SocialProvider } from "@/components/composed/social-providers"
-import type { AuthAccent } from "@/lib/auth-accent"
+import type { TSocialProvider } from "@/components/composed/social-providers"
+import type { TAuthAccent } from "@/lib/auth-accent"
 import { cn } from "@/lib/utils"
 import { AuthCard, AuthSuccess, MorphStep } from "./auth-shell"
-import { CodeAuthBlock, type CodeAuthBlockProps } from "./code-auth-block"
+import { CodeAuthBlock, type ICodeAuthBlockProps } from "./code-auth-block"
 import {
   ForgotPasswordBlock,
-  type ForgotPasswordBlockProps,
+  type IForgotPasswordBlockProps,
 } from "./forgot-password-block"
-import { LoginBlock, type LoginBlockProps } from "./login-block"
+import { LoginBlock, type ILoginBlockProps } from "./login-block"
 import {
   OnboardingBlock,
-  type OnboardingBlockProps,
-  type OnboardingStepConfig,
-  type OnboardingValue,
+  type IOnboardingBlockProps,
+  type IOnboardingStepConfig,
+  type TOnboardingValue,
 } from "./onboarding-block"
-import { SignupBlock, type SignupBlockProps } from "./signup-block"
+import { SignupBlock, type ISignupBlockProps } from "./signup-block"
 import {
   UpdatePasswordBlock,
-  type UpdatePasswordBlockProps,
+  type IUpdatePasswordBlockProps,
 } from "./update-password-block"
 import type {
-  AuthFlowId,
-  AuthFlowState,
-  AuthFlowStep,
-  AuthUser,
-  BeginAuthVerificationOptions,
+  TAuthFlowId,
+  IAuthFlowState,
+  TAuthFlowStep,
+  IAuthUser,
+  IBeginAuthVerificationOptions,
 } from "./auth-state-type"
 import { useAuthFlow, useAuthFlowActions } from "./use-auth-state"
 
@@ -48,69 +48,69 @@ import { useAuthFlow, useAuthFlowActions } from "./use-auth-state"
  * which owns its transient error/shake state (see `react/CLAUDE.md`,
  * "Third implementation: auth").
  */
-export type AuthFlowDirective =
-  | { user: AuthUser }
-  | { verify: BeginAuthVerificationOptions }
-  | { step: AuthFlowStep }
+export type TAuthFlowDirective =
+  | { user: IAuthUser }
+  | { verify: IBeginAuthVerificationOptions }
+  | { step: TAuthFlowStep }
   | void
 
-export type AuthFlowHandler<Data = void> = (
+export type TAuthFlowHandler<Data = void> = (
   data: Data
-) => Promise<AuthFlowDirective> | AuthFlowDirective
+) => Promise<TAuthFlowDirective> | TAuthFlowDirective
 
 /** Per-step prop overrides, merged over the orchestrator's wiring — spread
  * last, so an app can restyle a block or unhook a default navigation link
  * (`{ login: { onSignup: undefined } }` removes the sign-up hand-off). */
-export interface AuthFlowStepOverrides {
-  login?: Partial<LoginBlockProps>
-  signup?: Partial<SignupBlockProps>
-  "verify-code"?: Partial<CodeAuthBlockProps>
-  "forgot-password"?: Partial<ForgotPasswordBlockProps>
-  "update-password"?: Partial<UpdatePasswordBlockProps>
-  onboarding?: Partial<OnboardingBlockProps>
+export interface IAuthFlowStepOverrides {
+  login?: Partial<ILoginBlockProps>
+  signup?: Partial<ISignupBlockProps>
+  "verify-code"?: Partial<ICodeAuthBlockProps>
+  "forgot-password"?: Partial<IForgotPasswordBlockProps>
+  "update-password"?: Partial<IUpdatePasswordBlockProps>
+  onboarding?: Partial<IOnboardingBlockProps>
 }
 
-export interface AuthFlowBlockProps {
+export interface IAuthFlowBlockProps {
   /** Which flow instance to orchestrate. The default flow unless a re-auth
    * modal or a second surface needs its own. */
-  flowId?: AuthFlowId
+  flowId?: TAuthFlowId
   /** Brand mark handed to every step's card. */
   logo?: React.ReactNode
   /** Brand accent handed to every step's card. */
-  accent?: AuthAccent
+  accent?: TAuthAccent
   /** Social providers offered on the login and signup steps. */
-  providers?: SocialProvider[]
+  providers?: TSocialProvider[]
   /** The login attempt. Resolve with a directive; reject to show the error
    * in the block. */
-  onLogin?: AuthFlowHandler<{
+  onLogin?: TAuthFlowHandler<{
     email: string
     password: string
     remember: boolean
   }>
   /** The signup attempt. */
-  onSignup?: AuthFlowHandler<{ name: string; email: string; password: string }>
+  onSignup?: TAuthFlowHandler<{ name: string; email: string; password: string }>
   /** A social provider chosen on the login or signup step. */
-  onProviderSelect?: AuthFlowHandler<SocialProvider>
+  onProviderSelect?: TAuthFlowHandler<TSocialProvider>
   /** The forgot-password request. Resolving without a directive stays on the
    * step (the block shows its own "link sent" state). */
-  onRequestReset?: AuthFlowHandler<{ email: string }>
+  onRequestReset?: TAuthFlowHandler<{ email: string }>
   /** The code entered on the verification step. */
-  onVerifyCode?: AuthFlowHandler<string>
+  onVerifyCode?: TAuthFlowHandler<string>
   /** "Resend code" on the verification step. */
-  onResendCode?: AuthFlowHandler
+  onResendCode?: TAuthFlowHandler
   /** The update-password submit. */
-  onUpdatePassword?: AuthFlowHandler<{ password: string }>
+  onUpdatePassword?: TAuthFlowHandler<{ password: string }>
   /** Onboarding finished, with the merged profile. */
-  onOnboardingComplete?: AuthFlowHandler<Record<string, OnboardingValue>>
+  onOnboardingComplete?: TAuthFlowHandler<Record<string, TOnboardingValue>>
   /** Declared onboarding steps, handed to `OnboardingBlock`. */
-  onboardingSteps?: OnboardingStepConfig[]
+  onboardingSteps?: IOnboardingStepConfig[]
   /** Per-step prop overrides, merged over the orchestrator's wiring. */
-  steps?: AuthFlowStepOverrides
+  steps?: IAuthFlowStepOverrides
   /** Replace any step's UI entirely; return `undefined` to keep the default
    * for that step. Receives the flow state for destination copy etc. */
   renderStep?: (
-    step: AuthFlowStep,
-    flow: AuthFlowState
+    step: TAuthFlowStep,
+    flow: IAuthFlowState
   ) => React.ReactNode | undefined
   /** Replaces the whole default success card. */
   success?: React.ReactNode
@@ -127,7 +127,7 @@ export interface AuthFlowBlockProps {
  * `useAuthFlow`. Navigation links between steps (login ↔ signup, forgot
  * password, back from verification) are pre-wired to `goToStep`; each
  * submit-shaped prop awaits your handler and applies the returned
- * {@link AuthFlowDirective}.
+ * {@link TAuthFlowDirective}.
  *
  * The blocks themselves stay untouched: passwords, codes and field drafts
  * live in their local state, and a rejected handler renders as the block's
@@ -164,12 +164,12 @@ export function AuthFlowBlock({
   successTitle = "Welcome",
   successDescription,
   className,
-}: AuthFlowBlockProps): React.ReactElement {
+}: IAuthFlowBlockProps): React.ReactElement {
   const flow = useAuthFlow(flowId)
   const { goToStep, beginVerification, complete } = useAuthFlowActions(flowId)
 
   const apply = React.useCallback(
-    (directive: AuthFlowDirective) => {
+    (directive: TAuthFlowDirective) => {
       if (!directive) return
       if ("user" in directive) complete(directive.user)
       else if ("verify" in directive) beginVerification(directive.verify)
@@ -181,7 +181,7 @@ export function AuthFlowBlock({
   /** Wrap a handler so its directive lands in the store. Errors propagate —
    * the block owns the error rendering. Absent handlers stay absent, so a
    * block keeps its "no handler" affordances (hidden buttons etc.). */
-  function run<Data>(handler: AuthFlowHandler<Data> | undefined) {
+  function run<Data>(handler: TAuthFlowHandler<Data> | undefined) {
     if (!handler) return undefined
     return async (data: Data) => {
       apply(await handler(data))

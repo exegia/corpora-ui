@@ -3,17 +3,17 @@
 import { Tabs as TabsPrimitive } from "@base-ui/react/tabs"
 import * as React from "react"
 import {
-  type SegmentedControlSize,
+  type TSegmentedControlSize,
   segmentedControlItemLayoutClassName,
   segmentedControlItemSizeClassNames,
 } from "@/lib/segmented-control"
 import { cn } from "@/lib/utils"
 
-type TabsVariant = "default" | "underline"
-type TabsSize = SegmentedControlSize
+type TTabsVariant = "default" | "underline"
+type TTabsSize = TSegmentedControlSize
 
-const TabsListContext: React.Context<TabsSize> =
-  React.createContext<TabsSize>("default")
+const TabsListContext: React.Context<TTabsSize> =
+  React.createContext<TTabsSize>("default")
 
 export function Tabs({
   className,
@@ -38,8 +38,8 @@ export function TabsList({
   children,
   ...props
 }: TabsPrimitive.List.Props & {
-  size?: TabsSize
-  variant?: TabsVariant
+  size?: TTabsSize
+  variant?: TTabsVariant
 }): React.ReactElement {
   return (
     <TabsPrimitive.List
@@ -77,10 +77,10 @@ export function TabsTab({
   size,
   ...props
 }: TabsPrimitive.Tab.Props & {
-  size?: TabsSize
+  size?: TTabsSize
 }): React.ReactElement {
-  const contextSize: TabsSize = React.useContext(TabsListContext)
-  const resolvedSize: TabsSize = size ?? contextSize
+  const contextSize: TTabsSize = React.useContext(TabsListContext)
+  const resolvedSize: TTabsSize = size ?? contextSize
 
   return (
     <TabsPrimitive.Tab
@@ -115,6 +115,6 @@ export {
   TabsPrimitive,
   TabsTab as TabsTrigger,
   TabsPanel as TabsContent,
-  type TabsSize,
-  type TabsVariant,
+  type TTabsSize,
+  type TTabsVariant,
 }

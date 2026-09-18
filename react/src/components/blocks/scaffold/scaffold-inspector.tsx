@@ -12,7 +12,7 @@ import {
   toggleScaffoldInspectorAtom,
 } from "./scaffold-atom"
 import { useScaffoldContext } from "./scaffold-context"
-import type { ScaffoldInspectorProps } from "./type"
+import type { IScaffoldInspectorProps } from "./type"
 import { GlassContainer } from "@/components/ui/glasscn/glass-container.tsx"
 import { Button } from "@/components/ui/button"
 import { LucideX } from "lucide-react"
@@ -28,7 +28,7 @@ export function ScaffoldInspector({
   name = "Inspector",
   className,
   ...rest
-}: ScaffoldInspectorProps): React.ReactElement {
+}: IScaffoldInspectorProps): React.ReactElement {
   const { scaffoldId, inspectorWidth } = useScaffoldContext()
   const inspectorOpen = useAtomValue(scaffoldInspectorOpenAtom(scaffoldId))
   const toggleInspector = useSetAtom(toggleScaffoldInspectorAtom(scaffoldId))

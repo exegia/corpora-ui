@@ -1,24 +1,24 @@
 import { PAD_Y, PILL_OFFSET, ROW_GAP } from "./constant";
-import type { StepNode } from "./types";
+import type { TStepNode } from "./types";
 
-export type Offsets = Record<string, { dx: number; dy: number }>;
-export type Heights = Record<string, number>;
+export type TOffsets = Record<string, { dx: number; dy: number }>;
+export type THeights = Record<string, number>;
 
 /** Everything `place`/`bezier` need to position a node, resolved once per render. */
-export type Layout = {
+export type TLayout = {
   width: number;
-  offsets: Offsets;
+  offsets: TOffsets;
   rows: number[];
   rowY: number[];
-  heights: Heights;
+  heights: THeights;
 };
 
 /** Distinct row indices, ascending. */
-export const rows = (steps: StepNode[]) =>
+export const rows = (steps: TStepNode[]) =>
   [...new Set(steps.map((n) => n.row))].sort((a, b) => a - b);
 
 /** Height of each row = tallest node in it. */
-export const rowH = (steps: StepNode[], heights: Heights) =>
+export const rowH = (steps: TStepNode[], heights: THeights) =>
   rows(steps).map((r) =>
     Math.max(...steps.filter((n) => n.row === r).map((n) => heights[n.id] ?? 90)),
   );
@@ -35,7 +35,7 @@ export const mix = (hue: string, pct: number, base = "var(--surface)") =>
 
 export const cw = (width: number) => width || 480;
 
-export const place = (n: StepNode, { width, offsets, rows, rowY }: Layout) => {
+export const place = (n: TStepNode, { width, offsets, rows, rowY }: TLayout) => {
   const w = Math.min(n.w, cw(width) * 0.92);
   const off = offsets[n.id];
   return {
@@ -46,7 +46,7 @@ export const place = (n: StepNode, { width, offsets, rows, rowY }: Layout) => {
 };
 
 /** Card anchor points (pills sit above the card, so offset the top). */
-export const anchors = (n: StepNode, layout: Layout) => {
+export const anchors = (n: TStepNode, layout: TLayout) => {
   const { cx, top } = place(n, layout);
   return {
     top: { x: cx, y: top + (n.kind ? PILL_OFFSET : 0) },
@@ -54,25 +54,25 @@ export const anchors = (n: StepNode, layout: Layout) => {
   };
 };
 
-export type Point = { x: number; y: number };
+export type TPoint = { x: number; y: number };
 
 /** Vertical S-curve between two points. */
-export const curve = (from: Point, to: Point) => {
+export const curve = (from: TPoint, to: TPoint) => {
   const k = Math.min(Math.max(Math.abs(to.y - from.y) * 0.55, 24), 84);
   return `M ${from.x} ${from.y} C ${from.x} ${from.y + k}, ${to.x} ${to.y - k}, ${to.x} ${to.y}`;
 };
 
 /** Cubic bezier midpoint, where the connector toolbar sits. */
-export const midpoint = (from: Point, to: Point): Point => ({ x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 });
+export const midpoint = (from: TPoint, to: TPoint): TPoint => ({ x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 });
 
-export const edgePoints = (edge: { from: string; to: string }, steps: StepNode[], layout: Layout) => {
+export const edgePoints = (edge: { from: string; to: string }, steps: TStepNode[], layout: TLayout) => {
   const a = steps.find((n) => n.id === edge.from);
   const b = steps.find((n) => n.id === edge.to);
   if (!a || !b) return null;
   return { from: anchors(a, layout).bottom, to: anchors(b, layout).top };
 };
 
-export const bezier = (edge: { from: string; to: string }, steps: StepNode[], layout: Layout) => {
+export const bezier = (edge: { from: string; to: string }, steps: TStepNode[], layout: TLayout) => {
   const pts = edgePoints(edge, steps, layout);
   return pts ? curve(pts.from, pts.to) : "";
 };

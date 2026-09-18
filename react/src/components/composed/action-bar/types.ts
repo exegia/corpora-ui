@@ -1,20 +1,20 @@
-import type { ButtonProps } from "@/components/ui/button";
-import type { PopoverGlassProps } from "@/components/ui/popover-glass";
+import type { TButtonProps } from "@/components/ui/button";
+import type { TPopoverGlassProps } from "@/components/ui/popover-glass";
 import type { ToolbarSeparatorProps } from "@base-ui/react";
 import type { Emoji } from "frimousse";
 import type { LucideIcon } from "lucide-react";
 import type { FunctionComponent } from "react";
 
 
-export interface ActionButtonProps<T extends string> extends Omit<ButtonProps, "variant" | "glassVariant" | "size"> {
+export interface IActionButtonProps<T extends string> extends Omit<TButtonProps, "variant" | "glassVariant" | "size"> {
   action: () => void;
   tooltip?: string;
   Icon: LucideIcon | Emoji;
   id: T;
 }
 
-type ActionBarItemType = "action" | "separator";
-export type ActionKey<T extends string = string, Type extends ActionBarItemType = "action"> = `${Type}-${T}`;
+type TActionBarItemType = "action" | "separator";
+export type TActionKey<T extends string = string, Type extends TActionBarItemType = "action"> = `${Type}-${T}`;
 
 /**
  * Insertion order is the contract: the bar groups positionally, so the order
@@ -22,33 +22,33 @@ export type ActionKey<T extends string = string, Type extends ActionBarItemType 
  * is a non-numeric `${type}-${name}` string, which `Object.entries` preserves
  * — but a map built by spreading or `Object.fromEntries` must keep that order.
  */
-export type ActionMap<T extends ActionKey> = Record<T, FunctionComponent<ActionButtonProps<T> | ToolbarSeparatorProps>>;
+export type TActionMap<T extends TActionKey> = Record<T, FunctionComponent<IActionButtonProps<T> | ToolbarSeparatorProps>>;
 
-export type ActionEntry = readonly [
+export type TActionEntry = readonly [
   key: string,
-  Item: FunctionComponent<ActionButtonProps<string> | ToolbarSeparatorProps>,
+  Item: FunctionComponent<IActionButtonProps<string> | ToolbarSeparatorProps>,
 ];
 
 /** Actions between two separators, rendered inside one `ToolbarGroup`. */
-export type ActionItemsByGroup = Record<string, ActionEntry[]>;
+export type TActionItemsByGroup = Record<string, TActionEntry[]>;
 
 /**
  * The bar as an ordered, render-ready list. A "group" is a run of consecutive
  * actions; a "separator" is whatever component the map supplied for that key.
  * Empty groups (leading, trailing or back-to-back separators) are dropped.
  */
-export type ActionBarSegment =
-  | { type: "group"; key: string; items: ActionEntry[] }
+export type TActionBarSegment =
+  | { type: "group"; key: string; items: TActionEntry[] }
   | { type: "separator"; key: string; Separator: FunctionComponent<ToolbarSeparatorProps> };
 
-export interface ActionBarProps extends Omit<PopoverGlassProps, "variant" | "children"> {
+export interface IActionBarProps extends Omit<TPopoverGlassProps, "variant" | "children"> {
   id: string;
   variant: "default" | "ghost" | "glass";
-  actions: ActionMap<ActionKey>;
+  actions: TActionMap<TActionKey>;
 }
 
 
-export interface EmojiActionBarProps {
+export interface IEmojiActionBarProps {
   /** Fires for both a quick reaction and a pick from the full picker. */
   onEmojiSelect?: (emoji: Emoji) => void
   /** Quick row contents. Defaults to {@link QUICK_REACTIONS}. */

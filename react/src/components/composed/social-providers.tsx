@@ -10,7 +10,7 @@ import type * as React from "react"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import type { SocialProvider } from "./types"
+import type { TSocialProvider } from "./types"
 
 
 /** Google's four-color "G" — the only provider whose mark isn't monochrome. */
@@ -43,7 +43,7 @@ function GoogleColorIcon(props: React.SVGProps<SVGSVGElement>) {
  * `brandClassName` render it in the provider's own colors.
  */
 export const SOCIAL_PROVIDERS: Record<
-  SocialProvider,
+  TSocialProvider,
   {
     label: string
     Icon: React.ComponentType<{ className?: string }>
@@ -83,16 +83,16 @@ const ACTION_LABELS = {
   continue: "Continue with",
 } as const
 
-export interface SocialProvidersProps {
-  providers?: SocialProvider[]
+export interface ISocialProvidersProps {
+  providers?: TSocialProvider[]
   /** Verb used in the stacked layout labels. */
   action?: keyof typeof ACTION_LABELS
   /** "stack" = full-width labeled buttons; "row" = icon-only buttons. */
   layout?: "stack" | "row"
   /** Shows the matching button in its loading state and disables the rest. */
-  loadingProvider?: SocialProvider | null
+  loadingProvider?: TSocialProvider | null
   disabled?: boolean
-  onSelect?: (provider: SocialProvider) => void
+  onSelect?: (provider: TSocialProvider) => void
   className?: string
 }
 
@@ -105,7 +105,7 @@ export function SocialProviders({
   disabled = false,
   onSelect,
   className,
-}: SocialProvidersProps) {
+}: ISocialProvidersProps) {
   const row = layout === "row"
 
   return (

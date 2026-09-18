@@ -5,9 +5,9 @@ import { defineStory } from "@/registry/story"
 import { MenuCommand } from "@/components/ui/menu-command"
 import { Button } from "@/components/ui/button"
 
-type PreviewProps = Pick<ComponentProps<typeof MenuCommand>, "side" | "align">
+type TPreviewProps = Pick<ComponentProps<typeof MenuCommand>, "side" | "align">
 
-function MenuCommandPreview(props: PreviewProps) {
+function MenuCommandPreview(props: TPreviewProps) {
   return (
     <div className="p-6">
       <div className="">

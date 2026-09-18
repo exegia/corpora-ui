@@ -1,14 +1,14 @@
 import { Avatar } from "@/components/atoms"
 import { Badge } from "@/components/ui/badge"
-import type { UserInfoProps } from "./types"
+import type { TUserInfoProps } from "./types"
 import { cn } from "@/lib/utils"
 
 /**
  * This component displays a user's information in a compact format.
  * that can be used to display a user's name and role,
  * in the chat bubble header or sidebar profile.
- * @param {UserInfoProps['user']} user - The user to display.
- * @param {UserInfoProps['description']} description - The description to display.
+ * @param {TUserInfoProps['user']} user - The user to display.
+ * @param {TUserInfoProps['description']} description - The description to display.
  *
  * @description Displays a user's name and role in a compact format.
  *
@@ -19,7 +19,7 @@ export function Info({
   direction = "sender",
   audio,
   size,
-}: UserInfoProps) {
+}: TUserInfoProps) {
   return (
     <div
       slot="info"

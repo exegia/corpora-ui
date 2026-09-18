@@ -7,7 +7,7 @@ import {
   CommandMenu,
   Composer,
   SuggestedPrompts,
-  type ComposerSuggestionsProps,
+  type IComposerSuggestionsProps,
 } from "../composer"
 import { SuggestedPrompt } from "@/components/composed/ai/suggested-prompt"
 
@@ -43,7 +43,7 @@ describe("Composer", () => {
   test("folds the suggested prompts behind the disclosure and routes a pick", async () => {
     const user = userEvent.setup()
     const onSelect = mock(() => {})
-    const Suggestions = (props: ComposerSuggestionsProps) => (
+    const Suggestions = (props: IComposerSuggestionsProps) => (
       <SuggestedPrompts onOpenChange={props.onOpenChange} open={props.open}>
         <SuggestedPrompt onSelect={onSelect}>Check ¶12</SuggestedPrompt>
       </SuggestedPrompts>

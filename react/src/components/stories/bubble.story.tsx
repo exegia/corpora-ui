@@ -4,9 +4,9 @@ import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
 import { Bubble } from "@/components/atoms/bubble"
 
-type PreviewProps = Pick<ComponentProps<typeof Bubble>, "variant" | "continued">
+type TPreviewProps = Pick<ComponentProps<typeof Bubble>, "variant" | "continued">
 
-function BubblePreview(props: PreviewProps) {
+function BubblePreview(props: TPreviewProps) {
   return (
     <div className="p-6">
       <div className="max-w-lg">

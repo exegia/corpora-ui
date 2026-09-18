@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/accordion"
 import { cn } from "@/lib/utils"
 
-export type RecommendationGroupProps = AccordionPrimitive.Root.Props
+export type TRecommendationGroupProps = AccordionPrimitive.Root.Props
 
 /** Rows enter staggered 80ms apart; each Item picks up `row` from `ROW_VARIANTS`. */
 const GROUP_VARIANTS = {
@@ -24,7 +24,7 @@ export function Group({
   className,
   multiple = true,
   ...props
-}: RecommendationGroupProps): React.ReactElement {
+}: TRecommendationGroupProps): React.ReactElement {
   return (
     <Accordion
       className={cn("flex w-full flex-col gap-2 max-w-11/12", className)}

@@ -4,11 +4,11 @@ import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
 import { Card, CardHeader, CardPanel, CardTitle } from "@/components/ui/card"
 
-type PreviewProps = Pick<ComponentProps<typeof Card>, "className"> & {
+type TPreviewProps = Pick<ComponentProps<typeof Card>, "className"> & {
   children: string
 }
 
-function CardPreview({ children, ...props }: PreviewProps) {
+function CardPreview({ children, ...props }: TPreviewProps) {
   return (
     <div className="p-6">
       <div className="max-w-sm">

@@ -4,10 +4,10 @@ import userEvent from "@testing-library/user-event";
 
 import {
   PasskeyManagerBlock,
-  type PasskeyRecord,
+  type IPasskeyRecord,
 } from "../passkey-manager-block";
 
-const PASSKEYS: PasskeyRecord[] = [
+const PASSKEYS: IPasskeyRecord[] = [
   { id: "pk-1", name: "MacBook", createdAt: "2026-01-05T00:00:00.000Z" },
   { id: "pk-2", name: "iPhone", lastUsedAt: "2026-02-01T00:00:00.000Z" },
 ];

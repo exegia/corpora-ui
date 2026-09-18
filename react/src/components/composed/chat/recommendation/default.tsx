@@ -4,7 +4,7 @@ import { useId } from "react"
 import type * as React from "react"
 import { Group } from "./group"
 import { Item } from "./item"
-import type { RecommendationCardProps } from "./types"
+import type { IRecommendationCardProps } from "./types"
 
 /**
  * One-card convenience: a Group with a single Item, so existing
@@ -14,7 +14,7 @@ export function RecommendationCard({
   value,
   defaultOpen = true,
   ...props
-}: RecommendationCardProps): React.ReactElement {
+}: IRecommendationCardProps): React.ReactElement {
   const autoId = useId()
   const itemValue = value ?? autoId
   return (

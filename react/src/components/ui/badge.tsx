@@ -72,7 +72,7 @@ const badgeVariants = cva(
   }
 )
 
-interface BadgeProps extends useRender.ComponentProps<"span"> {
+interface IBadgeProps extends useRender.ComponentProps<"span"> {
   variant?: VariantProps<typeof badgeVariants>["variant"]
   size?: VariantProps<typeof badgeVariants>["size"]
   radius?: VariantProps<typeof badgeVariants>["radius"]
@@ -85,7 +85,7 @@ function Badge({
   radius,
   render,
   ...props
-}: BadgeProps) {
+}: IBadgeProps) {
   const defaultProps = {
     "data-slot": "badge",
     className: cn(badgeVariants({ variant, size, radius, className })),
@@ -98,4 +98,4 @@ function Badge({
   })
 }
 
-export { Badge, badgeVariants, type BadgeProps }
+export { Badge, badgeVariants, type IBadgeProps }

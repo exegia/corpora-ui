@@ -1,8 +1,8 @@
 import { Unlink } from "lucide-react"
 import { IconButton } from "@/components/ui/chat"
 import { cn } from "@/lib/utils"
-import type { Edge } from "./types"
-import type { Point } from "./utils"
+import type { TEdge } from "./types"
+import type { TPoint } from "./utils"
 
 const WIDTHS = [1.25, 2, 3]
 const COLORS = ["var(--line-strong)", "var(--tag-purple-text)", "var(--tag-amber-text)", "var(--tag-blue-text)", "var(--tag-green-text)"]
@@ -14,9 +14,9 @@ export function EdgeToolbar({
   onChange,
   onRemove,
 }: {
-  edge: Edge
-  at: Point
-  onChange?: (id: string, patch: Pick<Edge, "strokeWidth" | "color">) => void
+  edge: TEdge
+  at: TPoint
+  onChange?: (id: string, patch: Pick<TEdge, "strokeWidth" | "color">) => void
   onRemove?: (id: string) => void
 }) {
   const width = edge.strokeWidth ?? 1.25

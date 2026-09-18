@@ -1,7 +1,7 @@
-import type { SidebarResource } from "./type.ts"
+import type { ISidebarResource } from "./type.ts"
 import { Bookmark, FileText, Folder, FolderOpen } from "lucide-react"
 
-export function SidebarIcon(item: SidebarResource, expanded: boolean) {
+export function SidebarIcon(item: ISidebarResource, expanded: boolean) {
   const Icon =
     item.kind === "folder" || item.kind === "project"
       ? expanded

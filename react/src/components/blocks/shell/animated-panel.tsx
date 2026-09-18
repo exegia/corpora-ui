@@ -11,7 +11,7 @@ import {
 } from "react"
 import { EASE_OUT } from "@/lib/ease.ts"
 import { cn } from "@/lib/utils"
-import type { AnimatedSidebarProps } from "./type"
+import type { IAnimatedSidebarProps } from "./type"
 import {
   AnimatedSidebarPanelContext,
   expandedWidthVar,
@@ -36,7 +36,7 @@ export function AnimatedPanel({
   style,
   ref,
   ...props
-}: AnimatedSidebarProps) {
+}: IAnimatedSidebarProps) {
   const context = useAnimatedSidebar()
   const { bounds, panelWidth, resetPanelWidth, resizePanel } = context.fit
   const sideOpen = context.open[side]

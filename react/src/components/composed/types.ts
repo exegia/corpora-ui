@@ -1,4 +1,4 @@
-export type SocialProvider = "google" | "apple" | "github" | "x"
+export type TSocialProvider = "google" | "apple" | "github" | "x"
 
 
 export type * from "./action-bar/types"

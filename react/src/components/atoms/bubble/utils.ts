@@ -1,14 +1,14 @@
 import type { ClassValue } from "clsx"
-import type { BubbleReaction, BubbleVariant } from "./types"
+import type { IBubbleReaction, TBubbleVariant } from "./types"
 import { cn } from "@/lib/utils"
 
 /** Returns a stable key for a reaction, falling back to the emoji label if no ID is provided. */
-export function reactionKey(reaction: BubbleReaction, index: number): string {
+export function reactionKey(reaction: IBubbleReaction, index: number): string {
   return reaction.id ?? `${reaction.label ?? String(reaction.emoji)}-${index}`
 }
 
 /** Root alignment: outgoing hugs the right edge, everything else the left. */
-export const twBubbleAlignClasses: Record<BubbleVariant, ClassValue> = {
+export const twBubbleAlignClasses: Record<TBubbleVariant, ClassValue> = {
   sender: "items-end",
   recipient: "items-start",
   ai: "items-start",
@@ -19,7 +19,7 @@ export const twBubbleAlignClasses: Record<BubbleVariant, ClassValue> = {
  * and action row all align to the bubble's own edges rather than the
  * thread's. Generated output stays full-bleed.
  */
-export const twBubbleColumnClasses: Record<BubbleVariant, ClassValue> = {
+export const twBubbleColumnClasses: Record<TBubbleVariant, ClassValue> = {
   sender: "items-end max-w-[80%] min-w-0 mr-4",
   recipient: "items-start max-w-[80%] min-w-0 ml-4",
   ai: "w-full items-stretch min-w-0",
@@ -36,7 +36,7 @@ export const twBubbleColumnClasses: Record<BubbleVariant, ClassValue> = {
  */
 
 const defaultClasses = "w-fit  rounded-full text-xs leading-4 font-medium relative"
-export const twBubbleMessageClasses: Record<BubbleVariant, ClassValue> = {
+export const twBubbleMessageClasses: Record<TBubbleVariant, ClassValue> = {
   sender: cn(defaultClasses,
     "inset-shadow-lit inset-shadow-dim inset-shadow-dim-b-1 inset-shadow-dim-r inset-shadow-lit-l-1 inset-shadow-lit-t-1 inset-shadow-blur-1 rounded-br-[8px] group-has-[+[data-continued]]/bubble:rounded-br-full has-[[data-slot=attachment]]:rounded-b-md has-[[data-slot=attachment]]:rounded-t-md bg-indigo-700 dark:bg-neutral-100 text-background chat-bubble bubble-sender text-left pl-6 pr-4 py-3"),
   recipient: cn(defaultClasses,

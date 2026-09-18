@@ -1,25 +1,25 @@
 import type * as React from "react"
 
-import type { MenuCommandItem } from "@/components/ui/menu-command"
-import type { AttachmentProps } from "./attachment"
+import type { IMenuCommandItem } from "@/components/ui/menu-command"
+import type { TAttachmentProps } from "./attachment"
 import type { HTMLMotionProps } from "motion/react"
-import type { AtomSize } from "@/components/atoms/types"
+import type { TAtomSize } from "@/components/atoms/types"
 
-export type ComposerMode = "answer" | "fix" | "ask"
+export type TComposerMode = "answer" | "fix" | "ask"
 
 /** A tray chip: any Attachment kind plus a stable id. */
-export type ComposerAttachment = Omit<
-  AttachmentProps,
+export type TComposerAttachment = Omit<
+  TAttachmentProps,
   "variant" | "onRemove" | "removable"
 > & { id: string }
 
 export interface IComposerMenuProps {
-  items?: MenuCommandItem[]
-  onCommand?: (item: MenuCommandItem) => void
+  items?: IMenuCommandItem[]
+  onCommand?: (item: IMenuCommandItem) => void
   onAttach?: () => void
 }
 
-export interface ComposerSuggestionsProps {
+export interface IComposerSuggestionsProps {
   prompts?: React.ReactNode
   label?: (count: number) => React.ReactNode
   defaultOpen?: boolean
@@ -37,16 +37,16 @@ export interface IComposerSubmitButtonProps<
   isExpanded: E
 }
 
-export interface ComposerModeProps {
-  mode: ComposerMode
-  onModeChange?: (mode: ComposerMode) => void
+export interface IComposerModeProps {
+  mode: TComposerMode
+  onModeChange?: (mode: TComposerMode) => void
 }
 
-export interface ComposerBaseProps<
+export interface IComposerBaseProps<
   S extends boolean = boolean,
   E extends boolean = boolean,
-  M extends ComposerMode = ComposerMode,
-  A extends ComposerAttachment = ComposerAttachment,
+  M extends TComposerMode = TComposerMode,
+  A extends TComposerAttachment = TComposerAttachment,
 > {
   value?: string
   onValueChange?: (value: string) => void
@@ -67,18 +67,18 @@ export interface ComposerBaseProps<
 }
 
 export interface IComposerProps<
-  IMode extends ComposerModeProps = ComposerModeProps,
+  IMode extends IComposerModeProps = IComposerModeProps,
   S extends boolean = boolean,
   E extends boolean = boolean,
-> extends ComposerBaseProps<S, E> {
+> extends IComposerBaseProps<S, E> {
   /** Replaces the default `SendButton`. Receives the streaming/expanded state. */
   SubmitButton?: React.FC<IComposerSubmitButtonProps<S, E>>
   ModeComponent?: React.FC<IMode>
-  Suggestions?: React.FC<ComposerSuggestionsProps>
+  Suggestions?: React.FC<IComposerSuggestionsProps>
   ComposerMenu?: React.FC<IComposerMenuProps>
 }
 
-export interface SuggestedPromptsProps extends Omit<
+export interface ISuggestedPromptsProps extends Omit<
   HTMLMotionProps<"div">,
   "children"
 > {
@@ -95,7 +95,7 @@ export interface SuggestedPromptsProps extends Omit<
 
 export type TBubbleActionPayload =
   string | number | Record<string, unknown> | undefined
-export type TBubbleActionSize = Extract<AtomSize, "sm" | "default" | "lg">
+export type TBubbleActionSize = Extract<TAtomSize, "sm" | "default" | "lg">
 export type TBubbleActionKey =
   "copy" | "edit" | "delete" | "share" | "retry" | "more" | "download"
 export interface IBubbleActionBaseProps<
@@ -110,7 +110,7 @@ export interface IBubbleActionBaseProps<
   size?: S
 }
 
-export type IBubbleActionProps<
+export type TIBubbleActionProps<
   K extends TBubbleActionKey = TBubbleActionKey,
   S extends TBubbleActionSize = TBubbleActionSize,
   P extends TBubbleActionPayload = TBubbleActionPayload,
@@ -122,5 +122,5 @@ export interface IBubbleActionsProps<
 > {
   size?: S
   onClick?: (key: K, payload: P) => void
-  actions: { [key in K]?: IBubbleActionProps<K, S, P> }
+  actions: { [key in K]?: TIBubbleActionProps<K, S, P> }
 }

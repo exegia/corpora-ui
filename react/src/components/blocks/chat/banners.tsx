@@ -4,12 +4,12 @@ import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertAction, AlertDescription } from "@/components/ui/alert"
-import type { DegradedBannerProps, LockedBannerProps, PinnedThreadBannerProps } from "./types"
+import type { IDegradedBannerProps, ILockedBannerProps, IPinnedThreadBannerProps } from "./types"
 
 export function LockedBanner({
   children = "This published corpus is locked. Ask questions here, or continue in a working draft to make changes.",
   className,
-}: LockedBannerProps): React.ReactElement {
+}: ILockedBannerProps): React.ReactElement {
   return (
     <Alert className={cn("rounded-sm text-xs", className)} role="status">
       <AlertDescription className="text-xs">
@@ -24,7 +24,7 @@ export function LockedBanner({
 
 export function PinnedThreadBanner({
   className,
-}: PinnedThreadBannerProps): React.ReactElement {
+}: IPinnedThreadBannerProps): React.ReactElement {
   return (
     <Alert className={cn("rounded-sm", className)} role="status">
       <AlertDescription className="text-xs">
@@ -40,7 +40,7 @@ export function DegradedBanner({
   reason = "The model is unavailable right now.",
   onRetry,
   className,
-}: DegradedBannerProps): React.ReactElement {
+}: IDegradedBannerProps): React.ReactElement {
   return (
     <Alert className={cn("rounded-sm", className)} variant="warning">
       <AlertDescription className="text-xs">{reason}</AlertDescription>

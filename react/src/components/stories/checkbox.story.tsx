@@ -4,12 +4,12 @@ import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
 import { Checkbox } from "@/components/ui/checkbox"
 
-type PreviewProps = Pick<
+type TPreviewProps = Pick<
   ComponentProps<typeof Checkbox>,
   "indeterminate" | "disabled" | "sound"
 >
 
-function CheckboxPreview(props: PreviewProps) {
+function CheckboxPreview(props: TPreviewProps) {
   return (
     <div className="p-6">
       <div className="">

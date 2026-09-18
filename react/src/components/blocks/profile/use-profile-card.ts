@@ -15,35 +15,35 @@ import {
   setProfileCardMenuOpenAtom,
 } from "./profile-card-atom"
 import type {
-  ProfileCardAction,
-  ProfileCardConfig,
-  ProfileCardHandlers,
-  ProfileCardInstanceId,
-  ProfileCardVariant,
+  IProfileCardAction,
+  IProfileCardConfig,
+  IProfileCardHandlers,
+  TProfileCardInstanceId,
+  TProfileCardVariant,
 } from "./type"
 
-export interface UseProfileCardOptions {
-  profileCardId?: ProfileCardInstanceId
+export interface IUseProfileCardOptions {
+  profileCardId?: TProfileCardInstanceId
   /** Controlled fold. `undefined` leaves the store (and `defaultVariant`) in charge. */
-  variant?: ProfileCardVariant
-  defaultVariant?: ProfileCardVariant
-  onVariantChange?: (variant: ProfileCardVariant) => void
+  variant?: TProfileCardVariant
+  defaultVariant?: TProfileCardVariant
+  onVariantChange?: (variant: TProfileCardVariant) => void
   /** Controlled menu. */
   open?: boolean
   defaultOpen?: boolean
   onError?: (error: unknown) => void
 }
 
-export interface ProfileCardBinding {
-  profileCardId: ProfileCardInstanceId
-  variant: ProfileCardVariant
+export interface IProfileCardBinding {
+  profileCardId: TProfileCardInstanceId
+  variant: TProfileCardVariant
   collapsed: boolean
   menuOpen: boolean
   busy: boolean
   /** Hand to the menu's `onOpenChange` (first argument). Stable. */
   setMenuOpen: (open: boolean) => void
   /** Run an action: `onSelect`, promise → busy, rejection → `onError`. Stable. */
-  select: (action: ProfileCardAction) => void
+  select: (action: IProfileCardAction) => void
 }
 
 /**
@@ -57,8 +57,8 @@ export interface ProfileCardBinding {
  * (`useProfileCardActions(id).collapse()`) survives a route change.
  */
 export function useProfileCard(
-  options: UseProfileCardOptions
-): ProfileCardBinding {
+  options: IUseProfileCardOptions
+): IProfileCardBinding {
   const {
     variant: variantProp,
     defaultVariant = "expanded",
@@ -71,11 +71,11 @@ export function useProfileCard(
 
   const controlsVariant = variantProp !== undefined
   const controlsMenuOpen = openProp !== undefined
-  const config = React.useMemo<ProfileCardConfig>(
+  const config = React.useMemo<IProfileCardConfig>(
     () => ({ controlsVariant, controlsMenuOpen }),
     [controlsVariant, controlsMenuOpen]
   )
-  const handlers = React.useMemo<ProfileCardHandlers>(
+  const handlers = React.useMemo<IProfileCardHandlers>(
     () => ({ onVariantChange, onError }),
     [onVariantChange, onError]
   )

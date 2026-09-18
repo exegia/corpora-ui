@@ -15,16 +15,16 @@ export {
 } from "./selection-atom"
 export { useSelection } from "./use-selection"
 export type {
-  HighlightPopoverPrimitiveProps,
-  HighlightPopoverProps,
-  SelectionPosition,
-  SelectionPopoverComponent,
-  SelectionRenderProps,
-  SelectionState,
-  SelectionStateUpdate,
-  TextClickPopoverProps,
-  TextPopoverRenderProps,
-  TextSelectionProps,
-  UseSelectionOptions,
-  UseSelectionResult,
+  THighlightPopoverPrimitiveProps,
+  IHighlightPopoverProps,
+  ISelectionPosition,
+  TSelectionPopoverComponent,
+  ISelectionRenderProps,
+  ISelectionState,
+  TSelectionStateUpdate,
+  ITextClickPopoverProps,
+  ITextPopoverRenderProps,
+  ITextSelectionProps,
+  IUseSelectionOptions,
+  IUseSelectionResult,
 } from "./types"

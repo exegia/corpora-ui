@@ -1,11 +1,11 @@
 import type * as React from "react"
 import type { IComposerProps } from "@/components/composed/chat/composer"
 
-export type AiScopeKind =
+export type TAiScopeKind =
   "word" | "passage" | "articulus" | "quaestio" | "corpus"
 
-export interface AiScope {
-  kind: AiScopeKind
+export interface IAiScope {
+  kind: TAiScopeKind
   label: string
   /** Reader location shown after a normal word/node scope. */
   location?: string
@@ -15,16 +15,16 @@ export interface AiScope {
   pinned?: boolean
 }
 
-export interface RecommendationStackProps
+export interface IRecommendationStackProps
   extends React.ComponentPropsWithoutRef<"div"> {
   children: React.ReactNode
 }
 
-export interface PinnedThreadBannerProps {
+export interface IPinnedThreadBannerProps {
   className?: string
 }
 
-export interface DegradedBannerProps {
+export interface IDegradedBannerProps {
   reason?: React.ReactNode
   onRetry?: () => void
   className?: string
@@ -32,15 +32,15 @@ export interface DegradedBannerProps {
 
 // The reader selection shapes moved with `SelectionPopover` to
 // `composed/reader`; re-exported so the block's surface stays whole.
-export type { NodeSelection, WordSelection } from "@/components/composed/reader"
+export type { INodeSelection, IWordSelection } from "@/components/composed/reader"
 
-export interface AiPanelProps extends Omit<
+export interface IAiPanelProps extends Omit<
   React.ComponentPropsWithoutRef<"aside">,
   "title"
 > {
-  scope: AiScope
+  scope: IAiScope
   onNewThread?: () => void
-  onScopeChange?: (kind: AiScope["kind"]) => void
+  onScopeChange?: (kind: IAiScope["kind"]) => void
   onRemoveScope?: () => void
   thread?: React.ReactNode
   /** Transient confirmation (e.g. ApplyToast), anchored to the bottom of the
@@ -55,17 +55,17 @@ export interface AiPanelProps extends Omit<
   headerTitle?: string
 }
 
-export interface AiPanelHeaderProps {
+export interface IAiPanelHeaderProps {
   title: string
   /** Shows the lock affordance and its “Published corpus” tooltip. */
   locked?: boolean
   onNewThread?: () => void
 }
 
-export type { ComposerMode } from "@/components/composed/chat/composer"
-export type { DiffRow, SuggestionState } from "@/components/composed/ai/types"
+export type { TComposerMode } from "@/components/composed/chat/composer"
+export type { IDiffRow, TSuggestionState } from "@/components/composed/ai/types"
 
-export interface VersionHistoryEntry {
+export interface IVersionHistoryEntry {
   id?: string
   responseId: string
   applyingUser?: string
@@ -77,20 +77,20 @@ export interface VersionHistoryEntry {
   action?: "apply" | "revert"
 }
 
-export interface SuggestedPromptsProps {
+export interface ISuggestedPromptsProps {
   prompts?: string[]
   onSelect?: (prompt: string) => void
   emptyLabel?: string
   className?: string
 }
 
-export interface VersionHistoryRecordProps {
-  entry: VersionHistoryEntry
+export interface IVersionHistoryRecordProps {
+  entry: IVersionHistoryEntry
   className?: string
 }
 
 
-export interface LockedBannerProps {
+export interface ILockedBannerProps {
   children?: React.ReactNode
   className?: string
 }

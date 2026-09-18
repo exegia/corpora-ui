@@ -5,14 +5,14 @@ import * as React from "react";
 import { PasswordInput } from "@/components/composed/password-input";
 import {
   SocialProviders,
-  type SocialProvider,
+  type TSocialProvider,
 } from "@/components/composed/social-providers";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { type AuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
+import { type TAuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
 import { cn } from "@/lib/utils";
 import {
   AuthCard,
@@ -21,18 +21,18 @@ import {
   AuthSuccess,
   MorphStep,
   Reveal,
-  type AuthStatus,
+  type TAuthStatus,
 } from "./auth-shell";
 
-export interface LoginBlockProps {
+export interface ILoginBlockProps {
   title?: string;
   description?: string;
   /** Brand mark rendered above the title. Omit for no logo row at all. */
   logo?: React.ReactNode;
   /** Brand accent for the primary action. Omit to keep the default primary. */
-  accent?: AuthAccent;
+  accent?: TAuthAccent;
   /** Social providers to offer; empty array hides the social section. */
-  providers?: SocialProvider[];
+  providers?: TSocialProvider[];
   showRememberMe?: boolean;
   showForgotPassword?: boolean;
   /** Reject (or throw) to show the error state with the error's message. */
@@ -41,7 +41,7 @@ export interface LoginBlockProps {
     password: string;
     remember: boolean;
   }) => Promise<void> | void;
-  onProviderSelect?: (provider: SocialProvider) => Promise<void> | void;
+  onProviderSelect?: (provider: TSocialProvider) => Promise<void> | void;
   onForgotPassword?: () => void;
   onSignup?: () => void;
 }
@@ -58,13 +58,13 @@ export function LoginBlock({
   onProviderSelect,
   onForgotPassword,
   onSignup,
-}: LoginBlockProps) {
+}: ILoginBlockProps) {
   const emailId = React.useId();
   const rememberId = React.useId();
-  const [status, setStatus] = React.useState<AuthStatus>("idle");
+  const [status, setStatus] = React.useState<TAuthStatus>("idle");
   const [error, setError] = React.useState<string | null>(null);
   const [loadingProvider, setLoadingProvider] =
-    React.useState<SocialProvider | null>(null);
+    React.useState<TSocialProvider | null>(null);
   const [remember, setRemember] = React.useState(false);
   const [email, setEmail] = React.useState("");
   const [emailValid, setEmailValid] = React.useState(false);
@@ -102,7 +102,7 @@ export function LoginBlock({
     }
   }
 
-  async function handleProvider(provider: SocialProvider) {
+  async function handleProvider(provider: TSocialProvider) {
     setError(null);
     setLoadingProvider(provider);
     try {

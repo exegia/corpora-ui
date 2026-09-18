@@ -5,12 +5,12 @@ import { defineStory } from "@/registry/story"
 import { Label } from "@/components/ui/label"
 import { OTPField, OTPFieldInput } from "@/components/ui/otp-field"
 
-type PreviewProps = Pick<
+type TPreviewProps = Pick<
   ComponentProps<typeof OTPField>,
   "size" | "disabled" | "sound"
 > & { length: 4 | 6 | 8 }
 
-function OTPFieldPreview({ length, ...props }: PreviewProps) {
+function OTPFieldPreview({ length, ...props }: TPreviewProps) {
   return (
     <div className="overflow-x-auto p-6">
       <Label className="sr-only" htmlFor="otp-story">

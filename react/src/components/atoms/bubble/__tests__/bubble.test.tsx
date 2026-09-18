@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { Bubble, type BubbleReaction } from "../index"
+import { Bubble, type IBubbleReaction } from "../index"
 import User from "@/components/composed/user"
 
 describe("Bubble", () => {
@@ -35,7 +35,7 @@ describe("Bubble", () => {
 
   test("reaction chips expose aria-pressed and report toggles by index", async () => {
     const user = userEvent.setup()
-    const onToggle = mock((_reaction: BubbleReaction, _index: number) => {})
+    const onToggle = mock((_reaction: IBubbleReaction, _index: number) => {})
     render(
       <Bubble variant="recipient">
         <Bubble.Message>Hi</Bubble.Message>

@@ -6,13 +6,13 @@ import {
   metricsEqual,
   panelBounds,
   requiredWidth,
-  type ShellMetrics,
+  type IShellMetrics,
 } from "../shell-metrics"
 
 /** The columns the shell ships with: rail 256 (56 folded), body floor 360,
  * secondary panel floor 320 — 936px before a panel can exist — plus the 32px
  * of shell padding and column gaps that only the ceiling pays for. */
-function shell(over: Partial<ShellMetrics> = {}): ShellMetrics {
+function shell(over: Partial<IShellMetrics> = {}): IShellMetrics {
   return {
     rail: 256,
     insetMin: 360,

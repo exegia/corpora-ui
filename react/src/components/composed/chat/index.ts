@@ -1,23 +1,23 @@
 export {
   Attachment,
-  type AttachmentKind,
-  type AttachmentProps,
-  type AttachmentVariant,
+  type TAttachmentKind,
+  type TAttachmentProps,
+  type TAttachmentVariant,
 } from "./attachment"
 export {
   Chart,
-  type ChartDatum,
-  type ChartProps,
-  type ChartSeries,
-  type ChartType,
+  type TChartDatum,
+  type IChartProps,
+  type IChartSeries,
+  type TChartType,
 } from "./chart"
 export {
   Markdown,
   markdownViewAtom,
   removeMarkdownInstance,
   useMarkdownView,
-  type MarkdownProps,
-  type MarkdownView,
+  type IMarkdownProps,
+  type TMarkdownView,
 } from "./markdown"
 // `SuggestedPrompts`, `SendButton` and `AddButton` stay off the barrel on
 // purpose: `blocks/ai-panel` and `ui/chat` already export those names, and
@@ -35,10 +35,10 @@ export {
   useComposerAttachments,
 } from "./composer"
 export type {
-  ComposerAttachment,
-  ComposerBaseProps,
-  ComposerMode,
-  ComposerSuggestionsProps,
+  TComposerAttachment,
+  IComposerBaseProps,
+  TComposerMode,
+  IComposerSuggestionsProps,
   IComposerMenuProps,
   IComposerProps,
   IComposerSubmitButtonProps,
@@ -46,51 +46,51 @@ export type {
 
 export { Recommendation, RecommendationCard } from "./recommendation"
 export type {
-  RecommendationCardProps,
-  RecommendationCheckboxProps,
-  RecommendationEntity,
-  RecommendationFields,
-  RecommendationGroupProps,
-  RecommendationItemProps,
-  RecommendationOption,
-  RecommendationState,
+  IRecommendationCardProps,
+  IRecommendationCheckboxProps,
+  IRecommendationEntity,
+  IRecommendationFields,
+  TRecommendationGroupProps,
+  IRecommendationItemProps,
+  IRecommendationOption,
+  TRecommendationState,
 } from "./recommendation"
 export {
   ContextCards,
-  type ContextCard,
-  type ContextCardsProps,
+  type IContextCard,
+  type IContextCardsProps,
 } from "./context-cards"
 export {
   CodeBlock,
   tokenize,
-  type CodeBlockProps,
-  type CodeDiffLine,
+  type ICodeBlockProps,
+  type ICodeDiffLine,
 } from "./code-block"
 export {
   FilterTable,
   filterTableFilterAtom,
   removeFilterTableInstance,
-  type FilterTableColumn,
-  type FilterTableProps,
-  type FilterTableStatus,
+  type IFilterTableColumn,
+  type IFilterTableProps,
+  type IFilterTableStatus,
 } from "./filter-table"
 export {
   RecordsTable,
   recordsTableSelectionAtom,
   removeRecordsTableInstance,
-  type RecordsColumnKey,
-  type RecordsRow,
-  type RecordsTableProps,
+  type TRecordsColumnKey,
+  type IRecordsRow,
+  type IRecordsTableProps,
 } from "./records-table"
 export * from "./flowchart"
-export { type ChartNodeProps, type FlowchartProps } from "./flowchart"
+export { type IChartNodeProps, type IFlowchartProps } from "./flowchart"
 export {
   InsightCards,
   InsightEntity,
-  type Insight,
-  type InsightAllocation,
-  type InsightSegment,
-  type InsightCardsProps,
+  type IInsight,
+  type IInsightAllocation,
+  type IInsightSegment,
+  type IInsightCardsProps,
 } from "./insight-cards"
 
 export { SendHint } from "./hint"

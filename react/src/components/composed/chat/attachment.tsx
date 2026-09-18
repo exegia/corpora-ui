@@ -17,7 +17,7 @@ import {
   Waveform,
 } from "@/components/ui/chat"
 
-export type AttachmentKind =
+export type TAttachmentKind =
   | "document"
   | "image"
   | "media"
@@ -26,14 +26,14 @@ export type AttachmentKind =
   | "username-handle"
   | "url-link"
 
-export type AttachmentVariant = "default" | "preview"
+export type TAttachmentVariant = "default" | "preview"
 
-interface AttachmentBase {
+interface IAttachmentBase {
   id?: string
   className?: string
   style?: React.CSSProperties
   /** `default` is the 240×52 composer chip; `preview` the in-bubble rendering. */
-  variant?: AttachmentVariant
+  variant?: TAttachmentVariant
   /** Primary line of the chip (file name, handle, URL, source…). */
   title: React.ReactNode
   /** Secondary line of the chip ("PDF · 2.4 MB", "Link · fetching preview"…). */
@@ -43,7 +43,7 @@ interface AttachmentBase {
   removable?: boolean
 }
 
-export type AttachmentProps = AttachmentBase &
+export type TAttachmentProps = IAttachmentBase &
   (
     | { kind: "document"; onAction?: () => void; actionIcon?: React.ReactNode }
     | { kind: "image"; src?: string; alt?: string }
@@ -54,7 +54,7 @@ export type AttachmentProps = AttachmentBase &
     | { kind: "url-link"; src?: string; domain?: React.ReactNode; description?: React.ReactNode; favicon?: string; href?: string }
   )
 
-const KIND_ICON: Record<AttachmentKind, React.ComponentType<{ className?: string }>> = {
+const KIND_ICON: Record<TAttachmentKind, React.ComponentType<{ className?: string }>> = {
   document: FileText,
   image: ImageIcon,
   media: Film,
@@ -75,7 +75,7 @@ const metaClasses = "truncate text-[11px] leading-3 text-text-secondary"
  *
  * @sketch "Component / Attachment / {Image, Media, Document, Text Selection, Chat Reply, Username Handle, URL Link} / {Default, Preview}", "Component / Attachment / Media / Preview Audio"
  */
-export function Attachment(props: AttachmentProps): React.ReactElement {
+export function Attachment(props: TAttachmentProps): React.ReactElement {
   if (props.variant === "preview") return <AttachmentPreview {...props} />
   if (!PREVIEWABLE.has(props.kind)) return <AttachmentChip {...props} />
   // A chip whose kind has a richer rendering shows it on hover / focus.
@@ -90,9 +90,9 @@ export function Attachment(props: AttachmentProps): React.ReactElement {
 }
 
 /** Kinds whose preview rendering says more than the chip: images, media, quotes, replies and link cards. */
-const PREVIEWABLE: ReadonlySet<AttachmentKind> = new Set(["image", "media", "text-selection", "chat-reply", "url-link"])
+const PREVIEWABLE: ReadonlySet<TAttachmentKind> = new Set(["image", "media", "text-selection", "chat-reply", "url-link"])
 
-function AttachmentChip(props: AttachmentProps & Record<string, unknown>): React.ReactElement {
+function AttachmentChip(props: TAttachmentProps & Record<string, unknown>): React.ReactElement {
   const { kind, variant: _variant, title, meta, onRemove, removable = true, className, id, style, ...rest } = props
   const Icon = KIND_ICON[kind]
   const leading =
@@ -121,7 +121,7 @@ function chipRest(rest: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(Object.entries(rest).filter(([k]) => !KIND_PROPS.has(k)))
 }
 
-function AttachmentPreview(props: AttachmentProps): React.ReactElement {
+function AttachmentPreview(props: TAttachmentProps): React.ReactElement {
   const { kind, variant: _variant, title, meta, onRemove: _onRemove, removable: _removable, className, id, style } = props
   const shared = { "data-slot": "attachment", "data-kind": kind, "data-variant": "preview", id, style } as const
 

@@ -5,7 +5,7 @@ import { mergeProps } from "@base-ui/react/merge-props";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 
-export type TextareaProps = React.ComponentPropsWithoutRef<"textarea"> &
+export type TTextareaProps = React.ComponentPropsWithoutRef<"textarea"> &
   React.RefAttributes<HTMLTextAreaElement> & {
     size?: "sm" | "default" | "lg" | number;
     unstyled?: boolean;
@@ -17,7 +17,7 @@ export function Textarea({
   unstyled = false,
   ref,
   ...props
-}: TextareaProps): React.ReactElement {
+}: TTextareaProps): React.ReactElement {
   return (
     <span
       className={

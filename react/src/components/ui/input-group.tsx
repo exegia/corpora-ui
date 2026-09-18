@@ -3,8 +3,8 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
-import { Input, type InputProps } from "@/components/ui/input";
-import { Textarea, type TextareaProps } from "@/components/ui/textarea";
+import { Input, type TInputProps } from "@/components/ui/input";
+import { Textarea, type TTextareaProps } from "@/components/ui/textarea";
 
 const inputGroupAddonVariants = cva(
   "flex h-auto cursor-text select-none items-center justify-center gap-2 leading-none [&>kbd]:rounded-[calc(var(--radius)-5px)] in-[[data-slot=input-group]:has([data-slot=input-control],[data-slot=textarea-control])]:[&_svg:not([class*='size-'])]:size-4.5 sm:in-[[data-slot=input-group]:has([data-slot=input-control],[data-slot=textarea-control])]:[&_svg:not([class*='size-'])]:size-4 [&_svg]:-mx-0.5 not-has-[button]:**:[svg:not([class*='opacity-'])]:opacity-80",
@@ -93,13 +93,13 @@ export function InputGroupText({
 export function InputGroupInput({
   className,
   ...props
-}: InputProps): React.ReactElement {
+}: TInputProps): React.ReactElement {
   return <Input className={className} unstyled {...props} />;
 }
 
 export function InputGroupTextarea({
   className,
   ...props
-}: TextareaProps): React.ReactElement {
+}: TTextareaProps): React.ReactElement {
   return <Textarea className={className} unstyled {...props} />;
 }

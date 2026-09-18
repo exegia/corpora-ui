@@ -1,9 +1,9 @@
-import { Button, type ButtonProps } from "@/components/ui/button";
+import { Button, type TButtonProps } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import type { PopoverTriggerState } from "@base-ui/react";
 import { cn } from "@/lib/utils";
 
-export function AddButton({ state, ...props}: ButtonProps & { state: PopoverTriggerState }) {
+export function AddButton({ state, ...props}: TButtonProps & { state: PopoverTriggerState }) {
   // One attach button for both shapes: it is absolutely positioned in each,
   // so the class swap moves it and `layout` glides it between the two spots
   // rather than mounting a second control.

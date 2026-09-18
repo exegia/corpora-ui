@@ -15,7 +15,7 @@ import { useAtomValue } from "jotai"
 import { PanelMenuButton } from "./panel-menu-button.tsx"
 import { scaffoldPanelDimmedAtom } from "./scaffold-atom"
 import { useScaffoldContext } from "./scaffold-context"
-import type { ScaffoldPanelProps, TSubPanelPosition } from "./type"
+import type { IScaffoldPanelProps, TSubPanelPosition } from "./type"
 import { ScaffoldSubPanel } from "@/components/blocks/scaffold/scaffold-sub-panel.tsx"
 
 /**
@@ -35,7 +35,7 @@ export function ScaffoldPanel({
   swapLabel = "Swap panel content",
   sound = true,
   className,
-}: ScaffoldPanelProps): React.ReactElement {
+}: IScaffoldPanelProps): React.ReactElement {
   const { scaffoldId } = useScaffoldContext()
   const reducedMotion = useReducedMotion()
 

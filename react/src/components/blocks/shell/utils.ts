@@ -6,8 +6,8 @@ import { EASE_OUT, EASE_DRAWER } from "@/lib/ease.ts"
 import type { Variants } from "motion/react"
 import { createContext, useContext, useSyncExternalStore } from "react"
 import type {
-  AnimatedSidebarContextValue,
-  AnimatedSidebarPanelContextValue,
+  IAnimatedSidebarContextValue,
+  IAnimatedSidebarPanelContextValue,
 } from "./type"
 
 export const SIDEBAR_MORPH_TRANSITION = {
@@ -137,10 +137,10 @@ export function resolveLength(host: HTMLElement, value: string) {
 }
 
 export const AnimatedSidebarContext =
-  createContext<AnimatedSidebarContextValue | null>(null)
+  createContext<IAnimatedSidebarContextValue | null>(null)
 
 export const AnimatedSidebarPanelContext =
-  createContext<AnimatedSidebarPanelContextValue | null>(null)
+  createContext<IAnimatedSidebarPanelContextValue | null>(null)
 
 export function useAnimatedSidebar() {
   const context = useContext(AnimatedSidebarContext)

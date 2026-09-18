@@ -1,23 +1,23 @@
 import type {
-  ChartProps,
-  ComposerSuggestionsProps,
-  MarkdownProps,
-  RecommendationStackProps,
-  ResearchAnswerProps,
-  UserType,
+  IChartProps,
+  IComposerSuggestionsProps,
+  IMarkdownProps,
+  IResearchAnswerProps,
 } from "@/index"
-import type * as React from "react"
+import type { TUserType } from "@/components/atoms/types"
+import type { ReactNode } from "react"
+import type { IRecommendationStackProps } from "@/components/types"
 
-export type SuggestionState = "accepted" | "rejected" | "pending"
+export type TSuggestionState = "accepted" | "rejected" | "pending"
 
-export interface DiffRow {
+export interface IDiffRow {
   type: "add" | "remove"
-  value: React.ReactNode
+  value: ReactNode
   field?: string
 }
 
 /** A word, or an inline citation; extra fields turn the chip into a hover preview. */
-export type StreamingToken =
+export type TStreamingToken =
   | { text: string }
   | {
       cite: string
@@ -27,9 +27,9 @@ export type StreamingToken =
       href?: string
     }
 
-export interface StreamingTextProps extends React.ComponentPropsWithoutRef<"div"> {
+export interface IStreamingTextProps extends React.ComponentPropsWithoutRef<"div"> {
   /** Paragraphs, each a token list; a string is split on spaces. */
-  paragraphs: (string | StreamingToken[])[]
+  paragraphs: (string | TStreamingToken[])[]
   /** Reveal words over time and show the caret. */
   streaming?: boolean
   /** Reveal gap in ms; defaults to the --stream-gap token (60ms). */
@@ -37,45 +37,45 @@ export interface StreamingTextProps extends React.ComponentPropsWithoutRef<"div"
 }
 
 /** Kind → props map for message content; the source of truth for `AIContentProps`. */
-export interface AIContentPropsMap {
-  markdown: MarkdownProps
-  research: ResearchAnswerProps
-  chart: ChartProps
-  suggestion: ComposerSuggestionsProps
-  recommendation: RecommendationStackProps
+export interface IAIContentPropsMap {
+  markdown: IMarkdownProps
+  research: IResearchAnswerProps
+  chart: IChartProps
+  suggestion: IComposerSuggestionsProps
+  recommendation: IRecommendationStackProps
 }
 
-export type AIMessageType = keyof AIContentPropsMap
+export type TAIMessageType = keyof IAIContentPropsMap
 
 /** Discriminated union of `{ kind } & props`, distributed over `T`. */
-export type AIContentProps<T extends AIMessageType = AIMessageType> = {
-  [K in T]: { kind: K } & AIContentPropsMap[K]
+export type TAIContentProps<T extends TAIMessageType = TAIMessageType> = {
+  [K in T]: { kind: K } & IAIContentPropsMap[K]
 }[T]
 
-export interface AIMessageProps<T extends AIMessageType = AIMessageType> {
+export interface IAIMessageProps<T extends TAIMessageType = TAIMessageType> {
   /** Identity shown in the header. */
-  user?: UserType
+  user?: TUserType
   type: T
   thinking?: boolean
   /** Replaces the default `User.Info` identity row in the header. */
-  AttachedContent?: React.ComponentType<AIContentProps<T>>
+  AttachedContent?: React.ComponentType<TAIContentProps<T>>
   /** Props forwarded to `AttachedContent`, typed by `type`. */
-  contentProps?: AIContentPropsMap[T]
+  contentProps?: IAIContentPropsMap[T]
   children?: React.ReactNode
   isStreaming?: boolean
   className?: string
 }
 
-export interface ReferenceBase {
+export interface IReferenceBase {
   id: string
   title?: string
   url?: string
 }
 
-export interface AISuggestionBase {
+export interface IAISuggestionBase {
   heading: string
   description?: string | React.ReactNode
-  state?: SuggestionState
+  state?: TSuggestionState
   updatedAt?: string
-  references?: ReferenceBase[] | ReferenceBase
+  references?: IReferenceBase[] | IReferenceBase
 }

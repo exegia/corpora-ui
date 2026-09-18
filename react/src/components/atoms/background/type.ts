@@ -1,9 +1,9 @@
-export type TextureVariant =
+export type TTextureVariant =
   | "fabric"
   | "paper"
   | "none"
-export interface TextureProps {
-  variant?: TextureVariant
+export interface ITextureProps {
+  variant?: TTextureVariant
   opacity?: number
   className?: string
   children?: React.ReactNode

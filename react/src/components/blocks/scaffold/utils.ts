@@ -1,7 +1,7 @@
 import type { Variants } from "motion/react"
 import type { ClassNameValue } from "tailwind-merge"
 import type {
-  ScaffoldPanelVisibility,
+  IScaffoldPanelVisibility,
   TSubPanelVariant,
 } from "@/components/blocks/scaffold/type.ts"
 import { EASE_OUT } from "@/lib/ease.ts"
@@ -26,7 +26,7 @@ export function getPanelCapacity(width: number | null): number {
 }
 
 /** @internal An untracked scaffold: nothing registered, nothing hidden. */
-export const EMPTY_SCAFFOLD_VISIBILITY: ScaffoldPanelVisibility = {
+export const EMPTY_SCAFFOLD_VISIBILITY: IScaffoldPanelVisibility = {
   visibleOrder: [],
   autoHidden: [],
   userHidden: [],
@@ -40,10 +40,10 @@ export const EMPTY_SCAFFOLD_VISIBILITY: ScaffoldPanelVisibility = {
  * changes, so callers can compare identities instead of contents.
  */
 export function reconcileVisibility(
-  prev: ScaffoldPanelVisibility,
+  prev: IScaffoldPanelVisibility,
   ids: readonly string[],
   capacity: number
-): ScaffoldPanelVisibility {
+): IScaffoldPanelVisibility {
   const known = new Set(ids)
   const visibleOrder = prev.visibleOrder.filter((id) => known.has(id))
   const autoHidden = prev.autoHidden.filter((id) => known.has(id))

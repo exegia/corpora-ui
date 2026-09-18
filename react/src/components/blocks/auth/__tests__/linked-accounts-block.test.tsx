@@ -4,10 +4,10 @@ import userEvent from "@testing-library/user-event";
 
 import {
   LinkedAccountsBlock,
-  type LinkedIdentity,
+  type ILinkedIdentity,
 } from "../linked-accounts-block";
 
-const IDENTITIES: LinkedIdentity[] = [
+const IDENTITIES: ILinkedIdentity[] = [
   { id: "id-1", provider: "google", email: "reader@example.com" },
   { id: "id-2", provider: "github" },
 ];

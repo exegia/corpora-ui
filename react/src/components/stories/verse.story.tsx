@@ -6,12 +6,12 @@ import { defineStory } from "@/registry/story"
 
 import { Verse } from "@/components/composed/verse"
 
-type PreviewProps = Pick<
+type TPreviewProps = Pick<
   ComponentProps<typeof Verse>,
   "chapter" | "href" | "size" | "children"
 >
 
-function VersePreview(props: PreviewProps) {
+function VersePreview(props: TPreviewProps) {
   return (
     <Verse
       {...props}
@@ -28,7 +28,7 @@ function VersePreview(props: PreviewProps) {
 }
 
 export const story = defineStory({
-  Component: VersePreview as FC<PreviewProps>,
+  Component: VersePreview as FC<TPreviewProps>,
   args: {
     initial: {
       chapter: "1:1",

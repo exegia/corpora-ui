@@ -5,14 +5,14 @@ import Toolbar from "./toolbar"
 
 export { useActionBar, useEmojiPicker, QUICK_REACTIONS } from "./utils"
 export type {
-  ActionBarProps,
-  ActionBarSegment,
-  ActionButtonProps,
-  EmojiActionBarProps,
-  ActionEntry,
-  ActionItemsByGroup,
-  ActionKey,
-  ActionMap,
+  IActionBarProps,
+  TActionBarSegment,
+  IActionButtonProps,
+  IEmojiActionBarProps,
+  TActionEntry,
+  TActionItemsByGroup,
+  TActionKey,
+  TActionMap,
 } from "./types"
 
 export const ActionBar = {

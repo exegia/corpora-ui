@@ -2,9 +2,9 @@ import { describe, expect, mock, test } from "bun:test"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { Provider } from "jotai"
 
-import { Composer, type ComposerAttachment } from "../composer"
+import { Composer, type TComposerAttachment } from "../composer"
 
-const SEED: ComposerAttachment[] = [
+const SEED: TComposerAttachment[] = [
   { id: "a", kind: "document", title: "Q3.pdf", meta: "PDF" },
   { id: "b", kind: "image", title: "IMG.jpg" },
 ]
@@ -36,7 +36,7 @@ describe("Composer attachments", () => {
     const [draft, , attachments] = onSubmit.mock.calls[0] as unknown as [
       string,
       string,
-      ComposerAttachment[],
+      TComposerAttachment[],
     ]
     expect(draft).toBe("hello")
     expect(attachments.map((a) => a.id)).toEqual(["b"])

@@ -1,11 +1,11 @@
 import { forwardRef } from "react"
 import { Button } from "@/components/ui/button"
 import { useAnimatedSidebar } from "./utils"
-import type { AnimatedSidebarTriggerProps } from "./type"
+import type { IAnimatedSidebarTriggerProps } from "./type"
 
 export const AnimatedPanelTrigger = forwardRef<
   HTMLButtonElement,
-  AnimatedSidebarTriggerProps
+  IAnimatedSidebarTriggerProps
 >(function AnimatedSidebarTrigger(
   { onClick, side = "left", type = "button", ...props },
   forwardedRef

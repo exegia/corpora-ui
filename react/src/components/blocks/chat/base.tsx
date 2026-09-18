@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import Background from "@/components/atoms/background"
 import { AiPanelHeader } from "./header"
 import { SuggestedPrompts } from "./suggested-prompts"
-import type { AiPanelProps } from "./types"
+import type { IAiPanelProps } from "./types"
 
 /**
  * Full-height curation rail, designed to sit inside a host container such as
@@ -26,7 +26,7 @@ export function AiPanel({
   headerTitle = "AI panel",
   className,
   ...props
-}: AiPanelProps): React.ReactElement {
+}: IAiPanelProps): React.ReactElement {
   return (
     // A landmark, not a bare div: `aria-label` on a roleless element is not
     // exposed, so the panel would lose both its name and its region.

@@ -6,12 +6,12 @@ import { defineStory } from "@/registry/story"
 
 import { AiPanel } from "@/components/blocks/chat/base"
 
-type PreviewProps = Pick<
+type TPreviewProps = Pick<
   ComponentProps<typeof AiPanel>,
   "scope" | "headerTitle" | "className" | "thread" | "locked"
 >
 
-function BlockPreview(props: PreviewProps) {
+function BlockPreview(props: TPreviewProps) {
   return <AiPanel {...props} />
 }
 

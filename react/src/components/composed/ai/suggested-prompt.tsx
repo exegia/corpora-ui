@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils"
 import { EASE_IN_OUT, SPRING_PANEL } from "@/lib/ease"
 import { flattenChildren, ITEM_VARIANTS, LIST_VARIANTS } from "./shared"
 
-export interface SuggestedPromptProps extends Omit<
+export interface ISuggestedPromptProps extends Omit<
   HTMLMotionProps<"button">,
   "children" | "onSelect"
 > {
@@ -38,7 +38,7 @@ export function SuggestedPrompt({
   layoutId,
   className,
   ...props
-}: SuggestedPromptProps): React.ReactElement {
+}: ISuggestedPromptProps): React.ReactElement {
   const reduceMotion = useReducedMotion()
   return (
     <motion.button
@@ -66,7 +66,7 @@ export function SuggestedPrompt({
   )
 }
 
-export interface SuggestedPromptsProps extends Omit<
+export interface ISuggestedPromptsProps extends Omit<
   HTMLMotionProps<"div">,
   "children"
 > {
@@ -95,7 +95,7 @@ export function SuggestedPrompts({
   onOpenChange,
   className,
   ...props
-}: SuggestedPromptsProps): React.ReactElement | null {
+}: ISuggestedPromptsProps): React.ReactElement | null {
   const panelId = useId()
   const reduceMotion = useReducedMotion()
   const [internalOpen, setInternalOpen] = useState(defaultOpen)

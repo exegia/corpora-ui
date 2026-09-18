@@ -6,7 +6,7 @@ import { useHighlightPopover } from "@omsimos/react-highlight-popover"
 import { Card, CardPanel } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { useSelection } from "./use-selection"
-import type { HighlightPopoverProps, SelectionRenderProps } from "./types"
+import type { IHighlightPopoverProps, ISelectionRenderProps } from "./types"
 
 export function HighlightPopover({
   children,
@@ -15,7 +15,7 @@ export function HighlightPopover({
   render,
   className,
   ...props
-}: HighlightPopoverProps): React.ReactElement {
+}: IHighlightPopoverProps): React.ReactElement {
   const primitive = useHighlightPopover()
   const selection = useSelection()
   const currentSelection =
@@ -56,7 +56,7 @@ export function HighlightPopover({
     stateSelection,
   ])
 
-  const renderProps: SelectionRenderProps = {
+  const renderProps: ISelectionRenderProps = {
     position,
     selection: currentSelection,
     selected,

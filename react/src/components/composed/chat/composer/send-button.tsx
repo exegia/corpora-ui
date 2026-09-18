@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import type { ButtonProps } from "@/components/ui/button"
+import type { TButtonProps } from "@/components/ui/button"
 import type { IComposerSubmitButtonProps } from "../type"
 import { ArrowUp, Squircle } from "lucide"
 import { cn } from "@/lib/utils"
@@ -11,7 +11,7 @@ export function SendButton({
   disabled,
   onStop,
   ...props
-}: IComposerSubmitButtonProps & ButtonProps): React.ReactElement {
+}: IComposerSubmitButtonProps & TButtonProps): React.ReactElement {
   return (
     <Button
       {...props}

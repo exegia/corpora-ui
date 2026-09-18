@@ -6,7 +6,7 @@ import { defineStory } from "@/registry/story"
 
 import { PasswordInput } from "@/components/composed/password-input"
 
-type PreviewProps = Pick<
+type TPreviewProps = Pick<
   ComponentProps<typeof PasswordInput>,
   | "visibilityToggle"
   | "showStrength"
@@ -16,7 +16,7 @@ type PreviewProps = Pick<
   | "aria-label"
 >
 
-function PasswordInputPreview(props: PreviewProps) {
+function PasswordInputPreview(props: TPreviewProps) {
   return (
     <div className="p-6 flex justify-center">
       <PasswordInput {...props} className="max-w-sm w-full" />

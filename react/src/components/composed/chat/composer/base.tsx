@@ -11,7 +11,7 @@ import { Text } from "@/components/atoms"
 import { Attachment } from "../attachment"
 import { SendHint } from "@/components/composed/chat"
 import type {
-  ComposerMode,
+  TComposerMode,
   IComposerProps,
   IComposerSubmitButtonProps,
 } from "../type"
@@ -44,7 +44,7 @@ export function Composer({
   const reduceMotion = useReducedMotion()
   const [internalValue, setInternalValue] = useState(defaultValue)
   const [isFocused, setIsExpanded] = useState(expanded)
-  const [mode] = useState<ComposerMode>("answer")
+  const [mode] = useState<TComposerMode>("answer")
   // The prompts fold when the field expands: the two never stack open.
   const [promptsOpen, setPromptsOpen] = useState(true)
 

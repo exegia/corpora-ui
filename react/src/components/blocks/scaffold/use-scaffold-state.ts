@@ -11,9 +11,9 @@ import {
   toggleScaffoldPanelAtom,
 } from "./scaffold-atom"
 import type {
-  ScaffoldInstanceId,
-  ScaffoldState,
-  ScaffoldStateActions,
+  TScaffoldInstanceId,
+  IScaffoldState,
+  IScaffoldStateActions,
 } from "./type"
 
 /**
@@ -29,7 +29,7 @@ import type {
  * to that field's atom instead:
  * `useAtomValue(scaffoldInspectorOpenAtom("workspace"))`.
  */
-export function useScaffoldState(scaffoldId: ScaffoldInstanceId): ScaffoldState {
+export function useScaffoldState(scaffoldId: TScaffoldInstanceId): IScaffoldState {
   return useAtomValue(scaffoldStateAtom(scaffoldId))
 }
 
@@ -44,8 +44,8 @@ export function useScaffoldState(scaffoldId: ScaffoldInstanceId): ScaffoldState 
  * ```
  */
 export function useScaffoldActions(
-  scaffoldId: ScaffoldInstanceId
-): ScaffoldStateActions {
+  scaffoldId: TScaffoldInstanceId
+): IScaffoldStateActions {
   const setInspectorOpen = useSetAtom(setScaffoldInspectorOpenAtom(scaffoldId))
   const toggleInspector = useSetAtom(toggleScaffoldInspectorAtom(scaffoldId))
   const togglePanel = useSetAtom(toggleScaffoldPanelAtom(scaffoldId))

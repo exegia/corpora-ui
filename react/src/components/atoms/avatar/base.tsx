@@ -4,7 +4,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar"
-import type { AvatarProps, UserType } from "./types"
+import type { IAvatarProps, TUserType } from "./types"
 import { cn } from "@/lib/utils"
 import {
   initialsFrom,
@@ -18,13 +18,13 @@ import { VerifiedBadge } from "./verified"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Loader } from "../loader"
 
-export default function Base<T extends UserType>({
+export default function Base<T extends TUserType>({
   user,
   size = "sm",
   className,
   loading,
   audio,
-}: AvatarProps<T>) {
+}: IAvatarProps<T>) {
   return (
     <div
       className={cn(

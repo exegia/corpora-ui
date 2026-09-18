@@ -7,7 +7,7 @@ import {
 import { Tooltip, TooltipPopup } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { tooltipHandle, useActionBar } from "./utils"
-import type { ActionBarProps } from "./types"
+import type { IActionBarProps } from "./types"
 
 /**
  * Toolbar chrome. "default" keeps the bordered card surface; "ghost" and
@@ -25,7 +25,7 @@ export default function Toolbar({
   actions,
   variant = "default",
   className,
-}: ActionBarProps) {
+}: IActionBarProps) {
   const { segments, entries, hasGroups } = useActionBar({ actions })
 
   return (

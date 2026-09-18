@@ -21,9 +21,9 @@ import { EASE_OUT } from "@/lib/ease";
 import { useHoverCapable } from "@/lib/hooks/use-hover-capable";
 import { cn } from "@/lib/utils";
 
-export type OverflowActionsSize = "sm" | "md";
+export type TOverflowActionsSize = "sm" | "md";
 
-export type OverflowActionItem = {
+export type TOverflowActionItem = {
   id: string;
   label: ReactNode;
   icon?: ReactNode;
@@ -32,7 +32,7 @@ export type OverflowActionItem = {
   ariaLabel?: string;
 };
 
-export type OverflowActionsClassNames = {
+export type TOverflowActionsClassNames = {
   root?: string;
   track?: string;
   action?: string;
@@ -43,19 +43,19 @@ export type OverflowActionsClassNames = {
   label?: string;
 };
 
-export interface OverflowActionsProps {
-  primaryActions: OverflowActionItem[];
-  overflowActions: OverflowActionItem[];
+export interface IOverflowActionsProps {
+  primaryActions: TOverflowActionItem[];
+  overflowActions: TOverflowActionItem[];
   expanded?: boolean;
   defaultExpanded?: boolean;
   onExpandedChange?: (expanded: boolean) => void;
-  onAction?: (item: OverflowActionItem) => void;
+  onAction?: (item: TOverflowActionItem) => void;
   collapseOnAction?: boolean;
-  size?: OverflowActionsSize;
+  size?: TOverflowActionsSize;
   openLabel?: string;
   closeLabel?: string;
   className?: string;
-  classNames?: OverflowActionsClassNames;
+  classNames?: TOverflowActionsClassNames;
 }
 
 // This needs a softer layout spring than the app defaults, so the overflow group
@@ -87,27 +87,27 @@ const OVERFLOW_ACTION_VARIANTS: Variants = {
   exit: { opacity: 0, filter: "blur(4px)" },
 };
 
-const TRACK_SIZE_CLASS: Record<OverflowActionsSize, string> = {
+const TRACK_SIZE_CLASS: Record<TOverflowActionsSize, string> = {
   sm: "gap-1 p-1 text-xs",
   md: "gap-1.5 p-1.5 text-sm",
 };
 
-const GROUP_GAP_CLASS: Record<OverflowActionsSize, string> = {
+const GROUP_GAP_CLASS: Record<TOverflowActionsSize, string> = {
   sm: "gap-1",
   md: "gap-1.5",
 };
 
-const ACTION_SIZE_CLASS: Record<OverflowActionsSize, string> = {
+const ACTION_SIZE_CLASS: Record<TOverflowActionsSize, string> = {
   sm: "h-8 min-w-8 gap-1.5 px-3",
   md: "h-9 min-w-9 gap-2 px-3.5",
 };
 
-const TOGGLE_SIZE_CLASS: Record<OverflowActionsSize, string> = {
+const TOGGLE_SIZE_CLASS: Record<TOverflowActionsSize, string> = {
   sm: "h-8 w-8",
   md: "h-9 w-9",
 };
 
-const ICON_SIZE_CLASS: Record<OverflowActionsSize, string> = {
+const ICON_SIZE_CLASS: Record<TOverflowActionsSize, string> = {
   sm: "h-3.5 w-3.5",
   md: "h-4 w-4",
 };
@@ -151,7 +151,7 @@ export function OverflowActions({
   closeLabel = "Hide extra actions",
   className,
   classNames,
-}: OverflowActionsProps) {
+}: IOverflowActionsProps) {
   const reduce = useReducedMotion();
   const canHover = useHoverCapable();
   const overflowId = useId();
@@ -181,7 +181,7 @@ export function OverflowActions({
     overflowWrapperLeftRef.current = overflowNode.getBoundingClientRect().left;
   }, [isExpanded]);
 
-  const handleAction = (item: OverflowActionItem) => {
+  const handleAction = (item: TOverflowActionItem) => {
     item.onClick?.();
     onAction?.(item);
     if (collapseOnAction) setIsExpanded(false);
@@ -312,14 +312,14 @@ function ActionButton({
   iconClassName,
   labelClassName,
 }: {
-  item: OverflowActionItem;
-  size: OverflowActionsSize;
+  item: TOverflowActionItem;
+  size: TOverflowActionsSize;
   reduce: boolean | null;
   canHover: boolean;
   overflow?: boolean;
   visible?: boolean;
   variants?: Variants;
-  onAction: (item: OverflowActionItem) => void;
+  onAction: (item: TOverflowActionItem) => void;
   layoutTransition: Transition;
   className?: string;
   iconClassName?: string;

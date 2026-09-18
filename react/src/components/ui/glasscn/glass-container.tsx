@@ -3,14 +3,14 @@
 import * as React from "react"
 
 import {
-  type FrostGlassVariant,
-  type FrostGlassVariantProp,
+  type TFrostGlassVariant,
+  type TFrostGlassVariantProp,
   glassVariantStyles,
 } from "@/lib/glass-variants"
 import { cn } from "@/lib/utils"
 import { LiquidGlass } from "./liquid-glass"
 
-const glassSidebarVariableStyles: Record<FrostGlassVariant, string> = {
+const glassSidebarVariableStyles: Record<TFrostGlassVariant, string> = {
   clear: [
     "[--sidebar:rgba(255,255,255,0.18)]",
     "[--sidebar-foreground:oklch(0.145_0_0)]",
@@ -82,10 +82,10 @@ const glassSidebarVariableStyles: Record<FrostGlassVariant, string> = {
   ].join(" "),
 }
 
-type GlassSidebarProps = React.HTMLAttributes<HTMLDivElement> &
-  FrostGlassVariantProp & { refraction?: number, bezel?: number, saturation?: number, blur?: number }
+type TGlassSidebarProps = React.HTMLAttributes<HTMLDivElement> &
+  TFrostGlassVariantProp & { refraction?: number, bezel?: number, saturation?: number, blur?: number }
 
-function getGlassSidebarStandaloneClasses(glassVariant: FrostGlassVariant) {
+function getGlassSidebarStandaloneClasses(glassVariant: TFrostGlassVariant) {
   return cn(
     glassVariantStyles[glassVariant],
     glassSidebarVariableStyles[glassVariant],
@@ -103,7 +103,7 @@ function GlassContainer({
   blur,
   saturation,
   ...props
-}: GlassSidebarProps) {
+}: TGlassSidebarProps) {
   return (
     <LiquidGlass
       className={cn("rounded-[1.75rem]", className)}
@@ -128,4 +128,4 @@ function GlassContainer({
 }
 
 export { GlassContainer, glassSidebarVariableStyles }
-export type { FrostGlassVariant } from "@/lib/glass-variants"
+export type { TFrostGlassVariant } from "@/lib/glass-variants"

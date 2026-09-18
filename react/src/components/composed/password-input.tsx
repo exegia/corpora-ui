@@ -35,7 +35,7 @@ const STRENGTH_COLORS = [
   "bg-emerald-500",
 ] as const;
 
-export interface PasswordInputProps
+export interface IPasswordInputProps
   extends Omit<React.ComponentProps<typeof InputGroupInput>, "type" | "size"> {
   /** Render the eye toggle button. */
   visibilityToggle?: boolean;
@@ -59,7 +59,7 @@ export function PasswordInput({
   defaultValue,
   onChange,
   ...props
-}: PasswordInputProps) {
+}: IPasswordInputProps) {
   const [visible, setVisible] = React.useState(false);
   const [uncontrolled, setUncontrolled] = React.useState(
     String(defaultValue ?? ""),

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Copy, Link2, Plus, Sparkles, Trash2 } from "lucide-react";
-import type { ChartNodeProps } from "./types";
+import type { IChartNodeProps } from "./types";
 import { ConditionBody, StepBody } from "./step-body";
 import { nodeLabel, useFlowchartContext } from "./hooks";
 import { mix } from "./utils";
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/context-menu";
 import { cn } from "@/lib/utils";
 
-export function ChartNode({ node, index = 0, onRef, children }: ChartNodeProps) {
+export function ChartNode({ node, index = 0, onRef, children }: IChartNodeProps) {
   const {
     steps, selected, updateSelected, onPointerDown, onPointerMove, onPointerUp, handlePlace, wasDragged, drag, readOnly, onAdd, removeNode,
     snapTarget, previewNode, setPreviewNode, connectTo, renameNode, duplicateNode, canRename, canDuplicate, canConnect,

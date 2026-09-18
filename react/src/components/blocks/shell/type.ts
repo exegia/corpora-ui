@@ -7,7 +7,7 @@ import {
 } from "react"
 import type { HTMLMotionProps } from "motion/react"
 
-import type { ShellMetrics } from "./shell-metrics"
+import type { IShellMetrics } from "./shell-metrics"
 
 // ---------------------------------------------------------------------------
 // Shell fit — the shell's measurement of itself, kept in Jotai atoms keyed by
@@ -18,20 +18,20 @@ import type { ShellMetrics } from "./shell-metrics"
 /** The key a shell's fit state is filed under. Pass your own to reach it from
  * anywhere (`useShellFitState("app-shell")`); leave it out and the provider
  * generates one that dies with it. */
-export type ShellFitInstanceId = string
+export type TShellFitInstanceId = string
 
 /** The range a secondary-panel resize may land in, in px. */
-export interface ShellFitPanelBounds {
+export interface IShellFitPanelBounds {
   min: number
   max: number
 }
 
 /** What the shell measured of itself — readable by id through
  * `useShellFitState`. */
-export interface ShellFitState {
+export interface IShellFitState {
   /** The px the shell last measured, or null before its first measurement
    * (a server render, a host with no layout). */
-  metrics: ShellMetrics | null
+  metrics: IShellMetrics | null
   /** Whether the shell can hold a secondary panel. True while unmeasured, so
    * a panel never flickers out over a reading that has not happened yet. */
   fits: boolean
@@ -40,12 +40,12 @@ export interface ShellFitState {
    * `--panel-width`. */
   panelWidth: number | null
   /** The range a resize may land in. */
-  bounds: ShellFitPanelBounds
+  bounds: IShellFitPanelBounds
 }
 
 /** Writes only — drive a shell's secondary panel by id through
  * `useShellFitActions` without re-rendering when it moves. */
-export interface ShellFitActions {
+export interface IShellFitActions {
   /** Resize the secondary panel. Clamped on the way in, so a drag past the
    * gutter parks at the bound instead of banking travel it has to give back. */
   resizePanel: (width: number) => void
@@ -56,14 +56,14 @@ export interface ShellFitActions {
 
 /** What `useShellFit` hands the provider: the state, the actions and the id
  * they are filed under. */
-export interface ShellFitController extends ShellFitState, ShellFitActions {
-  shellId: ShellFitInstanceId
+export interface IShellFitController extends IShellFitState, IShellFitActions {
+  shellId: TShellFitInstanceId
 }
 
-export interface UseShellFitOptions {
+export interface IUseShellFitOptions {
   /** File the fit under this id so it can be read elsewhere and outlive the
    * shell. Generated (and dropped on unmount) when omitted. */
-  shellId?: ShellFitInstanceId
+  shellId?: TShellFitInstanceId
   /** The element the shell's CSS variables live on (the provider wrapper). */
   hostRef: RefObject<HTMLElement | null>
   /** Whether the left rail is expanded right now — a render input, so a fold
@@ -79,12 +79,12 @@ export interface UseShellFitOptions {
 }
 
 /** @internal What an instance starts from, restored by `resetShellPanelWidthAtom`. */
-export interface ShellFitSeed {
+export interface IShellFitSeed {
   /** The requested panel width at mount — null for `--panel-width`. */
   panelWidth: number | null
 }
 
-export interface ShellAction {
+export interface IShellAction {
   id: string
   label: string
   icon: ReactNode
@@ -92,7 +92,7 @@ export interface ShellAction {
   onSelect?: () => void
 }
 
-export interface ShellWorkspace {
+export interface IShellWorkspace {
   name: string
   logo?: ReactNode
   meta?: ReactNode
@@ -128,14 +128,14 @@ export type TPanelMap<Side extends TPanelSide = TPanelSide> = Partial<
 /** Dynamic panel content keyed by side — filled by
  * `useShellPanels().openPanel(side, component)` and read by ShellLayout,
  * where a side's entry wins over the static `panels` map's `component`. */
-export type SidebarComponentMap = Partial<Record<SidebarSide, ReactNode>>
+export type TSidebarComponentMap = Partial<Record<TSidebarSide, ReactNode>>
 
 /** The open/close surface of the shell's panels, lifted straight from
  * AnimatedPanelProvider — every prop is keyed by side, there are no
  * explicit per-side props. `useShellPanels` produces the controlled subset
  * of these as `providerProps`. */
-export type ShellPanelControlProps = Pick<
-  AnimatedSidebarProviderProps,
+export type TShellPanelControlProps = Pick<
+  IAnimatedSidebarProviderProps,
   | "open"
   | "defaultOpen"
   | "onOpenChange"
@@ -147,17 +147,17 @@ export type ShellPanelControlProps = Pick<
   | "panelComponents"
 >
 
-export interface UseShellPanelsOptions {
+export interface IUseShellPanelsOptions {
   /** The id the shell's fit state is filed under. Name it to read the same
    * shell from elsewhere (`useShellFitState("app-shell")`) and to keep a
    * dragged panel width across a route change; otherwise the hook generates
    * one that dies with it. */
-  shellId?: ShellFitInstanceId
+  shellId?: TShellFitInstanceId
   /** Initial desktop open state per side, merged over
    * `{ left: true, right: false }`. */
-  defaultOpen?: AnimatedSidebarProviderProps["defaultOpen"]
+  defaultOpen?: IAnimatedSidebarProviderProps["defaultOpen"]
   /** Initial mobile overlay state per side — every side starts closed. */
-  defaultOpenMobile?: AnimatedSidebarProviderProps["defaultOpenMobile"]
+  defaultOpenMobile?: IAnimatedSidebarProviderProps["defaultOpenMobile"]
   /** The width the secondary panel opens at, in px, instead of
    * `--panel-width`. */
   defaultPanelWidth?: number
@@ -167,10 +167,10 @@ export interface UseShellPanelsOptions {
   onPanelChange?: (open: boolean, side: TPanelSide) => void
 }
 
-export interface ShellPanelControls {
+export interface IShellPanelControls {
   /** The id the shell's fit state is filed under — hand it to
    * `useShellFitState` / `useShellFitActions` anywhere below `ExegiaProvider`. */
-  shellId: ShellFitInstanceId
+  shellId: TShellFitInstanceId
   /** The viewport cannot hold the secondary panel beside the rail and the
    * body at their floors, so the shell has dropped the right panel and its
    * trigger — UI outside the shell should stand down with them. Read straight
@@ -184,29 +184,29 @@ export interface ShellPanelControls {
    * the shell has. */
   resizePanel: (width: number) => void
   /** Live desktop open state, keyed by side. */
-  open: Record<SidebarSide, boolean>
+  open: Record<TSidebarSide, boolean>
   /** Live mobile overlay state, keyed by side. */
-  openMobile: Record<SidebarSide, boolean>
+  openMobile: Record<TSidebarSide, boolean>
   /** Refuses to OPEN the right panel while `isNarrow` — there is nothing on
    * screen to open. Closing it always goes through. */
-  setOpen: (open: boolean, side: SidebarSide) => void
-  setOpenMobile: (open: boolean, side: SidebarSide) => void
+  setOpen: (open: boolean, side: TSidebarSide) => void
+  setOpenMobile: (open: boolean, side: TSidebarSide) => void
   /** Desktop-only convenience — the in-shell triggers already pick the
    * mobile state themselves when the viewport is narrow. Carries the same
    * `isNarrow` refusal as `setOpen`. */
-  toggle: (side: SidebarSide) => void
+  toggle: (side: TSidebarSide) => void
   /** Open a side's panel and, when given, swap in the content it shows.
    * The component travels through `providerProps.panelComponents` into
    * ShellLayout, where it wins over the static `panels` entry for that
    * side, and sticks until the next `openPanel(side, component)` replaces
    * it — closing the panel leaves it in place for the exit animation and
    * the next open. Carries the same `isNarrow` refusal as `setOpen`. */
-  openPanel: (side: SidebarSide, component?: ReactNode) => void
+  openPanel: (side: TSidebarSide, component?: ReactNode) => void
   /** Spread onto ShellLayout (or AnimatedPanelProvider directly). */
-  providerProps: ShellPanelControlProps
+  providerProps: TShellPanelControlProps
 }
 
-export interface ShellLayoutProps extends ShellPanelControlProps {
+export interface IShellLayoutProps extends TShellPanelControlProps {
   children?: ReactNode
   /** Content for the shell's panels, keyed by the side. The shell renders
    * the `left` rail and the `right` drawer; other sides are reserved. */
@@ -220,66 +220,66 @@ export interface ShellLayoutProps extends ShellPanelControlProps {
   variant?: "web" | "desktop"
 }
 
-export type SidebarSide = "left" | "right"
+export type TSidebarSide = "left" | "right"
 /** Open flags keyed by the side. Sides left out stay uncontrolled / at their
  * default — there is no per-side prop, the record IS the API. */
-export type SidebarOpenState = Partial<Record<SidebarSide, boolean>>
-export type SidebarVariant = "sidebar" | "floating" | "inset"
-export type SidebarCollapsible = "offcanvas" | "icon" | "none"
+export type TSidebarOpenState = Partial<Record<TSidebarSide, boolean>>
+export type TSidebarVariant = "sidebar" | "floating" | "inset"
+export type TSidebarCollapsible = "offcanvas" | "icon" | "none"
 
-export interface AnimatedSidebarContextValue {
+export interface IAnimatedSidebarContextValue {
   isMobile: boolean
   /** What the shell measured of itself: whether it can hold a secondary panel
    * at all, how wide that panel is, and the range a resize may land in. The
    * right panel and its trigger stand down when `fit.fits` is false. */
-  fit: ShellFitController
+  fit: IShellFitController
   layoutId: string
   /** Desktop open state, keyed by side. */
-  open: Record<SidebarSide, boolean>
+  open: Record<TSidebarSide, boolean>
   /** Mobile overlay open state, keyed by side. */
-  openMobile: Record<SidebarSide, boolean>
+  openMobile: Record<TSidebarSide, boolean>
   reduce: boolean
-  setOpen: (open: boolean, side: SidebarSide) => void
-  setOpenMobile: (open: boolean, side: SidebarSide) => void
+  setOpen: (open: boolean, side: TSidebarSide) => void
+  setOpenMobile: (open: boolean, side: TSidebarSide) => void
   /** Mobile-aware: toggles the overlay below md, the docked panel above. */
-  toggleSidebar: (side: SidebarSide) => void
-  triggerRefs: Record<SidebarSide, React.RefObject<HTMLButtonElement | null>>
+  toggleSidebar: (side: TSidebarSide) => void
+  triggerRefs: Record<TSidebarSide, React.RefObject<HTMLButtonElement | null>>
 }
 
-export interface AnimatedSidebarProviderProps extends HTMLAttributes<HTMLDivElement> {
+export interface IAnimatedSidebarProviderProps extends HTMLAttributes<HTMLDivElement> {
   /** The id this shell's fit state (whether a secondary panel fits, how wide
    * it is) is filed under in the store. Name it to read or drive the shell
    * from elsewhere and to keep a dragged width across a route change; omit it
    * and the provider generates one that is dropped on unmount. */
-  shellId?: ShellFitInstanceId
+  shellId?: TShellFitInstanceId
   /** The width the secondary panel opens at, in px, instead of
    * `--panel-width`. Read once, on mount. */
   defaultPanelWidth?: number
   /** Controlled desktop open state, keyed by the side. A side left undefined
    * stays uncontrolled. */
-  open?: SidebarOpenState
+  open?: TSidebarOpenState
   /** Initial desktop open state, merged over `{ left: true, right: false }`. */
-  defaultOpen?: SidebarOpenState
-  onOpenChange?: (open: boolean, side: SidebarSide) => void
+  defaultOpen?: TSidebarOpenState
+  onOpenChange?: (open: boolean, side: TSidebarSide) => void
   /** Controlled mobile overlay state, keyed by side. */
-  openMobile?: SidebarOpenState
+  openMobile?: TSidebarOpenState
   /** Initial mobile overlay state — every side starts closed. */
-  defaultOpenMobile?: SidebarOpenState
-  onOpenMobileChange?: (open: boolean, side: SidebarSide) => void
+  defaultOpenMobile?: TSidebarOpenState
+  onOpenMobileChange?: (open: boolean, side: TSidebarSide) => void
   /** Content pushed into a side's panel by `useShellPanels().openPanel`. It
    * rides along in `providerProps` so the record can be spread on either
    * surface: ShellLayout renders it in that side's panel; the bare provider
    * renders no panels, so it only swallows the prop to keep it off the DOM. */
-  panelComponents?: SidebarComponentMap
+  panelComponents?: TSidebarComponentMap
   /** Fires when the shell crosses the width a secondary panel needs (rail +
    * body + panel at their floors). An imperative escape hatch for a consumer
    * that mounts the provider on its own; anything under `ExegiaProvider` can
    * subscribe by id instead with `useShellFitState(shellId).fits`. */
   onNarrowChange?: (isNarrow: boolean) => void
-  style?: SidebarProviderStyle
+  style?: TSidebarProviderStyle
 }
 
-export type SidebarProviderStyle = CSSProperties & {
+export type TSidebarProviderStyle = CSSProperties & {
   /** Left rail, expanded. */
   "--sidebar-width"?: string
   /** Left rail, folded to icons. */
@@ -291,31 +291,31 @@ export type SidebarProviderStyle = CSSProperties & {
   "--inset-min-width"?: string
 }
 
-export type AnimatedSidebarInsetProps = HTMLMotionProps<"main">
+export type TAnimatedSidebarInsetProps = HTMLMotionProps<"main">
 
-export interface AnimatedSidebarTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  side?: SidebarSide
+export interface IAnimatedSidebarTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  side?: TSidebarSide
 }
 
-export interface AnimatedSidebarPanelContextValue {
+export interface IAnimatedSidebarPanelContextValue {
   collapsed: boolean
-  collapsible: SidebarCollapsible
-  side: SidebarSide
+  collapsible: TSidebarCollapsible
+  side: TSidebarSide
 }
 
-export interface AnimatedSidebarProps extends Omit<
+export interface IAnimatedSidebarProps extends Omit<
   HTMLMotionProps<"aside">,
   "children"
 > {
   children?: ReactNode
-  side?: SidebarSide
-  variant?: SidebarVariant
-  collapsible?: SidebarCollapsible
+  side?: TSidebarSide
+  variant?: TSidebarVariant
+  collapsible?: TSidebarCollapsible
   ariaLabel?: string
   panelClassName?: string
 }
 
-export interface AnimatedSidebarMenuSubProps extends Omit<
+export interface IAnimatedSidebarMenuSubProps extends Omit<
   HTMLMotionProps<"ul">,
   "children"
 > {
@@ -323,7 +323,7 @@ export interface AnimatedSidebarMenuSubProps extends Omit<
   children?: ReactNode
 }
 
-export interface AnimatedSidebarMenuSubButtonProps {
+export interface IAnimatedSidebarMenuSubButtonProps {
   children: ReactNode
   icon?: ReactNode
   href?: string
@@ -336,7 +336,7 @@ export interface AnimatedSidebarMenuSubButtonProps {
   className?: string
 }
 
-export interface AnimatedSidebarMenuButtonProps {
+export interface IAnimatedSidebarMenuButtonProps {
   children: ReactNode
   icon?: ReactNode
   badge?: ReactNode

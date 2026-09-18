@@ -11,11 +11,11 @@ import {
   scaffoldHiddenPanelIdsAtom,
 } from "./scaffold-atom"
 import { useScaffoldContext } from "./scaffold-context"
-import type { ScaffoldCanvasProps, ScaffoldPanelProps } from "./type"
+import type { TScaffoldCanvasProps, IScaffoldPanelProps } from "./type"
 
 /** A canvas child's panel id when it opted into responsive hiding. */
 function panelIdOf(child: React.ReactNode): string | undefined {
-  if (!React.isValidElement<Pick<ScaffoldPanelProps, "id">>(child))
+  if (!React.isValidElement<Pick<IScaffoldPanelProps, "id">>(child))
     return undefined
   const id = child.props.id
   return typeof id === "string" ? id : undefined
@@ -31,7 +31,7 @@ export function ScaffoldCanvas({
   className,
   children,
   ...rest
-}: ScaffoldCanvasProps): React.ReactElement {
+}: TScaffoldCanvasProps): React.ReactElement {
   const { scaffoldId } = useScaffoldContext()
   const hiddenPanelIds = useAtomValue(scaffoldHiddenPanelIdsAtom(scaffoldId))
   const registerPanelIds = useSetAtom(registerScaffoldPanelIdsAtom(scaffoldId))

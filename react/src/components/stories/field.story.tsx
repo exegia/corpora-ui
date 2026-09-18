@@ -5,9 +5,9 @@ import { defineStory } from "@/registry/story"
 import { Field, FieldLabel, FieldDescription, FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 
-type PreviewProps = Pick<ComponentProps<typeof Field>, "disabled" | "invalid">
+type TPreviewProps = Pick<ComponentProps<typeof Field>, "disabled" | "invalid">
 
-function FieldPreview(props: PreviewProps) {
+function FieldPreview(props: TPreviewProps) {
   return (
     <div className="p-6">
       <div className="min-w-sm">

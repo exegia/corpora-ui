@@ -7,12 +7,12 @@
  * field values in local `useState` — these types describe the coordination
  * state an app wires *around* the blocks.
  */
-import type { AuthStatus } from "./auth-shell"
+import type { TAuthStatus } from "./auth-shell"
 
-export type AuthFlowId = string
+export type TAuthFlowId = string
 
 /** Which auth block the app is showing. */
-export type AuthFlowStep =
+export type TAuthFlowStep =
   | "login"
   | "signup"
   | "verify-code"
@@ -21,50 +21,50 @@ export type AuthFlowStep =
   | "onboarding"
   | "success"
 
-export type AuthFlowChannel = "email" | "sms"
+export type TAuthFlowChannel = "email" | "sms"
 
-export interface AuthFlowState {
-  step: AuthFlowStep
+export interface IAuthFlowState {
+  step: TAuthFlowStep
   /** The identifier in flight — an email or phone number. Cleared by reset
    * and by signOut. Never store passwords or codes here. */
   identifier: string | null
   /** `identifier` masked for display — "y•••@example.com", "•••1234". */
   maskedIdentifier: string | null
-  channel: AuthFlowChannel
-  status: AuthStatus
+  channel: TAuthFlowChannel
+  status: TAuthStatus
   error: string | null
 }
 
 /** Options for `beginAuthVerificationAtom` / `beginVerification`. */
-export interface BeginAuthVerificationOptions {
+export interface IBeginAuthVerificationOptions {
   identifier: string
   /** @default "email" */
-  channel?: AuthFlowChannel
+  channel?: TAuthFlowChannel
   /** @default "verify-code" */
-  step?: AuthFlowStep
+  step?: TAuthFlowStep
 }
 
 /** What `useAuthFlowActions(flowId)` returns. */
-export interface AuthFlowActions {
+export interface IAuthFlowActions {
   /** Show a step; resets status to `"idle"` and clears the error. Keeps the
    * identifier. */
-  goToStep: (step: AuthFlowStep) => void
+  goToStep: (step: TAuthFlowStep) => void
   /** Record the identifier in flight and move to the verification step. */
-  beginVerification: (options: BeginAuthVerificationOptions) => void
+  beginVerification: (options: IBeginAuthVerificationOptions) => void
   /** Mark the flow `"loading"` while an async attempt is in flight. */
   beginAttempt: () => void
   /** Mark the flow `"error"` with a message. */
   fail: (message: string) => void
   /** Mark the flow `"success"`; when a user is given, also sign the session
    * in. */
-  complete: (user?: AuthUser) => void
+  complete: (user?: IAuthUser) => void
   /** Back to the initial values (login step, no identifier). */
   reset: () => void
 }
 
 /** The signed-in identity, kept for the whole session. Structurally
  * assignable to `ProfileCardUser`, so it drops into `ProfileCardBlock`. */
-export interface AuthUser {
+export interface IAuthUser {
   id: string
   name: string
   /** Secondary line — a handle, an email, a role. */
@@ -78,18 +78,18 @@ export interface AuthUser {
 }
 
 /** `unknown` until the app restores or rejects a session at boot. */
-export type AuthSessionStatus = "unknown" | "unauthenticated" | "authenticated"
+export type TAuthSessionStatus = "unknown" | "unauthenticated" | "authenticated"
 
-export interface AuthSessionState {
-  status: AuthSessionStatus
-  user: AuthUser | null
+export interface IAuthSessionState {
+  status: TAuthSessionStatus
+  user: IAuthUser | null
 }
 
 /** What `useAuthSessionActions()` returns. */
-export interface AuthSessionActions {
-  signIn: (user: AuthUser) => void
+export interface IAuthSessionActions {
+  signIn: (user: IAuthUser) => void
   /** Shallow-merge a patch into the signed-in user; no-op when signed out. */
-  updateUser: (patch: Partial<AuthUser>) => void
+  updateUser: (patch: Partial<IAuthUser>) => void
   /** What an app calls at boot when session restore fails. */
   markUnauthenticated: () => void
   /** Sign out AND return the default auth flow to the login step. */

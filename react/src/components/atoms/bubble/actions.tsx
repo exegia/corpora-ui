@@ -2,7 +2,7 @@
 
 import type * as React from "react"
 import { cn } from "@/lib/utils"
-import type { BubbleActionsProps } from "./types"
+import type { TBubbleActionsProps } from "./types"
 
 /**
  * Row of per-message actions (copy, retry, …). Hidden until the bubble is
@@ -12,7 +12,7 @@ export function BubbleActions({
   className,
   "aria-label": ariaLabel = "Message actions",
   ...props
-}: BubbleActionsProps): React.ReactElement {
+}: TBubbleActionsProps): React.ReactElement {
   return (
     <div
       aria-label={ariaLabel}

@@ -10,7 +10,7 @@ import {
   type MouseEvent,
 } from "react"
 import { useAtomValue, useSetAtom } from "jotai"
-import type { ResourceRowProps } from "./type"
+import type { IResourceRowProps } from "./type"
 import {
   AnimatePresence,
   motion,
@@ -65,7 +65,7 @@ const reducedPillVariants: Variants = {
   exit: (hoverActive: boolean) => (!hoverActive ? { opacity: 0 } : {}),
 }
 
-function ResourceRowImpl({ row }: ResourceRowProps) {
+function ResourceRowImpl({ row }: IResourceRowProps) {
   const {
     sidebarId,
     hoverLayoutId,
@@ -366,7 +366,7 @@ function ResourceRowImpl({ row }: ResourceRowProps) {
  * its item (stable unless the data changed), depth and parent — so a sibling
  * opening does not walk every row. Each row's own state reaches it through
  * its atoms instead. */
-function sameRow(prev: ResourceRowProps, next: ResourceRowProps): boolean {
+function sameRow(prev: IResourceRowProps, next: IResourceRowProps): boolean {
   return (
     prev.row.item === next.row.item &&
     prev.row.depth === next.row.depth &&

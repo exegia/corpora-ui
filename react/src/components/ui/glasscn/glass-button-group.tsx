@@ -1,7 +1,7 @@
 "use client"
 
 import {
-  type FrostGlassVariantProp,
+  type TFrostGlassVariantProp,
   glassVariantStyles,
 } from "@/lib/glass-variants"
 import { cn } from "@/lib/utils"
@@ -9,15 +9,15 @@ import { cn } from "@/lib/utils"
 import { ButtonGroup } from "../button-group"
 import { LiquidGlass } from "./liquid-glass"
 
-type GlassButtonGroupProps = React.ComponentProps<typeof ButtonGroup> &
-  FrostGlassVariantProp
+type TGlassButtonGroupProps = React.ComponentProps<typeof ButtonGroup> &
+  TFrostGlassVariantProp
 
 function GlassButtonGroup({
   className,
   glassVariant = "liquid-refract",
   children,
   ...props
-}: GlassButtonGroupProps) {
+}: TGlassButtonGroupProps) {
   if (glassVariant === "liquid-refract") {
     return (
       <LiquidGlass className={cn("", className)}>

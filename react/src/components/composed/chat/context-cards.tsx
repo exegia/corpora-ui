@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import { Card, CardPanel } from "@/components/ui/card"
 import { FileTypeBadge, Pill } from "@/components/ui/chat"
 
-export interface ContextCard {
+export interface IContextCard {
   id?: string
   title: React.ReactNode
   /** "290 characters" */
@@ -16,12 +16,12 @@ export interface ContextCard {
   icon?: React.ReactNode
 }
 
-export interface ContextCardsProps extends React.ComponentPropsWithoutRef<"div"> {
+export interface IContextCardsProps extends React.ComponentPropsWithoutRef<"div"> {
   header?: React.ReactNode
-  cards: ContextCard[]
+  cards: IContextCard[]
   /** Count pill; defaults to `cards.length`. */
   count?: React.ReactNode
-  onOpen?: (card: ContextCard, index: number) => void
+  onOpen?: (card: IContextCard, index: number) => void
 }
 
 /**
@@ -30,7 +30,7 @@ export interface ContextCardsProps extends React.ComponentPropsWithoutRef<"div">
  *
  * @sketch "Component / Context Cards"
  */
-export function ContextCards({ header = "All chunks", cards, count, onOpen, className, ...props }: ContextCardsProps): React.ReactElement {
+export function ContextCards({ header = "All chunks", cards, count, onOpen, className, ...props }: IContextCardsProps): React.ReactElement {
   return (
     <div data-slot="context-cards" className={cn("flex w-[380px] max-w-full flex-col gap-2", className)} {...props}>
       <div className="flex items-center gap-2.5 px-0.5">

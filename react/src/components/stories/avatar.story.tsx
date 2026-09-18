@@ -4,12 +4,12 @@ import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
 import { Avatar } from "@/components/atoms/avatar"
 
-type PreviewProps = Pick<
+type TPreviewProps = Pick<
   ComponentProps<typeof Avatar>,
   "user" | "size" | "audio" | "loading"
 >
 
-function AvatarPreview(props: PreviewProps) {
+function AvatarPreview(props: TPreviewProps) {
   return (
     <div className="p-6">
       <div className="">

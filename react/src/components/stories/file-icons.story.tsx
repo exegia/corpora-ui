@@ -4,9 +4,9 @@ import type { ComponentProps } from "react"
 import { defineStory } from "@/registry/story"
 import { FileBadgeTei } from "@/components/icons/file-badge-tei"
 
-type PreviewProps = Pick<ComponentProps<typeof FileBadgeTei>, "size" | "title">
+type TPreviewProps = Pick<ComponentProps<typeof FileBadgeTei>, "size" | "title">
 
-function FileBadgeTeiPreview(props: PreviewProps) {
+function FileBadgeTeiPreview(props: TPreviewProps) {
   return (
     <div className="p-6">
       <div className="">

@@ -13,10 +13,10 @@ import {
 } from "./scaffold-atom"
 import { ScaffoldContext } from "./scaffold-context"
 import type {
-  ScaffoldConfig,
-  ScaffoldContextValue,
-  ScaffoldHandlers,
-  ScaffoldRootProps,
+  IScaffoldConfig,
+  IScaffoldContextValue,
+  IScaffoldHandlers,
+  IScaffoldRootProps,
 } from "./type"
 import type { ClassNameValue } from "tailwind-merge"
 
@@ -43,17 +43,17 @@ export function ScaffoldRoot({
   className,
   children,
   ...rest
-}: ScaffoldRootProps): React.ReactElement {
+}: IScaffoldRootProps): React.ReactElement {
   const generatedId = React.useId()
   const scaffoldId = scaffoldIdProp ?? generatedId
   const background: ClassNameValue = `bg-linear-to-tr/increasing from-neutral-200 via-neutral-100 to-stone-200 dark:from-neutral-900 dark:via-neutral-950 dark:to-stone-950`
 
   const controlsInspector = inspectorOpenProp !== undefined
-  const config = React.useMemo<ScaffoldConfig>(
+  const config = React.useMemo<IScaffoldConfig>(
     () => ({ controlsInspector }),
     [controlsInspector]
   )
-  const handlers = React.useMemo<ScaffoldHandlers>(
+  const handlers = React.useMemo<IScaffoldHandlers>(
     () => ({ onInspectorOpenChange }),
     [onInspectorOpenChange]
   )
@@ -91,7 +91,7 @@ export function ScaffoldRoot({
     return () => removeScaffoldInstance(scaffoldId)
   }, [scaffoldIdProp, scaffoldId])
 
-  const value = React.useMemo<ScaffoldContextValue>(
+  const value = React.useMemo<IScaffoldContextValue>(
     () => ({ scaffoldId, inspectorWidth }),
     [scaffoldId, inspectorWidth]
   )

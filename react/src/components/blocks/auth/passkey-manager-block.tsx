@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils"
 import { AuthError, EASE, Reveal } from "./auth-shell"
 
 /** One registered passkey, as rendered by {@link PasskeyManagerBlock}. */
-export interface PasskeyRecord {
+export interface IPasskeyRecord {
   id: string
   /** Server-derived name; falls back to "Passkey" when absent. */
   name?: string | null
@@ -28,11 +28,11 @@ export interface PasskeyRecord {
   lastUsedAt?: string | null
 }
 
-export interface PasskeyManagerBlockProps {
+export interface IPasskeyManagerBlockProps {
   title?: string
   description?: string
   /** The account's passkeys, newest first. */
-  passkeys?: PasskeyRecord[]
+  passkeys?: IPasskeyRecord[]
   /** Whether this device can register passkeys at all. */
   available?: boolean
   /** Shows the loading row instead of the list. */
@@ -75,7 +75,7 @@ export function PasskeyManagerBlock({
   onRename,
   onDelete,
   className,
-}: PasskeyManagerBlockProps) {
+}: IPasskeyManagerBlockProps) {
   const [error, setError] = React.useState<string | null>(null)
   const [busy, setBusy] = React.useState(false)
   const [registering, setRegistering] = React.useState(false)
@@ -107,7 +107,7 @@ export function PasskeyManagerBlock({
     setRegistering(false)
   }
 
-  function startRename(passkey: PasskeyRecord) {
+  function startRename(passkey: IPasskeyRecord) {
     setConfirmingId(null)
     setRenamingId(passkey.id)
     setRenameValue(passkey.name ?? "")

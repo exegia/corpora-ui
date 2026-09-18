@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test"
 import { render, screen } from "@testing-library/react"
 import { Message } from "../message"
-import type { AIContentProps } from "../types"
+import type { TAIContentProps } from "../types"
 
 describe("Message", () => {
   test("renders the agent identity row and the body as a polite live region", () => {
@@ -35,8 +35,8 @@ describe("Message", () => {
   })
 
   test("hands AttachedContent the message type as `kind` plus contentProps", () => {
-    const seen = mock<(props: AIContentProps<"chart">) => void>(() => {})
-    const Attached = (props: AIContentProps<"chart">) => {
+    const seen = mock<(props: TAIContentProps<"chart">) => void>(() => {})
+    const Attached = (props: TAIContentProps<"chart">) => {
       seen(props)
       return <div data-testid="attached">chart goes here</div>
     }
