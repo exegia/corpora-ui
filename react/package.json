@@ -30,6 +30,7 @@
     "src/assets/css/shadows.css",
     "src/assets/css/chat.css",
     "src/tailwind-inset-shadow.js",
+    "src/specular.js",
     "src/index.ts"
   ],
   "scripts": {

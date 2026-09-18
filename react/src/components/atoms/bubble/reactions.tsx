@@ -165,10 +165,7 @@ export function BubbleReactions({
     >
       <GlassContainer
         glassVariant="frosted"
-        refraction={3}
-        bezel={12}
-        blur={5}
-        saturation={2}
+        optics={{ strength: 0.03, bendWidth: 0.12, frost: 5, saturate: 2 }}
         className={cn(
           "inline-flex h-full w-fit items-center rounded-xl",
           className

@@ -6,7 +6,7 @@ import { defineStory, type TStoryData } from "@/registry/story"
 import { RecordsTable } from "@/components/composed/chat/records-table"
 
 type TPreviewProps = TStoryData<
-  Pick<ComponentProps<typeof RecordsTable>, "rows" | "headers" | "maxTags">
+  Pick<ComponentProps<typeof RecordsTable>, "rows" | "headers" | "maxTags" | "stickyHeader">
 >
 
 function RecordsTablePreview(props: TPreviewProps) {
@@ -44,6 +44,7 @@ export const story = defineStory({
         },
       ],
       maxTags: 2,
+      stickyHeader: false,
     },
   },
 })

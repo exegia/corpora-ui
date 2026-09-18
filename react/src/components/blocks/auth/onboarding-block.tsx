@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { cn } from "@/lib/utils";
+import { Select, SelectTrigger, SelectValue, SelectPopup, SelectItem } from "@/components/ui/select";
 import {
   AuthCard,
   AuthError,
@@ -58,6 +58,7 @@ export function OnboardingBlock({
   >({});
 
   const [index, setIndex] = React.useState(0);
+  const [furthestIndex, setFurthestIndex] = React.useState(0);
   const [values, setValues] = React.useState<Record<string, TOnboardingValue>>(
     {},
   );
@@ -87,7 +88,10 @@ export function OnboardingBlock({
       delete draftsRef.current[step.id];
       setDrafts({ ...draftsRef.current });
       setStatus(last ? "success" : "idle");
-      if (!last) setIndex((current) => current + 1);
+      if (!last) {
+        setFurthestIndex((current) => Math.max(current, index + 1));
+        setIndex((current) => current + 1);
+      }
     } catch (cause) {
       setStatus("idle");
       setError(
@@ -117,23 +121,27 @@ export function OnboardingBlock({
         ) : step ? (
           <div className="flex flex-col gap-4">
             <nav aria-label="Onboarding progress">
-              <ol className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
-                {steps.map((item, itemIndex) => (
-                  <li
-                    key={item.id}
-                    aria-current={itemIndex === index ? "step" : undefined}
-                    className={cn(
-                      "text-muted-foreground",
-                      itemIndex === index && "font-medium text-foreground",
-                    )}
-                  >
-                    {item.title}
-                    {itemIndex < index && (
-                      <span className="sr-only"> (completed)</span>
-                    )}
-                  </li>
-                ))}
-              </ol>
+              <Select
+                items={steps.map((item) => ({ value: item.id, label: item.title }))}
+                value={step.id}
+                disabled={status === "loading"}
+                onValueChange={(id) => {
+                  const next = steps.findIndex((item) => item.id === id);
+                  if (next < 0 || next > furthestIndex) return;
+                  setError(null);
+                  setDrafts({ ...draftsRef.current });
+                  setIndex(next);
+                }}
+              >
+                <SelectTrigger aria-label="Onboarding step"><SelectValue /></SelectTrigger>
+                <SelectPopup>
+                  {steps.map((item, itemIndex) => (
+                    <SelectItem key={item.id} value={item.id} disabled={itemIndex > furthestIndex}>
+                      {item.title}
+                    </SelectItem>
+                  ))}
+                </SelectPopup>
+              </Select>
             </nav>
 
             {/* The AuthCard title is the visible heading; this one exists to

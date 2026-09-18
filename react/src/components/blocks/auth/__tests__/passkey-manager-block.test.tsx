@@ -44,7 +44,7 @@ describe("PasskeyManagerBlock", () => {
     const onRegister = mock(async () => {});
     render(<PasskeyManagerBlock onRegister={onRegister} />);
 
-    await user.click(screen.getByRole("button", { name: "Add a passkey" }));
+    await user.click(screen.getByRole("button", { name: "Add" }));
 
     expect(onRegister).toHaveBeenCalledTimes(1);
   });
@@ -122,7 +122,7 @@ describe("PasskeyManagerBlock", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: "Add a passkey" }));
+    await user.click(screen.getByRole("button", { name: "Add" }));
 
     expect((await screen.findByRole("alert")).textContent).toBe(
       "Passkey registration is disabled.",

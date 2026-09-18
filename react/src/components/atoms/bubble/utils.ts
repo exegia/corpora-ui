@@ -38,9 +38,9 @@ export const twBubbleColumnClasses: Record<TBubbleVariant, ClassValue> = {
 const defaultClasses = "w-fit  rounded-full text-xs leading-4 font-medium relative"
 export const twBubbleMessageClasses: Record<TBubbleVariant, ClassValue> = {
   sender: cn(defaultClasses,
-    "inset-shadow-lit inset-shadow-dim inset-shadow-dim-b-1 inset-shadow-dim-r inset-shadow-lit-l-1 inset-shadow-lit-t-1 inset-shadow-blur-1 rounded-br-[8px] group-has-[+[data-continued]]/bubble:rounded-br-full has-[[data-slot=attachment]]:rounded-b-md has-[[data-slot=attachment]]:rounded-t-md bg-indigo-700 dark:bg-neutral-100 text-background chat-bubble bubble-sender text-left pl-6 pr-4 py-3"),
+    "bezel-lit-t-2 bezel-lit-blur-3 bezel-lit/14 bezel-dim-b-2 bezel-dim-blur-3 bezel-dim/78 dark:bezel-lit-blur-2 dark:bezel-lit/57 dark:bezel-dim/11 rounded-br-[8px] group-has-[+[data-continued]]/bubble:rounded-br-full has-[[data-slot=attachment]]:rounded-b-md has-[[data-slot=attachment]]:rounded-t-md bg-indigo-700 dark:bg-neutral-100 text-background chat-bubble bubble-sender text-left pl-6 pr-4 py-3"),
   recipient: cn(defaultClasses,
-    "inset-shadow-lit inset-shadow-dim/20 dark:inset-shadow-lit/20 dark:inset-shadow-dim/50 inset-shadow-dim-b-1 inset-shadow-dim-r inset-shadow-lit-t-1 inset-shadow-lit-l-1 inset-shadow-blur-1 rounded-bl-[8px] group-has-[+[data-continued]]/bubble:rounded-bl-full has-[[data-slot=attachment]]:rounded-b-md has-[[data-slot=attachment]]:rounded-t-md bg-neutral-100 dark:bg-neutral-800 text-foreground chat-bubble bubble-recipient text-right pl-4 pr-6 py-3"),
+    "bezel-lit-t-2 bezel-lit-blur-2 bezel-lit/57 bezel-dim-b-2 bezel-dim-blur-3 bezel-dim/11 dark:bezel-lit-blur-3 dark:bezel-lit/14 dark:bezel-dim/78 rounded-bl-[8px] group-has-[+[data-continued]]/bubble:rounded-bl-full has-[[data-slot=attachment]]:rounded-b-md has-[[data-slot=attachment]]:rounded-t-md bg-neutral-100 dark:bg-neutral-800 text-foreground chat-bubble bubble-recipient text-right pl-4 pr-6 py-3"),
   ai: cn(defaultClasses,
     "text-sm leading-5 my-1 text-foreground w-full"),
 }

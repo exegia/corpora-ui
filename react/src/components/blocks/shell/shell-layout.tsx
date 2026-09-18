@@ -6,7 +6,7 @@ import * as React from "react"
 import { AnimatedPanel } from "./animated-panel.tsx"
 import { cn } from "@/lib/utils"
 import type { IShellLayoutProps, TShellPanelControlProps } from "./type"
-import { TITLE_BAR_HEIGHT } from "./utils"
+import { SHELL_BEZEL_CLASSES, TITLE_BAR_HEIGHT } from "./utils"
 import type { ClassNameValue } from "tailwind-merge"
 import { AnimatedPanelProvider } from "./animated-panel-provider.tsx"
 import { AnimatedPanelTrigger } from "./animated-panel-trigger.tsx"
@@ -107,8 +107,8 @@ export function ShellLayout({
           // surface itself; the desktop rail keeps it on the inner panel.
           className={cn(
             "bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900",
-            "outline-offset-0.5 border-t-3 border-white outline-neutral-100 dark:inset-ring-black",
-            "rounded-md shadow-md shadow-neutral-200 dark:shadow-neutral-950"
+            "rounded-md",
+            SHELL_BEZEL_CLASSES
           )}
           collapsible="offcanvas"
           role="complementary"

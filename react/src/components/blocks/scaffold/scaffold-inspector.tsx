@@ -16,6 +16,7 @@ import type { IScaffoldInspectorProps } from "./type"
 import { GlassContainer } from "@/components/ui/glasscn/glass-container.tsx"
 import { Button } from "@/components/ui/button"
 import { LucideX } from "lucide-react"
+import { SCAFFOLD_BEZEL_CLASSES } from "./utils"
 
 /**
  * The right-hand drawer: a brighter card that slides in over the canvas,
@@ -60,7 +61,10 @@ export function ScaffoldInspector({
       {...rest}
     >
       <GlassContainer
-        className="flex flex-1 flex-col rounded-md border-t border-white bg-neutral-50/20 shadow-inner shadow-lg dark:border-neutral-800 dark:bg-black/5"
+        className={cn(
+          "flex flex-1 flex-col rounded-md bg-neutral-50/20 dark:bg-black/5",
+          SCAFFOLD_BEZEL_CLASSES
+        )}
         glassVariant="subtle"
       >
         <div

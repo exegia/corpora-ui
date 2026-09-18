@@ -6,10 +6,9 @@ import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
-import { LiquidGlass } from "@/components/ui/glasscn/liquid-glass";
+import { GlassSurface } from "@/components/ui/glasscn/liquid-glass";
 import {
   type TFrostGlassVariant,
-  glassVariantStyles,
   liquidRefractStyles,
 } from "@/lib/glass-variants";
 
@@ -124,7 +123,7 @@ export function Button({
 
   const resolvedGlassVariant: TFrostGlassVariant | undefined =
     variant === "glass" ? (glassVariant ?? "liquid-refract") : undefined;
-  const isLiquidRefract = resolvedGlassVariant === "liquid-refract";
+
 
   // Icon-only sizes overlay the spinner on top of the (hidden) icon; text
   // sizes keep the label visible and show the spinner inline before it.
@@ -133,6 +132,7 @@ export function Button({
   const defaultProps = {
     children: (
       <>
+        {resolvedGlassVariant && <GlassSurface glassVariant={resolvedGlassVariant} />}
         {!isIconSize && (
           // Always mounted so the button width morphs as the slot collapses
           // and expands; the closed state cancels the flex gap (which varies
@@ -169,8 +169,7 @@ export function Button({
       !isIconSize &&
         "hover:[&_svg:not([class*='animate-'])]:scale-101 motion-reduce:hover:[&_svg]:scale-100",
       loading && isIconSize && "data-loading:text-transparent",
-      resolvedGlassVariant && glassVariantStyles[resolvedGlassVariant],
-      isLiquidRefract && liquidRefractStyles,
+      resolvedGlassVariant && cn("isolate", liquidRefractStyles),
       className,
     ),
     "aria-disabled": loading || undefined,
@@ -188,12 +187,6 @@ export function Button({
     props: mergeProps<"button">(defaultProps, props),
     render,
   });
-
-  // liquid-refract delegates the finish to the LiquidGlass wrapper, which
-  // renders the SVG-displacement backdrop behind an unstyled button.
-  if (isLiquidRefract) {
-    return <LiquidGlass>{element}</LiquidGlass>;
-  }
 
   return element;
 }

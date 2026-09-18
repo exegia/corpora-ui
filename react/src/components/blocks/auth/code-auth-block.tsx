@@ -75,6 +75,7 @@ export function CodeAuthBlock({
   return (
     <AuthCard
       title="Enter verification code"
+      className="[&_[data-slot=card-header]]:gap-3 [&_[data-slot=card-header]]:pb-8 [&_[data-slot=card-description]]:text-xs [&_[data-slot=card-description]]:leading-relaxed"
       logo={logo}
       accent={accent}
       description={

@@ -177,12 +177,12 @@ export function LinkedAccountsBlock({
               )}
 
               {connectable.map((provider) => {
-                const { label, BrandIcon, brandClassName } =
+                const { label, BrandIcon, brandClassName, buttonClassName, labelClassName } =
                   SOCIAL_PROVIDERS[provider]
                 return (
                   <Button
                     key={provider}
-                    className="w-full"
+                    className={cn("w-full", buttonClassName)}
                     type="button"
                     variant="outline"
                     disabled={busy}
@@ -190,7 +190,7 @@ export function LinkedAccountsBlock({
                     onClick={() => void connect(provider)}
                   >
                     <BrandIcon aria-hidden="true" className={brandClassName} />
-                    <span className="flex-1">Connect {label}</span>
+                    <span className={cn("flex-1", labelClassName)}>Connect {label}</span>
                   </Button>
                 )
               })}

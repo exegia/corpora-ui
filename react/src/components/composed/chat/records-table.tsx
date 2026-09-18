@@ -32,6 +32,8 @@ export interface IRecordsTableProps extends React.ComponentPropsWithoutRef<"div"
   tableId?: string
   rows: IRecordsRow[]
   headers?: Partial<Record<TRecordsColumnKey, React.ReactNode>>
+  /** Pin the header inside a height-constrained scroll container. */
+  stickyHeader?: boolean
   maxTags?: number
   selected?: ReadonlySet<string>
   onSelectionChange?: (selected: ReadonlySet<string>) => void
@@ -47,7 +49,7 @@ const HEADERS: Record<TRecordsColumnKey, string> = { name: "Company", tags: "Cat
  *
  * @sketch "Component / Records Table"
  */
-export function RecordsTable({ tableId, rows, headers, maxTags = 2, selected, onSelectionChange, onSortChange, className, ...props }: IRecordsTableProps): React.ReactElement {
+export function RecordsTable({ tableId, rows, headers, stickyHeader = false, maxTags = 2, selected, onSelectionChange, onSortChange, className, ...props }: IRecordsTableProps): React.ReactElement {
   const generatedId = React.useId()
   const id = tableId ?? generatedId
   const [stored, setStored] = useAtom(recordsTableSelectionAtom(id))
@@ -78,12 +80,12 @@ export function RecordsTable({ tableId, rows, headers, maxTags = 2, selected, on
   )
 
   return (
-    <Card data-slot="records-table" className={cn("w-[540px] max-w-full overflow-x-auto", className)} {...props}>
-      <table className="w-full border-collapse text-left">
-        <thead>
+    <Card tabIndex={0} role="region" aria-label="Records table" data-slot="records-table" className={cn("isolate w-[540px] max-w-full overflow-auto select-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden", className)} {...props}>
+      <table className="w-full min-w-[540px] border-separate border-spacing-0 text-left [&_td]:border-b [&_td]:border-border-default [&_th]:border-b [&_th]:border-border-default [&_tr:last-child_td]:border-b-0">
+        <thead className={cn(stickyHeader && "[&_th]:sticky [&_th]:top-0 [&_th]:z-20 [&_th]:bg-surface-card [&_th:first-child]:z-30 [&_th:nth-child(2)]:z-30")}>
           <tr className="border-b border-border-default text-[11px] font-medium leading-3 text-text-secondary">
-            <th className="w-7 py-2.5 pl-3"><Checkbox aria-label="Select all" checked={all} indeterminate={some} onCheckedChange={toggleAll} className="size-4" /></th>
-            <th className="px-2 py-2.5">{h.name}</th>
+            <th className="sticky left-0 z-10 w-13 min-w-13 bg-surface-card py-2.5 pl-3"><Checkbox aria-label="Select all" checked={all} indeterminate={some} onCheckedChange={toggleAll} className="size-4" /></th>
+            <th className="sticky left-13 z-10 min-w-44 bg-surface-card px-2 py-2.5">{h.name}</th>
             <th className="px-2 py-2.5">{sortable("tags", h.tags)}</th>
             <th className="px-2 py-2.5">{sortable("lastInteraction", h.lastInteraction)}</th>
             <th className="px-2 py-2.5 pr-3">{sortable("strength", h.strength)}</th>
@@ -96,13 +98,13 @@ export function RecordsTable({ tableId, rows, headers, maxTags = 2, selected, on
             const checked = current.has(row.id)
             return (
               <tr key={row.id} data-selected={checked || undefined} className="border-b border-border-default last:border-b-0 data-selected:bg-accent-subtle/40">
-                <td className="py-2 pl-3">
+                <td className={cn("sticky left-0 z-10 w-13 min-w-13 py-2 pl-3", checked ? "bg-accent-subtle" : "bg-surface-card")}>
                   <span className="flex items-center gap-2">
                     <span className="w-2 text-[11px] text-text-muted group-hover:hidden">{i + 1}</span>
                     <Checkbox aria-label={`Select row ${i + 1}`} checked={checked} onCheckedChange={() => toggle(row.id)} className="size-4" />
                   </span>
                 </td>
-                <td className="px-2 py-2">
+                <td className={cn("sticky left-13 z-10 min-w-44 px-2 py-2", checked ? "bg-accent-subtle" : "bg-surface-card")}>
                   <span className="flex items-center gap-2">
                     <span className="inline-flex size-5 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-subtle text-[9px] font-semibold text-text-secondary">
                       {row.avatarSrc ? <img alt="" className="size-full object-cover" src={row.avatarSrc} /> : row.initial}
