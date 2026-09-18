@@ -2,12 +2,8 @@
 
 import * as React from "react"
 
-import { DemoSelect, DemoStage } from "@/components/docs/demo-controls"
+import { DemoStage } from "@/components/docs/demo-controls"
 import { Verse, VerseNote, VerseSpan } from "@/components/composed/verse"
-
-const SIZES = ["small", "medium", "large"] as const
-
-type DemoSize = (typeof SIZES)[number]
 
 function PopoverNote({
   label,
@@ -17,8 +13,8 @@ function PopoverNote({
   children: React.ReactNode
 }): React.ReactElement {
   return (
-    <div className="grid gap-1">
-      <p className="text-[8px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
+    <div className="gap-1 grid">
+      <p className="font-medium text-[8px] tracking-[0.14em] text-muted-foreground uppercase">
         {label}
       </p>
       <p className="text-sm text-foreground">{children}</p>
@@ -27,20 +23,9 @@ function PopoverNote({
 }
 
 export default function VerseDemo(): React.ReactElement {
-  const [size, setSize] = React.useState<DemoSize>("medium")
-
   return (
-    <DemoStage
-      controls={
-        <DemoSelect
-          label="size"
-          options={SIZES}
-          value={size}
-          onChange={setSize}
-        />
-      }
-    >
-      <div className="grid max-w-xl gap-5">
+    <DemoStage>
+      <div className="max-w-xl gap-5 grid">
         <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">
           Click the chapter reference, dotted spans or the note marker
         </p>
@@ -52,7 +37,7 @@ export default function VerseDemo(): React.ReactElement {
             </PopoverNote>
           }
           href="#verse-demo"
-          size={size}
+          size="medium"
         >
           In the beginning{" "}
           <VerseSpan

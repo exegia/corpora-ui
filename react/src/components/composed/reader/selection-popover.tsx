@@ -18,7 +18,7 @@ import {
   mutedText,
   surface,
 } from "@/components/composed/ai/shared"
-import type { SelectionPopoverProps } from "./type"
+import type { ISelectionPopoverProps } from "./type"
 
 /**
  * The reader entry point, built on the preview-card atom: hovering or
@@ -37,7 +37,7 @@ export function SelectionPopover({
   onClose,
   children,
   className,
-}: SelectionPopoverProps): React.ReactElement {
+}: ISelectionPopoverProps): React.ReactElement {
   const [internalOpen, setInternalOpen] = useState(defaultOpen)
   const isOpen = open ?? internalOpen
 

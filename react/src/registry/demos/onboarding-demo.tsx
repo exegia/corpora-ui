@@ -2,13 +2,12 @@
 
 import * as React from "react"
 
-import { DemoBrandMark, DemoSelect, DemoStage, DemoToggle } from "@/components/docs/demo-controls"
-import {
-  OnboardingBlock,
-  type OnboardingStepConfig,
-} from "@/components/blocks/auth/onboarding-block"
+import { DemoBrandMark, DemoSelect, DemoToggle } from "@/components/docs/demo-controls"
+import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
+import { OnboardingBlock } from "@/components/blocks/auth/onboarding-block"
+import type { IOnboardingStepConfig } from "@/components/blocks/auth/type"
 
-const STEPS: OnboardingStepConfig[] = [
+const STEPS: IOnboardingStepConfig[] = [
   {
     id: "profile",
     title: "Profile",
@@ -76,6 +75,7 @@ export default function OnboardingDemo() {
       }
     >
       <OnboardingBlock
+        autoFocus={false}
         key={resetKey}
         steps={STEPS}
         logo={logo ? <DemoBrandMark /> : undefined}

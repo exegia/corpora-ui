@@ -21,7 +21,7 @@ import {
   toggleTreeNodeAtom,
   treeStateAtom,
 } from "./tree-atom"
-import type { TreeActions, TreeInstanceId, TreeState } from "./type"
+import type { ITreeActions, TTreeInstanceId, ITreeState } from "./type"
 
 /**
  * Read the tree registered under `treeId` from anywhere below
@@ -35,7 +35,7 @@ import type { TreeActions, TreeInstanceId, TreeState } from "./type"
  * change. A component that reads one field should subscribe to that field's
  * atom instead: `useAtomValue(treeCollapsedAtom("app-nav"))`.
  */
-export function useTreeState(treeId: TreeInstanceId): TreeState {
+export function useTreeState(treeId: TTreeInstanceId): ITreeState {
   return useAtomValue(treeStateAtom(treeId))
 }
 
@@ -49,7 +49,7 @@ export function useTreeState(treeId: TreeInstanceId): TreeState {
  * <Button onClick={nav.collapseAll}>Collapse all</Button>
  * ```
  */
-export function useTreeActions(treeId: TreeInstanceId): TreeActions {
+export function useTreeActions(treeId: TTreeInstanceId): ITreeActions {
   const expand = useSetAtom(expandTreeNodeAtom(treeId))
   const collapse = useSetAtom(collapseTreeNodeAtom(treeId))
   const toggleExpanded = useSetAtom(toggleTreeNodeAtom(treeId))

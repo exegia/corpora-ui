@@ -3,11 +3,9 @@
 import type * as React from "react"
 import { Group } from "@/components/ui/group"
 import { cn } from "@/lib/utils"
+import type { IRecommendationStackProps } from "./type"
 
-export interface RecommendationStackProps
-  extends React.ComponentPropsWithoutRef<"div"> {
-  children: React.ReactNode
-}
+
 
 /**
  * Fuses a run of RecommendationCards into one bordered stack for the thread.
@@ -21,11 +19,11 @@ export function RecommendationStack({
   className,
   children,
   ...props
-}: RecommendationStackProps): React.ReactElement {
+}: IRecommendationStackProps): React.ReactElement {
   return (
     <Group
       className={cn(
-        "w-full *:before:content-none",
+        "w-full *:before:content-none mt-3",
         "[&>*:not(:last-child)_[data-slot=recommendation-card]]:rounded-b-none",
         "[&>*:not(:last-child)_[data-slot=recommendation-card]]:before:rounded-b-none",
         "[&>*+*_[data-slot=recommendation-card]]:rounded-t-none",

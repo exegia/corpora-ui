@@ -1,4 +1,4 @@
-import type { FileIconProps } from "./types"
+import type { IFileIconProps } from "./types"
 
 /**
  * Corpus file icon — badge variant.
@@ -9,7 +9,7 @@ export function FileBadgeCorpus({
   title = "Corpus file",
   className,
   ...props
-}: FileIconProps) {
+}: IFileIconProps) {
   return (
     <svg
       viewBox="-44 -48 1068 1114"

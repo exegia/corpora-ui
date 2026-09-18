@@ -23,7 +23,7 @@ import {
 import { SPRING_LAYOUT } from "@/lib/ease";
 import { cn } from "@/lib/utils";
 
-export interface SharedLayoutBgProps
+export interface ISharedLayoutBgProps
   extends Omit<HTMLAttributes<HTMLElement>, "children"> {
   children: ReactNode;
   /** Semantic container used for the children. */
@@ -49,7 +49,7 @@ const reducedVariants: Variants = {
   exit: (isActive: boolean) => (!isActive ? { opacity: 0 } : {}),
 };
 
-export const SharedLayoutBg = forwardRef<HTMLElement, SharedLayoutBgProps>(
+export const SharedLayoutBg = forwardRef<HTMLElement, ISharedLayoutBgProps>(
   function SharedLayoutBg(
     {
       children,

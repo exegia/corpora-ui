@@ -32,7 +32,7 @@ export const selectTriggerVariants = cva(
 
 export const selectTriggerIconClassName = "-me-1 size-4.5 opacity-80 sm:size-4";
 
-export interface SelectButtonProps extends useRender.ComponentProps<"button"> {
+export interface ISelectButtonProps extends useRender.ComponentProps<"button"> {
   size?: VariantProps<typeof selectTriggerVariants>["size"];
 }
 
@@ -42,7 +42,7 @@ export function SelectButton({
   render,
   children,
   ...props
-}: SelectButtonProps): React.ReactElement {
+}: ISelectButtonProps): React.ReactElement {
   const typeValue: React.ButtonHTMLAttributes<HTMLButtonElement>["type"] =
     render ? undefined : "button";
 

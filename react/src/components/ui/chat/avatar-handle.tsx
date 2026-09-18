@@ -1,7 +1,7 @@
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 
-export interface AvatarHandleProps extends React.ComponentPropsWithoutRef<"span"> {
+export interface IAvatarHandleProps extends React.ComponentPropsWithoutRef<"span"> {
   src?: string
   /** Initials shown when no image loads; two characters at most. */
   initials?: string
@@ -13,7 +13,7 @@ export interface AvatarHandleProps extends React.ComponentPropsWithoutRef<"span"
  *
  * @sketch "Atom / Avatar / Handle 20"
  */
-export function AvatarHandle({ src, initials, size = 20, className, ...props }: AvatarHandleProps): React.ReactElement {
+export function AvatarHandle({ src, initials, size = 20, className, ...props }: IAvatarHandleProps): React.ReactElement {
   return (
     <span
       data-slot="avatar-handle"

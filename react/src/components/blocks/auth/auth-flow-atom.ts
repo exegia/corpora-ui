@@ -20,17 +20,17 @@ import { atom } from "jotai"
 import type { Getter, Setter } from "jotai"
 
 import { signInAtom, signOutAtom } from "./auth-session-atom"
-import type { AuthStatus } from "./auth-shell"
 import type {
-  AuthFlowChannel,
-  AuthFlowId,
-  AuthFlowState,
-  AuthFlowStep,
-  AuthUser,
-  BeginAuthVerificationOptions,
-} from "./auth-state-type"
+  TAuthStatus,
+  TAuthFlowChannel,
+  TAuthFlowId,
+  IAuthFlowState,
+  TAuthFlowStep,
+  IAuthUser,
+  IBeginAuthVerificationOptions,
+} from "./type"
 
-export const DEFAULT_AUTH_FLOW_ID: AuthFlowId = "default"
+export const DEFAULT_AUTH_FLOW_ID: TAuthFlowId = "default"
 
 /**
  * A string-keyed atom family (same in-house shape as `tree-atom.ts`:
@@ -38,24 +38,24 @@ export const DEFAULT_AUTH_FLOW_ID: AuthFlowId = "default"
  * the string-keyed case with a `remove`). Dropping a key lets the store's
  * WeakMap release that instance's state.
  */
-type Family<AtomType> = ((id: AuthFlowId) => AtomType) & {
-  remove: (id: AuthFlowId) => void
+type TFamily<AtomType> = ((id: TAuthFlowId) => AtomType) & {
+  remove: (id: TAuthFlowId) => void
 }
 
 /** Every family, so `removeAuthFlowInstance` can drop an id from all. */
-const families: { remove: (id: AuthFlowId) => void }[] = []
+const families: { remove: (id: TAuthFlowId) => void }[] = []
 
-function keyed<AtomType>(create: (id: AuthFlowId) => AtomType) {
-  const cache = new Map<AuthFlowId, AtomType>()
-  const family = ((id: AuthFlowId) => {
+function keyed<AtomType>(create: (id: TAuthFlowId) => AtomType) {
+  const cache = new Map<TAuthFlowId, AtomType>()
+  const family = ((id: TAuthFlowId) => {
     let instance = cache.get(id)
     if (instance === undefined) {
       instance = create(id)
       cache.set(id, instance)
     }
     return instance
-  }) as Family<AtomType>
-  family.remove = (id: AuthFlowId) => {
+  }) as TFamily<AtomType>
+  family.remove = (id: TAuthFlowId) => {
     cache.delete(id)
   }
   families.push(family)
@@ -72,7 +72,7 @@ function stateFamily<Value>(name: string, initialValue: Value) {
 
 function readFamily<Value>(
   name: string,
-  read: (get: Getter, id: AuthFlowId) => Value
+  read: (get: Getter, id: TAuthFlowId) => Value
 ) {
   return keyed((id) => {
     const instance = atom((get) => read(get, id))
@@ -83,7 +83,7 @@ function readFamily<Value>(
 
 function actionFamily<Args extends unknown[]>(
   name: string,
-  write: (get: Getter, set: Setter, id: AuthFlowId, ...args: Args) => void
+  write: (get: Getter, set: Setter, id: TAuthFlowId, ...args: Args) => void
 ) {
   return keyed((id) => {
     const instance = atom(null, (get, set, ...args: Args) =>
@@ -113,7 +113,7 @@ export function maskAuthIdentifier(identifier: string): string {
 
 // ── primitives ───────────────────────────────────────────────────────────
 
-export const authFlowStepAtom = stateFamily<AuthFlowStep>("step", "login")
+export const authFlowStepAtom = stateFamily<TAuthFlowStep>("step", "login")
 
 /** An email or phone number in flight — never a password or a code. */
 export const authFlowIdentifierAtom = stateFamily<string | null>(
@@ -121,12 +121,12 @@ export const authFlowIdentifierAtom = stateFamily<string | null>(
   null
 )
 
-export const authFlowChannelAtom = stateFamily<AuthFlowChannel>(
+export const authFlowChannelAtom = stateFamily<TAuthFlowChannel>(
   "channel",
   "email"
 )
 
-export const authFlowStatusAtom = stateFamily<AuthStatus>("status", "idle")
+export const authFlowStatusAtom = stateFamily<TAuthStatus>("status", "idle")
 
 export const authFlowErrorAtom = stateFamily<string | null>("error", null)
 
@@ -141,7 +141,7 @@ export const authFlowMaskedIdentifierAtom = readFamily<string | null>(
   }
 )
 
-export const authFlowStateAtom = readFamily<AuthFlowState>(
+export const authFlowStateAtom = readFamily<IAuthFlowState>(
   "state",
   (get, id) => ({
     step: get(authFlowStepAtom(id)),
@@ -157,7 +157,7 @@ export const authFlowStateAtom = readFamily<AuthFlowState>(
 
 /** Show a step with a clean slate (`"idle"`, no error). Keeps the
  * identifier so "back to verify" flows don't lose the destination. */
-export const goToAuthStepAtom = actionFamily<[step: AuthFlowStep]>(
+export const goToAuthStepAtom = actionFamily<[step: TAuthFlowStep]>(
   "goToStep",
   (_get, set, id, step) => {
     set(authFlowStepAtom(id), step)
@@ -168,7 +168,7 @@ export const goToAuthStepAtom = actionFamily<[step: AuthFlowStep]>(
 
 /** Record the identifier in flight and move to the verification step. */
 export const beginAuthVerificationAtom = actionFamily<
-  [options: BeginAuthVerificationOptions]
+  [options: IBeginAuthVerificationOptions]
 >(
   "beginVerification",
   (_get, set, id, { identifier, channel = "email", step = "verify-code" }) => {
@@ -200,7 +200,7 @@ export const failAuthFlowAtom = actionFamily<[message: string]>(
 /** Mark the flow `"success"` and land on the success step. When `user` is
  * given, also sign the session in — one atomic write for the whole
  * "verification passed" transition. */
-export const completeAuthFlowAtom = actionFamily<[user?: AuthUser]>(
+export const completeAuthFlowAtom = actionFamily<[user?: IAuthUser]>(
   "complete",
   (_get, set, id, user) => {
     set(authFlowStatusAtom(id), "success")
@@ -233,6 +233,6 @@ endAuthSessionAtom.debugLabel = "auth-flow/endAuthSession"
 
 /** Drop every atom for `id`. Call on teardown of an explicit flow id; the
  * default flow usually just gets `resetAuthFlowAtom`. */
-export function removeAuthFlowInstance(id: AuthFlowId): void {
+export function removeAuthFlowInstance(id: TAuthFlowId): void {
   for (const family of families) family.remove(id)
 }

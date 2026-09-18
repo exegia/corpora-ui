@@ -1,7 +1,7 @@
 import { Info } from "./info"
 import { Message } from "./message"
 import { Pill } from "./pill"
-import type { UserInfoProps, UserPillProps } from "./types"
+import type { TUserInfoProps, TUserPillProps } from "./types"
 
 const User = {
   Info,
@@ -9,6 +9,6 @@ const User = {
   Pill,
 }
 
-export type { UserInfoProps, UserPillProps }
+export type { TUserInfoProps, TUserPillProps }
 
 export default User

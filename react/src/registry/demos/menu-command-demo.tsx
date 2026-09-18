@@ -5,9 +5,9 @@ import * as React from "react"
 
 import { DemoStage } from "@/components/docs/demo-controls"
 import { Button } from "@/components/ui/button"
-import { MenuCommand, type MenuCommandItem } from "@/components/ui/menu-command"
+import { MenuCommand, type IMenuCommandItem } from "@/components/ui/menu-command"
 
-const ITEMS: MenuCommandItem[] = [
+const ITEMS: IMenuCommandItem[] = [
   { id: "upload", label: "Add photos & files", description: "Upload from your computer", icon: <Paperclip /> },
   { id: "scoop", label: "Scoop Data", description: "Sales & churn metrics", icon: <BarChart3 /> },
   { id: "flavors", label: "Flavor records", description: "26 makers, tags, links", icon: <Layers /> },

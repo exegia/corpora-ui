@@ -25,7 +25,7 @@ instance id, NOT in a per-component React context. Consumers mount
 a second provider to the public surface — that is the whole point of this
 layer.
 
-- `src/state/store.ts` — `exegiaStore` (module-level default) + `ExegiaStore`.
+- `src/state/store.ts` — `exegiaStore` (module-level default) + `TExegiaStore`.
 - `src/state/exegia-provider.tsx` — `ExegiaProvider` (jotai `Provider`, plus
   opt-in `sound` and `theme`) and `useExegiaStore`.
 - `jotai` is a **peerDependency**: the library owns a store, so a consumer app
@@ -118,7 +118,7 @@ which also resets the default flow). Never store passwords, codes or field
 values in the store — the auth blocks keep those in local `useState` on
 purpose. `AuthFlowBlock` (`auth-flow-block.tsx`) is the optional orchestrator
 over this layer: it renders the block for the current step with `goToStep`
-navigation pre-wired, and each submit handler returns an `AuthFlowDirective`
+navigation pre-wired, and each submit handler returns a `TAuthFlowDirective`
 (`{ user }` / `{ verify }` / `{ step }` / void) that it applies to the store.
 Rejections propagate into the block — the orchestrator never mirrors
 transient status/error into the flow atoms.
@@ -155,7 +155,7 @@ should reuse it, with `motion/react` for step morphs.
 Components emit inert `data-cuelume-*` attributes (Button: press/release,
 gated by its `sound` prop, default true). Nothing plays until an app calls
 `bindSounds()` (re-exported from `src/lib/sound.ts`; the docs site does this
-in `main.tsx`). Never call `bind()` at library-module scope — opting into
+through `<ExegiaProvider sound>` in `press.config.tsx`). Never call `bind()` at library-module scope — opting into
 sound is the consumer's decision. For keyboard-driven cues the attributes
 can't cover (OTP typing, visibility toggles), use `playCue()` from
 `lib/sound.ts` — it no-ops until bindSounds() has run; never call cuelume's
@@ -170,7 +170,7 @@ Glass is NOT a separate component family — it is a `variant="glass"` on the
 base component, with a `glassVariant` prop selecting the finish. The system
 has three parts:
 
-- `src/lib/glass-variants.ts` — `FrostGlassVariant` type + `glassVariantStyles`
+- `src/lib/glass-variants.ts` — `TFrostGlassVariant` type + `glassVariantStyles`
   (one Tailwind class string per finish) + `liquidRefractStyles`.
 - `src/components/ui/glasscn/` — glass-only machinery. `liquid-glass.tsx` is
   the SVG-displacement backdrop wrapper used by the `liquid-refract` finish.
@@ -186,10 +186,10 @@ Follow `ui/button.tsx` exactly:
 2. Type-gate the finish with a discriminated union — `glassVariant` must only
    be accepted when `variant` is `"glass"`:
    ```ts
-   type Props = BaseProps &
+   type TProps = TBaseProps &
      (
-       | { variant: "glass"; glassVariant?: FrostGlassVariant }
-       | { variant?: Exclude<Variant, "glass">; glassVariant?: never }
+       | { variant: "glass"; glassVariant?: TFrostGlassVariant }
+       | { variant?: Exclude<TVariant, "glass">; glassVariant?: never }
      )
    ```
 3. Default finish is `"liquid-refract"`. Resolve it only when
@@ -207,7 +207,7 @@ Follow `ui/button.tsx` exactly:
 
 ### Adding a new finish
 
-Extend the `FrostGlassVariant` union and add a `glassVariantStyles` entry in
+Extend the `TFrostGlassVariant` union and add a `glassVariantStyles` entry in
 `glass-variants.ts` — every consumer picks it up automatically. Finishes that
 need runtime machinery (like `liquid-refract`, whose entry is `""`) get their
 wrapper in `ui/glasscn/` and an explicit branch in the base component.
@@ -228,3 +228,25 @@ wrapper in `ui/glasscn/` and an explicit branch in the base component.
 - `glassVariantStyles` strings override the cva base via tailwind-merge order
   (they are passed after the cva output in `cn`), e.g. finish borders win
   over `border-transparent`.
+
+## Fumapress
+
+- The `/content/` folder is the docs prose and MDX source loaded by `press.config.tsx`.
+- Pages mount at the site root, not under `/docs`.
+
+## Key files
+
+- One `.md` or `.mdx` file is one docs page.
+- `index.mdx` owns `/`.
+- `meta.json` controls navigation order.
+
+## Commands
+
+- `bun run build:docs` validates the site from `react/`.
+
+## Gotchas
+
+- Keep documentation prose and MDX usage here.
+- Keep route logic and docs-site widgets outside this folder.
+- Import site components through the `@/` alias.
+- Keep instruction files outside `content/`; all Markdown files there are published pages.

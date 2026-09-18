@@ -21,10 +21,10 @@ import { usePopoverPortalPosition } from "@/components/motion/popover-position";
 import { EASE_OUT, SPRING_PANEL } from "@/lib/ease";
 import { cn } from "@/lib/utils";
 
-type Side = "top" | "bottom";
-type Align = "start" | "end";
+type TSide = "top" | "bottom";
+type TAlign = "start" | "end";
 
-type MorphContextValue = {
+type TMorphContextValue = {
   open: boolean;
   setOpen: (open: boolean) => void;
   toggle: () => void;
@@ -35,7 +35,7 @@ type MorphContextValue = {
   contentRef: React.MutableRefObject<HTMLDivElement | null>;
 };
 
-const MorphContext = createContext<MorphContextValue | null>(null);
+const MorphContext = createContext<TMorphContextValue | null>(null);
 
 function useMorphContext(component: string) {
   const ctx = useContext(MorphContext);
@@ -43,7 +43,7 @@ function useMorphContext(component: string) {
   return ctx;
 }
 
-export interface MorphPopoverProps {
+export interface IMorphPopoverProps {
   children: ReactNode;
   /** Controlled open state. */
   open?: boolean;
@@ -64,7 +64,7 @@ export function MorphPopover({
   defaultOpen = false,
   onOpenChange,
   className,
-}: MorphPopoverProps) {
+}: IMorphPopoverProps) {
   const baseId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
@@ -102,7 +102,7 @@ export function MorphPopover({
     };
   }, [open, setOpen]);
 
-  const ctx = useMemo<MorphContextValue>(
+  const ctx = useMemo<TMorphContextValue>(
     () => ({
       open,
       setOpen,
@@ -127,7 +127,7 @@ export function MorphPopover({
   );
 }
 
-export interface MorphPopoverTriggerProps {
+export interface IMorphPopoverTriggerProps {
   children: ReactElement;
 }
 
@@ -142,7 +142,7 @@ function mergeRefs<T>(...refs: Array<Ref<T> | undefined>) {
 }
 
 /** Wraps a single element, toggling the popover on click. */
-export function MorphPopoverTrigger({ children }: MorphPopoverTriggerProps) {
+export function MorphPopoverTrigger({ children }: IMorphPopoverTriggerProps) {
   const ctx = useMorphContext("MorphPopoverTrigger");
   if (!isValidElement(children)) return children;
 
@@ -167,12 +167,12 @@ export function MorphPopoverTrigger({ children }: MorphPopoverTriggerProps) {
   });
 }
 
-const originFor = (side: Side, align: Align) =>
+const originFor = (side: TSide, align: TAlign) =>
   `${side === "bottom" ? "top" : "bottom"} ${align === "end" ? "right" : "left"}`;
 
 // A clip that hides everything but the corner nearest the trigger, so the
 // panel appears to grow out of it. inset(top right bottom left).
-function clipHidden(side: Side, align: Align, radius: number) {
+function clipHidden(side: TSide, align: TAlign, radius: number) {
   const top = side === "bottom" ? "0%" : "92%";
   const bottom = side === "bottom" ? "92%" : "0%";
   const right = align === "end" ? "0%" : "92%";
@@ -185,10 +185,10 @@ const clipShown = (radius: number) => `inset(0% 0% 0% 0% round ${radius}px)`;
 // clip-path so it cannot snap when the spring resolves its final distance.
 const MORPH_CLIP_TRANSITION = { duration: 0.32, ease: EASE_OUT } as const;
 
-export interface MorphPopoverContentProps {
+export interface IMorphPopoverContentProps {
   children: ReactNode;
-  side?: Side;
-  align?: Align;
+  side?: TSide;
+  align?: TAlign;
   /** Gap between trigger and panel, in px. Default 8. */
   sideOffset?: number;
   /** Panel corner radius, in px. Default 16. */
@@ -203,7 +203,7 @@ export function MorphPopoverContent({
   sideOffset = 8,
   radius = 16,
   className,
-}: MorphPopoverContentProps) {
+}: IMorphPopoverContentProps) {
   const ctx = useMorphContext("MorphPopoverContent");
   const { contentId, setContentRef, triggerId } = ctx;
   const reduce = useReducedMotion() ?? false;

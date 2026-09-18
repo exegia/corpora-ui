@@ -16,28 +16,13 @@ import {
   CardPanel,
 } from "@/components/ui/card"
 import { AvatarHandle, Signal, Tag } from "@/components/ui/chat"
-import { EASE_IN_OUT, EASE_OUT_STRONG } from "@/lib/ease"
+import { EASE_OUT_STRONG } from "@/lib/ease"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "./checkbox"
-import { CONFIDENCE, STATE_LABEL, STATE_TONE } from "./constant"
-import type { RecommendationItemProps } from "./types"
+import { CONFIDENCE, STATE_LABEL, STATE_TONE, ACTION_MOTION, ROW_VARIANTS } from "./constant"
+import type { IRecommendationItemProps } from "./types"
+import { Reference } from "@/components/atoms"
 
-const ACTION_MOTION = {
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: 4 },
-  initial: { opacity: 0, y: 4 },
-  transition: { duration: 0.18, ease: EASE_IN_OUT },
-} as const
-
-/** Row entrance, driven by the Group's staggered `visible` variant. */
-const ROW_VARIANTS = {
-  hidden: { opacity: 0, y: 8 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: EASE_OUT_STRONG },
-  },
-} as const
 
 /**
  * Human-in-the-loop proposal: title, description with entity + lead-time
@@ -53,8 +38,8 @@ export function Item({
   title,
   description,
   entity,
-  descriptionSuffix,
   leadTime,
+  reference,
   options = [],
   optionsLabel = "Other options",
   confidence = "high",
@@ -72,7 +57,7 @@ export function Item({
   children,
   className,
   ...props
-}: RecommendationItemProps): React.ReactElement {
+}: IRecommendationItemProps): React.ReactElement {
   const declined = state === "rejected"
   const decline = onReject ?? onAlternatives
   const declineLabel = rejectLabel ?? alternativesLabel
@@ -106,40 +91,16 @@ export function Item({
         data-slot="recommendation-card"
         data-state={state}
       >
-        <AccordionTrigger className="relative items-center gap-3 rounded-t-[calc(var(--radius-md)-1px)] rounded-b-none px-3 py-2.5 text-left hover:bg-black/4 focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/4">
+        <AccordionTrigger className="gap-3 px-3 py-2.5 hover:bg-black/4 dark:hover:bg-white/4 relative items-center rounded-none text-left focus-visible:ring-0">
           <Checkbox state={state} step={step} />
-          <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
+          <div className="min-w-0 gap-1 flex flex-1 flex-col items-start">
             <span
               className={cn(
-                "w-full text-[14px] leading-4 font-semibold text-text-primary",
+                "leading-4 font-semibold w-full text-[14px] text-text-primary",
                 declined && "font-light text-muted-foreground line-through"
               )}
             >
               {title}
-            </span>
-            <span
-              className={cn(
-                "flex w-full flex-wrap items-center gap-x-1.5 gap-y-1.5 text-[13px] leading-[15px] text-text-secondary",
-                declined && "line-through opacity-50"
-              )}
-            >
-              {description}
-              {entity ? (
-                <span className="inline-flex h-[22px] items-center gap-1.5 rounded-full bg-surface-subtle py-0.5 pr-2 pl-0.5 text-[12px] font-medium text-text-primary">
-                  <AvatarHandle
-                    initials={entity.initials}
-                    size={16}
-                    src={entity.src}
-                  />
-                  {entity.name}
-                </span>
-              ) : null}
-              {descriptionSuffix}
-              {leadTime ? (
-                <Tag className="rounded-full" tone="green">
-                  {leadTime}
-                </Tag>
-              ) : null}
             </span>
           </div>
           {state === "accepted" || state === "rejected" ? (
@@ -151,17 +112,31 @@ export function Item({
 
         {/* `relative`: the frame's ::before veil is positioned, so an
             unpositioned panel body would paint under it and look faded. */}
-        <AccordionPanel className="relative px-0 pb-0">
-          {options.length ? (
+        <AccordionPanel className="px-0 pb-0 relative">
+          {(description || entity || leadTime) && <div className={cn("flex flex-wrap items-center gap-x-1.5 gap-y-1.5 px-3 pb-3 text-[13px] leading-[18px] text-text-secondary", declined && "line-through opacity-50")}>
+            {description}
+            {entity && <span className="inline-flex h-[22px] items-center gap-1.5 rounded-full bg-surface-subtle py-0.5 pl-0.5 pr-2 text-xs font-medium text-text-primary"><AvatarHandle initials={entity.initials} size={16} src={entity.src} />{entity.name}</span>}
+            {leadTime && <Tag className="rounded-full" tone="green">{leadTime}</Tag>}
+          </div>}
+          {reference && <div
+            className={cn(
+              "gap-x-1.5 gap-y-1 px-2 pb-1.5 flex w-full items-center",
+              declined && "line-through opacity-50"
+            )}
+          >
+            <Reference {...reference} />
+          </div>}
+          {children && <div className="px-3 py-2">{children}</div>}
+          {options.length > 0 && (
             <Card className="mx-3 rounded-md before:rounded-[calc(var(--radius-md)-1px)]">
-              <CardPanel className="flex flex-col gap-2 px-3.5 py-2.5">
-                <span className="text-[11px] leading-3 text-text-secondary">
+              <CardPanel className="gap-2 px-3.5 py-2.5 flex flex-col">
+                <span className="leading-3 text-[11px] text-text-secondary">
                   {optionsLabel}
                 </span>
                 {options.map((option, index) => (
                   <motion.button
                     {...optionMotion(index)}
-                    className="-mx-2 flex h-6 items-center gap-2.5 rounded-md px-2 text-left text-[12.5px] leading-none text-text-primary outline-none hover:bg-black/4 focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/6"
+                    className="-mx-2 h-6 gap-2.5 px-2 hover:bg-black/4 dark:hover:bg-white/6 flex items-center rounded-md text-left text-[12.5px] leading-none text-text-primary outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     key={index}
                     onClick={() => onSelectOption?.(index)}
                     type="button"
@@ -177,18 +152,14 @@ export function Item({
                 ))}
               </CardPanel>
             </Card>
-          ) : null}
-          {children ? (
-            <div className="px-3 pb-2 text-sm leading-[22px] text-foreground/90">
-              {children}
-            </div>
-          ) : null}
-          <CardFrameFooter className="relative flex items-center gap-2 px-4 py-3">
+          )}
+         
+          <CardFrameFooter className="gap-2 px-4 py-3.5 relative flex items-center">
             <Signal level={confidence} />
             <span className="text-[12.5px] text-text-primary">
               {confidenceLabel ?? CONFIDENCE[confidence]}
             </span>
-            <span className="ml-auto flex items-center gap-2">
+            <span className="gap-2 ml-auto flex items-center">
               <AnimatePresence initial={false} mode="wait">
                 {state === "running" ? (
                   // The spinner in the heading already reports progress; the
@@ -197,11 +168,11 @@ export function Item({
                 ) : state === "pending" ? (
                   <motion.div
                     {...ACTION_MOTION}
-                    className="flex items-center gap-2"
+                    className="gap-2 flex items-center"
                     key="actions"
                   >
                     <Button
-                      className="h-[27px] rounded-full px-3 text-[12px] font-medium sm:h-[27px]"
+                      className="px-3 font-medium sm:h-6 h-6 rounded-full text-[12px]"
                       onClick={decline}
                       size="xs"
                       variant="outline"
@@ -219,7 +190,7 @@ export function Item({
                   // leaving actions once a sibling enters behind them.
                   <motion.div
                     {...ACTION_MOTION}
-                    className="inline-flex items-center gap-1 text-xs font-normal text-success-foreground"
+                    className="gap-1 text-xs font-normal inline-flex items-center text-success-foreground"
                     key={state}
                   >
                     {onUndo ? (

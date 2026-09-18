@@ -1,7 +1,7 @@
 import type * as React from "react"
 
 /** A single selected word in the reader. */
-export interface WordSelection {
+export interface IWordSelection {
   lemma: string
   partOfSpeech?: string
   pos?: string
@@ -10,19 +10,19 @@ export interface WordSelection {
 }
 
 /** A selected run of reader nodes. */
-export interface NodeSelection {
+export interface INodeSelection {
   range: string
   nodeIds: string[]
   wordCount: number
 }
 
-export interface SelectionPopoverProps {
+export interface ISelectionPopoverProps {
   open?: boolean
   defaultOpen?: boolean
   onOpenChange?: (open: boolean) => void
   variant: "word" | "node"
-  word?: WordSelection
-  node?: NodeSelection
+  word?: IWordSelection
+  node?: INodeSelection
   onAddToChat?: () => void
   onClose?: () => void
   /** The selected reader content — rendered as the hover/focus trigger. */
@@ -30,17 +30,17 @@ export interface SelectionPopoverProps {
   className?: string
 }
 
-export interface SelectionHighlightProps
+export interface ISelectionHighlightProps
   extends React.ComponentPropsWithoutRef<"span"> {
   range?: string
 }
 
-export interface AppliedMarkProps
+export interface IAppliedMarkProps
   extends React.ComponentPropsWithoutRef<"span"> {
   nodeId?: string
 }
 
-export interface ApplyToastProps {
+export interface IApplyToastProps {
   open?: boolean
   message?: React.ReactNode
   onUndo?: () => void

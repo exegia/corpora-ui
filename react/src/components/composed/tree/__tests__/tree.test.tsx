@@ -4,11 +4,11 @@ import userEvent from "@testing-library/user-event"
 import { FileTextIcon, FolderIcon, SearchIcon } from "lucide-react"
 
 import { Tree } from "../index"
-import type { TreeNode } from "../type"
+import type { ITreeNode } from "../type"
 import { moveNode } from "../utils"
 
 /** 3-level data — `navigation` promotes the top level to section names. */
-const SECTIONED: TreeNode[] = [
+const SECTIONED: ITreeNode[] = [
   {
     id: "research",
     label: "Research",
@@ -32,7 +32,7 @@ const SECTIONED: TreeNode[] = [
 ]
 
 /** 2-level data — the top level stays plain link rows. */
-const FLAT_NAV: TreeNode[] = [
+const FLAT_NAV: ITreeNode[] = [
   { id: "search", label: "Search", href: "/search" },
   {
     id: "library",
@@ -41,7 +41,7 @@ const FLAT_NAV: TreeNode[] = [
   },
 ]
 
-const TOC: TreeNode[] = [
+const TOC: ITreeNode[] = [
   {
     id: "guide",
     label: "Guide",
@@ -57,12 +57,12 @@ const TOC: TreeNode[] = [
   { id: "api", label: "API", href: "/api" },
 ]
 
-const RAIL: TreeNode[] = [
+const RAIL: ITreeNode[] = [
   { id: "search", label: "Search", icon: <SearchIcon />, href: "/search" },
   { id: "notes", label: "Notes", icon: <FileTextIcon />, href: "/notes" },
 ]
 
-const FILES: TreeNode[] = [
+const FILES: ITreeNode[] = [
   {
     id: "src",
     label: "src",
@@ -142,7 +142,7 @@ describe("Tree · navigation", () => {
   test("onNavigate fires for leaf rows after the node's own onSelect", async () => {
     const user = userEvent.setup()
     const order: string[] = []
-    const items: TreeNode[] = [
+    const items: ITreeNode[] = [
       {
         id: "a",
         label: "Alpha",
@@ -163,7 +163,7 @@ describe("Tree · navigation", () => {
 
   test("href is passed through to onNavigate, never rendered as an anchor", async () => {
     const user = userEvent.setup()
-    const onNavigate = mock((_node: TreeNode) => {})
+    const onNavigate = mock((_node: ITreeNode) => {})
     render(<Tree items={FLAT_NAV} onNavigate={onNavigate} variant="navigation" />)
 
     const search = screen.getByRole("button", { name: "Search" })
@@ -187,7 +187,7 @@ describe("Tree · navigation", () => {
 describe("Tree · toc", () => {
   test("parents select on the row and expand from the overlay toggle", async () => {
     const user = userEvent.setup()
-    const onNavigate = mock((_node: TreeNode) => {})
+    const onNavigate = mock((_node: ITreeNode) => {})
     render(<Tree items={TOC} onNavigate={onNavigate} variant="toc" />)
 
     // Guide is a parent, but toc parents are selectable rows — the row
@@ -359,7 +359,7 @@ describe("Tree · sidebar", () => {
   })
 
   test("nested children are ignored — the rail is single-level", () => {
-    const items: TreeNode[] = [
+    const items: ITreeNode[] = [
       {
         id: "top",
         label: "Top",

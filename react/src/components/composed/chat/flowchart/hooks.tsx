@@ -1,41 +1,41 @@
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
-import type { Edge, EdgeEnd, FlowchartProps, StepNode } from "./types";
-import { anchors, bezier, canvasH, curve, cw, edgePoints, place, rowH, rows, rowYs, type Heights, type Layout, type Offsets, type Point } from "./utils";
+import type { TEdge, TEdgeEnd, IFlowchartProps, TStepNode } from "./types";
+import { anchors, bezier, canvasH, curve, cw, edgePoints, place, rowH, rows, rowYs, type THeights, type TLayout, type TOffsets, type TPoint } from "./utils";
 import { EST_H, SNAP_RADIUS } from "./constant";
 import { toastManager } from "@/components/ui/toast";
 
 export const ZOOM_MIN = 0.25;
 export const ZOOM_MAX = 2;
 
-type Options = Pick<FlowchartProps, "edges" | "readOnly" | "zoomable" | "onDrag" | "onAdd" | "onRemove" | "onEdgeRemove" | "onEdgeConnect" | "onEdgeChange" | "onRename" | "onDuplicate"> & {
-  steps: StepNode[];
+type TOptions = Pick<IFlowchartProps, "edges" | "readOnly" | "zoomable" | "onDrag" | "onAdd" | "onRemove" | "onEdgeRemove" | "onEdgeConnect" | "onEdgeChange" | "onRename" | "onDuplicate"> & {
+  steps: TStepNode[];
   canvasRef: React.RefObject<HTMLDivElement | null>;
 };
 
 /** A connector end being dragged towards a new card; `snap` is the card whose anchor is in range. */
-export type EdgeDrag = { id: string; end: EdgeEnd; point: Point; snap?: string };
+export type TEdgeDrag = { id: string; end: TEdgeEnd; point: TPoint; snap?: string };
 
 /** Pill text: explicit name, else the kind label, else "Node n" (conditions always count). */
-export const nodeLabel = (node: StepNode, index: number) =>
+export const nodeLabel = (node: TStepNode, index: number) =>
   node.name ?? (node.condition || !node.kind ? `Node ${index + 1}` : node.kind.label);
 
 /** Default connectors: a chain through the steps in order. */
-export const chainEdges = (steps: StepNode[]): Edge[] =>
+export const chainEdges = (steps: TStepNode[]): TEdge[] =>
   steps.slice(1).map((n, i) => ({ id: `${steps[i].id}->${n.id}`, source: steps[i].id, target: n.id }));
 
-export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomable = false, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, onRename, onDuplicate, canvasRef }: Options) => {
+export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomable = false, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, onRename, onDuplicate, canvasRef }: TOptions) => {
   /** Visible canvas box; the world behind it is twice this size. */
   const [frame, setFrame] = useState({ w: 0, h: 0 });
-  const [heights, setHeights] = useState<Heights>(EST_H);
+  const [heights, setHeights] = useState<THeights>(EST_H);
   const [selected, setSelected] = useState<string | null>(null);
-  const [offsets, setOffsets] = useState<Offsets>({});
+  const [offsets, setOffsets] = useState<TOffsets>({});
   /** Zoom and pan of the world inside the frame (pan in frame px). */
   const [view, setView] = useState({ scale: 1, x: 0, y: 0 });
   const scale = view.scale;
   const pan = useRef<{ startX: number; startY: number; baseX: number; baseY: number; moved: boolean } | null>(null);
   const [pendingRemove, setPendingRemove] = useState<{ id: string; orphans: string[] } | null>(null);
   const [selectedEdge, setSelectedEdge] = useState<string | null>(null);
-  const [edgeDrag, setEdgeDrag] = useState<EdgeDrag | null>(null);
+  const [edgeDrag, setEdgeDrag] = useState<TEdgeDrag | null>(null);
   /** Card highlighted while the user browses "Connect to…" in the context menu. */
   const [previewNode, setPreviewNode] = useState<string | null>(null);
   const drag = useRef<{
@@ -51,7 +51,7 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
   const rowHeight = useMemo(() => rowH(steps, heights), [heights, steps]);
   // The world is twice the frame so there is always hidden canvas to drag into view.
   const width = frame.w * 2;
-  const layout = useMemo<Layout>(() => {
+  const layout = useMemo<TLayout>(() => {
     const _rows = rows(steps);
     return { width, offsets, rows: _rows, rowY: rowYs(rowHeight), heights };
   }, [steps, width, offsets, rowHeight, heights]);
@@ -69,7 +69,7 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
     [frame, connectorWidth, worldHeight],
   );
 
-  const updateHeights = useCallback((callback: (prev: Heights) => Heights) => setHeights(callback), []);
+  const updateHeights = useCallback((callback: (prev: THeights) => THeights) => setHeights(callback), []);
   const updateFrame = useCallback((w: number, h: number) => {
     setFrame((prev) => (prev.w === w && prev.h === h ? prev : { w, h }));
     // First measurement centres the world horizontally, top-aligned; later
@@ -132,7 +132,7 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
   };
   const isPanning = () => pan.current?.moved === true;
 
-  const onPointerDown = (node: StepNode) => (event: React.PointerEvent<HTMLDivElement>) => {
+  const onPointerDown = (node: TStepNode) => (event: React.PointerEvent<HTMLDivElement>) => {
     // Left button only: a right-press belongs to the context menu.
     if (readOnly || event.button !== 0) return;
     if ((event.target as Element).closest("[data-ui]")) return;
@@ -145,15 +145,17 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
       baseDy: off?.dy ?? 0,
       moved: false,
     };
-    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+    // Capture only once a drag starts; capturing a still press retargets
+    // its click to the wrapper instead of the node selection button.
   };
 
-  const onPointerMove = (node: StepNode) => (event: React.PointerEvent<HTMLDivElement>) => {
+  const onPointerMove = (node: TStepNode) => (event: React.PointerEvent<HTMLDivElement>) => {
     const d = drag.current;
     if (!d || d.id !== node.id) return;
     const dx = d.baseDx + (event.clientX - d.startX) / scale;
     const dy = d.baseDy + (event.clientY - d.startY) / scale;
     if (!d.moved && Math.hypot(dx - d.baseDx, dy - d.baseDy) < 3) return;
+    if (!d.moved) event.currentTarget.setPointerCapture(event.pointerId);
     d.moved = true;
 
     // keep the card inside the canvas
@@ -166,7 +168,7 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
     setOffsets((current) => ({ ...current, [node.id]: { dx: cx - baseCx, dy: top - baseTop } }));
   };
 
-  const onPointerUp = (node: StepNode) => () => {
+  const onPointerUp = (node: TStepNode) => () => {
     const d = drag.current;
     if (d?.id !== node.id) return;
     if (d.moved) {
@@ -177,23 +179,23 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
   };
 
   const wasDragged = () => drag.current?.moved === true;
-  const isLit = (edge: Edge) => selected === edge.source || selected === edge.target || selectedEdge === edge.id;
+  const isLit = (edge: TEdge) => selected === edge.source || selected === edge.target || selectedEdge === edge.id;
 
   /** Client → unscaled canvas coordinates. */
-  const toCanvas = (clientX: number, clientY: number): Point => {
+  const toCanvas = (clientX: number, clientY: number): TPoint => {
     const rect = canvasRef.current?.getBoundingClientRect();
     return { x: (clientX - (rect?.left ?? 0) - view.x) / scale, y: (clientY - (rect?.top ?? 0) - view.y) / scale };
   };
-  const edgeEnds = (edge: Edge) => edgePoints({ from: edge.source, to: edge.target }, steps, layout);
+  const edgeEnds = (edge: TEdge) => edgePoints({ from: edge.source, to: edge.target }, steps, layout);
 
-  const onEdgeHandleDown = (edge: Edge, end: EdgeEnd) => (event: React.PointerEvent<SVGElement>) => {
+  const onEdgeHandleDown = (edge: TEdge, end: TEdgeEnd) => (event: React.PointerEvent<SVGElement>) => {
     if (!onEdgeConnect) return;
     event.stopPropagation();
     (event.currentTarget as Element).setPointerCapture(event.pointerId);
     setEdgeDrag({ id: edge.id, end, point: toCanvas(event.clientX, event.clientY) });
   };
   /** Nearest anchor of another card within SNAP_RADIUS: top anchors for a target end, bottom for a source end. */
-  const snapCandidate = (edge: Edge, end: EdgeEnd, point: Point) => {
+  const snapCandidate = (edge: TEdge, end: TEdgeEnd, point: TPoint) => {
     const other = end === "source" ? edge.target : edge.source;
     let best: { id: string; d: number } | null = null;
     for (const node of steps) {
@@ -248,8 +250,8 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
     setSelectedEdge(null);
     onEdgeRemove?.(id);
   };
-  const bezierCurve = (edge: Edge) => bezier({ from: edge.source, to: edge.target }, steps, layout);
-  const handlePlace = (node: StepNode) => place(node, layout);
+  const bezierCurve = (edge: TEdge) => bezier({ from: edge.source, to: edge.target }, steps, layout);
+  const handlePlace = (node: TStepNode) => place(node, layout);
 
   /** Children that would lose their only parent if `id` were removed. */
   const orphansOf = (id: string) =>
@@ -333,10 +335,10 @@ export const useFlowchart = ({ steps, edges: edgesProp, readOnly = false, zoomab
   };
 };
 
-export type FlowchartController = ReturnType<typeof useFlowchart>;
+export type TFlowchartController = ReturnType<typeof useFlowchart>;
 
 /** Root owns the one `useFlowchart` instance; nodes read it from here. */
-export const FlowchartContext = createContext<FlowchartController | null>(null);
+export const FlowchartContext = createContext<TFlowchartController | null>(null);
 
 export const useFlowchartContext = () => {
   const ctx = useContext(FlowchartContext);

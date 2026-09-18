@@ -2,10 +2,10 @@ import { describe, expect, mock, test } from "bun:test"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { Provider } from "jotai"
-import { AiPanel, SelectionPopover, type AiScope } from "../index"
+import { AiPanel, SelectionPopover, type IAiScope } from "../index"
 import { formatScopeLabel } from "../shared"
 
-const passageScope: AiScope = {
+const passageScope: IAiScope = {
   kind: "passage",
   label: "a.1",
   range: "¶1–¶2",

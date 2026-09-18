@@ -1,7 +1,7 @@
 import { useAtomValue, useSetAtom } from "jotai"
 import { useCallback } from "react"
 
-import type { ComposerAttachment } from "../type"
+import type { TComposerAttachment } from "../type"
 import {
   addComposerAttachmentAtom,
   clearComposerAttachmentsAtom,
@@ -12,7 +12,7 @@ import {
 /** Read the tray of one composer. */
 export function useComposerAttachments(
   composerId: string
-): ComposerAttachment[] {
+): TComposerAttachment[] {
   return useAtomValue(composerAttachmentsAtom(composerId))
 }
 
@@ -22,7 +22,7 @@ export function useComposerAttachmentActions(composerId: string) {
   const remove = useSetAtom(removeComposerAttachmentAtom(composerId))
   const clear = useSetAtom(clearComposerAttachmentsAtom(composerId))
   return {
-    add: useCallback((item: ComposerAttachment) => add(item), [add]),
+    add: useCallback((item: TComposerAttachment) => add(item), [add]),
     remove: useCallback((itemId: string) => remove(itemId), [remove]),
     clear: useCallback(() => clear(), [clear]),
   }

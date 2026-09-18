@@ -2,14 +2,14 @@
 
 import type * as React from "react"
 import { cn } from "@/lib/utils"
-import type { AppliedMarkProps } from "./type"
+import type { IAppliedMarkProps } from "./type"
 
 export function AppliedMark({
   nodeId,
   className,
   children,
   ...props
-}: AppliedMarkProps): React.ReactElement {
+}: IAppliedMarkProps): React.ReactElement {
   return (
     <span
       className={cn(

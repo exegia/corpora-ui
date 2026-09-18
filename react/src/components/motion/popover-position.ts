@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 
-export type PortalLayout = {
+export type TPortalLayout = {
   trigger: {
     left: number;
     top: number;
@@ -20,7 +20,7 @@ export type PortalLayout = {
   };
 };
 
-function sameLayout(a: PortalLayout | null, b: PortalLayout) {
+function sameLayout(a: TPortalLayout | null, b: TPortalLayout) {
   return (
     a?.trigger.left === b.trigger.left &&
     a.trigger.top === b.trigger.top &&
@@ -40,7 +40,7 @@ export function usePopoverPortalPosition<
   contentRef: MutableRefObject<ContentElement | null>,
   active: boolean,
 ) {
-  const [layout, setLayout] = useState<PortalLayout | null>(null);
+  const [layout, setLayout] = useState<TPortalLayout | null>(null);
 
   const update = useCallback(() => {
     const trigger = triggerRef.current;
@@ -48,7 +48,7 @@ export function usePopoverPortalPosition<
     if (!trigger || !content) return;
 
     const rect = trigger.getBoundingClientRect();
-    const next: PortalLayout = {
+    const next: TPortalLayout = {
       trigger: {
         left: rect.left,
         top: rect.top,

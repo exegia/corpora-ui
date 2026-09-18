@@ -9,7 +9,8 @@ import {
   useAuthSession,
   useAuthSessionActions,
 } from "@/components/blocks/auth/auth-state"
-import { DemoBrandMark, DemoSelect, DemoStage, DemoToggle } from "@/components/docs/demo-controls"
+import { DemoBrandMark, DemoSelect, DemoToggle } from "@/components/docs/demo-controls"
+import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
 
 const ACCENTS = ["none", "corpora", "exegia"] as const
 

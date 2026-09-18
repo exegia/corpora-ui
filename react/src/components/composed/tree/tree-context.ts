@@ -2,11 +2,11 @@
 
 import * as React from "react"
 
-import type { TreeContextValue } from "./type"
+import type { ITreeContextValue } from "./type"
 
-export const TreeContext = React.createContext<TreeContextValue | null>(null)
+export const TreeContext = React.createContext<ITreeContextValue | null>(null)
 
-export function useTreeContext(): TreeContextValue {
+export function useTreeContext(): ITreeContextValue {
   const context = React.useContext(TreeContext)
   if (!context) throw new Error("Tree rows must render inside <Tree>.")
   return context

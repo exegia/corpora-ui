@@ -9,14 +9,13 @@ import {
 } from "@/components/composed/password-input";
 import {
   SocialProviders,
-  type SocialProvider,
 } from "@/components/composed/social-providers";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { type AuthAccent, authAccentActionStyles } from "@/lib/auth-accent";
+import { authAccentActionStyles } from "@/lib/auth-accent";
 import { cn } from "@/lib/utils";
 import {
   AuthCard,
@@ -25,46 +24,10 @@ import {
   AuthSuccess,
   MorphStep,
   Reveal,
-  type AuthStatus,
 } from "./auth-shell";
+import type { ISignupBlockProps, TAuthStatus } from "./type";
+import type { TSocialProvider } from "@/components/composed/types";
 
-export interface SignupBlockProps {
-  title?: string;
-  description?: string;
-  /**
-   * Replaces the built-in "terms" link inside the consent label — pass your
-   * own dialog trigger to render it inline instead of wiring `onTerms`.
-   */
-  termsComponent?: React.ReactNode;
-  /** Brand mark rendered above the title. Omit for no logo row at all. */
-  logo?: React.ReactNode;
-  /** Brand accent for the primary action. Omit keeping the default primary. */
-  accent?: AuthAccent;
-  providers?: SocialProvider[];
-  showNameField?: boolean;
-  /** Require the term checkbox before submitting. */
-  showTerms?: boolean;
-  /**
-   * Controls the term checkbox. Pass it with `onTermsCheckedChange` when
-   * something outside the block has to tick the box — an "I agree" action in
-   * your own terms dialog, say. Omit letting the block own the state.
-   */
-  termsChecked?: boolean;
-  /** Starting state of the term checkbox while it is uncontrolled. */
-  defaultTermsChecked?: boolean;
-  /** Fires on every change, controlled or not. */
-  onTermsCheckedChange?: (checked: boolean) => void;
-  /** Block submission until every password requirement is met. */
-  enforceStrongPassword?: boolean;
-  onSubmit?: (data: {
-    name: string;
-    email: string;
-    password: string;
-  }) => Promise<void> | void;
-  onProviderSelect?: (provider: SocialProvider) => Promise<void> | void;
-  onLogin?: () => void;
-  onTerms?: () => void;
-}
 
 export function SignupBlock({
   title = "Create your account",
@@ -83,15 +46,15 @@ export function SignupBlock({
   onProviderSelect,
   onLogin,
   onTerms,
-}: SignupBlockProps) {
+}: ISignupBlockProps) {
   const nameId = React.useId();
   const emailId = React.useId();
   const passwordId = React.useId();
   const termsId = React.useId();
-  const [status, setStatus] = React.useState<AuthStatus>("idle");
+  const [status, setStatus] = React.useState<TAuthStatus>("idle");
   const [error, setError] = React.useState<string | null>(null);
   const [loadingProvider, setLoadingProvider] =
-    React.useState<SocialProvider | null>(null);
+    React.useState<TSocialProvider | null>(null);
   const [password, setPassword] = React.useState("");
   // Controlled when `termsChecked` is passed, uncontrolled otherwise. The
   // internal state is kept either way, so a block that switches between the
@@ -150,7 +113,7 @@ export function SignupBlock({
     }
   }
 
-  async function handleProvider(provider: SocialProvider) {
+  async function handleProvider(provider: TSocialProvider) {
     setError(null);
     setLoadingProvider(provider);
     try {

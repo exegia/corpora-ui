@@ -8,7 +8,7 @@
  */
 
 /** Brand accents available to the auth blocks. */
-export type AuthAccent = "corpora" | "exegia";
+export type TAuthAccent = "corpora" | "exegia";
 
 /**
  * Custom properties an accent contributes, set on the AuthCard root.
@@ -19,7 +19,7 @@ export type AuthAccent = "corpora" | "exegia";
  * itself is a constant, so its contrast pair has to be too (white on the
  * corpora yellow fails badly).
  */
-export const authAccentVars: Record<AuthAccent, Record<string, string>> = {
+export const authAccentVars: Record<TAuthAccent, Record<string, string>> = {
   corpora: {
     "--auth-accent": "#E8B124",
     "--auth-accent-image": "none",

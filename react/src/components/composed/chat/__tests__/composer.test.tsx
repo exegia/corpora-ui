@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test"
-import { render, screen } from "@testing-library/react"
+import { act, fireEvent, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { Provider } from "jotai"
 
@@ -7,12 +7,12 @@ import {
   CommandMenu,
   Composer,
   SuggestedPrompts,
-  type ComposerSuggestionsProps,
+  type IComposerSuggestionsProps,
 } from "../composer"
 import { SuggestedPrompt } from "@/components/composed/ai/suggested-prompt"
 
 describe("Composer", () => {
-  test("rests as a pill with the send hint and expands on focus", async () => {
+  test("shows the prompt bar controls at rest and preserves keyboard sending", async () => {
     const user = userEvent.setup()
     const onSubmit = mock(() => {})
     render(
@@ -25,8 +25,13 @@ describe("Composer", () => {
       </Provider>
     )
 
-    expect(screen.getByText("to send message")).toBeDefined()
-    expect(screen.queryByRole("button", { name: "Send message" })).toBeNull()
+    expect(screen.queryByText("to send message")).toBeNull()
+    expect(
+      screen
+        .getByRole("button", { name: "Send message" })
+        .hasAttribute("disabled")
+    ).toBe(true)
+    expect(screen.getByRole("combobox", { name: "Choose model" })).toBeDefined()
 
     const field = screen.getByRole("textbox", { name: "Message" })
     await user.click(field)
@@ -43,7 +48,7 @@ describe("Composer", () => {
   test("folds the suggested prompts behind the disclosure and routes a pick", async () => {
     const user = userEvent.setup()
     const onSelect = mock(() => {})
-    const Suggestions = (props: ComposerSuggestionsProps) => (
+    const Suggestions = (props: IComposerSuggestionsProps) => (
       <SuggestedPrompts onOpenChange={props.onOpenChange} open={props.open}>
         <SuggestedPrompt onSelect={onSelect}>Check ¶12</SuggestedPrompt>
       </SuggestedPrompts>
@@ -77,5 +82,167 @@ describe("Composer", () => {
     )
     await user.click(screen.getByRole("button", { name: "Stop" }))
     expect(onStop).toHaveBeenCalledTimes(1)
+  })
+
+  test("filters commands and sources and inserts a keyboard selection without sending", async () => {
+    const user = userEvent.setup()
+    const onSubmit = mock(() => {})
+    const onCommand = mock(() => {})
+    const onSourceSelect = mock(() => {})
+    const command = {
+      id: "validate",
+      label: "/validate",
+      insertText: "/validate ",
+    }
+    const source = { id: "corpus", label: "Corpus", insertText: "@corpus " }
+    render(
+      <Provider>
+        <Composer
+          commands={[command, { id: "compare", label: "/compare" }]}
+          sources={[source]}
+          onSubmit={onSubmit}
+          onCommand={onCommand}
+          onSourceSelect={onSourceSelect}
+        />
+      </Provider>
+    )
+    const field = screen.getByRole("textbox", {
+      name: "Message",
+    }) as HTMLTextAreaElement
+    await user.type(field, "/val")
+    expect(
+      await screen.findByRole("option", { name: "/validate" })
+    ).toBeDefined()
+    expect(screen.queryByRole("option", { name: "/compare" })).toBeNull()
+    await user.keyboard("{Tab}")
+    expect(field.value).toBe("/validate ")
+    expect(onCommand).toHaveBeenCalledWith(command)
+    await user.type(field, "@cor")
+    await user.keyboard("{Enter}")
+    expect(field.value).toBe("/validate @corpus ")
+    expect(onSourceSelect).toHaveBeenCalledWith(source)
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  test("changes the selected model through the picker", async () => {
+    const user = userEvent.setup()
+    const onModelChange = mock(() => {})
+    render(
+      <Provider>
+        <Composer
+          models={[
+            { id: "auto", label: "Auto" },
+            { id: "reasoning", label: "Reasoning" },
+          ]}
+          onModelChange={onModelChange}
+        />
+      </Provider>
+    )
+    await user.click(screen.getByRole("combobox", { name: "Choose model" }))
+    await user.click(await screen.findByRole("option", { name: "Reasoning" }))
+    expect(onModelChange).toHaveBeenCalledWith("reasoning")
+    expect(
+      screen.getByRole("combobox", { name: "Choose model" }).textContent
+    ).toContain("Reasoning")
+  })
+
+  test("keeps Shift+Enter and IME input from submitting and leaves controlled text to the parent", () => {
+    const onSubmit = mock(() => {})
+    const onValueChange = mock(() => {})
+    render(
+      <Provider>
+        <Composer
+          value="Controlled draft"
+          onSubmit={onSubmit}
+          onValueChange={onValueChange}
+        />
+      </Provider>
+    )
+    const field = screen.getByRole("textbox", {
+      name: "Message",
+    }) as HTMLTextAreaElement
+    fireEvent.keyDown(field, { key: "Enter", shiftKey: true })
+    fireEvent.keyDown(field, { key: "Enter", isComposing: true })
+    expect(onSubmit).not.toHaveBeenCalled()
+    fireEvent.keyDown(field, { key: "Enter" })
+    expect(onSubmit).toHaveBeenCalledWith("Controlled draft", "answer", [])
+    expect(field.value).toBe("Controlled draft")
+  })
+
+  test("dictation appends final results and is cancelled on send", async () => {
+    const original = Object.getOwnPropertyDescriptor(
+      window,
+      "SpeechRecognition"
+    )
+    const recognizers: MockRecognition[] = []
+    class MockRecognition {
+      continuous = false
+      interimResults = false
+      lang = ""
+      onresult:
+        | ((event: {
+            resultIndex: number
+            results: { isFinal: boolean; 0: { transcript: string } }[]
+          }) => void)
+        | null = null
+      onerror: ((event: { error: string }) => void) | null = null
+      onend: (() => void) | null = null
+      start = mock(() => {})
+      stop = mock(() => {})
+      abort = mock(() => {})
+      constructor() {
+        recognizers.push(this)
+      }
+    }
+    Object.defineProperty(window, "SpeechRecognition", {
+      configurable: true,
+      value: MockRecognition,
+    })
+    const onSubmit = mock(() => {})
+    const view = render(
+      <Provider>
+        <Composer defaultValue="Please" onSubmit={onSubmit} />
+      </Provider>
+    )
+    try {
+      fireEvent.click(screen.getByRole("button", { name: "Start dictation" }))
+      const recognizer = recognizers[0]
+      expect(recognizer!.start).toHaveBeenCalledTimes(1)
+      await act(async () => {
+        recognizer!.onresult?.({
+          resultIndex: 0,
+          results: [
+            { isFinal: false, 0: { transcript: "ignore" } },
+            { isFinal: true, 0: { transcript: "validate this" } },
+          ],
+        })
+      })
+      expect(
+        (
+          screen.getByRole("textbox", {
+            name: "Message",
+          }) as HTMLTextAreaElement
+        ).value
+      ).toBe("Please validate this")
+      fireEvent.click(screen.getByRole("button", { name: "Send message" }))
+      expect(onSubmit).toHaveBeenCalledWith(
+        "Please validate this",
+        "answer",
+        []
+      )
+      expect(recognizer!.abort).toHaveBeenCalledTimes(1)
+      expect(recognizer!.onresult).toBeNull()
+      expect(
+        (
+          screen.getByRole("textbox", {
+            name: "Message",
+          }) as HTMLTextAreaElement
+        ).value
+      ).toBe("")
+    } finally {
+      view.unmount()
+      if (original) Object.defineProperty(window, "SpeechRecognition", original)
+      else Reflect.deleteProperty(window, "SpeechRecognition")
+    }
   })
 })

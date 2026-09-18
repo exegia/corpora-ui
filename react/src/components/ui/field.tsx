@@ -10,7 +10,7 @@ export function Field({
 }: FieldPrimitive.Root.Props): React.ReactElement {
   return (
     <FieldPrimitive.Root
-      className={cn("flex flex-col items-start gap-2", className)}
+      className={cn("flex flex-col items-start gap-1.5", className)}
       data-slot="field"
       {...props}
     />
@@ -56,7 +56,7 @@ export function FieldDescription({
       // interpolate-size (set on :root) plus a fade/blur rise. Removal is
       // unmount-instant; wrap in AnimatePresence when an exit is needed.
       className={cn(
-        "overflow-hidden text-muted-foreground text-xs transition-[height,opacity,filter,translate] duration-300 ease-smooth-out starting:h-0 starting:translate-y-1 starting:opacity-0 starting:blur-[2px] motion-reduce:transition-none",
+        "overflow-hidden text-muted-foreground text-xs ml-3 transition-[height,opacity,filter,translate] duration-300 ease-smooth-out starting:h-0 starting:translate-y-1 starting:opacity-0 starting:blur-small motion-reduce:transition-none",
         className,
       )}
       data-slot="field-description"
@@ -72,7 +72,7 @@ export function FieldError({
   return (
     <FieldPrimitive.Error
       className={cn(
-        "overflow-hidden text-destructive-foreground text-xs transition-[height,opacity,filter,translate] duration-300 ease-smooth-out starting:h-0 starting:translate-y-1 starting:opacity-0 starting:blur-[2px] motion-reduce:transition-none",
+        "overflow-hidden text-destructive-foreground text-xs ml-3 transition-[height,opacity,filter,translate] duration-300 ease-smooth-out starting:h-0 starting:translate-y-1 starting:opacity-0 starting:blur-small motion-reduce:transition-none",
         className,
       )}
       data-slot="field-error"

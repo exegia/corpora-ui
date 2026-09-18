@@ -35,29 +35,29 @@ import { cn } from "@/lib/utils"
 
 import { useProfileCard } from "./use-profile-card"
 import type {
-  ProfileCardAction,
-  ProfileCardItem,
-  ProfileCardUser,
-  ProfileCardVariant,
+  IProfileCardAction,
+  TProfileCardItem,
+  IProfileCardUser,
+  TProfileCardVariant,
 } from "./type"
 
 export type {
-  ProfileCardAction,
-  ProfileCardActions,
-  ProfileCardInstanceId,
-  ProfileCardItem,
-  ProfileCardLabel,
-  ProfileCardSeparator,
-  ProfileCardState,
-  ProfileCardUser,
-  ProfileCardVariant,
+  IProfileCardAction,
+  IProfileCardActions,
+  TProfileCardInstanceId,
+  TProfileCardItem,
+  IProfileCardLabel,
+  IProfileCardSeparator,
+  IProfileCardState,
+  IProfileCardUser,
+  TProfileCardVariant,
 } from "./type"
 
 /**
  * The menu the card ships with. Spread it to keep the shape and attach your
  * own handlers, or ignore it and pass `items` of your own.
  */
-export const defaultProfileCardItems: ProfileCardItem[] = [
+export const defaultProfileCardItems: TProfileCardItem[] = [
   { type: "label", label: "Management" },
   { id: "profile", label: "Profile", icon: <UserIcon aria-hidden="true" /> },
   {
@@ -77,19 +77,19 @@ export const defaultProfileCardItems: ProfileCardItem[] = [
   },
 ]
 
-type PopupProps = React.ComponentProps<typeof DropdownMenuContent>
+type TPopupProps = React.ComponentProps<typeof DropdownMenuContent>
 
-export interface ProfileCardBlockProps {
-  user: ProfileCardUser
+export interface IProfileCardBlockProps {
+  user: IProfileCardUser
   /**
    * The menu, flat: actions plus `{ type: "separator" }` / `{ type: "label" }`
    * entries. Defaults to `defaultProfileCardItems` (no handlers attached).
    */
-  items?: ProfileCardItem[]
+  items?: TProfileCardItem[]
   /** Menu placement relative to the card. */
-  align?: PopupProps["align"]
-  side?: PopupProps["side"]
-  sideOffset?: PopupProps["sideOffset"]
+  align?: TPopupProps["align"]
+  side?: TPopupProps["side"]
+  sideOffset?: TPopupProps["sideOffset"]
   open?: boolean
   defaultOpen?: boolean
   onOpenChange?: MenuPrimitive.Root.Props["onOpenChange"]
@@ -106,9 +106,9 @@ export interface ProfileCardBlockProps {
    * it sits in (a panel footer folds with the rail on its own), and
    * outside a panel starts from `defaultVariant`.
    */
-  variant?: ProfileCardVariant
-  defaultVariant?: ProfileCardVariant
-  onVariantChange?: (variant: ProfileCardVariant) => void
+  variant?: TProfileCardVariant
+  defaultVariant?: TProfileCardVariant
+  onVariantChange?: (variant: TProfileCardVariant) => void
   /**
    * Name this card's slice of the store so `useProfileCardState(id)` /
    * `useProfileCardActions(id)` can read or drive it (fold it, open its
@@ -117,7 +117,7 @@ export interface ProfileCardBlockProps {
    */
   profileCardId?: string
   /** Presence badge on the avatar — overrides `user.presence`. */
-  presence?: ProfileCardUser["presence"]
+  presence?: IProfileCardUser["presence"]
   /**
    * Emit cuelume press/release on the card and play the open/close cues.
    * Inert unless the app opts into interaction sound via `bindSounds()`.
@@ -130,10 +130,10 @@ export interface ProfileCardBlockProps {
 
 /** Split a flat item list into the groups the menu renders. */
 function toGroups(
-  items: ProfileCardItem[]
-): { label?: string; actions: ProfileCardAction[] }[] {
-  const groups: { label?: string; actions: ProfileCardAction[] }[] = []
-  let current: { label?: string; actions: ProfileCardAction[] } = {
+  items: TProfileCardItem[]
+): { label?: string; actions: IProfileCardAction[] }[] {
+  const groups: { label?: string; actions: IProfileCardAction[] }[] = []
+  let current: { label?: string; actions: IProfileCardAction[] } = {
     actions: [],
   }
 
@@ -179,7 +179,7 @@ export function ProfileCardBlock({
   sound = true,
   onError,
   className,
-}: ProfileCardBlockProps): React.ReactElement {
+}: IProfileCardBlockProps): React.ReactElement {
   const groups = React.useMemo(() => toGroups(items), [items])
 
   // Optional, not required: the card is a standalone block that also lands

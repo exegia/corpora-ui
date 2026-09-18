@@ -16,16 +16,17 @@
  * the old `usePanelVisibility` hook needed has no equivalent here.
  */
 
+import type { IScaffoldPanelLayout } from "./type"
 import { atom } from "jotai"
 import type { Atom, Getter, Setter } from "jotai"
 
 import { SCAFFOLD_PANEL_CAPACITY } from "./constants"
 import type {
-  ScaffoldConfig,
-  ScaffoldHandlers,
-  ScaffoldInstanceId,
-  ScaffoldPanelVisibility,
-  ScaffoldState,
+  IScaffoldConfig,
+  IScaffoldHandlers,
+  TScaffoldInstanceId,
+  IScaffoldPanelVisibility,
+  IScaffoldState,
 } from "./type"
 import {
   EMPTY_SCAFFOLD_VISIBILITY,
@@ -33,29 +34,29 @@ import {
   reconcileVisibility,
 } from "./utils"
 
-const DEFAULT_CONFIG: ScaffoldConfig = { controlsInspector: false }
-const NO_HANDLERS: ScaffoldHandlers = {}
+const DEFAULT_CONFIG: IScaffoldConfig = { controlsInspector: false }
+const NO_HANDLERS: IScaffoldHandlers = {}
 const NO_PANEL_IDS: readonly string[] = []
 
 // ── families ───────────────────────────────────────────────────────────────
 
-type Family<AtomType> = ((id: ScaffoldInstanceId) => AtomType) & {
-  remove: (id: ScaffoldInstanceId) => void
+type TFamily<AtomType> = ((id: TScaffoldInstanceId) => AtomType) & {
+  remove: (id: TScaffoldInstanceId) => void
 }
 
-const families: { remove: (id: ScaffoldInstanceId) => void }[] = []
+const families: { remove: (id: TScaffoldInstanceId) => void }[] = []
 
-function keyed<AtomType>(create: (id: ScaffoldInstanceId) => AtomType) {
-  const cache = new Map<ScaffoldInstanceId, AtomType>()
-  const family = ((id: ScaffoldInstanceId) => {
+function keyed<AtomType>(create: (id: TScaffoldInstanceId) => AtomType) {
+  const cache = new Map<TScaffoldInstanceId, AtomType>()
+  const family = ((id: TScaffoldInstanceId) => {
     let instance = cache.get(id)
     if (instance === undefined) {
       instance = create(id)
       cache.set(id, instance)
     }
     return instance
-  }) as Family<AtomType>
-  family.remove = (id: ScaffoldInstanceId) => {
+  }) as TFamily<AtomType>
+  family.remove = (id: TScaffoldInstanceId) => {
     cache.delete(id)
   }
   families.push(family)
@@ -72,7 +73,7 @@ function stateFamily<Value>(name: string, initialValue: Value) {
 
 function readFamily<Value>(
   name: string,
-  read: (get: Getter, id: ScaffoldInstanceId) => Value
+  read: (get: Getter, id: TScaffoldInstanceId) => Value
 ) {
   return keyed((id) => {
     const instance = atom((get) => read(get, id))
@@ -86,7 +87,7 @@ function actionFamily<Args extends unknown[]>(
   write: (
     get: Getter,
     set: Setter,
-    id: ScaffoldInstanceId,
+    id: TScaffoldInstanceId,
     ...args: Args
   ) => void
 ) {
@@ -104,10 +105,10 @@ function actionFamily<Args extends unknown[]>(
  * rule from the tree, at panel scale. Removal drops a whole scaffold. */
 function panelFamily<Value>(
   name: string,
-  read: (get: Getter, id: ScaffoldInstanceId, panelId: string) => Value
+  read: (get: Getter, id: TScaffoldInstanceId, panelId: string) => Value
 ) {
-  const cache = new Map<ScaffoldInstanceId, Map<string, Atom<Value>>>()
-  const family = (id: ScaffoldInstanceId, panelId: string): Atom<Value> => {
+  const cache = new Map<TScaffoldInstanceId, Map<string, Atom<Value>>>()
+  const family = (id: TScaffoldInstanceId, panelId: string): Atom<Value> => {
     let panels = cache.get(id)
     if (panels === undefined) {
       panels = new Map()
@@ -123,7 +124,7 @@ function panelFamily<Value>(
     return instance
   }
   families.push({
-    remove: (id: ScaffoldInstanceId) => {
+    remove: (id: TScaffoldInstanceId) => {
       cache.delete(id)
     },
   })
@@ -152,7 +153,7 @@ export const scaffoldMeasuredCapacityAtom = stateFamily<number | null>(
 )
 
 /** @internal The three visibility lists, settled as one value. */
-export const scaffoldVisibilityAtom = stateFamily<ScaffoldPanelVisibility>(
+export const scaffoldVisibilityAtom = stateFamily<IScaffoldPanelVisibility>(
   "visibility",
   EMPTY_SCAFFOLD_VISIBILITY
 )
@@ -163,13 +164,13 @@ export const scaffoldHoveredPanelIdAtom = stateFamily<string | null>(
 )
 
 /** @internal */
-export const scaffoldConfigAtom = stateFamily<ScaffoldConfig>(
+export const scaffoldConfigAtom = stateFamily<IScaffoldConfig>(
   "config",
   DEFAULT_CONFIG
 )
 
 /** @internal */
-export const scaffoldHandlersAtom = stateFamily<ScaffoldHandlers>(
+export const scaffoldHandlersAtom = stateFamily<IScaffoldHandlers>(
   "handlers",
   NO_HANDLERS
 )
@@ -179,8 +180,7 @@ export const scaffoldHandlersAtom = stateFamily<ScaffoldHandlers>(
 /** How many panels fit side by side; the cap while the canvas is unmeasured. */
 export const scaffoldPanelCapacityAtom = readFamily(
   "panelCapacity",
-  (get, id) =>
-    get(scaffoldMeasuredCapacityAtom(id)) ?? SCAFFOLD_PANEL_CAPACITY
+  (get, id) => get(scaffoldMeasuredCapacityAtom(id)) ?? SCAFFOLD_PANEL_CAPACITY
 )
 
 /** Ids of panels currently hidden (auto + user), for tabs to reflect. */
@@ -218,13 +218,54 @@ export const scaffoldPanelDimmedAtom = panelFamily(
   }
 )
 
+export const scaffoldPanelLayoutsAtom = stateFamily<
+  Record<string, IScaffoldPanelLayout>
+>("panel-layouts", {})
+export const scaffoldActiveResizeAtom = stateFamily<string | null>(
+  "active-resize",
+  null
+)
+export const scaffoldInspectorWidthAtom = stateFamily<number | null>(
+  "inspector-width",
+  null
+)
+export const resizeScaffoldInspectorAtom = actionFamily<[number]>(
+  "resize-inspector",
+  (_get, set, id, width) => {
+    if (Number.isFinite(width))
+      set(scaffoldInspectorWidthAtom(id), Math.max(180, width))
+  }
+)
+export const updateScaffoldPanelLayoutAtom = actionFamily<
+  [string, Partial<IScaffoldPanelLayout>]
+>("update-panel-layout", (get, set, id, panelId, patch) => {
+  const layouts = get(scaffoldPanelLayoutsAtom(id))
+  const safe = { ...patch }
+  if (safe.width !== undefined && Number.isFinite(safe.width))
+    set(scaffoldActiveResizeAtom(id), panelId)
+  if (safe.width !== undefined)
+    safe.width = Number.isFinite(safe.width)
+      ? Math.max(320, safe.width)
+      : undefined
+  if (safe.secondarySize !== undefined)
+    safe.secondarySize = Number.isFinite(safe.secondarySize)
+      ? Math.max(56, safe.secondarySize)
+      : undefined
+  set(scaffoldPanelLayoutsAtom(id), {
+    ...layouts,
+    [panelId]: { ...layouts[panelId], ...safe },
+  })
+})
+
 /** The whole state of one scaffold. This changes on every hover move, so a
  * component that reads one field should subscribe to that field's atom
  * instead: `useAtomValue(scaffoldInspectorOpenAtom("workspace"))`. */
-export const scaffoldStateAtom = readFamily<ScaffoldState>(
+export const scaffoldStateAtom = readFamily<IScaffoldState>(
   "state",
   (get, id) => ({
     inspectorOpen: get(scaffoldInspectorOpenAtom(id)),
+    inspectorWidth: get(scaffoldInspectorWidthAtom(id)),
+    panelLayouts: get(scaffoldPanelLayoutsAtom(id)),
     panelCapacity: get(scaffoldPanelCapacityAtom(id)),
     hiddenPanelIds: get(scaffoldHiddenPanelIdsAtom(id)),
     hoveredPanelId: get(scaffoldHoveredPanelIdAtom(id)),
@@ -235,7 +276,7 @@ export const scaffoldStateAtom = readFamily<ScaffoldState>(
 
 /** Re-settle the lists after any input moved. Inert when nothing changes —
  * `reconcileVisibility` returns `prev` untouched then. */
-function settleVisibility(get: Getter, set: Setter, id: ScaffoldInstanceId) {
+function settleVisibility(get: Getter, set: Setter, id: TScaffoldInstanceId) {
   const prev = get(scaffoldVisibilityAtom(id))
   const settled = reconcileVisibility(
     prev,
@@ -280,7 +321,7 @@ export const toggleScaffoldPanelAtom = actionFamily<[panelId: string]>(
       prev.autoHidden.includes(panelId) || prev.userHidden.includes(panelId)
     if (!hidden && prev.visibleOrder.length <= 1) return
 
-    const next: ScaffoldPanelVisibility = hidden
+    const next: IScaffoldPanelVisibility = hidden
       ? {
           // Showing: newest activation — reconcile evicts the oldest
           // visible panel if the canvas can't fit one more.
@@ -341,7 +382,7 @@ export const measureScaffoldCanvasAtom = actionFamily<[width: number]>(
 
 /** @internal Projection of the mounted root's controlled props. */
 export const projectScaffoldPropsAtom = actionFamily<
-  [config: ScaffoldConfig, inspectorOpen: boolean | undefined]
+  [config: IScaffoldConfig, inspectorOpen: boolean | undefined]
 >("projectProps", (_get, set, id, config, inspectorOpen) => {
   set(scaffoldConfigAtom(id), config)
   if (config.controlsInspector && inspectorOpen !== undefined)
@@ -350,7 +391,7 @@ export const projectScaffoldPropsAtom = actionFamily<
 
 /** @internal */
 export const setScaffoldHandlersAtom = actionFamily<
-  [handlers: ScaffoldHandlers]
+  [handlers: IScaffoldHandlers]
 >("setHandlers", (_get, set, id, handlers) => {
   set(scaffoldHandlersAtom(id), handlers)
 })
@@ -368,6 +409,9 @@ export const seedScaffoldInspectorAtom = actionFamily<[open: boolean]>(
 
 export const resetScaffoldAtom = actionFamily<[]>("reset", (_get, set, id) => {
   set(scaffoldInspectorOpenAtom(id), false)
+  set(scaffoldInspectorWidthAtom(id), null)
+  set(scaffoldPanelLayoutsAtom(id), {})
+  set(scaffoldActiveResizeAtom(id), null)
   set(scaffoldPanelIdsAtom(id), NO_PANEL_IDS)
   set(scaffoldMeasuredCapacityAtom(id), null)
   set(scaffoldVisibilityAtom(id), EMPTY_SCAFFOLD_VISIBILITY)
@@ -378,6 +422,6 @@ export const resetScaffoldAtom = actionFamily<[]>("reset", (_get, set, id) => {
 
 /** Forget a scaffold entirely — every family drops the key so the store can
  * release its state. Call on teardown of a named instance. */
-export function removeScaffoldInstance(id: ScaffoldInstanceId): void {
+export function removeScaffoldInstance(id: TScaffoldInstanceId): void {
   for (const family of families) family.remove(id)
 }

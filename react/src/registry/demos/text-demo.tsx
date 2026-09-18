@@ -10,19 +10,19 @@ import {
 import { Text } from "@/components/atoms/text"
 import { TextClickPopover } from "@/components/atoms/text-selection"
 import type {
-  SelectionRenderProps,
-  TextPopoverRenderProps,
+  ISelectionRenderProps,
+  ITextPopoverRenderProps,
 } from "@/components/atoms/text-selection"
 
 const TYPES = ["default", "heading", "paragraph", "link", "subscript"] as const
 const SIZES = ["small", "medium", "large"] as const
 
-type DemoType = (typeof TYPES)[number]
-type DemoSize = (typeof SIZES)[number]
+type TDemoType = (typeof TYPES)[number]
+type TDemoSize = (typeof SIZES)[number]
 
 function SelectionPopoverContent({
   selection,
-}: SelectionRenderProps): React.ReactElement {
+}: ISelectionRenderProps): React.ReactElement {
   return (
     <div className="flex items-center gap-3">
       <div className="min-w-0 flex-1">
@@ -35,7 +35,7 @@ function SelectionPopoverContent({
   )
 }
 
-function ClickPopoverContent({ close }: TextPopoverRenderProps) {
+function ClickPopoverContent({ close }: ITextPopoverRenderProps) {
   return (
     <div className="grid gap-1">
       <p className="text-[8px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
@@ -56,15 +56,15 @@ function ClickPopoverContent({ close }: TextPopoverRenderProps) {
 }
 
 export default function TextDemo(): React.ReactElement {
-  const [type, setType] = React.useState<DemoType>("default")
-  const [size, setSize] = React.useState<DemoSize>("medium")
+  const [type, setType] = React.useState<TDemoType>("default")
+  const [size, setSize] = React.useState<TDemoSize>("medium")
   const [selection, setSelection] = React.useState(false)
   const renderSelectionPopover = React.useCallback(
-    (props: SelectionRenderProps) => <SelectionPopoverContent {...props} />,
+    (props: ISelectionRenderProps) => <SelectionPopoverContent {...props} />,
     []
   )
   const renderClickPopover = React.useCallback(
-    (props: TextPopoverRenderProps) => <ClickPopoverContent {...props} />,
+    (props: ITextPopoverRenderProps) => <ClickPopoverContent {...props} />,
     []
   )
 

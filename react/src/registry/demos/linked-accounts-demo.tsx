@@ -2,13 +2,12 @@
 
 import * as React from "react"
 
-import { DemoStage, DemoToggle } from "@/components/docs/demo-controls"
-import {
-  LinkedAccountsBlock,
-  type LinkedIdentity,
-} from "@/components/blocks/auth/linked-accounts-block"
+import { DemoToggle } from "@/components/docs/demo-controls"
+import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
+import { LinkedAccountsBlock } from "@/components/blocks/auth/linked-accounts-block"
+import type { ILinkedIdentity } from "@/components/blocks/auth/type"
 
-const INITIAL: LinkedIdentity[] = [
+const INITIAL: ILinkedIdentity[] = [
   { id: "id-1", provider: "google", email: "reader@example.com" },
   { id: "id-2", provider: "github", email: "reader@users.noreply.github.com" },
 ]

@@ -7,16 +7,16 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { TreeContext } from "./tree-context"
 import { TreeRow } from "./tree-node"
 import type {
-  TreeContextValue,
-  TreeController,
-  TreeDataProps,
-  TreeNode,
-  TreeProps,
+  ITreeContextValue,
+  ITreeController,
+  TTreeDataProps,
+  ITreeNode,
+  TTreeProps,
 } from "./type"
 import { useTree } from "./use-tree"
 import { useTreeDndHandlers } from "./use-tree-dnd"
 
-const DEFAULT_LABELS: Record<TreeController["variant"], string> = {
+const DEFAULT_LABELS: Record<ITreeController["variant"], string> = {
   navigation: "Main",
   toc: "On this page",
   sidebar: "Main",
@@ -39,7 +39,7 @@ const DEFAULT_LABELS: Record<TreeController["variant"], string> = {
  * labels fold away when `collapsed` flips. Arrow keys walk visible rows,
  * expand and collapse; F2 renames in `files`.
  */
-export function Tree(props: TreeProps): React.ReactElement {
+export function Tree(props: TTreeProps): React.ReactElement {
   // Two components rather than one: hooks may not be called conditionally,
   // and the controller form has no props to build a fallback controller
   // from. Nobody switches a tree between the two forms at runtime.
@@ -56,7 +56,7 @@ export function Tree(props: TreeProps): React.ReactElement {
 }
 
 /** The props form: builds its own controller and renders through it. */
-function UncontrolledTree(props: TreeDataProps): React.ReactElement {
+function UncontrolledTree(props: TTreeDataProps): React.ReactElement {
   const {
     variant,
     items,
@@ -87,11 +87,11 @@ function UncontrolledTree(props: TreeDataProps): React.ReactElement {
   )
 }
 
-interface TreeViewProps {
-  tree: TreeController
+interface ITreeViewProps {
+  tree: ITreeController
   ariaLabel?: string
   className?: string
-  renderTrailing?: (node: TreeNode) => React.ReactNode
+  renderTrailing?: (node: ITreeNode) => React.ReactNode
 }
 
 /** Rendering only — every piece of state and behaviour lives on `tree`. */
@@ -100,7 +100,7 @@ function TreeView({
   ariaLabel,
   className,
   renderTrailing,
-}: TreeViewProps): React.ReactElement {
+}: ITreeViewProps): React.ReactElement {
   const { variant, items, sectioned, collapsed } = tree
   const rootRef = React.useRef<HTMLUListElement>(null)
 
@@ -175,7 +175,7 @@ function TreeView({
   // controller — so this value keeps its identity and a toggle re-renders only
   // the rows whose own atoms changed.
   const dnd = useTreeDndHandlers(tree.treeId)
-  const context = React.useMemo<TreeContextValue>(
+  const context = React.useMemo<ITreeContextValue>(
     () => ({ treeId: tree.treeId, renderTrailing, dnd }),
     [tree.treeId, renderTrailing, dnd]
   )

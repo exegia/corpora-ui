@@ -2,9 +2,9 @@ export {
   ProfileCardBlock,
   defaultProfileCardItems,
 } from "./profile-card-block"
-export type { ProfileCardBlockProps } from "./profile-card-block"
+export type { IProfileCardBlockProps } from "./profile-card-block"
 export { useProfileCard } from "./use-profile-card"
-export type { ProfileCardBinding, UseProfileCardOptions } from "./use-profile-card"
+export type { IProfileCardBinding, IUseProfileCardOptions } from "./use-profile-card"
 export {
   useProfileCardActions,
   useProfileCardState,

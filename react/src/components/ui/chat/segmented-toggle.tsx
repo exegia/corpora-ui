@@ -6,13 +6,13 @@ import { cn } from "@/lib/utils"
 import { SPRING_LAYOUT } from "@/lib/ease"
 import { playCue } from "@/lib/sound"
 
-export interface SegmentedToggleOption<T extends string> {
+export interface ISegmentedToggleOption<T extends string> {
   value: T
   label: React.ReactNode
 }
 
-export interface SegmentedToggleProps<T extends string> extends Omit<React.ComponentPropsWithoutRef<"div">, "onChange" | "defaultValue"> {
-  options: readonly SegmentedToggleOption<T>[]
+export interface ISegmentedToggleProps<T extends string> extends Omit<React.ComponentPropsWithoutRef<"div">, "onChange" | "defaultValue"> {
+  options: readonly ISegmentedToggleOption<T>[]
   value?: T
   defaultValue?: T
   onValueChange?: (value: T) => void
@@ -35,7 +35,7 @@ export function SegmentedToggle<T extends string>({
   sound = true,
   className,
   ...props
-}: SegmentedToggleProps<T>): React.ReactElement {
+}: ISegmentedToggleProps<T>): React.ReactElement {
   const reduceMotion = useReducedMotion()
   const layoutId = React.useId()
   const [internal, setInternal] = React.useState<T>(defaultValue ?? options[0].value)

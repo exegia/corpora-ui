@@ -3,7 +3,7 @@
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { BubbleContext } from "./context"
-import type { BubbleProps } from "./types"
+import type { IBubbleProps } from "./types"
 import { twBubbleAlignClasses, twBubbleColumnClasses } from "./utils"
 
 export function Bubble({
@@ -12,7 +12,7 @@ export function Bubble({
   className,
   children,
   ...props
-}: BubbleProps): React.ReactElement {
+}: IBubbleProps): React.ReactElement {
   return (
     <BubbleContext.Provider value={variant}>
       <div

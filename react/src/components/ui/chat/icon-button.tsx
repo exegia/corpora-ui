@@ -2,9 +2,9 @@
 
 import type * as React from "react"
 import { cn } from "@/lib/utils"
-import { Button, type ButtonProps } from "@/components/ui/button"
+import { Button, type TButtonProps } from "@/components/ui/button"
 
-export type IconButtonProps = Omit<ButtonProps, "variant" | "size" | "glassVariant" | "aria-label"> & {
+export type TIconButtonProps = Omit<TButtonProps, "variant" | "size" | "glassVariant" | "aria-label"> & {
   /** Required: icon-only controls need a name. */
   "aria-label": string
 }
@@ -14,7 +14,7 @@ export type IconButtonProps = Omit<ButtonProps, "variant" | "size" | "glassVaria
  *
  * @sketch "Atom / Icon Button"
  */
-export function IconButton({ className, ...props }: IconButtonProps): React.ReactElement {
+export function IconButton({ className, ...props }: TIconButtonProps): React.ReactElement {
   return (
     <Button
       variant="ghost"

@@ -12,17 +12,17 @@ import {
   goToAuthStepAtom,
   isAuthenticatedAtom,
 } from "../auth-state"
-import type { AuthUser } from "../auth-state"
+import type { IAuthUser } from "../type"
 
-const USER: AuthUser = {
+const USER: IAuthUser = {
   id: "u-1",
   name: "Yona Appletree",
   email: "yo@example.com",
 }
 
-type Store = ReturnType<typeof createStore>
+type TStore = ReturnType<typeof createStore>
 
-function mount(store: Store, ui: React.ReactElement) {
+function mount(store: TStore, ui: React.ReactElement) {
   return render(<ExegiaProvider store={store}>{ui}</ExegiaProvider>)
 }
 

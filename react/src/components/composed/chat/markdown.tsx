@@ -17,7 +17,7 @@ import { Tabs, TabsList, TabsTab } from "@/components/ui/tabs"
 import {
   markdownViewAtom,
   removeMarkdownInstance,
-  type MarkdownView,
+  type TMarkdownView,
   useMarkdownView,
 } from "./markdown-atom"
 
@@ -25,7 +25,7 @@ export {
   markdownViewAtom,
   removeMarkdownInstance,
   useMarkdownView,
-  type MarkdownView,
+  type TMarkdownView,
 }
 
 const VIEWS = [
@@ -94,7 +94,7 @@ const COMPONENTS: Components = {
   ),
 }
 
-export interface MarkdownProps extends Omit<
+export interface IMarkdownProps extends Omit<
   React.ComponentPropsWithoutRef<"div">,
   "onCopy"
 > {
@@ -102,9 +102,9 @@ export interface MarkdownProps extends Omit<
   source: string
   /** Stable id for the view atom. Unnamed cards key off `useId()`. */
   markdownId?: string
-  view?: MarkdownView
-  defaultView?: MarkdownView
-  onViewChange?: (view: MarkdownView) => void
+  view?: TMarkdownView
+  defaultView?: TMarkdownView
+  onViewChange?: (view: TMarkdownView) => void
   onCopy?: (source: string) => void
   onExpand?: () => void
   /** Drop the card border (inside an AiBubble the bubble supplies it). */
@@ -127,7 +127,7 @@ export function Markdown({
   bare = false,
   className,
   ...props
-}: MarkdownProps): React.ReactElement {
+}: IMarkdownProps): React.ReactElement {
   const reduceMotion = useReducedMotion()
   const generatedId = React.useId()
   const id = markdownId ?? generatedId
@@ -137,8 +137,8 @@ export function Markdown({
     return () => removeMarkdownInstance(id)
   }, [markdownId, id])
 
-  const current: MarkdownView = view ?? stored ?? defaultView ?? "preview"
-  const select = (next: MarkdownView) => {
+  const current: TMarkdownView = view ?? stored ?? defaultView ?? "preview"
+  const select = (next: TMarkdownView) => {
     if (view === undefined) setStored(next)
     onViewChange?.(next)
   }
@@ -159,7 +159,7 @@ export function Markdown({
         <Tabs
           className="gap-0"
           value={current}
-          onValueChange={(next) => select(next as MarkdownView)}
+          onValueChange={(next) => select(next as TMarkdownView)}
         >
           <TabsList aria-label="Markdown view" size="xs">
             {VIEWS.map((v) => (

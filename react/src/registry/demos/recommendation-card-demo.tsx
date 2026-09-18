@@ -4,7 +4,7 @@ import * as React from "react"
 
 import { DemoStage } from "@/components/docs/demo-controls"
 import { Recommendation, RecommendationCard } from "@/components/composed/chat"
-import type { RecommendationState } from "@/components/composed/chat"
+import type { TRecommendationState } from "@/components/composed/chat"
 
 const GROUP = [
   {
@@ -36,9 +36,9 @@ const GROUP = [
 
 function GroupDemo(): React.ReactElement {
   const [states, setStates] = React.useState<
-    Record<string, RecommendationState>
+    Record<string, TRecommendationState>
   >({ vendor: "accepted" })
-  const set = (value: string, state: RecommendationState) => () =>
+  const set = (value: string, state: TRecommendationState) => () =>
     setStates((prev) => ({ ...prev, [value]: state }))
 
   return (
@@ -71,7 +71,6 @@ export default function RecommendationCardDemo(): React.ReactElement {
           title="Want me to validate the Iliad corpus before the walker runs?"
           description="Check otype, oslots and the section features in"
           entity={{ name: "Iliad · Homer corpus", initials: "I" }}
-          descriptionSuffix="which takes about"
           leadTime="2 min"
           options={[
             { label: "Reconcile against the source TEI first", status: "Needs review", signal: "medium" },

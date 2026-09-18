@@ -1,14 +1,13 @@
 import { describe, expect, mock, test } from "bun:test";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import {
   OnboardingBlock,
-  type OnboardingBlockProps,
-  type OnboardingStepConfig,
 } from "../onboarding-block";
+import type { IOnboardingBlockProps, IOnboardingStepConfig } from "../type";
 
-const STEPS: OnboardingStepConfig[] = [
+const STEPS: IOnboardingStepConfig[] = [
   {
     id: "profile",
     title: "Your profile",
@@ -27,14 +26,42 @@ const STEPS: OnboardingStepConfig[] = [
 ];
 
 describe("OnboardingBlock", () => {
-  test("renders the declared steps as progress", () => {
-    render(<OnboardingBlock steps={STEPS} />);
+  test("embedded previews do not steal focus", () => {
+    render(<OnboardingBlock steps={STEPS} autoFocus={false} />);
+    expect(document.activeElement).not.toBe(
+      screen.getByRole("heading", { name: "Your profile" }),
+    );
+  });
 
-    const items = screen
-      .getByRole("navigation", { name: "Onboarding progress" })
-      .querySelectorAll("li");
-    expect(items).toHaveLength(2);
-    expect(items[0]?.getAttribute("aria-current")).toBe("step");
+  test("focuses the current step by default", () => {
+    render(<OnboardingBlock steps={STEPS} />);
+    expect(document.activeElement).toBe(
+      screen.getByRole("heading", { name: "Your profile" }),
+    );
+  });
+
+  test("renders a step picker and prevents skipping required steps", async () => {
+    const user = userEvent.setup();
+    render(<OnboardingBlock steps={STEPS} autoFocus={false} />);
+    await user.click(screen.getByRole("combobox", { name: "Onboarding step" }));
+    expect(screen.getByRole("option", { name: "Your profile" })).toBeDefined();
+    expect(screen.getByRole("option", { name: "Your links" }).getAttribute("aria-disabled")).toBe("true");
+  });
+
+  test("the picker restores drafts when revisiting completed steps", async () => {
+    const user = userEvent.setup();
+    render(<OnboardingBlock steps={STEPS} autoFocus={false} />);
+    await user.type(screen.getByLabelText("Display name"), "Ada");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.type(await screen.findByLabelText("Website"), "https://example.com");
+    await waitFor(() => expect(screen.getAllByRole("combobox", { name: "Onboarding step" })).toHaveLength(1));
+    await user.click(screen.getByRole("combobox", { name: "Onboarding step" }));
+    await user.click(screen.getByRole("option", { name: "Your profile" }));
+    expect((await screen.findByLabelText("Display name") as HTMLInputElement).value).toBe("Ada");
+    await waitFor(() => expect(screen.getAllByRole("combobox", { name: "Onboarding step" })).toHaveLength(1));
+    await user.click(screen.getByRole("combobox", { name: "Onboarding step" }));
+    await user.click(screen.getByRole("option", { name: "Your links" }));
+    expect((await screen.findByLabelText("Website") as HTMLInputElement).value).toBe("https://example.com");
   });
 
   test("blocks advance on a missing required field", async () => {
@@ -64,9 +91,9 @@ describe("OnboardingBlock", () => {
   test("walks the steps and reports the merged profile once", async () => {
     const user = userEvent.setup();
     const onStepSubmit =
-      mock<NonNullable<OnboardingBlockProps["onStepSubmit"]>>(async () => {});
+      mock<NonNullable<IOnboardingBlockProps["onStepSubmit"]>>(async () => {});
     const onComplete =
-      mock<NonNullable<OnboardingBlockProps["onComplete"]>>(async () => {});
+      mock<NonNullable<IOnboardingBlockProps["onComplete"]>>(async () => {});
     render(
       <OnboardingBlock
         steps={STEPS}

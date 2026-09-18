@@ -3,14 +3,14 @@
 import * as React from "react"
 
 import { DemoStage } from "@/components/docs/demo-controls"
-import { Flowchart, type Edge, type FlowchartSide, type StepNode } from "@/components/composed/chat"
+import { Flowchart, type TEdge, type TFlowchartSide, type TStepNode } from "@/components/composed/chat"
 
 const PURPLE = "var(--tag-purple-text)"
 const AMBER = "var(--tag-amber-text)"
 const BLUE = "var(--tag-blue-text)"
 const GREEN = "var(--tag-green-text)"
 
-const NODES: StepNode[] = [
+const NODES: TStepNode[] = [
   {
     id: "trigger",
     row: 0,
@@ -46,13 +46,13 @@ const NODES: StepNode[] = [
 
 export default function FlowchartDemo(): React.ReactElement {
   const [steps, setSteps] = React.useState(NODES)
-  const [edges, setEdges] = React.useState<Edge[]>([
+  const [edges, setEdges] = React.useState<TEdge[]>([
     { id: "trigger->cond", source: "trigger", target: "cond" },
     { id: "cond->polycarp", source: "cond", target: "polycarp" },
   ])
   const [readOnly, setReadOnly] = React.useState(false)
 
-  const add = (from: string, side: FlowchartSide) => {
+  const add = (from: string, side: TFlowchartSide) => {
     const parent = steps.find((n) => n.id === from)
     if (!parent) return
     const id = `node-${Date.now().toString(36)}`

@@ -1,20 +1,33 @@
-import React, { type ComponentProps, type ReactElement, type ReactNode, } from "react"
+import React, {
+  type ComponentProps,
+  type ReactElement,
+  type ReactNode,
+} from "react"
 
 /** Key of one scaffold's slice of the store. */
-export type ScaffoldInstanceId = string
+export type TScaffoldInstanceId = string
 
 /** The identity every scaffold part shares through ScaffoldContext. State
  * itself lives in the store — parts subscribe to the atoms they render from,
  * so this value never changes identity while the scaffold is mounted. */
-export interface ScaffoldContextValue {
-  scaffoldId: ScaffoldInstanceId
+export interface IScaffoldContextValue {
+  scaffoldId: TScaffoldInstanceId
   /** Drawer width in px — Actions reads it to slide out of the drawer's way. */
   inspectorWidth: number
 }
 
+export interface IScaffoldPanelLayout {
+  width?: number
+  secondarySize?: number
+  secondaryExpanded?: boolean
+  swapped?: boolean
+}
+
 /** One scaffold's whole state, as `useScaffoldState` returns it. A component
  * that watches one field should subscribe to that field's atom instead. */
-export interface ScaffoldState {
+export interface IScaffoldState {
+  inspectorWidth: number | null
+  panelLayouts: Record<string, IScaffoldPanelLayout>
   /** Whether the inspector drawer is currently shown. */
   inspectorOpen: boolean
   /** How many panels currently fit side by side, from the measured canvas
@@ -29,7 +42,12 @@ export interface ScaffoldState {
 }
 
 /** Drive a scaffold by id from anywhere, as `useScaffoldActions` returns it. */
-export interface ScaffoldStateActions {
+export interface IScaffoldStateActions {
+  resizePanel: (panelId: string, width: number) => void
+  resizeInspector: (width: number) => void
+  resizeSecondaryPanel: (panelId: string, height: number) => void
+  setSecondaryExpanded: (panelId: string, expanded: boolean) => void
+  setPanelSwapped: (panelId: string, swapped: boolean) => void
   setInspectorOpen: (open: boolean) => void
   toggleInspector: () => void
   /** Show/hide an id'd panel. Showing past capacity auto-hides the
@@ -40,13 +58,13 @@ export interface ScaffoldStateActions {
 
 /** @internal Which props currently control the scaffold — write gates for
  * the action atoms, so the store never overwrites a prop. */
-export interface ScaffoldConfig {
+export interface IScaffoldConfig {
   controlsInspector: boolean
 }
 
 /** @internal The mounted root's callbacks, published into the store so
  * action atoms can report changes wherever they were fired from. */
-export interface ScaffoldHandlers {
+export interface IScaffoldHandlers {
   onInspectorOpenChange?: (open: boolean) => void
 }
 
@@ -57,18 +75,18 @@ export interface ScaffoldHandlers {
  *   recent last. They return on their own when room comes back.
  * - `userHidden`: panels hidden by a tab press. They stay hidden until the
  *   tab is pressed again, however wide the canvas grows. */
-export interface ScaffoldPanelVisibility {
+export interface IScaffoldPanelVisibility {
   visibleOrder: string[]
   autoHidden: string[]
   userHidden: string[]
 }
 
-export interface ScaffoldRootProps extends ComponentProps<"div"> {
+export interface IScaffoldRootProps extends ComponentProps<"div"> {
   /** Names this scaffold's slice of the store, so `useScaffoldState` /
    * `useScaffoldActions` can drive it by id and its state outlives the
    * component. Omitted, the root keys off `useId` and drops its state on
    * unmount. `useScaffold().providerProps` carries one. */
-  scaffoldId?: ScaffoldInstanceId
+  scaffoldId?: TScaffoldInstanceId
   /** Controlled inspector state — pair with `onInspectorOpenChange`. The
    * prop stays the source of truth: store writes are gated off, and actions
    * report through the callback instead. */
@@ -80,15 +98,15 @@ export interface ScaffoldRootProps extends ComponentProps<"div"> {
   inspectorWidth?: number
 }
 
-export type ScaffoldSidebarProps = ComponentProps<"nav">
+export type TScaffoldSidebarProps = ComponentProps<"nav">
 
-export type ScaffoldMainProps = ComponentProps<"div">
+export type TScaffoldMainProps = ComponentProps<"div">
 
-export type ScaffoldCanvasProps = ComponentProps<"div">
+export type TScaffoldCanvasProps = ComponentProps<"div">
 
 /** React's drag/animation DOM handlers collide with motion's gesture props
  * on `motion.*` elements — strip them from pass-through HTML props. */
-type MotionSafe<T> = Omit<
+type TMotionSafe<T> = Omit<
   T,
   | "onDrag"
   | "onDragStart"
@@ -98,7 +116,7 @@ type MotionSafe<T> = Omit<
   | "onAnimationIteration"
 >
 
-export interface ScaffoldActionsProps extends MotionSafe<
+export interface IScaffoldActionsProps extends TMotionSafe<
   Omit<ComponentProps<"div">, "children">
 > {
   /** Called when the Add segment is pressed. The segment renders only
@@ -117,10 +135,10 @@ export interface ScaffoldActionsProps extends MotionSafe<
 }
 
 export type TScaffoldPanelChild<
-  T extends ScaffoldSubPanelProps = ScaffoldSubPanelProps,
+  T extends IScaffoldSubPanelProps = IScaffoldSubPanelProps,
 > = ReactElement<T, React.JSXElementConstructor<T>>
 
-export interface ScaffoldPanelProps {
+export interface IScaffoldPanelProps {
   /** Stable id opting the panel into responsive hiding: the canvas hides
    * id'd panels when it can't grant each `SCAFFOLD_PANEL_MIN_WIDTH`, and a
    * `Scaffold.Tab` with the matching `panelId` reflects and toggles it.
@@ -147,7 +165,7 @@ export interface ScaffoldPanelProps {
   className?: string
 }
 
-export interface ScaffoldTabProps extends MotionSafe<
+export interface IScaffoldTabProps extends TMotionSafe<
   Omit<ComponentProps<"div">, "children">
 > {
   /** The tab's label. */
@@ -169,7 +187,7 @@ export interface ScaffoldTabProps extends MotionSafe<
 export type TSubPanelPosition = "bottom" | "top"
 export type TSubPanelVariant = "card" | "subtle" | "inset"
 
-export interface ScaffoldSubPanelProps extends MotionSafe<
+export interface IScaffoldSubPanelProps extends TMotionSafe<
   Omit<ComponentProps<"div">, "children">
 > {
   children?: ReactNode
@@ -190,7 +208,7 @@ export interface ScaffoldSubPanelProps extends MotionSafe<
   className?: string
 }
 
-export interface ScaffoldInspectorProps extends MotionSafe<
+export interface IScaffoldInspectorProps extends TMotionSafe<
   Omit<ComponentProps<"aside">, "children">
 > {
   children?: ReactNode
@@ -198,7 +216,7 @@ export interface ScaffoldInspectorProps extends MotionSafe<
   name?: string
 }
 
-export interface PanelFloatingButtonProps {
+export interface IPanelFloatingButtonProps {
   onClick?: () => void
   /** Accessible name — the button is icon-only. */
   label: string
@@ -206,7 +224,7 @@ export interface PanelFloatingButtonProps {
   className?: string
 }
 
-export interface PanelMenuButtonProps extends PanelFloatingButtonProps {
+export interface IPanelMenuButtonProps extends IPanelFloatingButtonProps {
   /** Called when the Expand action is pressed — the panel trades which
    * sub-panel holds the flexible slot. */
   onExpand?: () => void
@@ -221,26 +239,26 @@ export interface PanelMenuButtonProps extends PanelFloatingButtonProps {
   swapped?: boolean
 }
 
-export interface UseScaffoldOptions {
+export interface IUseScaffoldOptions {
   /** Names the scaffold's slice of the store. Omitted, the hook generates
    * one and drops its state on unmount. */
-  scaffoldId?: ScaffoldInstanceId
+  scaffoldId?: TScaffoldInstanceId
   /** Initial inspector state. Closed by default. */
   defaultInspectorOpen?: boolean
   /** Fires on every inspector open/close. */
   onInspectorChange?: (open: boolean) => void
 }
 
-export interface ScaffoldControls {
+export interface IScaffoldControls {
   /** The id the hook and the root share — hand it to `useScaffoldState` /
    * `useScaffoldActions` to drive the scaffold from elsewhere. */
-  scaffoldId: ScaffoldInstanceId
+  scaffoldId: TScaffoldInstanceId
   inspectorOpen: boolean
   setInspectorOpen: (open: boolean) => void
   toggleInspector: () => void
   /** Spread onto Scaffold.Root. */
   providerProps: Pick<
-    ScaffoldRootProps,
+    IScaffoldRootProps,
     "scaffoldId" | "defaultInspectorOpen" | "onInspectorOpenChange"
   >
 }

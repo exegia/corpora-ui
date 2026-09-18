@@ -1,44 +1,36 @@
-import { Button } from "@/components/ui/button"
-import type { ButtonProps } from "@/components/ui/button"
-import type { IComposerSubmitButtonProps } from "../type"
-import { ArrowUp, Squircle } from "lucide"
+import { ArrowUp, Square } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { MorphIcon } from "morphicons/react"
+import type { IComposerSubmitButtonProps } from "../type"
+import type * as React from "react"
 
 export function SendButton({
   isStreaming,
-  isExpanded,
+  isExpanded: _isExpanded,
   disabled,
   onStop,
+  className,
   ...props
-}: IComposerSubmitButtonProps & ButtonProps): React.ReactElement {
+}: IComposerSubmitButtonProps &
+  React.ButtonHTMLAttributes<HTMLButtonElement>): React.ReactElement {
   return (
-    <Button
+    <button
       {...props}
-      aria-hidden={!isExpanded}
+      type={isStreaming ? "button" : "submit"}
       aria-label={isStreaming ? "Stop" : "Send message"}
-      // Not streaming, the button is type="submit" and the form's onSubmit
-      // owns the send; the click handler only carries the stop.
+      data-cuelume-press=""
+      data-cuelume-release=""
+      disabled={disabled}
       onClick={isStreaming ? onStop : undefined}
       className={cn(
-        "shrink-0 justify-self-center",
-        !isExpanded && "pointer-events-none"
+        "size-7 flex shrink-0 items-center justify-center rounded-lg bg-foreground text-background transition-colors hover:opacity-90 focus-visible:outline-2 focus-visible:outline-ring disabled:bg-foreground/10 disabled:text-muted-foreground disabled:opacity-60",
+        className
       )}
-      // Empty-draft must NOT disable: the disabled:opacity-50! rule would
-      // pin Motion's inline opacity at 0.5 and break the fade. send() guards
-      // empty drafts, and the collapsed button is pointer-events-none.
-      disabled={disabled && !isStreaming}
-      size="icon-lg"
-      tabIndex={isExpanded ? 0 : -1}
-      type={isStreaming ? "button" : "submit"}
     >
-      <MorphIcon
-        className={cn(
-          "size-4 rounded-full",
-          isStreaming ? "animate-pulse fill-current" : "stroke-2"
-        )}
-        icon={isStreaming ? Squircle : ArrowUp}
-      />
-    </Button>
+      {isStreaming ? (
+        <Square aria-hidden className="size-3 fill-current" />
+      ) : (
+        <ArrowUp aria-hidden className="size-4 stroke-[2.4]" />
+      )}
+    </button>
   )
 }

@@ -3,21 +3,27 @@ title: "Auth flow"
 description: "Orchestrator over the auth blocks: renders the right block for the flow's current step (login, signup, verify-code, forgot-password, update-password, onboarding, success) with the store wiring built in — the switchboard every host app was hand-rolling around `useAuthFlow`."
 ---
 
-import { Preview } from "@/components/blocks/auth/auth-flow-block.story"
+import { Preview } from "@/components/stories/auth-flow-block.story"
 import Demo from "@/registry/demos/auth-flow-demo"
 
 ## Preview and props
 
-Adjust the generated controls to explore the component's TypeScript props.
+Expand **Props** below the centered preview to change the component’s properties.
 
 <Preview />
+
+## Examples
+
+Follow the connected authentication steps. Enter `111111` to pass the simulated verification.
+
+<Demo />
 
 ## Usage
 
 ```tsx
 import { AuthFlowBlock } from "@exegia/corpora-ui"
 
-;<AuthFlowBlock
+<AuthFlowBlock
   onLogin={async ({ email, password }) => {
     const outcome = await api.signIn(email, password)
     return outcome.mfa
@@ -38,10 +44,6 @@ import { AuthFlowBlock } from "@exegia/corpora-ui"
 | Prop                                                                                                                           | Type                                                                                           | Default                | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | flowId                                                                                                                         | <code>string</code>                                                                            | <code>"default"</code> | Which flow instance to orchestrate. A re-auth modal passes its own id and coexists with the main flow; `useAuthFlowActions(flowId)` drives the same instance from anywhere.                                                                                                                                                                                                                                                                                                                               |
-| onLogin / onSignup / onVerifyCode / onRequestReset / onUpdatePassword / onProviderSelect / onOnboardingComplete / onResendCode | <code>(data) =&gt; AuthFlowDirective &#124; Promise&lt;AuthFlowDirective&gt;</code>            | —                      | The API boundary, one handler per step submit. Resolve with a directive to move the flow: `&#123; user &#125;` completes it AND signs the session in (one atomic write), `&#123; verify: &#123; identifier &#125; &#125;` records the destination and moves to the code step, `&#123; step &#125;` navigates, and `void` stays put (the block shows its own success). Reject to render the block's own error state — the orchestrator never mirrors transients into the store.                            |
-| logo / accent / providers                                                                                                      | <code>ReactNode / AuthAccent / SocialProvider[]</code>                                         | —                      | Branding handed to every step's card; `providers` feeds the login and signup steps.                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| steps / renderStep / success                                                                                                   | <code>AuthFlowStepOverrides / (step, flow) =&gt; ReactNode &#124; undefined / ReactNode</code> | —                      | Escape hatches, in escalating order: `steps` merges prop overrides over the wiring of one block (`&#123; login: &#123; onSignup: undefined &#125; &#125;` unhooks a default navigation link), `renderStep` replaces a whole step's UI (return undefined to keep the default), and `success` swaps the built-in completion card (`successTitle` / `successDescription` retitle it instead). Navigation between steps (login ↔ signup, forgot password, back from verification) is pre-wired to `goToStep`. |
-
-## Examples
-
-<Demo />
+| onLogin / onSignup / onVerifyCode / onRequestReset / onUpdatePassword / onProviderSelect / onOnboardingComplete / onResendCode | <code>(data) =&gt; TAuthFlowDirective &#124; Promise&lt;TAuthFlowDirective&gt</code>            | —                      | The API boundary, one handler per step submit. Resolve with a directive to move the flow: `&#123; user &#125;` completes it AND signs the session in (one atomic write), `&#123; verify: &#123; identifier &#125; &#125;` records the destination and moves to the code step, `&#123; step &#125;` navigates, and `void` stays put (the block shows its own success). Reject to render the block's own error state — the orchestrator never mirrors transients into the store.                            |
+| logo / accent / providers                                                                                                      | <code>ReactNode / TAuthAccent / TSocialProvider[]</code>                                         | —                      | Branding handed to every step's card; `providers` feeds the login and signup steps.                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| steps / renderStep / success                                                                                                   | <code>IAuthFlowStepOverrides / (step, flow) =&gt; ReactNode &#124; undefined / ReactNode</code> | —                      | Escape hatches, in escalating order: `steps` merges prop overrides over the wiring of one block (`&#123; login: &#123; onSignup: undefined &#125; &#125;` unhooks a default navigation link), `renderStep` replaces a whole step's UI (return undefined to keep the default), and `success` swaps the built-in completion card (`successTitle` / `successDescription` retitle it instead). Navigation between steps (login ↔ signup, forgot password, back from verification) is pre-wired to `goToStep`. |

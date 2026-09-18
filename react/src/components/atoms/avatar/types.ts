@@ -1,24 +1,24 @@
-import type { AtomSize } from "../types";
+import type { TAtomSize } from "../types";
 
-export type UserType = {
+export type TUserType = {
   firstName?: string
   lastName?: string
   email?: string
   role?: string
   avatarUrl?: string
   verified?: boolean
-  status?: AvatarStatus
+  status?: TAvatarStatus
 }
 
-export type AvatarSize = Exclude<AtomSize, "xs">
-export type AvatarStatus = "online" | "idle" | "offline"
+export type TAvatarSize = Exclude<TAtomSize, "xs">
+export type TAvatarStatus = "online" | "idle" | "offline"
 
-export type AvatarAudio = "muted" | "unmuted" | "speaking"
+export type TAvatarAudio = "muted" | "unmuted" | "speaking"
 
-export interface AvatarProps<T extends UserType> {
+export interface IAvatarProps<T extends TUserType> {
   user?: T
-  size?: AvatarSize
+  size?: TAvatarSize
   className?: string
-  audio?: AvatarAudio
+  audio?: TAvatarAudio
   loading?: boolean
 }

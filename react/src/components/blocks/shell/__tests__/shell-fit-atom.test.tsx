@@ -18,17 +18,17 @@ import {
   shellFitRequestedWidthAtom,
   shellFitStateAtom,
 } from "../shell-fit-atom"
-import type { ShellMetrics } from "../shell-metrics"
+import type { IShellMetrics } from "../shell-metrics"
 import { useShellFitActions, useShellFitState } from "../use-shell-fit-state"
 import { useShellPanels } from "../use-shell-panels"
 import type { TPanelMap } from "../type"
 import { SHELL_WIDTHS } from "../utils"
 
-type Store = ReturnType<typeof createStore>
+type TStore = ReturnType<typeof createStore>
 
 /** The shell's shipping numbers on a 1024px viewport: rail 256 + body 360 +
  * panel 320 = 936, with 32px of frame. */
-const WIDE: ShellMetrics = {
+const WIDE: IShellMetrics = {
   rail: 256,
   insetMin: 360,
   panelMin: 320,
@@ -37,9 +37,9 @@ const WIDE: ShellMetrics = {
 }
 
 /** The same shell squeezed to 800px — 936 needed, no room. */
-const NARROW: ShellMetrics = { ...WIDE, viewport: 800 }
+const NARROW: IShellMetrics = { ...WIDE, viewport: 800 }
 
-function measure(store: Store, id: string, metrics: ShellMetrics) {
+function measure(store: TStore, id: string, metrics: IShellMetrics) {
   store.set(measureShellFitAtom(id), metrics)
 }
 
@@ -228,6 +228,8 @@ function stubShellWidths() {
   )
   const original = Element.prototype.getBoundingClientRect
   Element.prototype.getBoundingClientRect = function (this: HTMLElement) {
+    if (this.getAttribute("data-slot") === "sidebar-wrapper")
+      return { width: window.innerWidth } as DOMRect
     const isProbe =
       this.style.visibility === "hidden" && this.style.position === "absolute"
     if (!isProbe) return original.call(this)

@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import type { TextureProps } from "./type";
+import type { ITextureProps } from "./type";
 import { linearGradient, textureMap } from "./utils";
 
 
@@ -8,7 +8,7 @@ export function Texture({
   opacity = 1,
   className,
   children,
-}: TextureProps) {
+}: ITextureProps) {
   const textureUrl = variant !== "none" ? textureMap[variant] : null
   return (
     <div className="relative h-full w-full flex flex-col flex-1">

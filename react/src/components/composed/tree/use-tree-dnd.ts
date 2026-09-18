@@ -12,11 +12,11 @@ import {
   treeItemsAtom,
 } from "./tree-atom"
 import type {
-  TreeDndContextValue,
-  TreeDndHandlers,
-  TreeDropPosition,
-  TreeInstanceId,
-  TreeNode,
+  ITreeDndContextValue,
+  ITreeDndHandlers,
+  TTreeDropPosition,
+  TTreeInstanceId,
+  ITreeNode,
 } from "./type"
 import { containsNode, findNode, locateNode } from "./utils"
 
@@ -37,7 +37,7 @@ const EDGE_RATIO = 0.25
  * never read, so the flow also works where the store is unavailable (tests,
  * some webviews).
  */
-export function useTreeDndHandlers(treeId: TreeInstanceId): TreeDndHandlers {
+export function useTreeDndHandlers(treeId: TTreeInstanceId): ITreeDndHandlers {
   const store = useStore()
   const enabled = useAtomValue(treeCanMoveAtom(treeId))
   const setDraggedId = useSetAtom(treeDraggedIdAtom(treeId))
@@ -72,7 +72,7 @@ export function useTreeDndHandlers(treeId: TreeInstanceId): TreeDndHandlers {
   )
 
   const onRowDragOver = React.useCallback(
-    (event: React.DragEvent, node: TreeNode) => {
+    (event: React.DragEvent, node: ITreeNode) => {
       const draggedId = readDraggedId()
       if (!enabled || draggedId === null) return
       // A node never drops onto itself or into its own subtree.
@@ -87,7 +87,7 @@ export function useTreeDndHandlers(treeId: TreeInstanceId): TreeDndHandlers {
       // Any node carrying a children array is a folder — an empty one still
       // accepts drops "inside".
       const folder = node.children !== undefined
-      const position: TreeDropPosition = folder
+      const position: TTreeDropPosition = folder
         ? ratio < EDGE_RATIO
           ? "before"
           : ratio > 1 - EDGE_RATIO
@@ -116,7 +116,7 @@ export function useTreeDndHandlers(treeId: TreeInstanceId): TreeDndHandlers {
   )
 
   const onRowDrop = React.useCallback(
-    (event: React.DragEvent, node: TreeNode) => {
+    (event: React.DragEvent, node: ITreeNode) => {
       if (!enabled) return
       event.preventDefault()
       event.stopPropagation()
@@ -167,7 +167,7 @@ export function useTreeDndHandlers(treeId: TreeInstanceId): TreeDndHandlers {
 
 /** The handlers plus live drag state, for `TreeController.dnd`. Rows take the
  * handlers alone and read the state per node instead. */
-export function useTreeDnd(treeId: TreeInstanceId): TreeDndContextValue {
+export function useTreeDnd(treeId: TTreeInstanceId): ITreeDndContextValue {
   const handlers = useTreeDndHandlers(treeId)
   const draggedId = useAtomValue(treeDraggedIdAtom(treeId))
   const dropTarget = useAtomValue(treeDropTargetAtom(treeId))

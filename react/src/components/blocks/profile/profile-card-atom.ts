@@ -11,39 +11,39 @@ import { atom } from "jotai"
 import type { Getter, Setter } from "jotai"
 
 import type {
-  ProfileCardAction,
-  ProfileCardConfig,
-  ProfileCardHandlers,
-  ProfileCardInstanceId,
-  ProfileCardState,
-  ProfileCardVariant,
+  IProfileCardAction,
+  IProfileCardConfig,
+  IProfileCardHandlers,
+  TProfileCardInstanceId,
+  IProfileCardState,
+  TProfileCardVariant,
 } from "./type"
 
-const DEFAULT_CONFIG: ProfileCardConfig = {
+const DEFAULT_CONFIG: IProfileCardConfig = {
   controlsVariant: false,
   controlsMenuOpen: false,
 }
-const NO_HANDLERS: ProfileCardHandlers = {}
+const NO_HANDLERS: IProfileCardHandlers = {}
 
 // ── families ───────────────────────────────────────────────────────────────
 
-type Family<AtomType> = ((id: ProfileCardInstanceId) => AtomType) & {
-  remove: (id: ProfileCardInstanceId) => void
+type TFamily<AtomType> = ((id: TProfileCardInstanceId) => AtomType) & {
+  remove: (id: TProfileCardInstanceId) => void
 }
 
-const families: { remove: (id: ProfileCardInstanceId) => void }[] = []
+const families: { remove: (id: TProfileCardInstanceId) => void }[] = []
 
-function keyed<AtomType>(create: (id: ProfileCardInstanceId) => AtomType) {
-  const cache = new Map<ProfileCardInstanceId, AtomType>()
-  const family = ((id: ProfileCardInstanceId) => {
+function keyed<AtomType>(create: (id: TProfileCardInstanceId) => AtomType) {
+  const cache = new Map<TProfileCardInstanceId, AtomType>()
+  const family = ((id: TProfileCardInstanceId) => {
     let instance = cache.get(id)
     if (instance === undefined) {
       instance = create(id)
       cache.set(id, instance)
     }
     return instance
-  }) as Family<AtomType>
-  family.remove = (id: ProfileCardInstanceId) => {
+  }) as TFamily<AtomType>
+  family.remove = (id: TProfileCardInstanceId) => {
     cache.delete(id)
   }
   families.push(family)
@@ -60,7 +60,7 @@ function stateFamily<Value>(name: string, initialValue: Value) {
 
 function readFamily<Value>(
   name: string,
-  read: (get: Getter, id: ProfileCardInstanceId) => Value
+  read: (get: Getter, id: TProfileCardInstanceId) => Value
 ) {
   return keyed((id) => {
     const instance = atom((get) => read(get, id))
@@ -74,7 +74,7 @@ function actionFamily<Args extends unknown[]>(
   write: (
     get: Getter,
     set: Setter,
-    id: ProfileCardInstanceId,
+    id: TProfileCardInstanceId,
     ...args: Args
   ) => void
 ) {
@@ -89,7 +89,7 @@ function actionFamily<Args extends unknown[]>(
 
 // ── primitives ─────────────────────────────────────────────────────────────
 
-export const profileCardVariantAtom = stateFamily<ProfileCardVariant>(
+export const profileCardVariantAtom = stateFamily<TProfileCardVariant>(
   "variant",
   "expanded"
 )
@@ -102,13 +102,13 @@ export const profileCardPendingActionIdAtom = stateFamily<string | null>(
 )
 
 /** @internal */
-export const profileCardConfigAtom = stateFamily<ProfileCardConfig>(
+export const profileCardConfigAtom = stateFamily<IProfileCardConfig>(
   "config",
   DEFAULT_CONFIG
 )
 
 /** @internal */
-export const profileCardHandlersAtom = stateFamily<ProfileCardHandlers>(
+export const profileCardHandlersAtom = stateFamily<IProfileCardHandlers>(
   "handlers",
   NO_HANDLERS
 )
@@ -127,7 +127,7 @@ export const profileCardBusyAtom = readFamily(
 
 /** Whole-state read for callers that want the object; the field atoms are
  * cheaper for components that watch one thing. */
-export const profileCardStateAtom = readFamily<ProfileCardState>(
+export const profileCardStateAtom = readFamily<IProfileCardState>(
   "state",
   (get, id) => ({
     variant: get(profileCardVariantAtom(id)),
@@ -142,7 +142,7 @@ export const profileCardStateAtom = readFamily<ProfileCardState>(
 /** Reports through `onVariantChange` always; writes the store only when no
  * `variant` prop controls the card — the prop is truth then. */
 export const setProfileCardVariantAtom = actionFamily<
-  [variant: ProfileCardVariant]
+  [variant: TProfileCardVariant]
 >("setVariant", (get, set, id, variant) => {
   if (get(profileCardVariantAtom(id)) === variant) return
   if (!get(profileCardConfigAtom(id)).controlsVariant)
@@ -181,7 +181,7 @@ export const setProfileCardMenuOpenAtom = actionFamily<[open: boolean]>(
  * writes to an instance nobody renders any more.
  */
 export const selectProfileCardActionAtom = actionFamily<
-  [action: ProfileCardAction]
+  [action: IProfileCardAction]
 >("selectAction", (get, set, id, action) => {
   const result = action.onSelect?.()
   if (!(result instanceof Promise)) return
@@ -200,8 +200,8 @@ export const selectProfileCardActionAtom = actionFamily<
 /** @internal Projection of the mounted component's controlled props. */
 export const projectProfileCardPropsAtom = actionFamily<
   [
-    config: ProfileCardConfig,
-    variant: ProfileCardVariant | undefined,
+    config: IProfileCardConfig,
+    variant: TProfileCardVariant | undefined,
     menuOpen: boolean | undefined,
   ]
 >("projectProps", (_get, set, id, config, variant, menuOpen) => {
@@ -214,7 +214,7 @@ export const projectProfileCardPropsAtom = actionFamily<
 
 /** @internal */
 export const setProfileCardHandlersAtom = actionFamily<
-  [handlers: ProfileCardHandlers]
+  [handlers: IProfileCardHandlers]
 >("setHandlers", (_get, set, id, handlers) => {
   set(profileCardHandlersAtom(id), handlers)
 })
@@ -222,7 +222,7 @@ export const setProfileCardHandlersAtom = actionFamily<
 /** @internal Seed the uncontrolled variant on mount without firing
  * `onVariantChange`. */
 export const seedProfileCardVariantAtom = actionFamily<
-  [variant: ProfileCardVariant]
+  [variant: TProfileCardVariant]
 >("seedVariant", (_get, set, id, variant) => {
   set(profileCardVariantAtom(id), variant)
 })
@@ -242,6 +242,6 @@ export const resetProfileCardAtom = actionFamily<[]>(
 
 /** Forget a card entirely — every family drops the key so the store can
  * release its state. Call on teardown of a named instance. */
-export function removeProfileCardInstance(id: ProfileCardInstanceId): void {
+export function removeProfileCardInstance(id: TProfileCardInstanceId): void {
   for (const family of families) family.remove(id)
 }

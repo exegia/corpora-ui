@@ -8,7 +8,7 @@ import { motion } from "motion/react"
 import ActionBar from "./toolbar"
 import { BOUNCE_IN_OUT } from "@/lib/ease"
 
-import type { ActionKey, ActionMap, EmojiActionBarProps } from "./types"
+import type { TActionKey, TActionMap, IEmojiActionBarProps } from "./types"
 import {
   EmojiPicker,
   EmojiPickerContent,
@@ -29,7 +29,7 @@ export function EmojiActionBar({
   onEmojiSelect,
   reactions = QUICK_REACTIONS,
   hideMore = false,
-}: EmojiActionBarProps): React.ReactElement {
+}: IEmojiActionBarProps): React.ReactElement {
   const {
     actions: quickReactions,
     isFullPicker,
@@ -38,10 +38,10 @@ export function EmojiActionBar({
   } = useEmojiPicker({ onEmojiSelect, reactions, hideMore })
 
   const actions = useMemo(() => {
-    return quickReactions.reduce<ActionMap<ActionKey>>((acc, item) => {
+    return quickReactions.reduce<TActionMap<TActionKey>>((acc, item) => {
       // Replace spaces with hyphens and convert to lowercase for the action key
       const label = item.label.replace(/\s+/g, "-").toLowerCase()
-      const key: ActionKey = `action-${label}` as const
+      const key: TActionKey = `action-${label}` as const
       // Create the action component, using the more action if the label includes "more"
       const moreAction = (
         <Action

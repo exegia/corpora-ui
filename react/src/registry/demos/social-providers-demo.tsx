@@ -2,40 +2,18 @@
 
 import * as React from "react"
 
-import { DemoSelect, DemoStage, DemoToggle } from "@/components/docs/demo-controls"
-import {
-  SocialProviders,
-  type SocialProvider,
-} from "@/components/composed/social-providers"
-
-const ACTIONS = ["continue", "login", "signup"] as const
-const LAYOUTS = ["stack", "row"] as const
+import { DemoStage } from "@/components/docs/demo-controls"
+import { SocialProviders } from "@/components/composed/social-providers"
+import type { TSocialProvider } from "@/components/composed/types"
 
 export default function SocialProvidersDemo() {
-  const [action, setAction] = React.useState<(typeof ACTIONS)[number]>("continue")
-  const [layout, setLayout] = React.useState<(typeof LAYOUTS)[number]>("stack")
-  const [withX, setWithX] = React.useState(false)
-  const [loading, setLoading] = React.useState<SocialProvider | null>(null)
-
-  const providers: SocialProvider[] = withX
-    ? ["google", "apple", "github", "x"]
-    : ["google", "apple", "github"]
+  const [loading, setLoading] = React.useState<TSocialProvider | null>(null)
 
   return (
-    <DemoStage
-      controls={
-        <>
-          <DemoSelect label="action" value={action} options={ACTIONS} onChange={setAction} />
-          <DemoSelect label="layout" value={layout} options={LAYOUTS} onChange={setLayout} />
-          <DemoToggle label="include X" checked={withX} onChange={setWithX} />
-        </>
-      }
-    >
+    <DemoStage>
       <SocialProviders
         className="max-w-64"
-        providers={providers}
-        action={action}
-        layout={layout}
+        providers={["google", "apple", "github"]}
         loadingProvider={loading}
         onSelect={(provider) => {
           setLoading(provider)

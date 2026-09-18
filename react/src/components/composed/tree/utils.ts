@@ -1,8 +1,8 @@
-import type { TreeNode } from "./type"
+import type { ITreeNode } from "./type"
 
 /** Depth-0 nodes read as sections only when the data actually nests three
  * levels — a two-level tree keeps its top level as plain link rows. */
-export function hasThreeLevels(items: readonly TreeNode[]): boolean {
+export function hasThreeLevels(items: readonly ITreeNode[]): boolean {
   return items.some((node) =>
     node.children?.some((child) => (child.children?.length ?? 0) > 0)
   )
@@ -10,10 +10,10 @@ export function hasThreeLevels(items: readonly TreeNode[]): boolean {
 
 /** Ids of every ancestor of `id` (nearest last); empty when absent. */
 export function ancestorIdsOf(
-  items: readonly TreeNode[],
+  items: readonly ITreeNode[],
   id: string
 ): string[] {
-  const walk = (nodes: readonly TreeNode[], trail: string[]): string[] | null => {
+  const walk = (nodes: readonly ITreeNode[], trail: string[]): string[] | null => {
     for (const node of nodes) {
       if (node.id === id) return trail
       if (node.children) {
@@ -29,11 +29,11 @@ export function ancestorIdsOf(
 /** Ids that start expanded: `defaultOpen` nodes plus every ancestor of the
  * active entry, so the current location is never folded away. */
 export function initialExpandedIds(
-  items: readonly TreeNode[],
+  items: readonly ITreeNode[],
   activeId?: string
 ): Set<string> {
   const expanded = new Set<string>()
-  const walk = (nodes: readonly TreeNode[]) => {
+  const walk = (nodes: readonly ITreeNode[]) => {
     for (const node of nodes) {
       if (node.defaultOpen) expanded.add(node.id)
       if (node.children) walk(node.children)
@@ -48,11 +48,11 @@ export function initialExpandedIds(
 /** Ids of every node that can hold children — the set `expandAll` opens.
  * In `files` an empty `children: []` still counts (it is a folder). */
 export function expandableIdsOf(
-  items: readonly TreeNode[],
+  items: readonly ITreeNode[],
   filesVariant = false
 ): string[] {
   const ids: string[] = []
-  const walk = (nodes: readonly TreeNode[]) => {
+  const walk = (nodes: readonly ITreeNode[]) => {
     for (const node of nodes) {
       const branch = filesVariant
         ? node.children !== undefined
@@ -67,10 +67,10 @@ export function expandableIdsOf(
 
 /** Immutably relabel `id`. Returns the same array reference when absent. */
 export function renameNode(
-  items: readonly TreeNode[],
+  items: readonly ITreeNode[],
   id: string,
   label: string
-): TreeNode[] {
+): ITreeNode[] {
   return items.map((node) => {
     if (node.id === id) return { ...node, label }
     return node.children
@@ -82,7 +82,7 @@ export function renameNode(
 /** Whether `candidateId` is `id` itself or nests anywhere under it — the
  * guard that keeps a folder from being dropped into its own subtree. */
 export function containsNode(
-  items: readonly TreeNode[],
+  items: readonly ITreeNode[],
   id: string,
   candidateId: string
 ): boolean {
@@ -93,9 +93,9 @@ export function containsNode(
 }
 
 export function findNode(
-  items: readonly TreeNode[],
+  items: readonly ITreeNode[],
   id: string
-): TreeNode | null {
+): ITreeNode | null {
   for (const node of items) {
     if (node.id === id) return node
     if (node.children) {
@@ -108,11 +108,11 @@ export function findNode(
 
 /** Parent id (`null` at root) and index of `id` among its siblings. */
 export function locateNode(
-  items: readonly TreeNode[],
+  items: readonly ITreeNode[],
   id: string
 ): { parentId: string | null; index: number } | null {
   const walk = (
-    nodes: readonly TreeNode[],
+    nodes: readonly ITreeNode[],
     parentId: string | null
   ): { parentId: string | null; index: number } | null => {
     for (const [index, node] of nodes.entries()) {
@@ -132,15 +132,15 @@ export function locateNode(
  * consumers don't each rebuild it. `index` addresses the sibling list
  * *after* the node has been lifted out. */
 export function moveNode(
-  items: readonly TreeNode[],
+  items: readonly ITreeNode[],
   id: string,
   parentId: string | null,
   index: number
-): TreeNode[] {
+): ITreeNode[] {
   // Dropping into the node's own subtree would orphan it — refuse.
   if (parentId !== null && containsNode(items, id, parentId)) return [...items]
-  let moved: TreeNode | null = null
-  const strip = (nodes: readonly TreeNode[]): TreeNode[] =>
+  let moved: ITreeNode | null = null
+  const strip = (nodes: readonly ITreeNode[]): ITreeNode[] =>
     nodes.flatMap((node) => {
       if (node.id === id) {
         moved = node
@@ -152,14 +152,14 @@ export function moveNode(
     })
   const stripped = strip(items)
   if (!moved) return [...items]
-  const captured = moved as TreeNode
+  const captured = moved as ITreeNode
 
   if (parentId === null) {
     const next = [...stripped]
     next.splice(Math.min(index, next.length), 0, captured)
     return next
   }
-  const insert = (nodes: readonly TreeNode[]): TreeNode[] =>
+  const insert = (nodes: readonly ITreeNode[]): ITreeNode[] =>
     nodes.map((node) => {
       if (node.id === parentId) {
         const children = [...(node.children ?? [])]

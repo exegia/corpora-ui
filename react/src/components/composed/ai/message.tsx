@@ -1,4 +1,4 @@
-import type { AIContentProps, AIMessageProps, AIMessageType } from "./types"
+import type { TAIContentProps, IAIMessageProps, TAIMessageType } from "./types"
 import { Bubble } from "@/components/atoms"
 import { cn } from "@/lib/utils"
 import { Avatar } from "./avatar"
@@ -8,7 +8,7 @@ import { Avatar } from "./avatar"
  * changes — a "Suggestions" disclosure that fans the cards out below with a
  * staggered spring.
  */
-export function Message<T extends AIMessageType>({
+export function Message<T extends TAIMessageType>({
   children,
   isStreaming = false,
   className,
@@ -16,15 +16,15 @@ export function Message<T extends AIMessageType>({
   type,
   contentProps,
   ...props
-}: AIMessageProps<T>): React.ReactElement {
+}: IAIMessageProps<T>): React.ReactElement {
   // TS can't relate `AIContentProps<T>` to JSX's IntrinsicAttributes while `T`
   // is unresolved; widen to the full union for the render site only.
   const Content = AttachedContent as
-    React.ComponentType<AIContentProps> | undefined
+    React.ComponentType<TAIContentProps> | undefined
 
   return (
     <Bubble
-      className={cn(className)}
+      className={cn("my-1.5", className)}
       data-slot="ai-message"
       data-streaming={isStreaming ? "" : undefined}
       variant="ai"
@@ -39,9 +39,9 @@ export function Message<T extends AIMessageType>({
         aria-live="polite"
         data-slot="ai-message-body"
       >
-        {children}
+        <div className="ml-3">{children}</div>
         {Content && (
-          <Content {...({ kind: type, ...contentProps } as AIContentProps)} />
+          <Content {...({ kind: type, ...contentProps } as TAIContentProps)} />
         )}
       </Bubble.Message>
     </Bubble>

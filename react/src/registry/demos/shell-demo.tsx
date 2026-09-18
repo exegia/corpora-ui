@@ -2,7 +2,7 @@
 
 import { ShellLayout } from "@/components/blocks/shell/shell-layout"
 import { useShellPanels } from "@/components/blocks/shell/use-shell-panels"
-import { DemoStage } from "@/components/docs/demo-controls"
+import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
 
 export default function ShellDemo() {
   const panels = useShellPanels()

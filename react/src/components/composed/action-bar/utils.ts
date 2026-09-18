@@ -1,20 +1,19 @@
-import { type ComponentType, useMemo, useState } from "react"
+import { createContext, useMemo, useState } from "react"
 import { Tooltip } from "@base-ui/react/tooltip"
-import { TooltipCreateHandle } from "@/components/ui/tooltip"
 import type {
-  ActionBarSegment,
-  ActionEntry,
-  ActionItemsByGroup,
-  ActionKey,
-  ActionMap,
-  EmojiActionBarProps,
+  TActionBarSegment,
+  TActionEntry,
+  TActionItemsByGroup,
+  TActionKey,
+  TActionMap,
+  IEmojiActionBarProps,
 } from "./types"
 import type { Emoji } from "frimousse"
 
-// Annotated, not inferred: the emitted .d.ts cannot name base-ui's
-// `TooltipHandle` on its own (TS2883).
-export const tooltipHandle: Tooltip.Handle<ComponentType> =
-  TooltipCreateHandle<ComponentType>()
+// Each toolbar owns its handle; a shared handle cannot control multiple roots.
+export const ActionTooltipContext = createContext<
+  Tooltip.Handle<string> | undefined
+>(undefined)
 
 export const isSeparator = (key: string): boolean => key.includes("separator")
 
@@ -29,12 +28,12 @@ export const isSeparator = (key: string): boolean => key.includes("separator")
 export const useActionBar = ({
   actions,
 }: {
-  actions: ActionMap<ActionKey>
+  actions: TActionMap<TActionKey>
 }) => {
   return useMemo(() => {
-    const entries = Object.entries(actions) as ActionEntry[]
-    const segments: ActionBarSegment[] = []
-    let open: ActionEntry[] = []
+    const entries = Object.entries(actions) as TActionEntry[]
+    const segments: TActionBarSegment[] = []
+    let open: TActionEntry[] = []
 
     const closeGroup = (): void => {
       if (open.length === 0) return
@@ -59,7 +58,7 @@ export const useActionBar = ({
     // once the caller has actually asked for grouping.
     const hasGroups = segments.some((s) => s.type === "separator")
 
-    const actionItemsByGroup: ActionItemsByGroup = Object.fromEntries(
+    const actionItemsByGroup: TActionItemsByGroup = Object.fromEntries(
       groups.map((group) => [group.key, group.items])
     )
 
@@ -106,7 +105,7 @@ export const useEmojiPicker = ({
   onEmojiSelect,
   reactions,
   hideMore,
-}: EmojiActionBarProps) => {
+}: IEmojiActionBarProps) => {
   const [isFullPicker, setShowAll] = useState(false)
 
   // Toggles the picker between quick reactions and the full picker.

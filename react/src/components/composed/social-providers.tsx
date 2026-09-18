@@ -10,8 +10,8 @@ import type * as React from "react"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import type { TSocialProvider } from "./types"
 
-export type SocialProvider = "google" | "apple" | "github" | "x"
 
 /** Google's four-color "G" — the only provider whose mark isn't monochrome. */
 function GoogleColorIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -43,37 +43,39 @@ function GoogleColorIcon(props: React.SVGProps<SVGSVGElement>) {
  * `brandClassName` render it in the provider's own colors.
  */
 export const SOCIAL_PROVIDERS: Record<
-  SocialProvider,
+  TSocialProvider,
   {
     label: string
     Icon: React.ComponentType<{ className?: string }>
     BrandIcon: React.ComponentType<{ className?: string }>
-    brandClassName: string
+    brandClassName?: string
+    buttonClassName?: string
+    labelClassName?: string
   }
 > = {
   google: {
     label: "Google",
     Icon: RiGoogleFill,
     BrandIcon: GoogleColorIcon,
-    brandClassName: "",
+    brandClassName: "fill-black dark:fill-white"
   },
   apple: {
     label: "Apple",
     Icon: RiAppleFill,
     BrandIcon: RiAppleFill,
-    brandClassName: "text-foreground",
+    brandClassName: "fill-white! dark:fill-black!",
+    buttonClassName: "bg-neutral-950 hover:bg-black dark:bg-white dark:hover:bg-neutral-100 shadow-bezel dark:shadow-bubble-dim border-border dark:border-muted",
+    labelClassName: "text-white dark:text-black"
   },
   github: {
     label: "GitHub",
     Icon: RiGithubFill,
-    BrandIcon: RiGithubFill,
-    brandClassName: "text-foreground",
+    BrandIcon: RiGithubFill
   },
   x: {
     label: "X",
     Icon: RiTwitterXFill,
-    BrandIcon: RiTwitterXFill,
-    brandClassName: "text-foreground",
+    BrandIcon: RiTwitterXFill
   },
 }
 
@@ -83,16 +85,16 @@ const ACTION_LABELS = {
   continue: "Continue with",
 } as const
 
-export interface SocialProvidersProps {
-  providers?: SocialProvider[]
+export interface ISocialProvidersProps {
+  providers?: TSocialProvider[]
   /** Verb used in the stacked layout labels. */
   action?: keyof typeof ACTION_LABELS
   /** "stack" = full-width labeled buttons; "row" = icon-only buttons. */
   layout?: "stack" | "row"
   /** Shows the matching button in its loading state and disables the rest. */
-  loadingProvider?: SocialProvider | null
+  loadingProvider?: TSocialProvider | null
   disabled?: boolean
-  onSelect?: (provider: SocialProvider) => void
+  onSelect?: (provider: TSocialProvider) => void
   className?: string
 }
 
@@ -105,7 +107,7 @@ export function SocialProviders({
   disabled = false,
   onSelect,
   className,
-}: SocialProvidersProps) {
+}: ISocialProvidersProps) {
   const row = layout === "row"
 
   return (
@@ -117,13 +119,19 @@ export function SocialProviders({
       )}
     >
       {providers.map((provider) => {
-        const { label, Icon } = SOCIAL_PROVIDERS[provider]
+        const {
+          label,
+          BrandIcon,
+          brandClassName,
+          buttonClassName,
+          labelClassName,
+        } = SOCIAL_PROVIDERS[provider]
         return (
           <Button
             key={provider}
             variant="outline"
             size={row ? "icon" : "default"}
-            className={row ? undefined : "w-full"}
+            className={cn(buttonClassName, row ? undefined : "w-full")}
             aria-label={`${ACTION_LABELS[action]} ${label}`}
             loading={loadingProvider === provider}
             disabled={
@@ -132,9 +140,9 @@ export function SocialProviders({
             }
             onClick={() => onSelect?.(provider)}
           >
-            <Icon aria-hidden="true" />
+            <BrandIcon aria-hidden="true" className={brandClassName} />
             {!row && (
-              <span className="flex-1">
+              <span className={cn("flex-1", labelClassName)}>
                 {ACTION_LABELS[action]} {label}
               </span>
             )}

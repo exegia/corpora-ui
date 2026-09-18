@@ -11,9 +11,9 @@ import {
   toggleProfileCardVariantAtom,
 } from "./profile-card-atom"
 import type {
-  ProfileCardActions,
-  ProfileCardInstanceId,
-  ProfileCardState,
+  IProfileCardActions,
+  TProfileCardInstanceId,
+  IProfileCardState,
 } from "./type"
 
 /**
@@ -29,8 +29,8 @@ import type {
  * `useAtomValue(profileCardVariantAtom("account"))`.
  */
 export function useProfileCardState(
-  profileCardId: ProfileCardInstanceId
-): ProfileCardState {
+  profileCardId: TProfileCardInstanceId
+): IProfileCardState {
   return useAtomValue(profileCardStateAtom(profileCardId))
 }
 
@@ -44,8 +44,8 @@ export function useProfileCardState(
  * ```
  */
 export function useProfileCardActions(
-  profileCardId: ProfileCardInstanceId
-): ProfileCardActions {
+  profileCardId: TProfileCardInstanceId
+): IProfileCardActions {
   const setVariant = useSetAtom(setProfileCardVariantAtom(profileCardId))
   const toggleVariant = useSetAtom(toggleProfileCardVariantAtom(profileCardId))
   const setMenuOpen = useSetAtom(setProfileCardMenuOpenAtom(profileCardId))

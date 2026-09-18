@@ -1,23 +1,23 @@
 import { atom } from "jotai"
 import type {
-  SelectionPosition,
-  SelectionState,
-  SelectionStateUpdate,
+  ISelectionPosition,
+  ISelectionState,
+  TSelectionStateUpdate,
 } from "./types"
 
-export const initialSelectionState: SelectionState = {
+export const initialSelectionState: ISelectionState = {
   selected: false,
   currentSelection: "",
   showPopover: false,
   popoverPosition: null,
 }
 
-export const selectionAtom = atom<SelectionState>(initialSelectionState)
+export const selectionAtom = atom<ISelectionState>(initialSelectionState)
 
 /** Update only the fields that changed, keeping selection state atomic. */
 export const updateSelectionAtom = atom(
   null,
-  (get, set, update: SelectionStateUpdate) => {
+  (get, set, update: TSelectionStateUpdate) => {
     const next =
       typeof update === "function" ? update(get(selectionAtom)) : update
     set(selectionAtom, { ...get(selectionAtom), ...next })
@@ -30,7 +30,7 @@ export const setSelectionAtom = atom(null, (_get, set, selection: string) => {
 
 export const setSelectionPositionAtom = atom(
   null,
-  (_get, set, popoverPosition: SelectionPosition) => {
+  (_get, set, popoverPosition: ISelectionPosition) => {
     set(updateSelectionAtom, { popoverPosition })
   }
 )

@@ -6,8 +6,6 @@ export * from "./avatar"
 export * from "./loader"
 export * from "./reference"
 
-export type { ReferenceProps } from "./types"
-
 export {
   HighlightPopover,
   TextClickPopover,
@@ -26,27 +24,3 @@ export {
   updateSelectionAtom,
 } from "./text-selection/selection-atom"
 export { useSelection } from "./text-selection/use-selection"
-export type {
-  HighlightPopoverPrimitiveProps,
-  HighlightPopoverProps,
-  SelectionPosition,
-  SelectionPopoverComponent,
-  SelectionRenderProps,
-  SelectionState,
-  SelectionStateUpdate,
-  TextClickPopoverProps,
-  TextPopoverRenderProps,
-  TextSelectionProps,
-} from "./text-selection/types"
-export type {
-  UseSelectionOptions,
-  UseSelectionResult,
-} from "./text-selection/types"
-export type {
-  AvatarAudio,
-  AvatarProps,
-  AvatarSize,
-  AvatarStatus,
-  UserType,
-} from "./avatar/types"
-export type { ILoaderProps, TLoaderType } from "./loader"

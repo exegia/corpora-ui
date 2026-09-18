@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils"
 import { SCAFFOLD_EASE, SCAFFOLD_EDGE_GUTTER, SCAFFOLD_MORPH_DURATION } from "./constants"
 import { scaffoldInspectorOpenAtom } from "./scaffold-atom"
 import { useScaffoldContext } from "./scaffold-context"
-import type { ScaffoldActionsProps } from "./type"
+import type { IScaffoldActionsProps } from "./type"
 import { segmentVariants } from "./utils"
 import { Button } from "@/components/ui/button"
 import { SPRING_LAYOUT } from "@/lib/ease.ts"
@@ -30,7 +30,7 @@ export function ScaffoldActions({
   className,
   children,
   ...rest
-}: ScaffoldActionsProps): React.ReactElement {
+}: IScaffoldActionsProps): React.ReactElement {
   const { scaffoldId, inspectorWidth } = useScaffoldContext()
   const inspectorOpen = useAtomValue(scaffoldInspectorOpenAtom(scaffoldId))
   const reducedMotion = useReducedMotion()

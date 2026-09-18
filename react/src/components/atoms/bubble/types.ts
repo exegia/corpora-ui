@@ -7,10 +7,10 @@ import type { ComponentPropsWithoutRef, ReactNode } from "react"
  * - "recipient" — an incoming message from another person (left-aligned, muted)
  * - "ai"        — generated output (left-aligned, chrome-less prose)
  */
-export type BubbleVariant = "ai" | "sender" | "recipient"
+export type TBubbleVariant = "ai" | "sender" | "recipient"
 
-export interface BubbleProps extends ComponentPropsWithoutRef<"div"> {
-  variant?: BubbleVariant
+export interface IBubbleProps extends ComponentPropsWithoutRef<"div"> {
+  variant?: TBubbleVariant
   /**
    * A follow-up in a run of messages from the same author: tucks under the
    * previous bubble. Render `Bubble.Header` on the first of the run only.
@@ -18,11 +18,14 @@ export interface BubbleProps extends ComponentPropsWithoutRef<"div"> {
   continued?: boolean
 }
 
-export type BubbleMessageProps = ComponentPropsWithoutRef<"div">
+export type TBubbleMessageProps = ComponentPropsWithoutRef<"div"> & {
+  /** No bubble surface. Automatically true for attachment-only children; set explicitly for custom wrappers. */
+  unstyled?: boolean
+}
 
-export type BubbleHeaderProps = ComponentPropsWithoutRef<"div">
+export type TBubbleHeaderProps = ComponentPropsWithoutRef<"div">
 
-export interface BubbleReaction {
+export interface IBubbleReaction {
   /** Stable key; falls back to the label/emoji when omitted. */
   id?: string
   emoji: ReactNode | string
@@ -35,39 +38,39 @@ export interface BubbleReaction {
 
 /** An emoji chosen from the picker. Mirrors frimousse's payload so the
  *  library never re-exports a dependency's type on its public surface. */
-export interface BubblePickedEmoji {
+export interface IBubblePickedEmoji {
   emoji: string
   label: string
 }
 
-export interface BubbleReactionsProps extends Omit<
+export interface IBubbleReactionsProps extends Omit<
   ComponentPropsWithoutRef<"div">,
   "onToggle"
 > {
-  reactions?: BubbleReaction[]
-  onToggle?: (reaction: BubbleReaction, index: number) => void
+  reactions?: IBubbleReaction[]
+  onToggle?: (reaction: IBubbleReaction, index: number) => void
   /** Fires when an emoji is picked from the add-reaction popover. */
-  onEmojiSelect?: (emoji: BubblePickedEmoji) => void
+  onEmojiSelect?: (emoji: IBubblePickedEmoji) => void
 }
 
-export type BubbleActionsProps = ComponentPropsWithoutRef<"div">
+export type TBubbleActionsProps = ComponentPropsWithoutRef<"div">
 
-export interface BubbleReactionChipProps extends Omit<
+export interface IBubbleReactionChipProps extends Omit<
   HTMLMotionProps<"button">,
   "onToggle" | "children"
 > {
-  reaction: BubbleReaction
+  reaction: IBubbleReaction
   index: number
-  onToggle?: (reaction: BubbleReaction, index: number) => void
+  onToggle?: (reaction: IBubbleReaction, index: number) => void
 }
 
-export type BubbleReactionsButtonProps = Omit<
+export type TBubbleReactionsButtonProps = Omit<
   HTMLMotionProps<"button">,
   "onToggle" | "children" | "onClick"
 > & {
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
   /** Fires when an emoji is picked from the popover. */
-  onEmojiSelect?: (emoji: BubblePickedEmoji) => void
+  onEmojiSelect?: (emoji: IBubblePickedEmoji) => void
 }
 
 /**

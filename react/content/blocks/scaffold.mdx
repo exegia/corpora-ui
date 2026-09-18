@@ -3,14 +3,20 @@ title: "Scaffold"
 description: "Composable desktop workspace: an icon rail on a soft gradient backdrop, a canvas of closable/swappable panels, a floating actions cluster, and an inspector drawer that slides in over the canvas."
 ---
 
-import { Preview } from "@/components/blocks/scaffold/scaffold-root.story"
+import { Preview } from "@/components/stories/scaffold-root.story"
 import Demo from "@/registry/demos/scaffold-demo"
 
 ## Preview and props
 
-Adjust the generated controls to explore the component's TypeScript props.
+Expand **Props** below the centered preview to change the component’s properties.
 
 <Preview />
+
+## Examples
+
+Add and switch workspace panels, then open the inspector to explore the layout.
+
+<Demo />
 
 ## Usage
 
@@ -73,6 +79,25 @@ function App() {
 | Tab · children / panelId / onClose / closeLabel                                  | <code>ReactNode / string / () =&gt; void / string</code>        | —       | A panel's tab inside the Actions pill — its label plus a close button. With `panelId` (a `Scaffold.Panel`'s `id`) the tab fronts that panel's visibility: a hidden panel dims its tab behind an eye-off icon, and pressing the label toggles it — showing one past capacity hides the least-recently-activated panel in its place. Hovering the tab spotlights its panel — every other id'd panel fades to 0.35 opacity. The close button renders only while `onClose` is present; omit it on the last remaining panel's tab so at least one panel stays open. Key each tab — closes animate out of the pill.                                                                                                                                             |
 | Inspector · name / children                                                      | <code>string / ReactNode</code>                                 | —       | Drawer content. Stays mounted and inert while closed so it can slide back out; opening also slides the Actions cluster leftward in step.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
-## Examples
 
-<Demo />
+### Resize and control panels from anywhere
+
+The workspace uses `motion-panels` for column edges, secondary-panel seams, and the inspector edge. Arrow keys resize a focused separator; Shift uses larger steps, Enter collapses, and double-click resets. The last visible workspace panel remains available, and secondary panels collapse to their existing strip.
+
+Use stable panel IDs and a `scaffoldId` to share layout state under one `ExegiaProvider`:
+
+```tsx
+const actions = useScaffoldActions("workspace")
+const state = useScaffoldState("workspace")
+
+actions.resizePanel("editor", 480)
+actions.resizeSecondaryPanel("editor", 160)
+actions.setSecondaryExpanded("editor", true)
+actions.setPanelSwapped("editor", true)
+actions.resizeInspector(360)
+actions.toggleInspector()
+actions.togglePanel("editor")
+// state.panelLayouts and state.inspectorWidth retain the requested sizes.
+```
+
+Widths are constrained to the available workspace; hidden panels retain their layout when reopened. `reset()` clears saved panel sizes and expansion state too.

@@ -1,10 +1,9 @@
-import type { TextProps } from "./types"
+import type { TSpanProps } from "./types"
 import { Text } from "./default"
 import { cn } from "@/lib/utils"
 
-export type SpanProps = Omit<TextProps, "type">
 
-export function Span(props: SpanProps) {
+export function Span(props: TSpanProps) {
   return (
     <Text
       {...props}

@@ -1,14 +1,14 @@
 import { Avatar } from "@/components/atoms"
 import { Badge } from "@/components/ui/badge"
-import type { UserInfoProps } from "./types"
+import type { TUserInfoProps } from "./types"
 import { cn } from "@/lib/utils"
 
 /**
  * This component displays a user's information in a compact format.
  * that can be used to display a user's name and role,
  * in the chat bubble header or sidebar profile.
- * @param {UserInfoProps['user']} user - The user to display.
- * @param {UserInfoProps['description']} description - The description to display.
+ * @param {TUserInfoProps['user']} user - The user to display.
+ * @param {TUserInfoProps['description']} description - The description to display.
  *
  * @description Displays a user's name and role in a compact format.
  *
@@ -19,17 +19,25 @@ export function Info({
   direction = "sender",
   audio,
   size,
-}: UserInfoProps) {
+}: TUserInfoProps) {
   return (
     <div
       slot="info"
-      className={cn("flex flex-row items-center gap-1.5", {
+      className={cn("gap-1.5 flex flex-row items-center", {
         "flex-row-reverse": direction === "sender",
       })}
     >
       <Avatar size={size ?? "default"} user={user} audio={audio} />
-      <div className="flex flex-col">
-        <div className={cn("flex items-center flex-row gap-1.5", { "flex-row-reverse": direction === "sender" })}>
+      <div
+        className={cn("flex flex-col", {
+          "items-end text-right": direction === "sender",
+        })}
+      >
+        <div
+          className={cn("gap-1.5 flex flex-row items-center", {
+            "flex-row-reverse": direction === "sender",
+          })}
+        >
           <span className="text-sm font-semibold">
             {user.firstName} {user.lastName}
           </span>

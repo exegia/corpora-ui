@@ -3,7 +3,7 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
-import type { ScaffoldMainProps } from "./type"
+import type { TScaffoldMainProps } from "./type"
 
 /**
  * The region right of the rail. Hosts `Scaffold.Actions` (top-right),
@@ -14,7 +14,7 @@ export function ScaffoldMain({
   className,
   children,
   ...rest
-}: ScaffoldMainProps): React.ReactElement {
+}: TScaffoldMainProps): React.ReactElement {
   return (
     <div
       id="scaffold-main"

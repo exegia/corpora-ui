@@ -9,7 +9,7 @@ import {
   setScaffoldInspectorOpenAtom,
   toggleScaffoldInspectorAtom,
 } from "./scaffold-atom"
-import type { ScaffoldControls, UseScaffoldOptions } from "./type"
+import type { IScaffoldControls, IUseScaffoldOptions } from "./type"
 
 /**
  * Owns the scaffold's inspector state for UI living outside the scaffold
@@ -27,7 +27,7 @@ export function useScaffold({
   scaffoldId: scaffoldIdProp,
   defaultInspectorOpen,
   onInspectorChange,
-}: UseScaffoldOptions = {}): ScaffoldControls {
+}: IUseScaffoldOptions = {}): IScaffoldControls {
   const generatedId = useId()
   const scaffoldId = scaffoldIdProp ?? generatedId
 
@@ -40,7 +40,7 @@ export function useScaffold({
     return () => removeScaffoldInstance(scaffoldId)
   }, [scaffoldIdProp, scaffoldId])
 
-  const providerProps = useMemo<ScaffoldControls["providerProps"]>(
+  const providerProps = useMemo<IScaffoldControls["providerProps"]>(
     () => ({
       scaffoldId,
       defaultInspectorOpen,

@@ -12,7 +12,7 @@ import {
   toggleScaffoldPanelAtom,
 } from "./scaffold-atom"
 import { useScaffoldContext } from "./scaffold-context"
-import type { ScaffoldTabProps } from "./type"
+import type { IScaffoldTabProps } from "./type"
 import { segmentVariants } from "./utils"
 import { Button } from "@/components/ui/button"
 import { LucideAppWindow, LucideEyeOff, LucideX } from "lucide-react"
@@ -37,7 +37,7 @@ export function ScaffoldTab({
   sound = true,
   className,
   ...rest
-}: ScaffoldTabProps): React.ReactElement {
+}: IScaffoldTabProps): React.ReactElement {
   const { scaffoldId } = useScaffoldContext()
   // The per-panel atom keeps this tab still while its siblings toggle; the
   // empty-key sentinel reads false for a tab without a `panelId`.

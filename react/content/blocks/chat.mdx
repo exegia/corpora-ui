@@ -3,14 +3,20 @@ title: "Chat"
 description: "The chat surface end to end: the chrome-less AiPanel rail (scoped selections, generated answers, recommendation cards) and the Bubble-atom messages that carry attachments and AI content. The panel is the main example; the examples below show message exchanges, attachments and an AI reply."
 ---
 
-import { Preview } from "@/components/blocks/chat/base.story"
+import { Preview } from "@/components/stories/base.story"
 import Demo from "@/registry/demos/chat-demo"
 
 ## Preview and props
 
-Adjust the generated controls to explore the component's TypeScript props.
+Expand **Props** below the centered preview to change the component’s properties.
 
 <Preview />
+
+## Examples
+
+Explore message exchanges, attachments and generated replies.
+
+<Demo />
 
 ## Usage
 
@@ -30,7 +36,28 @@ import { AiPanel, GeneratedBlock, RecommendationCard } from "@exegia/corpora-ui"
       />
     </>
   }
-  composerProps={{ onSend: askContextFabric }}
+  composerProps={{
+    onSubmit: askContextFabric,
+    models: [
+      { id: "auto", label: "Auto" },
+      { id: "reasoning", label: "Reasoning" },
+    ],
+    onModelChange: setModel,
+    sources: [
+      {
+        id: "corpus",
+        label: "Corpus",
+        description: "Manuscripts and annotations",
+      },
+    ],
+    commands: [
+      {
+        id: "validate",
+        label: "/validate",
+        description: "Check the selected passage",
+      },
+    ],
+  }}
 />
 ```
 
@@ -44,6 +71,12 @@ import { AiPanel, GeneratedBlock, RecommendationCard } from "@exegia/corpora-ui"
 | GeneratedBlock / RecommendationCard | <code>content and recommendation props</code>                                   | —       | Thread blocks with persistent generated labeling, polite live-region streaming, and direct human-in-the-loop recommendation cards with Reject/Accept actions.                                                                                                |
 | Bubble                              | <code>variant="sender" &#124; "recipient", Header, Message</code>               | —       | The message atom: sender hugs the right edge, recipient carries attachments inline. Render Bubble.Header on the first message of a run and mark follow-ups `continued`.                                                                                      |
 
-## Examples
+### Prompt Bar composer
 
-<Demo />
+The composer follows [Beautiful UI's Prompt Bar](https://www.beautifului.dev/#prompt-bar): a compact rounded row with attachments, message input, model selection, dictation, and send. Long drafts move above the controls and grow to a bounded height. Use `composerProps.shape="pill"` for the pill shape or `expanded` to keep the text above the controls.
+
+Type `@` to find configured `sources` or `/` to find `commands`. Arrow keys move through matches; Enter or Tab inserts a selection; Escape dismisses the menu. Enter sends, Shift+Enter inserts a new line, and ⌘/Ctrl+Enter still sends. While streaming, Send becomes Stop.
+
+`onSubmit(value, mode, attachments)` retains the existing contract. Local file attachments include a `file` object; the consuming app owns uploads. `model` / `onModelChange` support controlled model selection. Dictation starts only from the microphone button and uses the browser's speech recognition; unsupported browsers disable the control. Set `dictation={false}` to hide it.
+
+Files are classified as images, video, audio, or documents when selected. Keep the complete attachment object when rendering it in the thread: `<Attachment {...attachment} variant="default" removable={false} />` preserves its file, source URL, and preview metadata. Sent messages use the compact attachment chip with a hover/focus preview. The `preview` variant displays expanded content without a hover card. Wrap sent attachments in `<Bubble.Message unstyled>` to remove the surrounding bubble surface. Text and attachments can occupy separate message surfaces in the same `Bubble`.

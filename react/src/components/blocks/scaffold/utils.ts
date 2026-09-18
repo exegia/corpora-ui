@@ -1,7 +1,7 @@
 import type { Variants } from "motion/react"
 import type { ClassNameValue } from "tailwind-merge"
 import type {
-  ScaffoldPanelVisibility,
+  IScaffoldPanelVisibility,
   TSubPanelVariant,
 } from "@/components/blocks/scaffold/type.ts"
 import { EASE_OUT } from "@/lib/ease.ts"
@@ -26,7 +26,7 @@ export function getPanelCapacity(width: number | null): number {
 }
 
 /** @internal An untracked scaffold: nothing registered, nothing hidden. */
-export const EMPTY_SCAFFOLD_VISIBILITY: ScaffoldPanelVisibility = {
+export const EMPTY_SCAFFOLD_VISIBILITY: IScaffoldPanelVisibility = {
   visibleOrder: [],
   autoHidden: [],
   userHidden: [],
@@ -40,10 +40,10 @@ export const EMPTY_SCAFFOLD_VISIBILITY: ScaffoldPanelVisibility = {
  * changes, so callers can compare identities instead of contents.
  */
 export function reconcileVisibility(
-  prev: ScaffoldPanelVisibility,
+  prev: IScaffoldPanelVisibility,
   ids: readonly string[],
   capacity: number
-): ScaffoldPanelVisibility {
+): IScaffoldPanelVisibility {
   const known = new Set(ids)
   const visibleOrder = prev.visibleOrder.filter((id) => known.has(id))
   const autoHidden = prev.autoHidden.filter((id) => known.has(id))
@@ -70,9 +70,12 @@ export function reconcileVisibility(
 export const scaffoldBackgroundClass: ClassNameValue =
   "bg-linear-to-tr/increasing from-neutral-400 via-stone-200 to-neutral-300 dark:from-neutral-900 dark:via-neutral-950 dark:to-stone-950"
 
+export const SCAFFOLD_BEZEL_CLASSES =
+  "bezel-lit-t-2 bezel-lit-blur-2 bezel-lit/57 bezel-dim-b-2 bezel-dim-blur-3 bezel-dim/11 dark:bezel-lit-blur-3 dark:bezel-lit/14 dark:bezel-dim/78"
+
 /** Card surface shared by a panel's primary area and secondary strip. */
 export const panelSurfaceClass: ClassNameValue =
-  "rounded-md bg-slate-100 inset-ring-1 inset-ring-white/60 dark:bg-neutral-900 dark:inset-ring-white/5"
+  `rounded-md bg-slate-100 dark:bg-neutral-900 ${SCAFFOLD_BEZEL_CLASSES}`
 
 /** Floating icon button hovering over a panel (close, swap). */
 export const floatingButtonClass: ClassNameValue =
@@ -103,7 +106,7 @@ export const segmentVariants: Variants = {
 
 /** Map of sub-panel variants to their corresponding side. */
 export const subPanelVariant: Record<TSubPanelVariant, ClassNameValue> = {
-  card: "bg-neutral-50 dark:bg-neutral-900 rounded-md border-t border-b border-t-white dark:border-t-neutral-700/50 border-b-neutral-900/10 dark:border-b-black/70 shadow-sm shadow-neutral-900/10 dark:shadow-black/50 inset-shadow-sm inset-shadow-white dark:inset-shadow-neutral-800",
+  card: `bg-neutral-50 dark:bg-neutral-900 rounded-md ${SCAFFOLD_BEZEL_CLASSES}`,
   subtle: "bg-neutral-100 dark:bg-neutral-800",
   inset: "bg-neutral-200 dark:bg-neutral-700",
 } as const

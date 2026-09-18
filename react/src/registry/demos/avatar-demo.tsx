@@ -9,26 +9,26 @@ import {
 } from "@/components/docs/demo-controls"
 import { Avatar } from "@/components/atoms"
 import type {
-  AvatarAudio,
-  AvatarSize,
-  AvatarStatus,
-  UserType,
+  TAvatarAudio,
+  TAvatarSize,
+  TAvatarStatus,
+  TUserType,
 } from "@/components/atoms"
 
 const AVATAR =
   "https://lh3.googleusercontent.com/a/ACg8ocID__S9qxuDKDy8eBAu4lT56ElP0cmi5y_FMFD4ALHPFuoquQxxEg=s120-c"
 
-const SIZES: AvatarSize[] = ["sm", "default", "lg", "xl", "xxl"] as const
-const PRESENCE: AvatarStatus[] = ["idle", "online", "offline"] as const
-const AUDIO: AvatarAudio[] = ["muted", "unmuted", "speaking"] as const
+const SIZES: TAvatarSize[] = ["sm", "default", "lg", "xl", "xxl"] as const
+const PRESENCE: TAvatarStatus[] = ["idle", "online", "offline"] as const
+const AUDIO: TAvatarAudio[] = ["muted", "unmuted", "speaking"] as const
 
 export default function AvatarDemo() {
-  const [size, setSize] = React.useState<AvatarSize>("lg")
+  const [size, setSize] = React.useState<TAvatarSize>("lg")
   const [loading, setLoading] = React.useState(false)
   // A fresh key each reload, so the image really re-fetches and the skeleton shows.
   const [nonce, setNonce] = React.useState(0)
-  const [audio, setAudio] = React.useState<AvatarAudio>("speaking")
-  const [user, setUser] = React.useState<UserType>({
+  const [audio, setAudio] = React.useState<TAvatarAudio>("speaking")
+  const [user, setUser] = React.useState<TUserType>({
     firstName: "John",
     lastName: "Doe",
     avatarUrl: AVATAR,
@@ -37,12 +37,12 @@ export default function AvatarDemo() {
 
   // Speaking/unmuted means live audio, so presence must be online — and going
   // offline/idle drops the ring to muted. Enforced in both handlers.
-  const handleStatusChange = useCallback((status: AvatarStatus) => {
+  const handleStatusChange = useCallback((status: TAvatarStatus) => {
     setUser((prev) => ({ ...prev, status }))
     if (status !== "online") setAudio("muted")
   }, [])
 
-  const handleAudioChange = useCallback((next: AvatarAudio) => {
+  const handleAudioChange = useCallback((next: TAvatarAudio) => {
     setAudio(next)
     if (next !== "muted") setUser((prev) => ({ ...prev, status: "online" }))
   }, [])

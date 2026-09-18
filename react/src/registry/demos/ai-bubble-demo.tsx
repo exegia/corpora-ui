@@ -6,6 +6,7 @@ import { DemoSelect, DemoStage } from "@/components/docs/demo-controls"
 import { Chart, Markdown } from "@/components/composed/chat"
 import AI from "@/components/composed/ai"
 import { SAMPLE } from "./markdown-demo"
+import { wordOccurrences } from "./corpus-chart-data"
 
 const KINDS = ["markdown", "research", "chart", "streaming"] as const
 
@@ -18,14 +19,16 @@ const CONTENT: Record<(typeof KINDS)[number], React.ReactNode> = {
       source={{
         label: "Iliad · Homer corpus",
         title: "Iliad — Homer corpus",
-        description: "Book 1: the quarrel between Agamemnon and Achilles opens the poem.",
+        description:
+          "Book 1: the quarrel between Agamemnon and Achilles opens the poem.",
         href: "https://corpora.dev/iliad",
       }}
       date="c. 750 BCE · Sep 2"
       authors={{
         label: "Homer · M. L. West",
         title: "Homer — author record",
-        description: "Attribution follows M. L. West's critical edition of the corpus.",
+        description:
+          "Attribution follows M. L. West's critical edition of the corpus.",
         href: "https://corpora.dev/homer",
       }}
     />
@@ -33,17 +36,11 @@ const CONTENT: Record<(typeof KINDS)[number], React.ReactNode> = {
   chart: (
     <Chart
       type="bar"
-      title="Sales by flavor"
-      subtitle="Units · last 6 months"
-      data={[
-        { label: "Pist.", units: 62 },
-        { label: "Vanilla", units: 88 },
-        { label: "Mint", units: 70 },
-        { label: "Choc.", units: 100 },
-        { label: "Mango", units: 74 },
-        { label: "Rocky", units: 48 },
-      ]}
-      series={[{ key: "units", label: "Units sold" }]}
+      title="Word occurrences by book"
+      subtitle="Illustrative counts · selected Bible books"
+      reference={{ children: "Strong’s G26" }}
+      data={wordOccurrences}
+      series={[{ key: "occurrences", label: "Occurrences" }]}
     />
   ),
   streaming: (
@@ -58,9 +55,9 @@ const CONTENT: Record<(typeof KINDS)[number], React.ReactNode> = {
             description: "Monthly flavor velocity across 1,200 parlours.",
             href: "https://scoopdata.io",
           },
-          ...("Stone-fruit flavors trend in the same range."
+          ..."Stone-fruit flavors trend in the same range."
             .split(" ")
-            .map((text) => ({ text }))),
+            .map((text) => ({ text })),
         ],
       ]}
     />
@@ -72,7 +69,14 @@ export default function AiBubbleDemo(): React.ReactElement {
   return (
     <DemoStage
       canvasClassName="flex min-h-24 w-full justify-center p-6"
-      controls={<DemoSelect label="content" options={KINDS} value={kind} onChange={setKind} />}
+      controls={
+        <DemoSelect
+          label="content"
+          options={KINDS}
+          value={kind}
+          onChange={setKind}
+        />
+      }
     >
       <AI.Message key={kind} type="markdown">
         {CONTENT[kind]}

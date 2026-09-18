@@ -1,4 +1,4 @@
-import type { FileIconProps } from "./types"
+import type { IFileIconProps } from "./types"
 
 /**
  * TEI file icon — badge variant.
@@ -9,7 +9,7 @@ export function FileBadgeTei({
   title = "TEI file",
   className,
   ...props
-}: FileIconProps) {
+}: IFileIconProps) {
   return (
     <svg
       viewBox="-36 -48 1060 1114"

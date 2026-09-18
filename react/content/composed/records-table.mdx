@@ -3,7 +3,7 @@ title: "Records table"
 description: "Selectable records with an initial avatar, tags with +N overflow, relative date and connection strength. Selection lives in recordsTableSelectionAtom(id); sorting is a callback only."
 ---
 
-import { Preview } from "@/components/composed/records-table.story"
+import { Preview } from "@/components/stories/records-table.story"
 
 import Demo from "@/registry/demos/records-table-demo"
 
@@ -13,7 +13,18 @@ Use the controls to explore the component's props.
 
 <Preview />
 
-## Usage
+## Props
+
+| Prop                           | Type                  | Default | Description                                         |
+| ------------------------------ | --------------------- | ------- | --------------------------------------------------- |
+| `rows` (required)              | `IRecordsRow[]`        | —       | id, name, initial, tags, lastInteraction, strength. |
+| `selected / onSelectionChange` | `ReadonlySet<string>` | —       | Controlled selection.                               |
+| `onSortChange`                 | `(column) => void`    | —       | Header sort control; the design shows no direction. |
+| `maxTags`                      | `number`              | `2`     | Tags shown before +N.                               |
+
+## Example
+
+<Demo />
 
 ```tsx
 import { RecordsTable } from "@exegia/corpora-ui"
@@ -21,17 +32,4 @@ import { RecordsTable } from "@exegia/corpora-ui"
 <RecordsTable rows={rows} onSortChange={sortBy} />
 ```
 
-## Props
-
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `rows` (required) | `RecordsRow[]` | — | id, name, initial, tags, lastInteraction, strength. |
-| `selected / onSelectionChange` | `ReadonlySet<string>` | — | Controlled selection. |
-| `onSortChange` | `(column) => void` | — | Header sort control; the design shows no direction. |
-| `maxTags` | `number` | `2` | Tags shown before +N. |
-
-## Examples
-
-Explore the complete demo, including its additional variants and interactions.
-
-<Demo />
+The selection and company columns stay pinned during horizontal scrolling. Set `stickyHeader` and constrain the height (for example, `className="max-h-64"`) to keep the header visible while scrolling vertically. Scrollbars are hidden; trackpad, wheel, touch, and keyboard scrolling remain available.
