@@ -41,7 +41,7 @@ export function BubbleReactionChip({
       aria-label={reaction.label}
       aria-pressed={reaction.reacted ?? false}
       className={cn(
-        "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-1.5 font-bold text-neutral-600 transition-colors duration-150 ease-smooth-out outline-none hover:bg-black/6 focus-visible:ring-0 focus-visible:ring-ring dark:text-neutral-300 dark:hover:bg-white/8",
+        "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-1.5 font-bold text-neutral-600 transition-[colors,scale] duration-150 ease-smooth-out outline-none hover:scale-105 focus-visible:ring-0 focus-visible:ring-ring dark:text-neutral-300",
         reaction.reacted && "text-foreground",
         className
       )}
@@ -103,7 +103,7 @@ export function BubbleReactionsButton({
           <button
             aria-label="Add reaction"
             className={cn(
-              "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-2 font-bold text-neutral-600 duration-150 ease-smooth-out outline-none hover:bg-black/6 focus-visible:ring-0 dark:text-neutral-300 dark:hover:bg-white/8",
+              "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-2 font-bold text-neutral-600 duration-150 ease-smooth-out outline-none hover:scale-105 focus-visible:ring-0 dark:text-neutral-300",
               className
             )}
             data-slot="bubble-reaction-button"
@@ -164,8 +164,8 @@ export function BubbleReactions({
       )}
     >
       <GlassContainer
-        glassVariant="frosted"
-        optics={{ strength: 0.03, bendWidth: 0.12, frost: 5, saturate: 2 }}
+        glassVariant="liquid"
+        optics={{ strength: 0.5, depth: 0.5, bendWidth: 0.4, frost: 1.5 }}
         className={cn(
           "inline-flex h-full w-fit items-center rounded-xl",
           className
