@@ -1,17 +1,17 @@
 import type { ClassNameValue } from "tailwind-merge"
-import type { TitleStyleType } from "./type"
+import type { TTitleStyleType } from "./type"
 
 export const titleBarStyle = (
-  style: TitleStyleType,
+  style: TTitleStyleType,
   component: "title" | "frame"
 ): ClassNameValue => {
-  const titleBarClassName: Record<TitleStyleType, ClassNameValue> = {
+  const titleBarClassName: Record<TTitleStyleType, ClassNameValue> = {
     titlebar: "relative",
     hidden: "top-0 left-0 absolute",
     expanded: "relative",
   }
 
-  const bodyClassName: Record<TitleStyleType, ClassNameValue> = {
+  const bodyClassName: Record<TTitleStyleType, ClassNameValue> = {
     titlebar: "relative",
     hidden: "",
     expanded: "relative",
