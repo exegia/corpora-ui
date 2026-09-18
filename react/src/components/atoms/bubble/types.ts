@@ -18,7 +18,10 @@ export interface IBubbleProps extends ComponentPropsWithoutRef<"div"> {
   continued?: boolean
 }
 
-export type TBubbleMessageProps = ComponentPropsWithoutRef<"div">
+export type TBubbleMessageProps = ComponentPropsWithoutRef<"div"> & {
+  /** No bubble surface. Automatically true for attachment-only children; set explicitly for custom wrappers. */
+  unstyled?: boolean
+}
 
 export type TBubbleHeaderProps = ComponentPropsWithoutRef<"div">
 
