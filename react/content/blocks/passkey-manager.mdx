@@ -34,7 +34,7 @@ import { PasskeyManagerBlock } from "@exegia/corpora-ui"
 
 | Prop                | Type                                                                               | Default            | Description                                                                                                    |
 | ------------------- | ---------------------------------------------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------- |
-| passkeys            | <code>PasskeyRecord[]</code>                                                       | <code>[]</code>    | The account's passkeys (&#123; id, name?, createdAt?, lastUsedAt? &#125;), newest first.                       |
+| passkeys            | <code>IPasskeyRecord[]</code>                                                       | <code>[]</code>    | The account's passkeys (&#123; id, name?, createdAt?, lastUsedAt? &#125;), newest first.                       |
 | available           | <code>boolean</code>                                                               | <code>true</code>  | Whether this device can register passkeys. false swaps the panel for an explanation.                           |
 | loading             | <code>boolean</code>                                                               | <code>false</code> | Shows the loading row instead of the list.                                                                     |
 | onRegister          | <code>() =&gt; Promise&lt;&#123; cancelled?: boolean &#125; &#124; void&gt</code> | —                  | Reject (or throw) to show the error. Resolve with &#123; cancelled: true &#125; to return silently to idle.    |

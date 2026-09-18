@@ -22,7 +22,7 @@ import { Avatar } from "@exegia/corpora-ui"
 
 | Prop    | Type                                                  | Default | Description                                                                                                 |
 | ------- | ----------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------- |
-| user    | UserType                                              | —       | Identity: firstName/lastName drive the initials, avatarUrl the image, status the badge, verified the check. |
+| user    | TUserType                                              | —       | Identity: firstName/lastName drive the initials, avatarUrl the image, status the badge, verified the check. |
 | size    | "sm" &#124; "md" &#124; "lg" &#124; "xl" &#124; "xxl" | "sm"    | Disc size; the badge and its offset scale with it.                                                          |
 | loading | boolean                                               | —       | Forces the skeleton with a dots loader, for when the identity itself is still being fetched.                |
 | audio   | "muted" &#124; "unmuted" &#124; "speaking"            | —       | Story ring — "speaking" spins it, "unmuted" holds it dim, "muted" fades it. Omitted, no ring.               |

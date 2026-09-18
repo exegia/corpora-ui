@@ -30,7 +30,7 @@ import { LinkedAccountsBlock } from "@exegia/corpora-ui"
 
 | Prop              | Type                                                        | Default                                    | Description                                                                                     |
 | ----------------- | ----------------------------------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| identities        | <code>LinkedIdentity[]</code>                               | <code>[]</code>                            | Identities attached to the account (&#123; id, provider, email? &#125;).                        |
-| providers         | <code>SocialProvider[]</code>                               | <code>["google", "apple", "github"]</code> | Connect candidates. Already-connected providers are filtered out.                               |
+| identities        | <code>ILinkedIdentity[]</code>                               | <code>[]</code>                            | Identities attached to the account (&#123; id, provider, email? &#125;).                        |
+| providers         | <code>TSocialProvider[]</code>                               | <code>["google", "apple", "github"]</code> | Connect candidates. Already-connected providers are filtered out.                               |
 | loading           | <code>boolean</code>                                        | <code>false</code>                         | Shows the loading row instead of the list.                                                      |
 | onLink / onUnlink | <code>(provider &#124; id) =&gt; Promise&lt;void&gt</code> | —                                          | Reject (or throw) to show the inline error. Unlink never fires for the last remaining identity. |

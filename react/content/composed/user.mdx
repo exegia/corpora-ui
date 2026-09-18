@@ -17,9 +17,9 @@ Use the controls to explore the component's props.
 
 | Prop              | Type                                 | Default     | Description                                                                                                                                       |
 | ----------------- | ------------------------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `user` (required) | `UserType`                           | —           | The identity: firstName / lastName drive the name and initials, role the badge, avatarUrl the photo, status the presence dot, verified the check. |
+| `user` (required) | `TUserType`                           | —           | The identity: firstName / lastName drive the name and initials, role the badge, avatarUrl the photo, status the presence dot, verified the check. |
 | `description`     | `string`                             | —           | Info only — muted secondary line under the name (a handle, a status, a timestamp).                                                                |
-| `size`            | `AvatarSize`                         | `"default"` | Info only — avatar size for the row.                                                                                                              |
+| `size`            | `TAvatarSize`                         | `"default"` | Info only — avatar size for the row.                                                                                                              |
 | `direction`       | `"sender" \| "recipient"`            | `"sender"`  | Info only — sender mirrors the row so it reads inward from a sender bubble's edge.                                                                |
 | `audio`           | `"muted" \| "unmuted" \| "speaking"` | —           | Info only — story-style ring around the avatar for live voice states.                                                                             |
 
