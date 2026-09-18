@@ -3,10 +3,8 @@
 import * as React from "react"
 
 import { DemoStage } from "@/components/docs/demo-controls"
-import {
-  SocialProviders,
-  type TSocialProvider,
-} from "@/components/composed/social-providers"
+import { SocialProviders } from "@/components/composed/social-providers"
+import type { TSocialProvider } from "@/components/composed/types"
 
 export default function SocialProvidersDemo() {
   const [loading, setLoading] = React.useState<TSocialProvider | null>(null)

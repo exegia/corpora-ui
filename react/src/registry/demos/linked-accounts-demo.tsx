@@ -4,10 +4,8 @@ import * as React from "react"
 
 import { DemoToggle } from "@/components/docs/demo-controls"
 import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
-import {
-  LinkedAccountsBlock,
-  type ILinkedIdentity,
-} from "@/components/blocks/auth/linked-accounts-block"
+import { LinkedAccountsBlock } from "@/components/blocks/auth/linked-accounts-block"
+import type { ILinkedIdentity } from "@/components/blocks/auth/type"
 
 const INITIAL: ILinkedIdentity[] = [
   { id: "id-1", provider: "google", email: "reader@example.com" },

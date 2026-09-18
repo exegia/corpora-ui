@@ -4,10 +4,8 @@ import * as React from "react"
 
 import { DemoToggle } from "@/components/docs/demo-controls"
 import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
-import {
-  PasskeyManagerBlock,
-  type IPasskeyRecord,
-} from "@/components/blocks/auth/passkey-manager-block"
+import { PasskeyManagerBlock } from "@/components/blocks/auth/passkey-manager-block"
+import type { IPasskeyRecord } from "@/components/blocks/auth/type"
 
 const INITIAL: IPasskeyRecord[] = [
   {

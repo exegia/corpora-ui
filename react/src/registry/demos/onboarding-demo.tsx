@@ -4,10 +4,8 @@ import * as React from "react"
 
 import { DemoBrandMark, DemoSelect, DemoToggle } from "@/components/docs/demo-controls"
 import { BlockDemoStage as DemoStage } from "@/components/docs/block-demo-stage"
-import {
-  OnboardingBlock,
-  type IOnboardingStepConfig,
-} from "@/components/blocks/auth/onboarding-block"
+import { OnboardingBlock } from "@/components/blocks/auth/onboarding-block"
+import type { IOnboardingStepConfig } from "@/components/blocks/auth/type"
 
 const STEPS: IOnboardingStepConfig[] = [
   {

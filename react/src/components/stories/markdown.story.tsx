@@ -1,15 +1,11 @@
 "use client"
 
-import type { ComponentProps, FC } from "react"
-
 import { defineStory } from "@/registry/story"
 
 import { Markdown } from "@/components/composed/chat/markdown"
 
 export const story = defineStory({
-  Component: Markdown as FC<
-    Pick<ComponentProps<typeof Markdown>, "source" | "view" | "bare">
-  >,
+  Component: Markdown,
   args: {
     initial: {
       source:

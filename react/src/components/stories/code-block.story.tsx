@@ -1,18 +1,11 @@
 "use client"
 
-import type { ComponentProps, FC } from "react"
-
 import { defineStory } from "@/registry/story"
 
 import { CodeBlock } from "@/components/composed/chat/code-block"
 
 export const story = defineStory({
-  Component: CodeBlock as FC<
-    Pick<
-      ComponentProps<typeof CodeBlock>,
-      "filename" | "code" | "diff" | "view"
-    >
-  >,
+  Component: CodeBlock,
   args: {
     initial: {
       filename: "corpus.ts",

@@ -1,20 +1,11 @@
 "use client"
 
-import type { ComponentProps, FC } from "react"
-
 import { defineStory } from "@/registry/story"
 
 import { FilterTable } from "@/components/composed/chat/filter-table"
 
 export const story = defineStory({
-  Component: FilterTable<{ id: string; status: string; passage: string }> as FC<
-    Pick<
-      ComponentProps<
-        typeof FilterTable<{ id: string; status: string; passage: string }>
-      >,
-      "statuses" | "columns" | "rows" | "filter" | "allLabel"
-    >
-  >,
+  Component: FilterTable<{ id: string; status: string; passage: string }>,
   args: {
     initial: {
       statuses: [

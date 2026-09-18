@@ -3,10 +3,14 @@ import { Heading } from "./heading"
 import { Paragraph } from "./paragraph"
 import { Span } from "./span"
 import { Label } from "./label"
-export type { THeadingProps } from "./heading"
-export type { TParagraphProps } from "./paragraph"
-export type { TSpanProps } from "./span"
-export type { TTextProps, TTextSize, TTextVariant } from "./types"
+export type {
+  THeadingProps,
+  TParagraphProps,
+  TSpanProps,
+  TTextProps,
+  TTextSize,
+  TTextVariant,
+} from "./types"
 
 export const Text = {
   /** The polymorphic base the presets below are built on — the only member
