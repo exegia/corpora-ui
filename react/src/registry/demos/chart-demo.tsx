@@ -21,6 +21,8 @@ export default function ChartDemo(): React.ReactElement {
     <DemoStage canvasClassName="grid w-full grid-cols-1 gap-4 p-6 md:grid-cols-2">
       <Chart
         type="pie"
+        interactive
+        variant="donut"
         title="Commentaries by author"
         subtitle="Entries on the selected verse"
         reference={{
@@ -34,6 +36,9 @@ export default function ChartDemo(): React.ReactElement {
       />
       <Chart
         type="area"
+        interactive
+        plotHeight={210}
+        brush
         title="Cross-reference coverage"
         subtitle="Cumulative links through the passage"
         reference={{
@@ -46,6 +51,7 @@ export default function ChartDemo(): React.ReactElement {
       />
       <Chart
         type="line"
+        interactive
         title="Cross-references"
         subtitle="Linked passages by testament"
         reference={{
@@ -61,6 +67,7 @@ export default function ChartDemo(): React.ReactElement {
       />
       <Chart
         type="bar"
+        interactive
         title="Word occurrences"
         subtitle="Matched tokens by Bible book"
         reference={{
@@ -69,7 +76,13 @@ export default function ChartDemo(): React.ReactElement {
             "Tokens indexed under Strong’s G26, grouped by book in the illustrative corpus.",
         }}
         data={wordOccurrences}
-        series={[{ key: "occurrences", label: "Occurrences" }]}
+        series={[
+          {
+            key: "occurrences",
+            label: "Occurrences",
+            bar: { variant: "gradient" },
+          },
+        ]}
       />
       <p className="text-xs md:col-span-2 text-muted-foreground">
         Illustrative corpus counts for these examples; not statistics from a
