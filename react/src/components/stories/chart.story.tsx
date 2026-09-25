@@ -19,6 +19,14 @@ type TPreviewProps = TStoryData<
     | "center"
     | "headerless"
     | "plotHeight"
+    | "width"
+    | "height"
+    | "variant"
+    | "interactive"
+    | "loading"
+    | "showLegend"
+    | "animation"
+    | "renderer"
   >
 >
 
@@ -31,6 +39,12 @@ export const story = defineStory({
   args: {
     initial: {
       type: "bar",
+      variant: "default",
+      interactive: true,
+      loading: false,
+      showLegend: true,
+      animation: true,
+      renderer: "canvas",
       title: "Word occurrences by book",
       subtitle: "Illustrative counts · selected Bible books",
       reference: {
@@ -39,7 +53,8 @@ export const story = defineStory({
           "Matched tokens grouped by Strong’s entry and Bible book. These counts are illustrative.",
       },
       headerless: false,
-      plotHeight: 244,
+      width: "100%",
+      height: 360,
       data: wordOccurrences,
       series: [
         {
