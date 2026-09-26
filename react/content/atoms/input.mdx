@@ -1,0 +1,31 @@
+---
+title: "Input"
+description: "A styled text input with label and adornment support."
+---
+
+import { Preview } from "@/components/stories/input.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Input } from "@exegia/corpora-ui/ui/input"
+
+function ComponentPreview() {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Input aria-label="Document title" placeholder="Document title" />
+    </div>
+  )
+}
+
+<ComponentPreview />
+```
+
+## API notes
+
+`size` controls density. `disabled`, `required`, and native input props are forwarded. `className` styles the wrapper; use `nativeInput` when composing with a Base UI input primitive.

@@ -1,6 +1,6 @@
 {
   "name": "@exegia/corpora-ui",
-  "version": "3.1.0",
+  "version": "4.0.0",
   "description": "shadcn-ready React UI library for the corpora manuscript-research apps.",
   "license": "MIT",
   "repository": {
@@ -51,6 +51,226 @@
     "./scaffold": {
       "types": "./dist-lib/components/blocks/scaffold/index.d.ts",
       "import": "./dist-lib/scaffold.js"
+    },
+    "./ui": {
+      "types": "./dist-lib/ui/index.d.ts",
+      "import": "./dist-lib/ui/index.js"
+    },
+    "./ui/accordion": {
+      "types": "./dist-lib/ui/accordion.d.ts",
+      "import": "./dist-lib/ui/accordion.js"
+    },
+    "./ui/alert": {
+      "types": "./dist-lib/ui/alert.d.ts",
+      "import": "./dist-lib/ui/alert.js"
+    },
+    "./ui/alert-dialog": {
+      "types": "./dist-lib/ui/alert-dialog.d.ts",
+      "import": "./dist-lib/ui/alert-dialog.js"
+    },
+    "./ui/autocomplete": {
+      "types": "./dist-lib/ui/autocomplete.d.ts",
+      "import": "./dist-lib/ui/autocomplete.js"
+    },
+    "./ui/avatar": {
+      "types": "./dist-lib/ui/avatar.d.ts",
+      "import": "./dist-lib/ui/avatar.js"
+    },
+    "./ui/badge": {
+      "types": "./dist-lib/ui/badge.d.ts",
+      "import": "./dist-lib/ui/badge.js"
+    },
+    "./ui/breadcrumb": {
+      "types": "./dist-lib/ui/breadcrumb.d.ts",
+      "import": "./dist-lib/ui/breadcrumb.js"
+    },
+    "./ui/button": {
+      "types": "./dist-lib/ui/button.d.ts",
+      "import": "./dist-lib/ui/button.js"
+    },
+    "./ui/calendar": {
+      "types": "./dist-lib/ui/calendar.d.ts",
+      "import": "./dist-lib/ui/calendar.js"
+    },
+    "./ui/card": {
+      "types": "./dist-lib/ui/card.d.ts",
+      "import": "./dist-lib/ui/card.js"
+    },
+    "./ui/checkbox": {
+      "types": "./dist-lib/ui/checkbox.d.ts",
+      "import": "./dist-lib/ui/checkbox.js"
+    },
+    "./ui/checkbox-group": {
+      "types": "./dist-lib/ui/checkbox-group.d.ts",
+      "import": "./dist-lib/ui/checkbox-group.js"
+    },
+    "./ui/collapsible": {
+      "types": "./dist-lib/ui/collapsible.d.ts",
+      "import": "./dist-lib/ui/collapsible.js"
+    },
+    "./ui/combobox": {
+      "types": "./dist-lib/ui/combobox.d.ts",
+      "import": "./dist-lib/ui/combobox.js"
+    },
+    "./ui/command": {
+      "types": "./dist-lib/ui/command.d.ts",
+      "import": "./dist-lib/ui/command.js"
+    },
+    "./ui/context-menu": {
+      "types": "./dist-lib/ui/context-menu.d.ts",
+      "import": "./dist-lib/ui/context-menu.js"
+    },
+    "./ui/dialog": {
+      "types": "./dist-lib/ui/dialog.d.ts",
+      "import": "./dist-lib/ui/dialog.js"
+    },
+    "./ui/drawer": {
+      "types": "./dist-lib/ui/drawer.d.ts",
+      "import": "./dist-lib/ui/drawer.js"
+    },
+    "./ui/empty": {
+      "types": "./dist-lib/ui/empty.d.ts",
+      "import": "./dist-lib/ui/empty.js"
+    },
+    "./ui/field": {
+      "types": "./dist-lib/ui/field.d.ts",
+      "import": "./dist-lib/ui/field.js"
+    },
+    "./ui/fieldset": {
+      "types": "./dist-lib/ui/fieldset.d.ts",
+      "import": "./dist-lib/ui/fieldset.js"
+    },
+    "./ui/form": {
+      "types": "./dist-lib/ui/form.d.ts",
+      "import": "./dist-lib/ui/form.js"
+    },
+    "./ui/frame": {
+      "types": "./dist-lib/ui/frame.d.ts",
+      "import": "./dist-lib/ui/frame.js"
+    },
+    "./ui/group": {
+      "types": "./dist-lib/ui/group.d.ts",
+      "import": "./dist-lib/ui/group.js"
+    },
+    "./ui/input": {
+      "types": "./dist-lib/ui/input.d.ts",
+      "import": "./dist-lib/ui/input.js"
+    },
+    "./ui/input-group": {
+      "types": "./dist-lib/ui/input-group.d.ts",
+      "import": "./dist-lib/ui/input-group.js"
+    },
+    "./ui/kbd": {
+      "types": "./dist-lib/ui/kbd.d.ts",
+      "import": "./dist-lib/ui/kbd.js"
+    },
+    "./ui/label": {
+      "types": "./dist-lib/ui/label.d.ts",
+      "import": "./dist-lib/ui/label.js"
+    },
+    "./ui/menu": {
+      "types": "./dist-lib/ui/menu.d.ts",
+      "import": "./dist-lib/ui/menu.js"
+    },
+    "./ui/meter": {
+      "types": "./dist-lib/ui/meter.d.ts",
+      "import": "./dist-lib/ui/meter.js"
+    },
+    "./ui/number-field": {
+      "types": "./dist-lib/ui/number-field.d.ts",
+      "import": "./dist-lib/ui/number-field.js"
+    },
+    "./ui/otp-field": {
+      "types": "./dist-lib/ui/otp-field.d.ts",
+      "import": "./dist-lib/ui/otp-field.js"
+    },
+    "./ui/pagination": {
+      "types": "./dist-lib/ui/pagination.d.ts",
+      "import": "./dist-lib/ui/pagination.js"
+    },
+    "./ui/popover": {
+      "types": "./dist-lib/ui/popover.d.ts",
+      "import": "./dist-lib/ui/popover.js"
+    },
+    "./ui/preview-card": {
+      "types": "./dist-lib/ui/preview-card.d.ts",
+      "import": "./dist-lib/ui/preview-card.js"
+    },
+    "./ui/progress": {
+      "types": "./dist-lib/ui/progress.d.ts",
+      "import": "./dist-lib/ui/progress.js"
+    },
+    "./ui/radio-group": {
+      "types": "./dist-lib/ui/radio-group.d.ts",
+      "import": "./dist-lib/ui/radio-group.js"
+    },
+    "./ui/scroll-area": {
+      "types": "./dist-lib/ui/scroll-area.d.ts",
+      "import": "./dist-lib/ui/scroll-area.js"
+    },
+    "./ui/select": {
+      "types": "./dist-lib/ui/select.d.ts",
+      "import": "./dist-lib/ui/select.js"
+    },
+    "./ui/separator": {
+      "types": "./dist-lib/ui/separator.d.ts",
+      "import": "./dist-lib/ui/separator.js"
+    },
+    "./ui/sheet": {
+      "types": "./dist-lib/ui/sheet.d.ts",
+      "import": "./dist-lib/ui/sheet.js"
+    },
+    "./ui/sidebar": {
+      "types": "./dist-lib/ui/sidebar.d.ts",
+      "import": "./dist-lib/ui/sidebar.js"
+    },
+    "./ui/skeleton": {
+      "types": "./dist-lib/ui/skeleton.d.ts",
+      "import": "./dist-lib/ui/skeleton.js"
+    },
+    "./ui/slider": {
+      "types": "./dist-lib/ui/slider.d.ts",
+      "import": "./dist-lib/ui/slider.js"
+    },
+    "./ui/spinner": {
+      "types": "./dist-lib/ui/spinner.d.ts",
+      "import": "./dist-lib/ui/spinner.js"
+    },
+    "./ui/switch": {
+      "types": "./dist-lib/ui/switch.d.ts",
+      "import": "./dist-lib/ui/switch.js"
+    },
+    "./ui/table": {
+      "types": "./dist-lib/ui/table.d.ts",
+      "import": "./dist-lib/ui/table.js"
+    },
+    "./ui/tabs": {
+      "types": "./dist-lib/ui/tabs.d.ts",
+      "import": "./dist-lib/ui/tabs.js"
+    },
+    "./ui/textarea": {
+      "types": "./dist-lib/ui/textarea.d.ts",
+      "import": "./dist-lib/ui/textarea.js"
+    },
+    "./ui/toast": {
+      "types": "./dist-lib/ui/toast.d.ts",
+      "import": "./dist-lib/ui/toast.js"
+    },
+    "./ui/toggle": {
+      "types": "./dist-lib/ui/toggle.d.ts",
+      "import": "./dist-lib/ui/toggle.js"
+    },
+    "./ui/toggle-group": {
+      "types": "./dist-lib/ui/toggle-group.d.ts",
+      "import": "./dist-lib/ui/toggle-group.js"
+    },
+    "./ui/toolbar": {
+      "types": "./dist-lib/ui/toolbar.d.ts",
+      "import": "./dist-lib/ui/toolbar.js"
+    },
+    "./ui/tooltip": {
+      "types": "./dist-lib/ui/tooltip.d.ts",
+      "import": "./dist-lib/ui/tooltip.js"
     }
   },
   "files": [
@@ -95,6 +315,7 @@
     "motion": "^13.2.0",
     "motion-icons-react": "^1.1.0",
     "motion-panels": "^0.5.2",
+    "react-day-picker": "^10.0.1",
     "react-markdown": "^10.1.0",
     "recharts": "^3.10.1",
     "tailwind-merge": "^3.6.0"

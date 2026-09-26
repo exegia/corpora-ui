@@ -16,6 +16,7 @@
     "navbar",
     "shell",
     "scaffold",
-    "chat"
+    "chat",
+    "sidebar-primitives"
   ]
 }

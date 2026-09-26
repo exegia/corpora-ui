@@ -1,0 +1,37 @@
+---
+title: "Dialog"
+description: "A focused overlay with an accessible title and description."
+---
+
+import { Preview } from "@/components/stories/dialog.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Dialog, DialogTrigger, DialogPopup, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@exegia/corpora-ui/ui/dialog"
+import { Button } from "@exegia/corpora-ui/ui/button"
+
+function ComponentPreview({ disabled }: { disabled: boolean }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Dialog>
+      <DialogTrigger render={<Button />} disabled={disabled}>Open dialog</DialogTrigger>
+      <DialogPopup><DialogHeader><DialogTitle>Review import</DialogTitle><DialogDescription>Review the selected documents before continuing.</DialogDescription></DialogHeader>
+        <DialogFooter><DialogClose render={<Button variant="outline" />}>Close</DialogClose></DialogFooter>
+      </DialogPopup>
+    </Dialog>
+    </div>
+  )
+}
+
+<ComponentPreview disabled={false} />
+```
+
+## API notes
+
+`open` with `onOpenChange` controls visibility; `defaultOpen` sets initial state. Always include a title and description. Triggers and close controls accept `render` for button composition.

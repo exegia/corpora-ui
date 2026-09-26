@@ -1,0 +1,34 @@
+---
+title: "Breadcrumb"
+description: "Navigation that shows the current location."
+---
+
+import { Preview } from "@/components/stories/breadcrumb.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@exegia/corpora-ui/ui/breadcrumb"
+
+function ComponentPreview({ page }: { page: string }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Breadcrumb><BreadcrumbList>
+      <BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
+      <BreadcrumbItem><BreadcrumbPage>{page}</BreadcrumbPage></BreadcrumbItem>
+    </BreadcrumbList></Breadcrumb>
+    </div>
+  )
+}
+
+<ComponentPreview page={"Library"} />
+```
+
+## API notes
+
+`BreadcrumbLink` accepts anchor props. Use `BreadcrumbPage` for the current location and `BreadcrumbSeparator` between items.

@@ -1,0 +1,32 @@
+---
+title: "Toolbar"
+description: "Related controls with arrow-key navigation."
+---
+
+import { Preview } from "@/components/stories/toolbar.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Toolbar, ToolbarGroup, ToolbarButton, ToolbarSeparator, ToolbarLink } from "@exegia/corpora-ui/ui/toolbar"
+import { Button } from "@exegia/corpora-ui/ui/button"
+
+function ComponentPreview({ disabled }: { disabled: boolean }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Toolbar aria-label="Document tools"><ToolbarGroup><ToolbarButton render={<Button variant="ghost" />} disabled={disabled}>Copy</ToolbarButton><ToolbarButton render={<Button variant="ghost" />}>Export</ToolbarButton></ToolbarGroup><ToolbarSeparator /><ToolbarLink href="/atoms/button">Button guide</ToolbarLink></Toolbar>
+    </div>
+  )
+}
+
+<ComponentPreview {...{ disabled: false }} />
+```
+
+## API notes
+
+`orientation` determines keyboard navigation. Compose `ToolbarGroup`, `ToolbarButton`, `ToolbarLink`, and `ToolbarInput` for controls. Buttons accept `render` to reuse library styling.

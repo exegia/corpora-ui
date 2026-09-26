@@ -1,0 +1,31 @@
+---
+title: "Progress"
+description: "An accessible value indicator with a label and track."
+---
+
+import { Preview } from "@/components/stories/progress.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Progress, ProgressLabel, ProgressTrack, ProgressIndicator, ProgressValue } from "@exegia/corpora-ui/ui/progress"
+
+function ComponentPreview({ value }: { value: number }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Progress value={value}><div className="flex justify-between"><ProgressLabel>Import progress</ProgressLabel><ProgressValue /></div><ProgressTrack><ProgressIndicator /></ProgressTrack></Progress>
+    </div>
+  )
+}
+
+<ComponentPreview value={65} />
+```
+
+## API notes
+
+`value` sets the current amount, with `min` and `max` defining the range. Use `null` for indeterminate progress.

@@ -1,0 +1,31 @@
+---
+title: "Spinner"
+description: "An animated loading status icon."
+---
+
+import { Preview } from "@/components/stories/spinner.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Spinner } from "@exegia/corpora-ui/ui/spinner"
+
+function ComponentPreview({ large }: { large: boolean }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Spinner className={large ? "size-8" : "size-5"} aria-label="Loading documents" />
+    </div>
+  )
+}
+
+<ComponentPreview {...{ large: false }} />
+```
+
+## API notes
+
+`className` sets icon dimensions. `aria-label` describes what is loading; the component supplies `role="status"`.

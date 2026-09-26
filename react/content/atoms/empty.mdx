@@ -1,0 +1,31 @@
+---
+title: "Empty"
+description: "An empty state with a title, explanation, and optional action."
+---
+
+import { Preview } from "@/components/stories/empty.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyContent } from "@exegia/corpora-ui/ui/empty"
+
+function ComponentPreview({ title }: { title: string }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Empty><EmptyHeader><EmptyTitle>{title}</EmptyTitle><EmptyDescription>Add a document to begin exploring your collection.</EmptyDescription></EmptyHeader><EmptyContent><a className="underline" href="/atoms/input">Read the input guide</a></EmptyContent></Empty>
+    </div>
+  )
+}
+
+<ComponentPreview title={"No documents yet"} />
+```
+
+## API notes
+
+`EmptyHeader` groups the title and explanation. `EmptyContent` holds actions; `EmptyMedia` supports an optional icon or illustration.

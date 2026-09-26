@@ -1,0 +1,31 @@
+---
+title: "Tabs"
+description: "Switch between related panels."
+---
+
+import { Preview } from "@/components/stories/tabs.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Tabs, TabsList, TabsTab, TabsPanel } from "@exegia/corpora-ui/ui/tabs"
+
+function ComponentPreview({ variant }: { variant: "default" | "underline" }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Tabs defaultValue="text"><TabsList variant={variant}><TabsTab value="text">Text</TabsTab><TabsTab value="notes">Notes</TabsTab></TabsList><TabsPanel value="text">Read the selected passage.</TabsPanel><TabsPanel value="notes">Review the editorial annotations.</TabsPanel></Tabs>
+    </div>
+  )
+}
+
+<ComponentPreview {...{ variant: "default" }} />
+```
+
+## API notes
+
+`value` and `onValueChange` control the active tab; `defaultValue` initializes it. Match each tab and panel value. `TabsList` supports `default` and `underline` variants.

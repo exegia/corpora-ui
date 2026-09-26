@@ -1,0 +1,31 @@
+---
+title: "Skeleton"
+description: "A visual placeholder for content that is loading."
+---
+
+import { Preview } from "@/components/stories/skeleton.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Skeleton } from "@exegia/corpora-ui/ui/skeleton"
+
+function ComponentPreview({ wide }: { wide: boolean }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <div role="status" aria-label="Loading document" className="space-y-3"><Skeleton className="h-6 w-40" /><Skeleton className={wide ? "h-4 w-72" : "h-4 w-48"} /><Skeleton className="h-4 w-56" /></div>
+    </div>
+  )
+}
+
+<ComponentPreview {...{ wide: true }} />
+```
+
+## API notes
+
+`className` sets dimensions and shape. Match the loaded layout and put an accessible loading label on the surrounding region.

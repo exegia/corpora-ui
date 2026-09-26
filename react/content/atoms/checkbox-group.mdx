@@ -1,0 +1,35 @@
+---
+title: "Checkbox group"
+description: "Related checkboxes with shared selection state."
+---
+
+import { Preview } from "@/components/stories/checkbox-group.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { CheckboxGroup } from "@exegia/corpora-ui/ui/checkbox-group"
+import { Checkbox } from "@exegia/corpora-ui/ui/checkbox"
+
+function ComponentPreview({ disabled }: { disabled: boolean }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <CheckboxGroup defaultValue={["text"]} disabled={disabled} aria-label="Export contents">
+      <label className="flex items-center gap-2"><Checkbox value="text" />Text</label>
+      <label className="flex items-center gap-2"><Checkbox value="notes" />Annotations</label>
+    </CheckboxGroup>
+    </div>
+  )
+}
+
+<ComponentPreview disabled={false} />
+```
+
+## API notes
+
+`value` and `defaultValue` contain the selected checkbox values. `onValueChange` receives the selection. `disabled` disables the group.
