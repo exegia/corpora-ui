@@ -60,6 +60,10 @@ export default defineConfig({
           ),
           path.resolve(import.meta.dirname, "dist-lib/BEAUTIFUL-UI-LICENSE.txt")
         )
+        await copyFile(
+          path.resolve(import.meta.dirname, "src/components/composed/chat/chart/evilcharts/LICENSE"),
+          path.resolve(import.meta.dirname, "dist-lib/EVILCHARTS-LICENSE.txt")
+        )
       },
     }),
   ],

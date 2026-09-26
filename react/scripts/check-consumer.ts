@@ -110,6 +110,10 @@ try {
     entries.includes("package/dist-lib/BEAUTIFUL-UI-LICENSE.txt"),
     "Missing third-party notice"
   )
+  assert(
+    entries.includes("package/dist-lib/EVILCHARTS-LICENSE.txt"),
+    "Missing EvilCharts notice"
+  )
 
   const example = path.join(root, "examples/consumer")
   for (const file of [
