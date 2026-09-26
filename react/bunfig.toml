@@ -1,2 +1,6 @@
+[install]
+# Preserve the docs toolchain's flat resolution when adding workspaces.
+linker = "hoisted"
+
 [test]
 preload = ["./src/test/setup.ts"]

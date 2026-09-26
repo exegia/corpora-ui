@@ -1,0 +1,196 @@
+:root {
+  --background: #f5f4ef;
+  --foreground: #242d27;
+  --card: #fffefa;
+  --card-foreground: #242d27;
+  --primary: #315b43;
+  --primary-foreground: #ffffff;
+  --muted-foreground: #69736b;
+  --border: #dbdfd5;
+  --input: #c9d0c6;
+  --ring: #63836a;
+  --font-sans: system-ui, sans-serif;
+  --radius: 0.75rem;
+}
+
+:root.dark {
+  --background: #171d19;
+  --foreground: #e6eade;
+  --card: #202822;
+  --card-foreground: #e6eade;
+  --popover: #202822;
+  --primary: #b7d0ad;
+  --primary-foreground: #17261b;
+  --muted-foreground: #a0ac9e;
+  --border: #374039;
+  --input: #475448;
+  --ring: #a0b994;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+.reading-room {
+  max-width: 1160px;
+  padding: 0 36px;
+  margin: 0 auto;
+}
+.masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 100px;
+  border-bottom: 1px solid var(--border);
+}
+.wordmark {
+  color: var(--foreground);
+  text-decoration: none;
+  font-size: 21px;
+  font-weight: 650;
+  letter-spacing: -0.05em;
+}
+.wordmark span {
+  color: var(--muted-foreground);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.intro {
+  padding: 72px 0 48px;
+}
+.eyebrow {
+  margin: 0 0 16px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+.intro h1 {
+  margin: 0 0 18px;
+  font-family: Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(38px, 6vw, 66px);
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+}
+.intro > p:last-child {
+  color: var(--muted-foreground);
+  font-size: 16px;
+  line-height: 1.6;
+}
+.reading-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+.passage-card,
+.notes-card {
+  box-shadow: none;
+}
+.passage {
+  padding: 14px 0 24px;
+  font-family: Georgia, serif;
+  font-size: 23px;
+  line-height: 1.75;
+}
+.passage p + p {
+  margin-top: 24px;
+}
+.passage-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+.notes-card form {
+  display: grid;
+  gap: 12px;
+}
+.notes-card form > button {
+  justify-self: start;
+  margin-top: 4px;
+}
+.note-count {
+  margin: 28px 0 12px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+.empty-notes {
+  padding: 20px 0;
+  font-family: Georgia, serif;
+  font-style: italic;
+  color: var(--muted-foreground);
+}
+.saved-notes {
+  padding: 0;
+  list-style: none;
+}
+.saved-notes li {
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.page-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 48px 0 32px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+}
+
+@media (max-width: 720px) {
+  .reading-room {
+    padding: 0 20px;
+  }
+  .masthead {
+    min-height: 80px;
+  }
+  .wordmark span {
+    display: none;
+  }
+  .intro {
+    padding: 44px 0 28px;
+  }
+  .reading-grid {
+    grid-template-columns: 1fr;
+  }
+  .passage {
+    font-size: 21px;
+  }
+}
+.notebook-modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.notebook-modal-description {
+  margin: 0.75rem 0 1.25rem;
+  color: var(--muted-foreground);
+  line-height: 1.6;
+}
+
+.notebook-about {
+  max-width: 20rem;
+}
+
+.workspace-section { margin-top: 48px; }
+.workspace-section h2 { font-family: Georgia, serif; font-size: 28px; }
+.workspace-section > p { margin: 12px 0 20px; color: var(--muted-foreground); }
+.workspace-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 20px 0 12px; }
+.workspace-controls > span, .workspace-hint { font-size: 12px; color: var(--muted-foreground); }
+.workspace-hint { margin-bottom: 12px; }
+.workspace-stage { height: 480px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.workspace-content { padding: 20px; overflow: auto; overflow-wrap: anywhere; }
+.workspace-content h3 { font-size: 18px; font-weight: 600; margin-bottom: 12px; }
+.workspace-content p { line-height: 1.6; margin-bottom: 16px; }
+.workspace-quotation { font-family: Georgia, serif; font-size: 20px; }

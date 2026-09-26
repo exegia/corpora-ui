@@ -6,7 +6,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
-import { GlassSurface } from "@/components/ui/glasscn/liquid-glass";
+import { LazyGlassSurface } from "@/components/ui/glasscn/lazy-glass-surface";
 import {
   type TFrostGlassVariant,
   liquidRefractStyles,
@@ -132,7 +132,7 @@ export function Button({
   const defaultProps = {
     children: (
       <>
-        {resolvedGlassVariant && <GlassSurface glassVariant={resolvedGlassVariant} />}
+        {resolvedGlassVariant && <LazyGlassSurface glassVariant={resolvedGlassVariant} />}
         {!isIconSize && (
           // Always mounted so the button width morphs as the slot collapses
           // and expands; the closed state cancels the flex gap (which varies

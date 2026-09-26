@@ -4,6 +4,7 @@ import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
 import type React from "react"
 import { type TFrostGlassVariant } from "@/lib/glass-variants"
 import { cn } from "@/lib/utils"
+import { useExegiaPortalContainer } from "@/lib/state/portal-context"
 import { GlassContainer } from "@/components/ui/glasscn/glass-container"
 
 /** Layout, sizing and transition — shared by every popup variant. */
@@ -76,14 +77,15 @@ export function PopoverGlass({
   ...props
 }: TPopoverGlassProps): React.ReactElement {
   const resolvedGlassVariant: TPopoverGlassVariant = glassVariant ?? "frosted"
+  const container = useExegiaPortalContainer(portalProps?.container)
 
   return (
-    <PopoverPrimitive.Portal {...portalProps} keepMounted>
+    <PopoverPrimitive.Portal {...portalProps} container={container} keepMounted>
       <PopoverPrimitive.Positioner
         align={align}
         alignOffset={alignOffset}
         anchor={anchor}
-        className="z-50 h-(--positioner-height) w-(--positioner-width) max-w-(--available-width) transition-[top,left,right,bottom,transform] animate-bezier-sine-in-out animate-duration-fast data-instant:transition-none"
+        className="z-50 h-(--positioner-height) w-(--positioner-width) max-w-(--available-width) transition-[top,left,right,bottom,transform] [animation-timing-function:cubic-bezier(0.445,0.05,0.55,0.95)] [animation-duration:200ms] data-instant:transition-none"
         data-slot="popover-positioner"
         side={side}
         sideOffset={sideOffset}

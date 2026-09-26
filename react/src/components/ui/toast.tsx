@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { cn } from "@/lib/utils";
+import { useExegiaPortalContainer } from "@/lib/state/portal-context";
 import { buttonVariants } from "@/components/ui/button";
 
 const TOAST_ICONS = {
@@ -275,6 +276,9 @@ function AnchoredToasts({
 export const toastManager: ReturnType<typeof Toast.createToastManager> =
   Toast.createToastManager();
 
+/** Use the manager belonging to the nearest ExegiaProvider/ToastProvider. */
+export const useToastManager: typeof Toast.useToastManager = Toast.useToastManager;
+
 export const anchoredToastManager: ReturnType<typeof Toast.createToastManager> =
   Toast.createToastManager();
 
@@ -297,10 +301,11 @@ export function ToastProvider({
   portalProps,
   ...props
 }: IToastProviderProps): React.ReactElement {
+  const container = useExegiaPortalContainer(portalProps?.container);
   return (
     <Toast.Provider toastManager={toastManager} {...props}>
       {children}
-      <Toasts portalProps={portalProps} position={position} />
+      <Toasts portalProps={{ ...portalProps, container }} position={position} />
     </Toast.Provider>
   );
 }
@@ -314,10 +319,11 @@ export function AnchoredToastProvider({
   portalProps,
   ...props
 }: IAnchoredToastProviderProps): React.ReactElement {
+  const container = useExegiaPortalContainer(portalProps?.container);
   return (
     <Toast.Provider toastManager={anchoredToastManager} {...props}>
       {children}
-      <AnchoredToasts portalProps={portalProps} />
+      <AnchoredToasts portalProps={{ ...portalProps, container }} />
     </Toast.Provider>
   );
 }

@@ -64,7 +64,7 @@ jobs:
       - uses: ./.github/actions/setup
       - run: make ci
 
-  # The release PR's third gate is a real `npm pack`: if the tarball cannot be
+  # The release PR's third gate is a real `bun pm pack`: if the tarball cannot be
   # produced here, the production publish would fail after the merge, on
   # protected main.
   package:
