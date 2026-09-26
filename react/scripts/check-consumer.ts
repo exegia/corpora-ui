@@ -90,7 +90,7 @@ try {
     "dark:bezel-dim/11", "dark:bezel-dim/78",
   ]
   for (const className of bezelClasses) {
-    const selector = `.${className.replace(/[:/]/g, "\\$&")}${
+    const selector = `.${className.replace(/[\\:/]/g, "\\$&")}${
       className.startsWith("dark:") ? ":is(.dark *)" : ""
     }`
     const ruleStart = css.indexOf(`${selector}{`)
