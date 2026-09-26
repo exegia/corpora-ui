@@ -1,0 +1,31 @@
+---
+title: "Scroll area"
+description: "A bounded content viewport with styled scrollbars."
+---
+
+import { Preview } from "@/components/stories/scroll-area.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { ScrollArea } from "@exegia/corpora-ui/ui/scroll-area"
+
+function ComponentPreview({ count }: { count: number }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <ScrollArea className="h-48 rounded-lg border"><div className="space-y-3 p-4">{Array.from({ length: count }, (_, index) => <p key={index}>Passage {index + 1}</p>)}</div></ScrollArea>
+    </div>
+  )
+}
+
+<ComponentPreview {...{ count: 20 }} />
+```
+
+## API notes
+
+Set a bounded height or width with `className` so overflow can occur. `ScrollBar` is available for composing scrollbars with the primitive viewport.

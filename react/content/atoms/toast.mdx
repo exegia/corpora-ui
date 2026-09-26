@@ -1,0 +1,32 @@
+---
+title: "Toast"
+description: "Temporary feedback through the shared toast manager."
+---
+
+import { Preview } from "@/components/stories/toast.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { toastManager } from "@exegia/corpora-ui/ui/toast"
+import { Button } from "@exegia/corpora-ui/ui/button"
+
+function ComponentPreview({ title }: { title: string }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Button onClick={() => toastManager.add({ title, description: "Your changes are available in the library.", type: "success" })}>Show toast</Button>
+    </div>
+  )
+}
+
+<ComponentPreview {...{ title: "Document saved" }} />
+```
+
+## API notes
+
+Mount `ExegiaProvider` once at the application root; it owns the toast infrastructure. `toastManager.add` accepts `title`, `description`, and a semantic `type`. Save the returned id to update or close a notification. Do not mount a second global `ToastProvider` inside that provider.

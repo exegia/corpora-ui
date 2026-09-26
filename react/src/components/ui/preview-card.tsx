@@ -2,6 +2,7 @@
 
 import { PreviewCard as PreviewCardPrimitive } from "@base-ui/react/preview-card";
 import type React from "react";
+import { useExegiaPortalContainer } from "@/lib/state/portal-context";
 import { cn } from "@/lib/utils";
 
 export const PreviewCard: typeof PreviewCardPrimitive.Root =
@@ -19,20 +20,24 @@ export function PreviewCardPopup({
   className,
   children,
   align = "center",
+  side = "bottom",
   sideOffset = 4,
   anchor,
   portalProps,
   ...props
 }: PreviewCardPrimitive.Popup.Props & {
   align?: PreviewCardPrimitive.Positioner.Props["align"];
+  side?: PreviewCardPrimitive.Positioner.Props["side"];
   sideOffset?: PreviewCardPrimitive.Positioner.Props["sideOffset"];
   anchor?: PreviewCardPrimitive.Positioner.Props["anchor"];
   portalProps?: PreviewCardPrimitive.Portal.Props;
 }): React.ReactElement {
+  const container = useExegiaPortalContainer(portalProps?.container);
   return (
-    <PreviewCardPrimitive.Portal {...portalProps}>
+    <PreviewCardPrimitive.Portal {...portalProps} container={container}>
       <PreviewCardPrimitive.Positioner
         align={align}
+        side={side}
         anchor={anchor}
         className="z-50"
         data-slot="preview-card-positioner"

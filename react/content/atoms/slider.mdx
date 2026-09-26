@@ -1,0 +1,31 @@
+---
+title: "Slider"
+description: "Adjust a numeric value along a track."
+---
+
+import { Preview } from "@/components/stories/slider.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Slider, SliderValue } from "@exegia/corpora-ui/ui/slider"
+
+function ComponentPreview({ disabled }: { disabled: boolean }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Slider defaultValue={50} disabled={disabled} aria-label="Text size"><SliderValue /></Slider>
+    </div>
+  )
+}
+
+<ComponentPreview {...{ disabled: false }} />
+```
+
+## API notes
+
+`value` and `onValueChange` control a number or array of values. `min`, `max`, and `step` define the range. Supply an accessible name for the control.

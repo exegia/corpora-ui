@@ -1,0 +1,33 @@
+---
+title: "Pagination"
+description: "Links for navigating a paginated collection."
+---
+
+import { Preview } from "@/components/stories/pagination.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext } from "@exegia/corpora-ui/ui/pagination"
+
+function ComponentPreview({ activePage }: { activePage: number }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Pagination><PaginationContent><PaginationItem><PaginationPrevious href="?page=1" /></PaginationItem>
+      {[1, 2, 3].map((page) => <PaginationItem key={page}><PaginationLink href={`?page=${page}`} isActive={page === activePage}>{page}</PaginationLink></PaginationItem>)}
+      <PaginationItem><PaginationNext href="?page=3" /></PaginationItem></PaginationContent></Pagination>
+    </div>
+  )
+}
+
+<ComponentPreview activePage={2} />
+```
+
+## API notes
+
+`PaginationLink` accepts `href` and `isActive`. Previous and next links need their destination supplied by the application. Use `PaginationEllipsis` for skipped ranges.

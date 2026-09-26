@@ -1,0 +1,32 @@
+---
+title: "Group"
+description: "Adjacent controls joined into a single visual group."
+---
+
+import { Preview } from "@/components/stories/group.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Group, GroupSeparator } from "@exegia/corpora-ui/ui/group"
+import { Button } from "@exegia/corpora-ui/ui/button"
+
+function ComponentPreview({ orientation }: { orientation: "horizontal" | "vertical" }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Group orientation={orientation} aria-label="Document actions"><Button variant="outline">Preview</Button><GroupSeparator /><Button variant="outline">Download</Button></Group>
+    </div>
+  )
+}
+
+<ComponentPreview orientation={"horizontal"} />
+```
+
+## API notes
+
+`orientation` is `horizontal` or `vertical`. `GroupSeparator` separates controls. This is visual grouping; use Toolbar when arrow-key navigation is required.

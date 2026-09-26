@@ -1,0 +1,32 @@
+---
+title: "Tooltip"
+description: "Brief supporting text for an interactive control."
+---
+
+import { Preview } from "@/components/stories/tooltip.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Tooltip, TooltipTrigger, TooltipPopup } from "@exegia/corpora-ui/ui/tooltip"
+import { Button } from "@exegia/corpora-ui/ui/button"
+
+function ComponentPreview({ description }: { description: string }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Tooltip><TooltipTrigger render={<Button variant="outline" />}>Export</TooltipTrigger><TooltipPopup>{description}</TooltipPopup></Tooltip>
+    </div>
+  )
+}
+
+<ComponentPreview {...{ description: "Download this document" }} />
+```
+
+## API notes
+
+`ExegiaProvider` supplies the tooltip provider. `Tooltip` owns local visibility. `TooltipPopup` supports positioning props. Keep required instructions in visible text.

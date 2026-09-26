@@ -1,0 +1,31 @@
+---
+title: "Keyboard shortcut"
+description: "Keycap labels for keyboard shortcuts."
+---
+
+import { Preview } from "@/components/stories/kbd.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Kbd, KbdGroup } from "@exegia/corpora-ui/ui/kbd"
+
+function ComponentPreview({ shortcut }: { shortcut: string }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <KbdGroup><Kbd>⌘</Kbd><Kbd>{shortcut}</Kbd></KbdGroup>
+    </div>
+  )
+}
+
+<ComponentPreview shortcut={"K"} />
+```
+
+## API notes
+
+`Kbd` displays one key. `KbdGroup` groups a chord. These elements describe a shortcut; they do not register keyboard listeners.

@@ -1,0 +1,32 @@
+---
+title: "Menu"
+description: "A trigger-based action menu."
+---
+
+import { Preview } from "@/components/stories/menu.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Menu, MenuTrigger, MenuPopup, MenuItem } from "@exegia/corpora-ui/ui/menu"
+import { Button } from "@exegia/corpora-ui/ui/button"
+
+function ComponentPreview({ disabled }: { disabled: boolean }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Menu><MenuTrigger render={<Button variant="outline" />}>Document actions</MenuTrigger><MenuPopup><MenuItem>Open source</MenuItem><MenuItem disabled={disabled}>Download text</MenuItem></MenuPopup></Menu>
+    </div>
+  )
+}
+
+<ComponentPreview disabled={false} />
+```
+
+## API notes
+
+`open` and `onOpenChange` control the root. `MenuPopup` accepts positioning props. Items support `disabled` and `onClick`; use `MenuLinkItem` for links.

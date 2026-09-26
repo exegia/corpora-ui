@@ -1,0 +1,31 @@
+---
+title: "Toggle"
+description: "A button with a pressed state."
+---
+
+import { Preview } from "@/components/stories/toggle.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Toggle } from "@exegia/corpora-ui/ui/toggle"
+
+function ComponentPreview({ disabled }: { disabled: boolean }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Toggle disabled={disabled} aria-label="Emphasize selection">Bold</Toggle>
+    </div>
+  )
+}
+
+<ComponentPreview {...{ disabled: false }} />
+```
+
+## API notes
+
+`pressed` and `onPressedChange` control state. `defaultPressed` initializes it. `variant` and `size` select the visual treatment.

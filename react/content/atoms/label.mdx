@@ -1,0 +1,33 @@
+---
+title: "Label"
+description: "An accessible text label for a form control."
+---
+
+import { Preview } from "@/components/stories/label.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Label } from "@exegia/corpora-ui/ui/label"
+import { Input } from "@exegia/corpora-ui/ui/input"
+
+function ComponentPreview() {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Label htmlFor="document-title">Document title</Label>
+      <Input id="document-title" placeholder="Enter a title" />
+    </div>
+  )
+}
+
+<ComponentPreview />
+```
+
+## API notes
+
+Set `htmlFor` to the id of the associated input. Label every control with visible text.

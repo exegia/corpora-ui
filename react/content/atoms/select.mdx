@@ -1,0 +1,31 @@
+---
+title: "Select"
+description: "Choose a value from an anchored option list."
+---
+
+import { Preview } from "@/components/stories/select.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Select, SelectTrigger, SelectValue, SelectPopup, SelectItem } from "@exegia/corpora-ui/ui/select"
+
+function ComponentPreview({ disabled }: { disabled: boolean }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Select defaultValue="text" disabled={disabled}><SelectTrigger aria-label="Export format"><SelectValue /></SelectTrigger><SelectPopup><SelectItem value="text">Plain text</SelectItem><SelectItem value="json">JSON</SelectItem></SelectPopup></Select>
+    </div>
+  )
+}
+
+<ComponentPreview {...{ disabled: false }} />
+```
+
+## API notes
+
+`value` and `onValueChange` control selection. `defaultValue` initializes it. `disabled` disables the trigger; every item needs a stable value.

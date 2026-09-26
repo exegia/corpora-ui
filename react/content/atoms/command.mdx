@@ -1,0 +1,35 @@
+---
+title: "Command"
+description: "A searchable list of commands."
+---
+
+import { Preview } from "@/components/stories/command.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Command, CommandInput, CommandList, CommandItem, CommandEmpty } from "@exegia/corpora-ui/ui/command"
+
+function ComponentPreview({ placeholder }: { placeholder: string }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Command items={["Open library", "Browse references", "View projects"]}>
+      <CommandInput aria-label="Find a command" placeholder={placeholder} />
+      <CommandEmpty>No commands found.</CommandEmpty>
+      <CommandList>{(item: string) => <CommandItem key={item} value={item}>{item}</CommandItem>}</CommandList>
+    </Command>
+    </div>
+  )
+}
+
+<ComponentPreview placeholder={"Find a command"} />
+```
+
+## API notes
+
+`items` supplies searchable commands. Use `CommandList` with a render function and stable item values. For a modal palette, compose `CommandDialog`, `CommandDialogTrigger`, and `CommandDialogPopup` around the command.

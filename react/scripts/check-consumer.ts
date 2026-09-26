@@ -152,6 +152,13 @@ try {
     "bun", "-e", `
       import assert from "node:assert/strict";
       const root = await import("@exegia/corpora-ui");
+      const manifest = await import("@exegia/corpora-ui/package.json");
+      for (const entry of Object.keys(manifest.default.exports).filter(path => path.startsWith("./ui/"))) {
+        const focused = await import("@exegia/corpora-ui" + entry.slice(1));
+        for (const [name, value] of Object.entries(focused)) {
+          assert.strictEqual(root.UI[name], value, entry + ": duplicate or missing UI export " + name);
+        }
+      }
       for (const entry of ["button", "card", "input", "label", "state", "overlays", "shell", "scaffold"]) {
         const focused = await import("@exegia/corpora-ui/" + entry);
         for (const [name, value] of Object.entries(focused)) {

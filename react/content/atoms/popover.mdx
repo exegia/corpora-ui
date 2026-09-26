@@ -1,0 +1,32 @@
+---
+title: "Popover"
+description: "An anchored panel opened by a trigger."
+---
+
+import { Preview } from "@/components/stories/popover.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Popover, PopoverTrigger, PopoverPopup, PopoverTitle, PopoverDescription, PopoverClose } from "@exegia/corpora-ui/ui/popover"
+import { Button } from "@exegia/corpora-ui/ui/button"
+
+function ComponentPreview({ title }: { title: string }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Popover><PopoverTrigger render={<Button variant="outline" />}>Source information</PopoverTrigger><PopoverPopup><PopoverTitle>{title}</PopoverTitle><PopoverDescription>Includes bibliographic details and editorial notes.</PopoverDescription><PopoverClose render={<Button variant="ghost" />}>Close</PopoverClose></PopoverPopup></Popover>
+    </div>
+  )
+}
+
+<ComponentPreview title={"Source information"} />
+```
+
+## API notes
+
+`open` and `onOpenChange` control visibility. `side`, `align`, and `sideOffset` on the popup adjust positioning. `PopoverContent` is an alias for `PopoverPopup`.
