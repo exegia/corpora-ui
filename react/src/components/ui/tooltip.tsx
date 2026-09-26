@@ -3,6 +3,7 @@
 import { Tooltip as TooltipPrimitive } from "@base-ui/react/tooltip";
 import type React from "react";
 import { cn } from "@/lib/utils";
+import { useExegiaPortalContainer } from "@/lib/state/portal-context";
 
 export const TooltipCreateHandle: typeof TooltipPrimitive.createHandle =
   TooltipPrimitive.createHandle;
@@ -34,8 +35,9 @@ export function TooltipPopup({
   anchor?: TooltipPrimitive.Positioner.Props["anchor"];
   portalProps?: TooltipPrimitive.Portal.Props;
 }): React.ReactElement {
+  const container = useExegiaPortalContainer(portalProps?.container);
   return (
-    <TooltipPrimitive.Portal {...portalProps}>
+    <TooltipPrimitive.Portal {...portalProps} container={container}>
       <TooltipPrimitive.Positioner
         align={align}
         anchor={anchor}

@@ -3,6 +3,7 @@
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
 import type React from "react";
 import { cn } from "@/lib/utils";
+import { useExegiaPortalContainer } from "@/lib/state/portal-context";
 
 export const PopoverCreateHandle: typeof PopoverPrimitive.createHandle =
   PopoverPrimitive.createHandle;
@@ -45,9 +46,9 @@ export function PopoverPopup({
   tooltipStyle?: boolean;
   anchor?: PopoverPrimitive.Positioner.Props["anchor"];
   }): React.ReactElement {
-
+  const container = useExegiaPortalContainer(portalProps?.container);
   return (
-    <PopoverPrimitive.Portal {...portalProps}>
+    <PopoverPrimitive.Portal {...portalProps} container={container}>
       <PopoverPrimitive.Positioner
         align={align}
         alignOffset={alignOffset}

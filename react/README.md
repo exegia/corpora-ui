@@ -11,9 +11,29 @@ bun run typecheck
 bun run lint
 bun test
 bun run build        # docs site + publishable library
+bun run dev:example  # React consumer on http://127.0.0.1:3001
+bun run check:consumer # pack + isolated consumer typecheck/production build
 ```
 
 ## Project layout
+
+`react/` is the Bun workspace root. `examples/consumer` has its own private
+manifest and shares version definitions through the root catalog. Use one
+`bun install` here; do not install dependencies at the repository root.
+See [the consumer example](examples/consumer/README.md) for development and
+tarball verification.
+
+Focused imports are available from `@exegia/corpora-ui/button`, `/card`,
+`/input`, `/label`, `/state`, `/overlays`, `/shell`, and `/scaffold`.
+Existing root imports continue to work. The consumer example loads its
+Shell/Scaffold reading workspace on demand using those focused layout exports.
+Import `@exegia/corpora-ui/index.css` once for either style. The library builds
+all entrypoints together, sharing component implementations and state.
+
+Mount `ExegiaProvider` once for toast, shared tooltip settings, and portal
+defaults. Pass `store={appStore}` to share arbitrary app atoms with library
+state. Existing Shell/Scaffold panel and drawer layout contexts stay local.
+See [getting started](content/getting-started.mdx) for the provider contract.
 
 - `src/components/ui` — atoms
 - `src/components/composed` — components

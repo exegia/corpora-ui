@@ -37,7 +37,7 @@ pkg_name = node -p "require('./$(REACT_DIR)/package.json').name"
 
 .DEFAULT_GOAL := help
 
-.PHONY: help install serve build preview test typecheck lint format check ci pack \
+.PHONY: help install serve build preview test typecheck lint format check ci pack consumer-check \
         clean distclean pkg-version next-version version-set release-notes \
         pr-guard pr-types-sync release-pr release-branch delete-branch publish publish-github \
         tag-release rulesets-apply rulesets-diff \
@@ -75,7 +75,10 @@ format: ## Format sources with prettier
 
 check: typecheck lint ## Typecheck + lint
 
-ci: install check test build ## Everything CI runs on a pull request
+ci: install check test build consumer-check ## Everything CI runs on a pull request
+
+consumer-check: ## Build the library and verify its tarball in an isolated React app
+	cd $(REACT_DIR) && $(BUN) run check:consumer
 
 clean: ## Remove build output and caches
 	rm -rf $(REACT_DIR)/dist $(REACT_DIR)/dist-lib $(REACT_DIR)/node_modules/.vite dist-pack
@@ -181,9 +184,10 @@ delete-branch: ## Delete a remote branch, tolerating one already gone (env: BRAN
 
 # --- releases ---------------------------------------------------------------
 
+# Bun resolves catalog references before the tarball reaches npm.
 pack: install build ## Write the publishable tarball to dist-pack/
 	mkdir -p dist-pack
-	cd $(REACT_DIR) && npm pack --pack-destination ../dist-pack
+	cd $(REACT_DIR) && $(BUN) pm pack --destination ../dist-pack
 
 publish: ## Publish react/ to npm, skipping a version that is already public
 	@set -eu; \
@@ -191,7 +195,9 @@ publish: ## Publish react/ to npm, skipping a version that is already public
 	if npm view "$$name@$$version" version >/dev/null 2>&1; then \
 	  echo "$$name@$$version is already on npm — skipping"; exit 0; \
 	fi; \
-	cd $(REACT_DIR) && npm publish --provenance --access public
+	mkdir -p dist-pack; \
+	cd $(REACT_DIR) && $(BUN) pm pack --filename ../dist-pack/release.tgz && \
+	npm publish ../dist-pack/release.tgz --provenance --access public
 
 # GitHub Packages requires auth even for reads, so the skip-check relies on the
 # same .npmrc token `npm publish` does. No --provenance: npmjs-only feature.
@@ -202,7 +208,9 @@ publish-github: ## Publish react/ to GitHub Packages, skipping a version already
 	if npm view "$$name@$$version" version --registry "$$registry" >/dev/null 2>&1; then \
 	  echo "$$name@$$version is already on GitHub Packages — skipping"; exit 0; \
 	fi; \
-	cd $(REACT_DIR) && npm publish --registry "$$registry"
+	mkdir -p dist-pack; \
+	cd $(REACT_DIR) && $(BUN) pm pack --filename ../dist-pack/release.tgz && \
+	npm publish ../dist-pack/release.tgz --registry "$$registry"
 
 tag-release: ## Tag HEAD as v<package version> and publish the GitHub Release
 	@set -eu; \

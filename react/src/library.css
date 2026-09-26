@@ -1,0 +1,20 @@
+/* Build the npm stylesheet independently of the documentation site. */
+@import "tailwindcss" source(none);
+@import "./index.css";
+
+/* Preserve the preset's pulse endpoints without shipping its dialog styles. */
+@theme inline {
+  --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+}
+
+@source "./components";
+@source "./lib";
+@source not "./components/docs";
+@source not "./components/stories";
+@source not "./components/**/__tests__";
+@source not "./lib/**/__tests__";

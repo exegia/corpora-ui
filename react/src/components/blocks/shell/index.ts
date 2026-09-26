@@ -1,4 +1,5 @@
 import { ShellLayout } from "./shell-layout"
+export { ShellLayout }
 
 export type * from "./type"
 export * from "./shell-metrics"
