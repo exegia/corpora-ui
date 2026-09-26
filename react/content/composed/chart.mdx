@@ -18,7 +18,7 @@ Use the controls to explore the component's props.
 | Prop                       | Type                                                            | Default | Description                                                                                                                                    |
 | -------------------------- | --------------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | `type` (required)          | `"pie" \| "area" \| "line" \| "bar"`                            | —       | Plot kind.                                                                                                                                     |
-| `data` (required)          | `{ label: string; [key]: number \| string }[]`                  | —       | One row per x label (or pie slice).                                                                                                            |
+| `data` (required)          | `{ label: string; [key]: number \| string \| null }[]`                  | —       | One row per x label (or pie slice).                                                                                                            |
 | `series` (required)        | `{ key, label, color?, format? }[]`                             | —       | Keys to plot; colour defaults to the series token by position. Pie uses the first. `format` renders the value in the legend and hover tooltip. |
 | `title / subtitle / badge` | `ReactNode`                                                     | —       | Header row; badge defaults to the type name.                                                                                                   |
 | `reference`                | `Reference` props (`children`, `href?`, `preview?`, `onClick?`) | —       | Passage or Strong’s entry displayed as a reference pill instead of the type badge.                                                             |
@@ -49,5 +49,93 @@ import { Chart } from "@exegia/corpora-ui"
     { label: "1 John", occurrences: 18 },
   ]}
   series={[{ key: "occurrences", label: "Occurrences" }]}
+/>
+```
+
+
+## ECharts configuration
+
+The renderer uses vendored [EvilCharts ECharts components](https://github.com/legions-developer/evilcharts), with `echarts` as a runtime dependency. Existing imports and the four plot types remain supported. The default pie remains a donut; use `pie={{ innerRadius: 0 }}` for a solid pie.
+
+| Prop | Default | Behavior |
+| --- | --- | --- |
+| `variant` | `"default"` | `stacked` and `percent` apply to area/bar; `horizontal` applies to bar; `donut` applies to pie. Other combinations use the default plot. |
+| `renderer` / `animation` | `"canvas"` / `true` | Canvas or SVG rendering; animation also respects reduced motion. |
+| `loading` / `emptyContent` | `false` / `"No data"` | Loading skeleton or an empty-state message; loading hides the legend. |
+| `showLegend` / `interactive` | `true` / `false` | Show the accessible HTML legend; enable keyboard and pointer selection. |
+| `grid` / `xAxis` / `yAxis` | `true` / `true` / `false` | Cartesian grid and axes. Axis objects accept `label`, `tickFormatter`, and `hideDots`. |
+| `tooltip` | `true` | Boolean or `{ variant, roundness, cursor, position }`; defaults to `frosted-glass`; `default` provides a solid background. Tooltips preserve React labels and series formatters. |
+| `brush` | `false` | Cartesian zoom brush; accepts `height`, `formatLabel`, and `onChange({ startIndex, endIndex })`. Horizontal bars omit the brush. |
+| `curveType` | `"monotone"` | Line/area interpolation, including `linear`, `smooth`, and `step`. |
+| `pie` | — | Radius, angles, corner radius, padding and clickability settings. |
+| `chartOptions` | — | Advanced ECharts options, shallowly overriding generated options. |
+
+Series accept `area`, `line`, and `bar` configuration objects. Area fills include `gradient`, `solid`, `dotted`, `lines`, `hatched`, and `none`. Bar styles include `default`, `gradient`, `hatched`, `duotone`, `stripped`, `blocks`, and `expandable`. Line settings include `strokeVariant`, `strokeWidth`, `glowing`, and `connectNulls`.
+
+```tsx
+<Chart
+  type="area"
+  variant="stacked"
+  data={data}
+  series={[
+    { key: "oldTestament", label: "Old Testament", area: { variant: "gradient" } },
+    { key: "newTestament", label: "New Testament", area: { variant: "hatched" } },
+  ]}
+  interactive
+  brush
+  plotHeight={260}
+/>
+```
+
+## State and methods
+
+Give each chart a unique `chartId` to address it from another component under the same Jotai provider. Omit the ID for an isolated chart. `selectedKey` controls selection; `defaultSelectedKey` seeds uncontrolled selection. For pie charts, keys are row labels; for other charts, keys are series keys. Keys must be unique. `onSelectionChange` reports changes, and invalid keys are ignored.
+
+```tsx
+import { Chart, useChartActions, useChartState } from "@exegia/corpora-ui"
+
+function SelectionControls() {
+  const { selectedKey } = useChartState("research")
+  const chart = useChartActions("research")
+  return <button onClick={chart.clearSelection}>Clear {selectedKey ?? "selection"}</button>
+}
+
+// Mount both under the same Jotai Provider.
+<Chart chartId="research" type="bar" data={data} series={series} interactive />
+```
+
+Actions expose `select(key)`, `toggle(key)`, `clearSelection()`, and `reset()` (restores the default selection). The same methods are exposed through a React `ref`. In controlled mode, actions request changes through `onSelectionChange`; the parent must update `selectedKey`.
+
+For narrow subscriptions, use `chartSelectedKeyAtom(chartId)`. `chartStateAtom`, `selectChartKeyAtom`, `toggleChartKeyAtom`, and `resetChartAtom` are also exported. Call `removeChartInstance(id)` after all consumers of a named chart unmount to release its cached atoms. Generated IDs are cleaned up automatically. Children can obtain the enclosing ID through `useChartContext()`.
+
+Implementation modules follow the scaffold structure: `chart-root`, `chart-plot`, `chart-legend`, `chart-tooltip`, `chart-atom`, `chart-context`, `use-chart`, `use-chart-state`, `type`, `constants`, and `utils`. The original `chat/chart` entry point remains compatible.
+
+
+## Consumer sizing and outer component
+
+`width` and `height` size the **whole chart component**, including its header and legend. Numbers mean pixels; CSS lengths such as `"100%"`, `"28rem"`, and `"clamp(18rem, 50vh, 32rem)"` also work. Percentage heights require a parent with a defined height. Without sizing props, the compact defaults remain unchanged.
+
+When `height` (or `style.height`) is set, the plot fills the remaining space. `plotHeight` overrides that automatic fill and accepts CSS lengths too. `style` takes precedence over `width` and `height`; `className` remains available for responsive widths. A fixed outer height must leave enough room for the header, legend, and any children.
+
+Use the coss/Base UI `render` prop to replace the outer element or supply your own component. It works with both the framed and `headerless` layouts. Custom components must forward their props, children, and DOM ref. The chart's own `ref` continues to expose selection actions.
+
+```tsx
+<Chart
+  type="bar"
+  data={data}
+  series={series}
+  width="100%"
+  height={360}
+  render={<section aria-label="Word occurrences" />}
+/>
+
+<Chart
+  type="pie"
+  data={data}
+  series={series}
+  headerless
+  width="100%"
+  plotHeight="12rem"
+  render={<MyChartSurface />}
 />
 ```

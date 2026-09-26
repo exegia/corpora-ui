@@ -46,6 +46,11 @@ export default defineConfig([
     },
   },
   {
+    // EvilCharts intentionally keeps mutable renderer state in a live ref.
+    files: ['src/components/composed/chat/chart/evilcharts/**/*.tsx'],
+    rules: { 'react-hooks/refs': 'off' },
+  },
+  {
     // Vendored from the @beui registry (`shadcn add @beui/<name>`). Hand edits
     // are lost on the next install, so the house rules it trips are relaxed
     // here rather than patched in place: mount guards that setState in an

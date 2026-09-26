@@ -4,13 +4,7 @@ export {
   type TAttachmentProps,
   type TAttachmentVariant,
 } from "./attachment"
-export {
-  Chart,
-  type TChartDatum,
-  type IChartProps,
-  type IChartSeries,
-  type TChartType,
-} from "./chart"
+export * from "./chart"
 export {
   Markdown,
   markdownViewAtom,
