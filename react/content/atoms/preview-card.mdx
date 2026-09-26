@@ -1,0 +1,31 @@
+---
+title: "Preview card"
+description: "Supplementary information shown beside a hovered link."
+---
+
+import { Preview } from "@/components/stories/preview-card.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { PreviewCard, PreviewCardTrigger, PreviewCardPopup } from "@exegia/corpora-ui/ui/preview-card"
+
+function ComponentPreview({ description }: { description: string }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <PreviewCard><PreviewCardTrigger href="/atoms/reference" className="underline">Reference guide</PreviewCardTrigger><PreviewCardPopup>{description}</PreviewCardPopup></PreviewCard>
+    </div>
+  )
+}
+
+<ComponentPreview {...{ description: "Create consistent references for books, chapters, and passages." }} />
+```
+
+## API notes
+
+`PreviewCardTrigger` accepts link props. The popup accepts `align` and `sideOffset`. Keep essential information available outside hover content.

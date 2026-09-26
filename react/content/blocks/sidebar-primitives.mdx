@@ -1,0 +1,34 @@
+---
+title: "Sidebar primitives"
+description: "Composable responsive navigation with scoped state."
+---
+
+import { Preview } from "@/components/stories/sidebar-primitives.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset, SidebarTrigger } from "@exegia/corpora-ui/ui/sidebar"
+
+function ComponentPreview({ defaultOpen }: { defaultOpen: boolean }) {
+
+  return (
+    <div className="relative isolate mx-auto h-80 w-full overflow-hidden border [transform:translateZ(0)]">
+      <SidebarProvider defaultOpen={defaultOpen} className="min-h-72">
+      <Sidebar collapsible="icon" className="absolute"><SidebarHeader>Library</SidebarHeader><SidebarContent><SidebarMenu><SidebarMenuItem><SidebarMenuButton isActive>Documents</SidebarMenuButton></SidebarMenuItem><SidebarMenuItem><SidebarMenuButton>Collections</SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarContent></Sidebar>
+      <SidebarInset><div className="p-4"><SidebarTrigger /><p className="mt-4">Choose a collection from the navigation.</p></div></SidebarInset>
+    </SidebarProvider>
+    </div>
+  )
+}
+
+<ComponentPreview {...{ defaultOpen: true }} />
+```
+
+## API notes
+
+`SidebarProvider` scopes open and mobile state for one sidebar. `defaultOpen` initializes it; `open` and `onOpenChange` make it controlled. `Sidebar` supports `collapsible="icon"`, `"offcanvas"`, or `"none"`. Use `SidebarTrigger` for an accessible toggle. This module is separate from the AI chat sidebar.

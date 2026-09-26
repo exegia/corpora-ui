@@ -4,7 +4,7 @@
     "types": ["vite/client"],
     "declarationMap": false
   },
-  "include": ["src/index.ts", "src/components", "src/lib"],
+  "include": ["src/index.ts", "src/ui", "src/components", "src/lib"],
   "exclude": [
     "src/components/docs",
     "src/components/stories",

@@ -1,0 +1,33 @@
+---
+title: "Context menu"
+description: "Actions opened by a context click or keyboard command."
+---
+
+import { Preview } from "@/components/stories/context-menu.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { ContextMenu, ContextMenuTrigger, ContextMenuPopup, ContextMenuItem } from "@exegia/corpora-ui/ui/context-menu"
+
+function ComponentPreview({ disabled }: { disabled: boolean }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <ContextMenu><ContextMenuTrigger className="block rounded-lg border border-dashed p-8">Right-click this passage</ContextMenuTrigger>
+      <ContextMenuPopup><ContextMenuItem disabled={disabled}>Copy reference</ContextMenuItem><ContextMenuItem>View source</ContextMenuItem></ContextMenuPopup>
+    </ContextMenu>
+    </div>
+  )
+}
+
+<ComponentPreview disabled={false} />
+```
+
+## API notes
+
+`ContextMenuTrigger` defines the target. Items accept `onClick` and `disabled`. Compose checkbox, radio, or submenu exports for richer menus.

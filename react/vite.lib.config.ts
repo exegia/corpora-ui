@@ -1,4 +1,5 @@
 import path from "path"
+import { readdirSync } from "node:fs"
 import { access, copyFile, readFile } from "node:fs/promises"
 import tailwindcss from "@tailwindcss/vite"
 import react from "@vitejs/plugin-react"
@@ -19,6 +20,7 @@ export default defineConfig({
       include: [
         "src/assets/**",
         "src/index.ts",
+        "src/ui/**",
         "src/components/**",
         "src/lib/**",
         "src/state/**",
@@ -80,6 +82,9 @@ export default defineConfig({
     cssMinify: "lightningcss",
     lib: {
       entry: {
+        ...Object.fromEntries(readdirSync(path.resolve(import.meta.dirname, "src/ui"))
+          .filter(file => file.endsWith(".ts"))
+          .map(file => [`ui/${file.slice(0, -3)}`, path.resolve(import.meta.dirname, "src/ui", file)])),
         shell: path.resolve(import.meta.dirname, "src/components/blocks/shell/index.ts"),
         scaffold: path.resolve(import.meta.dirname, "src/components/blocks/scaffold/index.ts"),
         index: path.resolve(import.meta.dirname, "src/library.ts"),
