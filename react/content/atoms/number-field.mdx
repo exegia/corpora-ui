@@ -1,0 +1,31 @@
+---
+title: "Number field"
+description: "A numeric input with increment and decrement controls."
+---
+
+import { Preview } from "@/components/stories/number-field.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { NumberField, NumberFieldGroup, NumberFieldDecrement, NumberFieldInput, NumberFieldIncrement } from "@exegia/corpora-ui/ui/number-field"
+
+function ComponentPreview({ disabled }: { disabled: boolean }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <NumberField defaultValue={3} min={1} max={20} disabled={disabled}><NumberFieldGroup><NumberFieldDecrement aria-label="Fewer results" /><NumberFieldInput aria-label="Result count" /><NumberFieldIncrement aria-label="More results" /></NumberFieldGroup></NumberField>
+    </div>
+  )
+}
+
+<ComponentPreview disabled={false} />
+```
+
+## API notes
+
+`value` and `onValueChange` control the number. `defaultValue` initializes it. `min`, `max`, and `step` constrain changes. `size` adjusts the group density.

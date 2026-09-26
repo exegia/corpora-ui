@@ -1,0 +1,32 @@
+---
+title: "Fieldset"
+description: "A semantic group of related form controls."
+---
+
+import { Preview } from "@/components/stories/fieldset.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Fieldset, FieldsetLegend } from "@exegia/corpora-ui/ui/fieldset"
+import { Checkbox } from "@exegia/corpora-ui/ui/checkbox"
+
+function ComponentPreview({ disabled }: { disabled: boolean }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Fieldset disabled={disabled}><FieldsetLegend>Notifications</FieldsetLegend><label className="flex items-center gap-2"><Checkbox defaultChecked />Email me about completed imports</label></Fieldset>
+    </div>
+  )
+}
+
+<ComponentPreview disabled={false} />
+```
+
+## API notes
+
+`disabled` disables descendants. `FieldsetLegend` names the group for assistive technology. Place independently labeled fields inside the group.

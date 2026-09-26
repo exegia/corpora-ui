@@ -1,0 +1,16 @@
+export { DialogCreateHandle } from "./utils";
+export { Dialog } from "./utils";
+export { DialogPortal } from "./utils";
+export { default as DialogTrigger } from "./trigger";
+export { default as DialogClose } from "./close";
+export { default as DialogBackdrop } from "./backdrop";
+export { default as DialogViewport } from "./viewport";
+export { default as DialogPopup } from "./popup";
+export { default as DialogHeader } from "./header";
+export { default as DialogFooter } from "./footer";
+export { default as DialogTitle } from "./title";
+export { default as DialogDescription } from "./description";
+export { default as DialogPanel } from "./panel";
+export { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
+export { default as DialogOverlay } from "./backdrop";
+export { default as DialogContent } from "./popup";

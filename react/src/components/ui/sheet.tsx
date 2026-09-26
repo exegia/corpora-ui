@@ -1,9 +1,12 @@
-import * as React from "react"
+import { mergeProps } from "@base-ui/react/merge-props"
+import { useRender } from "@base-ui/react/use-render"
 import { Dialog as SheetPrimitive } from "@base-ui/react/dialog"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { XIcon } from "lucide-react"
+import SheetPortal from "./sheet-parts/portal"
+import SheetOverlay from "./sheet-parts/overlay"
 
 function Sheet({ ...props }: SheetPrimitive.Root.Props) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />
@@ -15,23 +18,6 @@ function SheetTrigger({ ...props }: SheetPrimitive.Trigger.Props) {
 
 function SheetClose({ ...props }: SheetPrimitive.Close.Props) {
   return <SheetPrimitive.Close data-slot="sheet-close" {...props} />
-}
-
-function SheetPortal({ ...props }: SheetPrimitive.Portal.Props) {
-  return <SheetPrimitive.Portal data-slot="sheet-portal" {...props} />
-}
-
-function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
-  return (
-    <SheetPrimitive.Backdrop
-      data-slot="sheet-overlay"
-      className={cn(
-        "fixed inset-0 z-50 bg-black/10 transition-opacity duration-150 data-ending-style:opacity-0 data-starting-style:opacity-0 supports-backdrop-filter:backdrop-blur-xs",
-        className
-      )}
-      {...props}
-    />
-  )
 }
 
 function SheetContent({
@@ -77,24 +63,37 @@ function SheetContent({
   )
 }
 
-function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="sheet-header"
-      className={cn("flex flex-col gap-0.5 p-4", className)}
-      {...props}
-    />
-  )
+function SheetHeader({ className, render, ...props }: useRender.ComponentProps<"div">) {
+  const defaultProps = {
+    "data-slot": "sheet-header",
+    className: cn("flex flex-col gap-0.5 p-4", className),
+  }
+  return useRender({
+    defaultTagName: "div",
+    props: mergeProps<"div">(defaultProps, props),
+    render,
+  })
 }
 
-function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="sheet-footer"
-      className={cn("mt-auto flex flex-col gap-2 p-4", className)}
-      {...props}
-    />
-  )
+function SheetFooter({
+  className,
+  render,
+  variant,
+  ...props
+}: useRender.ComponentProps<"div"> & { variant?: "default" | "bare" }) {
+  const defaultProps = {
+    "data-slot": "sheet-footer",
+    className: cn(
+      "mt-auto flex flex-col gap-2 p-4",
+      variant === "default" && "border-t bg-muted/72",
+      className,
+    ),
+  }
+  return useRender({
+    defaultTagName: "div",
+    props: mergeProps<"div">(defaultProps, props),
+    render,
+  })
 }
 
 function SheetTitle({ className, ...props }: SheetPrimitive.Title.Props) {
@@ -133,3 +132,10 @@ export {
   SheetTitle,
   SheetDescription,
 }
+
+export { default as SheetBackdrop } from "./sheet-parts/backdrop"
+export { default as SheetViewport } from "./sheet-parts/viewport"
+export { default as SheetPopup } from "./sheet-parts/popup"
+export { default as SheetPanel } from "./sheet-parts/panel"
+export { SheetPortal, SheetOverlay, SheetPrimitive }
+export const SheetCreateHandle: typeof SheetPrimitive.createHandle = SheetPrimitive.createHandle

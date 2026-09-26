@@ -1,0 +1,10 @@
+export type { TableVariant } from "./types";
+export type { TableProps } from "./types";
+export { default as Table } from "./base";
+export { default as TableHeader } from "./header";
+export { default as TableBody } from "./body";
+export { default as TableFooter } from "./footer";
+export { default as TableRow } from "./row";
+export { default as TableHead } from "./head";
+export { default as TableCell } from "./cell";
+export { default as TableCaption } from "./caption";

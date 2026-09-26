@@ -1,0 +1,31 @@
+---
+title: "Meter"
+description: "An accessible value indicator with a label and track."
+---
+
+import { Preview } from "@/components/stories/meter.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Meter, MeterLabel, MeterTrack, MeterIndicator, MeterValue } from "@exegia/corpora-ui/ui/meter"
+
+function ComponentPreview({ value }: { value: number }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Meter value={value}><div className="flex justify-between"><MeterLabel>Storage used</MeterLabel><MeterValue /></div><MeterTrack><MeterIndicator /></MeterTrack></Meter>
+    </div>
+  )
+}
+
+<ComponentPreview value={65} />
+```
+
+## API notes
+
+`value` sets the current amount, with `min` and `max` defining the range. Use a meter for a measurement, rather than the progress of a task.

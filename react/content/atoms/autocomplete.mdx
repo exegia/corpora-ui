@@ -1,0 +1,34 @@
+---
+title: "Autocomplete"
+description: "Search a list of options using a keyboard accessible input."
+---
+
+import { Preview } from "@/components/stories/autocomplete.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Autocomplete, AutocompleteInput, AutocompletePopup, AutocompleteList, AutocompleteItem, AutocompleteEmpty } from "@exegia/corpora-ui/ui/autocomplete"
+
+function ComponentPreview({ disabled }: { disabled: boolean }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Autocomplete items={["Manuscripts", "Translations", "Commentaries"]}>
+      <AutocompleteInput aria-label="Collection" placeholder="Choose a collection" disabled={disabled} showClear />
+      <AutocompletePopup><AutocompleteEmpty>No collections found.</AutocompleteEmpty><AutocompleteList>{(item: string) => <AutocompleteItem key={item} value={item}>{item}</AutocompleteItem>}</AutocompleteList></AutocompletePopup>
+    </Autocomplete>
+    </div>
+  )
+}
+
+<ComponentPreview disabled={false} />
+```
+
+## API notes
+
+`items` supplies the searchable collection. The list render function receives each filtered item. `value` and `onValueChange` control text input. `showClear` and `showTrigger` expose input actions.

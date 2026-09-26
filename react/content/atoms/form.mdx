@@ -1,0 +1,38 @@
+---
+title: "Form"
+description: "Form validation and submission using Base UI fields."
+---
+
+import { Preview } from "@/components/stories/form.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Form } from "@exegia/corpora-ui/ui/form"
+import { useState } from "react"
+import { Field, FieldLabel, FieldError } from "@exegia/corpora-ui/ui/field"
+import { Input } from "@exegia/corpora-ui/ui/input"
+import { Button } from "@exegia/corpora-ui/ui/button"
+
+function ComponentPreview({ placeholder }: { placeholder: string }) {
+  const [submitted, setSubmitted] = useState(false)
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Form onSubmit={(event) => { event.preventDefault(); setSubmitted(true) }} className="grid gap-4">
+      <Field name="email"><FieldLabel>Email</FieldLabel><Input type="email" required placeholder={placeholder} /><FieldError /></Field>
+      <Button type="submit">Validate</Button><p role="status">{submitted ? "Email accepted." : "Enter an email address to validate."}</p>
+    </Form>
+    </div>
+  )
+}
+
+<ComponentPreview placeholder={"you@example.com"} />
+```
+
+## API notes
+
+`onSubmit` handles valid submissions; prevent the default browser navigation when handling client-side. `errors` supplies field errors keyed by name. Compose labeled `Field` controls for validation messages.

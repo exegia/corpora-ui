@@ -1,0 +1,37 @@
+---
+title: "Drawer"
+description: "A focused overlay with an accessible title and description."
+---
+
+import { Preview } from "@/components/stories/drawer.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Drawer, DrawerTrigger, DrawerPopup, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from "@exegia/corpora-ui/ui/drawer"
+import { Button } from "@exegia/corpora-ui/ui/button"
+
+function ComponentPreview({ disabled }: { disabled: boolean }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Drawer>
+      <DrawerTrigger render={<Button />} disabled={disabled}>Open drawer</DrawerTrigger>
+      <DrawerPopup><DrawerHeader><DrawerTitle>Review import</DrawerTitle><DrawerDescription>Review the selected documents before continuing.</DrawerDescription></DrawerHeader>
+        <DrawerFooter><DrawerClose render={<Button variant="outline" />}>Close</DrawerClose></DrawerFooter>
+      </DrawerPopup>
+    </Drawer>
+    </div>
+  )
+}
+
+<ComponentPreview disabled={false} />
+```
+
+## API notes
+
+`open` with `onOpenChange` controls visibility; `defaultOpen` sets initial state. Always include a title and description. Triggers and close controls accept `render` for button composition. `position` on `Drawer` chooses the screen edge.

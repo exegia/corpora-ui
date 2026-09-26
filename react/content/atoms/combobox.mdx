@@ -1,0 +1,34 @@
+---
+title: "Combobox"
+description: "Search a list of options using a keyboard accessible input."
+---
+
+import { Preview } from "@/components/stories/combobox.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Combobox, ComboboxInput, ComboboxPopup, ComboboxList, ComboboxItem, ComboboxEmpty } from "@exegia/corpora-ui/ui/combobox"
+
+function ComponentPreview({ disabled }: { disabled: boolean }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Combobox items={["Manuscripts", "Translations", "Commentaries"]}>
+      <ComboboxInput aria-label="Collection" placeholder="Choose a collection" disabled={disabled} showClear />
+      <ComboboxPopup><ComboboxEmpty>No collections found.</ComboboxEmpty><ComboboxList>{(item: string) => <ComboboxItem key={item} value={item}>{item}</ComboboxItem>}</ComboboxList></ComboboxPopup>
+    </Combobox>
+    </div>
+  )
+}
+
+<ComponentPreview disabled={false} />
+```
+
+## API notes
+
+`items` supplies the searchable collection. The list render function receives each filtered item. `value` and `onValueChange` control selection; `multiple` enables several selections. `showClear` and `showTrigger` expose input actions.

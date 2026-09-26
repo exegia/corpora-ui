@@ -1,0 +1,37 @@
+---
+title: "Alert dialog"
+description: "A focused overlay with an accessible title and description."
+---
+
+import { Preview } from "@/components/stories/alert-dialog.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { AlertDialog, AlertDialogTrigger, AlertDialogPopup, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogClose } from "@exegia/corpora-ui/ui/alert-dialog"
+import { Button } from "@exegia/corpora-ui/ui/button"
+
+function ComponentPreview({ disabled }: { disabled: boolean }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <AlertDialog>
+      <AlertDialogTrigger render={<Button />} disabled={disabled}>Open alert dialog</AlertDialogTrigger>
+      <AlertDialogPopup><AlertDialogHeader><AlertDialogTitle>Review import</AlertDialogTitle><AlertDialogDescription>Review the selected documents before continuing.</AlertDialogDescription></AlertDialogHeader>
+        <AlertDialogFooter><AlertDialogClose render={<Button variant="outline" />}>Close</AlertDialogClose></AlertDialogFooter>
+      </AlertDialogPopup>
+    </AlertDialog>
+    </div>
+  )
+}
+
+<ComponentPreview disabled={false} />
+```
+
+## API notes
+
+`open` with `onOpenChange` controls visibility; `defaultOpen` sets initial state. Always include a title and description. Triggers and close controls accept `render` for button composition.

@@ -1,0 +1,31 @@
+---
+title: "Frame"
+description: "A bordered container for related sections."
+---
+
+import { Preview } from "@/components/stories/frame.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Frame, FrameHeader, FrameTitle, FrameDescription, FramePanel } from "@exegia/corpora-ui/ui/frame"
+
+function ComponentPreview() {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Frame><FrameHeader><FrameTitle>Collection</FrameTitle><FrameDescription>Source documents</FrameDescription></FrameHeader><FramePanel>Review the documents in this collection.</FramePanel></Frame>
+    </div>
+  )
+}
+
+<ComponentPreview />
+```
+
+## API notes
+
+`FrameHeader` holds a title and description. `FramePanel` contains the main content; `FrameFooter` holds supporting actions. Each part accepts `className`.

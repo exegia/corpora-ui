@@ -1,0 +1,32 @@
+---
+title: "Calendar"
+description: "Date selection with a styled React DayPicker."
+---
+
+import { Preview } from "@/components/stories/calendar.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Calendar } from "@exegia/corpora-ui/ui/calendar"
+import { useState } from "react"
+
+function ComponentPreview({ showOutsideDays }: { showOutsideDays: boolean }) {
+  const [date, setDate] = useState<Date | undefined>()
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Calendar mode="single" selected={date} onSelect={setDate} showOutsideDays={showOutsideDays} />
+    </div>
+  )
+}
+
+<ComponentPreview showOutsideDays={true} />
+```
+
+## API notes
+
+`mode` supports single, multiple, and range selection. Supply matching `selected` and `onSelect` values. `disabled` restricts selectable dates; `showOutsideDays` defaults to true.

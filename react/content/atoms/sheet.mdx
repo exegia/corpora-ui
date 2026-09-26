@@ -1,0 +1,37 @@
+---
+title: "Sheet"
+description: "A focused overlay with an accessible title and description."
+---
+
+import { Preview } from "@/components/stories/sheet.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from "@exegia/corpora-ui/ui/sheet"
+import { Button } from "@exegia/corpora-ui/ui/button"
+
+function ComponentPreview({ disabled }: { disabled: boolean }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Sheet>
+      <SheetTrigger render={<Button />} disabled={disabled}>Open sheet</SheetTrigger>
+      <SheetContent><SheetHeader><SheetTitle>Review import</SheetTitle><SheetDescription>Review the selected documents before continuing.</SheetDescription></SheetHeader>
+        <SheetFooter><SheetClose render={<Button variant="outline" />}>Close</SheetClose></SheetFooter>
+      </SheetContent>
+    </Sheet>
+    </div>
+  )
+}
+
+<ComponentPreview disabled={false} />
+```
+
+## API notes
+
+`open` with `onOpenChange` controls visibility; `defaultOpen` sets initial state. Always include a title and description. Triggers and close controls accept `render` for button composition. `side` on `SheetContent` chooses the screen edge.

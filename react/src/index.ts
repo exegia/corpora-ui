@@ -103,3 +103,6 @@ export * from "./components/ui/chat"
 export * from "./components/composed/chat"
 export * from "./components/blocks/chat"
 export * from "./lib/keyed-atom"
+
+// Base UI primitives; names such as Avatar and Sidebar are scoped here.
+export * as UI from "./ui"

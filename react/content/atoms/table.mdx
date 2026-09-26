@@ -1,0 +1,31 @@
+---
+title: "Table"
+description: "Semantic rows and columns for tabular data."
+---
+
+import { Preview } from "@/components/stories/table.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Table, TableCaption, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@exegia/corpora-ui/ui/table"
+
+function ComponentPreview({ variant }: { variant: "default" | "card" }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Table variant={variant}><TableCaption>Available export formats</TableCaption><TableHeader><TableRow><TableHead>Format</TableHead><TableHead>Use</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>Plain text</TableCell><TableCell>Reading and quotation</TableCell></TableRow><TableRow><TableCell>JSON</TableCell><TableCell>Structured analysis</TableCell></TableRow></TableBody></Table>
+    </div>
+  )
+}
+
+<ComponentPreview {...{ variant: "default" }} />
+```
+
+## API notes
+
+`variant` chooses `default` or `card`. Use `TableHead` for headers, `TableCell` for values, and `TableCaption` to describe the table.

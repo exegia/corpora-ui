@@ -1,0 +1,31 @@
+---
+title: "Toggle group"
+description: "A set of related toggle buttons."
+---
+
+import { Preview } from "@/components/stories/toggle-group.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { ToggleGroup, ToggleGroupItem } from "@exegia/corpora-ui/ui/toggle-group"
+
+function ComponentPreview({ multiple }: { multiple: boolean }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <ToggleGroup multiple={multiple} defaultValue={["bold"]} aria-label="Text formatting"><ToggleGroupItem value="bold">Bold</ToggleGroupItem><ToggleGroupItem value="italic">Italic</ToggleGroupItem></ToggleGroup>
+    </div>
+  )
+}
+
+<ComponentPreview {...{ multiple: true }} />
+```
+
+## API notes
+
+`value` and `defaultValue` are arrays of selected values. `multiple` allows several buttons to be pressed. `orientation`, `variant`, and `size` configure the group.

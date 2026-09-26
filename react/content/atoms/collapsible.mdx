@@ -1,0 +1,31 @@
+---
+title: "Collapsible"
+description: "A single disclosure with a trigger and panel."
+---
+
+import { Preview } from "@/components/stories/collapsible.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Collapsible, CollapsibleTrigger, CollapsiblePanel } from "@exegia/corpora-ui/ui/collapsible"
+
+function ComponentPreview({ disabled }: { disabled: boolean }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Collapsible disabled={disabled}><CollapsibleTrigger>Show source details</CollapsibleTrigger><CollapsiblePanel><p className="py-3">The source edition includes editorial notes and a bibliography.</p></CollapsiblePanel></Collapsible>
+    </div>
+  )
+}
+
+<ComponentPreview disabled={false} />
+```
+
+## API notes
+
+`open` with `onOpenChange` controls visibility; `defaultOpen` sets the initial state. `disabled` prevents toggling.

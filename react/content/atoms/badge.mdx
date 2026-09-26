@@ -1,0 +1,31 @@
+---
+title: "Badge"
+description: "Compact status labels with semantic variants."
+---
+
+import { Preview } from "@/components/stories/badge.story"
+
+<Preview />
+
+## Usage
+
+Import the stylesheet once at the application root: `@exegia/corpora-ui/index.css`.
+
+```tsx
+import { Badge } from "@exegia/corpora-ui/ui/badge"
+
+function ComponentPreview({ variant }: { variant: "default" | "outline" | "secondary" | "success" }) {
+
+  return (
+    <div className="relative mx-auto w-full max-w-lg p-6">
+      <Badge variant={variant}>Published</Badge>
+    </div>
+  )
+}
+
+<ComponentPreview variant={"success"} />
+```
+
+## API notes
+
+`variant` controls the semantic appearance. `size` controls density; `render` can replace the default span when a status is also a link.

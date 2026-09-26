@@ -24,6 +24,15 @@ explicit animation values and the library preserves its existing pulse keyframes
 Keep the complete component source scan so npm consumers get styles for every
 export, including components absent from the example app.
 
+Base UI primitives are also available through `@exegia/corpora-ui/ui/<name>`
+and the root `UI` namespace. Focused UI entries reuse the same implementations
+as the existing root exports. The namespace keeps primitive `Avatar` and
+`Sidebar` separate from the composed root components with those names. New
+primitive compositions use one default component per file and named public
+barrels. Configuration contexts (position, field id, size) remain local; the
+sidebar's mutable state uses instance-keyed Jotai atoms in the shared store.
+
+
 `ExegiaProvider` owns one Jotai store plus mandatory toast and tooltip
 infrastructure. It provides a shared portal destination for modal, popover,
 tooltip, and toast surfaces. `overlays` exports their composition primitives;
