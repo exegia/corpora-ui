@@ -1,6 +1,7 @@
 "use client"
 
-import { MotionIcon } from "motion-icons-react"
+// Fixed imports let consumers discard the rest of Lucide's icon collection.
+import { PanelLeft, PanelRight } from "lucide-react"
 import * as React from "react"
 import { useAtomValueRawSync } from "jotai"
 import { removeShellFitInstance } from "./shell-fit-atom"
@@ -89,7 +90,21 @@ export function ShellLayout({
           {leftContent && (
             <div className="min-w-0 gap-2 flex shrink-0 items-center justify-start">
               <AnimatedPanelTrigger side="left">
-                <MotionIcon name="PanelLeft" size={24} animation="press" />
+                <span
+                  className="motion-press"
+                  role="img"
+                  aria-label="PanelLeft"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    animationDuration: "1000ms",
+                    animationDelay: "0ms",
+                    color: "currentColor",
+                  }}
+                >
+                  <PanelLeft size={24} aria-hidden="true" />
+                </span>
               </AnimatedPanelTrigger>
             </div>
           )}
@@ -103,11 +118,19 @@ export function ShellLayout({
               {trailing}
               {rightContent && (
                 <AnimatedPanelTrigger aria-label="Toggle panel" side="right">
-                  <MotionIcon
+                  <span
                     className="opacity-70"
-                    name="PanelRight"
-                    size={24}
-                  />
+                    role="img"
+                    aria-label="PanelRight"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "currentColor",
+                    }}
+                  >
+                    <PanelRight size={24} aria-hidden="true" />
+                  </span>
                 </AnimatedPanelTrigger>
               )}
             </div>

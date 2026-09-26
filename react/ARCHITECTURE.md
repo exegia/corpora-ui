@@ -2,6 +2,35 @@
 
 A React component library with a Fumapress documentation site.
 
+`react/` is also the Bun workspace root. The private `examples/consumer`
+workspace imports the library's public package exports and built stylesheet.
+Shared development versions live in `package.json`'s catalog; one `bun.lock`
+covers the library, documentation tooling, and example. The library build uses
+`vite.lib.config.ts` and `tsconfig.lib.json`; the docs keep `vite.config.ts`.
+Run `bun run check:consumer` to test a packed tarball outside the workspace.
+
+The library builds its root and focused `button`, `card`, `input`, `label`,
+`state`, `overlays`, `shell`, and `scaffold` entrypoints together. Shared chunks keep module-level state and
+component identity consistent across import paths. Explicit package exports
+pair each JavaScript entry with its declaration file. CSS remains one explicit
+`@exegia/corpora-ui/index.css` import. The consumer check guards export identity
+and ensures focused imports exclude unrelated emoji dependencies and defer
+layout motion until the example's workspace opens.
+
+`src/library.css` scans component and library sources explicitly, excluding
+docs, stories, and tests. It keeps the shared theme and component styles, but
+does not import the docs' `tailwind-animations` preset: the glass popover uses
+explicit animation values and the library preserves its existing pulse keyframes.
+Keep the complete component source scan so npm consumers get styles for every
+export, including components absent from the example app.
+
+`ExegiaProvider` owns one Jotai store plus mandatory toast and tooltip
+infrastructure. It provides a shared portal destination for modal, popover,
+tooltip, and toast surfaces. `overlays` exports their composition primitives;
+per-instance roots keep focus/trigger state local. Shell/Scaffold retain
+their measurement/layout contexts and use the supplied store for panel and
+drawer atoms. Consumer atoms need no registration or additional provider.
+
 ## Layout
 
 ```text
