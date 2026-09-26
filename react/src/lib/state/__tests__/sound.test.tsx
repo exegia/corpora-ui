@@ -1,11 +1,12 @@
 import { expect, mock, test } from "bun:test"
-import { fireEvent, render, screen } from "@testing-library/react"
+import { act, fireEvent, render, screen } from "@testing-library/react"
 
 import { Button } from "@/components/ui/button"
 import { playCue } from "@/lib/sound"
 import { ExegiaProvider } from "../exegia-provider"
+import { preloadSounds } from "../sound-loading"
 
-test("sound opt-in connects delegated and imperative cues to Web Audio", () => {
+test("loaded sound opt-in connects delegated and imperative cues to Web Audio", async () => {
   const original = Object.getOwnPropertyDescriptor(window, "AudioContext")
   const requestedAudio = mock(() => {})
   // Stop at the browser audio boundary: no real speakers are needed by tests.
@@ -30,12 +31,15 @@ test("sound opt-in connects delegated and imperative cues to Web Audio", () => {
     playCue("tick")
     expect(requestedAudio).not.toHaveBeenCalled()
 
-    view.rerender(
-      <ExegiaProvider sound>
-        <Button>Audible</Button>
-        <Button sound={false}>Silent</Button>
-      </ExegiaProvider>
-    )
+    await act(async () => {
+      view.rerender(
+        <ExegiaProvider sound>
+          <Button>Audible</Button>
+          <Button sound={false}>Silent</Button>
+        </ExegiaProvider>
+      )
+      await preloadSounds()
+    })
     fireEvent.pointerDown(screen.getByRole("button", { name: "Audible" }))
     expect(requestedAudio).toHaveBeenCalledTimes(1)
     fireEvent.pointerUp(screen.getByRole("button", { name: "Audible" }))

@@ -1,4 +1,4 @@
-import { createElement } from "react"
+import { createElement, type ReactElement } from "react"
 import { cn } from "@/lib/utils"
 import type { TTextProps, TTextSize, TTextVariant } from "./types"
 
@@ -33,7 +33,7 @@ export function Text({
   style,
   type = "default",
   ...props
-}: TTextProps) {
+}: TTextProps): ReactElement {
   const tag = defaultTags[type]
   const fontSize = typeof size === "number" ? `${size}px` : undefined
   const selectionValue =

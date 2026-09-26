@@ -16,13 +16,134 @@ Mount `ExegiaProvider` once at the root of your app. Stateful components use Jot
 
 ```tsx
 import { ExegiaProvider } from "@exegia/corpora-ui"
+import "@exegia/corpora-ui/index.css"
 
 export function App({ children }) {
   return <ExegiaProvider>{children}</ExegiaProvider>
 }
 ```
 
+The root provider always supplies toast infrastructure and shared tooltip
+timing. Modal, tooltip, and popover portals inherit its `portalContainer`
+(the document body by default). Each modal/popover keeps its own root for
+independent open state, focus management, and trigger relationships.
+
+Existing Shell/Scaffold panels and inspector drawers use this same Jotai
+store. Keep their `ShellLayout`/`Scaffold.Root` composition in place: those
+local contexts handle measurements, layout, and instance IDs. The root
+provider does not create a second shell or turn layout panels into portals.
+
+## Supply app state
+
+Define atoms outside components. Pass one store to make library state and
+your own atoms available throughout the app, including inside portals:
+
+```tsx
+// state.ts — a browser app's store and optional feature atoms
+import { atom, createStore } from "jotai"
+
+export const appStore = createStore()
+export const selectedDocumentAtom = atom<string | null>(null)
+export const detailsOpenAtom = atom(false)
+```
+
+```tsx
+import { ExegiaProvider } from "@exegia/corpora-ui/state"
+import { appStore } from "./state"
+
+export function App({ children }) {
+  return (
+    <ExegiaProvider
+      store={appStore}
+      tooltip={{ delay: 300 }}
+      toast={{ position: "bottom-right" }}
+    >
+      {children}
+    </ExegiaProvider>
+  )
+}
+```
+
+Use normal `useAtom`, `useAtomValue`, and `useSetAtom` hooks. There is no
+registration list and no extra feature provider. For SSR, create a fresh
+store per request/app instance rather than sharing a module-level store.
+Sound and theme configuration remain optional.
+
+### Optional sound
+
+`<ExegiaProvider sound>` downloads sound support on demand and binds it once
+loaded. Interactions before that point are silent; they are not replayed
+later. Download failure leaves the rest of the UI working normally.
+
+When sound must be ready before the first interaction, preload and bind it
+before mounting your browser app:
+
+```ts
+import { preloadSounds } from "@exegia/corpora-ui/state"
+
+const { bindSounds } = await preloadSounds()
+bindSounds()
+// Mount your app here. ExegiaProvider's sound prop is unnecessary in this case.
+```
+
+The existing synchronous sound exports remain available. Binding is a
+document-wide, one-time opt-in: changing `sound` to `false` or unmounting
+cancels pending activation, but does not remove listeners already installed.
+Use `setSoundEnabled(false)` to mute an initialized sound engine.
+`preloadSounds()` itself loads code only; it does not bind or play sound and
+its promise rejects if the download fails.
+
+## Use overlays
+
+Import overlay parts from `@exegia/corpora-ui/overlays` (root imports also
+work). `ModalPopup`, `PopoverPopup`, and `TooltipPopup` include their portals.
+Provide a title and a close control inside every modal:
+
+```tsx
+import { useAtom } from "jotai"
+import {
+  Modal, ModalTrigger, ModalPopup, ModalTitle, ModalClose,
+} from "@exegia/corpora-ui/overlays"
+import { detailsOpenAtom } from "./state"
+
+export function Details() {
+  const [open, setOpen] = useAtom(detailsOpenAtom)
+  return (
+    <Modal open={open} onOpenChange={setOpen}>
+      <ModalTrigger>Details</ModalTrigger>
+      <ModalPopup>
+        <ModalTitle>Document details</ModalTitle>
+        <ModalClose>Close</ModalClose>
+      </ModalPopup>
+    </Modal>
+  )
+}
+```
+
+Use `useToastManager()` beneath the provider to send notifications through
+its manager. The existing `toastManager` export remains the default manager;
+independent roots can supply their own through `toast={{ toastManager }}`.
+
+Set `portalContainer` when overlays need another destination, such as an
+embedded app. Individual popup `portalProps.container` values override it.
+An explicit `null` defers portal mounting until a container is available;
+pass `document.body` to override a custom destination with the body.
+
 ## Use a component
+
+The stylesheet is compiled with the library. Consumers do not need a Tailwind
+build step. Import it once before your app's theme overrides. It includes the
+library's global base styles and Tailwind Preflight; custom fonts are optional.
+
+Specular is included in that same stylesheet. The bezel utilities used by
+Shell, Scaffold, and Bubble, including their dark variants, are already
+compiled. No separate Specular stylesheet or Tailwind plugin registration is
+needed to use these components.
+
+To use additional Specular utility combinations in your own components,
+register `@exegia/specular/plugin` through a local plugin file configured with
+`createPlugin(surfaces)` in your own Tailwind build. The package stylesheet
+contains the combinations used by this library, not every possible utility.
 
 ```tsx
 import { Button } from "@exegia/corpora-ui"

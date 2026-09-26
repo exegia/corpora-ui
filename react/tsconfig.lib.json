@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "types": ["vite/client"],
+    "declarationMap": false
+  },
+  "include": ["src/index.ts", "src/components", "src/lib"],
+  "exclude": [
+    "src/components/docs",
+    "src/components/stories",
+    "src/components/atoms/_layout.tsx",
+    "src/**/__tests__/**",
+    "src/**/*.test.*"
+  ]
+}
