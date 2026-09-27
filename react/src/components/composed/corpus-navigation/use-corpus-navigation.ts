@@ -40,6 +40,8 @@ export function useCorpusNavigation(options: CorpusNavigationOptions) {
       actions.cancel()
       // StrictMode replays effects before this microtask; keep its live atoms.
       queueMicrotask(() => {
+        // Deliberately re-read the generation to detect StrictMode remounts.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         if (lifecycle.current === generation)
           removeCorpusNavigationInstance(navigatorId)
       })
