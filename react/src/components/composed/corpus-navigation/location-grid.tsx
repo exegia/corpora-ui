@@ -26,9 +26,12 @@ export default function LocationGrid({
   const data = useAtomValue(corpusNavigationDataAtom(navigatorId))
   const { draft, location } = useCorpusNavigationState(navigatorId)
   const { select } = useCorpusNavigationActions(navigatorId)
-  const [filter, setFilter] = useState("")
-  const [page, setPage] = useState(0)
-  const [focused, setFocused] = useState<string | null>(null)
+  const [controls, setControls] = useState<{
+    scope: string
+    filter: string
+    page: number | null
+    focused: string | null
+  }>({ scope: "", filter: "", page: null, focused: null })
   const root = useRef<HTMLDivElement>(null)
   if (!data) return null
   const level = data.schema.levels.find((item) => item.id === levelId)
@@ -43,6 +46,22 @@ export default function LocationGrid({
     (node) => node.level === levelId
   )
   if (!candidates.length) return null
+  const scope = JSON.stringify([
+    data.corpusId,
+    data.editionId,
+    levelId,
+    parent?.id,
+  ])
+  const defaults = { scope, filter: "", page: null, focused: null }
+  const { filter, page, focused } =
+    controls.scope === scope ? controls : defaults
+  function updateControls(patch: Partial<typeof controls>) {
+    setControls((previous) => ({
+      ...(previous.scope === scope ? previous : defaults),
+      ...patch,
+    }))
+  }
+  const selected = path.find((node) => node.level === levelId)?.id
   const normalized = filter.trim().toLocaleLowerCase()
   const filtered = candidates.filter(
     (node) =>
@@ -52,12 +71,15 @@ export default function LocationGrid({
       )
   )
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const activePage = Math.min(page, pages - 1)
+  const selectedPage = Math.max(
+    0,
+    Math.floor(filtered.findIndex((node) => node.id === selected) / PAGE_SIZE)
+  )
+  const activePage = Math.min(page ?? selectedPage, pages - 1)
   const visible = filtered.slice(
     activePage * PAGE_SIZE,
     (activePage + 1) * PAGE_SIZE
   )
-  const selected = path.find((node) => node.level === levelId)?.id
   const current = location
     ? indexCorpus(data)
         .get(location.nodeId)
@@ -121,8 +143,11 @@ export default function LocationGrid({
           placeholder={`Find ${level.label.toLocaleLowerCase()}…`}
           value={filter}
           onChange={(event) => {
-            setFilter(event.target.value)
-            setPage(0)
+            updateControls({
+              filter: event.target.value,
+              page: 0,
+              focused: null,
+            })
           }}
           className="**:data-[slot=input]:min-h-11"
         />
@@ -156,7 +181,7 @@ export default function LocationGrid({
                       aria-current={
                         current === node.id ? "location" : undefined
                       }
-                      onFocus={() => setFocused(node.id)}
+                      onFocus={() => updateControls({ focused: node.id })}
                       onClick={() => select(anchorFor(data, node.id))}
                     >
                       <bdi>{node.label}</bdi>
@@ -184,7 +209,9 @@ export default function LocationGrid({
             variant="ghost"
             className="min-h-11"
             disabled={activePage === 0}
-            onClick={() => setPage(activePage - 1)}
+            onClick={() =>
+              updateControls({ page: activePage - 1, focused: null })
+            }
           >
             Previous range
           </Button>
@@ -195,7 +222,9 @@ export default function LocationGrid({
             variant="ghost"
             className="min-h-11"
             disabled={activePage === pages - 1}
-            onClick={() => setPage(activePage + 1)}
+            onClick={() =>
+              updateControls({ page: activePage + 1, focused: null })
+            }
           >
             Next range
           </Button>
