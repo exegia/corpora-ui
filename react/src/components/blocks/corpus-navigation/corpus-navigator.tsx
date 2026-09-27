@@ -164,7 +164,7 @@ export default function CorpusNavigator({
           finalFocus={trigger}
           showBar={presentation === "compact"}
           dir={options.data.direction}
-          className="max-h-[min(85dvh,50rem)] duration-240 data-ending-style:duration-240 motion-reduce:transition-none"
+          className="max-h-[min(85dvh,50rem)] duration-240 data-ending-style:duration-240 motion-reduce:transition-none!"
         >
           <div className="gap-3 p-4 flex items-start justify-between border-b">
             <div>
