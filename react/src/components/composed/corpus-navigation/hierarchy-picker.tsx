@@ -40,7 +40,10 @@ export default function HierarchyPicker({ navigatorId }: HierarchyPickerProps) {
       inherited = false
     ): ITreeNode[] =>
       nodes.flatMap((node) => {
-        if (!hierarchy.has(node.level)) return []
+        if (!hierarchy.has(node.level))
+          return retained.has(node.id)
+            ? map(node.children ?? [], inherited)
+            : []
         const matches =
           inherited ||
           [node.label, ...(node.aliases ?? [])].some((label) =>
