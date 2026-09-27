@@ -26,7 +26,7 @@ RANGE ?= origin/main..HEAD
 GH_REPO ?= $(shell git config --get remote.origin.url 2>/dev/null | sed -E 's,.*github\.com[:/],,; s,\.git$$,,')
 
 # Branch and commit-title types accepted by `pr-guard`.
-TYPES := feat|fix|chore|docs|ci|refactor|test|perf|build|style|revert
+TYPES := feat|fix|chore|docs|ci|refactor|test|perf|build|style|revert|ai|copilot|claude
 
 # Command strings, NOT $(shell …) values: every consumer runs them inside a
 # recipe as `$$($(pkg_version))`. Turning them into make-time expansions makes
