@@ -1,8 +1,15 @@
 import { afterEach, expect, test } from "bun:test"
-import { cleanup, fireEvent, render, waitFor } from "@testing-library/react"
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  waitFor,
+} from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import {
   bindCorpusNavigationAtom,
+  selectCorpusLocationAtom,
   corpusNavigationStateAtom,
 } from "../corpus-navigation-atom"
 import LocationGrid from "../location-grid"
@@ -40,7 +47,7 @@ test("grid preview, keyboard focus and previous/next preserve boundaries", async
     ).disabled
   ).toBe(true)
   const first = view.getByRole("button", { name: "Verse 1" })
-  first.focus()
+  act(() => first.focus())
   fireEvent.keyDown(first, { key: "ArrowRight" })
   expect(document.activeElement).toBe(
     view.getByRole("button", { name: "Verse 2" })
@@ -136,4 +143,74 @@ test("all preset optional levels render only supplied choices", () => {
     ).toBeTruthy()
     view.unmount()
   }
+})
+
+test("changing numeric parent clears a hidden filter and preserves reachability", () => {
+  const data = bible()
+  data.nodes = [
+    {
+      id: "john",
+      label: "John",
+      level: "book",
+      children: [40, 3].map((count, c) => ({
+        id: `c${c}`,
+        label: String(c + 1),
+        level: "chapter",
+        children: Array.from({ length: count }, (_, v) => ({
+          id: `c${c}v${v + 1}`,
+          label: String(v + 1),
+          level: "verse",
+        })),
+      })),
+    },
+  ]
+  const store = bind(data, "c0v1")
+  const view = render(
+    <Provider store={store}>
+      <LocationGrid navigatorId="picker" levelId="verse" />
+    </Provider>
+  )
+  fireEvent.change(view.getByRole("textbox", { name: "Find verse" }), {
+    target: { value: "39" },
+  })
+  expect(view.getAllByRole("gridcell")).toHaveLength(1)
+  act(() =>
+    store.set(selectCorpusLocationAtom("picker"), anchorFor(data, "c1"))
+  )
+  expect(view.getAllByRole("gridcell")).toHaveLength(3)
+  expect(view.queryByRole("textbox", { name: "Find verse" })).toBeNull()
+})
+
+test("custom hierarchy after a numeric level remains reachable", async () => {
+  const data: CorpusData = {
+    corpusId: "custom",
+    editionId: "one",
+    label: "Custom",
+    schema: {
+      id: "custom",
+      label: "Volumes",
+      levels: [
+        { id: "volume", label: "Volume", kind: "number" },
+        { id: "section", label: "Section", kind: "hierarchy" },
+      ],
+    },
+    nodes: [
+      {
+        id: "volume-1",
+        level: "volume",
+        label: "1",
+        children: [{ id: "intro", level: "section", label: "Introduction" }],
+      },
+    ],
+  }
+  const store = bind(data, "volume-1")
+  const view = render(
+    <Provider store={store}>
+      <HierarchyPicker navigatorId="picker" />
+    </Provider>
+  )
+  fireEvent.click(await view.findByRole("button", { name: "Introduction" }))
+  expect(store.get(corpusNavigationStateAtom("picker")).draft?.nodeId).toBe(
+    "intro"
+  )
 })
