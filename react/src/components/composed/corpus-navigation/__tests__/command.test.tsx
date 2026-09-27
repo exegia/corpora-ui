@@ -84,3 +84,38 @@ test("reference Enter commits once and Escape restores the trigger", async () =>
   )
   await waitFor(() => expect(document.activeElement).toBe(trigger))
 })
+
+test("async reference activation completes before closing", async () => {
+  const store = createStore()
+  const data = bible()
+  const user = userEvent.setup()
+  let complete!: (anchor: import("../types").CorpusAnchor) => void
+  data.resolve = () =>
+    new Promise((resolve) => {
+      complete = resolve
+    })
+  store.set(bindCorpusNavigationAtom("async"), {
+    data,
+    controlled: false,
+    location: anchorFor(data, "john-1-1"),
+    historyLimit: 20,
+  })
+  const view = render(
+    <Provider store={store}>
+      <ReferenceCommand navigatorId="async" />
+    </Provider>
+  )
+  await user.click(view.getByRole("button", { name: /Find a reference/ }))
+  await user.type(
+    await view.findByRole("combobox", { name: "Reference or text" }),
+    "Jn 1:5"
+  )
+  await user.click(await view.findByRole("option", { name: "John › 1 › 5" }))
+  expect(store.get(corpusNavigationStateAtom("async")).pending).toBe(true)
+  await act(async () => {
+    complete(anchorFor(data, "john-1-5"))
+  })
+  expect(store.get(corpusNavigationStateAtom("async")).location?.nodeId).toBe(
+    "john-1-5"
+  )
+})
