@@ -106,3 +106,6 @@ export * from "./lib/keyed-atom"
 
 // Base UI primitives; names such as Avatar and Sidebar are scoped here.
 export * as UI from "./ui"
+
+// schema-driven corpus navigation
+export * from "./components/blocks/corpus-navigation/public"
