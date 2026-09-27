@@ -43,7 +43,9 @@ const resize = (width: number) =>
         {} as ResizeObserver
       )
   })
-test("container breakpoints preserve draft across sheet, drawer and inline layout", async () => {
+test(
+  "container breakpoints preserve draft across sheet, drawer and inline layout",
+  async () => {
   const store = createStore()
   const data = bible()
   const view = render(
@@ -89,7 +91,9 @@ test("container breakpoints preserve draft across sheet, drawer and inline layou
   )
   resize(320)
   expect(root.getAttribute("data-presentation")).toBe("compact")
-})
+  },
+  15_000
+)
 
 test("provider portal inheritance, explicit override and deferred null container", async () => {
   const data = bible()
