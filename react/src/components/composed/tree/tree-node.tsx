@@ -460,7 +460,7 @@ function TreeRowImpl({ node, depth }: ITreeRowProps): React.ReactElement {
               initial={reduce ? { opacity: 0 } : "closed"}
               key="branch"
               role="group"
-              transition={reduce ? { duration: 0.12 } : undefined}
+              transition={reduce ? { duration: 0 } : undefined}
               variants={reduce ? undefined : TREE_BRANCH_VARIANTS}
             >
               {children.map((child) => (
