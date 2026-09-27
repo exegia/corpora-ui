@@ -7,6 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
+import { ExegiaProvider } from "@/lib/state"
 import CorpusNavigator from "../corpus-navigator"
 import { corpusNavigationStateAtom } from "@/components/composed/corpus-navigation"
 import { bible } from "@/components/composed/corpus-navigation/__tests__/fixtures"
@@ -15,7 +16,10 @@ const originalObserver = globalThis.ResizeObserver
 const observers = new Set<ResizeObserverCallback>()
 beforeEach(() => {
   globalThis.ResizeObserver = class {
-    constructor(private callback: ResizeObserverCallback) {}
+    private callback: ResizeObserverCallback
+    constructor(callback: ResizeObserverCallback) {
+      this.callback = callback
+    }
     observe(target: Element) {
       if (target.hasAttribute("data-corpus-navigator"))
         observers.add(this.callback)
@@ -85,4 +89,44 @@ test("container breakpoints preserve draft across sheet, drawer and inline layou
   )
   resize(320)
   expect(root.getAttribute("data-presentation")).toBe("compact")
+})
+
+test("provider portal inheritance, explicit override and deferred null container", async () => {
+  const data = bible()
+  const store = createStore()
+  const host = document.createElement("div")
+  const override = document.createElement("div")
+  document.body.append(host, override)
+  const content = (container?: HTMLElement | null) => (
+    <ExegiaProvider store={store} portalContainer={host}>
+      <CorpusNavigator
+        navigatorId="portals"
+        data={data}
+        portalProps={{ container }}
+      />
+    </ExegiaProvider>
+  )
+  const view = render(content())
+  try {
+    fireEvent.click(view.getByRole("button", { name: "Browse Sample Bible" }))
+    await waitFor(() =>
+      expect(host.querySelector('[role="dialog"]')).toBeTruthy()
+    )
+    view.rerender(content(override))
+    await waitFor(() =>
+      expect(override.querySelector('[role="dialog"]')).toBeTruthy()
+    )
+    view.rerender(content(null))
+    await waitFor(() =>
+      expect(document.querySelector('[role="dialog"]')).toBeNull()
+    )
+    view.rerender(content(host))
+    await waitFor(() =>
+      expect(host.querySelector('[role="dialog"]')).toBeTruthy()
+    )
+  } finally {
+    view.unmount()
+    host.remove()
+    override.remove()
+  }
 })
