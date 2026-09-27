@@ -145,6 +145,7 @@ export const openCorpusPickerAtom = actionFamily(
     set(stateAtom(id), {
       ...state,
       pickerOpen: true,
+      commandOpen: false,
       draft: state.location,
       error: null,
     })
@@ -177,6 +178,7 @@ export const setCorpusCommandOpenAtom = actionFamily(
     set(stateAtom(id), {
       ...get(stateAtom(id)),
       commandOpen: open,
+      pickerOpen: open ? false : get(stateAtom(id)).pickerOpen,
       searchStatus: open ? get(stateAtom(id)).searchStatus : "idle",
     })
   }
@@ -188,10 +190,14 @@ export const searchCorpusAtom = keyed((id) => {
     if (!binding) return
     const request = new AbortController()
     set(searchRequestAtom(id), request)
+    get(commitRequestAtom(id))?.abort()
+    set(commitRequestAtom(id), null)
     const reference = referenceResults(binding.data, query)
     set(stateAtom(id), {
       ...get(stateAtom(id)),
       query,
+      pending: false,
+      error: null,
       results: reference,
       searchError: null,
       searchStatus: query.trim() && binding.data.search ? "loading" : "ready",
@@ -256,7 +262,7 @@ async function commit(
   }
   const request = new AbortController()
   set(commitRequestAtom(id), request)
-  set(stateAtom(id), { ...state, pending: true, error: null })
+  set(stateAtom(id), { ...state, draft: anchor, pending: true, error: null })
   try {
     const resolved = binding.data.resolve
       ? await binding.data.resolve(anchor, request.signal)
