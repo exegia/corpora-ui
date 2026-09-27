@@ -133,7 +133,13 @@ pr-guard: ## Validate a PR's base, branch name and title (env: BASE, HEAD, TITLE
 	    || { echo "::error::next only accepts PRs from dev (got '$$HEAD')"; exit 1; }; \
 	  ;; \
 	*) \
-	  echo "::error::$$BASE is not a valid base — target dev, next, main, or release/vX.Y.Z"; exit 1;; \
+	  echo "$$BASE" | grep -Eq '^($(TYPES))/[a-z0-9][a-z0-9._-]*$$' \
+	    || { echo "::error::$$BASE is not a valid base — target a stacked <type>/<slug>, dev, next, main, or release/vX.Y.Z"; exit 1; }; \
+	  echo "$$HEAD" | grep -Eq '^($(TYPES))/[a-z0-9][a-z0-9._-]*$$' \
+	    || { echo "::error::branch must be <type>/<slug> — one of $(TYPES) (got '$$HEAD')"; exit 1; }; \
+	  printf '%s' "$${TITLE-}" | grep -Eq '^($(TYPES))(\([a-z0-9._/-]+\))?!?: .+' \
+	    || { echo "::error::PR title must read '<type>: summary' (got '$${TITLE-}')"; exit 1; }; \
+	  ;; \
 	esac; \
 	echo "guard passed: $$HEAD -> $$BASE"
 

@@ -46,8 +46,9 @@ jobs:
       #
       # `event.pull_request.base.ref`, NOT `github.base_ref`: when a PR is part
       # of a GitHub stack, `github.base_ref` reports the stack's ultimate base
-      # rather than the PR's own parent. Feature PRs into `dev` stacked on a
-      # release PR into `main` would otherwise look like they target `main`.
+      # rather than the PR's own parent. The guard accepts a stacked
+      # `<type>/<slug>` parent here, while still enforcing the long-lived base
+      # rules on PRs that actually target `dev`, `next`, `main`, or `release/*`.
       - name: Check base, branch name and title
         env:
           BASE: ${{ github.event.pull_request.base.ref }}
