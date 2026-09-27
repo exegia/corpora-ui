@@ -86,6 +86,7 @@ export default defineConfig({
           .filter(file => file.endsWith(".ts"))
           .map(file => [`ui/${file.slice(0, -3)}`, path.resolve(import.meta.dirname, "src/ui", file)])),
         shell: path.resolve(import.meta.dirname, "src/components/blocks/shell/index.ts"),
+        "corpus-navigation": path.resolve(import.meta.dirname, "src/components/blocks/corpus-navigation/public.ts"),
         scaffold: path.resolve(import.meta.dirname, "src/components/blocks/scaffold/index.ts"),
         index: path.resolve(import.meta.dirname, "src/library.ts"),
         button: path.resolve(import.meta.dirname, "src/components/ui/button.tsx"),
