@@ -19,6 +19,7 @@
     "filter-table",
     "records-table",
     "flowchart",
-    "insight-cards"
+    "insight-cards",
+    "corpus-navigation"
   ]
 }
