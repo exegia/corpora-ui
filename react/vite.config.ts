@@ -2,6 +2,7 @@ import path from "path"
 import story from "@fumadocs/story/vite"
 import tailwindcss from "@tailwindcss/vite"
 import { fumadocsMdx } from "fumadocs-mdx/vite"
+import basicSsl from "@vitejs/plugin-basic-ssl"
 import press from "fumapress/vite"
 import { defineConfig } from "vite"
 
@@ -10,6 +11,7 @@ export default defineConfig({
   plugins: [
     press({ basePath: "/" }),
     fumadocsMdx(),
+    basicSsl(),
     tailwindcss(),
     story({
       tsconfigPath: path.resolve(import.meta.dirname, "tsconfig.app.json"),
@@ -21,6 +23,7 @@ export default defineConfig({
     exclude: ["lucide-react"],
   },
   environments: {
+    test: {},
     client: {
       optimizeDeps: {
         // The home header reaches these through Fumapress's RSC proxies.
@@ -42,6 +45,7 @@ export default defineConfig({
       },
     },
   },
+
   server: {
     port: 4000,
     open: true,

@@ -281,7 +281,7 @@
     "dist-lib"
   ],
   "scripts": {
-    "dev": "fumapress dev",
+    "dev": "fumapress dev -- --force",
     "build": "tsc -b && fumapress build && bun run build:lib",
     "build:docs": "fumapress build",
     "build:lib": "vite build --config vite.lib.config.ts",
@@ -374,7 +374,7 @@
     "@types/react-dom": "^19",
     "@types/node": "^24",
     "typescript": "~6",
-    "vite": "^8.2.2",
+    "vite": "^8.3.1",
     "@vitejs/plugin-react": "^6"
   }
 }

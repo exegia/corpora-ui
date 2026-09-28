@@ -16,7 +16,15 @@ const DocsLayout = createDocsLayoutPage<typeof config.$context>({
   async render(page) {
     return {
       ...page,
+      layoutProps: {
+        containerProps: {
+          className: "[--fd-layout-width:100%]",
+        },
+        tabMode: "top",
+      },
       pageProps: {
+        className: "max-w-none",
+        full: true,
         tableOfContent: {
           style: "clerk",
         },
