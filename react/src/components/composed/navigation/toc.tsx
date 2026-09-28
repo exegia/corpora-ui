@@ -1,26 +1,13 @@
-import { Accordion } from "@/ui"
-import { randomUUIDv7 } from "bun"
+import { Accordion, AccordionItem, AccordionContent, AccordionTrigger } from "@/ui"
 import { TableOfContents } from "lucide-react"
+import type { ITocProps } from "./types"
 
 
-const items = [
-    {
-        id: randomUUIDv7(),
-        label: "Old Testament",
-        description: "Traditionally includes the Pentateuch, tunim and the katunim",
-        link: "#old-testament-section",
-        type: "section",
-        nodes: [
-            {
-                
-            }
-        ]
-    }    
-]
 
-export function TableOfContent() {
+
+export function TableOfContent({ items, activeLink }: ITocProps) {
   return (
-    <div>
+    <div className="w-full">
       <h1 className="text-xl font-bold mb-3 gap-x-2 flex flex-row items-center">
         <TableOfContents className="rotate-180" /> Table of Content
       </h1>
@@ -32,8 +19,38 @@ export function TableOfContent() {
         nesciunt.
           </div>
 
-          <Accordion>
-              ()
+          <Accordion className="w-full">
+              {
+                items.map((item, index) => (
+                  <AccordionItem key={index} value={item.id}>
+                    <AccordionTrigger className="w-full text-left">
+                      {item.label}
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <ul className="pl-4">
+                        {item.nodes && item.nodes.map((child, childIndex) => (
+                          <li key={childIndex}>
+                            <a
+                              href={child.link}
+                              onClick={(e) => {
+                                e.preventDefault()
+                                // onLinkClick(child.link)
+                              }}
+                              className={`block py-1 ${
+                              activeLink &&  activeLink.link === child.link
+                                  ? "text-primary font-semibold"
+                                  : "text-muted-foreground"
+                              }`}
+                            >
+                              {child.label}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))  
+              }
           </Accordion>
     </div>
   )

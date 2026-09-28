@@ -1,83 +1,95 @@
 "use client";
 
-import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox";
+import {
+  Checkbox as ArkCheckbox,
+  useCheckboxContext,
+} from "@ark-ui/react/checkbox";
+import { CheckIcon, MinusIcon } from "lucide-react";
 import type React from "react";
-import { playCue } from "@/lib/sound";
+import { tv } from "tailwind-variants";
 import { cn } from "@/lib/utils";
 
-export function Checkbox({
-  className,
-  sound = true,
-  onCheckedChange,
-  ...props
-}: CheckboxPrimitive.Root.Props & {
-  /** Play the cuelume toggle cue on check/uncheck. Silent until bindSounds(). */
-  sound?: boolean;
-}): React.ReactElement {
-  return (
-    <CheckboxPrimitive.Root
-      // Cued off the state change rather than data-cuelume-toggle: Base UI
-      // renders the native input as a *sibling* of this root, so a click on an
-      // associated <label> never bubbles through an element carrying the
-      // attribute and would toggle silently. This fires once for box clicks,
-      // label clicks and keyboard Space alike, and not for programmatic changes.
-      onCheckedChange={(checked, eventDetails) => {
-        if (sound) playCue("toggle");
-        onCheckedChange?.(checked, eventDetails);
-      }}
-      className={cn(
-        "relative inline-flex size-4.5 shrink-0 cursor-pointer items-center justify-center rounded-[.25rem] border border-input bg-background not-dark:bg-clip-padding shadow-xs/5 outline-none ring-ring transition-shadow before:pointer-events-none before:absolute before:inset-0 before:rounded-[3px] not-data-disabled:not-data-checked:not-aria-invalid:before:shadow-[0_1px_--theme(--color-black/4%)] focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-offset-background aria-invalid:border-destructive/36 focus-visible:aria-invalid:border-destructive/64 focus-visible:aria-invalid:ring-destructive/48 data-disabled:cursor-not-allowed data-disabled:opacity-64 sm:size-4 dark:not-data-checked:bg-input/32 dark:aria-invalid:ring-destructive/24 dark:not-data-disabled:not-data-checked:not-aria-invalid:before:shadow-[0_-1px_--theme(--color-white/6%)] [[data-disabled],[data-checked],[aria-invalid]]:shadow-none",
-        className,
-      )}
-      data-slot="checkbox"
-      {...props}
-    >
-      <CheckboxPrimitive.Indicator
-        className="absolute -inset-px flex items-center justify-center rounded-[.25rem] text-primary-foreground data-unchecked:hidden data-checked:bg-primary data-indeterminate:text-foreground"
-        data-slot="checkbox-indicator"
-        render={(
-          props: React.ComponentProps<"span">,
-          state: CheckboxPrimitive.Indicator.State,
-        ) => (
-          <span {...props}>
-            {state.indeterminate ? (
-              <svg
-                aria-hidden="true"
-                className="size-3.5 sm:size-3"
-                fill="none"
-                height="24"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="3"
-                viewBox="0 0 24 24"
-                width="24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M5.252 12h13.496" />
-              </svg>
-            ) : (
-              <svg
-                aria-hidden="true"
-                className="size-3.5 sm:size-3"
-                fill="none"
-                height="24"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="3"
-                viewBox="0 0 24 24"
-                width="24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M5.252 12.7 10.2 18.63 18.748 5.37" />
-              </svg>
-            )}
-          </span>
-        )}
-      />
-    </CheckboxPrimitive.Root>
-  );
-}
+export const useCheckbox = useCheckboxContext;
 
-export { CheckboxPrimitive };
+export const CheckboxGroup = (
+  props: React.ComponentProps<typeof ArkCheckbox.Group>
+) => {
+  const { className, ...rest } = props;
+
+  return (
+    <ArkCheckbox.Group
+      className={cn("flex flex-col gap-2", className)}
+      data-slot="checkbox-group"
+      {...rest}
+    />
+  );
+};
+
+export const checkboxVariants = tv({
+  base: [
+    "relative",
+    "inline-flex shrink-0 items-center justify-center",
+    "size-4",
+    "bg-transparent",
+    "rounded-sm border border-input shadow-xs/5",
+    "transition-shadow",
+    "data-focus-visible:border-primary data-focus-visible:ring-[3px] data-focus-visible:ring-ring/32 data-focus-visible:ring-offset-1 data-focus-visible:ring-offset-background",
+    "dark:data-focus-visible:data-invalid:border-destructive-foreground/64 dark:data-focus-visible:data-invalid:ring-destructive-foreground/48",
+    "data-disabled:opacity-64",
+    "[[data-disabled],[data-checked],[data-invalid]]:shadow-none",
+    "data-invalid:border-destructive data-invalid:ring-[3px] data-invalid:ring-destructive/24",
+    "dark:data-invalid:border-destructive-foreground dark:data-invalid:text-destructive-foreground dark:data-invalid:ring-destructive-foreground/20",
+    "dark:not-data-checked:bg-input/32 dark:data-invalid:ring-destructive-foreground/24",
+    "motion-reduce:transition-none!",
+  ],
+});
+
+export const Checkbox = (
+  props: React.ComponentProps<typeof ArkCheckbox.Root>
+) => {
+  const { className, tabIndex, ...rest } = props;
+
+  return (
+    <ArkCheckbox.Root
+      className={cn(checkboxVariants(), className)}
+      data-slot="checkbox"
+      role="checkbox"
+      {...rest}
+    >
+      <ArkCheckbox.Control data-slot="checkbox-control">
+        <CheckboxIndicator>
+          <CheckIcon />
+        </CheckboxIndicator>
+
+        <CheckboxIndicator indeterminate>
+          <MinusIcon />
+        </CheckboxIndicator>
+      </ArkCheckbox.Control>
+
+      <ArkCheckbox.HiddenInput tabIndex={tabIndex} />
+    </ArkCheckbox.Root>
+  );
+};
+
+export const CheckboxIndicator = (
+  props: React.ComponentProps<typeof ArkCheckbox.Indicator>
+) => {
+  const { className, ...rest } = props;
+
+  return (
+    <ArkCheckbox.Indicator
+      className={cn(
+        "absolute -inset-px",
+        "flex items-center justify-center",
+        "rounded-sm",
+        "text-primary-foreground",
+        "data-[state=checked]:bg-primary",
+        "data-[state=unchecked]:hidden",
+        "data-[state=indeterminate]:text-foreground",
+        className
+      )}
+      data-slot="checkbox-indicator"
+      {...rest}
+    />
+  );
+};

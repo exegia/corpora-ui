@@ -2,18 +2,18 @@
 
 import { TableOfContent } from "@/components/composed/navigation"
 import { defineStory } from "@/registry/story"
+import { items } from "../composed/navigation/constants"
 
-function ComponentPreview({ title }: { title: string }) {
+function ComponentPreview() {
   return (
     <div className="max-w-lg p-6 relative mx-auto w-full">
-      <TableOfContent />
+      <TableOfContent items={items} />
     </div>
   )
 }
 
 export const story = defineStory({
-  Component: ComponentPreview,
-  args: { initial: { title: "Document saved" } },
+  Component: ComponentPreview
 })
 
-export const Preview = story.WithControl
+export const Preview = story

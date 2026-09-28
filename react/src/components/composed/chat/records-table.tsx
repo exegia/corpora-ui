@@ -84,7 +84,7 @@ export function RecordsTable({ tableId, rows, headers, stickyHeader = false, max
       <table className="w-full min-w-[540px] border-separate border-spacing-0 text-left [&_td]:border-b [&_td]:border-border-default [&_th]:border-b [&_th]:border-border-default [&_tr:last-child_td]:border-b-0">
         <thead className={cn(stickyHeader && "[&_th]:sticky [&_th]:top-0 [&_th]:z-20 [&_th]:bg-surface-card [&_th:first-child]:z-30 [&_th:nth-child(2)]:z-30")}>
           <tr className="border-b border-border-default text-[11px] font-medium leading-3 text-text-secondary">
-            <th className="sticky left-0 z-10 w-13 min-w-13 bg-surface-card py-2.5 pl-3"><Checkbox aria-label="Select all" checked={all} indeterminate={some} onCheckedChange={toggleAll} className="size-4" /></th>
+            <th className="sticky left-0 z-10 w-13 min-w-13 bg-surface-card py-2.5 pl-3"><Checkbox aria-label="Select all" checked={some ? "indeterminate" : all} onCheckedChange={toggleAll} className="size-4" /></th>
             <th className="sticky left-13 z-10 min-w-44 bg-surface-card px-2 py-2.5">{h.name}</th>
             <th className="px-2 py-2.5">{sortable("tags", h.tags)}</th>
             <th className="px-2 py-2.5">{sortable("lastInteraction", h.lastInteraction)}</th>
