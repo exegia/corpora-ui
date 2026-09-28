@@ -159,7 +159,7 @@ try {
           assert.strictEqual(root.UI[name], value, entry + ": duplicate or missing UI export " + name);
         }
       }
-      for (const entry of ["button", "card", "input", "label", "state", "overlays", "shell", "scaffold"]) {
+      for (const entry of ["button", "card", "input", "label", "state", "overlays", "shell", "scaffold", "corpus-navigation"]) {
         const focused = await import("@exegia/corpora-ui/" + entry);
         for (const [name, value] of Object.entries(focused)) {
           const rootName = entry === "shell" && name === "default" ? "ShellLayout" : name;

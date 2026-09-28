@@ -17,6 +17,7 @@
     "shell",
     "scaffold",
     "chat",
-    "sidebar-primitives"
+    "sidebar-primitives",
+    "corpus-navigator"
   ]
 }
