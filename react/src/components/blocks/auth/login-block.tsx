@@ -172,7 +172,7 @@ export function LoginBlock({
                   <Checkbox
                     id={rememberId}
                     checked={remember}
-                    onCheckedChange={(checked) => setRemember(checked)}
+                    onCheckedChange={(details) => setRemember(details.checked === true)}
                     disabled={busy}
                   />
                   <Label htmlFor={rememberId} className="font-normal">

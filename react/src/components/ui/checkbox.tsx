@@ -11,20 +11,6 @@ import { cn } from "@/lib/utils";
 
 export const useCheckbox = useCheckboxContext;
 
-export const CheckboxGroup = (
-  props: React.ComponentProps<typeof ArkCheckbox.Group>
-) => {
-  const { className, ...rest } = props;
-
-  return (
-    <ArkCheckbox.Group
-      className={cn("flex flex-col gap-2", className)}
-      data-slot="checkbox-group"
-      {...rest}
-    />
-  );
-};
-
 export const checkboxVariants = tv({
   base: [
     "relative",

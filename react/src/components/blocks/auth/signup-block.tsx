@@ -223,8 +223,8 @@ export function SignupBlock({
                   <Checkbox
                     id={termsId}
                     checked={terms}
-                    onCheckedChange={(checked) =>
-                      handleTermsChange(checked === true)
+                    onCheckedChange={(details) =>
+                      handleTermsChange(details.checked === true)
                     }
                     disabled={busy}
                   />

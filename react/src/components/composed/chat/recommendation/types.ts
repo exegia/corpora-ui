@@ -1,6 +1,6 @@
 import type * as React from "react"
 import type { TSignalLevel } from "@/components/ui/chat"
-import type { AccordionPrimitive } from "@/components/ui/accordion"
+import type { Accordion } from "@/components/ui/accordion"
 import type { IReferenceProps } from "@/components/atoms/types"
 
 export interface IRecommendationOption {
@@ -66,7 +66,7 @@ export interface IRecommendationCardProps extends IRecommendationFields {
   className?: string
 }
 
-export type TRecommendationGroupProps = AccordionPrimitive.Root.Props
+export type TRecommendationGroupProps = React.ComponentProps<typeof Accordion>
 
 export interface IRecommendationCheckboxProps {
   state: TRecommendationState

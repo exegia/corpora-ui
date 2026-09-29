@@ -22,6 +22,18 @@ first; this file only holds what is specific to the tree.
 | `index.ts`          | Barrel. Public atoms are listed explicitly — never `export *`.                                          |
 | `__tests__/`        | `tree.test.tsx` (rendering per variant), `use-tree.test.tsx` (controller/hook), `tree-atom.test.tsx` (store + memo guard). |
 
+## Design guardrails
+
+- **Jotai remains the only tree state owner.** Keep state in the keyed atom
+  families; do not add component-local mirrors or let an Ark UI machine become
+  a second source of truth. Adapt atom-backed state into Ark UI props and
+  callbacks when a primitive needs it.
+- **Prefer Ark UI for tree semantics and accessibility.** Start new structural
+  work from `components/ui/tree-view` before introducing custom tree markup or
+  keyboard behavior.
+- Keep this composed layer focused on its four documented variants. Do not add
+  abstraction layers unless a current variant needs them.
+
 ## Row anatomy (as of 2026-08-18)
 
 - **Every non-section row is the shared `ui/button` `Button`** (`variant="ghost"`,

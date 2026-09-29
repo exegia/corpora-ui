@@ -16,4 +16,4 @@ export const story = defineStory({
   Component: ComponentPreview
 })
 
-export const Preview = story
+export const Preview = story.WithControl

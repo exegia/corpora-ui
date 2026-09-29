@@ -5,7 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import type * as React from "react"
 import {
   AccordionItem,
-  AccordionPanel,
+  AccordionContent,
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
@@ -19,7 +19,7 @@ import { AvatarHandle, Signal, Tag } from "@/components/ui/chat"
 import { EASE_OUT_STRONG } from "@/lib/ease"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "./checkbox"
-import { CONFIDENCE, STATE_LABEL, STATE_TONE, ACTION_MOTION, ROW_VARIANTS } from "./constant"
+import { ACTION_MOTION, CONFIDENCE, STATE_LABEL, STATE_TONE } from "./constant"
 import type { IRecommendationItemProps } from "./types"
 import { Reference } from "@/components/atoms"
 
@@ -79,7 +79,6 @@ export function Item({
   return (
     <AccordionItem
       className="border-0 last:border-0"
-      render={<motion.div variants={reduceMotion ? undefined : ROW_VARIANTS} />}
       value={value}
       {...props}
     >
@@ -112,7 +111,7 @@ export function Item({
 
         {/* `relative`: the frame's ::before veil is positioned, so an
             unpositioned panel body would paint under it and look faded. */}
-        <AccordionPanel className="px-0 pb-0 relative">
+        <AccordionContent className="px-0 pb-0 relative">
           {(description || entity || leadTime) && <div className={cn("flex flex-wrap items-center gap-x-1.5 gap-y-1.5 px-3 pb-3 text-[13px] leading-[18px] text-text-secondary", declined && "line-through opacity-50")}>
             {description}
             {entity && <span className="inline-flex h-[22px] items-center gap-1.5 rounded-full bg-surface-subtle py-0.5 pl-0.5 pr-2 text-xs font-medium text-text-primary"><AvatarHandle initials={entity.initials} size={16} src={entity.src} />{entity.name}</span>}
@@ -208,7 +207,7 @@ export function Item({
               </AnimatePresence>
             </span>
           </CardFrameFooter>
-        </AccordionPanel>
+        </AccordionContent>
       </CardFrame>
     </AccordionItem>
   )

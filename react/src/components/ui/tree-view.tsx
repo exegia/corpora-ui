@@ -118,10 +118,9 @@ export const TreeViewTree = (
   )
 }
 
-// @eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface NodeProviderProps<
+export type NodeProviderProps<
   T extends TreeNodeType = TreeNodeType,
-> extends ArkTreeView.NodeProviderProps<T> {}
+> = ArkTreeView.NodeProviderProps<T>
 
 export const TreeViewNode = <T extends TreeNodeType>(
   props: NodeProviderProps<T>
@@ -337,7 +336,7 @@ interface TreeViewItemProps extends React.ComponentProps<
 export const TreeViewItem = (props: TreeViewItemProps) => {
   const { icon: Icon = FileIcon, className, children, ...rest } = props
 
-  const { fileIcons } = _useTreeView()
+  const { fileIcons } = useTreeViewContext()
 
   const getFileIcon = (value: string): React.JSX.ElementType => {
     const extension = getFileExtension(value)
@@ -444,9 +443,7 @@ const TreeViewNodeInput = (
   )
 }
 
-// @ts-expect-error use of private context
-const _useTreeView = () => {
-  // @eslint-disable-next-line react-hooks/rules-of-hooks
+const useTreeViewContext = () => {
   const context = React.useContext(TreeViewContext)
 
   if (!context) {

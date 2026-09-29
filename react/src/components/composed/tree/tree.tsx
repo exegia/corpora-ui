@@ -44,7 +44,7 @@ export function Tree(props: TTreeProps): React.ReactElement {
   // and the controller form has no props to build a fallback controller
   // from. Nobody switches a tree between the two forms at runtime.
   return props.tree ? (
-    <TreeView
+    <TreeRenderer
       ariaLabel={props.ariaLabel}
       className={props.className}
       renderTrailing={props.renderTrailing}
@@ -78,7 +78,7 @@ function UncontrolledTree(props: TTreeDataProps): React.ReactElement {
     onRename: variant === "files" ? props.onRename : undefined,
   })
   return (
-    <TreeView
+    <TreeRenderer
       ariaLabel={ariaLabel}
       className={className}
       renderTrailing={variant === "files" ? props.renderTrailing : undefined}
@@ -95,7 +95,7 @@ interface ITreeViewProps {
 }
 
 /** Rendering only — every piece of state and behaviour lives on `tree`. */
-function TreeView({
+function TreeRenderer({
   tree,
   ariaLabel,
   className,
