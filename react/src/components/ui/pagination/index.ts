@@ -1,5 +1,6 @@
 export { default as Pagination } from "./base";
 export { default as PaginationContent } from "./content";
+export { default as PaginationGrid, paginationGridItemClassName } from "./grid";
 export { default as PaginationItem } from "./item";
 export type { PaginationLinkProps } from "./types";
 export { default as PaginationLink } from "./link";

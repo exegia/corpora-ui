@@ -9,6 +9,10 @@ import {
   type ReactNode,
 } from "react"
 import { Text } from "@/components/atoms/text"
+import {
+  PaginationGrid,
+  paginationGridItemClassName,
+} from "@/components/ui/pagination"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
   createTreeCollection,
@@ -67,11 +71,6 @@ const mapItemsToTreeNodes = (items: readonly TTocItem[]): TTocTreeNode[] =>
     children: item.nodes ? mapItemsToTreeNodes(item.nodes) : undefined,
   }))
 
-const getGridClasses = (type?: TNodeType): string =>
-  type === "verse"
-    ? "grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8"
-    : "grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4"
-
 const isGridNodeType = (type: TNodeType): boolean => GRID_NODE_TYPES.has(type)
 
 function TocTreeNode({
@@ -116,9 +115,8 @@ function TocTreeNode({
         <TreeViewContent
           asChild
           className={cn(
-            className,
-            inGrid &&
-              "min-h-11 px-3 py-2 shadow-xs/5 rounded-md border border-input bg-popover hover:bg-accent hover:text-accent-foreground"
+            inGrid && paginationGridItemClassName({ active: isActive }),
+            !inGrid && className
           )}
         >
           <a href={node.href} onClick={handleLeafClick}>
@@ -145,8 +143,12 @@ function TocTreeNode({
           className={cn(
             className,
             inGrid &&
-              "min-h-11 ps-3 pe-3 shadow-xs/5 rounded-md border border-input bg-popover text-center hover:bg-accent hover:text-accent-foreground",
-            inGrid && childType === "verse" && "text-xs sm:text-sm"
+              paginationGridItemClassName({
+                active: isActive,
+                compact: childType === "verse",
+                role: "branch",
+              }),
+            inGrid && "text-center"
           )}
           expandedIcon={null}
           icon={null}
@@ -155,26 +157,36 @@ function TocTreeNode({
           {node.item.label}
         </TreeViewBranchItem>
         <TreeViewBranchContent>
-          <div
-            className={cn(
-              renderChildrenAsGrid
-                ? getGridClasses(childType)
-                : "gap-2 flex flex-col"
-            )}
-          >
-            {node.children.map((child, index) => (
-              <TocTreeNode
-                activeLink={activeLink}
-                inGrid={renderChildrenAsGrid}
-                indexPath={[...indexPath, index]}
-                key={child.id}
-                node={child}
-                onLinkClick={onLinkClick}
-                supportsGridView={supportsGridView}
-                viewMode={viewMode}
-              />
-            ))}
-          </div>
+          {renderChildrenAsGrid ? (
+            <PaginationGrid variant={childType === "verse" ? "verse" : "default"}>
+              {node.children.map((child, index) => (
+                <TocTreeNode
+                  activeLink={activeLink}
+                  inGrid={true}
+                  indexPath={[...indexPath, index]}
+                  key={child.id}
+                  node={child}
+                  onLinkClick={onLinkClick}
+                  supportsGridView={supportsGridView}
+                  viewMode={viewMode}
+                />
+              ))}
+            </PaginationGrid>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {node.children.map((child, index) => (
+                <TocTreeNode
+                  activeLink={activeLink}
+                  indexPath={[...indexPath, index]}
+                  key={child.id}
+                  node={child}
+                  onLinkClick={onLinkClick}
+                  supportsGridView={supportsGridView}
+                  viewMode={viewMode}
+                />
+              ))}
+            </div>
+          )}
         </TreeViewBranchContent>
       </TreeViewBranch>
     </TreeViewNode>
