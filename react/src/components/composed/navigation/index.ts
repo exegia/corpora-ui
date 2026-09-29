@@ -1,4 +1,2 @@
-import { TableOfContent } from "./toc"
-
-export { TableOfContent }
+export { TableOfContent } from "./toc"
 export { hasSectionWithNestedNodes } from "./utils"
