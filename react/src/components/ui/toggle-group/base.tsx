@@ -31,7 +31,7 @@ export const ToggleGroup = (props: ToggleGroupProps) => {
     multiple = true,
     orientation = "horizontal",
     variant = "ghost",
-    size = "md",
+    size = "default",
     spacing = 0,
     className,
     style,

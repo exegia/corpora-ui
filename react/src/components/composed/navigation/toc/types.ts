@@ -84,7 +84,8 @@ export interface ITocProps<K extends TTocKind = "regular"> {
   readonly items: readonly TTocUnionItem<K>[]
   readonly activeLink?: TTocUnionItem<K>
   readonly onLinkClick?: (item: TTocUnionItem<K>) => void
-  readonly renderSection?: (item: TTocUnionItem<K>) => ReactNode
+    readonly renderSection?: (item: TTocUnionItem<K>) => ReactNode
+    readonly description?: ReactNode
   readonly kind?: K
 }
 

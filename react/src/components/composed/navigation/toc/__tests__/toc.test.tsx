@@ -67,44 +67,7 @@ describe("TOC views", () => {
     expect(onLinkClick.mock.calls[1]?.[0]).toBe(verse)
   })
 
-  test("Canon reveals square book, chapter, and verse grids", async () => {
-    const onLinkClick = mock()
-    const { container } = render(
-      <Canonical items={canon} onLinkClick={onLinkClick} />
-    )
-    await act(async () => {})
-    expect(screen.getByText("Old Testament")).toBeTruthy()
-    expect(screen.getByRole("button", { name: "Genesis" }).textContent).toBe(
-      "Gen"
-    )
-    expect(screen.queryByRole("button", { name: "Chapter 1" })).toBeNull()
-    fireEvent.click(screen.getByRole("button", { name: "Genesis" }))
-    expect(
-      screen
-        .getByRole("button", { name: "Genesis" })
-        .getAttribute("aria-expanded")
-    ).toBe("true")
-    fireEvent.click(screen.getByRole("button", { name: "Chapter 1" }))
-    const verseLink = screen.getByRole("button", { name: "Verse 1" })
-    expect(verseLink.textContent).toBe("1")
-    fireEvent.click(verseLink)
-    expect(verseLink.getAttribute("aria-current")).toBe("page")
-    expect(onLinkClick.mock.calls.map(([item]) => item)).toEqual([
-      book,
-      chapter,
-      verse,
-    ])
-    expect(
-      container.querySelectorAll('[data-slot="toc-canon-grid"]').length
-    ).toBe(3)
-    for (const link of container.querySelectorAll('[data-slot="toggle"]')) {
-      expect(link.getAttribute("style")).toContain("aspect-ratio: 1")
-    }
-    fireEvent.click(screen.getByRole("button", { name: "Genesis" }))
-    expect(screen.queryByRole("button", { name: "Chapter 1" })).toBeNull()
-  })
-
-  test("section tabs switch the visible collection above the square grid", async () => {
+  test("Canon preserves the section tabs and flat toggle groups", async () => {
     const newTestament = {
       id: "nt",
       label: "New Testament",
@@ -121,38 +84,32 @@ describe("TOC views", () => {
         },
       ],
     } satisfies TCanonItem
-    const { container } = render(<Canonical items={[...canon, newTestament]} />)
+    const onLinkClick = mock()
+    render(
+      <Canonical items={[...canon, newTestament]} onLinkClick={onLinkClick} />
+    )
+    await act(async () => {})
     expect(
       screen
         .getByRole("tab", { name: "Old Testament" })
         .getAttribute("aria-selected")
     ).toBe("true")
-    expect(screen.queryByRole("button", { name: "Matthew" })).toBeNull()
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Gen" })) })
+    expect(onLinkClick.mock.calls[0]?.[0]).toBe(book)
+    expect(screen.queryByText("Chapter 1")).toBeNull()
     await act(async () => {
       fireEvent.click(screen.getByRole("tab", { name: "New Testament" }))
     })
-    expect(screen.getByRole("button", { name: "Matthew" })).toBeTruthy()
-    expect(screen.queryByRole("button", { name: "Genesis" })).toBeNull()
-    expect(
-      container
-        .querySelector('[data-slot="toc-canon-grid"]')
-        ?.getAttribute("style")
-    ).toContain("gap: 4px")
-    await act(async () => {
-      fireEvent.click(screen.getByRole("tab", { name: "Old Testament" }))
-    })
-    expect(screen.getByRole("button", { name: "Genesis" })).toBeTruthy()
+    expect(screen.getByRole("button", { name: "Matt" })).toBeTruthy()
+    expect(screen.queryByRole("button", { name: "Gen" })).toBeNull()
   })
 
-  test("Canon navigates by hash without a callback and respects controlled selection", () => {
-    render(<Canonical items={[book]} activeLink={book} />)
-    const bookLink = screen.getByRole("button", { name: "Genesis" })
-    expect(bookLink.getAttribute("aria-current")).toBe("page")
-    fireEvent.click(bookLink)
+  test("Canon keeps hash navigation without restoring nested views", async () => {
+    render(<Canonical items={canon} />)
+    await act(async () => {})
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Gen" })) })
     expect(window.location.hash).toBe(book.link)
-    fireEvent.click(screen.getByRole("button", { name: "Chapter 1" }))
-    expect(window.location.hash).toBe(chapter.link)
-    expect(bookLink.getAttribute("aria-current")).toBe("page")
+    expect(screen.queryByText("Chapter 1")).toBeNull()
   })
 
   test("both views accept empty collections", () => {
@@ -162,7 +119,9 @@ describe("TOC views", () => {
         <Canonical items={[]} />
       </>
     )
-    expect(container.querySelectorAll('[data-slot="toggle"]').length).toBe(0)
+    expect(
+      container.querySelectorAll('[data-slot="toggle-group-item"]').length
+    ).toBe(0)
   })
 
   test("tree labels preserve rich display text and produce searchable text", () => {

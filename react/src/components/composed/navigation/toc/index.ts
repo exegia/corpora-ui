@@ -37,3 +37,4 @@ export const TOC = {
   TreeNode: TocTreeNode,
 }
 
+export default TOC

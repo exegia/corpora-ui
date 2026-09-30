@@ -5,7 +5,7 @@ import type { ToggleGroupContextProps } from "./type";
 
 
 export const ToggleGroupContext = React.createContext<ToggleGroupContextProps>({
-  size: "md",
+  size: "default",
   variant: "ghost",    
 });
 

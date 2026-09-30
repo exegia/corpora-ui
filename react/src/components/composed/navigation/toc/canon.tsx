@@ -1,23 +1,37 @@
 "use client"
 
-import { useState, type JSX } from "react"
+import { useMemo, useState, type JSX } from "react"
+import { SearchIcon } from "lucide-react"
+import {
+  InputGroup,
+  InputGroupInput,
+  InputGroupAddon,
+} from "@/components/ui/input-group"
 import { cn } from "@/lib/utils"
 import { DefaultSection } from "./section"
 import type { CanonItemProps, ITocProps, TCanonItem } from "./types"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/components/ui/toggle-group/index"
+import { buttonVariants } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Kbd } from "@/ui"
 
-export function CanonItem({ item, onLinkClick }: CanonItemProps): JSX.Element {
+export function CanonItem({ item, active, onLinkClick }: CanonItemProps): JSX.Element {
   return (
-      <ToggleGroupItem
-          asChild
-      onClick={() => onLinkClick?.(item)}
-      className="min-w-0 p-0 aspect-square rounded-sm"
-
-      key={item.id}
+    <ToggleGroupItem
       value={item.link}
+
+      data-slot="toggle-group-item"
+      onClick={() => onLinkClick?.(item)}
+      className={cn(
+        buttonVariants({ variant: active ? "secondary" : "outline" }),
+          "min-w-0 p-0 rounded-xs min-h-12 aspect-square h-auto w-full",
+        active && "bg-current!"
+      )}
     >
-      <span className={cn("text-sm")}>
+      <span className={cn("text-xs")}>
         {item.type === "book" ? item.abbreviation : (item.number ?? item.label)}
       </span>
     </ToggleGroupItem>
@@ -27,11 +41,12 @@ export function CanonItem({ item, onLinkClick }: CanonItemProps): JSX.Element {
 export function Canonical({
   items,
   activeLink,
+  description,
   onLinkClick,
 }: ITocProps<"canon">): JSX.Element {
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set())
   const [selectedLink, setSelectedLink] = useState<string>()
-  const selected = activeLink?.link ?? selectedLink
+  const selected = useMemo(() =>  activeLink && activeLink.link ? [activeLink.link] : selectedLink ? [selectedLink] : [], [activeLink, selectedLink])
 
   const selectItem = (item: TCanonItem) => {
     setSelectedLink(item.link)
@@ -49,7 +64,14 @@ export function Canonical({
 
   const renderGroup = (nodes: readonly TCanonItem[]) => (
     <div>
-      <ToggleGroup variant={"outline"} size={"lg"} spacing={2}>
+          <ToggleGroup
+              multiple={false}
+              variant={"outline"}
+              value={selected}
+        size={"lg"}
+        spacing={2}
+        className="gap-2 grid w-full grid-flow-row grid-cols-5 place-content-stretch place-items-stretch"
+      >
         {nodes.map((item) => {
           if (item.type === "section")
             return <DefaultSection key={item.id} item={item} />
@@ -57,7 +79,7 @@ export function Canonical({
             <CanonItem
               key={item.id}
               item={item}
-              active={selected === item.link}
+              active={selected.includes(item.link)}
               expanded={expanded.has(item.id)}
               onLinkClick={selectItem}
             />
@@ -68,16 +90,17 @@ export function Canonical({
   )
 
   const sections = items.filter((item) => item.type === "section")
- 
+
   const renderTabList = () => {
     return (
       <TabsList
         variant="underline"
+        size="xs"
         aria-label="Corpus sections"
-        className="max-w-full overflow-x-auto"
+        className="mb-2 max-w-full overflow-x-auto"
       >
         {sections.map((section) => (
-          <TabsTrigger key={section.id} value={section.id}>
+          <TabsTrigger size="xs" key={section.id} value={section.id}>
             {section.label}
           </TabsTrigger>
         ))}
@@ -102,8 +125,25 @@ export function Canonical({
   return (
     <nav
       aria-label="Canonical table of contents"
-      className="gap-3 flex h-full flex-col"
+      className="gap-3 max-w-80 flex h-full flex-col"
     >
+      <h1 className="text-lg font-bold">Table of Content</h1>
+      {description && description}
+      <InputGroup>
+        <InputGroupInput
+          size="lg"
+          type="search"
+          aria-label="Search books"
+          placeholder="Search…"
+        />
+        <InputGroupAddon>
+          <SearchIcon aria-hidden="true" />
+        </InputGroupAddon>
+        <InputGroupAddon align="inline-end">
+          <Kbd>⌘K</Kbd>
+        </InputGroupAddon>
+      </InputGroup>
+
       {sections.length ? (
         <Tabs defaultValue={sections[0]?.id}>
           {renderTabList()}
