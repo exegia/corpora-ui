@@ -1,15 +1,15 @@
 "use client"
 
-import { TOC as Toc } from "@/components/composed/navigation"
+import { TOC } from "@/components/composed/navigation"
 import { defineStory } from "@/registry/story"
 import { items } from "../composed/navigation/constants"
 
 function ComponentPreview() {
   return (
     <div className="max-w-lg p-6 relative mx-auto w-full">
-      <Toc.Canonical items={items}>
+      <TOC.Canonical items={items}>
               
-      </Toc.Canonical>
+      </TOC.Canonical>
     </div>
   )
 }

@@ -18,12 +18,13 @@ export function TocViewModeToggle({
   onValueChange,
 }: TocViewModeToggleProps) {
   return (
-    <ToggleGroup
+      <ToggleGroup
+          size={"md"}
       aria-label="Table of content view"
       className="shrink-0"
       multiple={false}
-      onValueChange={(value) => {
-        const next = value[0]
+      onValueChange={(payload) => {
+        const next = payload.value[0]
         if (next === "grid" || next === "list") onValueChange(next)
       }}
       value={[viewMode]}

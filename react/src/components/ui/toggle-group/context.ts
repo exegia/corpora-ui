@@ -1,12 +1,19 @@
 "use client";
 
-import type { VariantProps } from "class-variance-authority";
 import * as React from "react";
-import { type toggleVariants } from "@/components/ui/toggle";
+import type { ToggleGroupContextProps } from "./type";
 
-export const ToggleGroupContext: React.Context<
-  VariantProps<typeof toggleVariants>
-> = React.createContext<VariantProps<typeof toggleVariants>>({
-  size: "default",
-  variant: "default",
+
+export const ToggleGroupContext = React.createContext<ToggleGroupContextProps>({
+  size: "md",
+  variant: "ghost",    
 });
+
+
+export const useToggleGroup = () => {
+  const context = React.useContext(ToggleGroupContext);
+  if (!context) {
+    throw new Error("useToggleGroupContext must be used within a ToggleGroup");
+  }
+  return context;
+};

@@ -1,34 +1,33 @@
 "use client";
 
-import type { Toggle as TogglePrimitive } from "@base-ui/react/toggle";
-import type { VariantProps } from "class-variance-authority";
-import * as React from "react";
-import { Toggle as ToggleComponent, type toggleVariants } from "@/components/ui/toggle";
-import { ToggleGroupContext } from "./context";
+import  { type ToggleGroupItemProps, ToggleGroup as ArkToggleGroup } from "@ark-ui/react/toggle-group";
+import { Toggle } from "./toggle";
+import { cn } from "@/library";
+import { useToggleGroup } from "./context";
 
-export default function ToggleGroupItem({
-  className,
-  children,
-  variant,
-  size,
-  ...props
-}: TogglePrimitive.Props &
-  VariantProps<typeof toggleVariants>): React.ReactElement {
-  const context = React.useContext(ToggleGroupContext);
 
-  const resolvedVariant = context.variant || variant;
-  const resolvedSize = context.size || size;
+
+export const ToggleGroupItem = (props: ToggleGroupItemProps) => {
+  const { value, className, ...rest } = props;
+
+  const { variant, size, spacing } = useToggleGroup();
 
   return (
-    <ToggleComponent
-      className={className}
-      data-size={resolvedSize}
-      data-variant={resolvedVariant}
-      size={resolvedSize}
-      variant={resolvedVariant}
-      {...props}
-    >
-      {children}
-    </ToggleComponent>
+      <ArkToggleGroup.Item asChild data-slot="toggle-group-item" value={value}>
+        <Toggle className={cn(
+                    "shrink-0 focus:z-10 focus-visible:z-10",
+                    "data-[spacing=0]:rounded-none",
+                    "data-[spacing=0]:px-2",
+                    "data-[orientation=horizontal]:data-[spacing=0]:first:rounded-l-lg",
+                    "data-[orientation=vertical]:data-[spacing=0]:first:rounded-t-lg",
+                    "data-[orientation=horizontal]:data-[spacing=0]:last:rounded-r-lg",
+                    "data-[orientation=vertical]:data-[spacing=0]:last:rounded-b-lg",
+                    "data-[orientation=horizontal]:data-[spacing=0]:data-[variant=outline]:border-l-0",
+                    "data-[orientation=vertical]:data-[spacing=0]:data-[variant=outline]:border-t-0",
+                    "data-[orientation=horizontal]:data-[spacing=0]:data-[variant=outline]:first:border-l",
+                    className
+                  )} data-spacing={spacing} data-variant={variant} size={size} variant={variant} {...rest} />
+    </ArkToggleGroup.Item>
   );
-}
+};
+
