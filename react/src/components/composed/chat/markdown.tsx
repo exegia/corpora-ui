@@ -13,7 +13,7 @@ import {
   CardPanel,
 } from "@/components/ui/card"
 import { IconButton } from "@/components/ui/chat"
-import { Tabs, TabsList, TabsTab } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   markdownViewAtom,
   removeMarkdownInstance,
@@ -159,13 +159,13 @@ export function Markdown({
         <Tabs
           className="gap-0"
           value={current}
-          onValueChange={(next) => select(next as TMarkdownView)}
+          onValueChange={(next) => select(next.value as TMarkdownView)}
         >
-          <TabsList aria-label="Markdown view" size="xs">
+          <TabsList aria-label="Markdown view">
             {VIEWS.map((v) => (
-              <TabsTab key={v.value} size="xs" value={v.value}>
+              <TabsTrigger key={v.value} size="xs" value={v.value}>
                 {v.label}
-              </TabsTab>
+              </TabsTrigger>
             ))}
           </TabsList>
         </Tabs>

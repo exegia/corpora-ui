@@ -1,4 +1,5 @@
 import path from "path"
+import { existsSync, readFileSync } from "node:fs"
 import story from "@fumadocs/story/vite"
 import tailwindcss from "@tailwindcss/vite"
 import { fumadocsMdx } from "fumadocs-mdx/vite"
@@ -6,12 +7,21 @@ import basicSsl from "@vitejs/plugin-basic-ssl"
 import press from "fumapress/vite"
 import { defineConfig } from "vite"
 
+// Keep machine-local TLS material outside Git. A supplied certificate must
+// include the LAN address and be trusted on the device opening the docs.
+const tlsDirectory = path.resolve(import.meta.dirname, ".certs.local")
+const tlsCertificate = path.join(tlsDirectory, "server-cert.pem")
+const tlsKey = path.join(tlsDirectory, "server-key.pem")
+const localHttps = existsSync(tlsCertificate) && existsSync(tlsKey)
+  ? { cert: readFileSync(tlsCertificate), key: readFileSync(tlsKey) }
+  : undefined
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     press({ basePath: "/" }),
     fumadocsMdx(),
-    basicSsl(),
+    !localHttps && basicSsl(),
     tailwindcss(),
     story({
       tsconfigPath: path.resolve(import.meta.dirname, "tsconfig.app.json"),
@@ -47,6 +57,7 @@ export default defineConfig({
   },
 
   server: {
+    https: localHttps,
     port: 4000,
     open: true,
     host: "0.0.0.0",

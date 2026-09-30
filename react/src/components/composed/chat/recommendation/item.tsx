@@ -112,9 +112,9 @@ export function Item({
         {/* `relative`: the frame's ::before veil is positioned, so an
             unpositioned panel body would paint under it and look faded. */}
         <AccordionContent className="px-0 pb-0 relative">
-          {(description || entity || leadTime) && <div className={cn("flex flex-wrap items-center gap-x-1.5 gap-y-1.5 px-3 pb-3 text-[13px] leading-[18px] text-text-secondary", declined && "line-through opacity-50")}>
+          {(description || entity || leadTime) && <div className={cn("flex flex-wrap items-center gap-x-1.5 gap-y-1.5 px-3 pb-3 text-[13px] leading-4.5 text-text-secondary", declined && "line-through opacity-50")}>
             {description}
-            {entity && <span className="inline-flex h-[22px] items-center gap-1.5 rounded-full bg-surface-subtle py-0.5 pl-0.5 pr-2 text-xs font-medium text-text-primary"><AvatarHandle initials={entity.initials} size={16} src={entity.src} />{entity.name}</span>}
+            {entity && <span className="inline-flex h-5.5 items-center gap-1.5 rounded-full bg-surface-subtle py-0.5 pl-0.5 pr-2 text-xs font-medium text-text-primary"><AvatarHandle initials={entity.initials} size={16} src={entity.src} />{entity.name}</span>}
             {leadTime && <Tag className="rounded-full" tone="green">{leadTime}</Tag>}
           </div>}
           {reference && <div

@@ -1,2 +1,2 @@
-export { TableOfContent } from "./toc"
-export { hasSectionWithNestedNodes } from "./utils"
+export { TOC } from "./toc"
+export { hasSectionWithNestedNodes } from "./toc/utils"

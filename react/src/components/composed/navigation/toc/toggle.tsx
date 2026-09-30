@@ -1,9 +1,14 @@
 import { Grid2x2, List } from "lucide-react"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import type { TNodeType } from "../types"
+import type { TNodeType } from "./types"
 import type { TocViewModeToggleProps } from "./types"
 
-const GRID_NODE_TYPES = new Set<TNodeType>(["chapter", "verse", "surah"])
+const GRID_NODE_TYPES = new Set<TNodeType>([
+  "book",
+  "chapter",
+  "verse",
+  "surah",
+])
 
 export const isGridNodeType = (type: TNodeType): boolean =>
   GRID_NODE_TYPES.has(type)
