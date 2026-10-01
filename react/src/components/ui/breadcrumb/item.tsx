@@ -1,17 +1,26 @@
-"use client";
+"use client"
 
-import type * as React from "react";
-import { cn } from "@/lib/utils";
+import type * as React from "react"
+import BreadcrumbOverlay from "./overlay"
+import type { BreadcrumbItemOverlay } from "./types"
+import { cn } from "@/lib/utils"
 
 export default function BreadcrumbItem({
   className,
+  children,
+  overlay,
   ...props
-}: React.ComponentProps<"li">): React.ReactElement {
+}: React.ComponentProps<"li"> & {
+  overlay?: BreadcrumbItemOverlay
+}): React.ReactElement {
   return (
     <li
-      className={cn("inline-flex items-center gap-1.5", className)}
+      className={cn("gap-1.5 inline-flex items-center", className)}
       data-slot="breadcrumb-item"
       {...props}
-    />
-  );
+    >
+      {children}
+      {overlay ? <BreadcrumbOverlay {...overlay} /> : null}
+    </li>
+  )
 }

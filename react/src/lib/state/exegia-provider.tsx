@@ -9,7 +9,9 @@
  * overlay roots retain per-instance focus and open-state coordination.
  *
  * One Jotai provider supplies the library's module-level atoms and any
- * consumer atoms. Local UI contexts coordinate layout and focus without
+ * consumer atoms, including named Tree and Canonical navigator instances.
+ * Pass a fresh store for each request or isolated app; no feature registration
+ * is required. Local UI contexts coordinate layout and focus without
  * replacing that store. No atom registration or additional app provider
  * is needed as features are added.
  *

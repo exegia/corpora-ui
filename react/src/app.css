@@ -40,3 +40,12 @@
   --color-fd-primary-foreground: var(--color-amber-950);
   --color-fd-ring: var(--color-amber-300);
 }
+
+/* The library stylesheet can arrive after the docs stylesheet and its base
+   .flex utility then overrides md:hidden. Keep the docs mobile header hidden
+   alongside the desktop sidebar, independent of stylesheet loading order. */
+@media (width >= 48rem) {
+  #nd-docs-layout > #nd-subnav {
+    display: none;
+  }
+}
