@@ -15,16 +15,20 @@ import {
   useCorpusNavigationActions,
   useCorpusNavigationState,
 } from "./use-corpus-navigation-state"
-import { adjacentAnchor, anchorFor, indexCorpus } from "./utils"
+import LocationPopover from "./location-popover"
+import type { BreadcrumbItemOverlay } from "@/components/ui/breadcrumb"
+import { adjacentAnchor, indexCorpus } from "./utils"
 
 export interface LocationBarProps {
   navigatorId: string
   className?: string
+  portalProps?: BreadcrumbItemOverlay["portalProps"]
 }
 /** Breadcrumbs preview ancestors. Previous/next are explicit committed jumps. */
 export default function LocationBar({
   navigatorId,
   className,
+  portalProps,
 }: LocationBarProps) {
   const data = useAtomValue(corpusNavigationDataAtom(navigatorId))
   const { location, pending } = useCorpusNavigationState(navigatorId)
@@ -48,23 +52,15 @@ export default function LocationBar({
         >
           <BreadcrumbList className="gap-0.5">
             {path.map((node, i) => (
-              <Fragment key={node.id}>
+              <Fragment key={`${data.corpusId}/${data.editionId}/${node.id}`}>
                 {i > 0 && <BreadcrumbSeparator className="rtl:rotate-180" />}
-                <BreadcrumbItem>
-                  <Button
-                    variant="ghost"
-                    className="min-h-11 px-2"
-                    aria-current={
-                      i === path.length - 1 ? "location" : undefined
-                    }
-                    onClick={() => {
-                      actions.openPicker()
-                      actions.select(anchorFor(data, node.id))
-                    }}
-                  >
-                    <bdi>{node.label}</bdi>
-                  </Button>
-                </BreadcrumbItem>
+                <LocationPopover
+                  navigatorId={navigatorId}
+                  data={data}
+                  node={node}
+                  current={i === path.length - 1}
+                  portalProps={portalProps}
+                />
               </Fragment>
             ))}
             {!path.length && (

@@ -38,3 +38,16 @@ export const TOC = {
 }
 
 export default TOC
+
+export { useCanon } from "./use-canon"
+export {
+  canonSelectedLinkAtom,
+  canonExpandedIdsAtom,
+  canonActiveSectionIdAtom,
+  canonStateAtom,
+  selectCanonItemAtom,
+  setCanonSectionAtom,
+  resetCanonAtom,
+  removeCanonInstance,
+} from "./canon-atom"
+export type { CanonState, CanonProps, CanonContextMenuItem, CanonContextMenuItems } from "./types"

@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, type JSX } from "react"
+import { useMemo, useState, type JSX } from "react"
 import {
   createTreeCollection,
   TreeView,
@@ -8,7 +8,19 @@ import {
   TreeViewTree,
 } from "@/components/ui/tree-view"
 import type { ITocProps, TTocCollectionNode } from "./types"
-import { hasSectionWithNestedNodes, mapItemsToTreeNodes } from "./utils"
+import { Kbd } from "@/components/ui/kbd"
+import { SearchIcon } from "lucide-react"
+import {
+  InputGroup,
+  InputGroupInput,
+  InputGroupAddon,
+} from "@/components/ui/input-group"
+import {
+  filterTocNodes,
+  tocBranchIds,
+  hasSectionWithNestedNodes,
+  mapItemsToTreeNodes,
+} from "./utils"
 import { DefaultSection } from "./section"
 import { TocTreeNode } from "./tree-node"
 
@@ -18,7 +30,15 @@ export function Root({
   onLinkClick,
   renderSection,
 }: ITocProps): JSX.Element {
-  const nodes = useMemo(() => mapItemsToTreeNodes(items), [items])
+  const [query, setQuery] = useState("")
+  const [expandedIds, setExpandedIds] = useState<string[]>([])
+  const allNodes = useMemo(() => mapItemsToTreeNodes(items), [items])
+  const nodes = useMemo(
+    () => filterTocNodes(allNodes, query),
+    [allNodes, query]
+  )
+  const searching = query.trim().length > 0
+  const searchExpandedIds = useMemo(() => tocBranchIds(nodes), [nodes])
   const collection = useMemo(
     () =>
       createTreeCollection<TTocCollectionNode>({
@@ -31,7 +51,34 @@ export function Root({
   return (
     <div className="gap-3 flex w-full flex-col">
       <h1 className="text-lg font-bold">Table of Content</h1>
-      <TreeView className="w-full" collection={collection}>
+      <InputGroup>
+        <InputGroupInput
+          type="search"
+          aria-label="Search table of contents"
+          placeholder="Search…"
+          value={query}
+          onChange={(event) => setQuery(event.currentTarget.value)}
+        />
+        <InputGroupAddon>
+          <SearchIcon aria-hidden="true" />
+        </InputGroupAddon>
+        <InputGroupAddon align="inline-end">
+          <Kbd>⌘K</Kbd>
+        </InputGroupAddon>
+      </InputGroup>
+      {searching && nodes.length === 0 ? (
+        <p role="status" className="text-sm text-muted-foreground">
+          No results found.
+        </p>
+      ) : null}
+      <TreeView
+        className="w-full"
+        collection={collection}
+        expandedValue={searching ? searchExpandedIds : expandedIds}
+        onExpandedChange={({ expandedValue }) => {
+          if (!searching) setExpandedIds(expandedValue)
+        }}
+      >
         <TreeViewLabel className="sr-only">Table of Content</TreeViewLabel>
         <TreeViewTree>
           {nodes.map((node, index) =>

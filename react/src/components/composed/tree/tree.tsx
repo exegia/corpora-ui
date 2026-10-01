@@ -4,10 +4,8 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { TreeContext } from "./tree-context"
 import { TreeRow } from "./tree-node"
 import type {
-  ITreeContextValue,
   ITreeController,
   TTreeDataProps,
   ITreeNode,
@@ -171,14 +169,7 @@ function TreeRenderer({
     }
   }
 
-  // Rows take the tree's id and the stable drag handlers, never the
-  // controller — so this value keeps its identity and a toggle re-renders only
-  // the rows whose own atoms changed.
   const dnd = useTreeDndHandlers(tree.treeId)
-  const context = React.useMemo<ITreeContextValue>(
-    () => ({ treeId: tree.treeId, renderTrailing, dnd }),
-    [tree.treeId, renderTrailing, dnd]
-  )
 
   const label = ariaLabel ?? DEFAULT_LABELS[variant]
   let rendered = (
@@ -201,7 +192,14 @@ function TreeRenderer({
       role="tree"
     >
       {items.map((node) => (
-        <TreeRow depth={0} key={node.id} node={node} />
+        <TreeRow
+          depth={0}
+          key={node.id}
+          node={node}
+          treeId={tree.treeId}
+          renderTrailing={renderTrailing}
+          dnd={dnd}
+        />
       ))}
     </ul>
   )
@@ -213,21 +211,17 @@ function TreeRenderer({
   if (variant === "sidebar")
     rendered = <TooltipProvider>{rendered}</TooltipProvider>
 
-  return (
-    <TreeContext.Provider value={context}>
-      {variant === "files" ? (
-        <div className={cn("min-w-0", className)} data-slot="tree-root">
-          {rendered}
-        </div>
-      ) : (
-        <nav
-          aria-label={label}
-          className={cn("flex h-full w-full min-w-0", className)}
-          data-slot="tree-root"
-        >
-          {rendered}
-        </nav>
-      )}
-    </TreeContext.Provider>
+  return variant === "files" ? (
+    <div className={cn("min-w-0", className)} data-slot="tree-root">
+      {rendered}
+    </div>
+  ) : (
+    <nav
+      aria-label={label}
+      className={cn("flex h-full w-full min-w-0", className)}
+      data-slot="tree-root"
+    >
+      {rendered}
+    </nav>
   )
 }

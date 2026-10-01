@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { TOC } from "@/components/composed/navigation"
 import type {
   TBookAbbreviation,
@@ -120,9 +121,18 @@ const regularItems: TTocItem[] = [
 ]
 
 function CanonPreview() {
+  const [message, setMessage] = useState("")
   return (
     <div className="max-w-lg p-6 relative mx-auto w-full" data-toc-demo="canon">
-      <TOC.Canonical items={canonItems} onLinkClick={() => {}} />
+      <TOC.Canonical
+        items={canonItems}
+        onLinkClick={() => {}}
+        contextMenuItems={[
+          { id: "open", label: "Open book", onSelect: (item) => setMessage(`Opened ${String(item.label)}`) },
+          { id: "bookmark", label: "Bookmark book", onSelect: (item) => setMessage(`Bookmarked ${String(item.label)}`) },
+        ]}
+      />
+      <p role="status" className="mt-2 text-sm text-muted-foreground">{message}</p>
     </div>
   )
 }

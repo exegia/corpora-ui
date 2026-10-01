@@ -120,7 +120,22 @@ export interface TocTreeNodeProps {
   readonly onLinkClick?: (item: TTocItem) => void
 }
 
+/** A consumer-defined action on a canonical tile. */
+export interface CanonContextMenuItem {
+  id: string
+  label: ReactNode
+  icon?: ReactNode
+  disabled?: boolean
+  variant?: "default" | "destructive"
+  onSelect: (item: TCanonItem) => void
+}
+
+export type CanonContextMenuItems =
+  | readonly CanonContextMenuItem[]
+  | ((item: TCanonItem) => readonly CanonContextMenuItem[])
+
 export interface CanonItemProps {
+  readonly contextMenuItems?: CanonContextMenuItems
   readonly item: TCanonItem
   readonly active?: boolean
   readonly expanded?: boolean
@@ -130,4 +145,17 @@ export interface CanonItemProps {
 export interface TocViewModeToggleProps {
   readonly viewMode: TViewMode
   readonly onValueChange: (value: TViewMode) => void
+}
+
+/** Persistent state for one canonical navigator in an Exegia store. */
+export interface CanonState {
+  selectedLink: string | undefined
+  expandedIds: ReadonlySet<string>
+  activeSectionId: string | undefined
+}
+
+export interface CanonProps extends ITocProps<"canon"> {
+  contextMenuItems?: CanonContextMenuItems
+  /** Stable key for remote atom access. Omit for an isolated component instance. */
+  canonId?: string
 }

@@ -3,6 +3,6 @@ import { defineStory } from "@/registry/story"
 import CorpusNavigationDemo from "@/registry/demos/corpus-navigation-demo"
 export const story = defineStory({
   Component: CorpusNavigationDemo,
-  args: { initial: { initialWidth: 390 } },
+  centered: false,
 })
 export const Preview = story.WithControl

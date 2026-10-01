@@ -1,6 +1,6 @@
 "use client"
 
-import { useId, useMemo, useState, type JSX } from "react"
+import { useEffect, useId, useMemo, useState, type JSX } from "react"
 import { ToggleGroup as ArkToggleGroup } from "@ark-ui/react/toggle-group"
 import { playCue } from "@/lib/sound"
 import { LayoutGroup, motion, useReducedMotion } from "motion/react"
@@ -19,11 +19,18 @@ import {
 } from "@/components/ui/input-group"
 import { cn } from "@/lib/utils"
 import { DefaultSection } from "./section"
-import type { CanonItemProps, ITocProps, TCanonItem } from "./types"
+import type { CanonItemProps, CanonProps, TCanonItem } from "./types"
 import { ToggleGroup } from "@/components/ui/toggle-group/index"
 import { buttonVariants } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { Kbd } from "@/ui"
+import { Kbd } from "@/components/ui/kbd"
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuPopup,
+  ContextMenuItem,
+} from "@/components/ui/context-menu"
+import { useCanonController } from "./use-canon"
 
 type BookTooltipHandle = ReturnType<typeof TooltipCreateHandle<string>>
 
@@ -32,6 +39,7 @@ export function CanonItem({
   active,
   onLinkClick,
   tooltipHandle,
+  contextMenuItems,
 }: CanonItemProps & { tooltipHandle?: BookTooltipHandle }): JSX.Element {
   const reducedMotion = useReducedMotion()
   const content = (
@@ -61,17 +69,18 @@ export function CanonItem({
       onClick={() => onLinkClick?.(item)}
       className={cn(
         buttonVariants({ variant: "outline" }),
-        "min-w-0 p-0 min-h-12 bg-stone-50 dark:bg-stone-950 relative isolate aspect-square h-auto w-full rounded-sm",
-        active &&
-          "text-white! dark:text-black! bg-transparent! hover:bg-transparent!"
+        "min-w-0 p-0 min-h-12 bg-stone-100 dark:bg-stone-900 relative isolate aspect-square h-auto w-full rounded-sm",
+        active && "text-white! dark:text-black! hover:bg-transparent!",
+        "bezel-dim-b-2 bezel-dim-blur-1 bezel-dim/10 bezel-lit-blur-1 bezel-lit-t-2 bezel-lit/90 dark:bezel-lit-blur-2 dark:bezel-lit-t-1 dark:bezel-lit/20 dark:bezel-dim"
       )}
     />
   )
-  return tooltipHandle ? (
+  const trigger = tooltipHandle ? (
     <TooltipTrigger
-      delay={0}
+      delay={300}
       handle={tooltipHandle}
       payload={item.label}
+
       render={tile}
     >
       {content}
@@ -79,19 +88,52 @@ export function CanonItem({
   ) : (
     <ArkToggleGroup.Item {...tile.props}>{content}</ArkToggleGroup.Item>
   )
+  const menuItems = typeof contextMenuItems === "function"
+    ? contextMenuItems(item)
+    : contextMenuItems
+  if (!menuItems?.length) return trigger
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger render={trigger} />
+      <ContextMenuPopup>
+        {menuItems.map((action) => (
+          <ContextMenuItem
+            key={action.id}
+            disabled={action.disabled}
+            variant={action.variant}
+            onClick={() => action.onSelect(item)}
+          >
+            {action.icon}
+            {action.label}
+          </ContextMenuItem>
+        ))}
+      </ContextMenuPopup>
+    </ContextMenu>
+  )
 }
 
 export function Canonical({
   items,
+  canonId,
+  contextMenuItems,
   activeLink,
   description,
   onLinkClick,
-}: ITocProps<"canon">): JSX.Element {
+}: CanonProps): JSX.Element {
   const reducedMotion = useReducedMotion()
   const layoutScope = useId()
   const [tooltipHandle] = useState(() => TooltipCreateHandle<string>())
-  const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set())
-  const [selectedLink, setSelectedLink] = useState<string>()
+  const {
+    selectedLink,
+    expandedIds: expanded,
+    activeSectionId,
+    select,
+    setSection,
+  } = useCanonController(
+    canonId ?? layoutScope,
+    activeLink?.link,
+    canonId === undefined
+  )
   const selected = useMemo(
     () =>
       activeLink && activeLink.link
@@ -105,15 +147,7 @@ export function Canonical({
   const selectItem = (item: TCanonItem) => {
     if (selected[0] === item.link) return
     playCue("tick", { volume: 0.15 })
-    setSelectedLink(item.link)
-    if (item.nodes?.length) {
-      setExpanded((current) => {
-        const next = new Set(current)
-        if (next.has(item.id)) next.delete(item.id)
-        else next.add(item.id)
-        return next
-      })
-    }
+    select(item)
     if (onLinkClick) onLinkClick(item)
     else window.location.assign(item.link)
   }
@@ -140,6 +174,7 @@ export function Canonical({
               key={item.id}
               item={item}
               tooltipHandle={tooltipHandle}
+              contextMenuItems={contextMenuItems}
               active={selected.includes(item.link)}
               expanded={expanded.has(item.id)}
             />
@@ -150,6 +185,13 @@ export function Canonical({
   )
 
   const sections = items.filter((item) => item.type === "section")
+  const sectionId = sections.some((section) => section.id === activeSectionId)
+    ? activeSectionId
+    : sections[0]?.id
+  // Publish the effective initial/fallback tab for remote store readers.
+  useEffect(() => {
+    if (activeSectionId !== sectionId) setSection(sectionId)
+  }, [activeSectionId, sectionId, setSection])
 
   const renderTabList = () => {
     return (
@@ -212,8 +254,11 @@ export function Canonical({
 
         {sections.length ? (
           <Tabs
-            defaultValue={sections[0]?.id}
-            onValueChange={() => playCue("whisper", { volume: 0.12 })}
+            value={sectionId}
+            onValueChange={({ value }) => {
+              setSection(value)
+              playCue("whisper", { volume: 0.12 })
+            }}
           >
             {renderTabList()}
             {renderTabContent()}

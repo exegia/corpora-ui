@@ -14,7 +14,7 @@ first; this file only holds what is specific to the tree.
 | `use-tree.ts`       | `useTree(options)` — mounts an instance, projects controlled props into the store, returns the `ITreeController`. |
 | `use-tree-state.ts` | `useTreeState(id)` (reads, re-renders on any change) and `useTreeActions(id)` (writes only, never re-renders). |
 | `use-tree-dnd.ts`   | Stable drag handlers for `files`; they read `draggedId`/`dropTarget` out of the store at call time.       |
-| `tree-context.ts`   | Context value = `{ treeId, renderTrailing, dnd }` only. Never the controller.                            |
+| Row scope props | `{ treeId, renderTrailing, dnd }` pass through recursive rows; mutable state comes from atoms. |
 | `tree.tsx`          | `Tree` (props form → `UncontrolledTree`, controller form → `TreeView`), roving keyboard nav. |
 | `tree-node.tsx`     | `TreeRow` (memoized). Per-node atom subscriptions, row kind resolution, rename input, tooltip, toc overlay toggle, trailing slot, branch animation. |
 | `constants.ts`      | Durations, easings, motion variants.                                                                    |
