@@ -94,22 +94,88 @@ describe("TOC views", () => {
         .getByRole("tab", { name: "Old Testament" })
         .getAttribute("aria-selected")
     ).toBe("true")
-    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Gen" })) })
+    await act(async () => {
+      fireEvent.click(screen.getByRole("radio", { name: "Gen" }))
+    })
     expect(onLinkClick.mock.calls[0]?.[0]).toBe(book)
     expect(screen.queryByText("Chapter 1")).toBeNull()
     await act(async () => {
       fireEvent.click(screen.getByRole("tab", { name: "New Testament" }))
     })
-    expect(screen.getByRole("button", { name: "Matt" })).toBeTruthy()
-    expect(screen.queryByRole("button", { name: "Gen" })).toBeNull()
+    expect(screen.getByRole("radio", { name: "Matt" })).toBeTruthy()
+    expect(screen.queryByRole("radio", { name: "Gen" })).toBeNull()
   })
 
   test("Canon keeps hash navigation without restoring nested views", async () => {
     render(<Canonical items={canon} />)
     await act(async () => {})
-    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Gen" })) })
+    await act(async () => {
+      fireEvent.click(screen.getByRole("radio", { name: "Gen" }))
+    })
     expect(window.location.hash).toBe(book.link)
     expect(screen.queryByText("Chapter 1")).toBeNull()
+  })
+
+  test("Canon has one selected tile and clears previous tile state", async () => {
+    const exodus = {
+      ...book,
+      id: "exod",
+      label: "Exodus",
+      abbreviation: "Exod",
+      link: "#exod-book",
+    } satisfies TCanonItem
+    const onLinkClick = mock()
+    render(
+      <Canonical
+        items={[{ ...canon[0]!, nodes: [book, exodus] }]}
+        onLinkClick={onLinkClick}
+      />
+    )
+    await act(async () => {})
+    const genesisTile = screen.getByRole("radio", { name: "Gen" })
+    const exodusTile = screen.getByRole("radio", { name: "Exod" })
+    for (const tile of [genesisTile, exodusTile, genesisTile, genesisTile]) {
+      await act(async () => {
+        fireEvent.click(tile)
+      })
+      expect(
+        screen
+          .getAllByRole("radio")
+          .filter((radio) => radio.getAttribute("aria-checked") === "true")
+      ).toEqual([tile])
+    }
+    expect(exodusTile.getAttribute("data-state")).not.toBe("on")
+    expect(exodusTile.querySelector("[aria-hidden=true]")).toBeNull()
+    expect(genesisTile.querySelector("[aria-hidden=true]")).toBeTruthy()
+    expect(onLinkClick).toHaveBeenCalledTimes(3)
+  })
+
+  test("Canon follows externally controlled selection", async () => {
+    const exodus = {
+      ...book,
+      id: "exod",
+      label: "Exodus",
+      abbreviation: "Exod",
+      link: "#exod-book",
+    } satisfies TCanonItem
+    const items = [{ ...canon[0]!, nodes: [book, exodus] }]
+    const view = render(
+      <Canonical items={items} activeLink={book} onLinkClick={() => {}} />
+    )
+    await act(async () => {})
+    expect(
+      screen.getByRole("radio", { name: "Gen" }).getAttribute("aria-checked")
+    ).toBe("true")
+    view.rerender(
+      <Canonical items={items} activeLink={exodus} onLinkClick={() => {}} />
+    )
+    await act(async () => {})
+    expect(
+      screen.getByRole("radio", { name: "Gen" }).getAttribute("aria-checked")
+    ).toBe("false")
+    expect(
+      screen.getByRole("radio", { name: "Exod" }).getAttribute("aria-checked")
+    ).toBe("true")
   })
 
   test("both views accept empty collections", () => {

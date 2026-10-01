@@ -148,7 +148,7 @@ export function Markdown({
       data-slot="markdown"
       data-view={current}
       className={cn(
-        "w-[360px] max-w-full [--frame-radius:var(--radius-md)]",
+        "w-90 max-w-full [--frame-radius:var(--radius-md)]",
         bare && "border-transparent shadow-none",
         className,
         "rounded-md!"

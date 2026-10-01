@@ -14,21 +14,6 @@ const GRID_NODE_TYPES = new Set<TNodeType>([
 
 export const isGridNodeType = (type: TNodeType): boolean =>
     GRID_NODE_TYPES.has(type)
-      /*/* Grid layout belongs to this demo, preserving Canon's configurable toggle groups. */
-      // [data-toc-demo="canon"] [data-slot="toggle-group"] {
-      //   display: grid;
-      //   grid-template-columns: repeat(auto-fill, minmax(3rem, 1fr));
-      //   width: 100%;
-      //   gap: 4px;
-      // }
-      // 
-      // [data-toc-demo="canon"] [data-slot="toggle-group-item"] {
-      //   width: 100%;
-      //   height: auto;
-      //   min-width: 0;
-      //   aspect-ratio: 1;
-      //   padding: 0;
-      // }*/
 
 
 export function TocViewModeToggle({
