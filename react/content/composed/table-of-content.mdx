@@ -11,8 +11,222 @@ Browse the Old and New Testament books using their OSIS abbreviations. The searc
 
 <Preview />
 
+### Reproduce this preview
+
+Install `@exegia/corpora-ui` with its React and Jotai peers, then use this
+component. If your app already mounts `ExegiaProvider`, keep that provider and
+render only the contents below it.
+
+```tsx
+"use client"
+
+import { useState } from "react"
+import { TOC, type TCanonItem } from "@exegia/corpora-ui"
+import { ExegiaProvider } from "@exegia/corpora-ui/state"
+import "@exegia/corpora-ui/index.css"
+
+const books = {
+  OT: [
+    ["Gen", "Genesis"],
+    ["Exod", "Exodus"],
+    ["Lev", "Leviticus"],
+    ["Num", "Numbers"],
+    ["Deut", "Deuteronomy"],
+    ["Josh", "Joshua"],
+    ["Judg", "Judges"],
+    ["Ruth", "Ruth"],
+    ["1Sam", "1 Samuel"],
+    ["2Sam", "2 Samuel"],
+    ["1Kgs", "1 Kings"],
+    ["2Kgs", "2 Kings"],
+    ["1Chr", "1 Chronicles"],
+    ["2Chr", "2 Chronicles"],
+    ["Ezra", "Ezra"],
+    ["Neh", "Nehemiah"],
+    ["Esth", "Esther"],
+    ["Job", "Job"],
+    ["Ps", "Psalms"],
+    ["Prov", "Proverbs"],
+    ["Eccl", "Ecclesiastes"],
+    ["Song", "Song of Solomon"],
+    ["Isa", "Isaiah"],
+    ["Jer", "Jeremiah"],
+    ["Lam", "Lamentations"],
+    ["Ezek", "Ezekiel"],
+    ["Dan", "Daniel"],
+    ["Hos", "Hosea"],
+    ["Joel", "Joel"],
+    ["Amos", "Amos"],
+    ["Obad", "Obadiah"],
+    ["Jonah", "Jonah"],
+    ["Mic", "Micah"],
+    ["Nah", "Nahum"],
+    ["Hab", "Habakkuk"],
+    ["Zeph", "Zephaniah"],
+    ["Hag", "Haggai"],
+    ["Zech", "Zechariah"],
+    ["Mal", "Malachi"],
+  ],
+  NT: [
+    ["Matt", "Matthew"],
+    ["Mark", "Mark"],
+    ["Luke", "Luke"],
+    ["John", "John"],
+    ["Acts", "Acts"],
+    ["Rom", "Romans"],
+    ["1Cor", "1 Corinthians"],
+    ["2Cor", "2 Corinthians"],
+    ["Gal", "Galatians"],
+    ["Eph", "Ephesians"],
+    ["Phil", "Philippians"],
+    ["Col", "Colossians"],
+    ["1Thess", "1 Thessalonians"],
+    ["2Thess", "2 Thessalonians"],
+    ["1Tim", "1 Timothy"],
+    ["2Tim", "2 Timothy"],
+    ["Titus", "Titus"],
+    ["Phlm", "Philemon"],
+    ["Heb", "Hebrews"],
+    ["Jas", "James"],
+    ["1Pet", "1 Peter"],
+    ["2Pet", "2 Peter"],
+    ["1John", "1 John"],
+    ["2John", "2 John"],
+    ["3John", "3 John"],
+    ["Jude", "Jude"],
+    ["Rev", "Revelation"],
+  ],
+} as const
+
+const items: TCanonItem[] = (["OT", "NT"] as const).map((testament) => ({
+  id: testament,
+  label: testament === "OT" ? "Old Testament" : "New Testament",
+  link: `#${testament}-section`,
+  level: 1,
+  type: "section",
+  nodes: books[testament].map(([abbreviation, label]) => ({
+    id: abbreviation,
+    label,
+    abbreviation,
+    link: `#demo-${abbreviation}-book`,
+    level: 2,
+    type: "book",
+  })),
+}))
+
+export default function CanonExample() {
+  const [message, setMessage] = useState("")
+
+  return (
+    <ExegiaProvider>
+      <div className="relative mx-auto w-full max-w-lg p-6">
+        <TOC.Canonical
+          items={items}
+          onLinkClick={() => {}}
+          contextMenuItems={[
+            {
+              id: "open",
+              label: "Open book",
+              onSelect: (item) => setMessage(`Opened ${String(item.label)}`),
+            },
+            {
+              id: "bookmark",
+              label: "Bookmark book",
+              onSelect: (item) => setMessage(`Bookmarked ${String(item.label)}`),
+            },
+          ]}
+        />
+        <p role="status" className="mt-2 text-sm text-muted-foreground">
+          {message}
+        </p>
+      </div>
+    </ExegiaProvider>
+  )
+}
+```
+
+
 ## Regular tree navigation
 
 Expand the research handbook to explore its sections, chapters, and paragraphs. This example uses the regular TOC tree rows.
 
 <RegularTreePreview />
+
+## Shared canonical state
+
+Give `TOC.Canonical` a stable `canonId` to read and update its state elsewhere
+under the same `ExegiaProvider`. Omit the ID for an isolated component instance.
+Tree already supports the equivalent `treeId` API and shares this store.
+
+```tsx
+import { TOC } from "@exegia/corpora-ui"
+import { ExegiaProvider, useCanon } from "@exegia/corpora-ui/state"
+import { createStore } from "jotai"
+
+// Create once per app instance (once per request for SSR).
+const store = createStore()
+
+function ResetCanon() {
+  const { reset } = useCanon("reader")
+  return <button onClick={reset}>Reset navigation</button>
+}
+
+// `items` is your canonical collection.
+<ExegiaProvider store={store}>
+  <TOC.Canonical canonId="reader" items={items} />
+  <ResetCanon />
+</ExegiaProvider>
+```
+
+Every atom below is a stable family keyed by `canonId`, exported from
+`@exegia/corpora-ui/state` with `CanonState` and `CanonProps`.
+
+| Atom | Kind | Value or action argument |
+| --- | --- | --- |
+| `canonSelectedLinkAtom(id)` | Derived | `string \| undefined` |
+| `canonExpandedIdsAtom(id)` | Primitive | `ReadonlySet<string>` |
+| `canonActiveSectionIdAtom(id)` | Primitive | `string \| undefined` |
+| `canonStateAtom(id)` | Derived | `CanonState` |
+| `selectCanonItemAtom(id)` | Action | `TCanonItem` |
+| `setCanonSectionAtom(id)` | Action | `string \| undefined` |
+| `resetCanonAtom(id)` | Action | No argument |
+
+The `activeLink` prop remains authoritative when supplied. Reset clears owned
+selection and expansion and returns the mounted navigator to its first section;
+it does not override a controlled selection. Selection actions update state;
+navigation callbacks and sound run only for UI interactions.
+
+Named instances persist across remounts. Call `removeCanonInstance(id)` only
+after all consumers of that ID have unmounted. Jotai is already a peer dependency,
+and the package shares atom definitions across its root and state entrypoints.
+
+## Book context menu
+
+Right-click a book in the preview to try its actions. Supply `contextMenuItems`
+as an array, or a function returning actions for the selected book. Each action
+receives the original `TCanonItem`; opening the menu does not select or navigate.
+Omit the prop (or return an empty array) to keep the browser's native menu.
+
+```tsx
+<TOC.Canonical
+  items={items}
+  contextMenuItems={(book) => [
+    {
+      id: "bookmark",
+      label: "Bookmark book",
+      disabled: bookmarkedIds.has(book.id),
+      onSelect: (item) => bookmark(item.id),
+    },
+  ]}
+/>
+```
+
+Actions also accept an `icon` and `variant="destructive"`.
+`CanonContextMenuItem` and `CanonContextMenuItems` are exported from the package.
+
+## Search the regular tree
+
+`TOC.Root` includes a search input that filters labels without changing the
+source items. Matching descendants keep their ancestors and are expanded
+automatically. Matching branches retain their full subtree. Clear the input to
+restore the previous expansion state; an empty result shows “No results found.”

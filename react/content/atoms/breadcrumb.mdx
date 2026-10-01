@@ -3,7 +3,7 @@ title: "Breadcrumb"
 description: "Navigation that shows the current location."
 ---
 
-import { Preview } from "@/components/stories/breadcrumb.story"
+import { Preview, OverlayExample } from "@/components/stories/breadcrumb.story"
 
 <Preview />
 
@@ -32,3 +32,78 @@ function ComponentPreview({ page }: { page: string }) {
 ## API notes
 
 `BreadcrumbLink` accepts anchor props. Use `BreadcrumbPage` for the current location and `BreadcrumbSeparator` between items.
+
+
+## Item overlays
+
+Each `BreadcrumbItem` accepts an optional `overlay`. Its small labelled button
+opens a menu or popover, or shows a tooltip on hover and keyboard focus. The
+breadcrumb link still navigates normally. The same option works beside
+`BreadcrumbPage` for the current location.
+
+<OverlayExample />
+
+```tsx
+import {
+  Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink,
+  BreadcrumbPage, BreadcrumbSeparator,
+} from "@exegia/corpora-ui/ui/breadcrumb"
+import { MenuLinkItem } from "@exegia/corpora-ui/ui/menu"
+import { PopoverTitle, PopoverDescription } from "@exegia/corpora-ui/ui/popover"
+
+export function BreadcrumbWithOverlays() {
+  return (
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem overlay={{
+          type: "tooltip",
+          label: "About Home",
+          content: "Return to the documentation homepage.",
+        }}>
+          <BreadcrumbLink href="/">Home</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem overlay={{
+          type: "menu",
+          label: "Library navigation",
+          content: <>
+            <MenuLinkItem href="/library/books">Books</MenuLinkItem>
+            <MenuLinkItem href="/library/collections">Collections</MenuLinkItem>
+          </>,
+        }}>
+          <BreadcrumbLink href="/library">Library</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem overlay={{
+          type: "popover",
+          label: "About this page",
+          content: <>
+            <PopoverTitle>Breadcrumb</PopoverTitle>
+            <PopoverDescription>
+              Navigation that shows the current location.
+            </PopoverDescription>
+          </>,
+        }}>
+          <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  )
+}
+```
+
+| Option | Purpose |
+| --- | --- |
+| `type` | `"menu"`, `"popover"`, or `"tooltip"` |
+| `label` | Required accessible name for the overlay button |
+| `content` | Menu primitives, popover content, or a short noninteractive tooltip |
+| `icon` | Optional replacement for the chevron or info icon |
+| `disabled` | Disable the overlay button while keeping the crumb link available |
+
+For coordinated flows, `open` and `onOpenChange` control the overlay.
+`portalProps` forwards the portal container and mounting options.
+
+Import `BreadcrumbItemOverlay` from `@exegia/corpora-ui/ui/breadcrumb` to type
+shared configurations. Use `MenuItem` for actions and `MenuLinkItem` for links.
+Use popovers for interactive content. Menu and popover support Escape dismissal
+and focus restoration through the existing Coss/Base UI primitives.
