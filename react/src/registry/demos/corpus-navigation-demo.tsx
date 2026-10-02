@@ -2,84 +2,71 @@
 import { BrowserFrame } from "@/components/docs/browser"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { CorpusNavigator } from "@/components/blocks/corpus-navigation"
-import {
-  anchorFor,
-  formatReference,
-} from "@/components/composed/corpus-navigation"
-import { navigationSamples, firstReadingNode } from "./corpus-navigation-data"
+import { navigationSamples } from "./corpus-navigation-data"
+import { Scaffold, useScaffold } from "@/library"
+import Breadcrumb from "@/components/composed/breadcrumb"
 export default function CorpusNavigationDemo() {
   const [sample, setSample] = useState(0)
-  const data = navigationSamples[sample]
-  const first = firstReadingNode(data)
-  return (
-    <div className="not-prose space-y-4">
-      <div
-        className="gap-2 flex flex-wrap"
-        role="group"
-        aria-label="Corpus samples"
-      >
-        {navigationSamples.map((corpus, index) => (
-          <Button
-            key={corpus.corpusId}
-            variant={sample === index ? "default" : "outline"}
-            className="min-h-11"
-            aria-pressed={sample === index}
-            onClick={() => setSample(index)}
-          >
-            {corpus.label}
-          </Button>
-        ))}
-      </div>
-      <BrowserFrame title="Corpus reader" titleStyle="titlebar">
-        <CorpusNavigator
-          key={data.corpusId}
-          data={data}
-          defaultLocation={first ? anchorFor(data, first.id) : null}
-          shortcut="global"
-          contextSlot={
-            <div className="space-y-3">
-              <h3 className="font-semibold">About this sample</h3>
-              <p className="text-muted-foreground">
-                Navigation excerpts show the hierarchy. Books, booklets and
-                papers use illustrative page maps.
-              </p>
-              <p className="text-muted-foreground">
-                The host supplies text, routes, annotations and edition bounds.
-              </p>
-            </div>
-          }
+  // const data = navigationSamples[sample]
+  // const first = firstReadingNode(data)
+  const scaffold = useScaffold()
+
+  const renderTypeSelector = () => (
+    <div
+      className="gap-2 flex flex-wrap"
+      role="group"
+      aria-label="Corpus samples"
+    >
+      {navigationSamples.map((corpus, index) => (
+        <Button
+          key={corpus.corpusId}
+          variant={sample === index ? "default" : "outline"}
+          aria-pressed={sample === index}
+          onClick={() => setSample(index)}
         >
-          {(state) => (
-            <article className="max-w-prose space-y-5 py-6 mx-auto">
-              <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
-                {data.schema.label}
-              </p>
-              <h2 className="text-3xl font-semibold tracking-tight">
-                <bdi>{formatReference(data, state.location)}</bdi>
-              </h2>
-              {data.corpusId === "bible" ? (
-                <p className="text-lg leading-relaxed">
-                  In the beginning was the Word, and the Word was with God, and
-                  the Word was God.
-                </p>
-              ) : data.corpusId === "quran" ? (
-                <p lang="ar" className="text-3xl leading-loose">
-                  قُلْ هُوَ ٱللَّهُ أَحَدٌ
-                </p>
-              ) : (
-                <p className="text-lg leading-relaxed">
-                  A reading surface supplied by the host application.
-                </p>
-              )}
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                Browse another location without losing your place. Choose Go to
-                location to commit; Return takes you back. This sample keeps the
-                excerpt text fixed so navigation and rendering remain separate.
-              </p>
-            </article>
-          )}
-        </CorpusNavigator>
+          {corpus.label}
+        </Button>
+      ))}
+    </div>
+  )
+
+  const renderCorpusNavigator = () => (
+    <div>
+      <div className="my-3 px-2 w-full border-b border-b-secondary">
+        <Breadcrumb.Root>
+          <span>test</span>
+        </Breadcrumb.Root>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="not-prose space-y-4 relative">
+      {renderTypeSelector()}
+      <BrowserFrame
+        title="Corpus reader"
+        titleStyle="hidden"
+        className="max-h-96 relative items-stretch"
+      >
+        <Scaffold.Root
+          {...scaffold.providerProps}
+          className="min-h-0 relative h-full flex-1"
+        >
+          <Scaffold.Sidebar className="h-full shrink-0">
+            <div className="p-2"></div>
+          </Scaffold.Sidebar>
+          <Scaffold.Main>
+            <Scaffold.Actions>
+              <Scaffold.Tab key="draft">Draft</Scaffold.Tab>
+            </Scaffold.Actions>
+
+            <Scaffold.Canvas>
+              <Scaffold.Panel key="draft">
+                {renderCorpusNavigator()}
+              </Scaffold.Panel>
+            </Scaffold.Canvas>
+          </Scaffold.Main>
+        </Scaffold.Root>
       </BrowserFrame>
     </div>
   )

@@ -42,6 +42,13 @@ export * from "./components/ui/textarea"
 export * from "./components/icons"
 
 // components
+export { default as Breadcrumb } from "./components/composed/breadcrumb"
+export type {
+  IBreadcrumbItemProps,
+  IBreadcrumbSeparatorProps,
+  TBreadcrumbVariant,
+  TBreadcrumbSeparatorSymbol,
+} from "./components/composed/breadcrumb/types"
 export * from "./components/composed/ai"
 export * from "./components/composed/logo"
 export * from "./components/composed/password-input"
@@ -50,7 +57,11 @@ export * from "./components/composed/reader"
 export * from "./components/composed/tree"
 export * from "./components/composed/navigation/toc"
 export { default as User } from "./components/composed/user"
-export type { IUserMessageProps, TUserInfoProps, TUserPillProps } from "./components/composed/user/types"
+export type {
+  IUserMessageProps,
+  TUserInfoProps,
+  TUserPillProps,
+} from "./components/composed/user/types"
 export * from "./components/composed/verse"
 // The old `components/user-avatar` module was removed (92f029c); the avatar
 // now lives in `components/atoms/avatar` and flows through the atoms barrel.
@@ -110,3 +121,9 @@ export * as UI from "./ui"
 
 // schema-driven corpus navigation
 export * from "./components/blocks/corpus-navigation/public"
+
+export {
+  PreviewRail,
+  type PreviewRailItem,
+  type PreviewRailProps,
+} from "./components/motion/preview-rail"

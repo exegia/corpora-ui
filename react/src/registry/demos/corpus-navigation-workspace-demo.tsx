@@ -19,7 +19,7 @@ export default function CorpusNavigationWorkspaceDemo() {
       titleStyle="titlebar"
       className="not-prose"
     >
-      <div className="h-[42rem] w-full overflow-hidden">
+      <div className="h-168 w-full overflow-hidden">
         <Scaffold.Root
           inspectorOpen={inspectorOpen}
           onInspectorOpenChange={setInspectorOpen}
