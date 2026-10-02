@@ -4,7 +4,7 @@ import type { ReactElement } from "react"
 import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover"
 import { TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { Button } from "@/ui/button"
+import { Button } from "@/components/ui/button"
 import type { IBreadcrumbItemProps } from "./types"
 import { tooltipHandle } from "./utils"
 

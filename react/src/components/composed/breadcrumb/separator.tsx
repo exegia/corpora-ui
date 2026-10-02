@@ -3,7 +3,7 @@
 import { ChevronRight } from "lucide-react"
 import type { ReactElement } from "react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/ui/button"
+import { Button } from "@/components/ui/button"
 import type { IBreadcrumbSeparatorProps } from "./types"
 
 /** Displays a decorative symbol or uses it as a labelled menu trigger. */
