@@ -9,7 +9,7 @@ import type {
 } from "@/components/composed/navigation/toc/types"
 import { OSIS_BOOKS, type Testament } from "@/lib/canonical"
 import { defineStory } from "@/registry/story"
-// import "./toc.story.css"
+import { canonDemoCounts } from "./canon-demo-counts"
 
 function isBookAbbreviation(value: string): value is TBookAbbreviation {
   return Object.hasOwn(OSIS_BOOKS, value)
@@ -38,6 +38,22 @@ function canonBooks(
       link: `#demo-${abbreviation}-book`,
       level: 2,
       type: "book",
+      nodes: (canonDemoCounts[abbreviation] ?? []).map((verseCount, chapterIndex) => ({
+        id: `${abbreviation}-${chapterIndex + 1}`,
+        label: `${OSIS_BOOKS[abbreviation].name} ${chapterIndex + 1}`,
+        link: `#demo-${abbreviation}-${chapterIndex + 1}-chapter`,
+        level: 3,
+        type: "chapter",
+        number: chapterIndex + 1,
+        nodes: Array.from({ length: verseCount }, (_, verseIndex) => ({
+          id: `${abbreviation}-${chapterIndex + 1}-${verseIndex + 1}`,
+          label: `${OSIS_BOOKS[abbreviation].name} ${chapterIndex + 1}:${verseIndex + 1}`,
+          link: `#demo-${abbreviation}-${chapterIndex + 1}-${verseIndex + 1}-verse`,
+          level: 4,
+          type: "verse",
+          number: verseIndex + 1,
+        })),
+      })),
     }))
 }
 
@@ -123,13 +139,14 @@ const regularItems: TTocItem[] = [
 function CanonPreview() {
   const [message, setMessage] = useState("")
   return (
-    <div className="max-w-lg p-6 relative mx-auto w-full" data-toc-demo="canon">
+    <div className="max-w-lg p-2 sm:p-6 relative mx-auto w-full" data-toc-demo="canon">
       <TOC.Canonical
+        className="h-[32rem]"
         items={canonItems}
-        onLinkClick={() => {}}
+        onLinkClick={(item) => setMessage(`Selected ${String(item.label)}`)}
         contextMenuItems={[
-          { id: "open", label: "Open book", onSelect: (item) => setMessage(`Opened ${String(item.label)}`) },
-          { id: "bookmark", label: "Bookmark book", onSelect: (item) => setMessage(`Bookmarked ${String(item.label)}`) },
+          { id: "open", label: "Open location", onSelect: (item) => setMessage(`Opened ${String(item.label)}`) },
+          { id: "bookmark", label: "Bookmark location", onSelect: (item) => setMessage(`Bookmarked ${String(item.label)}`) },
         ]}
       />
       <p role="status" className="mt-2 text-sm text-muted-foreground">{message}</p>
