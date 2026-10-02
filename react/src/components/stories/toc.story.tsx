@@ -152,3 +152,20 @@ export const regularStory = defineStory({
 })
 export const Preview = story.WithControl
 export const RegularTreePreview = regularStory.WithControl
+
+function CompactPreview() {
+  const [activeLink, setActiveLink] = useState<TTocItem>(regularItems[0])
+  return (
+    <div className="mx-auto flex min-h-80 w-full max-w-lg items-center gap-6 p-6">
+      <TOC.Compact items={regularItems} activeLink={activeLink} onLinkClick={setActiveLink} />
+      <div className="min-w-0 flex-1">
+        <p className="mb-2 text-xs text-muted-foreground">RESEARCH HANDBOOK</p>
+        <p className="font-medium" role="status">{activeLink.label}</p>
+        <p className="mt-2 text-sm text-muted-foreground">Hover or focus a tick to preview its place in the outline. Select it to navigate.</p>
+      </div>
+    </div>
+  )
+}
+
+export const compactStory = defineStory({ Component: CompactPreview, centered: false })
+export const CompactPreviewRail = compactStory.WithControl

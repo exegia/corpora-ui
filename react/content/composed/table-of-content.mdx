@@ -3,7 +3,7 @@ title: "Table of content"
 description: "Browse canonical books in a grid or explore a book's hierarchy with tree navigation."
 ---
 
-import { Preview, RegularTreePreview } from "@/components/stories/toc.story"
+import { Preview, RegularTreePreview, CompactPreviewRail } from "@/components/stories/toc.story"
 
 ## Canon book grid
 
@@ -230,3 +230,42 @@ Actions also accept an `icon` and `variant="destructive"`.
 source items. Matching descendants keep their ancestors and are expanded
 automatically. Matching branches retain their full subtree. Clear the input to
 restore the previous expansion state; an empty result shows “No results found.”
+
+
+## Compact preview rail
+
+<CompactPreviewRail />
+
+`TOC.Compact` uses beUI's [Preview Rail](https://beui.dev/components/motion/preview-rail)
+(MIT). It accepts the same nested items as the regular TOC, including canonical
+items. Every destination appears in document order; shorter ticks indicate deeper
+nodes. Hover or keyboard focus reveals its title, ancestor path, and description.
+
+```tsx
+import { TOC, type TTocItem } from "@exegia/corpora-ui"
+import { useState } from "react"
+
+const items: TTocItem[] = [{
+  id: "intro", label: "Introduction", link: "#intro-section",
+  type: "section", level: 1,
+  nodes: [{
+    id: "sources", label: "Sources", link: "#sources-chapter",
+    type: "chapter", level: 2, description: "Primary texts and editions.",
+  }],
+}]
+
+export function CompactOutline() {
+  const [activeLink, setActiveLink] = useState<TTocItem>(items[0])
+  return <TOC.Compact items={items} activeLink={activeLink} onLinkClick={setActiveLink} />
+}
+```
+
+With `onLinkClick`, your application handles navigation and receives the original
+item. Omit it to follow each item's hash link (on touch, the first tap previews,
+the second follows). Supply `activeLink` to synchronize with the reader.
+
+Use `orientation="horizontal"` for a horizontal rail, `previewSide="before"`
+for previews on the opposite side, or `showPreview={false}` for ticks alone.
+`itemSize` defaults to 24 pixels. Reserve room beside the rail for its floating
+preview; avoid clipping ancestors. Labels include the full ancestor path for
+screen readers. Motion respects the reduced-motion preference.

@@ -30,19 +30,27 @@ The Shell contains the reading surface, browsing controls and optional context. 
 
 ```tsx
 import { useState } from "react"
-import { CorpusNavigator, type CorpusAnchor, type CorpusData } from "@exegia/corpora-ui/corpus-navigation"
+import {
+  CorpusNavigator,
+  type CorpusAnchor,
+  type CorpusData,
+} from "@exegia/corpora-ui/corpus-navigation"
 
 function ControlledReader({ data }: { data: CorpusData }) {
   const [location, setLocation] = useState<CorpusAnchor | null>(null)
-  return <CorpusNavigator
-    navigatorId="reader"
-    data={data}
-    location={location}
-    onNavigate={setLocation}
-    shortcut="focused"
-  >
-    {state => <p>Host reading anchor: {state.location?.nodeId ?? "None"}</p>}
-  </CorpusNavigator>
+  return (
+    <CorpusNavigator
+      navigatorId="reader"
+      data={data}
+      location={location}
+      onNavigate={setLocation}
+      shortcut="focused"
+    >
+      {(state) => (
+        <p>Host reading anchor: {state.location?.nodeId ?? "None"}</p>
+      )}
+    </CorpusNavigator>
+  )
 }
 ```
 
@@ -52,16 +60,16 @@ function ControlledReader({ data }: { data: CorpusData }) {
 
 ## Props
 
-| Prop | Default | Responsibility |
-| --- | --- | --- |
-| `data` | required | Immutable edition/schema/index and optional resolver/search |
-| `location`, `onNavigate` | uncontrolled | Host-owned anchor, or a notification for uncontrolled mode |
-| `defaultLocation` | none | Initial uncontrolled anchor |
-| `navigatorId` | generated | Shared hooks and explicit lifecycle |
-| `historyLimit` | 20 | Bounded Return history |
-| `shortcut` | focused | `focused`, `global`, or `false` |
-| `portalProps` | inherited | Breadcrumb popover and Drawer/Modal portal props, including container overrides |
-| `children`, `contextSlot`, `corpusSlot` | empty | Host content slots |
+| Prop                                    | Default      | Responsibility                                                                  |
+| --------------------------------------- | ------------ | ------------------------------------------------------------------------------- |
+| `data`                                  | required     | Immutable edition/schema/index and optional resolver/search                     |
+| `location`, `onNavigate`                | uncontrolled | Host-owned anchor, or a notification for uncontrolled mode                      |
+| `defaultLocation`                       | none         | Initial uncontrolled anchor                                                     |
+| `navigatorId`                           | generated    | Shared hooks and explicit lifecycle                                             |
+| `historyLimit`                          | 20           | Bounded Return history                                                          |
+| `shortcut`                              | focused      | `focused`, `global`, or `false`                                                 |
+| `portalProps`                           | inherited    | Breadcrumb popover and Drawer/Modal portal props, including container overrides |
+| `children`, `contextSlot`, `corpusSlot` | empty        | Host content slots                                                              |
 
 The `portalProps.container` override follows existing overlay behavior: omit to inherit the provider destination; pass an element/ref for an explicit destination; pass `null` to defer portal mounting until a container is ready. Pass `document.body` explicitly to target the body. Keep overlay targets inside the appropriate themed/direction subtree.
 

@@ -1,6 +1,9 @@
 "use client"
 
 import { Canonical, CanonItem } from "./canon"
+import { Compact } from "./compact"
+export type { CompactTocProps } from "./compact"
+
 import { Root } from "./default"
 import { DefaultSection } from "./section"
 import { TocTreeNode } from "./tree-node"
@@ -30,6 +33,7 @@ export type {
 
 export const TOC = {
   Root,
+  Compact,
   Canonical,
   CanonItem,
   Section: DefaultSection,
