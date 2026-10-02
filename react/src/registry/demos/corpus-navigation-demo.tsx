@@ -1,34 +1,9 @@
 "use client"
 import { BrowserFrame } from "@/components/docs/browser"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { navigationSamples } from "./corpus-navigation-data"
 import { Scaffold, useScaffold } from "@/library"
 import Breadcrumb from "@/components/composed/breadcrumb"
 export default function CorpusNavigationDemo() {
-  const [sample, setSample] = useState(0)
-  // const data = navigationSamples[sample]
-  // const first = firstReadingNode(data)
   const scaffold = useScaffold()
-
-  const renderTypeSelector = () => (
-    <div
-      className="gap-2 flex flex-wrap"
-      role="group"
-      aria-label="Corpus samples"
-    >
-      {navigationSamples.map((corpus, index) => (
-        <Button
-          key={corpus.corpusId}
-          variant={sample === index ? "default" : "outline"}
-          aria-pressed={sample === index}
-          onClick={() => setSample(index)}
-        >
-          {corpus.label}
-        </Button>
-      ))}
-    </div>
-  )
 
   const renderCorpusNavigator = () => (
     <div>
@@ -42,7 +17,6 @@ export default function CorpusNavigationDemo() {
 
   return (
     <div className="not-prose space-y-4 relative">
-      {renderTypeSelector()}
       <BrowserFrame
         title="Corpus reader"
         titleStyle="hidden"
