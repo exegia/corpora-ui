@@ -2,7 +2,7 @@
 
 import  { type ToggleGroupItemProps, ToggleGroup as ArkToggleGroup } from "@ark-ui/react/toggle-group";
 import { Toggle } from "./toggle";
-import { cn } from "@/library";
+import { cn } from "@/lib/utils";
 import { useToggleGroup } from "./context";
 
 
@@ -30,4 +30,3 @@ export const ToggleGroupItem = (props: ToggleGroupItemProps) => {
     </ArkToggleGroup.Item>
   );
 };
-

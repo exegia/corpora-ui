@@ -7,6 +7,8 @@ export { preloadSounds } from "./sound-loading"
 
 export { useCanon } from "../../components/composed/navigation/toc/use-canon"
 export {
+  canonBrowseLinkAtom,
+  browseCanonAtom,
   canonSelectedLinkAtom,
   canonExpandedIdsAtom,
   canonActiveSectionIdAtom,
