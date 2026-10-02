@@ -7,7 +7,7 @@ import { Preview, RegularTreePreview, CompactPreviewRail } from "@/components/st
 
 ## Canon book grid
 
-Browse the Old and New Testament books using their OSIS abbreviations. The search input is a UI preview; it does not filter the books yet.
+Browse the Old and New Testament books using their OSIS abbreviations. Select a book to open its chapters, then a chapter to open its verses. The highlighted header returns to books; the back button returns one level. Neighbor buttons switch books. The demo uses KJV chapter and verse counts. The search input is a UI preview; it does not filter the books yet.
 
 <Preview />
 
@@ -111,6 +111,23 @@ const items: TCanonItem[] = (["OT", "NT"] as const).map((testament) => ({
     link: `#demo-${abbreviation}-book`,
     level: 2,
     type: "book",
+    // A short Exodus excerpt; supply your edition’s full hierarchy here.
+    nodes: abbreviation === "Exod" ? [22, 25].map((count, index) => ({
+      id: `Exod-${index + 1}`,
+      label: `Exodus ${index + 1}`,
+      link: `#Exod-${index + 1}-chapter`,
+      type: "chapter",
+      level: 3,
+      number: index + 1,
+      nodes: Array.from({ length: count }, (_, verse) => ({
+        id: `Exod-${index + 1}-${verse + 1}`,
+        label: `Exodus ${index + 1}:${verse + 1}`,
+        link: `#Exod-${index + 1}-${verse + 1}-verse`,
+        type: "verse",
+        level: 4,
+        number: verse + 1,
+      })),
+    })) : undefined,
   })),
 }))
 
@@ -121,6 +138,7 @@ export default function CanonExample() {
     <ExegiaProvider>
       <div className="relative mx-auto w-full max-w-lg p-6">
         <TOC.Canonical
+          className="h-[32rem]"
           items={items}
           onLinkClick={() => {}}
           contextMenuItems={[
@@ -269,3 +287,41 @@ for previews on the opposite side, or `showPreview={false}` for ticks alone.
 `itemSize` defaults to 24 pixels. Reserve room beside the rail for its floating
 preview; avoid clipping ancestors. Labels include the full ancestor path for
 screen readers. Motion respects the reduced-motion preference.
+
+### Nested canonical navigation
+
+Supply chapters in each book’s `nodes` and verses in each chapter’s `nodes`.
+Counts come from your data; the component never invents missing chapters or verses.
+The snippet above contains an Exodus excerpt; the live demo includes all KJV books.
+`onLinkClick` receives the original item at every level. Without a callback, only
+leaf selections navigate to their hash. Items without children remain selectable.
+
+`useCanon(canonId)` exposes `browseLink` and `browse(link)` alongside selection.
+Call `browse(undefined)` to return to books without clearing the selected verse.
+Changing testament or calling `reset()` returns to the book grid. Motion respects
+reduced-motion preferences.
+
+Set `className="h-[32rem]"` (or give the parent a fixed height) to constrain the canonical navigator. The Coss ScrollArea scrolls the tiles while the search, tabs, and navigation header stay visible. Without a height constraint, the grid grows with its contents. Missing neighboring books are omitted so the current-book tile fills the available space.
+
+### Reuse the chapter or verse picker
+
+`TOC.CanonGrid` (also exported as `CanonGrid`) is the standalone heading, back
+control, and scrollable tile panel. Place it inside a breadcrumb popover and pass
+that book’s chapters or that chapter’s verses. It has no dependency on canonical
+store state; the host controls selection and navigation.
+
+```tsx
+<TOC.CanonGrid
+  className="h-72 w-80 flex-none"
+  title="Verses"
+  items={chapter.nodes ?? []}
+  selectedLink={selectedVerse?.link}
+  onLinkClick={setSelectedVerse}
+  backLabel="Chapters"
+  onBack={showChapters}
+/>
+```
+
+The scroll surface has outer spacing, padded tiles, and a neutral background
+(`dark:bg-neutral-950`). `contextMenuItems` supports the same actions as the full
+canonical navigator. Omit `onBack` to hide the back control.

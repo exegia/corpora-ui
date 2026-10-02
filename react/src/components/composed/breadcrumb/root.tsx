@@ -1,6 +1,6 @@
 "use client"
 
-import { Tooltip, TooltipPopup } from "@/library"
+import { Tooltip, TooltipPopup } from "@/components/ui/tooltip"
 import type * as React from "react"
 import { tooltipHandle } from "./utils"
 
