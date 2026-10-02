@@ -1,23 +1,23 @@
 {
   "title": "Blocks",
   "pages": [
-    "index",
-    "login",
-    "signup",
-    "forgot-password",
-    "code-auth",
-    "update-password",
-    "passkey-sign-in",
-    "passkey-manager",
-    "linked-accounts",
-    "onboarding",
     "auth-flow",
-    "profile-card",
-    "navbar",
-    "shell",
-    "scaffold",
+    "index",
     "chat",
+    "code-auth",
+    "corpus-navigator",
+    "forgot-password",
+    "linked-accounts",
+    "login",
+    "navbar",
+    "onboarding",
+    "passkey-manager",
+    "passkey-sign-in",
+    "profile-card",
+    "scaffold",
+    "shell",
     "sidebar-primitives",
-    "corpus-navigator"
+    "signup",
+    "update-password"
   ]
 }
