@@ -12,7 +12,9 @@ export function Root({
       <nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />
       <Tooltip handle={tooltipHandle}>
         {({ payload }) => (
-          <TooltipPopup>{payload?.tooltip ?? payload?.label}</TooltipPopup>
+          <TooltipPopup role="tooltip">
+            {payload?.tooltip ?? payload?.label}
+          </TooltipPopup>
         )}
       </Tooltip>
     </>
