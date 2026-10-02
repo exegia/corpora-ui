@@ -1,14 +1,18 @@
 "use client"
 
 import { Tooltip, TooltipTrigger, TooltipPopup } from "@/ui/tooltip"
-import { Button } from "@/ui/button"
+import { Button } from "@/components/ui/button"
 import { defineStory } from "@/registry/story"
 
 function ComponentPreview({ description }: { description: string }) {
-
   return (
-    <div className="relative mx-auto w-full max-w-lg p-6">
-      <Tooltip><TooltipTrigger render={<Button variant="outline" />}>Export</TooltipTrigger><TooltipPopup>{description}</TooltipPopup></Tooltip>
+    <div className="max-w-lg p-6 relative mx-auto w-full">
+      <Tooltip>
+        <TooltipTrigger render={<Button variant="outline" />}>
+          Export
+        </TooltipTrigger>
+        <TooltipPopup>{description}</TooltipPopup>
+      </Tooltip>
     </div>
   )
 }
