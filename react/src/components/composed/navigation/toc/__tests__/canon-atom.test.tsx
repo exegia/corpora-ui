@@ -88,9 +88,8 @@ describe("Canon atoms", () => {
       store.set(setCanonSectionAtom("remote"), "second")
       store.set(selectCanonItemAtom("remote"), other)
     })
-    expect(
-      screen.getByRole("radio", { name: "Exod" }).getAttribute("aria-checked")
-    ).toBe("true")
+    expect(screen.getByRole("heading", { name: "Chapters" })).toBeTruthy()
+    expect(store.get(canonStateAtom("remote")).browseLink).toBe(other.link)
     await act(async () => {
       fireEvent.click(screen.getByRole("tab", { name: "First" }))
     })
@@ -145,7 +144,7 @@ describe("Canon atoms", () => {
     await act(async () => {
       fireEvent.click(tiles[0]!)
     })
-    expect(tiles[0]!.getAttribute("aria-checked")).toBe("true")
+    expect(screen.getAllByRole("heading", { name: "Chapters" })).toHaveLength(1)
     expect(tiles[1]!.getAttribute("aria-checked")).toBe("false")
   })
 })

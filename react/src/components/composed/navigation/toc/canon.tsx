@@ -1,118 +1,25 @@
 "use client"
 
-import { useEffect, useId, useMemo, useState, type JSX } from "react"
-import { ToggleGroup as ArkToggleGroup } from "@ark-ui/react/toggle-group"
+import { useEffect, useId, useMemo, useRef, type JSX } from "react"
 import { playCue } from "@/lib/sound"
-import { LayoutGroup, motion, useReducedMotion } from "motion/react"
-import {
-  Tooltip,
-  TooltipCreateHandle,
-  TooltipPopup,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { SearchIcon } from "lucide-react"
+import { motion, useReducedMotion } from "motion/react"
+import { Grid2X2Icon, SearchIcon } from "lucide-react"
 import {
   InputGroup,
   InputGroupInput,
   InputGroupAddon,
 } from "@/components/ui/input-group"
 import { cn } from "@/lib/utils"
-import { DefaultSection } from "./section"
-import type { CanonItemProps, CanonProps, TCanonItem } from "./types"
-import { ToggleGroup } from "@/components/ui/toggle-group/index"
-import { buttonVariants } from "@/components/ui/button"
+import { CanonGrid } from "./canon-grid"
+export { CanonItem } from "./canon-item"
+import type { CanonProps, TCanonItem } from "./types"
+import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Kbd } from "@/components/ui/kbd"
-import {
-  ContextMenu,
-  ContextMenuTrigger,
-  ContextMenuPopup,
-  ContextMenuItem,
-} from "@/components/ui/context-menu"
 import { useCanonController } from "./use-canon"
 
-type BookTooltipHandle = ReturnType<typeof TooltipCreateHandle<string>>
-
-export function CanonItem({
-  item,
-  active,
-  onLinkClick,
-  tooltipHandle,
-  contextMenuItems,
-}: CanonItemProps & { tooltipHandle?: BookTooltipHandle }): JSX.Element {
-  const reducedMotion = useReducedMotion()
-  const content = (
-    <>
-      {active && (
-        <motion.span
-          aria-hidden="true"
-          layoutId="canon-selection"
-          initial={false}
-          transition={{
-            type: "spring",
-            duration: reducedMotion ? 0 : 0.3,
-            bounce: 0,
-          }}
-          className="inset-0 bg-stone-950 dark:bg-stone-100 pointer-events-none absolute rounded-sm bezel-dim-b-2 bezel-dim-blur-3 bezel-dim/78 bezel-lit-blur-2 bezel-lit-t-3 bezel-lit/14 dark:bezel-dim/50 dark:bezel-lit-blur-2 dark:bezel-lit/90"
-        />
-      )}
-      <span className="text-xs relative z-10">
-        {item.type === "book" ? item.abbreviation : (item.number ?? item.label)}
-      </span>
-    </>
-  )
-  const tile = (
-    <ArkToggleGroup.Item
-      value={item.link}
-      data-slot="toggle-group-item"
-      onClick={() => onLinkClick?.(item)}
-      className={cn(
-        buttonVariants({ variant: "outline" }),
-        "min-w-0 p-0 min-h-12 bg-stone-100 dark:bg-stone-900 relative isolate aspect-square h-auto w-full rounded-sm",
-        active && "text-white! dark:text-black! hover:bg-transparent!",
-        "bezel-dim-b-2 bezel-dim-blur-1 bezel-dim/10 bezel-lit-blur-1 bezel-lit-t-2 bezel-lit/90 dark:bezel-lit-blur-2 dark:bezel-lit-t-1 dark:bezel-lit/20 dark:bezel-dim"
-      )}
-    />
-  )
-  const trigger = tooltipHandle ? (
-    <TooltipTrigger
-      delay={300}
-      handle={tooltipHandle}
-      payload={item.label}
-
-      render={tile}
-    >
-      {content}
-    </TooltipTrigger>
-  ) : (
-    <ArkToggleGroup.Item {...tile.props}>{content}</ArkToggleGroup.Item>
-  )
-  const menuItems = typeof contextMenuItems === "function"
-    ? contextMenuItems(item)
-    : contextMenuItems
-  if (!menuItems?.length) return trigger
-  return (
-    <ContextMenu>
-      <ContextMenuTrigger render={trigger} />
-      <ContextMenuPopup>
-        {menuItems.map((action) => (
-          <ContextMenuItem
-            key={action.id}
-            disabled={action.disabled}
-            variant={action.variant}
-            onClick={() => action.onSelect(item)}
-          >
-            {action.icon}
-            {action.label}
-          </ContextMenuItem>
-        ))}
-      </ContextMenuPopup>
-    </ContextMenu>
-  )
-}
-
 export function Canonical({
+  className,
   items,
   canonId,
   contextMenuItems,
@@ -122,10 +29,10 @@ export function Canonical({
 }: CanonProps): JSX.Element {
   const reducedMotion = useReducedMotion()
   const layoutScope = useId()
-  const [tooltipHandle] = useState(() => TooltipCreateHandle<string>())
   const {
+    browseLink,
+    browse,
     selectedLink,
-    expandedIds: expanded,
     activeSectionId,
     select,
     setSection,
@@ -145,44 +52,14 @@ export function Canonical({
   )
 
   const selectItem = (item: TCanonItem) => {
+    if (item.nodes?.length) browse(item.link)
+    else if (item.type === "book") browse(undefined)
     if (selected[0] === item.link) return
     playCue("tick", { volume: 0.15 })
     select(item)
     if (onLinkClick) onLinkClick(item)
-    else window.location.assign(item.link)
+    else if (!item.nodes?.length) window.location.assign(item.link)
   }
-
-  const renderGroup = (nodes: readonly TCanonItem[]) => (
-    <LayoutGroup id={layoutScope}>
-      <ToggleGroup
-        multiple={false}
-        variant={"outline"}
-        value={selected}
-        onValueChange={({ value }) => {
-          const item = nodes.find((node) => node.link === value[0])
-          if (item) selectItem(item)
-        }}
-        size={"lg"}
-        spacing={2}
-        className="gap-2 grid w-full grid-flow-row grid-cols-5 place-content-stretch place-items-stretch"
-      >
-        {nodes.map((item) => {
-          if (item.type === "section")
-            return <DefaultSection key={item.id} item={item} />
-          return (
-            <CanonItem
-              key={item.id}
-              item={item}
-              tooltipHandle={tooltipHandle}
-              contextMenuItems={contextMenuItems}
-              active={selected.includes(item.link)}
-              expanded={expanded.has(item.id)}
-            />
-          )
-        })}
-      </ToggleGroup>
-    </LayoutGroup>
-  )
 
   const sections = items.filter((item) => item.type === "section")
   const sectionId = sections.some((section) => section.id === activeSectionId)
@@ -199,7 +76,7 @@ export function Canonical({
         variant="underline"
         size="xs"
         aria-label="Corpus sections"
-        className="mb-2 [&_[data-slot=tab-indicator]]:bg-black! dark:[&_[data-slot=tab-indicator]]:bg-white! max-w-full overflow-x-auto"
+        className="mb-2 shrink-0 [&_[data-slot=tab-indicator]]:bg-black! dark:[&_[data-slot=tab-indicator]]:bg-white! max-w-full overflow-x-auto"
       >
         {sections.map((section) => (
           <TabsTrigger size="xs" key={section.id} value={section.id}>
@@ -209,35 +86,88 @@ export function Canonical({
       </TabsList>
     )
   }
-  const renderTabContent = () => {
-    return sections.map((section) => (
-      <TabsContent key={section.id} value={section.id}>
-        <motion.div
-          initial={reducedMotion ? false : { opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.15, ease: [0.2, 0, 0, 1] }}
-          className="gap-4 flex flex-col"
-        >
-          {section.description && (
-            <p className="text-xs text-muted-foreground">
-              {section.description}
-            </p>
-          )}
-          {section.nodes && renderGroup(section.nodes)}
-        </motion.div>
-      </TabsContent>
-    ))
+  // Resolve against current data, so removed nodes never leave a stale detail view.
+  const findPath = (nodes: readonly TCanonItem[], link: string): TCanonItem[] => {
+    for (const node of nodes) {
+      if (node.link === link) return [node]
+      const childPath = node.nodes && findPath(node.nodes, link)
+      if (childPath?.length) return [node, ...childPath]
+    }
+    return []
   }
+  const sectionNodes = sections.length
+    ? sections.find((section) => section.id === sectionId)?.nodes ?? []
+    : items
+  const path = browseLink ? findPath(sectionNodes, browseLink) : []
+  const parent = path.at(-1)
+  const book = path.find((node) => node.type === "book")
+  const bookIndex = sectionNodes.findIndex((node) => node.id === book?.id)
+  const previousBook = sectionNodes[bookIndex - 1]
+  const nextBook = sectionNodes[bookIndex + 1]
+  const headingRef = useRef<HTMLHeadingElement>(null)
+  const navRef = useRef<HTMLElement>(null)
+  const previousBrowse = useRef(browseLink)
+  useEffect(() => {
+    if (browseLink) headingRef.current?.focus({ preventScroll: true })
+    else if (previousBrowse.current) navRef.current?.querySelector<HTMLButtonElement>('[role="radio"]')?.focus({ preventScroll: true })
+    previousBrowse.current = browseLink
+  }, [browseLink])
+  const childType = parent?.nodes?.[0]?.type
+  const gridLabel = childType === "verse" ? "Verses" : childType === "chapter" ? "Chapters" : "Contents"
+  const renderNavigation = () => (
+    <motion.div
+      key={parent?.link ?? sectionId ?? "books"}
+      initial={reducedMotion ? false : { opacity: 0, x: parent ? 12 : -12 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.18, ease: [0.2, 0, 0, 1] }}
+      className="flex min-h-0 flex-1 flex-col gap-3"
+    >
+      {parent && (
+        <>
+          <div className="flex shrink-0 items-stretch gap-2">
+            {previousBook && <Button variant="outline" className="h-10 sm:h-10 w-12 px-1 text-xs sm:text-xs"
+              aria-label={previousBook ? `Previous book: ${String(previousBook.label)}` : "Previous book"}
+              onClick={() => previousBook && selectItem(previousBook)}>
+              {previousBook.abbreviation}
+            </Button>}
+            <Button variant="default" className="h-10 sm:h-10 min-w-0 flex-1 justify-start gap-2 px-2 text-xs sm:text-xs border-stone-800 dark:border-stone-300 bg-stone-950 text-white hover:bg-stone-800 dark:bg-stone-100 dark:text-black dark:hover:bg-white"
+              aria-label="Back to books" onClick={() => browse(undefined)}>
+              <Grid2X2Icon aria-hidden="true" className="size-4 shrink-0" />
+              <span className="min-w-0 text-left">
+                <span className="block truncate font-bold">{book?.label ?? parent.label}{parent.type === "chapter" ? ` ${parent.number}` : ""}</span>
+                <span className="block text-[10px] font-normal leading-tight opacity-75">{parent.nodes?.length ?? 0} {gridLabel.toLowerCase()}</span>
+              </span>
+            </Button>
+            {nextBook && <Button variant="outline" className="h-10 sm:h-10 w-12 px-1 text-xs sm:text-xs"
+              aria-label={nextBook ? `Next book: ${String(nextBook.label)}` : "Next book"}
+              onClick={() => nextBook && selectItem(nextBook)}>
+              {nextBook.abbreviation}
+            </Button>}
+          </div>
+        </>
+      )}
+      <CanonGrid
+        items={parent?.nodes?.length ? parent.nodes : sectionNodes}
+        selectedLink={selected[0]}
+        onLinkClick={selectItem}
+        contextMenuItems={contextMenuItems}
+        title={parent ? gridLabel : undefined}
+        headingRef={headingRef}
+        onBack={parent ? () => browse(path.at(-2)?.link) : undefined}
+        backLabel={path.length > 1 ? "Chapters" : "Books"}
+      />
+    </motion.div>
+  )
 
   return (
-    <TooltipProvider>
       <nav
+        ref={navRef}
         aria-label="Canonical table of contents"
-        className="gap-3 max-w-80 flex h-full flex-col"
+        className={cn("gap-3 max-w-80 min-h-0 flex h-full flex-col overflow-hidden", className)}
       >
-        <h1 className="text-lg font-bold">Table of Content</h1>
+        <h1 className="shrink-0 text-lg font-bold">Table of Content</h1>
         {description && description}
-        <InputGroup>
+        <InputGroup className="shrink-0">
           <InputGroupInput
             size="lg"
             type="search"
@@ -254,6 +184,7 @@ export function Canonical({
 
         {sections.length ? (
           <Tabs
+            className="min-h-0 flex-1"
             value={sectionId}
             onValueChange={({ value }) => {
               setSection(value)
@@ -261,14 +192,14 @@ export function Canonical({
             }}
           >
             {renderTabList()}
-            {renderTabContent()}
+            {sections.map((section) => (
+              <TabsContent className="flex min-h-0 flex-1 flex-col" key={section.id} value={section.id}>
+                {section.id === sectionId && renderNavigation()}
+              </TabsContent>
+            ))}
           </Tabs>
-        ) : null}
+        ) : renderNavigation()}
       </nav>
-      <Tooltip handle={tooltipHandle}>
-        {({ payload }) => <TooltipPopup>{payload}</TooltipPopup>}
-      </Tooltip>
-    </TooltipProvider>
   )
 }
 

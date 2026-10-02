@@ -3,6 +3,8 @@
 import { useEffect, useRef } from "react"
 import { useAtomValue, useSetAtom } from "jotai"
 import {
+  canonBrowseLinkAtom,
+  browseCanonAtom,
   projectCanonLinkAtom,
   removeCanonInstance,
   canonActiveSectionIdAtom,
@@ -15,6 +17,8 @@ import {
 
 /** Bind a named canonical navigator to the nearest ExegiaProvider store. */
 export function useCanon(canonId: string) {
+  const browseLink = useAtomValue(canonBrowseLinkAtom(canonId))
+  const browse = useSetAtom(browseCanonAtom(canonId))
   const selectedLink = useAtomValue(canonSelectedLinkAtom(canonId))
   const expandedIds = useAtomValue(canonExpandedIdsAtom(canonId))
   const activeSectionId = useAtomValue(canonActiveSectionIdAtom(canonId))
@@ -22,6 +26,8 @@ export function useCanon(canonId: string) {
   const setSection = useSetAtom(setCanonSectionAtom(canonId))
   const reset = useSetAtom(resetCanonAtom(canonId))
   return {
+    browseLink,
+    browse,
     selectedLink,
     expandedIds,
     activeSectionId,

@@ -1,6 +1,9 @@
 "use client"
 
 import { Canonical, CanonItem } from "./canon"
+import { CanonGrid } from "./canon-grid"
+export { CanonGrid } from "./canon-grid"
+export type { CanonGridProps } from "./canon-grid"
 import { Compact } from "./compact"
 export type { CompactTocProps } from "./compact"
 
@@ -36,6 +39,7 @@ export const TOC = {
   Compact,
   Canonical,
   CanonItem,
+  CanonGrid,
   Section: DefaultSection,
   Toggle: TocViewModeToggle,
   TreeNode: TocTreeNode,
@@ -45,6 +49,8 @@ export default TOC
 
 export { useCanon } from "./use-canon"
 export {
+  canonBrowseLinkAtom,
+  browseCanonAtom,
   canonSelectedLinkAtom,
   canonExpandedIdsAtom,
   canonActiveSectionIdAtom,

@@ -11,10 +11,13 @@ function createCanonAtoms(id: string) {
   const projectLink = atom(null, (_get, set, value: string | undefined) => {
     set(controlledLink, value)
   })
+  const browseLink = atomWithReset<string | undefined>(undefined)
+  const browse = atom(null, (_get, set, link: string | undefined) => set(browseLink, link))
   const expandedIds = atomWithReset<CanonState["expandedIds"]>(new Set())
   const activeSectionId =
     atomWithReset<CanonState["activeSectionId"]>(undefined)
   const select = atom(null, (get, set, item: TCanonItem) => {
+    if (item.nodes?.length) set(browseLink, item.link)
     if (get(selectedLink) === item.link) return
     set(ownedLink, item.link)
     if (item.nodes?.length) {
@@ -26,18 +29,23 @@ function createCanonAtoms(id: string) {
   })
   const setSection = atom(null, (_get, set, sectionId: string | undefined) => {
     set(activeSectionId, sectionId)
+    set(browseLink, undefined)
   })
   const reset = atom(null, (_get, set) => {
+    set(browseLink, RESET)
     set(ownedLink, RESET)
     set(expandedIds, RESET)
     set(activeSectionId, RESET)
   })
   const state = atom<CanonState>((get) => ({
+    browseLink: get(browseLink),
     selectedLink: get(selectedLink),
     expandedIds: get(expandedIds),
     activeSectionId: get(activeSectionId),
   }))
   const atoms = {
+    browseLink,
+    browse,
     ownedLink,
     controlledLink,
     projectLink,
@@ -81,3 +89,6 @@ export function removeCanonInstance(id: string): void {
 
 /** @internal Publish the controlled prop without replacing owned selection. */
 export const projectCanonLinkAtom = (id: string) => canonAtoms(id).projectLink
+
+export const canonBrowseLinkAtom = (id: string) => canonAtoms(id).browseLink
+export const browseCanonAtom = (id: string) => canonAtoms(id).browse

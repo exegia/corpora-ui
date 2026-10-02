@@ -149,12 +149,16 @@ export interface TocViewModeToggleProps {
 
 /** Persistent state for one canonical navigator in an Exegia store. */
 export interface CanonState {
+  /** Parent whose children are currently visible; undefined shows the book grid. */
+  browseLink: string | undefined
   selectedLink: string | undefined
   expandedIds: ReadonlySet<string>
   activeSectionId: string | undefined
 }
 
 export interface CanonProps extends ITocProps<"canon"> {
+  /** Optional dimensions; a fixed height keeps the tile grid scrollable. */
+  className?: string
   contextMenuItems?: CanonContextMenuItems
   /** Stable key for remote atom access. Omit for an isolated component instance. */
   canonId?: string
