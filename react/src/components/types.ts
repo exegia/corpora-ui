@@ -3,9 +3,24 @@ import type * as NComposedProps from "./composed/types"
 import type * as NBlockProps from "./blocks/types"
 import type * as NIconsProps from "./icons/types"
 
+export type TTheme = "dark" | "light" | "system"
+export type TResolvedTheme = "dark" | "light"
+
+export type TThemeProviderProps = {
+  children: React.ReactNode
+  defaultTheme?: TTheme
+  storageKey?: string
+  disableTransitionOnChange?: boolean
+}
+
+export type TThemeProviderState = {
+  theme: TTheme
+  setTheme: (theme: TTheme) => void
+}
+
 // Type-only namespace exports cannot be reflected with `typeof`/`keyof`.
 // Keep these lists aligned with the exported *Props types, not state or options.
-type TAtomsProps =
+export type TAtomsProps =
   | NAtomsProps.IReferenceProps
   | NAtomsProps.IInputFieldProps
   | NAtomsProps.ILoaderProps
@@ -32,7 +47,7 @@ type TAtomsProps =
 
 // Instantiate generic props at their declared domains. Stories still infer the
 // concrete component's props (including narrower generic arguments) separately.
-type TComposedProps =
+export type TComposedProps =
   | NComposedProps.IActionButtonProps<string>
   | NComposedProps.IActionBarProps
   | NComposedProps.IEmojiActionBarProps
@@ -44,7 +59,10 @@ type TComposedProps =
   | NComposedProps.IChartNodeProps
   | NComposedProps.IRecommendationItemProps
   | NComposedProps.IRecommendationCardProps
-  | NComposedProps.IUserBaseProps<NAtomsProps.TUserType, NComposedProps.TUserVariant>
+  | NComposedProps.IUserBaseProps<
+      NAtomsProps.TUserType,
+      NComposedProps.TUserVariant
+    >
   | NComposedProps.IUserMessageProps<NAtomsProps.TUserType>
   | NComposedProps.TUserInfoProps<NAtomsProps.TUserType>
   | NComposedProps.TUserPillProps<NAtomsProps.TUserType>
@@ -52,7 +70,7 @@ type TComposedProps =
   | NComposedProps.TVerseSpanProps
   | NComposedProps.TVerseNoteProps
 
-type TBlockProps =
+export type TBlockProps =
   | NBlockProps.IRecommendationStackProps
   | NBlockProps.IPinnedThreadBannerProps
   | NBlockProps.IDegradedBannerProps
@@ -99,8 +117,9 @@ type TBlockProps =
   | NBlockProps.IAnimatedSidebarMenuSubButtonProps
   | NBlockProps.IAnimatedSidebarMenuButtonProps
 
-type TIconsProps = NIconsProps.IFileIconProps
+export type TIconsProps = NIconsProps.IFileIconProps
 
 /** Catalog of namespace-exported props, not a shared component call signature. */
-type TStoryComponentProps = TAtomsProps | TComposedProps | TBlockProps | TIconsProps
-export type { NAtomsProps, NComposedProps, NBlockProps, NIconsProps, TStoryComponentProps }
+export type TStoryComponentProps =
+  TAtomsProps | TComposedProps | TBlockProps | TIconsProps
+export type { NAtomsProps, NComposedProps, NBlockProps, NIconsProps }
