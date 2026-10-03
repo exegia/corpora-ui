@@ -235,12 +235,47 @@ export function useAnchoredPopover<TPayload = unknown>(
   }, [ref, triggers, match, anchorTo, hoverDelay, hoverCloseDelay, openWith, close, isOpen, resolvePayload, clearTimers])
 
   /* ------------------------------------------------------------ selection */
-  // TASK 5 fills this effect in.
   useLayoutEffect(() => {
     const view = ref.current
     if (!view || !triggers.includes("selection")) return
-    void selectionRangeWithin
-    return undefined
+    const doc = view.ownerDocument
+    let pending = false
+
+    const onSelectionChange = () => {
+      const range = selectionRangeWithin(view)
+      if (range) {
+        pending = true
+        return
+      }
+      pending = false
+      if (reasonRef.current === "selection") close("collapse")
+    }
+
+    // Open only once the gesture ends, so a drag does not flicker the popup.
+    const commit = (event: Event) => {
+      if (!pending) return
+      pending = false
+      const range = selectionRangeWithin(view)
+      if (!range) return
+      const text = range.toString()
+      if (text.trim().length < minSelectionLength) {
+        if (reasonRef.current === "selection") close("collapse")
+        return
+      }
+      const ancestor = range.commonAncestorContainer
+      const target = ancestor.nodeType === Node.ELEMENT_NODE ? (ancestor as Element) : ancestor.parentElement
+      const payload = resolvePayload({ target, text, event })
+      openWith(toAnchorRect(range), text, payload, target, () => range.getBoundingClientRect(), "selection")
+    }
+
+    doc.addEventListener("selectionchange", onSelectionChange)
+    doc.addEventListener("pointerup", commit)
+    doc.addEventListener("keyup", commit)
+    return () => {
+      doc.removeEventListener("selectionchange", onSelectionChange)
+      doc.removeEventListener("pointerup", commit)
+      doc.removeEventListener("keyup", commit)
+    }
   }, [ref, triggers, minSelectionLength, openWith, close, isOpen, resolvePayload])
 
   /* ----------------------------------------------------- lifecycle & api */

@@ -233,3 +233,90 @@ describe("useAnchoredPopover · hover", () => {
     expect(document.querySelector("[data-anchored-popover]")).toBeNull()
   })
 })
+
+function selectText(element: Element, start: number, end: number) {
+  const node = element.firstChild as Text
+  const range = document.createRange()
+  range.setStart(node, start)
+  range.setEnd(node, end)
+  const selection = document.getSelection()!
+  selection.removeAllRanges()
+  selection.addRange(range)
+  document.dispatchEvent(new Event("selectionchange"))
+}
+
+function collapseSelection() {
+  document.getSelection()!.removeAllRanges()
+  document.dispatchEvent(new Event("selectionchange"))
+}
+
+function SelectionHarness({
+  onOpenChange,
+  minSelectionLength,
+}: {
+  onOpenChange?: TOpenChange
+  minSelectionLength?: number
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const popover = useAnchoredPopover({ ref, id: "selection-harness", onOpenChange, minSelectionLength })
+  return (
+    <>
+      <div ref={ref}>
+        <p>Selectable corpus text</p>
+      </div>
+      <p>Outside text</p>
+      <AnchoredPopover {...popover.popoverProps}>{({ text }) => <p>sel:{text}</p>}</AnchoredPopover>
+    </>
+  )
+}
+
+describe("useAnchoredPopover · selection", () => {
+  test("opens on pointerup after a selection inside the view, with the selected text", async () => {
+    const onOpenChange = mock<TOpenChange>(() => {})
+    render(<SelectionHarness onOpenChange={onOpenChange} />)
+    selectText(screen.getByText("Selectable corpus text"), 0, 10)
+    expectAbsent("sel:Selectable")
+
+    document.dispatchEvent(new Event("pointerup"))
+    expect(await screen.findByText("sel:Selectable")).toBeTruthy()
+    expect(onOpenChange).toHaveBeenLastCalledWith(true, "selection")
+  })
+
+  test("a keyboard selection commits on keyup", async () => {
+    render(<SelectionHarness />)
+    selectText(screen.getByText("Selectable corpus text"), 11, 17)
+    document.dispatchEvent(new Event("keyup"))
+    expect(await screen.findByText("sel:corpus")).toBeTruthy()
+  })
+
+  test("collapsing the selection closes with reason collapse", async () => {
+    const onOpenChange = mock<TOpenChange>(() => {})
+    render(<SelectionHarness onOpenChange={onOpenChange} />)
+    selectText(screen.getByText("Selectable corpus text"), 0, 10)
+    document.dispatchEvent(new Event("pointerup"))
+    await screen.findByText("sel:Selectable")
+
+    collapseSelection()
+    await waitFor(() => expectAbsent("sel:Selectable"))
+    expect(onOpenChange).toHaveBeenLastCalledWith(false, "collapse")
+  })
+
+  test("a selection outside the view is ignored and closes an open popover", async () => {
+    render(<SelectionHarness />)
+    selectText(screen.getByText("Selectable corpus text"), 0, 10)
+    document.dispatchEvent(new Event("pointerup"))
+    await screen.findByText("sel:Selectable")
+
+    selectText(screen.getByText("Outside text"), 0, 7)
+    document.dispatchEvent(new Event("pointerup"))
+    await waitFor(() => expectAbsent(/^sel:/))
+  })
+
+  test("selections shorter than minSelectionLength do not open", async () => {
+    render(<SelectionHarness minSelectionLength={4} />)
+    selectText(screen.getByText("Selectable corpus text"), 0, 3)
+    document.dispatchEvent(new Event("pointerup"))
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expectAbsent(/^sel:/)
+  })
+})
