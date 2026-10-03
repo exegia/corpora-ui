@@ -1,7 +1,12 @@
 import type { ReactElement, ReactNode, DragEvent, KeyboardEvent } from "react"
 
 export type TSidebarResourceKind = "folder" | "project" | "file" | "bookmark"
-
+export type {
+  SidebarContextProps,
+  SidebarState,
+  SidebarActions,
+  SidebarProviderProps,
+} from "./primitives/types"
 export interface ISidebarResource {
   id: string
   label: string
@@ -174,7 +179,8 @@ export interface IAISidebarControllerProps extends TAISidebarViewProps {
 }
 
 /** Either form: raw props, or a `useAISidebar` controller. */
-export type TAISidebarComponentProps = IAISidebarProps | IAISidebarControllerProps
+export type TAISidebarComponentProps =
+  IAISidebarProps | IAISidebarControllerProps
 
 export interface IFlatResource {
   item: ISidebarResource

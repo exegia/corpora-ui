@@ -19,19 +19,5 @@ export type {
   ISelectionHighlightProps,
   ISelectionPopoverProps,
 } from "@/components/composed/reader"
-export type {
-  IAiPanelHeaderProps,
-  IAiPanelProps,
-  ILockedBannerProps,
-  IAiScope,
-  TAiScopeKind,
-  TComposerMode,
-  IDiffRow,
-  INodeSelection,
-  TSuggestionState,
-  IVersionHistoryEntry,
-  ISuggestedPromptsProps,
-  IWordSelection,
-} from "./type"
 
 export default AiPanel
