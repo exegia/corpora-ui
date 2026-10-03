@@ -1,11 +1,11 @@
 import { describe, expect, mock, test } from "bun:test"
-import { useRef } from "react"
-import { render, screen, waitFor } from "@testing-library/react"
+import { useEffect, useRef, useState } from "react"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { AnchoredPopover } from "../anchored-popover"
 import { useAnchoredPopover } from "../use-anchored-popover"
 import { useAnchoredPopoverActions } from "../use-anchored-popover-state"
-import type { TAnchoredPopoverReason } from "../type"
+import type { IUseAnchoredPopoverOptions, TAnchoredPopoverReason } from "../index"
 
 type TOpenChange = (open: boolean, reason: TAnchoredPopoverReason) => void
 
@@ -265,7 +265,15 @@ function SelectionHarness({
         <p>Selectable corpus text</p>
       </div>
       <p>Outside text</p>
-      <AnchoredPopover {...popover.popoverProps}>{({ text }) => <p>sel:{text}</p>}</AnchoredPopover>
+      <AnchoredPopover {...popover.popoverProps}>
+        {({ text }) => (
+          <div>
+            <p>sel:{text}</p>
+            <button type="button">Act</button>
+            <input aria-label="note" />
+          </div>
+        )}
+      </AnchoredPopover>
     </>
   )
 }
@@ -318,5 +326,198 @@ describe("useAnchoredPopover · selection", () => {
     document.dispatchEvent(new Event("pointerup"))
     await new Promise((resolve) => setTimeout(resolve, 20))
     expectAbsent(/^sel:/)
+  })
+})
+
+/* ------------------------------------------------------------------ */
+/* Review fix pass                                                     */
+/* ------------------------------------------------------------------ */
+
+// The option type is imported from the barrel on purpose: consumers reach
+// the hook's types through the package root.
+const lateOptions: Omit<IUseAnchoredPopoverOptions<string>, "ref"> = {
+  trigger: "click",
+  match: "[data-term]",
+  getPayload: ({ target }) => (target as HTMLElement).dataset.term ?? "",
+}
+
+function LateViewHarness() {
+  const [shown, setShown] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const popover = useAnchoredPopover<string>({ ref, ...lateOptions })
+  return (
+    <>
+      <button type="button" onClick={() => setShown(true)}>
+        reveal
+      </button>
+      {shown ? (
+        <div ref={ref}>
+          <span data-term="late">late</span>
+        </div>
+      ) : null}
+      <AnchoredPopover {...popover.popoverProps}>{({ payload }) => <p>late:{payload}</p>}</AnchoredPopover>
+    </>
+  )
+}
+
+function BothHarness() {
+  const ref = useRef<HTMLDivElement>(null)
+  const popover = useAnchoredPopover({ ref, id: "both-harness", trigger: ["selection", "click"] })
+  return (
+    <>
+      <div ref={ref}>
+        <p>Selectable corpus text</p>
+      </div>
+      <AnchoredPopover {...popover.popoverProps}>{({ text }) => <p>both:{text}</p>}</AnchoredPopover>
+    </>
+  )
+}
+
+function TickingHoverHarness() {
+  const [, tick] = useState(0)
+  useEffect(() => {
+    const interval = setInterval(() => tick((n) => n + 1), 5)
+    return () => clearInterval(interval)
+  }, [])
+  const ref = useRef<HTMLDivElement>(null)
+  const popover = useAnchoredPopover<string>({
+    ref,
+    trigger: "hover",
+    match: (el) => el.hasAttribute("data-term"),
+    getPayload: ({ target }) => (target as HTMLElement).dataset.term ?? "",
+    hoverDelay: 30,
+    hoverCloseDelay: 30,
+  })
+  return (
+    <div ref={ref}>
+      <span data-term="tick">tick</span>
+      <AnchoredPopover {...popover.popoverProps}>{({ payload }) => <p>tick:{payload}</p>}</AnchoredPopover>
+    </div>
+  )
+}
+
+function AnchorProbe() {
+  const ref = useRef<HTMLDivElement>(null)
+  const popover = useAnchoredPopover<string>({
+    ref,
+    id: "anchor-probe",
+    trigger: "click",
+    match: "[data-term]",
+    getPayload: ({ target }) => (target as HTMLElement).dataset.term ?? "",
+  })
+  return (
+    <>
+      <div ref={ref}>
+        <span data-term="a">a</span>
+      </div>
+      <button type="button" onClick={popover.hide}>
+        hide
+      </button>
+      <output data-testid="anchor-x">{popover.anchor ? String(popover.anchor.getBoundingClientRect().x) : "none"}</output>
+      <AnchoredPopover {...popover.popoverProps}>{({ text }) => <p>probe:{text}</p>}</AnchoredPopover>
+    </>
+  )
+}
+
+function RemoteShower() {
+  const { show } = useAnchoredPopoverActions("anchor-probe")
+  return (
+    <button type="button" onClick={() => show({ rect: { x: 400, y: 300, width: 10, height: 10 }, text: "remote" })}>
+      remote show
+    </button>
+  )
+}
+
+describe("useAnchoredPopover · review fixes", () => {
+  test("a view that mounts after the hook still gets its listeners", async () => {
+    const user = userEvent.setup()
+    render(<LateViewHarness />)
+    await user.click(screen.getByText("reveal"))
+    await user.click(screen.getByText("late"))
+    expect(await screen.findByText("late:late")).toBeTruthy()
+  })
+
+  test("the click that ends a drag-selection does not close or replace the selection popover", async () => {
+    render(<BothHarness />)
+    const p = screen.getByText("Selectable corpus text")
+    selectText(p, 0, 10)
+    document.dispatchEvent(new Event("pointerup"))
+    await screen.findByText("both:Selectable")
+
+    // Browsers fire `click` on the element where a drag ends.
+    fireEvent.click(p)
+    await new Promise((resolve) => setTimeout(resolve, 30))
+    expect(screen.getByText("both:Selectable")).toBeTruthy()
+  })
+
+  test("focusing an input inside a selection popover does not collapse-close it", async () => {
+    render(<SelectionHarness />)
+    selectText(screen.getByText("Selectable corpus text"), 0, 10)
+    document.dispatchEvent(new Event("pointerup"))
+    await screen.findByText("sel:Selectable")
+
+    // Pressing a form control collapses the document selection in browsers.
+    screen.getByLabelText("note").focus()
+    collapseSelection()
+    await new Promise((resolve) => setTimeout(resolve, 30))
+    expect(screen.getByText("sel:Selectable")).toBeTruthy()
+  })
+
+  test("a hover-opened popover leaves focus where it was", async () => {
+    const user = userEvent.setup()
+    render(
+      <>
+        <input aria-label="search" />
+        <HoverHarness />
+      </>
+    )
+    const search = screen.getByLabelText("search")
+    search.focus()
+    await user.hover(screen.getByText("alpha"))
+    await screen.findByText("hover:alpha")
+    await new Promise((resolve) => setTimeout(resolve, 30))
+    expect(document.activeElement).toBe(search)
+  })
+
+  test("an inline match predicate on a re-rendering parent still opens on hover", async () => {
+    const user = userEvent.setup()
+    render(<TickingHoverHarness />)
+    await user.hover(screen.getByText("tick"))
+    expect(await screen.findByText("tick:tick")).toBeTruthy()
+  })
+
+  test("a remote show() anchors to its own rect, not the previous target", async () => {
+    const user = userEvent.setup()
+    render(
+      <>
+        <AnchorProbe />
+        <RemoteShower />
+      </>
+    )
+    await user.click(screen.getByText("a"))
+    await screen.findByText("probe:a")
+    await user.click(screen.getByText("hide"))
+    await waitFor(() => expectAbsent("probe:a"))
+
+    await user.click(screen.getByText("remote show"))
+    await screen.findByText("probe:remote")
+    await waitFor(() => expect(screen.getByTestId("anchor-x").textContent).toBe("400"))
+  })
+
+  test("text inside a click-opened popover can be selected (mousedown keeps its default)", async () => {
+    const user = userEvent.setup()
+    render(<ClickHarness />)
+    await user.click(screen.getByText("alpha"))
+    const text = await screen.findByText("text:alpha")
+    expect(fireEvent.mouseDown(text)).toBe(true)
+  })
+
+  test("buttons inside a selection-opened popover keep the selection (mousedown is prevented)", async () => {
+    render(<SelectionHarness />)
+    selectText(screen.getByText("Selectable corpus text"), 0, 10)
+    document.dispatchEvent(new Event("pointerup"))
+    await screen.findByText("sel:Selectable")
+    expect(fireEvent.mouseDown(screen.getByText("Act"))).toBe(false)
+    expect(fireEvent.mouseDown(screen.getByText("sel:Selectable"))).toBe(true)
   })
 })

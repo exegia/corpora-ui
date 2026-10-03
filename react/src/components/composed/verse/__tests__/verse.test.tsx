@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import { render, screen } from "@testing-library/react"
+import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { Verse, VerseNote, VerseSpan } from "../verse"
 
@@ -81,5 +81,37 @@ describe("verse", () => {
     await user.keyboard("{Enter}")
     expect(await screen.findByText("Span body")).toBeTruthy()
     expect(span.getAttribute("aria-expanded")).toBe("true")
+  })
+
+  test("content that changes while the popover is open shows immediately", async () => {
+    const user = userEvent.setup()
+    const Editable = ({ n }: { n: number }) => (
+      <Verse chapter="1:1" href="#gen-1">
+        <VerseSpan popover={<p>content-{n}</p>}>word</VerseSpan>
+      </Verse>
+    )
+    const { rerender } = render(<Editable n={0} />)
+    await user.click(screen.getByText("word"))
+    await screen.findByText("content-0")
+
+    rerender(<Editable n={1} />)
+    expect(await screen.findByText("content-1")).toBeTruthy()
+  })
+
+  test("unmounting the open part closes its popover", async () => {
+    const user = userEvent.setup()
+    const Toggling = ({ show }: { show: boolean }) => (
+      <Verse chapter="1:1" href="#gen-1">
+        {show ? <VerseSpan popover={<p>Gone body</p>}>gone</VerseSpan> : null} rest
+      </Verse>
+    )
+    const { rerender } = render(<Toggling show />)
+    await user.click(screen.getByText("gone"))
+    await screen.findByText("Gone body")
+
+    rerender(<Toggling show={false} />)
+    await waitFor(() => {
+      if (screen.queryByText("Gone body")) throw new Error("popover still open")
+    })
   })
 })

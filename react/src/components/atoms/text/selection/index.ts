@@ -12,3 +12,22 @@ export {
   removeAnchoredPopoverInstance,
   showAnchoredPopoverAtom,
 } from "./anchored-popover-atom"
+export type {
+  IAnchorRect,
+  IAnchoredPopoverActions,
+  IAnchoredPopoverContext,
+  IAnchoredPopoverControlProps,
+  IAnchoredPopoverProps,
+  IAnchoredPopoverRenderProps,
+  IAnchoredPopoverState,
+  IShowAnchoredPopoverArgs,
+  ITextPopoverRenderProps,
+  IUseAnchoredPopoverOptions,
+  IUseAnchoredPopoverResult,
+  IVirtualAnchor,
+  TAnchorInput,
+  TAnchoredPopoverMatch,
+  TAnchoredPopoverPopupProps,
+  TAnchoredPopoverReason,
+  TAnchoredPopoverTrigger,
+} from "./type"

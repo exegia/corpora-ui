@@ -92,6 +92,8 @@ export interface IAnchoredPopoverActions {
 export interface IAnchoredPopoverControlProps<TPayload = unknown> {
   id: string
   open: boolean
+  /** Why the popover is open; null while closed. Drives focus and selection handling in the popup. */
+  reason: TAnchoredPopoverReason | null
   anchor: IVirtualAnchor | null
   text: string
   payload: TPayload | undefined

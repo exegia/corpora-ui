@@ -7,14 +7,15 @@ import { cn } from "@/lib/utils"
 import type { IAnchoredPopoverProps, IAnchoredPopoverRenderProps } from "./type"
 
 /**
- * Keep the reader's selection alive while they press a toolbar button inside
- * the popup: a mousedown would otherwise collapse it (and close a
- * selection-triggered popover) before the click lands. Form controls still
- * need the default so they can take focus.
+ * Keep the reader's selection alive while they press a toolbar control
+ * inside a selection-opened popup: a mousedown would otherwise collapse it
+ * (and close the popover) before the click lands. Only interactive targets
+ * are affected, so popup text stays selectable and form controls still take
+ * focus.
  */
 function preserveSelection(event: ReactMouseEvent<HTMLElement>): void {
   const target = event.target as Element
-  if (target.closest("input, textarea, select, [contenteditable]")) return
+  if (!target.closest("button, a, [role=button]")) return
   event.preventDefault()
 }
 
@@ -26,6 +27,7 @@ function preserveSelection(event: ReactMouseEvent<HTMLElement>): void {
 export function AnchoredPopover<TPayload = unknown>({
   id,
   open,
+  reason,
   anchor,
   text,
   payload,
@@ -47,13 +49,18 @@ export function AnchoredPopover<TPayload = unknown>({
     close: () => onOpenChange(false),
   }
   const content = typeof children === "function" ? children(renderProps) : children
+  const fromSelection = reason === "selection"
+  // A popup that opened because the pointer rested on a word, or because the
+  // reader selected text, must not take focus away from what they were doing.
+  const stealsFocus = reason === "hover" || fromSelection
 
   const shared = {
     ...popupProps,
     anchor: anchor ?? undefined,
     side,
     className: cn("max-w-64", className),
-    onMouseDown: preserveSelection,
+    initialFocus: stealsFocus ? false : popupProps.initialFocus,
+    onMouseDown: fromSelection ? preserveSelection : undefined,
     onPointerEnter: onPopupPointerEnter,
     onPointerLeave: onPopupPointerLeave,
     "data-selection-popover": "",
