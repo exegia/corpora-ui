@@ -1,54 +1,8 @@
-import { TextSelection } from "./selection"
+import { cn } from "@/lib/utils"
 import { Text } from "./default"
 import type { TParagraphProps } from "./type"
-import { cn } from "@/lib/utils"
 import { twClasses } from "./utils"
 
-export function Paragraph({
-  children,
-  selected,
-  popover,
-  component,
-  componentProps,
-  popoverComponent,
-  popoverProps,
-  renderPopover,
-  onSelectionStart,
-  onSelectionEnd,
-  onPopoverShow,
-  onPopoverHide,
-  offset,
-  zIndex,
-  alignment,
-  className,
-  minSelectionLength,
-  ...textProps
-}: TParagraphProps) {
-  return (
-    <TextSelection
-      alignment={alignment}
-      component={component}
-      componentProps={componentProps}
-      minSelectionLength={minSelectionLength}
-      offset={offset}
-      onPopoverHide={onPopoverHide}
-      onPopoverShow={onPopoverShow}
-      onSelectionEnd={onSelectionEnd}
-      onSelectionStart={onSelectionStart}
-      popover={popover}
-      popoverComponent={popoverComponent}
-      popoverProps={popoverProps}
-      renderPopover={renderPopover}
-      selected={selected}
-      zIndex={zIndex}
-    >
-      <Text
-        {...textProps}
-        className={cn(twClasses["default"], className)}
-        type="paragraph"
-      >
-        {children}
-      </Text>
-    </TextSelection>
-  )
+export function Paragraph({ className, ...props }: TParagraphProps) {
+  return <Text {...props} className={cn(twClasses["default"], className)} type="paragraph" />
 }

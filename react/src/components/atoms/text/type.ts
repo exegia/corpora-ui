@@ -1,5 +1,4 @@
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react"
-import type { ITextSelectionProps } from "../type"
 
 export type TTextVariant =
   "default" | "heading" | "paragraph" | "link" | "subscript"
@@ -21,12 +20,11 @@ export type TTextProps = Omit<
   style?: CSSProperties
 }
 
-export type THeadingProps = Omit<TTextProps, "type"> &
-  Omit<ITextSelectionProps, "children" | "className">
+export type THeadingProps = Omit<TTextProps, "type">
 
 export type TSpanProps = Omit<TTextProps, "type">
-export type TParagraphProps = Omit<TTextProps, "type"> &
-  Omit<ITextSelectionProps, "children" | "className">
+
+export type TParagraphProps = Omit<TTextProps, "type">
 
 export type TLabelLevel = "heading" | "title" | "caption" | "subtitle"
 
