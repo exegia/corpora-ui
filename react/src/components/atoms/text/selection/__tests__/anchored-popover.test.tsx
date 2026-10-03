@@ -9,6 +9,16 @@ import type { TAnchoredPopoverReason } from "../type"
 
 type TOpenChange = (open: boolean, reason: TAnchoredPopoverReason) => void
 
+/**
+ * Assert that no element with `text` is rendered. Throws a plain Error rather
+ * than using `expect(element).toBeNull()`: on failure bun serializes the DOM
+ * element (React fiber included), which blocks the event loop for seconds
+ * and starves the timers a `waitFor` is waiting on.
+ */
+function expectAbsent(text: string | RegExp): void {
+  if (screen.queryByText(text)) throw new Error(`expected no element with text ${String(text)}`)
+}
+
 function ClickHarness({
   onOpenChange,
   onLinkClick,
@@ -72,7 +82,7 @@ describe("useAnchoredPopover · click", () => {
     const user = userEvent.setup()
     const onOpenChange = mock<TOpenChange>(() => {})
     render(<ClickHarness onOpenChange={onOpenChange} />)
-    expect(screen.queryByText("term:alpha")).toBeNull()
+    expectAbsent("term:alpha")
 
     await user.click(screen.getByText("alpha"))
     expect(await screen.findByText("term:alpha")).toBeTruthy()
@@ -82,7 +92,7 @@ describe("useAnchoredPopover · click", () => {
     await user.click(screen.getByText("plain"))
     // An unmatched click is not a target, so it is an ordinary outside press:
     // Base UI dismisses the popover and nothing reopens it.
-    await waitFor(() => expect(screen.queryByText("term:alpha")).toBeNull())
+    await waitFor(() => expectAbsent("term:alpha"))
     expect(onOpenChange).toHaveBeenLastCalledWith(false, "dismiss")
   })
 
@@ -97,7 +107,7 @@ describe("useAnchoredPopover · click", () => {
     expect(await screen.findByText("term:beta")).toBeTruthy()
 
     await user.click(screen.getByText("beta"))
-    await waitFor(() => expect(screen.queryByText("term:beta")).toBeNull())
+    await waitFor(() => expectAbsent("term:beta"))
     expect(onOpenChange).toHaveBeenLastCalledWith(false, "toggle")
   })
 
@@ -109,7 +119,7 @@ describe("useAnchoredPopover · click", () => {
     expect(await screen.findByText("term:beta")).toBeTruthy()
 
     await user.keyboard("{Escape}")
-    await waitFor(() => expect(screen.queryByText("term:beta")).toBeNull())
+    await waitFor(() => expectAbsent("term:beta"))
   })
 
   test("the render-prop close dismisses", async () => {
@@ -117,7 +127,7 @@ describe("useAnchoredPopover · click", () => {
     render(<ClickHarness />)
     await user.click(screen.getByText("alpha"))
     await user.click(await screen.findByText("Dismiss"))
-    await waitFor(() => expect(screen.queryByText("term:alpha")).toBeNull())
+    await waitFor(() => expectAbsent("term:alpha"))
   })
 
   test("a link only loses its default when it has popover content", async () => {
@@ -127,7 +137,7 @@ describe("useAnchoredPopover · click", () => {
 
     await user.click(screen.getByText("bare link"))
     expect(onLinkClick).toHaveBeenLastCalledWith(false)
-    expect(screen.queryByText(/^term:/)).toBeNull()
+    expectAbsent(/^term:/)
 
     await user.click(screen.getByText("gamma link"))
     expect(onLinkClick).toHaveBeenLastCalledWith(true)
@@ -140,7 +150,7 @@ describe("useAnchoredPopover · click", () => {
     await user.keyboard("[MetaLeft>]")
     await user.click(screen.getByText("alpha"))
     await user.keyboard("[/MetaLeft]")
-    expect(screen.queryByText("term:alpha")).toBeNull()
+    expectAbsent("term:alpha")
   })
 })
 
@@ -157,6 +167,69 @@ describe("useAnchoredPopover · imperative and remote", () => {
     expect(await screen.findByText("term:point")).toBeTruthy()
 
     await user.click(screen.getByText("Remote close"))
-    await waitFor(() => expect(screen.queryByText("term:point")).toBeNull())
+    await waitFor(() => expectAbsent("term:point"))
+  })
+})
+
+function HoverHarness({ onOpenChange }: { onOpenChange?: TOpenChange }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const popover = useAnchoredPopover<string>({
+    ref,
+    trigger: "hover",
+    match: "[data-term]",
+    getPayload: ({ target }) => (target as HTMLElement).dataset.term ?? "",
+    hoverDelay: 10,
+    hoverCloseDelay: 30,
+    onOpenChange,
+  })
+  return (
+    <div ref={ref}>
+      <span data-term="alpha">alpha</span> <span>plain</span>
+      <AnchoredPopover {...popover.popoverProps}>{({ payload }) => <p>hover:{payload}</p>}</AnchoredPopover>
+    </div>
+  )
+}
+
+describe("useAnchoredPopover · hover", () => {
+  test("opens after the delay and closes after leaving", async () => {
+    const user = userEvent.setup()
+    const onOpenChange = mock<TOpenChange>(() => {})
+    render(<HoverHarness onOpenChange={onOpenChange} />)
+
+    await user.hover(screen.getByText("alpha"))
+    expectAbsent("hover:alpha")
+    expect(await screen.findByText("hover:alpha")).toBeTruthy()
+    expect(onOpenChange).toHaveBeenLastCalledWith(true, "hover")
+
+    await user.unhover(screen.getByText("alpha"))
+    await waitFor(() => expectAbsent("hover:alpha"))
+    expect(onOpenChange).toHaveBeenLastCalledWith(false, "leave")
+  })
+
+  test("moving into the popup keeps it open", async () => {
+    const user = userEvent.setup()
+    render(<HoverHarness />)
+    await user.hover(screen.getByText("alpha"))
+    const popup = await screen.findByText("hover:alpha")
+
+    await user.unhover(screen.getByText("alpha"))
+    await user.hover(popup)
+    await new Promise((resolve) => setTimeout(resolve, 60))
+    expect(screen.getByText("hover:alpha")).toBeTruthy()
+  })
+
+  test("leaving before the delay never opens; unmounting clears the timer", async () => {
+    const user = userEvent.setup()
+    const { unmount } = render(<HoverHarness />)
+    await user.hover(screen.getByText("alpha"))
+    await user.unhover(screen.getByText("alpha"))
+    await new Promise((resolve) => setTimeout(resolve, 30))
+    expectAbsent("hover:alpha")
+
+    await user.hover(screen.getByText("alpha"))
+    unmount()
+    await new Promise((resolve) => setTimeout(resolve, 30))
+    // No throw, no act() warning, nothing rendered.
+    expect(document.querySelector("[data-anchored-popover]")).toBeNull()
   })
 })

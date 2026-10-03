@@ -19,6 +19,10 @@ state from `.checked` (not `aria-checked`), and click it with `user-event` —
 a bare `fireEvent.click` does not toggle a native input in happy-dom. When a
 controlled owner refuses a change, the input's own `checked` stays toggled;
 assert `data-state` on the `[data-slot="checkbox"]` root for that case.
+Never put `expect(element).toBeNull()` inside `waitFor`: when the first poll
+fails, bun serializes the element (React fiber included) to build the message,
+blocking the event loop for seconds and starving the timers you are waiting
+on. Throw a plain `Error` from a helper instead.
 
 ## State (one provider, Jotai atom families)
 

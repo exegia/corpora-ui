@@ -187,11 +187,51 @@ export function useAnchoredPopover<TPayload = unknown>(
   }, [ref, triggers, match, anchorTo, openWith, close, isOpen, resolvePayload])
 
   /* ---------------------------------------------------------------- hover */
-  // TASK 4 fills this effect in.
   useLayoutEffect(() => {
     const view = ref.current
     if (!view || !triggers.includes("hover")) return
-    return undefined
+    let pointer = { x: 0, y: 0 }
+
+    const onPointerOver = (event: PointerEvent) => {
+      pointer = { x: event.clientX, y: event.clientY }
+      clearTimeout(timers.current.close)
+      const matched = closestMatch(event.target, match, view)
+      if (!matched) return
+      if (isOpen() && targetRef.current === matched) return
+      clearTimeout(timers.current.open)
+      timers.current.open = setTimeout(() => {
+        const text = matched.textContent ?? ""
+        const payload = resolvePayload({ target: matched, text, event })
+        if (getPayloadRef.current !== undefined && payload == null) return
+        const rect = anchorTo === "pointer" ? toAnchorRect(pointer) : toAnchorRect(matched)
+        const live = anchorTo === "pointer" ? null : () => matched.getBoundingClientRect()
+        openWith(rect, text, payload, matched, live, "hover")
+      }, hoverDelay)
+    }
+
+    const onPointerOut = (event: PointerEvent) => {
+      const related = event.relatedTarget
+      const current = targetRef.current ?? closestMatch(event.target, match, view)
+      // Moving between the target's own children is not a leave.
+      if (related instanceof Node && current?.contains(related)) return
+      clearTimeout(timers.current.open)
+      if (reasonRef.current !== "hover") return
+      clearTimeout(timers.current.close)
+      timers.current.close = setTimeout(() => close("leave"), hoverCloseDelay)
+    }
+
+    // A press means a click trigger (or a selection) is about to win.
+    const onPointerDown = () => clearTimeout(timers.current.open)
+
+    view.addEventListener("pointerover", onPointerOver)
+    view.addEventListener("pointerout", onPointerOut)
+    view.addEventListener("pointerdown", onPointerDown)
+    return () => {
+      view.removeEventListener("pointerover", onPointerOver)
+      view.removeEventListener("pointerout", onPointerOut)
+      view.removeEventListener("pointerdown", onPointerDown)
+      clearTimers()
+    }
   }, [ref, triggers, match, anchorTo, hoverDelay, hoverCloseDelay, openWith, close, isOpen, resolvePayload, clearTimers])
 
   /* ------------------------------------------------------------ selection */
