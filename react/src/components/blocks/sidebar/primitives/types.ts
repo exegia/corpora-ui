@@ -1,4 +1,4 @@
-import type * as React from "react";
+import type { ComponentProps } from "react";
 
 export type SidebarValue = boolean | ((previous: boolean) => boolean);
 export interface SidebarState {
@@ -13,7 +13,7 @@ export interface SidebarActions {
   toggleSidebar: () => void;
 }
 export type SidebarContextProps = SidebarState & SidebarActions;
-export type SidebarProviderProps = React.ComponentProps<"div"> & {
+export type SidebarProviderProps = ComponentProps<"div"> & {
   /** Explicit ids retain state across remounts and support remote actions. */
   sidebarId?: string;
   defaultOpen?: boolean;
