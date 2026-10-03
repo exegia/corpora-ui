@@ -16,14 +16,17 @@ export {
   mutedText,
   surface,
 } from "./shared"
-export { type IStreamingTextProps, type TStreamingToken } from "./streaming-text"
+export {
+  type IStreamingTextProps,
+  type TStreamingToken,
+} from "./streaming-text"
 export type { IResearchAnswerProps } from "./research-answer"
 export type {
   IAISuggestionBase,
   IDiffRow,
   IReferenceBase,
   TSuggestionState,
-} from "./types"
+} from "./type"
 
 const AI = {
   Message,

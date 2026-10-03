@@ -4,10 +4,15 @@ import type { JSX } from "react"
 import { ToggleGroup as ArkToggleGroup } from "@ark-ui/react/toggle-group"
 import { motion, useReducedMotion } from "motion/react"
 import { TooltipCreateHandle, TooltipTrigger } from "@/components/ui/tooltip"
-import { ContextMenu, ContextMenuTrigger, ContextMenuPopup, ContextMenuItem } from "@/components/ui/context-menu"
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuPopup,
+  ContextMenuItem,
+} from "@/components/ui/context-menu"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import type { CanonItemProps } from "./types"
+import type { CanonItemProps } from "./type"
 
 type BookTooltipHandle = ReturnType<typeof TooltipCreateHandle<string>>
 
@@ -34,7 +39,12 @@ export function CanonItem({
           className="inset-0 bg-stone-950 dark:bg-stone-100 pointer-events-none absolute rounded-sm bezel-dim-b-2 bezel-dim-blur-3 bezel-dim/78 bezel-lit-blur-2 bezel-lit-t-3 bezel-lit/14 dark:bezel-dim/50 dark:bezel-lit-blur-2 dark:bezel-lit/90"
         />
       )}
-      <span className={cn("relative z-10", item.type === "book" ? "text-xs" : "text-lg font-semibold")}>
+      <span
+        className={cn(
+          "relative z-10",
+          item.type === "book" ? "text-xs" : "text-lg font-semibold"
+        )}
+      >
         {item.type === "book" ? item.abbreviation : (item.number ?? item.label)}
       </span>
     </>
@@ -65,9 +75,10 @@ export function CanonItem({
   ) : (
     <ArkToggleGroup.Item {...tile.props}>{content}</ArkToggleGroup.Item>
   )
-  const menuItems = typeof contextMenuItems === "function"
-    ? contextMenuItems(item)
-    : contextMenuItems
+  const menuItems =
+    typeof contextMenuItems === "function"
+      ? contextMenuItems(item)
+      : contextMenuItems
   if (!menuItems?.length) return trigger
   return (
     <ContextMenu>
@@ -88,4 +99,3 @@ export function CanonItem({
     </ContextMenu>
   )
 }
-

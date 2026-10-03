@@ -4,7 +4,7 @@ import { ChevronRight } from "lucide-react"
 import type { ReactElement } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import type { IBreadcrumbSeparatorProps } from "./types"
+import type { IBreadcrumbSeparatorProps } from "./type"
 
 /** Displays a decorative symbol or uses it as a labelled menu trigger. */
 export default function BreadcrumbSeparator({

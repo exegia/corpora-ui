@@ -5,7 +5,7 @@ import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover"
 import { TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import type { IBreadcrumbItemProps } from "./types"
+import type { IBreadcrumbItemProps } from "./type"
 import { tooltipHandle } from "./utils"
 
 /** Renders custom content, a link, or a trigger for a preconfigured TOC/menu. */

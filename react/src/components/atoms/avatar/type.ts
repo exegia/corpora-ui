@@ -1,4 +1,4 @@
-import type { TAtomSize } from "../types";
+import type { TAtomSize } from "../type"
 
 export type TUserType = {
   firstName?: string

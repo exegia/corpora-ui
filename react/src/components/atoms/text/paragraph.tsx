@@ -1,9 +1,8 @@
-import { TextSelection } from "../text-selection"
+import { TextSelection } from "./selection"
 import { Text } from "./default"
-import type { TParagraphProps } from "./types"
+import type { TParagraphProps } from "./type"
 import { cn } from "@/lib/utils"
 import { twClasses } from "./utils"
-
 
 export function Paragraph({
   children,

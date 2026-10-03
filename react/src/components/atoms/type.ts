@@ -40,8 +40,8 @@ export interface ILoaderProps {
   size?: TAtomSize
 }
 
-export type * from "./avatar/types"
+export type * from "./avatar/type"
 export type * from "./background/type"
-export type * from "./bubble/types"
+export type * from "./bubble/type"
 export type * from "./text/type"
 export type * from "./text/selection/type"

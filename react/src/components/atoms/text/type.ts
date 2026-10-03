@@ -1,4 +1,5 @@
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react"
+import type { ITextSelectionProps } from "../type"
 
 export type TTextVariant =
   "default" | "heading" | "paragraph" | "link" | "subscript"

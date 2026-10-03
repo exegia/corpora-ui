@@ -5,7 +5,7 @@ import { ChevronDownIcon, InfoIcon } from "lucide-react"
 import { Menu, MenuPopup, MenuTrigger } from "@/components/ui/menu"
 import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover"
 import { Tooltip, TooltipPopup, TooltipTrigger } from "@/components/ui/tooltip"
-import type { BreadcrumbItemOverlay } from "./types"
+import type { BreadcrumbItemOverlay } from "./type"
 
 /** Keep navigation and overlay activation as separate, keyboard-accessible controls. */
 export default function BreadcrumbOverlay({

@@ -2,11 +2,9 @@
 
 import { motion } from "motion/react"
 import type * as React from "react"
-import {
-  Accordion,
-} from "@/components/ui/accordion"
+import { Accordion } from "@/components/ui/accordion"
 import { cn } from "@/lib/utils"
-import type { TRecommendationGroupProps } from "./types"
+import type { TRecommendationGroupProps } from "./type"
 import { GROUP_VARIANTS } from "./constant"
 
 /**
@@ -27,7 +25,7 @@ export function Group({
     >
       <Accordion
         className={cn(
-          "flex w-full max-w-11/12 flex-col gap-2 overflow-clip rounded-md",
+          "gap-2 flex w-full max-w-11/12 flex-col overflow-clip rounded-md",
           className
         )}
         data-slot="recommendation-group"

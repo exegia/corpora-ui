@@ -1,11 +1,17 @@
 import { Unlink } from "lucide-react"
 import { IconButton } from "@/components/ui/chat"
 import { cn } from "@/lib/utils"
-import type { TEdge } from "./types"
+import type { TEdge } from "./type"
 import type { TPoint } from "./utils"
 
 const WIDTHS = [1.25, 2, 3]
-const COLORS = ["var(--line-strong)", "var(--tag-purple-text)", "var(--tag-amber-text)", "var(--tag-blue-text)", "var(--tag-green-text)"]
+const COLORS = [
+  "var(--line-strong)",
+  "var(--tag-purple-text)",
+  "var(--tag-amber-text)",
+  "var(--tag-blue-text)",
+  "var(--tag-green-text)",
+]
 
 /** Floats at a selected connector's midpoint: stroke widths, colours, disconnect. */
 export function EdgeToolbar({
@@ -28,7 +34,7 @@ export function EdgeToolbar({
       role="toolbar"
       aria-label="Connector"
       onClick={(event) => event.stopPropagation()}
-      className="absolute z-20 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 rounded-md bg-surface p-1 shadow-btn"
+      className="gap-1 p-1 absolute z-20 flex -translate-x-1/2 -translate-y-1/2 items-center rounded-md bg-surface shadow-btn"
       style={{ left: at.x, top: at.y }}
     >
       {onChange
@@ -39,13 +45,21 @@ export function EdgeToolbar({
               aria-label={`Stroke ${w}`}
               aria-pressed={width === w}
               onClick={() => onChange(edge.id, { strokeWidth: w })}
-              className={cn("flex size-6 items-center justify-center rounded-sm hover:bg-hover-2", width === w && "bg-hover-2")}
+              className={cn(
+                "size-6 flex items-center justify-center rounded-sm hover:bg-hover-2",
+                width === w && "bg-hover-2"
+              )}
             >
-              <span className="w-3.5 rounded-full bg-ink" style={{ height: w }} />
+              <span
+                className="w-3.5 rounded-full bg-ink"
+                style={{ height: w }}
+              />
             </button>
           ))
         : null}
-      {onChange ? <span aria-hidden className="mx-0.5 h-4 w-px bg-line" /> : null}
+      {onChange ? (
+        <span aria-hidden className="mx-0.5 h-4 w-px bg-line" />
+      ) : null}
       {onChange
         ? COLORS.map((c) => (
             <button
@@ -54,7 +68,10 @@ export function EdgeToolbar({
               aria-label={`Colour ${c}`}
               aria-pressed={color === c}
               onClick={() => onChange(edge.id, { color: c })}
-              className={cn("flex size-6 items-center justify-center rounded-sm hover:bg-hover-2", color === c && "bg-hover-2")}
+              className={cn(
+                "size-6 flex items-center justify-center rounded-sm hover:bg-hover-2",
+                color === c && "bg-hover-2"
+              )}
             >
               <span className="size-3 rounded-full" style={{ background: c }} />
             </button>
@@ -62,7 +79,9 @@ export function EdgeToolbar({
         : null}
       {onRemove ? (
         <>
-          {onChange ? <span aria-hidden className="mx-0.5 h-4 w-px bg-line" /> : null}
+          {onChange ? (
+            <span aria-hidden className="mx-0.5 h-4 w-px bg-line" />
+          ) : null}
           <IconButton aria-label="Disconnect" onClick={() => onRemove(edge.id)}>
             <Unlink />
           </IconButton>

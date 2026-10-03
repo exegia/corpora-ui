@@ -3,7 +3,7 @@ import type {
   ISelectionPosition,
   ISelectionState,
   TSelectionStateUpdate,
-} from "./types"
+} from "./type"
 
 export const initialSelectionState: ISelectionState = {
   selected: false,

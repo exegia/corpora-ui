@@ -32,7 +32,7 @@ export type {
   TocTreeNodeProps,
   CanonItemProps,
   TocViewModeToggleProps,
-} from "./types"
+} from "./type"
 
 export const TOC = {
   Root,
@@ -60,4 +60,9 @@ export {
   resetCanonAtom,
   removeCanonInstance,
 } from "./canon-atom"
-export type { CanonState, CanonProps, CanonContextMenuItem, CanonContextMenuItems } from "./types"
+export type {
+  CanonState,
+  CanonProps,
+  CanonContextMenuItem,
+  CanonContextMenuItems,
+} from "./type"

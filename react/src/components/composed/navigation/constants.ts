@@ -1,4 +1,4 @@
-import type { TTocItem } from "./toc/types"
+import type { TTocItem } from "./toc/type"
 
 type TBibleBook = readonly [name: string, versesPerChapter: readonly number[]]
 

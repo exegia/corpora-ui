@@ -15,7 +15,7 @@ import {
 import { cn } from "@/lib/utils"
 import { CanonItem } from "./canon-item"
 import { DefaultSection } from "./section"
-import type { CanonContextMenuItems, TCanonItem } from "./types"
+import type { CanonContextMenuItems, TCanonItem } from "./type"
 
 export interface CanonGridProps {
   items: readonly TCanonItem[]

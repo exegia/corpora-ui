@@ -1,5 +1,5 @@
 import { Avatar } from "@/components/atoms"
-import type { TUserPillProps } from "./types"
+import type { TUserPillProps } from "./type"
 import { Button } from "@/components/ui/button"
 
 /**
@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
  */
 export function Pill({ user }: TUserPillProps) {
   return (
-    <Button size="sm" className="gap-1 rounded-full pl-0.5">
+    <Button size="sm" className="gap-1 pl-0.5 rounded-full">
       <Avatar user={user} size="sm" />
       <span className="text-xs">@{user.firstName}</span>
     </Button>

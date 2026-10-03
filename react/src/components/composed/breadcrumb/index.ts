@@ -9,7 +9,7 @@ export type {
   BreadcrumbItemOverlay,
   IBreadcrumbSeparatorProps,
   TBreadcrumbSeparatorSymbol,
-} from "./types"
+} from "./type"
 
 const Breadcrumb = {
   Root,

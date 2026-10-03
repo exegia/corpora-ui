@@ -6,7 +6,7 @@ export type {
   SidebarState,
   SidebarActions,
   SidebarProviderProps,
-} from "./primitives/types"
+} from "./primitives/type"
 export interface ISidebarResource {
   id: string
   label: string

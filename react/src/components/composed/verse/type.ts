@@ -1,6 +1,6 @@
 import type { HTMLAttributes, ReactNode } from "react"
-import type { TTextSize } from "../../atoms/text/types"
-import type { ITextClickPopoverProps } from "../../atoms/text-selection/types"
+import type { TTextSize } from "@/components/atoms/text/type"
+import type { ITextClickPopoverProps } from "@/components/atoms/type"
 
 export interface IVerseProps extends Omit<
   HTMLAttributes<HTMLElement>,

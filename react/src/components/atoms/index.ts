@@ -5,9 +5,3 @@ export * from "./background"
 export * from "./avatar"
 export * from "./loader"
 export * from "./reference"
-
-export {
-  HighlightPopover,
-  TextClickPopover,
-  TextSelection,
-} from "./text/selection"

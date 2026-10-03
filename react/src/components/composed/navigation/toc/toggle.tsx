@@ -2,8 +2,8 @@ import { Grid2x2, List } from "lucide-react"
 import { ToggleGroup } from "@/components/ui/toggle-group/base"
 import { ToggleGroup as ArkToggleGroup } from "@ark-ui/react/toggle-group"
 import { buttonVariants } from "@/components/ui/button"
-import type { TNodeType } from "./types"
-import type { TocViewModeToggleProps } from "./types"
+import type { TNodeType } from "./type"
+import type { TocViewModeToggleProps } from "./type"
 
 const GRID_NODE_TYPES = new Set<TNodeType>([
   "book",
@@ -13,8 +13,7 @@ const GRID_NODE_TYPES = new Set<TNodeType>([
 ])
 
 export const isGridNodeType = (type: TNodeType): boolean =>
-    GRID_NODE_TYPES.has(type)
-
+  GRID_NODE_TYPES.has(type)
 
 export function TocViewModeToggle({
   viewMode,

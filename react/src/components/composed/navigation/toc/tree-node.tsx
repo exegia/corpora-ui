@@ -7,7 +7,7 @@ import {
   TreeViewItem,
   TreeViewNode,
 } from "@/components/ui/tree-view"
-import type { TocTreeNodeProps } from "./types"
+import type { TocTreeNodeProps } from "./type"
 
 const EmptyIcon = () => null
 

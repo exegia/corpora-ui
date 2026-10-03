@@ -1,4 +1,4 @@
-import type { TUserType, IAvatarProps } from "@/components/atoms/types"
+import type { TUserType, IAvatarProps } from "@/components/atoms/type"
 import type {
   IBubbleReactionsProps,
   TBubbleVariant,

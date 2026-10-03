@@ -2,7 +2,7 @@ import { expect, mock, test } from "bun:test"
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { Canonical } from "../canon"
 import { Root } from "../default"
-import type { TCanonItem, TTocItem } from "../types"
+import type { TCanonItem, TTocItem } from "../type"
 
 const book: TCanonItem = {
   id: "exod",

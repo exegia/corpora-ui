@@ -1,6 +1,6 @@
 import { atom } from "jotai"
 import { atomWithReset, RESET } from "jotai/utils"
-import type { CanonState, TCanonItem } from "./types"
+import type { CanonState, TCanonItem } from "./type"
 
 // Cache definitions, never values: each Exegia store owns independent state.
 // Like Tree, named instances persist until explicitly released by the app.
@@ -12,7 +12,9 @@ function createCanonAtoms(id: string) {
     set(controlledLink, value)
   })
   const browseLink = atomWithReset<string | undefined>(undefined)
-  const browse = atom(null, (_get, set, link: string | undefined) => set(browseLink, link))
+  const browse = atom(null, (_get, set, link: string | undefined) =>
+    set(browseLink, link)
+  )
   const expandedIds = atomWithReset<CanonState["expandedIds"]>(new Set())
   const activeSectionId =
     atomWithReset<CanonState["activeSectionId"]>(undefined)

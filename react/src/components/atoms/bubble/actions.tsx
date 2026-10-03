@@ -2,7 +2,7 @@
 
 import type * as React from "react"
 import { cn } from "@/lib/utils"
-import type { TBubbleActionsProps } from "./types"
+import type { TBubbleActionsProps } from "./type"
 
 /**
  * Row of per-message actions (copy, retry, …). Hidden until the bubble is
@@ -17,7 +17,7 @@ export function BubbleActions({
     <div
       aria-label={ariaLabel}
       className={cn(
-        "flex items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover/bubble:opacity-100 focus-within:opacity-100 motion-reduce:transition-none relative",
+        "gap-0.5 relative flex items-center opacity-0 transition-opacity duration-150 group-hover/bubble:opacity-100 focus-within:opacity-100 motion-reduce:transition-none",
         className
       )}
       data-slot="bubble-actions"

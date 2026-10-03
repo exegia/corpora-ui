@@ -1,4 +1,4 @@
-import type { TResolvedTheme, TTheme } from "./types"
+import type { TResolvedTheme, TTheme } from "./type"
 
 export const COLOR_SCHEME_QUERY = "(prefers-color-scheme: dark)"
 export const THEME_VALUES: TTheme[] = ["dark", "light", "system"]

@@ -1,7 +1,7 @@
-import type * as NAtomsProps from "./atoms/types"
-import type * as NComposedProps from "./composed/types"
-import type * as NBlockProps from "./blocks/types"
-import type * as NIconsProps from "./icons/types"
+import type * as NAtomsProps from "./atoms/type"
+import type * as NComposedProps from "./composed/type"
+import type * as NBlockProps from "./blocks/type"
+import type * as NIconsProps from "./icons/type"
 
 export type TTheme = "dark" | "light" | "system"
 export type TResolvedTheme = "dark" | "light"

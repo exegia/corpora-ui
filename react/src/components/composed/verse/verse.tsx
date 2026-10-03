@@ -3,10 +3,10 @@
 import { createContext, useContext } from "react"
 import type { ReactElement } from "react"
 import { cn } from "@/lib/utils"
-import { Text } from "../../atoms/text/default"
-import { TextClickPopover } from "../../atoms/text-selection/click-popover"
-import type { TTextSize } from "../../atoms/text/types"
-import type { TVerseNoteProps, IVerseProps, TVerseSpanProps } from "./types"
+import { Text } from "@/components/atoms/text/default"
+import { TextClickPopover } from "@/components/atoms/text/selection"
+import type { TTextSize } from "@/components/atoms/text/type"
+import type { TVerseNoteProps, IVerseProps, TVerseSpanProps } from "./type"
 
 const VerseSizeContext = createContext<TTextSize | undefined>(undefined)
 

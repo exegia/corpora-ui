@@ -11,7 +11,7 @@ import {
   resetCanonAtom,
 } from "@/lib/state"
 import { Canonical } from "../canon"
-import type { TCanonItem } from "../types"
+import type { TCanonItem } from "../type"
 
 const book: TCanonItem = {
   id: "gen",

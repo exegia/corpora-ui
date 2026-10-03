@@ -1,3 +1,4 @@
+import type { IComposerProps } from "@/components/composed/chat"
 import type { ComponentPropsWithoutRef, ReactNode } from "react"
 
 export type TAiScopeKind =
@@ -64,7 +65,7 @@ export interface IAiPanelHeaderProps {
 }
 
 export type { TComposerMode } from "@/components/composed/chat/composer"
-export type { IDiffRow, TSuggestionState } from "@/components/composed/ai/types"
+export type { IDiffRow, TSuggestionState } from "@/components/composed/ai/type"
 
 export interface IVersionHistoryEntry {
   id?: string

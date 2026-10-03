@@ -3,10 +3,10 @@ import type {
   IComposerSuggestionsProps,
   IMarkdownProps,
   IResearchAnswerProps,
-} from "@/index"
-import type { TUserType } from "@/components/atoms/types"
+} from "@/components/"
+import type { TUserType } from "@/components/atoms/type"
 import type { ReactNode } from "react"
-import type { IRecommendationStackProps } from "@/components/blocks/types"
+import type { IRecommendationStackProps } from "@/components/blocks/type"
 
 export type TSuggestionState = "accepted" | "rejected" | "pending"
 

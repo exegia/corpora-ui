@@ -1,9 +1,8 @@
 import { cn } from "@/lib/utils"
-import { TextSelection } from "../text-selection"
+import { TextSelection } from "./selection/selection"
 import { Text } from "./default"
-import type { THeadingProps } from "./types"
-import { twClasses } from "./utils";
-
+import type { THeadingProps } from "./type"
+import { twClasses } from "./utils"
 
 export function Heading({
   children,
@@ -45,10 +44,7 @@ export function Heading({
     >
       <Text
         {...textProps}
-        className={cn(
-          twClasses["default"],
-          className
-        )}
+        className={cn(twClasses["default"], className)}
         type="heading"
       >
         {children}

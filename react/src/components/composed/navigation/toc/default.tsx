@@ -7,7 +7,7 @@ import {
   TreeViewLabel,
   TreeViewTree,
 } from "@/components/ui/tree-view"
-import type { ITocProps, TTocCollectionNode } from "./types"
+import type { ITocProps, TTocCollectionNode } from "./type"
 import { Kbd } from "@/components/ui/kbd"
 import { SearchIcon } from "lucide-react"
 import {

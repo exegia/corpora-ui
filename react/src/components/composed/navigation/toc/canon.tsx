@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils"
 import { CanonGrid } from "./canon-grid"
 export { CanonItem } from "./canon-item"
-import type { CanonProps, TCanonItem } from "./types"
+import type { CanonProps, TCanonItem } from "./type"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Kbd } from "@/components/ui/kbd"

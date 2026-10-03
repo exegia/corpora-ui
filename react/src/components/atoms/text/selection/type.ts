@@ -7,7 +7,6 @@ import type {
 } from "react"
 import type { HighlightPopover as HighlightPopoverPrimitive } from "@omsimos/react-highlight-popover"
 import type { PopoverPopup } from "@/components/ui/popover"
-import type { TTextProps } from "../text/type"
 
 export interface ISelectionPosition {
   top: number
@@ -83,7 +82,10 @@ export interface ITextPopoverRenderProps {
   close: () => void
 }
 
-export interface ITextClickPopoverProps extends Omit<TTextProps, "popover"> {
+export interface ITextClickPopoverProps extends Omit<
+  ComponentProps<"span">,
+  "popover"
+> {
   /** Popover content rendered when the text is clicked. */
   popover?: ReactNode
   /** Render function for applications that need full control of the markup. */

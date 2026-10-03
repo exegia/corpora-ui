@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { TOC } from "../index"
 import { Canonical } from "../canon"
 import { Root } from "../default"
-import type { TCanonItem, TTocItem } from "../types"
+import type { TCanonItem, TTocItem } from "../type"
 import { getLabelText, mapItemsToTreeNodes } from "../utils"
 
 const verse = {
@@ -109,30 +109,59 @@ describe("TOC views", () => {
   test("Canon browses chapters and verses, navigates leaves, and goes back", async () => {
     window.location.hash = ""
     render(<Canonical items={canon} />)
-    await act(async () => { fireEvent.click(screen.getByRole("radio", { name: "Gen" })) })
+    await act(async () => {
+      fireEvent.click(screen.getByRole("radio", { name: "Gen" }))
+    })
     expect(screen.getByRole("heading", { name: "Chapters" })).toBeTruthy()
     expect(window.location.hash).toBe("")
-    await act(async () => { fireEvent.click(screen.getByRole("radio", { name: "1" })) })
+    await act(async () => {
+      fireEvent.click(screen.getByRole("radio", { name: "1" }))
+    })
     expect(screen.getByRole("heading", { name: "Verses" })).toBeTruthy()
-    await act(async () => { fireEvent.click(screen.getByRole("radio", { name: "1" })) })
+    await act(async () => {
+      fireEvent.click(screen.getByRole("radio", { name: "1" }))
+    })
     expect(window.location.hash).toBe(verse.link)
-    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Chapters" })) })
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Chapters" }))
+    })
     expect(screen.getByRole("heading", { name: "Chapters" })).toBeTruthy()
-    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Back to books" })) })
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Back to books" }))
+    })
     expect(screen.getByRole("radio", { name: "Gen" })).toBeTruthy()
-    await act(async () => { fireEvent.click(screen.getByRole("radio", { name: "Gen" })) })
+    await act(async () => {
+      fireEvent.click(screen.getByRole("radio", { name: "Gen" }))
+    })
     expect(screen.getByRole("heading", { name: "Chapters" })).toBeTruthy()
   })
 
   test("neighbor books replace the chapter grid and callbacks retain original items", async () => {
-    const other = { ...book, id: "exod", label: "Exodus", abbreviation: "Exod", link: "#exod-book" } satisfies TCanonItem
+    const other = {
+      ...book,
+      id: "exod",
+      label: "Exodus",
+      abbreviation: "Exod",
+      link: "#exod-book",
+    } satisfies TCanonItem
     const onLinkClick = mock()
-    render(<Canonical items={[{ ...canon[0], nodes: [book, other] }]} onLinkClick={onLinkClick} />)
-    await act(async () => { fireEvent.click(screen.getByRole("radio", { name: "Gen" })) })
+    render(
+      <Canonical
+        items={[{ ...canon[0], nodes: [book, other] }]}
+        onLinkClick={onLinkClick}
+      />
+    )
+    await act(async () => {
+      fireEvent.click(screen.getByRole("radio", { name: "Gen" }))
+    })
     expect(screen.queryByRole("button", { name: "Previous book" })).toBeNull()
-    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Next book: Exodus" })) })
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Next book: Exodus" }))
+    })
     expect(onLinkClick).toHaveBeenLastCalledWith(other)
-    expect(screen.getByRole("button", { name: "Back to books" }).textContent).toContain("Exodus")
+    expect(
+      screen.getByRole("button", { name: "Back to books" }).textContent
+    ).toContain("Exodus")
     expect(screen.queryByRole("button", { name: "Next book" })).toBeNull()
   })
 
@@ -147,7 +176,15 @@ describe("TOC views", () => {
     const onLinkClick = mock()
     render(
       <Canonical
-        items={[{ ...canon[0]!, nodes: [{ ...book, nodes: undefined }, { ...exodus, nodes: undefined }] }]}
+        items={[
+          {
+            ...canon[0]!,
+            nodes: [
+              { ...book, nodes: undefined },
+              { ...exodus, nodes: undefined },
+            ],
+          },
+        ]}
         onLinkClick={onLinkClick}
       />
     )
@@ -178,7 +215,15 @@ describe("TOC views", () => {
       abbreviation: "Exod",
       link: "#exod-book",
     } satisfies TCanonItem
-    const items = [{ ...canon[0]!, nodes: [{ ...book, nodes: undefined }, { ...exodus, nodes: undefined }] }]
+    const items = [
+      {
+        ...canon[0]!,
+        nodes: [
+          { ...book, nodes: undefined },
+          { ...exodus, nodes: undefined },
+        ],
+      },
+    ]
     const view = render(
       <Canonical items={items} activeLink={book} onLinkClick={() => {}} />
     )

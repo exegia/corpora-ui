@@ -36,7 +36,7 @@ export function TextClickPopover({
       <PopoverTrigger
         nativeButton={false}
         render={
-          <Text
+          <span
             {...textProps}
             className={cn(
               "w-fit cursor-pointer data-popup-open:opacity-80",

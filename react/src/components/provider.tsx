@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useState, useMemo } from "react"
-import type { TTheme, TThemeProviderProps } from "./types"
+import type { TTheme, TThemeProviderProps } from "./type"
 import {
   COLOR_SCHEME_QUERY,
   disableTransitionsTemporarily,

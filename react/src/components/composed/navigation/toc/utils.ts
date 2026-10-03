@@ -1,5 +1,5 @@
 import { isValidElement, type ReactNode } from "react"
-import type { TTocItem, TTocTreeNode } from "./types"
+import type { TTocItem, TTocTreeNode } from "./type"
 
 const flatMapNestedNodes = (item: TTocItem): TTocItem[] =>
   item.nodes?.flatMap((node) => [node, ...flatMapNestedNodes(node)]) ?? []
@@ -50,7 +50,10 @@ export const mapItemsToTreeNodes = (
   }))
 
 /** Keep ancestors of matching rows; a matching branch keeps its descendants. */
-export function filterTocNodes(nodes: TTocTreeNode[], query: string): TTocTreeNode[] {
+export function filterTocNodes(
+  nodes: TTocTreeNode[],
+  query: string
+): TTocTreeNode[] {
   const term = query.trim().toLocaleLowerCase()
   if (!term) return nodes
   return nodes.flatMap((node) => {
@@ -61,7 +64,7 @@ export function filterTocNodes(nodes: TTocTreeNode[], query: string): TTocTreeNo
 }
 
 export function tocBranchIds(nodes: TTocTreeNode[]): string[] {
-  return nodes.flatMap((node) => node.children?.length
-    ? [node.id, ...tocBranchIds(node.children)]
-    : [])
+  return nodes.flatMap((node) =>
+    node.children?.length ? [node.id, ...tocBranchIds(node.children)] : []
+  )
 }

@@ -3,9 +3,9 @@ import {
   FieldLabel,
   FieldDescription,
   FieldError,
-} from "@/components/ui/field"
+  Input,
+} from "@/components/ui"
 import type { IInputFieldProps, TInputFieldSize } from "./type"
-import { Input } from "@/components/ui/input"
 
 const inputFieldSizeClasses: TInputFieldSize = {
   label: {

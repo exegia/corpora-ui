@@ -1,7 +1,7 @@
 import type * as React from "react"
 import type { TSignalLevel } from "@/components/ui/chat"
 import type { Accordion } from "@/components/ui/accordion"
-import type { IReferenceProps } from "@/components/atoms/types"
+import type { IReferenceProps } from "@/components/atoms/type"
 
 export interface IRecommendationOption {
   label: React.ReactNode
