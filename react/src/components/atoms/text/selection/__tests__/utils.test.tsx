@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test"
+import { afterEach, describe, expect, test } from "bun:test"
 import {
   closestMatch,
   isModifiedClick,
@@ -7,12 +7,23 @@ import {
   toAnchorRect,
 } from "../utils"
 
+// Fixtures go straight into `document.body`, outside Testing Library's
+// cleanup, so they are removed by hand — bun runs every test file in one
+// process and a stray `<p>` here would be found by another file's queries.
+const fixtures: HTMLElement[] = []
+
 function view(html: string): HTMLDivElement {
   const el = document.createElement("div")
   el.innerHTML = html
   document.body.append(el)
+  fixtures.push(el)
   return el
 }
+
+afterEach(() => {
+  document.getSelection()?.removeAllRanges()
+  for (const el of fixtures.splice(0)) el.remove()
+})
 
 describe("toAnchorRect", () => {
   test("a point becomes a zero-size rect", () => {

@@ -38,12 +38,9 @@ export type TAtomsProps =
   | NAtomsProps.TSpanProps
   | NAtomsProps.TParagraphProps
   | NAtomsProps.TLabelProps
-  | NAtomsProps.ISelectionRenderProps
-  | NAtomsProps.THighlightPopoverPrimitiveProps
-  | NAtomsProps.IHighlightPopoverProps
-  | NAtomsProps.ITextSelectionProps
   | NAtomsProps.ITextPopoverRenderProps
-  | NAtomsProps.ITextClickPopoverProps
+  | NAtomsProps.IAnchoredPopoverProps
+  | NAtomsProps.IUseAnchoredPopoverOptions
 
 // Instantiate generic props at their declared domains. Stories still infer the
 // concrete component's props (including narrower generic arguments) separately.
