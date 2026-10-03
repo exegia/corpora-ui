@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useCallback, useContext, useId, useLayoutEffect, useMemo, useRef } from "react"
+import { createContext, useCallback, useContext, useId, useLayoutEffect, useMemo, useRef, useState } from "react"
 import type { ReactElement, ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { Text } from "@/components/atoms/text/default"
@@ -67,7 +67,11 @@ export function Verse({
   ...props
 }: IVerseProps): ReactElement {
   const ref = useRef<HTMLElement>(null)
-  const registry = useRef(new Map<string, IVersePopoverProps>())
+  // A stable Map held in state and mutated in place: parts register from
+  // layout effects without re-rendering the verse (an inline `popover`
+  // element is a new identity every render, so setState here would loop),
+  // and render may read state where it may not read a ref.
+  const [registry] = useState(() => new Map<string, IVersePopoverProps>())
   const popover = useAnchoredPopover<string>({
     ref,
     trigger: "click",
@@ -75,12 +79,15 @@ export function Verse({
     getPayload: ({ target }) => target?.getAttribute("data-verse-popover") ?? "",
   })
 
-  const register = useCallback((key: string, entry: IVersePopoverProps) => {
-    registry.current.set(key, entry)
-    return () => {
-      registry.current.delete(key)
-    }
-  }, [])
+  const register = useCallback(
+    (key: string, entry: IVersePopoverProps) => {
+      registry.set(key, entry)
+      return () => {
+        registry.delete(key)
+      }
+    },
+    [registry]
+  )
 
   const openKey = popover.open ? (popover.payload ?? null) : null
   const context = useMemo<IVerseContextValue>(() => ({ size, openKey, register }), [size, openKey, register])
@@ -92,10 +99,9 @@ export function Verse({
     return register(chapterKey, { popover: chapterPopover, renderPopover: renderChapterPopover })
   }, [chapterActive, chapterKey, chapterPopover, register, renderChapterPopover])
 
-  // Looked up at render so content edits while open show immediately. The
-  // registry is a ref because registration happens in layout effects; reading
-  // it here is safe — it is written before the popover can open.
-  const activeEntry = openKey ? registry.current.get(openKey) : undefined
+  // Looked up at render; a part's content is registered before the popover
+  // can open, and the next render after any interaction sees current entries.
+  const activeEntry = openKey ? registry.get(openKey) : undefined
 
   return (
     <VerseContext.Provider value={context}>
