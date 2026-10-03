@@ -79,8 +79,11 @@ const VerseContext = createContext<IVerseContextValue>({
 
 const chapterClassName = "mr-1.5 align-super text-[0.7em] font-medium no-underline hover:underline"
 
+/** Booleans and the empty string render nothing, so they are not content either. */
 function hasContent(entry: IVersePopoverProps): boolean {
-  return entry.renderPopover !== undefined || (entry.popover !== undefined && entry.popover !== null)
+  if (entry.renderPopover !== undefined) return true
+  const { popover } = entry
+  return popover !== undefined && popover !== null && typeof popover !== "boolean" && popover !== ""
 }
 
 /** Registers a part's popover content and returns the attributes that make it a target. */
@@ -127,11 +130,14 @@ function VersePopup({
   registry: IVerseRegistry
   openKey: string | null
   popover: IUseAnchoredPopoverResult<string>
-}): ReactElement {
+}): ReactElement | null {
   useSyncExternalStore(registry.subscribe, registry.getVersion, registry.getVersion)
+  // A verse with no popover parts mounts no popover root at all.
+  if (registry.entries.size === 0) return null
   const entry = openKey ? registry.entries.get(openKey) : undefined
+  // Verse popovers open below their part, as the click popovers did before.
   return (
-    <AnchoredPopover {...popover.popoverProps} {...entry?.popoverProps}>
+    <AnchoredPopover {...popover.popoverProps} side="bottom" {...entry?.popoverProps}>
       {(renderProps) => renderVerseEntry(entry, renderProps)}
     </AnchoredPopover>
   )

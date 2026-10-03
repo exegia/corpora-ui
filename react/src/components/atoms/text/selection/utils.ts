@@ -40,7 +40,11 @@ export function rectToVirtualAnchor(
     contextElement: contextElement ?? undefined,
     getBoundingClientRect: () => {
       const current = live?.()
-      if (current) return current
+      // A detached element or a collapsed range reads as all zeros; the
+      // stored snapshot is the better answer then (exit animations included).
+      if (current && (current.x !== 0 || current.y !== 0 || current.width !== 0 || current.height !== 0)) {
+        return current
+      }
       const { x, y, width, height } = rect
       return {
         x,

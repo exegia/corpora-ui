@@ -147,6 +147,36 @@ export function useAnchoredPopover<TPayload = unknown>(
     []
   )
 
+  /**
+   * A point anchor is remembered as an offset inside the view, so the popup
+   * follows the text through scroll and reflow like an element anchor does.
+   */
+  const pointAnchor = useCallback(
+    (point: { x: number; y: number }, container: HTMLElement): { rect: IAnchorRect; read: TLiveRect } => {
+      const origin = container.getBoundingClientRect()
+      const dx = point.x - origin.left
+      const dy = point.y - origin.top
+      return {
+        rect: toAnchorRect(point),
+        read: () => {
+          if (!container.isConnected) return null
+          const now = container.getBoundingClientRect()
+          const x = now.left + dx
+          const y = now.top + dy
+          return { x, y, width: 0, height: 0, top: y, left: x, right: x, bottom: y, toJSON: () => ({ x, y }) } as DOMRect
+        },
+      }
+    },
+    []
+  )
+
+  const elementAnchor = useCallback((element: Element): { rect: IAnchorRect; read: TLiveRect } => {
+    return {
+      rect: toAnchorRect(element),
+      read: () => (element.isConnected ? element.getBoundingClientRect() : null),
+    }
+  }, [])
+
   /* ---------------------------------------------------------------- click */
   useLayoutEffect(() => {
     if (!view || !triggers.includes("click")) return
@@ -158,11 +188,10 @@ export function useAnchoredPopover<TPayload = unknown>(
       // the popover stays closed and a link keeps navigating.
       if (getPayloadRef.current !== undefined && payload == null) return
       if (matched.closest("a[href]")) event.preventDefault()
-      const rect =
+      const { rect, read } =
         anchorTo === "pointer" && event instanceof MouseEvent
-          ? toAnchorRect({ x: event.clientX, y: event.clientY })
-          : toAnchorRect(matched)
-      const read = anchorTo === "pointer" ? null : () => matched.getBoundingClientRect()
+          ? pointAnchor({ x: event.clientX, y: event.clientY }, view)
+          : elementAnchor(matched)
       openWith(rect, text, payload, matched, read, openReason)
     }
 
@@ -200,26 +229,41 @@ export function useAnchoredPopover<TPayload = unknown>(
       view.removeEventListener("click", onClick)
       view.removeEventListener("keydown", onKeyDown)
     }
-  }, [view, triggers, anchorTo, openWith, close, isOpen, resolvePayload])
+  }, [view, triggers, anchorTo, openWith, close, isOpen, resolvePayload, pointAnchor, elementAnchor])
 
   /* ---------------------------------------------------------------- hover */
   useLayoutEffect(() => {
     if (!view || !triggers.includes("hover")) return
     let pointer = { x: 0, y: 0 }
+    // The target whose open timer is running, and whether the pointer is
+    // still over it. Moving between a target's own children must not restart
+    // the delay, and `relatedTarget` is not always reliable, so the timer
+    // is never cancelled by a leave — it checks `over` when it fires.
+    let pendingTarget: Element | null = null
+    let over = false
+
+    const onPointerMove = (event: PointerEvent) => {
+      pointer = { x: event.clientX, y: event.clientY }
+    }
 
     const onPointerOver = (event: PointerEvent) => {
       pointer = { x: event.clientX, y: event.clientY }
       clearTimeout(timers.current.close)
       const matched = closestMatch(event.target, matchRef.current, view)
       if (!matched) return
+      over = true
       if (isOpen() && targetRef.current === matched) return
+      if (pendingTarget === matched) return
       clearTimeout(timers.current.open)
+      pendingTarget = matched
       timers.current.open = setTimeout(() => {
+        pendingTarget = null
+        if (!over) return
         const text = matched.textContent ?? ""
         const payload = resolvePayload({ target: matched, text, event })
         if (getPayloadRef.current !== undefined && payload == null) return
-        const rect = anchorTo === "pointer" ? toAnchorRect(pointer) : toAnchorRect(matched)
-        const read = anchorTo === "pointer" ? null : () => matched.getBoundingClientRect()
+        // The point is where the pointer rests when the delay ends, not where it entered.
+        const { rect, read } = anchorTo === "pointer" ? pointAnchor(pointer, view) : elementAnchor(matched)
         openWith(rect, text, payload, matched, read, "hover")
       }, hoverDelay)
     }
@@ -229,25 +273,31 @@ export function useAnchoredPopover<TPayload = unknown>(
       const current = targetRef.current ?? closestMatch(event.target, matchRef.current, view)
       // Moving between the target's own children is not a leave.
       if (related instanceof Node && current?.contains(related)) return
-      clearTimeout(timers.current.open)
+      over = false
       if (reasonRef.current !== "hover") return
       clearTimeout(timers.current.close)
       timers.current.close = setTimeout(() => close("leave"), hoverCloseDelay)
     }
 
     // A press means a click trigger (or a selection) is about to win.
-    const onPointerDown = () => clearTimeout(timers.current.open)
+    const onPointerDown = () => {
+      clearTimeout(timers.current.open)
+      pendingTarget = null
+      over = false
+    }
 
     view.addEventListener("pointerover", onPointerOver)
+    view.addEventListener("pointermove", onPointerMove)
     view.addEventListener("pointerout", onPointerOut)
     view.addEventListener("pointerdown", onPointerDown)
     return () => {
       view.removeEventListener("pointerover", onPointerOver)
+      view.removeEventListener("pointermove", onPointerMove)
       view.removeEventListener("pointerout", onPointerOut)
       view.removeEventListener("pointerdown", onPointerDown)
       clearTimers()
     }
-  }, [view, triggers, anchorTo, hoverDelay, hoverCloseDelay, openWith, close, isOpen, resolvePayload, clearTimers])
+  }, [view, triggers, anchorTo, hoverDelay, hoverCloseDelay, openWith, close, isOpen, resolvePayload, clearTimers, pointAnchor, elementAnchor])
 
   /* ------------------------------------------------------------ selection */
   useLayoutEffect(() => {
@@ -286,12 +336,15 @@ export function useAnchoredPopover<TPayload = unknown>(
       const selectionTarget =
         ancestor.nodeType === Node.ELEMENT_NODE ? (ancestor as Element) : ancestor.parentElement
       const payload = resolvePayload({ target: selectionTarget, text, event })
+      // Same rule as click/hover: a resolver answering null/undefined means
+      // there is nothing to show for this selection.
+      if (getPayloadRef.current !== undefined && payload == null) return
       openWith(
         toAnchorRect(range),
         text,
         payload,
         selectionTarget,
-        () => range.getBoundingClientRect(),
+        () => (range.collapsed ? null : range.getBoundingClientRect()),
         "selection"
       )
     }
@@ -310,18 +363,21 @@ export function useAnchoredPopover<TPayload = unknown>(
   useEffect(() => {
     return () => {
       clearTimers()
-      // Unnamed instances die with the component; an explicit id persists.
+      // Unnamed instances die with the component. An explicit id keeps its
+      // last text/rect for remote readers, but never an `open` with no view
+      // behind it — a remount would otherwise reopen at stale coordinates.
       if (idProp === undefined) removeAnchoredPopoverInstance(id)
+      else if (store.get(anchoredPopoverOpenAtom(id))) store.set(hideAnchoredPopoverAtom(id))
     }
-  }, [clearTimers, id, idProp])
+  }, [clearTimers, id, idProp, store])
 
   const show = useCallback(
     (input: TAnchorInput, payload?: TPayload) => {
       const element = input instanceof Element ? input : null
       const read: TLiveRect = element
-        ? () => element.getBoundingClientRect()
+        ? () => (element.isConnected ? element.getBoundingClientRect() : null)
         : input instanceof Range
-          ? () => input.getBoundingClientRect()
+          ? () => (input.collapsed ? null : input.getBoundingClientRect())
           : null
       openWith(toAnchorRect(input), element?.textContent ?? "", payload, element, read, "show")
     },
@@ -332,25 +388,36 @@ export function useAnchoredPopover<TPayload = unknown>(
 
   const handleOpenChange = useCallback(
     (next: boolean, details?: PopoverRoot.ChangeEventDetails) => {
-      if (next) return
+      if (next) {
+        // `setOpen(true)` from the render props: reopen at the last anchor
+        // with the last content. Nothing to reopen before a first open.
+        const last = store.get(anchoredPopoverStateAtom(id))
+        if (last.open || !last.rect) return
+        openWith(last.rect, last.text, last.payload, null, null, "show")
+        return
+      }
       if (details === undefined) {
         close("hide")
         return
       }
-      // Base UI dismisses on a press outside the popup. When that press lands
-      // on a click/hover target the click handler owns the outcome (toggle or
-      // switch), so the dismissal is cancelled here to avoid close-then-reopen.
-      if (details.reason === "outside-press") {
-        const pressed = details.event?.target ?? null
+      // Base UI dismisses on a press outside the popup (`click` for mouse,
+      // `pointerdown` for touch) and when focus leaves it. When the press or
+      // the new focus lands on a click/hover target, the click handler owns
+      // the outcome (toggle or switch), so the dismissal is cancelled here to
+      // avoid close-then-reopen.
+      if (details.reason === "outside-press" || details.reason === "focus-out") {
+        const event = details.event as Event | undefined
+        const landing =
+          details.reason === "focus-out" && event instanceof FocusEvent ? event.relatedTarget : (event?.target ?? null)
         const handlesPress = triggers.includes("click") || triggers.includes("hover")
-        if (view && handlesPress && closestMatch(pressed, matchRef.current, view)) {
+        if (view && handlesPress && closestMatch(landing, matchRef.current, view)) {
           details.cancel()
           return
         }
       }
       close("dismiss")
     },
-    [close, triggers, view]
+    [close, id, openWith, store, triggers, view]
   )
 
   const onPopupPointerEnter = useCallback(() => {

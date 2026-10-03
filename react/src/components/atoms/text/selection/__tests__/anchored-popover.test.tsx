@@ -521,3 +521,153 @@ describe("useAnchoredPopover · review fixes", () => {
     expect(fireEvent.mouseDown(screen.getByText("sel:Selectable"))).toBe(true)
   })
 })
+
+/* ------------------------------------------------------------------ */
+/* Deferred minors                                                     */
+/* ------------------------------------------------------------------ */
+
+function PointerHarness() {
+  const ref = useRef<HTMLDivElement>(null)
+  const popover = useAnchoredPopover<string>({
+    ref,
+    trigger: "click",
+    anchorTo: "pointer",
+    getPayload: ({ text }) => text,
+  })
+  return (
+    <>
+      <div ref={ref}>
+        <p>Pointer target</p>
+      </div>
+      <output data-testid="pointer-anchor">
+        {popover.anchor ? `${popover.anchor.getBoundingClientRect().x},${popover.anchor.getBoundingClientRect().y}` : "none"}
+      </output>
+      <AnchoredPopover {...popover.popoverProps}>{({ text }) => <p>pt:{text}</p>}</AnchoredPopover>
+    </>
+  )
+}
+
+function NestedHoverHarness({ onOpen }: { onOpen: () => void }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const popover = useAnchoredPopover<string>({
+    ref,
+    trigger: "hover",
+    match: "[data-term]",
+    getPayload: ({ target }) => (target as HTMLElement).dataset.term ?? "",
+    hoverDelay: 80,
+    hoverCloseDelay: 30,
+    onOpenChange: (open) => open && onOpen(),
+  })
+  return (
+    <div ref={ref}>
+      <span data-term="outer">
+        <em>inner</em> outer
+      </span>
+      <AnchoredPopover {...popover.popoverProps}>{({ payload }) => <p>nested:{payload}</p>}</AnchoredPopover>
+    </div>
+  )
+}
+
+function ReopenHarness() {
+  const ref = useRef<HTMLDivElement>(null)
+  const popover = useAnchoredPopover<string>({
+    ref,
+    id: "reopen-harness",
+    trigger: "click",
+    match: "[data-term]",
+    getPayload: ({ target }) => (target as HTMLElement).dataset.term ?? "",
+  })
+  return (
+    <>
+      <div ref={ref}>
+        <span data-term="again">again</span>
+      </div>
+      <button type="button" onClick={popover.hide}>
+        hide
+      </button>
+      <button type="button" onClick={() => popover.popoverProps.onOpenChange(true)}>
+        reopen
+      </button>
+      <AnchoredPopover {...popover.popoverProps}>{({ payload }) => <p>re:{payload}</p>}</AnchoredPopover>
+    </>
+  )
+}
+
+function NullSelectionHarness() {
+  const ref = useRef<HTMLDivElement>(null)
+  const popover = useAnchoredPopover<string | null>({ ref, getPayload: () => null })
+  return (
+    <>
+      <div ref={ref}>
+        <p>Selectable corpus text</p>
+      </div>
+      <AnchoredPopover {...popover.popoverProps}>{({ text }) => <p>null:{text}</p>}</AnchoredPopover>
+    </>
+  )
+}
+
+describe("useAnchoredPopover · deferred minors", () => {
+  test("anchorTo pointer anchors at the click point", async () => {
+    render(<PointerHarness />)
+    fireEvent.click(screen.getByText("Pointer target"), { clientX: 10, clientY: 20 })
+    await screen.findByText("pt:Pointer target")
+    expect(screen.getByTestId("pointer-anchor").textContent).toBe("10,20")
+  })
+
+  test("hovering a child of the pending target does not restart the delay", async () => {
+    const user = userEvent.setup()
+    const onOpen = mock(() => {})
+    render(<NestedHoverHarness onOpen={onOpen} />)
+    await user.hover(screen.getByText(/outer/))
+    await new Promise((resolve) => setTimeout(resolve, 40))
+    await user.hover(screen.getByText("inner"))
+    // Opens ~80 ms after the first hover; a restart would push it past 120 ms.
+    await new Promise((resolve) => setTimeout(resolve, 65))
+    expect(onOpen).toHaveBeenCalledTimes(1)
+  })
+
+  test("focus moving to another target keeps the popover open for the switch", async () => {
+    const user = userEvent.setup()
+    const onOpenChange = mock<TOpenChange>(() => {})
+    render(<ClickHarness onOpenChange={onOpenChange} />)
+    await user.click(screen.getByText("alpha"))
+    await screen.findByText("term:alpha")
+
+    screen.getByText("beta").focus()
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(screen.getByText("term:alpha")).toBeTruthy()
+    expect(onOpenChange).not.toHaveBeenCalledWith(false, "dismiss")
+  })
+
+  test("setOpen(true) reopens at the last anchor with the last content", async () => {
+    const user = userEvent.setup()
+    render(<ReopenHarness />)
+    await user.click(screen.getByText("again"))
+    await screen.findByText("re:again")
+    await user.click(screen.getByText("hide"))
+    await waitFor(() => expectAbsent("re:again"))
+
+    await user.click(screen.getByText("reopen"))
+    expect(await screen.findByText("re:again")).toBeTruthy()
+  })
+
+  test("an explicit id does not stay open across unmount", async () => {
+    const user = userEvent.setup()
+    const { unmount } = render(<ReopenHarness />)
+    await user.click(screen.getByText("again"))
+    await screen.findByText("re:again")
+    unmount()
+
+    render(<ReopenHarness />)
+    await new Promise((resolve) => setTimeout(resolve, 30))
+    expectAbsent("re:again")
+  })
+
+  test("a selection whose getPayload answers null does not open", async () => {
+    render(<NullSelectionHarness />)
+    selectText(screen.getByText("Selectable corpus text"), 0, 10)
+    document.dispatchEvent(new Event("pointerup"))
+    await new Promise((resolve) => setTimeout(resolve, 30))
+    expectAbsent(/^null:/)
+  })
+})

@@ -49,6 +49,14 @@ describe("rectToVirtualAnchor", () => {
     ])
     expect(anchor.contextElement).toBe(ctx)
   })
+  test("ignores a live rect that is all zero (detached element, collapsed range)", () => {
+    const anchor = rectToVirtualAnchor(
+      { x: 1, y: 2, width: 3, height: 4 },
+      null,
+      () => ({ x: 0, y: 0, width: 0, height: 0 }) as DOMRect
+    )
+    expect(anchor.getBoundingClientRect().x).toBe(1)
+  })
   test("prefers the live rect when one is supplied", () => {
     const anchor = rectToVirtualAnchor(
       { x: 1, y: 2, width: 3, height: 4 },

@@ -83,6 +83,24 @@ describe("verse", () => {
     expect(span.getAttribute("aria-expanded")).toBe("true")
   })
 
+  test("verse popovers open below their part, as before the migration", async () => {
+    const user = userEvent.setup()
+    render(<DemoVerse />)
+    await user.click(screen.getByText("God created"))
+    await screen.findByText("Span body")
+    expect(document.querySelector("[data-anchored-popover]")?.getAttribute("data-side")).toBe("bottom")
+  })
+
+  test("false and empty-string popovers do not count as content", async () => {
+    render(
+      <Verse chapter="1:1" href="#gen-1">
+        <VerseSpan popover={false}>off</VerseSpan> <VerseSpan popover="">empty</VerseSpan>
+      </Verse>
+    )
+    expect(screen.getByText("off").getAttribute("role")).toBeNull()
+    expect(screen.getByText("empty").getAttribute("role")).toBeNull()
+  })
+
   test("content that changes while the popover is open shows immediately", async () => {
     const user = userEvent.setup()
     const Editable = ({ n }: { n: number }) => (
