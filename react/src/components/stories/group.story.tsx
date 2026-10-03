@@ -1,6 +1,6 @@
 "use client"
 
-import { Group, GroupSeparator } from "@/ui/group"
+import { Group, GroupSeparator } from "@/components/ui/group"
 import { Button } from "@/components/ui/button"
 import { defineStory } from "@/registry/story"
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { toastManager } from "@/ui/toast"
+import { toastManager } from "@/components/ui/toast"
 import { Button } from "@/components/ui/button"
 import { defineStory } from "@/registry/story"
 

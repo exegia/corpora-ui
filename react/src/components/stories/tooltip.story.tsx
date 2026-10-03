@@ -1,6 +1,6 @@
 "use client"
 
-import { Tooltip, TooltipTrigger, TooltipPopup } from "@/ui/tooltip"
+import { Tooltip, TooltipTrigger, TooltipPopup } from "@/components/ui/tooltip"
 import { Button } from "@/components/ui/button"
 import { defineStory } from "@/registry/story"
 

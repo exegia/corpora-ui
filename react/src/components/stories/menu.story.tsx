@@ -1,6 +1,6 @@
 "use client"
 
-import { Menu, MenuTrigger, MenuPopup, MenuItem } from "@/ui/menu"
+import { Menu, MenuTrigger, MenuPopup, MenuItem } from "@/components/ui/menu"
 import { Button } from "@/components/ui/button"
 import { defineStory } from "@/registry/story"
 

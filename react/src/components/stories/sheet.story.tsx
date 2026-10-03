@@ -9,7 +9,7 @@ import {
   SheetDescription,
   SheetFooter,
   SheetClose,
-} from "@/ui/sheet"
+} from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { defineStory } from "@/registry/story"
 

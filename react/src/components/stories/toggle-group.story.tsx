@@ -1,6 +1,6 @@
 "use client"
 
-import { ToggleGroup, ToggleGroupItem } from "@/ui/toggle-group"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 import { defineStory } from "@/registry/story"
 

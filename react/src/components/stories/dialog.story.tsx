@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogClose,
-} from "@/ui/dialog"
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { defineStory } from "@/registry/story"
 

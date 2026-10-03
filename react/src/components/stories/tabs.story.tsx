@@ -1,6 +1,6 @@
 "use client"
 
-import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/ui/tabs"
+import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs"
 
 import { defineStory } from "@/registry/story"
 

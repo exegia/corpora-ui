@@ -1,7 +1,7 @@
 "use client"
 
-import { Fieldset, FieldsetLegend } from "@/ui/fieldset"
-import { Checkbox } from "@/ui/checkbox"
+import { Fieldset, FieldsetLegend } from "@/components/ui/fieldset"
+import { Checkbox } from "@/components/ui/checkbox"
 import { defineStory } from "@/registry/story"
 
 function ComponentPreview({ disabled }: { disabled: boolean }) {

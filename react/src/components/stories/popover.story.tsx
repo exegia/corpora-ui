@@ -7,7 +7,7 @@ import {
   PopoverTitle,
   PopoverDescription,
   PopoverClose,
-} from "@/ui/popover"
+} from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { defineStory } from "@/registry/story"
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { Autocomplete, AutocompleteInput, AutocompletePopup, AutocompleteList, AutocompleteItem, AutocompleteEmpty } from "@/ui/autocomplete"
+import { Autocomplete, AutocompleteInput, AutocompletePopup, AutocompleteList, AutocompleteItem, AutocompleteEmpty } from "@/components/ui/autocomplete"
 
 import { defineStory } from "@/registry/story"
 

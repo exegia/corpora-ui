@@ -9,7 +9,7 @@ import {
   DrawerDescription,
   DrawerFooter,
   DrawerClose,
-} from "@/ui/drawer"
+} from "@/components/ui/drawer"
 import { Button } from "@/components/ui/button"
 import { defineStory } from "@/registry/story"
 

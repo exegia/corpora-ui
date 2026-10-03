@@ -8,11 +8,11 @@ import {
   DemoToggle,
 } from "@/components/docs/demo-controls"
 import { Text } from "@/components/atoms/text"
-import { TextClickPopover } from "@/components/atoms/text-selection"
+import { TextClickPopover } from "@/components/atoms/text/selection"
 import type {
   ISelectionRenderProps,
   ITextPopoverRenderProps,
-} from "@/components/atoms/text-selection"
+} from "@/components/atoms/type"
 
 const TYPES = ["default", "heading", "paragraph", "link", "subscript"] as const
 const SIZES = ["small", "medium", "large"] as const

@@ -6,6 +6,7 @@ export { SuggestedPrompts } from "./suggested-prompts"
 export { RecommendationStack } from "./recommendation-stack"
 export { DegradedBanner, LockedBanner, PinnedThreadBanner } from "./banners"
 export { VersionHistoryRecord } from "./version-history-record"
+export type * from "./type"
 
 export {
   AppliedMark,

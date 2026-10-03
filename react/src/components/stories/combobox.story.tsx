@@ -1,6 +1,6 @@
 "use client"
 
-import { Combobox, ComboboxInput, ComboboxPopup, ComboboxList, ComboboxItem, ComboboxEmpty } from "@/ui/combobox"
+import { Combobox, ComboboxInput, ComboboxPopup, ComboboxList, ComboboxItem, ComboboxEmpty } from "@/components/ui/combobox"
 
 import { defineStory } from "@/registry/story"
 

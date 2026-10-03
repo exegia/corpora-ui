@@ -6,7 +6,7 @@ import {
   ToolbarButton,
   ToolbarSeparator,
   ToolbarLink,
-} from "@/ui/toolbar"
+} from "@/components/ui/toolbar"
 import { Button } from "@/components/ui/button"
 import { defineStory } from "@/registry/story"
 

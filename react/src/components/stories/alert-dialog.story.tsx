@@ -9,7 +9,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogClose,
-} from "@/ui/alert-dialog"
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { defineStory } from "@/registry/story"
 

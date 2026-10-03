@@ -33,7 +33,7 @@
 import * as React from "react"
 import { Provider, useStore } from "jotai"
 
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/components/provider"
 import { ToastProvider } from "@/components/ui/toast"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { activateProviderSounds } from "./sound-loading"

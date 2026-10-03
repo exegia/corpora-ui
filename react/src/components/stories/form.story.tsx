@@ -1,9 +1,9 @@
 "use client"
 
-import { Form } from "@/ui/form"
+import { Form } from "@/components/ui/form"
 import { useState } from "react"
-import { Field, FieldLabel, FieldError } from "@/ui/field"
-import { Input } from "@/ui/input"
+import { Field, FieldLabel, FieldError } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { defineStory } from "@/registry/story"
 

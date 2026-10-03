@@ -1,6 +1,6 @@
 "use client"
 
-import { Toggle } from "@/ui/toggle"
+import { Toggle } from "@/components/ui/toggle"
 
 import { defineStory } from "@/registry/story"
 
