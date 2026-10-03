@@ -30,16 +30,31 @@ export const checkboxVariants = tv({
   ],
 });
 
+/**
+ * The Ark root is a `<label>` and the hidden native `<input>` inside it is
+ * the accessible checkbox — so `id` and the aria-* naming props are routed to
+ * the input, not the root. That keeps `<Label htmlFor={id}>` and `aria-label`
+ * working, and leaves exactly one element with the checkbox role.
+ */
 export const Checkbox = (
   props: React.ComponentProps<typeof ArkCheckbox.Root>
 ) => {
-  const { className, tabIndex, ...rest } = props;
+  const {
+    className,
+    tabIndex,
+    id,
+    ids,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledby,
+    "aria-describedby": ariaDescribedby,
+    ...rest
+  } = props;
 
   return (
     <ArkCheckbox.Root
       className={cn(checkboxVariants(), className)}
       data-slot="checkbox"
-      role="checkbox"
+      ids={id === undefined ? ids : { ...ids, hiddenInput: id }}
       {...rest}
     >
       <ArkCheckbox.Control data-slot="checkbox-control">
@@ -52,7 +67,12 @@ export const Checkbox = (
         </CheckboxIndicator>
       </ArkCheckbox.Control>
 
-      <ArkCheckbox.HiddenInput tabIndex={tabIndex} />
+      <ArkCheckbox.HiddenInput
+        aria-describedby={ariaDescribedby}
+        aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledby}
+        tabIndex={tabIndex}
+      />
     </ArkCheckbox.Root>
   );
 };

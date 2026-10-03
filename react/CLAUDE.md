@@ -13,9 +13,12 @@ nothing here (references-only root tsconfig).
 and carries the preload). `src/test/setup.ts` registers happy-dom and stubs
 `matchMedia` + `Element.animate`, which motion needs; component tests use
 `@testing-library/react`. Anything behind `MorphStep`/`Reveal` arrives on an
-animation frame, so assert with `findBy*`, not `getBy*`. Base UI renders a
-hidden native input beside its Checkbox root, so query checkboxes by role
-rather than by label — `getByLabelText` matches both.
+animation frame, so assert with `findBy*`, not `getBy*`. The Ark Checkbox's
+hidden native `<input>` is the accessible checkbox: query it by role, read
+state from `.checked` (not `aria-checked`), and click it with `user-event` —
+a bare `fireEvent.click` does not toggle a native input in happy-dom. When a
+controlled owner refuses a change, the input's own `checked` stays toggled;
+assert `data-state` on the `[data-slot="checkbox"]` root for that case.
 
 ## State (one provider, Jotai atom families)
 
