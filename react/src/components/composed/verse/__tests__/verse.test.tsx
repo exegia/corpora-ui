@@ -54,4 +54,32 @@ describe("verse", () => {
     expect(chapter.tagName).toBe("A")
     expect(chapter.getAttribute("role")).toBeNull()
   })
+
+  test("a span without popover content is a plain span", async () => {
+    const user = userEvent.setup()
+    render(
+      <Verse chapter="1:2" href="#gen-1-2">
+        and the <VerseSpan>earth</VerseSpan> was
+      </Verse>
+    )
+    const span = screen.getByText("earth")
+    expect(span.getAttribute("role")).toBeNull()
+    expect(span.getAttribute("tabindex")).toBeNull()
+    await user.click(span)
+    expect(document.querySelector("[data-selection-popover]")).toBeNull()
+  })
+
+  test("spans open from the keyboard and expose their state", async () => {
+    const user = userEvent.setup()
+    render(<DemoVerse />)
+    const span = screen.getByText("God created")
+    expect(span.getAttribute("role")).toBe("button")
+    expect(span.getAttribute("aria-haspopup")).toBe("dialog")
+    expect(span.getAttribute("aria-expanded")).toBe("false")
+
+    span.focus()
+    await user.keyboard("{Enter}")
+    expect(await screen.findByText("Span body")).toBeTruthy()
+    expect(span.getAttribute("aria-expanded")).toBe("true")
+  })
 })

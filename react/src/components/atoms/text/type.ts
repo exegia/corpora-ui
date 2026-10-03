@@ -1,4 +1,4 @@
-import type { CSSProperties, HTMLAttributes, ReactNode } from "react"
+import type { CSSProperties, HTMLAttributes, ReactNode, Ref } from "react"
 
 export type TTextVariant =
   "default" | "heading" | "paragraph" | "link" | "subscript"
@@ -11,6 +11,8 @@ export type TTextProps = Omit<
   id?: string
   children?: ReactNode
   className?: string
+  /** Reaches the rendered element (React 19 passes `ref` as a prop). */
+  ref?: Ref<HTMLElement>
   /** Named sizes use the type scale; a number is interpreted as pixels. */
   size?: TTextSize
   type?: TTextVariant
