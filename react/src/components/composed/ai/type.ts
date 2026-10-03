@@ -1,9 +1,7 @@
-import type {
-  IChartProps,
-  IComposerSuggestionsProps,
-  IMarkdownProps,
-  IResearchAnswerProps,
-} from "@/components/"
+import type { IChartProps } from "@/components/composed/chat/chart/type"
+import type { IMarkdownProps } from "@/components/composed/chat/markdown"
+import type { IComposerSuggestionsProps } from "@/components/composed/chat/type"
+import type { IResearchAnswerProps } from "./research-answer"
 import type { TUserType } from "@/components/atoms/type"
 import type { ReactNode } from "react"
 import type { IRecommendationStackProps } from "@/components/blocks/type"

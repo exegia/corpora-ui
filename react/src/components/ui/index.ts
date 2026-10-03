@@ -20,7 +20,16 @@ export * from "./toggle-group"
 export * from "./accordion"
 export * from "./alert"
 export * from "./autocomplete"
-export * from "./avatar"
+// `Avatar` is the atoms' name (the user avatar); the Base UI root is scoped
+// to `AvatarRoot` so both reach `src/index.ts` without colliding.
+export {
+  Avatar as AvatarRoot,
+  AvatarBadge,
+  AvatarFallback,
+  AvatarGroup,
+  AvatarGroupCount,
+  AvatarImage,
+} from "./avatar"
 export * from "./badge"
 export * from "./button"
 export * from "./card"
