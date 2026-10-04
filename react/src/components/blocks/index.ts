@@ -6,3 +6,5 @@ export * from "./shell"
 export * from "./sidebar"
 
 export type * from "./type"
+
+export * from "./reader"

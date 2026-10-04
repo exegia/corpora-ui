@@ -19,6 +19,7 @@ export * from "./toggle"
 export * from "./toggle-group"
 export * from "./accordion"
 export * from "./alert"
+export * from "./alert-dialog"
 export * from "./autocomplete"
 // `Avatar` is the atoms' name (the user avatar); the Base UI root is scoped
 // to `AvatarRoot` so both reach `src/index.ts` without colliding.
@@ -65,3 +66,6 @@ export * from "./toast"
 export * from "./toolbar"
 export * from "./tooltip"
 export * from "./tree-view"
+
+// Resolve the primitive re-export shared by Field and Textarea.
+export { FieldPrimitive } from "./field"
