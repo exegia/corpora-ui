@@ -81,7 +81,7 @@ consumer-check: ## Build the library and verify its tarball in an isolated React
 	cd $(REACT_DIR) && $(BUN) run check:consumer
 
 clean: ## Remove build output and caches
-	rm -rf $(REACT_DIR)/dist $(REACT_DIR)/dist-lib $(REACT_DIR)/node_modules/.vite dist-pack
+	rm -rf $(REACT_DIR)/dist $(REACT_DIR)/dist-lib $(REACT_DIR)/node_modules/.** dist-pack
 
 distclean: clean ## Also remove node_modules
 	rm -rf $(REACT_DIR)/node_modules

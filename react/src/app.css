@@ -2,6 +2,8 @@
 @import "tailwind-animations";
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/figtree";
+@import "@fontsource-variable/noto-sans";
+@import "@fontsource-variable/noto-sans/wght-italic.css";
 
 
 @import 'fumadocs-ui/css/shadcn.css';
@@ -13,6 +15,7 @@
 
 
 @theme {
+  --font-corpus: "Noto Sans Variable", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
   --default-font-family: "Geist", sans-serif;
 
@@ -39,4 +42,13 @@
   --color-fd-primary: var(--color-amber-300);
   --color-fd-primary-foreground: var(--color-amber-950);
   --color-fd-ring: var(--color-amber-300);
+}
+
+/* The library stylesheet can arrive after the docs stylesheet and its base
+   .flex utility then overrides md:hidden. Keep the docs mobile header hidden
+   alongside the desktop sidebar, independent of stylesheet loading order. */
+@media (width >= 48rem) {
+  #nd-docs-layout > #nd-subnav {
+    display: none;
+  }
 }

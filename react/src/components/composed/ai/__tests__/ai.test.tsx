@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test"
 import { render, screen } from "@testing-library/react"
 import { Message } from "../message"
-import type { TAIContentProps } from "../types"
+import type { TAIContentProps } from "../type"
 
 describe("Message", () => {
   test("renders the agent identity row and the body as a polite live region", () => {

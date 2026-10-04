@@ -5,23 +5,79 @@ description: "Typography primitive for body copy, labels and captions."
 
 import { Preview } from "@/components/stories/text.story"
 
+import Demo from "@/registry/demos/text-demo"
+
 <Preview />
 
 ## Usage
 
 ```tsx
-import { Text } from "@exegia/corpora-ui"
-import { TextClickPopover } from "@exegia/corpora-ui"
+import { Text, AnchoredPopover, useAnchoredPopover } from "@exegia/corpora-ui"
 
 <Text.Heading size="large">Corpus title</Text.Heading>
 <Text.Paragraph>Readable corpus prose belongs here.</Text.Paragraph>
 <Text.Root type="link" href="/activity">View activity</Text.Root>
-
-// Click-triggered popover — works for default (span), link and subscript
-<TextClickPopover type="subscript" popover={<p>Annotation</p>}>
-  Subscript note
-</TextClickPopover>
 ```
+
+## Popovers on selection, click or hover
+
+No wrapper around the text: hold a `ref` to any view, call the hook, and
+render one `AnchoredPopover` anywhere. Base UI positions it against the
+selection, the clicked element or the pointer.
+
+<Demo />
+
+```tsx
+function Reader() {
+  const ref = useRef<HTMLDivElement>(null)
+  const popover = useAnchoredPopover<string>({
+    ref,
+    trigger: ["selection", "click"],
+    match: "[data-term]",
+    getPayload: ({ target, text }) => target?.getAttribute("data-term") ?? text,
+  })
+  return (
+    <div ref={ref}>
+      <Text.Paragraph>
+        Select any words, or click <span data-term="lemma">lemma</span>.
+      </Text.Paragraph>
+      <AnchoredPopover {...popover.popoverProps} side="top">
+        {({ payload, close }) => <Toolbar term={payload} onDone={close} />}
+      </AnchoredPopover>
+    </div>
+  )
+}
+```
+
+| Option                           | Type                                            | Default       | Description                                                                                                        |
+| -------------------------------- | ----------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `ref`                            | `RefObject<HTMLElement>`                        | —             | The view. Listeners attach here; selections outside it are ignored.                                                |
+| `id`                             | `string`                                        | `useId()`     | Instance id. An explicit id survives remounts and can be driven remotely.                                          |
+| `trigger`                        | `"selection" \| "click" \| "hover"` or an array | `"selection"` | Which events open the popover.                                                                                     |
+| `match`                          | `string \| (el) => boolean`                     | any element   | click/hover: which descendants are targets.                                                                        |
+| `getPayload`                     | `({ target, text, event }) => TPayload`         | —             | Data handed to the popup render function. Answering `null`/`undefined` means "nothing to show" — no popover opens. |
+| `anchorTo`                       | `"target" \| "pointer"`                         | `"target"`    | click/hover: anchor on the element, or on the pointer position (kept as an offset in the view, so it scrolls with the text). |
+| `minSelectionLength`             | `number`                                        | `1`           | Shorter selections do not open.                                                                                    |
+| `hoverDelay` / `hoverCloseDelay` | `number`                                        | `300` / `150` | Hover timings in ms.                                                                                               |
+| `onOpenChange`                   | `(open, reason) => void`                        | —             | Reasons: `selection`, `click`, `keyboard`, `hover`, `collapse`, `toggle`, `leave`, `dismiss`, `show`, `hide`.      |
+
+The hook returns `{ open, text, payload, target, anchor, show, hide, popoverProps }`.
+`show(elementOrRectOrPoint, payload?)` opens from any custom event. From
+elsewhere in the app, `useAnchoredPopoverState(id)` reads the selection and
+`useAnchoredPopoverActions(id).hide()` closes it.
+
+`AnchoredPopover` takes `popoverProps` plus the positioner props (`side`,
+`align`, `sideOffset`, `className`) and `variant="glass"` with an optional
+`glassVariant`. Its children may be a node or a render function receiving
+`{ open, text, payload, close, setOpen }`. Clicking anywhere outside the popup
+dismisses it, as with any popover.
+
+### Removed
+
+`TextClickPopover`, `TextSelection`, `HighlightPopover`, `useSelection` and the
+selection props on `Text.Heading` / `Text.Paragraph` are gone. Wrap-free
+replacement: the hook above; `Verse` keeps its `popover` props and uses it
+internally.
 
 ## API reference
 

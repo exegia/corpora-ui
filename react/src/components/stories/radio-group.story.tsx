@@ -1,6 +1,6 @@
 "use client"
 
-import { RadioGroup, Radio } from "@/ui/radio-group"
+import { RadioGroup, Radio } from "@/components/ui/radio-group"
 
 import { defineStory } from "@/registry/story"
 

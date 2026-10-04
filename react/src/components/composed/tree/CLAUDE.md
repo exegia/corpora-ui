@@ -14,13 +14,25 @@ first; this file only holds what is specific to the tree.
 | `use-tree.ts`       | `useTree(options)` — mounts an instance, projects controlled props into the store, returns the `ITreeController`. |
 | `use-tree-state.ts` | `useTreeState(id)` (reads, re-renders on any change) and `useTreeActions(id)` (writes only, never re-renders). |
 | `use-tree-dnd.ts`   | Stable drag handlers for `files`; they read `draggedId`/`dropTarget` out of the store at call time.       |
-| `tree-context.ts`   | Context value = `{ treeId, renderTrailing, dnd }` only. Never the controller.                            |
+| Row scope props | `{ treeId, renderTrailing, dnd }` pass through recursive rows; mutable state comes from atoms. |
 | `tree.tsx`          | `Tree` (props form → `UncontrolledTree`, controller form → `TreeView`), roving keyboard nav. |
 | `tree-node.tsx`     | `TreeRow` (memoized). Per-node atom subscriptions, row kind resolution, rename input, tooltip, toc overlay toggle, trailing slot, branch animation. |
 | `constants.ts`      | Durations, easings, motion variants.                                                                    |
 | `utils.ts`          | Pure tree helpers (`findNode`, `moveNode`, `renameNode`, ancestor walks).                               |
 | `index.ts`          | Barrel. Public atoms are listed explicitly — never `export *`.                                          |
 | `__tests__/`        | `tree.test.tsx` (rendering per variant), `use-tree.test.tsx` (controller/hook), `tree-atom.test.tsx` (store + memo guard). |
+
+## Design guardrails
+
+- **Jotai remains the only tree state owner.** Keep state in the keyed atom
+  families; do not add component-local mirrors or let an Ark UI machine become
+  a second source of truth. Adapt atom-backed state into Ark UI props and
+  callbacks when a primitive needs it.
+- **Prefer Ark UI for tree semantics and accessibility.** Start new structural
+  work from `components/ui/tree-view` before introducing custom tree markup or
+  keyboard behavior.
+- Keep this composed layer focused on its four documented variants. Do not add
+  abstraction layers unless a current variant needs them.
 
 ## Row anatomy (as of 2026-08-18)
 

@@ -1,14 +1,23 @@
 "use client"
 
-import { toastManager } from "@/ui/toast"
-import { Button } from "@/ui/button"
+import { toastManager } from "@/components/ui/toast"
+import { Button } from "@/components/ui/button"
 import { defineStory } from "@/registry/story"
 
 function ComponentPreview({ title }: { title: string }) {
-
   return (
-    <div className="relative mx-auto w-full max-w-lg p-6">
-      <Button onClick={() => toastManager.add({ title, description: "Your changes are available in the library.", type: "success" })}>Show toast</Button>
+    <div className="max-w-lg p-6 relative mx-auto w-full">
+      <Button
+        onClick={() =>
+          toastManager.add({
+            title,
+            description: "Your changes are available in the library.",
+            type: "success",
+          })
+        }
+      >
+        Show toast
+      </Button>
     </div>
   )
 }

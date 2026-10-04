@@ -5,12 +5,12 @@ import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { EASE_IN_OUT, SPRING_PRESS, SPRING_SWAP } from "@/lib/ease"
 import { useBubbleVariant } from "./context"
-import { MorphIcon } from "morphicons/react";
+import { MorphIcon } from "morphicons/react"
 import type {
   IBubbleReactionsProps,
   IBubbleReactionChipProps,
   TBubbleReactionsButtonProps,
-} from "./types"
+} from "./type"
 import { reactionKey } from "./utils"
 import { GlassContainer } from "@/components/ui/glasscn/glass-container"
 import {
@@ -41,7 +41,7 @@ export function BubbleReactionChip({
       aria-label={reaction.label}
       aria-pressed={reaction.reacted ?? false}
       className={cn(
-        "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-1.5 font-bold text-neutral-600 transition-[colors,scale] duration-150 ease-smooth-out outline-none hover:scale-105 focus-visible:ring-0 focus-visible:ring-ring dark:text-neutral-300",
+        "gap-1 px-1 py-1.5 font-bold text-neutral-600 dark:text-neutral-300 inline-flex cursor-pointer items-center rounded-lg transition-[colors,scale] duration-150 ease-smooth-out outline-none hover:scale-105 focus-visible:ring-0 focus-visible:ring-ring",
         reaction.reacted && "text-foreground",
         className
       )}
@@ -60,7 +60,7 @@ export function BubbleReactionChip({
             : { scale: reaction.reacted ? [1, 1.35, 1] : 1 }
         }
         aria-hidden={reaction.label ? true : undefined}
-        className="block text-xs/snug select-none"
+        className="text-xs/snug block select-none"
         transition={
           reduceMotion
             ? { duration: 0 }
@@ -92,9 +92,8 @@ export function BubbleReactionChip({
 export function BubbleReactionsButton({
   className,
   onClick,
-  onEmojiSelect
+  onEmojiSelect,
 }: TBubbleReactionsButtonProps): React.ReactElement {
-
   const [open, setOpen] = useState(false)
   return (
     <Popover onOpenChange={setOpen} open={open}>
@@ -103,7 +102,7 @@ export function BubbleReactionsButton({
           <button
             aria-label="Add reaction"
             className={cn(
-              "inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-2 font-bold text-neutral-600 duration-150 ease-smooth-out outline-none hover:scale-105 focus-visible:ring-0 dark:text-neutral-300",
+              "gap-1 px-1 py-2 font-bold text-neutral-600 dark:text-neutral-300 inline-flex cursor-pointer items-center rounded-lg duration-150 ease-smooth-out outline-none hover:scale-105 focus-visible:ring-0",
               className
             )}
             data-slot="bubble-reaction-button"
@@ -117,15 +116,18 @@ export function BubbleReactionsButton({
               onClick?.(event)
             }}
           >
-             <MorphIcon icon={state.open ? X : FaceSlightlySmilingPlus} size={16} />
+            <MorphIcon
+              icon={state.open ? X : FaceSlightlySmilingPlus}
+              size={16}
+            />
           </button>
         )}
       />
-       
+
       <PopoverGlass
         align="center"
         alignOffset={-25}
-  
+
         glassVariant="frosted"
         sideOffset={5}
         side="top"
@@ -158,7 +160,7 @@ export function BubbleReactions({
   return (
     <div
       className={cn(
-        "absolute -bottom-5 z-1 flex max-h-8 w-fit flex-1 items-center",
+        "-bottom-5 max-h-8 absolute z-1 flex w-fit flex-1 items-center",
         variant === "sender" ? "left-4" : "right-4",
         className
       )}

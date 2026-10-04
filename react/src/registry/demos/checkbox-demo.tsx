@@ -29,9 +29,9 @@ export default function CheckboxDemo() {
       <div className="flex items-center gap-2">
         <Checkbox
           id={id}
-          disabled={disabled}
-          indeterminate={indeterminate}
-          sound={sound}
+                  disabled={disabled}
+                  checked={indeterminate ?? "indeterminate"}
+          
           defaultChecked
         />
         <Label htmlFor={id}>Enable notifications</Label>
