@@ -19,7 +19,7 @@ const book: TCanonItem = {
   link: "#gen-book",
   level: 2,
   type: "book",
-  abbreviation: "Gen",
+  abbreviation: "GEN",
   nodes: [
     {
       id: "gen-1",
@@ -36,7 +36,7 @@ const other: TCanonItem = {
   id: "exod",
   label: "Exodus",
   link: "#exod-book",
-  abbreviation: "Exod",
+  abbreviation: "EXO",
 }
 const items: TCanonItem[] = [
   {
@@ -94,7 +94,7 @@ describe("Canon atoms", () => {
       fireEvent.click(screen.getByRole("tab", { name: "First" }))
     })
     await act(async () => {
-      fireEvent.click(screen.getByRole("radio", { name: "Gen" }))
+      fireEvent.click(screen.getByRole("radio", { name: "GEN" }))
     })
     expect(store.get(canonStateAtom("remote")).selectedLink).toBe(book.link)
     expect(store.get(canonStateAtom("remote")).activeSectionId).toBe("first")
@@ -140,7 +140,7 @@ describe("Canon atoms", () => {
       </StrictMode>
     )
     await act(async () => {})
-    const tiles = screen.getAllByRole("radio", { name: "Gen" })
+    const tiles = screen.getAllByRole("radio", { name: "GEN" })
     await act(async () => {
       fireEvent.click(tiles[0]!)
     })

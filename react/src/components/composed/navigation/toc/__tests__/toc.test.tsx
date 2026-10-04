@@ -29,7 +29,7 @@ const book = {
   link: "#gen-book",
   level: 2,
   type: "book",
-  abbreviation: "Gen",
+  abbreviation: "GEN",
   nodes: [chapter],
 } satisfies TCanonItem
 const canon = [
@@ -80,7 +80,7 @@ describe("TOC views", () => {
           id: "matt",
           label: "Matthew",
           link: "#matt-book",
-          abbreviation: "Matt",
+          abbreviation: "MAT",
         },
       ],
     } satisfies TCanonItem
@@ -95,22 +95,22 @@ describe("TOC views", () => {
         .getAttribute("aria-selected")
     ).toBe("true")
     await act(async () => {
-      fireEvent.click(screen.getByRole("radio", { name: "Gen" }))
+      fireEvent.click(screen.getByRole("radio", { name: "GEN" }))
     })
     expect(onLinkClick.mock.calls[0]?.[0]).toBe(book)
     expect(screen.getByRole("heading", { name: "Chapters" })).toBeTruthy()
     await act(async () => {
       fireEvent.click(screen.getByRole("tab", { name: "New Testament" }))
     })
-    expect(screen.getByRole("radio", { name: "Matt" })).toBeTruthy()
-    expect(screen.queryByRole("radio", { name: "Gen" })).toBeNull()
+    expect(screen.getByRole("radio", { name: "MAT" })).toBeTruthy()
+    expect(screen.queryByRole("radio", { name: "GEN" })).toBeNull()
   })
 
   test("Canon browses chapters and verses, navigates leaves, and goes back", async () => {
     window.location.hash = ""
     render(<Canonical items={canon} />)
     await act(async () => {
-      fireEvent.click(screen.getByRole("radio", { name: "Gen" }))
+      fireEvent.click(screen.getByRole("radio", { name: "GEN" }))
     })
     expect(screen.getByRole("heading", { name: "Chapters" })).toBeTruthy()
     expect(window.location.hash).toBe("")
@@ -129,9 +129,9 @@ describe("TOC views", () => {
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: "Back to books" }))
     })
-    expect(screen.getByRole("radio", { name: "Gen" })).toBeTruthy()
+    expect(screen.getByRole("radio", { name: "GEN" })).toBeTruthy()
     await act(async () => {
-      fireEvent.click(screen.getByRole("radio", { name: "Gen" }))
+      fireEvent.click(screen.getByRole("radio", { name: "GEN" }))
     })
     expect(screen.getByRole("heading", { name: "Chapters" })).toBeTruthy()
   })
@@ -141,7 +141,7 @@ describe("TOC views", () => {
       ...book,
       id: "exod",
       label: "Exodus",
-      abbreviation: "Exod",
+      abbreviation: "EXO",
       link: "#exod-book",
     } satisfies TCanonItem
     const onLinkClick = mock()
@@ -152,7 +152,7 @@ describe("TOC views", () => {
       />
     )
     await act(async () => {
-      fireEvent.click(screen.getByRole("radio", { name: "Gen" }))
+      fireEvent.click(screen.getByRole("radio", { name: "GEN" }))
     })
     expect(screen.queryByRole("button", { name: "Previous book" })).toBeNull()
     await act(async () => {
@@ -170,7 +170,7 @@ describe("TOC views", () => {
       ...book,
       id: "exod",
       label: "Exodus",
-      abbreviation: "Exod",
+      abbreviation: "EXO",
       link: "#exod-book",
     } satisfies TCanonItem
     const onLinkClick = mock()
@@ -189,8 +189,8 @@ describe("TOC views", () => {
       />
     )
     await act(async () => {})
-    const genesisTile = screen.getByRole("radio", { name: "Gen" })
-    const exodusTile = screen.getByRole("radio", { name: "Exod" })
+    const genesisTile = screen.getByRole("radio", { name: "GEN" })
+    const exodusTile = screen.getByRole("radio", { name: "EXO" })
     for (const tile of [genesisTile, exodusTile, genesisTile, genesisTile]) {
       await act(async () => {
         fireEvent.click(tile)
@@ -212,7 +212,7 @@ describe("TOC views", () => {
       ...book,
       id: "exod",
       label: "Exodus",
-      abbreviation: "Exod",
+      abbreviation: "EXO",
       link: "#exod-book",
     } satisfies TCanonItem
     const items = [
@@ -229,17 +229,17 @@ describe("TOC views", () => {
     )
     await act(async () => {})
     expect(
-      screen.getByRole("radio", { name: "Gen" }).getAttribute("aria-checked")
+      screen.getByRole("radio", { name: "GEN" }).getAttribute("aria-checked")
     ).toBe("true")
     view.rerender(
       <Canonical items={items} activeLink={exodus} onLinkClick={() => {}} />
     )
     await act(async () => {})
     expect(
-      screen.getByRole("radio", { name: "Gen" }).getAttribute("aria-checked")
+      screen.getByRole("radio", { name: "GEN" }).getAttribute("aria-checked")
     ).toBe("false")
     expect(
-      screen.getByRole("radio", { name: "Exod" }).getAttribute("aria-checked")
+      screen.getByRole("radio", { name: "EXO" }).getAttribute("aria-checked")
     ).toBe("true")
   })
 
@@ -283,7 +283,7 @@ const invalidAbbreviation: TCanonItem = {
   abbreviation: "name",
 }
 void invalidAbbreviation
-const invalidChapter: TCanonItem<number, "Gen", "chapter"> = {
+const invalidChapter: TCanonItem<number, "GEN", "chapter"> = {
   id: "invalid",
   label: "Invalid",
   link: "#invalid-chapter",

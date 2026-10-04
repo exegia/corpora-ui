@@ -74,7 +74,7 @@ export function Canonical({
     return (
       <TabsList
         variant="underline"
-        size="xs"
+        size="sm"
         aria-label="Corpus sections"
         className="mb-2 **:data-[slot=tab-indicator]:bg-black! dark:**:data-[slot=tab-indicator]:bg-white! max-w-full shrink-0 overflow-x-auto"
       >

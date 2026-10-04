@@ -1,82 +1,173 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { TOC } from "@/components/composed/navigation"
 import type {
-  TBookAbbreviation,
+  ITocProps,
   TCanonItem,
   TTocItem,
 } from "@/components/composed/navigation/toc/type"
-import { OSIS_BOOKS, type Testament } from "@/lib/canonical"
+import { OSIS_BOOKS } from "@/lib/canonical"
 import { defineStory } from "@/registry/story"
-import { canonDemoCounts } from "./canon-demo-counts"
+import {
+  FreeUseBibleApi,
+  type ApiTranslationBook,
+  type ApiTranslationBookChapter,
+  type BookId,
+} from "free-use-bible-api"
 
-function isBookAbbreviation(value: string): value is TBookAbbreviation {
+/** Public-domain translation used by the corpus demos. */
+export const BIBLE_TRANSLATION = "BSB"
+
+export const bibleApi = new FreeUseBibleApi()
+
+export interface CanonLocation {
+  readonly bookId: BookId
+  readonly bookName: string
+  readonly chapter: number
+  readonly verse?: number
+}
+
+function isBookId(value: string): value is BookId {
   return Object.hasOwn(OSIS_BOOKS, value)
 }
 
-const bookAbbreviations = Object.keys(OSIS_BOOKS).filter(isBookAbbreviation)
-
-function canonBooks(
-  testament: Testament
-): TCanonItem<number, TBookAbbreviation, "book">[] {
-  return bookAbbreviations
-    .filter(
-      (abbreviation) =>
-        OSIS_BOOKS[abbreviation].type === testament &&
-        OSIS_BOOKS[abbreviation].bookNumber !== undefined
-    )
-    .sort(
-      (left, right) =>
-        (OSIS_BOOKS[left].bookNumber ?? 0) - (OSIS_BOOKS[right].bookNumber ?? 0)
-    )
-    .map((abbreviation) => ({
-      id: abbreviation,
-      label: OSIS_BOOKS[abbreviation].name,
-      abbreviation,
-      number: OSIS_BOOKS[abbreviation].bookNumber,
-      link: `#demo-${abbreviation}-book`,
-      level: 2,
-      type: "book",
-      nodes: (canonDemoCounts[abbreviation] ?? []).map(
-        (verseCount, chapterIndex) => ({
-          id: `${abbreviation}-${chapterIndex + 1}`,
-          label: `${OSIS_BOOKS[abbreviation].name} ${chapterIndex + 1}`,
-          link: `#demo-${abbreviation}-${chapterIndex + 1}-chapter`,
-          level: 3,
-          type: "chapter",
-          number: chapterIndex + 1,
-          nodes: Array.from({ length: verseCount }, (_, verseIndex) => ({
-            id: `${abbreviation}-${chapterIndex + 1}-${verseIndex + 1}`,
-            label: `${OSIS_BOOKS[abbreviation].name} ${chapterIndex + 1}:${verseIndex + 1}`,
-            link: `#demo-${abbreviation}-${chapterIndex + 1}-${verseIndex + 1}-verse`,
-            level: 4,
-            type: "verse",
-            number: verseIndex + 1,
-          })),
-        })
-      ),
-    }))
+function sectionId(
+  apocryphal: boolean,
+  bookNumber: number | undefined
+): string {
+  if (apocryphal || bookNumber === undefined) return "demo-apocrypha"
+  return bookNumber <= 39 ? "demo-ot" : "demo-nt"
 }
 
-const canonItems: TCanonItem[] = [
-  {
-    id: "demo-ot",
-    label: "Old Testament",
-    link: "#demo-ot-section",
+type CanonBook = TCanonItem<number, BookId, "book">
+
+function bookItem(book: ApiTranslationBook): CanonBook | undefined {
+  if (!isBookId(book.id)) return undefined
+  const bookId = book.id
+  const metadata = OSIS_BOOKS[bookId]
+  const chapters = Array.from(
+    { length: book.numberOfChapters },
+    (_, index) => book.firstChapterNumber + index
+  )
+  return {
+    id: bookId,
+    label: metadata.name,
+    abbreviation: bookId,
+    number: metadata.bookNumber ?? book.order,
+    link: `#demo-${bookId}-book`,
+    level: 2,
+    type: "book",
+    nodes: chapters.map((chapter) => ({
+      id: `${bookId}-${chapter}`,
+      label: `${metadata.name} ${chapter}`,
+      abbreviation: bookId,
+      number: chapter,
+      link: `#demo-${bookId}-${chapter}-chapter`,
+      level: 3,
+      type: "chapter",
+    })),
+  }
+}
+
+function section(
+  id: string,
+  label: string,
+  nodes: readonly CanonBook[]
+): TCanonItem {
+  return {
+    id,
+    label,
+    link: `#${id}-section`,
     level: 1,
     type: "section",
-    nodes: canonBooks("OT"),
-  },
-  {
-    id: "demo-nt",
-    label: "New Testament",
-    link: "#demo-nt-section",
-    level: 1,
-    type: "section",
-    nodes: canonBooks("NT"),
-  },
-]
+    nodes,
+  }
+}
+
+/**
+ * Books and their chapters for a translation, grouped into canon sections.
+ * Chapter counts come from `getTranslationBooks`; verse lists are not part of
+ * that payload, so they load with the selected chapter instead.
+ */
+export async function fetchCanonItems(
+  translation: string = BIBLE_TRANSLATION
+): Promise<readonly TCanonItem[]> {
+  const { books } = await bibleApi.getTranslationBooks(translation)
+  const grouped = new Map<string, CanonBook[]>()
+  for (const book of books) {
+    const item = bookItem(book)
+    if (!item) continue
+    const id = sectionId(book.isApocryphal === true, item.number)
+    const items = grouped.get(id) ?? []
+    items.push(item)
+    grouped.set(id, items)
+  }
+  return [
+    section("demo-ot", "Old Testament", grouped.get("demo-ot") ?? []),
+    section("demo-nt", "New Testament", grouped.get("demo-nt") ?? []),
+    section("demo-apocrypha", "Apocrypha", grouped.get("demo-apocrypha") ?? []),
+  ].filter((item) => item.nodes?.length)
+}
+
+function isBook(item: TCanonItem): item is CanonBook {
+  return (
+    item.type === "book" &&
+    item.abbreviation !== undefined &&
+    isBookId(item.abbreviation)
+  )
+}
+
+/** Books directly under the canon sections. */
+export function canonBooks(items: readonly TCanonItem[]): readonly CanonBook[] {
+  const books: CanonBook[] = []
+  for (const item of items) {
+    for (const node of item.nodes ?? []) {
+      if (isBook(node)) books.push(node)
+    }
+  }
+  return books
+}
+
+/** Book, chapter, and optional verse behind a canon outline item. */
+export function canonLocation(
+  item: TCanonItem,
+  items: readonly TCanonItem[] = []
+): CanonLocation | undefined {
+  const abbreviation = item.abbreviation
+  if (!abbreviation || !isBookId(abbreviation)) return undefined
+  const book =
+    canonBooks(items).find(
+      (candidate) => candidate.abbreviation === abbreviation
+    ) ?? (isBook(item) ? item : undefined)
+  if (!book) return undefined
+  const chapter = chapterNumber(item, book)
+  if (chapter === undefined) return undefined
+  return {
+    bookId: abbreviation,
+    bookName: String(book.label),
+    chapter,
+    verse: item.type === "verse" ? item.number : undefined,
+  }
+}
+
+function chapterNumber(item: TCanonItem, book: CanonBook): number | undefined {
+  if (item.type === "chapter") return item.number
+  if (item.type === "verse") {
+    const match = item.id.match(/-(\d+)-\d+$/)
+    return match ? Number(match[1]) : book.nodes?.[0]?.number
+  }
+  return book.nodes?.[0]?.number
+}
+
+/** A translation chapter, with verses flattened to plain text. */
+export async function fetchChapterPassage(
+  bookId: BookId,
+  chapter: number,
+  translation: string = BIBLE_TRANSLATION
+): Promise<ApiTranslationBookChapter> {
+  return bibleApi.getTranslationBookChapter(translation, bookId, chapter)
+}
 
 const regularItems: TTocItem[] = [
   {
@@ -138,17 +229,72 @@ const regularItems: TTocItem[] = [
   },
 ]
 
-function CanonPreview() {
+export function CanonPreview({
+  onItemSelect,
+  fillHeight = false,
+}: {
+  onItemSelect?: ITocProps<"canon">["onLinkClick"]
+  fillHeight?: boolean
+}) {
+  const [items, setItems] = useState<readonly TCanonItem[]>([])
+  const [status, setStatus] = useState("Loading books…")
   const [message, setMessage] = useState("")
+
+  useEffect(() => {
+    let active = true
+    fetchCanonItems()
+      .then((next) => {
+        if (!active) return
+        setItems(next)
+        const count = next.reduce(
+          (total, item) => total + (item.nodes?.length ?? 0),
+          0
+        )
+        setStatus(`${count} books in ${BIBLE_TRANSLATION}`)
+      })
+      .catch(() => {
+        if (active) setStatus("Could not load books from the Bible API.")
+      })
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const selectItem = (item: TCanonItem) => {
+    const location = canonLocation(item, items)
+    setMessage(
+      location
+        ? `Selected ${location.bookName} ${location.chapter}${
+            location.verse ? `:${location.verse}` : ""
+          }`
+        : `Selected ${String(item.label)}`
+    )
+    if (onItemSelect) onItemSelect(item)
+    if (!location || item.type === "book") return
+    fetchChapterPassage(location.bookId, location.chapter)
+      .then((passage) => {
+        setMessage(
+          `${passage.book.commonName} ${passage.chapter.number} · ${passage.numberOfVerses} verses`
+        )
+      })
+      .catch(() => {
+        setMessage(`Could not load ${location.bookName} ${location.chapter}.`)
+      })
+  }
+
   return (
     <div
-      className="max-w-lg p-2 sm:p-6 relative mx-auto w-full"
+      className={
+        fillHeight
+          ? "min-h-0 gap-2 flex h-full w-full flex-col"
+          : "max-w-lg p-2 sm:p-6 relative mx-auto w-full"
+      }
       data-toc-demo="canon"
     >
       <TOC.Canonical
-        className="h-[32rem]"
-        items={canonItems}
-        onLinkClick={(item) => setMessage(`Selected ${String(item.label)}`)}
+        className={fillHeight ? "min-h-0 h-auto max-w-none flex-1" : "h-128"}
+        items={items}
+        onLinkClick={selectItem}
         contextMenuItems={[
           {
             id: "open",
@@ -162,8 +308,8 @@ function CanonPreview() {
           },
         ]}
       />
-      <p role="status" className="mt-2 text-sm text-muted-foreground">
-        {message}
+      <p role="status" className="mt-2 text-sm shrink-0 text-muted-foreground">
+        {message || status}
       </p>
     </div>
   )

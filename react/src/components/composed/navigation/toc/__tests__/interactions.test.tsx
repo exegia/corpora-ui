@@ -7,7 +7,7 @@ import type { TCanonItem, TTocItem } from "../type"
 const book: TCanonItem = {
   id: "exod",
   label: "Exodus",
-  abbreviation: "Exod",
+  abbreviation: "EXO",
   link: "#exod-book",
   level: 2,
   type: "book",
@@ -37,7 +37,7 @@ test("canonical tile menu receives the book without navigating on right click", 
     />
   )
   await act(async () => {
-    fireEvent.contextMenu(screen.getByRole("radio", { name: "Exod" }), {
+    fireEvent.contextMenu(screen.getByRole("radio", { name: "EXO" }), {
       button: 2,
       clientX: 30,
       clientY: 30,
@@ -59,7 +59,7 @@ test("canonical tile menu receives the book without navigating on right click", 
   expect(navigate).not.toHaveBeenCalled()
   await waitFor(() => expect(screen.queryByRole("menu")).toBeNull())
   await act(async () => {
-    fireEvent.click(screen.getByRole("radio", { name: "Exod" }))
+    fireEvent.click(screen.getByRole("radio", { name: "EXO" }))
   })
   expect(navigate).toHaveBeenCalledWith(book)
 })

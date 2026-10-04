@@ -78,7 +78,7 @@ export function BrowserFrame({
             </div>
           )}
         </div>
-        <div className={cn("flex flex-1", titleBarStyle(titleStyle, "frame"))}>
+        <div className={cn("flex min-h-0 flex-1", titleBarStyle(titleStyle, "frame"))}>
           {children}
         </div>
       </div>

@@ -344,6 +344,7 @@
     "eslint": "^10",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
+    "free-use-bible-api": "^0.4.0",
     "fumadocs-core": "^16.15.14",
     "fumadocs-mdx": "^15.4.5",
     "fumadocs-ui": "npm:@fumadocs/base-ui@^16.15.10",
