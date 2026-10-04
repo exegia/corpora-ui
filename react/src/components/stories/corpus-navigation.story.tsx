@@ -16,7 +16,9 @@ import {
   ReaderLocationPicker,
   BibleTranslationPicker,
 } from "./corpus-reader-pickers"
+import { Reader, ReaderChapter } from "@/components/blocks/reader"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useVisibleReference } from "@/lib/hooks/use-visible-reference"
 import type { TCanonItem } from "@/components/composed/navigation/toc/type"
 import {
   BIBLE_TRANSLATION,
@@ -44,7 +46,6 @@ export default function CorpusNavigationDemo() {
   const [passage, setPassage] = useState<Passage>()
   const [status, setStatus] = useState("Loading books…")
   const [loading, setLoading] = useState(true)
-  const [visibleReference, setVisibleReference] = useState("")
   const [reader, setReader] = useState<HTMLDivElement | null>(null)
   const request = useRef(0)
   const lifetime = useRef({ generation: 0 })
@@ -69,7 +70,6 @@ export default function CorpusNavigationDemo() {
     setEditionError("")
     setLoading(true)
     setLoadingBooks(true)
-    setVisibleReference("")
     setStatus(`Loading ${nextTranslation}…`)
     try {
       const nextItems = await fetchCanonItems(nextTranslation)
@@ -135,7 +135,6 @@ export default function CorpusNavigationDemo() {
       return
     }
     setLoading(true)
-    setVisibleReference("")
     setStatus(`Loading ${location.bookName} ${location.chapter}…`)
     try {
       const chapter = await bibleApi.getTranslationBookChapter(
@@ -162,34 +161,12 @@ export default function CorpusNavigationDemo() {
   useEffect(() => {
     const ownedLifetime = lifetime.current
     const generation = ++ownedLifetime.generation
-    const current = ++request.current
-    fetchCanonItems(BIBLE_TRANSLATION)
-      .then(async (nextItems) => {
-        if (request.current !== current) return
-        const book = canonBooks(nextItems)[0]
-        const location = book && canonLocation(book, nextItems)
-        if (!location) throw new Error("No readable chapters")
-        const chapter = await bibleApi.getTranslationBookChapter(
-          BIBLE_TRANSLATION,
-          location.bookId,
-          location.chapter
-        )
-        if (request.current !== current) return
-        setItems(withChapterVerses(nextItems, location.bookId, chapter))
-        setPassage({ location, chapter })
-        pendingScroll.current = {}
-        setStatus("")
-      })
-      .catch(() => {
-        if (request.current === current)
-          setStatus("Could not load books from the Bible API.")
-      })
-      .finally(() => {
-        if (request.current === current) {
-          setLoading(false)
-          setLoadingBooks(false)
-        }
-      })
+
+    async function loadInitialCanon() {
+      await loadEdition(BIBLE_TRANSLATION)
+    }
+
+    void loadInitialCanon()
     return () => {
       request.current += 1
       queueMicrotask(() => {
@@ -197,6 +174,8 @@ export default function CorpusNavigationDemo() {
           removeCanonInstance(canonId)
       })
     }
+    // Load the default edition once. Later editions go through the picker.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canonId])
 
   useEffect(() => {
@@ -222,50 +201,14 @@ export default function CorpusNavigationDemo() {
     })
   }, [reader, passage, loading])
 
-  useEffect(() => {
-    const article = reader?.querySelector("article")
-    if (!reader || !article || !passage || loading) return
-
-    const verses = Array.from(
-      article.querySelectorAll<HTMLElement>("[data-verse]")
-    )
-    const reference = `${passage.chapter.book.commonName} ${passage.chapter.chapter.number}`
-    let frame = 0
-    const updateRange = () => {
-      const viewport = reader.getBoundingClientRect()
-      const top = viewport.top + reader.clientTop
-      const bottom = top + reader.clientHeight
-      const visible = verses.filter((verse) => {
-        // Include partially visible verses at either edge of the reader.
-        return Array.from(verse.getClientRects()).some(
-          (bounds) =>
-            bounds.height > 0 && bounds.bottom > top && bounds.top < bottom
-        )
-      })
-      const first = visible[0]?.dataset.verse
-      const last = visible.at(-1)?.dataset.verse
-      setVisibleReference(
-        first
-          ? `${reference}:${first}${first === last ? "" : `-${last}`}`
-          : reference
-      )
-    }
-    const scheduleUpdate = () => {
-      cancelAnimationFrame(frame)
-      frame = requestAnimationFrame(updateRange)
-    }
-
-    scheduleUpdate()
-    reader.addEventListener("scroll", scheduleUpdate, { passive: true })
-    const observer = new ResizeObserver(scheduleUpdate)
-    observer.observe(reader)
-    observer.observe(article)
-    return () => {
-      cancelAnimationFrame(frame)
-      reader.removeEventListener("scroll", scheduleUpdate)
-      observer.disconnect()
-    }
-  }, [reader, passage, loading])
+  const reference = passage
+    ? `${passage.chapter.book.commonName} ${passage.chapter.chapter.number}`
+    : ""
+  const visibleReference = useVisibleReference(reader, {
+    label: reference,
+    generation: passage,
+    enabled: !loading && passage !== undefined,
+  })
 
   const selectItem = (item: TCanonItem) => {
     const location = canonLocation(item, items)
@@ -394,58 +337,12 @@ export default function CorpusNavigationDemo() {
         </p>
       )
     }
-    const { chapter } = passage
-    const activeVerse = passage.location.verse
     return (
-      <article
-        dir={chapter.translation.textDirection}
-        className="max-w-3xl py-6 mx-auto"
-      >
-        <header className="mb-4">
-          <h2 className="text-lg font-semibold text-center">
-            {chapter.book.commonName} {chapter.chapter.number}
-          </h2>
-        </header>
-        <div className="font-corpus text-base leading-6 selection:bg-indigo-700 dark:selection:bg-indigo-500 select-text">
-          {chapter.chapter.content.map((block, index) => {
-            if (block.type === "heading" || block.type === "hebrew_subtitle") {
-              const text =
-                block.type === "heading"
-                  ? block.content.join(" ")
-                  : bibleApi.getVerseText({
-                      type: "verse",
-                      number: 0,
-                      content: block.content,
-                    })
-              return (
-                <h3
-                  key={`heading-${index}`}
-                  className="my-3 text-xs leading-5 font-medium text-center font-sans text-muted-foreground"
-                >
-                  {text}
-                </h3>
-              )
-            }
-            if (block.type === "line_break") return null
-            const active = block.number === activeVerse
-            return (
-              <span
-                key={`${chapter.book.id}-${chapter.chapter.number}-${block.number}`}
-                id={`verse-${block.number}`}
-                data-verse={block.number}
-                data-active={active || undefined}
-                aria-current={active ? "location" : undefined}
-                className="rounded-sm box-decoration-clone transition-colors data-active:bg-primary/15 data-active:text-foreground motion-reduce:transition-none"
-              >
-                <sup className="mr-1 text-xs font-sans text-muted-foreground">
-                  {block.number}
-                </sup>
-                {bibleApi.getVerseText(block)}{" "}
-              </span>
-            )
-          })}
-        </div>
-      </article>
+      <ReaderChapter
+        chapter={passage.chapter}
+        activeVerse={passage.location.verse}
+        getVerseText={(verse) => bibleApi.getVerseText(verse)}
+      />
     )
   }
 
@@ -500,13 +397,20 @@ export default function CorpusNavigationDemo() {
                   <Separator />
                   <Panel className="min-h-0 flex flex-1 flex-col">
                     {renderBreadcrumb()}
-                    <div
+                    <Reader
                       ref={setReader}
-                      aria-busy={loading}
-                      className="p-4 min-h-0 bg-white dark:bg-neutral-950/60 relative w-full flex-1 overflow-y-auto"
+                      loading={loading}
+                      tocCollapsed={collapsed}
+                      verses={
+                        currentChapter?.nodes?.filter(
+                          (node) => node.type === "verse"
+                        ) ?? []
+                      }
+                      activeVerse={passage?.location.verse}
+                      onVerseSelect={selectItem}
                     >
                       {renderPassage()}
-                    </div>
+                    </Reader>
                     {renderStatusBar()}
                   </Panel>
                 </Group>

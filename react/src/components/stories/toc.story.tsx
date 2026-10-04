@@ -260,8 +260,10 @@ export function CanonPreview({
   useEffect(() => {
     if (suppliedItems !== undefined) return
     let active = true
-    fetchCanonItems(translation)
-      .then((next) => {
+
+    async function loadBooks() {
+      try {
+        const next = await fetchCanonItems(translation)
         if (!active) return
         setItems(next)
         const count = next.reduce(
@@ -269,13 +271,14 @@ export function CanonPreview({
           0
         )
         setStatus(`${count} books in ${translation}`)
-      })
-      .catch(() => {
+      } catch {
         if (active) setStatus("Could not load books from the Bible API.")
-      })
-      .finally(() => {
+      } finally {
         if (active) setLoadingBooks(false)
-      })
+      }
+    }
+
+    void loadBooks()
     return () => {
       active = false
       chapterRequest.current += 1
@@ -300,21 +303,30 @@ export function CanonPreview({
     if (onItemSelect) onItemSelect(item)
     if (!location || item.type === "book") return
     setLoadingChapter(true)
-    fetchChapterPassage(location.bookId, location.chapter, translation)
-      .then((passage) => {
-        if (chapterRequest.current !== current) return
-        setMessage(
-          `${passage.book.commonName} ${passage.chapter.number} · ${passage.numberOfVerses} verses`
-        )
-      })
-      .catch(() => {
-        if (chapterRequest.current === current) {
-          setMessage(`Could not load ${location.bookName} ${location.chapter}.`)
-        }
-      })
-      .finally(() => {
-        if (chapterRequest.current === current) setLoadingChapter(false)
-      })
+    void loadChapterStatus(location, current)
+  }
+
+  const loadChapterStatus = async (
+    location: CanonLocation,
+    current: number
+  ) => {
+    try {
+      const passage = await fetchChapterPassage(
+        location.bookId,
+        location.chapter,
+        translation
+      )
+      if (chapterRequest.current !== current) return
+      setMessage(
+        `${passage.book.commonName} ${passage.chapter.number} · ${passage.numberOfVerses} verses`
+      )
+    } catch {
+      if (chapterRequest.current === current) {
+        setMessage(`Could not load ${location.bookName} ${location.chapter}.`)
+      }
+    } finally {
+      if (chapterRequest.current === current) setLoadingChapter(false)
+    }
   }
 
   return (
