@@ -2,6 +2,8 @@
 @import "tailwind-animations";
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/figtree";
+@import "@fontsource-variable/noto-sans";
+@import "@fontsource-variable/noto-sans/wght-italic.css";
 
 
 @import 'fumadocs-ui/css/shadcn.css';
@@ -13,6 +15,7 @@
 
 
 @theme {
+  --font-corpus: "Noto Sans Variable", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
   --default-font-family: "Geist", sans-serif;
 

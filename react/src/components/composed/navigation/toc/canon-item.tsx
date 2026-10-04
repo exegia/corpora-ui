@@ -17,6 +17,7 @@ import type { CanonItemProps } from "./type"
 type BookTooltipHandle = ReturnType<typeof TooltipCreateHandle<string>>
 
 export function CanonItem({
+  size = "default",
   item,
   active,
   onLinkClick,
@@ -42,7 +43,11 @@ export function CanonItem({
       <span
         className={cn(
           "relative z-10",
-          item.type === "book" ? "text-xs" : "text-lg font-semibold"
+          item.type === "book"
+            ? "text-xs"
+            : size === "sm"
+              ? "text-sm font-semibold"
+              : "text-lg font-semibold"
         )}
       >
         {item.type === "book" ? item.abbreviation : (item.number ?? item.label)}
@@ -57,6 +62,7 @@ export function CanonItem({
       className={cn(
         buttonVariants({ variant: "outline" }),
         "min-w-0 p-0 min-h-12 bg-stone-100 dark:bg-stone-900 relative isolate aspect-square h-auto w-full rounded-sm",
+        size === "sm" && "min-h-8",
         active && "text-white! dark:text-black! hover:bg-transparent!",
         "bezel-dim-b-2 bezel-dim-blur-1 bezel-dim/10 bezel-lit-blur-1 bezel-lit-t-2 bezel-lit/90 dark:bezel-lit-blur-2 dark:bezel-lit-t-1 dark:bezel-lit/20 dark:bezel-dim"
       )}

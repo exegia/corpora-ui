@@ -84,8 +84,8 @@ export interface ITocProps<K extends TTocKind = "regular"> {
   readonly items: readonly TTocUnionItem<K>[]
   readonly activeLink?: TTocUnionItem<K>
   readonly onLinkClick?: (item: TTocUnionItem<K>) => void
-    readonly renderSection?: (item: TTocUnionItem<K>) => ReactNode
-    readonly description?: ReactNode
+  readonly renderSection?: (item: TTocUnionItem<K>) => ReactNode
+  readonly description?: ReactNode
   readonly kind?: K
 }
 
@@ -135,6 +135,7 @@ export type CanonContextMenuItems =
   | ((item: TCanonItem) => readonly CanonContextMenuItem[])
 
 export interface CanonItemProps {
+  readonly size?: "sm" | "default"
   readonly contextMenuItems?: CanonContextMenuItems
   readonly item: TCanonItem
   readonly active?: boolean

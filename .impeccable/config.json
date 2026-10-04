@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "geist",
+        "createdAt": "2026-10-04T13:59:35.222Z",
+        "reason": "Agent review: Geist is the pre-existing global interface font in app.css; the user requested Noto Sans specifically for corpus text, which now uses a separate font-corpus token. Preserve the existing interface typography."
+      }
+    ]
+  }
+}

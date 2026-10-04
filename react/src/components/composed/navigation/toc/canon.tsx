@@ -54,7 +54,7 @@ export function Canonical({
   const selectItem = (item: TCanonItem) => {
     if (item.nodes?.length) browse(item.link)
     else if (item.type === "book") browse(undefined)
-    if (selected[0] === item.link) return
+    if (selected[0] === item.link && item.type !== "verse") return
     playCue("tick", { volume: 0.15 })
     select(item)
     if (onLinkClick) onLinkClick(item)

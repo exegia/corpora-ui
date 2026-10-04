@@ -18,6 +18,7 @@ import { DefaultSection } from "./section"
 import type { CanonContextMenuItems, TCanonItem } from "./type"
 
 export interface CanonGridProps {
+  size?: "sm" | "default"
   items: readonly TCanonItem[]
   selectedLink?: string
   onLinkClick?: (item: TCanonItem) => void
@@ -31,6 +32,7 @@ export interface CanonGridProps {
 
 /** Controlled canonical picker, suitable for a TOC or breadcrumb popover. */
 export function CanonGrid({
+  size = "default",
   items,
   selectedLink,
   onLinkClick,
@@ -47,6 +49,7 @@ export function CanonGrid({
     <TooltipProvider>
       <section
         data-slot="canon-grid"
+        data-size={size}
         className={cn("min-h-0 gap-2 flex flex-1 flex-col", className)}
       >
         {(title || onBack) && (
@@ -54,7 +57,10 @@ export function CanonGrid({
             <h2
               ref={headingRef}
               tabIndex={-1}
-              className="font-bold outline-none"
+              className={cn(
+                "font-bold outline-none",
+                size === "sm" && "text-sm"
+              )}
             >
               {title}
             </h2>
@@ -76,7 +82,7 @@ export function CanonGrid({
               <ToggleGroup
                 multiple={false}
                 variant="outline"
-                size="lg"
+                size={size === "sm" ? "sm" : "lg"}
                 spacing={2}
                 value={selectedLink ? [selectedLink] : []}
                 onValueChange={({ value }) => {
@@ -91,6 +97,7 @@ export function CanonGrid({
                   ) : (
                     <CanonItem
                       key={item.id}
+                      size={size}
                       item={item}
                       active={selectedLink === item.link}
                       tooltipHandle={tooltipHandle}

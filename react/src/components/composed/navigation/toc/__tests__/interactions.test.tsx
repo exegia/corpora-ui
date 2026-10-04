@@ -23,6 +23,30 @@ const canon: TCanonItem[] = [
   },
 ]
 
+test("selecting the active verse again requests navigation again", async () => {
+  const verse: TCanonItem = {
+    id: "GEN-1-1",
+    label: "Genesis 1:1",
+    abbreviation: "GEN",
+    number: 1,
+    link: "#demo-GEN-1-1-verse",
+    type: "verse",
+    level: 4,
+  }
+  const navigate = mock()
+  render(<Canonical items={[verse]} onLinkClick={navigate} />)
+  const button = screen.getByRole("radio", { name: "1" })
+  await act(async () => {
+    fireEvent.click(button)
+  })
+  expect(navigate).toHaveBeenCalledTimes(1)
+  await act(async () => {
+    fireEvent.click(button)
+  })
+  expect(navigate).toHaveBeenCalledTimes(2)
+  expect(navigate).toHaveBeenLastCalledWith(verse)
+})
+
 test("canonical tile menu receives the book without navigating on right click", async () => {
   const onSelect = mock()
   const navigate = mock()

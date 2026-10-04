@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { Skeleton } from "@/components/ui/skeleton"
 import { TOC } from "@/components/composed/navigation"
 import type {
   ITocProps,
@@ -232,17 +233,34 @@ const regularItems: TTocItem[] = [
 export function CanonPreview({
   onItemSelect,
   fillHeight = false,
+  items: suppliedItems,
+  loadingBooks: suppliedLoadingBooks,
+  loadingChapter: suppliedLoadingChapter,
+  translation = BIBLE_TRANSLATION,
+  canonId,
 }: {
   onItemSelect?: ITocProps<"canon">["onLinkClick"]
   fillHeight?: boolean
+  items?: readonly TCanonItem[]
+  loadingBooks?: boolean
+  loadingChapter?: boolean
+  translation?: string
+  canonId?: string
 }) {
-  const [items, setItems] = useState<readonly TCanonItem[]>([])
+  const [localItems, setItems] = useState<readonly TCanonItem[]>([])
   const [status, setStatus] = useState("Loading books…")
   const [message, setMessage] = useState("")
+  const [localLoadingBooks, setLoadingBooks] = useState(true)
+  const [localLoadingChapter, setLoadingChapter] = useState(false)
+  const chapterRequest = useRef(0)
+  const items = suppliedItems ?? localItems
+  const loadingBooks = suppliedLoadingBooks ?? localLoadingBooks
+  const loadingChapter = suppliedLoadingChapter ?? localLoadingChapter
 
   useEffect(() => {
+    if (suppliedItems !== undefined) return
     let active = true
-    fetchCanonItems()
+    fetchCanonItems(translation)
       .then((next) => {
         if (!active) return
         setItems(next)
@@ -250,17 +268,27 @@ export function CanonPreview({
           (total, item) => total + (item.nodes?.length ?? 0),
           0
         )
-        setStatus(`${count} books in ${BIBLE_TRANSLATION}`)
+        setStatus(`${count} books in ${translation}`)
       })
       .catch(() => {
         if (active) setStatus("Could not load books from the Bible API.")
       })
+      .finally(() => {
+        if (active) setLoadingBooks(false)
+      })
     return () => {
       active = false
+      chapterRequest.current += 1
     }
-  }, [])
+  }, [suppliedItems, translation])
 
   const selectItem = (item: TCanonItem) => {
+    if (suppliedItems !== undefined) {
+      onItemSelect?.(item)
+      return
+    }
+    const current = ++chapterRequest.current
+    setLoadingChapter(false)
     const location = canonLocation(item, items)
     setMessage(
       location
@@ -271,14 +299,21 @@ export function CanonPreview({
     )
     if (onItemSelect) onItemSelect(item)
     if (!location || item.type === "book") return
-    fetchChapterPassage(location.bookId, location.chapter)
+    setLoadingChapter(true)
+    fetchChapterPassage(location.bookId, location.chapter, translation)
       .then((passage) => {
+        if (chapterRequest.current !== current) return
         setMessage(
           `${passage.book.commonName} ${passage.chapter.number} · ${passage.numberOfVerses} verses`
         )
       })
       .catch(() => {
-        setMessage(`Could not load ${location.bookName} ${location.chapter}.`)
+        if (chapterRequest.current === current) {
+          setMessage(`Could not load ${location.bookName} ${location.chapter}.`)
+        }
+      })
+      .finally(() => {
+        if (chapterRequest.current === current) setLoadingChapter(false)
       })
   }
 
@@ -291,26 +326,79 @@ export function CanonPreview({
       }
       data-toc-demo="canon"
     >
-      <TOC.Canonical
-        className={fillHeight ? "min-h-0 h-auto max-w-none flex-1" : "h-128"}
-        items={items}
-        onLinkClick={selectItem}
-        contextMenuItems={[
-          {
-            id: "open",
-            label: "Open location",
-            onSelect: (item) => setMessage(`Opened ${String(item.label)}`),
-          },
-          {
-            id: "bookmark",
-            label: "Bookmark location",
-            onSelect: (item) => setMessage(`Bookmarked ${String(item.label)}`),
-          },
-        ]}
-      />
-      <p role="status" className="mt-2 text-sm shrink-0 text-muted-foreground">
-        {message || status}
-      </p>
+      {loadingBooks || (suppliedItems !== undefined && loadingChapter) ? (
+        <div
+          aria-busy="true"
+          aria-label="Loading table of contents"
+          className={
+            fillHeight
+              ? "min-h-0 gap-3 flex flex-1 flex-col overflow-hidden"
+              : "h-128 gap-3 flex flex-col overflow-hidden"
+          }
+        >
+          <h1 className="text-lg font-bold shrink-0">Table of Content</h1>
+          <div
+            aria-hidden="true"
+            className="min-h-0 gap-3 flex flex-1 flex-col"
+          >
+            <Skeleton className="h-9 w-full shrink-0 motion-reduce:animate-none" />
+            <div className="gap-2 py-2 flex shrink-0">
+              <Skeleton className="h-4 w-24 motion-reduce:animate-none" />
+              <Skeleton className="h-4 w-24 motion-reduce:animate-none" />
+            </div>
+            <div className="min-h-0 overflow-hidden">
+              <div className="gap-2 grid grid-cols-5">
+                {Array.from({ length: 40 }, (_, index) => (
+                  <Skeleton
+                    key={index}
+                    className="min-h-12 aspect-square w-full motion-reduce:animate-none"
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <TOC.Canonical
+          canonId={canonId}
+          className={fillHeight ? "min-h-0 h-auto max-w-none flex-1" : "h-128"}
+          items={items}
+          onLinkClick={selectItem}
+          contextMenuItems={[
+            {
+              id: "open",
+              label: "Open location",
+              onSelect: (item) => setMessage(`Opened ${String(item.label)}`),
+            },
+            {
+              id: "bookmark",
+              label: "Bookmark location",
+              onSelect: (item) =>
+                setMessage(`Bookmarked ${String(item.label)}`),
+            },
+          ]}
+        />
+      )}
+      <div
+        role="status"
+        className="mt-2 min-h-5 text-sm shrink-0 text-muted-foreground"
+      >
+        {loadingBooks || loadingChapter ? (
+          <>
+            <Skeleton
+              aria-hidden="true"
+              className="h-4 w-28 motion-reduce:animate-none"
+            />
+            <span className="sr-only">
+              {loadingBooks ? "Loading books…" : "Loading chapter…"}
+            </span>
+          </>
+        ) : suppliedItems !== undefined ? (
+          `${canonBooks(items).length} books in ${translation}`
+        ) : (
+          message || status
+        )}
+      </div>
     </div>
   )
 }
