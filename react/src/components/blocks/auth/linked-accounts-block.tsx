@@ -3,9 +3,7 @@
 import { AnimatePresence, MotionConfig, motion } from "motion/react"
 import * as React from "react"
 
-import {
-  SOCIAL_PROVIDERS,
-} from "@/components/composed/social-providers"
+import { SOCIAL_PROVIDERS } from "@/components/composed/social-providers"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -18,9 +16,8 @@ import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 import { AuthError, EASE } from "./auth-shell"
 import type { ILinkedAccountsBlockProps } from "./type"
-import type { TSocialProvider } from "@/components/composed/types"
+import type { TSocialProvider } from "@/components/composed/type"
 import { Users2 } from "lucide-react"
-
 
 const LAST_METHOD_EXPLANATION =
   "This is your only way to sign in, so it can't be disconnected."
@@ -89,12 +86,14 @@ export function LinkedAccountsBlock({
     <MotionConfig reducedMotion="user">
       <Card className={cn("w-full", className)} data-slot="auth-block">
         <CardHeader>
-          <CardTitle className="inline-flex items-center gap-1"><Users2 size={18} /> {title}</CardTitle>
+          <CardTitle className="gap-1 inline-flex items-center">
+            <Users2 size={18} /> {title}
+          </CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardPanel>
           {loading ? (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="gap-2 text-sm flex items-center text-muted-foreground">
               <Spinner className="size-4" />
               Loading connected accounts…
             </div>
@@ -102,14 +101,14 @@ export function LinkedAccountsBlock({
             <motion.div
               layout
               transition={{ duration: 0.3, ease: EASE }}
-              className="flex flex-col gap-3"
+              className="gap-3 flex flex-col"
             >
               <AuthError message={error} />
 
               {identities.length > 0 ? (
                 <ul
                   aria-label="Connected accounts"
-                  className="flex flex-col gap-2"
+                  className="gap-2 flex flex-col"
                 >
                   <AnimatePresence initial={false}>
                     {identities.map((identity, index) => {
@@ -119,7 +118,7 @@ export function LinkedAccountsBlock({
                         <motion.li
                           key={identity.id}
                           layout
-                          className="flex items-center justify-between gap-3 rounded-md border px-3 py-2"
+                          className="gap-3 px-3 py-2 flex items-center justify-between rounded-md border"
                           initial={{ opacity: 0, y: -4 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -4 }}
@@ -131,17 +130,17 @@ export function LinkedAccountsBlock({
                             delay: Math.min(index, 5) * 0.04,
                           }}
                         >
-                          <div className="flex min-w-0 items-center gap-2.5">
+                          <div className="min-w-0 gap-2.5 flex items-center">
                             <BrandIcon
                               aria-hidden="true"
                               className={cn("size-4", brandClassName)}
                             />
-                            <div className="flex min-w-0 flex-col">
+                            <div className="min-w-0 flex flex-col">
                               <span className="text-sm font-medium">
                                 {label}
                               </span>
                               {identity.email && (
-                                <span className="truncate text-xs text-muted-foreground">
+                                <span className="text-xs truncate text-muted-foreground">
                                   {identity.email}
                                 </span>
                               )}
@@ -177,8 +176,13 @@ export function LinkedAccountsBlock({
               )}
 
               {connectable.map((provider) => {
-                const { label, BrandIcon, brandClassName, buttonClassName, labelClassName } =
-                  SOCIAL_PROVIDERS[provider]
+                const {
+                  label,
+                  BrandIcon,
+                  brandClassName,
+                  buttonClassName,
+                  labelClassName,
+                } = SOCIAL_PROVIDERS[provider]
                 return (
                   <Button
                     key={provider}
@@ -190,7 +194,9 @@ export function LinkedAccountsBlock({
                     onClick={() => void connect(provider)}
                   >
                     <BrandIcon aria-hidden="true" className={brandClassName} />
-                    <span className={cn("flex-1", labelClassName)}>Connect {label}</span>
+                    <span className={cn("flex-1", labelClassName)}>
+                      Connect {label}
+                    </span>
                   </Button>
                 )
               })}

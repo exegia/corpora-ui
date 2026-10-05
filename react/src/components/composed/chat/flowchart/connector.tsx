@@ -1,8 +1,17 @@
-import type { IConnectorProps } from "./types"
+import type { IConnectorProps } from "./type"
 
-export function Connector({ edge, isLit, selected, onPick, strokeWidth, ...props }: IConnectorProps) {
+export function Connector({
+  edge,
+  isLit,
+  selected,
+  onPick,
+  strokeWidth,
+  ...props
+}: IConnectorProps) {
   const width = strokeWidth ?? edge.strokeWidth ?? 1.25
-  const stroke = isLit ? "var(--accent-default)" : (edge.color ?? "var(--line-strong)")
+  const stroke = isLit
+    ? "var(--accent-default)"
+    : (edge.color ?? "var(--line-strong)")
   return (
     <g data-selected={selected || undefined}>
       <path

@@ -1,18 +1,16 @@
-"use client";
+"use client"
 
-import * as React from "react";
+import * as React from "react"
 
-import { PasswordInput } from "@/components/composed/password-input";
-import {
-  SocialProviders,
-} from "@/components/composed/social-providers";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { authAccentActionStyles } from "@/lib/auth-accent";
-import { cn } from "@/lib/utils";
+import { PasswordInput } from "@/components/composed/password-input"
+import { SocialProviders } from "@/components/composed/social-providers"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Field, FieldLabel } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { authAccentActionStyles } from "@/lib/auth-accent"
+import { cn } from "@/lib/utils"
 import {
   AuthCard,
   AuthError,
@@ -20,9 +18,9 @@ import {
   AuthSuccess,
   MorphStep,
   Reveal,
-} from "./auth-shell";
-import type { ILoginBlockProps, TAuthStatus } from "./type";
-import type { TSocialProvider } from "@/components/composed/types";
+} from "./auth-shell"
+import type { ILoginBlockProps, TAuthStatus } from "./type"
+import type { TSocialProvider } from "@/components/composed/type"
 
 export function LoginBlock({
   title = "Login to your account",
@@ -37,18 +35,18 @@ export function LoginBlock({
   onForgotPassword,
   onSignup,
 }: ILoginBlockProps) {
-  const emailId = React.useId();
-  const rememberId = React.useId();
-  const [status, setStatus] = React.useState<TAuthStatus>("idle");
-  const [error, setError] = React.useState<string | null>(null);
+  const emailId = React.useId()
+  const rememberId = React.useId()
+  const [status, setStatus] = React.useState<TAuthStatus>("idle")
+  const [error, setError] = React.useState<string | null>(null)
   const [loadingProvider, setLoadingProvider] =
-    React.useState<TSocialProvider | null>(null);
-  const [remember, setRemember] = React.useState(false);
-  const [email, setEmail] = React.useState("");
-  const [emailValid, setEmailValid] = React.useState(false);
-  const [password, setPassword] = React.useState("");
+    React.useState<TSocialProvider | null>(null)
+  const [remember, setRemember] = React.useState(false)
+  const [email, setEmail] = React.useState("")
+  const [emailValid, setEmailValid] = React.useState(false)
+  const [password, setPassword] = React.useState("")
 
-  const busy = status === "loading" || loadingProvider !== null;
+  const busy = status === "loading" || loadingProvider !== null
 
   // Progressive disclosure: each step unlocks the next. The password field is
   // gated on the email input's own constraint validation (required + type
@@ -57,41 +55,39 @@ export function LoginBlock({
   // would lock out anyone whose password predates them. The submit gate
   // re-checks emailValid so a stale password (typed, then the email was edited
   // back into an invalid state) can't leave the button on its own.
-  const passwordValid = password.trim().length > 0;
-  const canSubmit = emailValid && passwordValid;
+  const passwordValid = password.trim().length > 0
+  const canSubmit = emailValid && passwordValid
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+    event.preventDefault()
     // Enter in any field submits the form even while the button is hidden.
-    if (!canSubmit) return;
-    const form = new FormData(event.currentTarget);
-    setError(null);
-    setStatus("loading");
+    if (!canSubmit) return
+    const form = new FormData(event.currentTarget)
+    setError(null)
+    setStatus("loading")
     try {
       await onSubmit?.({
         email: String(form.get("email") ?? ""),
         password: String(form.get("password") ?? ""),
         remember,
-      });
-      setStatus("success");
+      })
+      setStatus("success")
     } catch (cause) {
-      setStatus("idle");
-      setError(cause instanceof Error ? cause.message : "Unable to login.");
+      setStatus("idle")
+      setError(cause instanceof Error ? cause.message : "Unable to login.")
     }
   }
 
   async function handleProvider(provider: TSocialProvider) {
-    setError(null);
-    setLoadingProvider(provider);
+    setError(null)
+    setLoadingProvider(provider)
     try {
-      await onProviderSelect?.(provider);
-      setStatus("success");
+      await onProviderSelect?.(provider)
+      setStatus("success")
     } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : "Unable to login.",
-      );
+      setError(cause instanceof Error ? cause.message : "Unable to login.")
     } finally {
-      setLoadingProvider(null);
+      setLoadingProvider(null)
     }
   }
 
@@ -119,8 +115,8 @@ export function LoginBlock({
             description="You are now logged in."
           />
         ) : (
-          <div className="flex flex-col gap-4">
-            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <div className="gap-4 flex flex-col">
+            <form className="gap-4 flex flex-col" onSubmit={handleSubmit}>
               <Field name="email">
                 <FieldLabel htmlFor={emailId}>Email</FieldLabel>
                 <Input
@@ -134,8 +130,8 @@ export function LoginBlock({
                   disabled={busy}
                   value={email}
                   onChange={(event) => {
-                    setEmail(event.currentTarget.value);
-                    setEmailValid(event.currentTarget.validity.valid);
+                    setEmail(event.currentTarget.value)
+                    setEmailValid(event.currentTarget.validity.valid)
                   }}
                 />
               </Field>
@@ -159,7 +155,7 @@ export function LoginBlock({
                     <Button
                       variant="link"
                       type="button"
-                      className="self-end font-normal text-muted-foreground text-xs hover:text-foreground sm:text-xs"
+                      className="font-normal text-xs sm:text-xs self-end text-muted-foreground hover:text-foreground"
                       onClick={onForgotPassword}
                     >
                       Forgot password?
@@ -168,11 +164,13 @@ export function LoginBlock({
                 </Field>
               </Reveal>
               {showRememberMe && (
-                <div className="flex items-center gap-2">
+                <div className="gap-2 flex items-center">
                   <Checkbox
                     id={rememberId}
                     checked={remember}
-                    onCheckedChange={(checked) => setRemember(checked)}
+                    onCheckedChange={(details) =>
+                      setRemember(details.checked === true)
+                    }
                     disabled={busy}
                   />
                   <Label htmlFor={rememberId} className="font-normal">
@@ -198,7 +196,7 @@ export function LoginBlock({
               // alternatives are just noise. They come back if a field is
               // invalidated again. gap-4 on the wrapper reproduces the spacing
               // the two children had as direct flex items of the column above.
-              <Reveal show={!canSubmit} className="flex flex-col gap-4">
+              <Reveal show={!canSubmit} className="gap-4 flex flex-col">
                 <AuthSeparator label="Or continue with" />
                 <SocialProviders
                   providers={providers}
@@ -213,5 +211,5 @@ export function LoginBlock({
         )}
       </MorphStep>
     </AuthCard>
-  );
+  )
 }

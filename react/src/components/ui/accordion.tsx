@@ -1,68 +1,110 @@
 "use client";
 
-import { Accordion as AccordionPrimitive } from "@base-ui/react/accordion";
+import {
+  Accordion as ArkAccordion,
+  useAccordionContext,
+} from "@ark-ui/react/accordion";
 import { ChevronDownIcon } from "lucide-react";
 import type React from "react";
 import { cn } from "@/lib/utils";
 
-export function Accordion(
-  props: AccordionPrimitive.Root.Props,
-): React.ReactElement {
-  return <AccordionPrimitive.Root data-slot="accordion" {...props} />;
-}
+export const useAccordion = useAccordionContext;
 
-export function AccordionItem({
-  className,
-  ...props
-}: AccordionPrimitive.Item.Props): React.ReactElement {
+export const Accordion = (
+  props: React.ComponentProps<typeof ArkAccordion.Root>
+) => {
+  const {
+    collapsible = true,
+    lazyMount = true,
+    unmountOnExit = true,
+    ...rest
+  } = props;
+
   return (
-    <AccordionPrimitive.Item
-      className={cn("border-b last:border-b-0", className)}
-      data-slot="accordion-item"
-      {...props}
+    <ArkAccordion.Root
+      collapsible={collapsible}
+      data-slot="accordion"
+      lazyMount={lazyMount}
+      unmountOnExit={unmountOnExit}
+      {...rest}
     />
   );
-}
+};
 
-export function AccordionTrigger({
-  className,
-  children,
-  ...props
-}: AccordionPrimitive.Trigger.Props): React.ReactElement {
+export const AccordionItem = (
+  props: React.ComponentProps<typeof ArkAccordion.Item>
+) => {
+  const { className, ...rest } = props;
+
   return (
-    <AccordionPrimitive.Header className="flex">
-      <AccordionPrimitive.Trigger
-        className={cn(
-          "flex flex-1 cursor-pointer items-start justify-between gap-4 rounded-md py-4 text-left font-medium text-sm outline-none transition-all focus-visible:ring-[3px] focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-64 data-panel-open:*:data-[slot=accordion-indicator]:rotate-180",
-          className,
-        )}
-        data-slot="accordion-trigger"
-        {...props}
-      >
-        {children}
-        <ChevronDownIcon
-          className="pointer-events-none size-4 shrink-0 translate-y-0.5 opacity-80 transition-transform duration-200 ease-in-out"
-          data-slot="accordion-indicator"
-        />
-      </AccordionPrimitive.Trigger>
-    </AccordionPrimitive.Header>
+    <ArkAccordion.Item
+      className={cn("flex flex-col border-b last:border-b-0", className)}
+      data-slot="accordion-item"
+      {...rest}
+    />
   );
-}
+};
 
-export function AccordionPanel({
-  className,
-  children,
-  ...props
-}: AccordionPrimitive.Panel.Props): React.ReactElement {
+export const AccordionTrigger = (
+  props: React.ComponentProps<typeof ArkAccordion.ItemTrigger>
+) => {
+  const { className, children, ...rest } = props;
+
   return (
-    <AccordionPrimitive.Panel
-      className="h-(--accordion-panel-height) overflow-hidden text-muted-foreground text-sm transition-[height,opacity] duration-300 ease-[var(--ease-out-strong)] data-ending-style:h-0 data-ending-style:opacity-0 data-starting-style:h-0 data-starting-style:opacity-0"
-      data-slot="accordion-panel"
-      {...props}
+    <ArkAccordion.ItemTrigger
+      className={cn(
+        "flex flex-1 items-center justify-between gap-3",
+        "py-4",
+        "text-left font-medium text-sm",
+        "rounded-md border border-transparent",
+        "outline-none",
+        "transition-all",
+        "disabled:pointer-events-none disabled:opacity-64 disabled:grayscale",
+        "focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-ring/32",
+        "[&_[data-state=open]>svg]:rotate-180",
+        "motion-reduce:transition-none!",
+        className
+      )}
+      data-slot="accordion-trigger"
+      {...rest}
     >
-      <div className={cn("pt-0 pb-4", className)}>{children}</div>
-    </AccordionPrimitive.Panel>
-  );
-}
+      {children}
 
-export { AccordionPrimitive, AccordionPanel as AccordionContent };
+      <ArkAccordion.ItemIndicator data-slot="accordion-indicator">
+        <ChevronDownIcon
+          className={cn(
+            "translate-y-0.5",
+            "size-4",
+            "shrink-0",
+            "text-muted-foreground",
+            "pointer-events-none",
+            "transition-transform duration-300",
+            "motion-reduce:transition-none!"
+          )}
+        />
+      </ArkAccordion.ItemIndicator>
+    </ArkAccordion.ItemTrigger>
+  );
+};
+
+export const AccordionContent = (
+  props: React.ComponentProps<typeof ArkAccordion.ItemContent>
+) => {
+  const { className, children, ...rest } = props;
+
+  return (
+    <ArkAccordion.ItemContent
+      className={cn(
+        "overflow-hidden rounded-md text-sm",
+        "data-[state=open]:animate-slide-down",
+        "data-[state=closed]:animate-slide-up",
+        "motion-reduce:animate-none!",
+        className
+      )}
+      data-slot="accordion-content"
+      {...rest}
+    >
+      <div className="pt-0 pb-4">{children}</div>
+    </ArkAccordion.ItemContent>
+  );
+};

@@ -1,4 +1,4 @@
-import type { TAIContentProps, IAIMessageProps, TAIMessageType } from "./types"
+import type { TAIContentProps, IAIMessageProps, TAIMessageType } from "./type"
 import { Bubble } from "@/components/atoms"
 import { cn } from "@/lib/utils"
 import { Avatar } from "./avatar"

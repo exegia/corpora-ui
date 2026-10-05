@@ -4,22 +4,7 @@ import { useReducedMotion } from "motion/react"
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { InlineSource } from "@/components/ui/chat"
-
-/** A word, or an inline citation; extra fields turn the chip into a hover preview. */
-export type TStreamingToken =
-  | { text: string }
-  | { cite: string; favicon?: string; title?: string; description?: string; href?: string }
-
-export interface IStreamingTextProps extends React.ComponentPropsWithoutRef<"div"> {
-  /** Paragraphs, each a token list; a string is split on spaces. */
-  paragraphs: (string | TStreamingToken[])[]
-  /** Reveal words over time and show the caret. */
-  streaming?: boolean
-  /** Reveal gap in ms; defaults to the --stream-gap token (60ms). */
-  wordMs?: number
-}
-
-
+import type { IStreamingTextProps, TStreamingToken } from "./type"
 
 const toTokens = (p: string | TStreamingToken[]): TStreamingToken[] => (typeof p === "string" ? p.split(" ").map((text) => ({ text })) : p)
 

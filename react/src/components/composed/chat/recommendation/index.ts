@@ -3,7 +3,7 @@ import { RecommendationCard } from "./default"
 import { Group } from "./group"
 import { Item } from "./item"
 
-export type * from "./types"
+export type * from "./type"
 
 export { RecommendationCard }
 

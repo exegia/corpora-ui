@@ -7,7 +7,7 @@ import type {
   TActionKey,
   TActionMap,
   IEmojiActionBarProps,
-} from "./types"
+} from "./type"
 import type { Emoji } from "frimousse"
 
 // Each toolbar owns its handle; a shared handle cannot control multiple roots.

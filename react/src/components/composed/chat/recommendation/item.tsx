@@ -5,7 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import type * as React from "react"
 import {
   AccordionItem,
-  AccordionPanel,
+  AccordionContent,
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
@@ -19,10 +19,9 @@ import { AvatarHandle, Signal, Tag } from "@/components/ui/chat"
 import { EASE_OUT_STRONG } from "@/lib/ease"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "./checkbox"
-import { CONFIDENCE, STATE_LABEL, STATE_TONE, ACTION_MOTION, ROW_VARIANTS } from "./constant"
-import type { IRecommendationItemProps } from "./types"
+import { ACTION_MOTION, CONFIDENCE, STATE_LABEL, STATE_TONE } from "./constant"
+import type { IRecommendationItemProps } from "./type"
 import { Reference } from "@/components/atoms"
-
 
 /**
  * Human-in-the-loop proposal: title, description with entity + lead-time
@@ -77,12 +76,7 @@ export function Item({
         }
 
   return (
-    <AccordionItem
-      className="border-0 last:border-0"
-      render={<motion.div variants={reduceMotion ? undefined : ROW_VARIANTS} />}
-      value={value}
-      {...props}
-    >
+    <AccordionItem className="border-0 last:border-0" value={value} {...props}>
       <CardFrame
         className={cn(
           "max-w-full [--frame-radius:var(--radius-md)]",
@@ -112,20 +106,42 @@ export function Item({
 
         {/* `relative`: the frame's ::before veil is positioned, so an
             unpositioned panel body would paint under it and look faded. */}
-        <AccordionPanel className="px-0 pb-0 relative">
-          {(description || entity || leadTime) && <div className={cn("flex flex-wrap items-center gap-x-1.5 gap-y-1.5 px-3 pb-3 text-[13px] leading-[18px] text-text-secondary", declined && "line-through opacity-50")}>
-            {description}
-            {entity && <span className="inline-flex h-[22px] items-center gap-1.5 rounded-full bg-surface-subtle py-0.5 pl-0.5 pr-2 text-xs font-medium text-text-primary"><AvatarHandle initials={entity.initials} size={16} src={entity.src} />{entity.name}</span>}
-            {leadTime && <Tag className="rounded-full" tone="green">{leadTime}</Tag>}
-          </div>}
-          {reference && <div
-            className={cn(
-              "gap-x-1.5 gap-y-1 px-2 pb-1.5 flex w-full items-center",
-              declined && "line-through opacity-50"
-            )}
-          >
-            <Reference {...reference} />
-          </div>}
+        <AccordionContent className="px-0 pb-0 relative">
+          {(description || entity || leadTime) && (
+            <div
+              className={cn(
+                "gap-x-1.5 gap-y-1.5 px-3 pb-3 leading-4.5 flex flex-wrap items-center text-[13px] text-text-secondary",
+                declined && "line-through opacity-50"
+              )}
+            >
+              {description}
+              {entity && (
+                <span className="h-5.5 gap-1.5 py-0.5 pl-0.5 pr-2 text-xs font-medium inline-flex items-center rounded-full bg-surface-subtle text-text-primary">
+                  <AvatarHandle
+                    initials={entity.initials}
+                    size={16}
+                    src={entity.src}
+                  />
+                  {entity.name}
+                </span>
+              )}
+              {leadTime && (
+                <Tag className="rounded-full" tone="green">
+                  {leadTime}
+                </Tag>
+              )}
+            </div>
+          )}
+          {reference && (
+            <div
+              className={cn(
+                "gap-x-1.5 gap-y-1 px-2 pb-1.5 flex w-full items-center",
+                declined && "line-through opacity-50"
+              )}
+            >
+              <Reference {...reference} />
+            </div>
+          )}
           {children && <div className="px-3 py-2">{children}</div>}
           {options.length > 0 && (
             <Card className="mx-3 rounded-md before:rounded-[calc(var(--radius-md)-1px)]">
@@ -153,7 +169,7 @@ export function Item({
               </CardPanel>
             </Card>
           )}
-         
+
           <CardFrameFooter className="gap-2 px-4 py-3.5 relative flex items-center">
             <Signal level={confidence} />
             <span className="text-[12.5px] text-text-primary">
@@ -208,7 +224,7 @@ export function Item({
               </AnimatePresence>
             </span>
           </CardFrameFooter>
-        </AccordionPanel>
+        </AccordionContent>
       </CardFrame>
     </AccordionItem>
   )

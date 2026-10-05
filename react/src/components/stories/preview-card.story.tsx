@@ -1,6 +1,6 @@
 "use client"
 
-import { PreviewCard, PreviewCardTrigger, PreviewCardPopup } from "@/ui/preview-card"
+import { PreviewCard, PreviewCardTrigger, PreviewCardPopup } from "@/components/ui/preview-card"
 
 import { defineStory } from "@/registry/story"
 

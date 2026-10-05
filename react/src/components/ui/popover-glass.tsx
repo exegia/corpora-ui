@@ -85,7 +85,7 @@ export function PopoverGlass({
         align={align}
         alignOffset={alignOffset}
         anchor={anchor}
-        className="z-50 h-(--positioner-height) w-(--positioner-width) max-w-(--available-width) transition-[top,left,right,bottom,transform] [animation-timing-function:cubic-bezier(0.445,0.05,0.55,0.95)] [animation-duration:200ms] data-instant:transition-none"
+        className="animate-bezier-sine-in-out z-50 h-(--positioner-height) w-(--positioner-width) max-w-(--available-width) transition-[top,left,right,bottom,transform] [animation-duration:200ms] data-instant:transition-none"
         data-slot="popover-positioner"
         side={side}
         sideOffset={sideOffset}
@@ -101,17 +101,22 @@ export function PopoverGlass({
           data-slot="popover-popup"
           {...props}
         >
-          <PopoverPrimitive.Arrow  className="relative block w-2.5 h-2 overflow-clip transition-[left] duration-[0.35s] ease-[cubic-bezier(0.22,1,0.36,1)] data-[side=bottom]:top-[-6px] data-[side=left]:right-[-9px] data-[side=left]:rotate-90 data-[side=right]:left-[-9px] data-[side=right]:-rotate-90 data-[side=top]:bottom-[-6px] data-[side=top]:rotate-180 before:content-[''] before:absolute before:bottom-0 before:left-1/2 before:w-[calc(6px*sqrt(2))] before:h-[calc(6px*sqrt(2))] before:bg-background/80 before:[transform:translate(-50%,50%)_rotate(45deg)]" />
-          
+          <PopoverPrimitive.Arrow className="w-2.5 h-2 before:bottom-0 relative block overflow-clip transition-[left] duration-[0.35s] ease-[cubic-bezier(0.22,1,0.36,1)] before:absolute before:left-1/2 before:h-[calc(6px*sqrt(2))] before:w-[calc(6px*sqrt(2))] before:[transform:translate(-50%,50%)_rotate(45deg)] before:bg-background/80 before:content-[''] data-[side=bottom]:top-[-6px] data-[side=left]:right-[-9px] data-[side=left]:rotate-90 data-[side=right]:left-[-9px] data-[side=right]:-rotate-90 data-[side=top]:bottom-[-6px] data-[side=top]:rotate-180" />
+
           <PopoverPrimitive.Viewport
             className={cn(
-              "relative size-full max-h-(--available-height) px-(--viewport-inline-padding) [--viewport-inline-padding:--spacing(4)] has-data-[slot=calendar]:p-2 **:data-current:w-[calc(var(--popup-width)-2*var(--viewport-inline-padding)-2px)] **:data-current:opacity-100 **:data-current:transition-opacity **:data-current:data-ending-style:opacity-0 data-instant:transition-none **:data-previous:w-[calc(var(--popup-width)-2*var(--viewport-inline-padding)-2px)] **:data-previous:opacity-100 **:data-previous:transition-opacity **:data-previous:data-ending-style:opacity-0 **:data-current:data-starting-style:opacity-0 **:data-previous:data-starting-style:opacity-0",
+              "[--viewport-inline-padding:--spacing(4)] has-data-[slot=calendar]:p-2 relative size-full max-h-(--available-height) px-(--viewport-inline-padding) **:data-current:w-[calc(var(--popup-width)-2*var(--viewport-inline-padding)-2px)] **:data-current:opacity-100 **:data-current:transition-opacity **:data-current:data-ending-style:opacity-0 data-instant:transition-none **:data-previous:w-[calc(var(--popup-width)-2*var(--viewport-inline-padding)-2px)] **:data-previous:opacity-100 **:data-previous:transition-opacity **:data-previous:data-ending-style:opacity-0 **:data-current:data-starting-style:opacity-0 **:data-previous:data-starting-style:opacity-0",
               "px-0"
             )}
             data-slot="popover-viewport"
             render={
               <GlassContainer
-                optics={{ strength: 0.08, bendWidth: 0.5, frost: 10, saturate: 1 }}
+                optics={{
+                  strength: 0.08,
+                  bendWidth: 0.5,
+                  frost: 10,
+                  saturate: 1,
+                }}
                 className={cn("shadow-md shadow-black/10 rounded-lg")}
                 glassVariant={resolvedGlassVariant}
               />
@@ -137,7 +142,7 @@ export function PopoverTitle({
 }: PopoverPrimitive.Title.Props): React.ReactElement {
   return (
     <PopoverPrimitive.Title
-      className={cn("text-lg leading-none font-semibold", className)}
+      className={cn("text-lg font-semibold leading-none", className)}
       data-slot="popover-title"
       {...props}
     />

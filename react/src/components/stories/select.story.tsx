@@ -1,6 +1,6 @@
 "use client"
 
-import { Select, SelectTrigger, SelectValue, SelectPopup, SelectItem } from "@/ui/select"
+import { Select, SelectTrigger, SelectValue, SelectPopup, SelectItem } from "@/components/ui/select"
 
 import { defineStory } from "@/registry/story"
 

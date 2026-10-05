@@ -6,7 +6,11 @@ import * as React from "react"
 import { useAtomValue } from "jotai"
 
 import { cn } from "@/lib/utils"
-import { SCAFFOLD_EASE, SCAFFOLD_EDGE_GUTTER, SCAFFOLD_MORPH_DURATION } from "./constants"
+import {
+  SCAFFOLD_EASE,
+  SCAFFOLD_EDGE_GUTTER,
+  SCAFFOLD_MORPH_DURATION,
+} from "./constants"
 import { scaffoldInspectorOpenAtom } from "./scaffold-atom"
 import { useScaffoldContext } from "./scaffold-context"
 import type { IScaffoldActionsProps } from "./type"
@@ -33,17 +37,37 @@ export function ScaffoldActions({
 }: IScaffoldActionsProps): React.ReactElement {
   const { scaffoldId, inspectorWidth } = useScaffoldContext()
   const inspectorOpen = useAtomValue(scaffoldInspectorOpenAtom(scaffoldId))
+  const actionsRef = React.useRef<HTMLDivElement>(null)
+  const [measuredInspectorWidth, setMeasuredInspectorWidth] =
+    React.useState<number>()
+  React.useLayoutEffect(() => {
+    const inspector = actionsRef.current
+      ?.closest('[data-slot="scaffold-main"]')
+      ?.querySelector<HTMLElement>('[data-slot="scaffold-inspector"]')
+    if (!inspector) return
+    const measure = () => {
+      const width = inspector.getBoundingClientRect().width
+      if (width > 0) setMeasuredInspectorWidth(width)
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(inspector)
+    return () => observer.disconnect()
+  }, [])
   const reducedMotion = useReducedMotion()
   const transition = reducedMotion ? { duration: 0 } : SPRING_LAYOUT
 
   return (
     <motion.div
       id="scaffold-actions"
+      ref={actionsRef}
       animate={{
-        x: inspectorOpen ? -(inspectorWidth + SCAFFOLD_EDGE_GUTTER) : 0,
+        x: inspectorOpen
+          ? -((measuredInspectorWidth ?? inspectorWidth) + SCAFFOLD_EDGE_GUTTER)
+          : 0,
       }}
       className={cn(
-        "sticky inline-flex h-12 items-center gap-0.5",
+        "h-12 gap-0.5 sticky inline-flex items-center",
         "justify-end",
         className
       )}
@@ -58,7 +82,7 @@ export function ScaffoldActions({
       <motion.div
         layout
         transition={transition}
-        className="flex items-center gap-1.5"
+        className="gap-1.5 flex items-center"
       >
         <AnimatePresence mode="popLayout" initial={false}>
           {onAdd && (
@@ -77,7 +101,7 @@ export function ScaffoldActions({
                 size="sm"
                 sound={sound}
                 variant="ghost"
-                className="h-full gap-2 rounded-sm py-1.5 pr-3 pl-2"
+                className="gap-2 py-1.5 pr-3 pl-2 h-full rounded-sm"
               >
                 {addIcon ?? <LucidePlus className="stroke-2" />}
                 {addLabel}

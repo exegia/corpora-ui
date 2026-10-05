@@ -1,6 +1,6 @@
 "use client"
 
-import { Progress, ProgressLabel, ProgressTrack, ProgressIndicator, ProgressValue } from "@/ui/progress"
+import { Progress, ProgressLabel, ProgressTrack, ProgressIndicator, ProgressValue } from "@/components/ui/progress"
 
 import { defineStory } from "@/registry/story"
 

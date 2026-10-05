@@ -1,12 +1,12 @@
-"use client";
+"use client"
 
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
-import type React from "react";
-import { useContext } from "react";
-import { cn } from "@/lib/utils";
-import type { DrawerPosition } from "./types";
-import { DrawerContext } from "./context";
+import { mergeProps } from "@base-ui/react/merge-props"
+import { useRender } from "@base-ui/react/use-render"
+import type React from "react"
+import { useContext } from "react"
+import { cn } from "@/lib/utils"
+import type { DrawerPosition } from "./type"
+import { DrawerContext } from "./context"
 
 export default function DrawerBar({
   className,
@@ -14,15 +14,15 @@ export default function DrawerBar({
   render,
   ...props
 }: useRender.ComponentProps<"div"> & {
-  position?: DrawerPosition;
+  position?: DrawerPosition
 }): React.ReactElement {
-  const { position: contextPosition } = useContext(DrawerContext);
-  const position = positionProp ?? contextPosition;
-  const horizontal = position === "left" || position === "right";
+  const { position: contextPosition } = useContext(DrawerContext)
+  const position = positionProp ?? contextPosition
+  const horizontal = position === "left" || position === "right"
   const defaultProps = {
     "aria-hidden": true as const,
     className: cn(
-      "absolute flex touch-none items-center justify-center p-3 before:rounded-full before:bg-input",
+      "p-3 absolute flex touch-none items-center justify-center before:rounded-full before:bg-input",
       horizontal
         ? "inset-y-0 before:h-12 before:w-1"
         : "inset-x-0 before:h-1 before:w-12",
@@ -30,14 +30,14 @@ export default function DrawerBar({
       position === "bottom" && "top-0",
       position === "left" && "right-0",
       position === "right" && "left-0",
-      className,
+      className
     ),
     "data-slot": "drawer-bar",
-  };
+  }
 
   return useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(defaultProps, props),
     render,
-  });
+  })
 }

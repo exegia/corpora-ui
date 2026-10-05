@@ -13,7 +13,7 @@ export type {
   TActionItemsByGroup,
   TActionKey,
   TActionMap,
-} from "./types"
+} from "./type"
 
 export const ActionBar = {
   Emoji: EmojiActionBar,
