@@ -1,6 +1,6 @@
 "use client"
 
-import { Table, TableCaption, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/ui/table"
+import { Table, TableCaption, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 
 import { defineStory } from "@/registry/story"
 

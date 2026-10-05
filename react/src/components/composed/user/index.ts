@@ -1,7 +1,7 @@
 import { Info } from "./info"
 import { Message } from "./message"
 import { Pill } from "./pill"
-import type { TUserInfoProps, TUserPillProps } from "./types"
+import type { TUserInfoProps, TUserPillProps } from "./type"
 
 const User = {
   Info,

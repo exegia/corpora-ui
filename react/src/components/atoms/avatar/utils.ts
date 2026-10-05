@@ -1,8 +1,10 @@
 import type { ClassValue } from "class-variance-authority/types"
-import type { TAvatarAudio, TAvatarSize, TUserType } from "./types"
-import type { TAtomSize } from "../types";
+import type { TAvatarAudio, TAvatarSize, TUserType } from "./type"
+import type { TAtomSize } from "../type"
 
-export function initialsFrom(user: string | TUserType | undefined): string | undefined {
+export function initialsFrom(
+  user: string | TUserType | undefined
+): string | undefined {
   // If the user is a string, use it directly to generate initials.
   if (user && typeof user === "string") {
     const parts = user.trim().split(/\s+/).filter(Boolean)

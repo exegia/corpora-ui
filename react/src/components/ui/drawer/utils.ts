@@ -1,5 +1,5 @@
-import { Drawer as DrawerPrimitive } from "@base-ui/react/drawer";
-import type { DrawerPosition } from "./types";
+import { Drawer as DrawerPrimitive } from "@base-ui/react/drawer"
+import type { DrawerPosition } from "./type"
 
 export const directionMap: Record<
   DrawerPosition,
@@ -9,7 +9,7 @@ export const directionMap: Record<
   left: "left",
   right: "right",
   top: "up",
-};
+}
 
 export const DrawerCreateHandle: typeof DrawerPrimitive.createHandle =
-  DrawerPrimitive.createHandle;
+  DrawerPrimitive.createHandle

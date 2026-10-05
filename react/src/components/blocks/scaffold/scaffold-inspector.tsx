@@ -34,6 +34,8 @@ import { SCAFFOLD_BEZEL_CLASSES } from "./utils"
 export function ScaffoldInspector({
   children,
   name = "Inspector",
+  minWidth = 180,
+  surface = "glass",
   className,
   ...rest
 }: IScaffoldInspectorProps): React.ReactElement {
@@ -46,8 +48,8 @@ export function ScaffoldInspector({
   const setInspectorOpen = useSetAtom(setScaffoldInspectorOpenAtom(scaffoldId))
   const [availableWidth, setAvailableWidth] = React.useState<number>(Infinity)
   const { panelRef, gripRef } = useMotionPanel({
-    size: Math.min(inspectorWidth, availableWidth),
-    minSize: 180,
+    size: Math.min(Math.max(inspectorWidth, minWidth), availableWidth),
+    minSize: Math.min(minWidth, availableWidth),
     maxSize: "90%",
     defaultSize: 272,
     collapsed: !inspectorOpen,
@@ -73,6 +75,8 @@ export function ScaffoldInspector({
 
   // Slide fully past the edge gutter and the drop shadow's blur radius.
   const offcanvasX = inspectorWidth + SCAFFOLD_EDGE_GUTTER + 12
+
+  const Surface = surface === "glass" ? GlassContainer : "div"
 
   return (
     <motion.aside
@@ -105,16 +109,19 @@ export function ScaffoldInspector({
         tabIndex={inspectorOpen ? 0 : -1}
         className="inset-y-0 -left-1 w-2 absolute z-30 cursor-col-resize touch-none focus-visible:outline-2 focus-visible:outline-ring"
       />
-      <GlassContainer
+      <Surface
         className={cn(
-          "bg-neutral-50/20 dark:bg-black/5 flex flex-1 flex-col rounded-md",
+          "min-h-0 flex flex-1 flex-col rounded-md",
+          surface === "solid"
+            ? "border border-border bg-card"
+            : "bg-neutral-50/20 dark:bg-black/5",
           SCAFFOLD_BEZEL_CLASSES
         )}
-        glassVariant="subtle"
+        {...(surface === "glass" ? { glassVariant: "subtle" as const } : {})}
       >
         <div
           id="scaffold-inspector-header"
-          className="h-12 gap-2 pr-3 pl-4 flex items-center justify-between border-b"
+          className="h-12 gap-2 pr-3 pl-4 flex shrink-0 items-center justify-between border-b"
         >
           <span className="text-base font-normal text-card-foreground/70">
             {name}
@@ -131,7 +138,7 @@ export function ScaffoldInspector({
           </Button>
         </div>
         {children}
-      </GlassContainer>
+      </Surface>
     </motion.aside>
   )
 }

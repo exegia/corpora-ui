@@ -18,6 +18,8 @@ import {
 } from "@exegia/corpora-ui/overlays"
 import { readingStore, savedNotesAtom, notebookDetailsOpenAtom } from "./store"
 
+const CorpusNavigationExample = lazy(() => import("./CorpusNavigationExample"))
+
 const ReadingWorkspace = lazy(() => import("./ReadingWorkspace"))
 
 export function App() {
@@ -140,6 +142,8 @@ export function App() {
           <ReadingWorkspace />
         </Suspense>}
       </section>
+
+      <Suspense fallback={<p>Loading corpus navigation…</p>}><CorpusNavigationExample /></Suspense>
 
       <footer className="page-footer">
         <Modal open={detailsOpen} onOpenChange={setDetailsOpen}>

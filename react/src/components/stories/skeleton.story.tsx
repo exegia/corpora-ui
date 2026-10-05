@@ -1,6 +1,6 @@
 "use client"
 
-import { Skeleton } from "@/ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton"
 
 import { defineStory } from "@/registry/story"
 

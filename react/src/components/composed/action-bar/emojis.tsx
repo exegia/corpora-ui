@@ -8,7 +8,7 @@ import { motion } from "motion/react"
 import ActionBar from "./toolbar"
 import { BOUNCE_IN_OUT } from "@/lib/ease"
 
-import type { TActionKey, TActionMap, IEmojiActionBarProps } from "./types"
+import type { TActionKey, TActionMap, IEmojiActionBarProps } from "./type"
 import {
   EmojiPicker,
   EmojiPickerContent,
@@ -16,7 +16,7 @@ import {
   EmojiPickerSearch,
 } from "@/components/ui/emoji-picker"
 import { isSeparator, QUICK_REACTIONS, useEmojiPicker } from "./utils"
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 
 /**
  * Compact reaction picker: a toolbar of quick emoji, then a "More" action that
@@ -67,20 +67,22 @@ export function EmojiActionBar({
   }, [quickReactions, selectEmoji, togglePicker])
 
   return (
-    <motion.div className="relative" initial={{ height: "auto" }} exit={{ height: "auto" }} animate={{ height: isFullPicker ? 326 : "auto" }} transition={BOUNCE_IN_OUT}>
-     
+    <motion.div
+      className="relative"
+      initial={{ height: "auto" }}
+      exit={{ height: "auto" }}
+      animate={{ height: isFullPicker ? 326 : "auto" }}
+      transition={BOUNCE_IN_OUT}
+    >
       {isFullPicker ? (
-        <EmojiPicker
-          className="h-full relative"
-          onEmojiSelect={selectEmoji}
-        >
+        <EmojiPicker className="relative h-full" onEmojiSelect={selectEmoji}>
           <div className="flex items-center">
-               <EmojiPickerSearch />
+            <EmojiPickerSearch />
             <Button variant="secondary" size="icon-xs" onClick={togglePicker}>
               <X className="size-3 stroke-3" />
             </Button>
           </div>
-       
+
           <EmojiPickerContent />
           <EmojiPickerFooter />
         </EmojiPicker>

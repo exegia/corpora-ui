@@ -1,7 +1,7 @@
 "use client"
 
-import { CheckboxGroup } from "@/ui/checkbox-group"
-import { Checkbox } from "@/ui/checkbox"
+import { CheckboxGroup } from "@/components/ui/checkbox-group"
+import { Checkbox } from "@/components/ui/checkbox"
 import { defineStory } from "@/registry/story"
 
 function ComponentPreview({ disabled }: { disabled: boolean }) {

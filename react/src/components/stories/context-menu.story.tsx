@@ -1,6 +1,6 @@
 "use client"
 
-import { ContextMenu, ContextMenuTrigger, ContextMenuPopup, ContextMenuItem } from "@/ui/context-menu"
+import { ContextMenu, ContextMenuTrigger, ContextMenuPopup, ContextMenuItem } from "@/components/ui/context-menu"
 
 import { defineStory } from "@/registry/story"
 

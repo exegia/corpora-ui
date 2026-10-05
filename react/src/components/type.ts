@@ -1,0 +1,122 @@
+import type * as NAtomsProps from "./atoms/type"
+import type * as NComposedProps from "./composed/type"
+import type * as NBlockProps from "./blocks/type"
+import type * as NIconsProps from "./icons/type"
+
+export type TTheme = "dark" | "light" | "system"
+export type TResolvedTheme = "dark" | "light"
+
+export type TThemeProviderProps = {
+  children: React.ReactNode
+  defaultTheme?: TTheme
+  storageKey?: string
+  disableTransitionOnChange?: boolean
+}
+
+export type TThemeProviderState = {
+  theme: TTheme
+  setTheme: (theme: TTheme) => void
+}
+
+// Type-only namespace exports cannot be reflected with `typeof`/`keyof`.
+// Keep these lists aligned with the exported *Props types, not state or options.
+export type TAtomsProps =
+  | NAtomsProps.IReferenceProps
+  | NAtomsProps.IInputFieldProps
+  | NAtomsProps.ILoaderProps
+  | NAtomsProps.IAvatarProps<NAtomsProps.TUserType>
+  | NAtomsProps.ITextureProps
+  | NAtomsProps.IBubbleProps
+  | NAtomsProps.TBubbleMessageProps
+  | NAtomsProps.TBubbleHeaderProps
+  | NAtomsProps.IBubbleReactionsProps
+  | NAtomsProps.TBubbleActionsProps
+  | NAtomsProps.IBubbleReactionChipProps
+  | NAtomsProps.TBubbleReactionsButtonProps
+  | NAtomsProps.TTextProps
+  | NAtomsProps.THeadingProps
+  | NAtomsProps.TSpanProps
+  | NAtomsProps.TParagraphProps
+  | NAtomsProps.TLabelProps
+  | NAtomsProps.ITextPopoverRenderProps
+  | NAtomsProps.IAnchoredPopoverProps
+  | NAtomsProps.IUseAnchoredPopoverOptions
+
+// Instantiate generic props at their declared domains. Stories still infer the
+// concrete component's props (including narrower generic arguments) separately.
+export type TComposedProps =
+  | NComposedProps.IActionButtonProps<string>
+  | NComposedProps.IActionBarProps
+  | NComposedProps.IEmojiActionBarProps
+  | NComposedProps.IStreamingTextProps
+  | NComposedProps.TAIContentProps<NComposedProps.TAIMessageType>
+  | NComposedProps.IAIMessageProps<NComposedProps.TAIMessageType>
+  | NComposedProps.IFlowchartProps
+  | NComposedProps.IConnectorProps
+  | NComposedProps.IChartNodeProps
+  | NComposedProps.IRecommendationItemProps
+  | NComposedProps.IRecommendationCardProps
+  | NComposedProps.IUserBaseProps<
+      NAtomsProps.TUserType,
+      NComposedProps.TUserVariant
+    >
+  | NComposedProps.IUserMessageProps<NAtomsProps.TUserType>
+  | NComposedProps.TUserInfoProps<NAtomsProps.TUserType>
+  | NComposedProps.TUserPillProps<NAtomsProps.TUserType>
+  | NComposedProps.IVerseProps
+  | NComposedProps.TVerseSpanProps
+  | NComposedProps.TVerseNoteProps
+
+export type TBlockProps =
+  | NBlockProps.IRecommendationStackProps
+  | NBlockProps.IPinnedThreadBannerProps
+  | NBlockProps.IDegradedBannerProps
+  | NBlockProps.IAiPanelProps
+  | NBlockProps.IAiPanelHeaderProps
+  | NBlockProps.ISuggestedPromptsProps
+  | NBlockProps.IVersionHistoryRecordProps
+  | NBlockProps.ILockedBannerProps
+  | NBlockProps.IAISidebarProps
+  | NBlockProps.TAISidebarViewProps
+  | NBlockProps.IAISidebarControllerProps
+  | NBlockProps.TAISidebarComponentProps
+  | NBlockProps.ISignupBlockProps
+  | NBlockProps.IForgotPasswordBlockProps
+  | NBlockProps.ILoginBlockProps
+  | NBlockProps.ICodeAuthBlockProps
+  | NBlockProps.IOnboardingBlockProps
+  | NBlockProps.IPasskeySignInBlockProps
+  | NBlockProps.IPasskeyManagerBlockProps
+  | NBlockProps.IUpdatePasswordBlockProps
+  | NBlockProps.ILinkedAccountsBlockProps
+  | NBlockProps.IAuthFlowBlockProps
+  | NBlockProps.IAISidebarProps
+  | NBlockProps.IAiPanelHeaderProps
+  | NBlockProps.IResourceRowProps
+  | NBlockProps.IScaffoldRootProps
+  | NBlockProps.TScaffoldSidebarProps
+  | NBlockProps.TScaffoldMainProps
+  | NBlockProps.TScaffoldCanvasProps
+  | NBlockProps.IScaffoldActionsProps
+  | NBlockProps.IScaffoldPanelProps
+  | NBlockProps.IScaffoldTabProps
+  | NBlockProps.IScaffoldSubPanelProps
+  | NBlockProps.IScaffoldInspectorProps
+  | NBlockProps.IPanelFloatingButtonProps
+  | NBlockProps.IPanelMenuButtonProps
+  | NBlockProps.TShellPanelControlProps
+  | NBlockProps.IShellLayoutProps
+  | NBlockProps.IAnimatedSidebarProviderProps
+  | NBlockProps.TAnimatedSidebarInsetProps
+  | NBlockProps.IAnimatedSidebarTriggerProps
+  | NBlockProps.IAnimatedSidebarProps
+  | NBlockProps.IAnimatedSidebarMenuSubProps
+  | NBlockProps.IAnimatedSidebarMenuSubButtonProps
+  | NBlockProps.IAnimatedSidebarMenuButtonProps
+
+export type TIconsProps = NIconsProps.IFileIconProps
+
+/** Catalog of namespace-exported props, not a shared component call signature. */
+export type TStoryComponentProps =
+  TAtomsProps | TComposedProps | TBlockProps | TIconsProps
+export type { NAtomsProps, NComposedProps, NBlockProps, NIconsProps }

@@ -1,10 +1,10 @@
-export {
-  ProfileCardBlock,
-  defaultProfileCardItems,
-} from "./profile-card-block"
+export { ProfileCardBlock, defaultProfileCardItems } from "./profile-card-block"
 export type { IProfileCardBlockProps } from "./profile-card-block"
 export { useProfileCard } from "./use-profile-card"
-export type { IProfileCardBinding, IUseProfileCardOptions } from "./use-profile-card"
+export type {
+  IProfileCardBinding,
+  IUseProfileCardOptions,
+} from "./use-profile-card"
 export {
   useProfileCardActions,
   useProfileCardState,
@@ -25,4 +25,3 @@ export {
   setProfileCardVariantAtom,
   toggleProfileCardVariantAtom,
 } from "./profile-card-atom"
-export type * from "./type"
