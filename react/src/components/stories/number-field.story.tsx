@@ -1,6 +1,6 @@
 "use client"
 
-import { NumberField, NumberFieldGroup, NumberFieldDecrement, NumberFieldInput, NumberFieldIncrement } from "@/ui/number-field"
+import { NumberField, NumberFieldGroup, NumberFieldDecrement, NumberFieldInput, NumberFieldIncrement } from "@/components/ui/number-field"
 
 import { defineStory } from "@/registry/story"
 

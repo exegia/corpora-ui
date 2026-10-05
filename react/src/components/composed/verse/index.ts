@@ -1,2 +1,2 @@
 export { Verse, VerseNote, VerseSpan } from "./verse"
-export type { TVerseNoteProps, IVerseProps, TVerseSpanProps } from "./types"
+export type { TVerseNoteProps, IVerseProps, TVerseSpanProps } from "./type"

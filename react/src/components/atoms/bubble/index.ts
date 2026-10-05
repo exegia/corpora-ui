@@ -33,5 +33,5 @@ export type {
   IBubbleProps,
   IBubbleReaction,
   IBubbleReactionsProps,
-  TBubbleVariant
-} from "./types"
+  TBubbleVariant,
+} from "./type"

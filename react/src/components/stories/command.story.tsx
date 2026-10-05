@@ -1,6 +1,6 @@
 "use client"
 
-import { Command, CommandInput, CommandList, CommandItem, CommandEmpty } from "@/ui/command"
+import { Command, CommandInput, CommandList, CommandItem, CommandEmpty } from "@/components/ui/command"
 
 import { defineStory } from "@/registry/story"
 

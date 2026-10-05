@@ -86,3 +86,10 @@ registry to update.
 
 Set `SITE_URL` to the deployed site URL for production builds. Local builds
 use `http://localhost:3000`.
+
+Canonical navigation stores selection, expansion and section tabs in named
+Jotai atoms (`canonId`). Tree uses its existing `treeId` atoms and passes only
+rendering scope to recursive rows, without a feature context. Both use the
+store supplied to `ExegiaProvider`; Canon atoms and `useCanon` are exported
+from `@exegia/corpora-ui/state`. Named instances persist across remounts;
+release their definitions only after every consumer has unmounted.

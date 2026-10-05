@@ -1,4 +1,4 @@
-import type { IFileIconProps } from "./types"
+import type { IFileIconProps } from "./type"
 
 /**
  * PDF file icon — wordmark variant.

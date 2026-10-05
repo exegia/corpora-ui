@@ -1,6 +1,6 @@
 import { Avatar } from "@/components/atoms"
 import { Badge } from "@/components/ui/badge"
-import type { TUserInfoProps } from "./types"
+import type { TUserInfoProps } from "./type"
 import { cn } from "@/lib/utils"
 
 /**
