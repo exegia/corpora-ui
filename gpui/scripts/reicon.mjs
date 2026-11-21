@@ -23,6 +23,7 @@ const ICONS = {
   'arrow-left': 'ArrowLeft',
   'arrow-right': 'ArrowRight',
   'arrow-up': 'ArrowUp',
+  'at-sign': 'AtSign',
   'badge-check': 'Verified',
   ban: 'Ban',
   battery: 'BatteryEmpty',
@@ -50,12 +51,14 @@ const ICONS = {
   cpu: 'Cpu',
   dash: 'Minus',
   delete: 'Trash',
+  download: 'Download',
   ellipsis: 'MoreH',
   'external-link': 'ArrowUpRightSquare',
   eye: 'Eye',
   'eye-off': 'EyeOff',
   file: 'File',
   'file-text': 'FileText',
+  film: 'Film',
   folder: 'Folder',
   'folder-closed': 'Folder',
   'folder-open': 'FolderOpen',
@@ -65,12 +68,14 @@ const ICONS = {
   'hard-drive': 'HardDrive',
   heart: 'Heart',
   'heart-off': 'HeartOff',
+  image: 'Image',
   inbox: 'Inbox',
   info: 'InfoCircle',
   'layout-dashboard': 'Category',
   'link-2': 'Link2',
   map: 'Map',
   maximize: 'Maximize',
+  'maximize-2': 'Maximize2',
   'memory-stick': 'Ram',
   menu: 'Menu',
   mic: 'Mic',
@@ -79,6 +84,7 @@ const ICONS = {
   moon: 'Moon',
   network: 'Hierarchy',
   palette: 'Palette',
+  paperclip: 'Paperclip',
   'panel-bottom': 'SidebarBottom',
   'panel-bottom-open': 'SidebarBottom',
   'panel-left': 'SidebarLeft',
@@ -94,6 +100,7 @@ const ICONS = {
   'redo-2': 'Redo',
   'refresh-cw': 'Refresh',
   replace: 'ArrowSwapHorizontal',
+  reply: 'Reply',
   'rotate-cw': 'RotateRight',
   search: 'Search',
   settings: 'Settings',
@@ -107,6 +114,8 @@ const ICONS = {
   'star-fill': 'Star:F',
   'star-off': 'StarOff',
   sun: 'Sun',
+  'text-align-start': 'TextalignLeft',
+  'text-quote': 'QuoteDown',
   'thumbs-down': 'ThumbsDown',
   'thumbs-up': 'ThumbsUp',
   'triangle-alert': 'AlertTriangle',
@@ -139,8 +148,11 @@ function svg(body) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">${body.trim()}</svg>\n`;
 }
 
-await rm(out, { recursive: true, force: true });
 await mkdir(out, { recursive: true });
+// Only the drawings are regenerated; the licence beside them stays.
+for (const file of await readdir(out)) {
+  if (file.endsWith('.svg')) await rm(join(out, file));
+}
 
 for (const [file, spec] of Object.entries(ICONS)) {
   const [name, weight = 'O'] = spec.split(':');

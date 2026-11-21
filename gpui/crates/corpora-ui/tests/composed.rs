@@ -513,3 +513,121 @@ fn clicked_text_opens_its_popover_and_escape_closes_it(cx: &mut TestAppContext) 
     });
     assert!(!still_open, "Escape closes the popover");
 }
+
+/// What the data pieces reported, for the tests below.
+#[derive(Default)]
+struct DataLog {
+    view: Option<SharedString>,
+    filter: Option<Option<SharedString>>,
+    selected: Option<Vec<SharedString>>,
+}
+
+struct DataHost {
+    log: Rc<RefCell<DataLog>>,
+}
+
+impl Render for DataHost {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        use corpora_ui::atoms::{SegmentedToggle, Tone};
+        use corpora_ui::composed::{FilterRow, FilterStatus, FilterTable, RecordRow, RecordsTable};
+
+        let (view, filter, selected) = (self.log.clone(), self.log.clone(), self.log.clone());
+        let record = |id: &'static str, name: &'static str| RecordRow {
+            id: id.into(),
+            name: name.into(),
+            ..RecordRow::default()
+        };
+        div()
+            .size_full()
+            .flex()
+            .flex_col()
+            .items_start()
+            .gap_4()
+            .child(
+                div().id("toggle").test_support().child(
+                    SegmentedToggle::new("view")
+                        .option("code", "Code")
+                        .option("diff", "Diff")
+                        .on_change(move |value, _, _| {
+                            view.borrow_mut().view = Some(value.clone());
+                        }),
+                ),
+            )
+            .child(
+                div().id("filter-table").test_support().w(px(400.)).child(
+                    FilterTable::new("tasks")
+                        .statuses([
+                            FilterStatus::new("done", "Done", Tone::Success),
+                            FilterStatus::new("open", "Open", Tone::Neutral),
+                        ])
+                        .columns(["Task", "Status"])
+                        .status_column(1)
+                        .rows([
+                            FilterRow::new("t1", "done", ["Collate", ""]),
+                            FilterRow::new("t2", "open", ["Align", ""]),
+                            FilterRow::new("t3", "open", ["Tag", ""]),
+                        ])
+                        .on_filter_change(move |status, _, _| {
+                            filter.borrow_mut().filter = Some(status.cloned());
+                        }),
+                ),
+            )
+            .child(
+                div().id("records").test_support().w(px(500.)).child(
+                    RecordsTable::new("witnesses")
+                        .rows([record("bezae", "Codex Bezae"), record("p75", "Papyrus 75")])
+                        .on_selection_change(move |ids, _, _| {
+                            selected.borrow_mut().selected = Some(ids.iter().cloned().collect());
+                        }),
+                ),
+            )
+    }
+}
+
+#[gpui_kit::test]
+fn data_pieces_report_the_view_filter_and_selection_picked(cx: &mut TestAppContext) {
+    cx.update(corpora_ui::init);
+    let log = Rc::new(RefCell::new(DataLog::default()));
+    let host_log = log.clone();
+    let window = open(cx, |_, cx| cx.new(|_| DataHost { log: host_log }));
+    let mut visual = VisualTestContext::from_window(window, cx);
+    let bounds = |visual: &mut VisualTestContext, id: &'static str| {
+        visual.update(|window, cx| {
+            window.render_frame(cx);
+            window.render_frame(cx);
+            window.find(id).bounds()
+        })
+    };
+
+    // The last segment sits at the trailing end of the toggle.
+    let toggle = bounds(&mut visual, "toggle");
+    visual.simulate_click(
+        point(toggle.right() - px(12.), toggle.center().y),
+        Modifiers::none(),
+    );
+    assert_eq!(log.borrow().view.as_deref(), Some("diff"));
+
+    // "All 3" comes first in the filter row, then "Done 1".
+    let table = bounds(&mut visual, "filter-table");
+    visual.simulate_click(
+        point(table.left() + px(80.), table.top() + px(12.)),
+        Modifiers::none(),
+    );
+    assert_eq!(log.borrow().filter, Some(Some("done".into())));
+    let filtered = bounds(&mut visual, "filter-table");
+    assert!(
+        filtered.size.height < table.size.height,
+        "two of the three rows are filtered out: {filtered:?} from {table:?}"
+    );
+
+    // The header's checkbox selects every row.
+    let records = bounds(&mut visual, "records");
+    visual.simulate_click(
+        point(records.left() + px(20.), records.top() + px(16.)),
+        Modifiers::none(),
+    );
+    assert_eq!(
+        log.borrow().selected,
+        Some(vec!["bezae".into(), "p75".into()])
+    );
+}

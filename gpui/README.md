@@ -78,6 +78,9 @@ by hand. So the port has two halves:
 | `SourceChip`, `SelectChip` | `Chip`, `SelectChip` | this crate, on the stock dropdown menu |
 | `EmojiPicker` | `EmojiPicker`, `EmojiPickerState`, `Emoji` | this crate, data from the `emojis` crate |
 | `Texture` | `Texture`, `TextureVariant` | this crate |
+| `Dot`, `Pill`, `Tag`, `FileTypeBadge` (`ui/chat`) | `Dot`, `Pill`, `Tag`, `FileTypeBadge`, with `Tone` and `TagTone` | this crate |
+| `Stat`, `FollowUpRow`, `Signal` (`ui/chat`) | `Stat`, `FollowUpRow`, `Signal` | this crate |
+| `SegmentedToggle` (`ui/chat`) | `SegmentedToggle` | this crate |
 | `TextSelection`, `TextClickPopover` | `TextSelection`, `TextPopover` | this crate, on GPUI Base's window text selection |
 | (height transitions) | `Reveal` | this crate, on GPUI Base's `MotionReveal` |
 | liquid glass surfaces | `GlassSpec`, `GlassEdges`, `GlassSurfaceExt`, `glass` | this crate, on the patched GPUI in `vendor/` |
@@ -99,6 +102,17 @@ Not ported yet: the `glass` button variant.
 | `PasswordInput` | `PasswordInput`, `password_strength` |
 | `SocialProviders` | `SocialProviders` |
 | `SendHint` | `SendHint` |
+| `Verse`, `VerseSpan`, `VerseNote` | `Verse` and its `span` and `note` |
+| `SelectionPopover` | `SelectionCard`, `ReaderSelection`, inside a popover |
+| `SelectionHighlight`, `AppliedMark`, `ApplyToast` | `SelectionHighlight`, `AppliedMark`, `ApplyToast` |
+| `Attachment` | `Attachment`, `AttachmentKind` |
+| `Markdown` | `Markdown` |
+| `Recommendation.Item`, `RecommendationCard` | `Recommendation`, `RecommendationOption`, `RecommendationState` |
+| `CodeBlock` | `CodeBlock`, `DiffLine`, `tokenize` |
+| `ContextCards` | `ContextCards`, `ContextCard` |
+| `FilterTable` | `FilterTable`, `FilterStatus`, `FilterRow` |
+| `RecordsTable` | `RecordsTable`, `RecordRow`, `RecordColumn` |
+| `InsightCards` | `InsightCards`, `Insight`, `InsightAllocation`, `InsightSegment` |
 
 ```rust
 use corpora_ui::composed::{AiMessage, StreamingText, UserMessage};
@@ -111,9 +125,10 @@ AiMessage::new("message-42")
     .child(StreamingText::from_text("message-42-text", [answer]).streaming(is_streaming))
 ```
 
-Not ported yet: the research answer, the chat composer, attachments,
-markdown, charts, the flowchart, recommendation and insight cards, the
-tables, corpus navigation and the tree.
+Not ported yet: the research answer, the chat composer, charts, the
+flowchart, corpus navigation and the tree. From `ui/chat`, the favicon, source chip, avatar stack,
+waveform, thumbnail and the composer's own buttons wait for the pieces that
+use them.
 
 ### Button
 
@@ -201,6 +216,38 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
   language and `IconName` keeps working. To add or remap an icon, edit the
   table in `scripts/reicon.mjs` and run it. A name Reicon does not draw
   (`cone`, the window controls, a few others) still gets Lucide's.
+- **A recommendation is one card.** `Recommendation` folds on its own
+  heading, so there is no `Recommendation.Group` accordion: stack cards in a
+  column. Its state belongs to the owner, and the running mark is the stock
+  spinner without the step number inside it.
+- **An attachment shows what it is given.** `Attachment` takes a kind, a
+  title and an optional thumbnail; it does not read files, play video or
+  sound, or render a PDF page. "Play", "Download" and "Open link" are buttons
+  that call `on_action` (a link with a `url` opens it in the browser). The
+  chip has no hover preview: show `.preview()` in a popover where one is
+  wanted.
+- **Markdown is GPUI Component's renderer.** `Markdown` draws its preview with
+  `TextView::markdown`, so headings, lists, code and links take that
+  component's styling, not React's tag map. Its view switch is the
+  `SegmentedToggle`, and "Copy markdown" writes to the clipboard itself.
+- **Tables are rows of shared-width cells.** GPUI has no table element, so
+  `FilterTable` and `RecordsTable` lay each row out as flex cells. They do not
+  scroll sideways and have no sticky columns or header; long cells are cut
+  short. `FilterTable` takes each row as its status and a list of cells, not
+  a typed record.
+- **Data pieces keep their own view state.** The code block's Code and Diff
+  switch, the filter table's status, the insight page and its picked share
+  live in the component, keyed by its id, and are reported through
+  `on_…` callbacks. `RecordsTable` and `SegmentedToggle` also take the value
+  from outside (`selected`, `value`).
+- **An insight has no trend snapshot yet.** `Insight` carries its summary,
+  figures, share breakdown and follow-up; the line chart waits for the chart
+  port. Its summary is plain text, so React's inline `InsightEntity` dot is
+  not available.
+- **Tag and code colors come from the theme.** React's `--tag-*` and
+  `--code-*` values are not copied: a tag takes a status or chart color at
+  three strengths, keywords take `info` and strings `success`. The code
+  block's header shows the file name without the file icon.
 - **A verse is one run of text.** `Verse` takes its reference, words, glosses
   and notes as segments and lays them out as a single wrapped paragraph, so
   React's `VerseSpan` and `VerseNote` are its `span` and `note` builders. GPUI

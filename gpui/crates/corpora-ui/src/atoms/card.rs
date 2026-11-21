@@ -8,7 +8,7 @@ use gpui_kit::{
 };
 
 /// Opacity of the muted tint behind a frame's header and footer.
-const FRAME_TINT: f32 = 0.72;
+pub(crate) const FRAME_TINT: f32 = 0.72;
 
 use crate::foundations::shadow::shadow_xs;
 use crate::foundations::{ActiveCorporaTheme as _, Radius};
@@ -251,6 +251,7 @@ struct Framed {
 /// `CardFrameAction` in React, and their `Frame*` twins.
 #[derive(IntoElement)]
 pub struct CardFrameHeader {
+    lead: Option<AnyElement>,
     title: SharedString,
     description: Option<SharedString>,
     action: Option<AnyElement>,
@@ -259,7 +260,19 @@ pub struct CardFrameHeader {
 impl CardFrameHeader {
     pub fn new(title: impl Into<SharedString>) -> Self {
         Self {
+            lead: None,
             title: title.into(),
+            description: None,
+            action: None,
+        }
+    }
+
+    /// A header led by a control, such as a view switch, where the title
+    /// would be.
+    pub fn custom(lead: impl IntoElement) -> Self {
+        Self {
+            lead: Some(lead.into_any_element()),
+            title: SharedString::default(),
             description: None,
             action: None,
         }
@@ -281,20 +294,25 @@ impl RenderOnce for CardFrameHeader {
     fn render(self, _: &mut Window, cx: &mut App) -> impl IntoElement {
         h_flex()
             .gap_4()
-            .child(
-                v_flex()
-                    .flex_1()
-                    .min_w_0()
-                    .child(div().text_sm().font_semibold().child(self.title))
-                    .when_some(self.description, |this, description| {
-                        this.child(
-                            div()
-                                .text_sm()
-                                .text_color(cx.theme().muted_foreground)
-                                .child(description),
-                        )
-                    }),
-            )
+            .when_some(self.lead, |this, lead| {
+                this.child(div().flex().flex_1().min_w_0().child(lead))
+            })
+            .when(!self.title.is_empty(), |this| {
+                this.child(
+                    v_flex()
+                        .flex_1()
+                        .min_w_0()
+                        .child(div().text_sm().font_semibold().child(self.title))
+                        .when_some(self.description, |this, description| {
+                            this.child(
+                                div()
+                                    .text_sm()
+                                    .text_color(cx.theme().muted_foreground)
+                                    .child(description),
+                            )
+                        }),
+                )
+            })
             .when_some(self.action, |this, action| {
                 this.child(div().flex_shrink_0().child(action))
             })

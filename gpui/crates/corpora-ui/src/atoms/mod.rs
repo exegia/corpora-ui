@@ -39,9 +39,11 @@ mod emoji;
 mod field;
 mod glass;
 mod loader;
+mod mark;
 mod reference;
 mod reveal;
 mod scaled;
+mod segmented;
 mod text;
 mod text_selection;
 mod texture;
@@ -50,6 +52,7 @@ pub use avatar::{Avatar, AvatarAudio, AvatarStatus, AvatarUser};
 pub use badge::{Badge, BadgeAppearance, BadgeVariant};
 pub use bubble::{Bubble, BubbleReaction, BubbleVariant};
 pub use button::{Button, ButtonKind};
+pub(crate) use card::FRAME_TINT;
 pub use card::{Card, CardFrame, CardFrameHeader, CardHeader, Frame};
 pub use chip::{Chip, SelectChip};
 pub(crate) use emoji::WIDTH as PICKER_WIDTH;
@@ -59,8 +62,13 @@ pub use glass::{
     GlassEdge, GlassEdges, GlassSpec, GlassSurface, GlassSurfaceExt, glass, neutral_tint,
 };
 pub use loader::{Loader, LoaderKind};
+pub(crate) use mark::subtle;
+pub use mark::{
+    Dot, FileTypeBadge, FollowUpRow, Pill, Signal, SignalLevel, Stat, Tag, TagTone, Tone,
+};
 pub use reference::Reference;
 pub use reveal::Reveal;
+pub use segmented::SegmentedToggle;
 pub use text::{LabelLevel, Text, TextSize, TextVariant};
 pub(crate) use text_selection::floating;
 pub use text_selection::{TextPopover, TextSelection};

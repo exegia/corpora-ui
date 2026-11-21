@@ -140,6 +140,8 @@ struct Gallery {
     email: Entity<InputState>,
     handle: Entity<InputState>,
     status: SharedString,
+    /// Where the gallery's recommendation stands.
+    proposal: corpora_ui::composed::RecommendationState,
     reactions: Vec<BubbleReaction>,
     /// The picker behind the bubble's "Add reaction" button.
     reaction_picker: Entity<EmojiPickerState>,
@@ -157,6 +159,7 @@ impl Gallery {
             page: Page::Foundations,
             page_changed: false,
             status: "Pending".into(),
+            proposal: Default::default(),
             reactions: vec![
                 BubbleReaction::new("👍", "👍", "thumbs up")
                     .count(2)
@@ -911,6 +914,376 @@ impl Gallery {
             .child(self.glass.clone())
     }
 
+    fn render_marks(&self) -> impl IntoElement {
+        use corpora_ui::atoms::{
+            Dot, FileTypeBadge, FollowUpRow, Pill, SegmentedToggle, Stat, Tag, TagTone, Tone,
+        };
+
+        Section::new("Marks")
+            .child(
+                row()
+                    .gap_3()
+                    .children(
+                        [
+                            Tone::Success,
+                            Tone::Warning,
+                            Tone::Info,
+                            Tone::Danger,
+                            Tone::Neutral,
+                            Tone::Accent,
+                        ]
+                        .map(Dot::new),
+                    )
+                    .children((1..=5).map(|series| Dot::new(Tone::Series(series)).small()))
+                    .child(Pill::new("12"))
+                    .child(Pill::new("Snapshot"))
+                    .child(FileTypeBadge::new("pdf"))
+                    .child(FileTypeBadge::new("csv"))
+                    .child(Tag::new("Papyrus").tone(TagTone::Amber))
+                    .child(Tag::new("Uncial").tone(TagTone::Purple))
+                    .child(Tag::new("Minuscule"))
+                    .child(Tag::new("Lectionary").tone(TagTone::Green))
+                    .child(
+                        SegmentedToggle::new("marks-view")
+                            .option("code", "Code")
+                            .option("diff", "Diff")
+                            .option("notes", "Notes"),
+                    ),
+            )
+            .child(
+                row()
+                    .items_start()
+                    .gap_6()
+                    .child(Stat::new("Attested", "1,204").delta("+38 this week"))
+                    .child(
+                        Stat::new("Disputed", "17")
+                            .tone(Tone::Series(3))
+                            .negative()
+                            .delta("+4"),
+                    )
+                    .child(div().w(rems(20.)).child(FollowUpRow::new(
+                        "marks-follow-up",
+                        "How old is the oldest witness?",
+                    ))),
+            )
+    }
+
+    fn render_data(&self) -> impl IntoElement {
+        use corpora_ui::atoms::{Stat, TagTone, Tone};
+        use corpora_ui::composed::{
+            CodeBlock, ContextCard, ContextCards, DiffLine, FilterRow, FilterStatus, FilterTable,
+            Insight, InsightAllocation, InsightCards, InsightSegment, RecordRow, RecordsTable,
+        };
+
+        let code = "export async function collate(witnesses) {\n  const base = witnesses[0]\n  return witnesses.map((w) => diff(base, w, \"word\"))\n}";
+        let record = |id: &'static str,
+                      name: &'static str,
+                      tags: &[(&'static str, TagTone)],
+                      last: &'static str,
+                      strength: &'static str| RecordRow {
+            id: id.into(),
+            name: name.into(),
+            initial: None,
+            tags: tags
+                .iter()
+                .map(|(label, tone)| ((*label).into(), *tone))
+                .collect(),
+            last_interaction: last.into(),
+            strength: strength.into(),
+        };
+
+        Section::new("Composed: data")
+            .child(
+                row()
+                    .items_start()
+                    .gap_8()
+                    .child(
+                        div().w(rems(27.)).child(
+                            CodeBlock::new("collate-code", code)
+                                .filename("src/collate.ts")
+                                .diff([
+                                    DiffLine::context("export async function collate(witnesses) {"),
+                                    DiffLine::removed("  const base = witnesses[0]"),
+                                    DiffLine::added("  const base = pickBase(witnesses)"),
+                                    DiffLine::context(
+                                        "  return witnesses.map((w) => diff(base, w, \"word\"))",
+                                    ),
+                                    DiffLine::context("}"),
+                                ]),
+                        ),
+                    )
+                    .child(
+                        div().w(rems(24.)).child(
+                            ContextCards::new("chunks").cards([
+                                ContextCard {
+                                    id: "c1".into(),
+                                    title: "Luke 22:43–44 in Codex Bezae".into(),
+                                    meta: Some("290 characters".into()),
+                                    snippet:
+                                        "The longer reading, with the angel and the sweat like \
+                                          drops of blood, stands in the first hand of the codex \
+                                          and in most of the Old Latin."
+                                            .into(),
+                                    file: Some(("bezae-collation.pdf".into(), "pdf".into())),
+                                },
+                                ContextCard {
+                                    id: "c2".into(),
+                                    title: "Editorial note".into(),
+                                    meta: Some("118 characters".into()),
+                                    snippet:
+                                        "Most modern editions print the verses in double brackets."
+                                            .into(),
+                                    file: None,
+                                },
+                            ]),
+                        ),
+                    ),
+            )
+            .child(
+                row()
+                    .items_start()
+                    .gap_8()
+                    .child(
+                        div().w(rems(28.)).child(
+                            FilterTable::new("tasks")
+                                .statuses([
+                                    FilterStatus::new("done", "Done", Tone::Success),
+                                    FilterStatus::new("review", "In review", Tone::Warning),
+                                    FilterStatus::new("open", "Open", Tone::Neutral),
+                                ])
+                                .columns(["Task", "Status", "Owner"])
+                                .status_column(1)
+                                .rows([
+                                    FilterRow::new("t1", "done", ["Collate John 1", "", "Ada"]),
+                                    FilterRow::new("t2", "review", ["Tag variants", "", "Grace"]),
+                                    FilterRow::new("t3", "open", ["Align Old Latin", "", "Ada"]),
+                                    FilterRow::new("t4", "done", ["Import Bezae", "", "Alan"]),
+                                ]),
+                        ),
+                    )
+                    .child(
+                        div().w(rems(21.5)).child(
+                            InsightCards::new("insights").insights([
+                                Insight {
+                                    summary:
+                                        "Byzantine witnesses carry the longer reading far more \
+                                          often than Alexandrian ones."
+                                            .into(),
+                                    stats: vec![
+                                        Stat::new("Attested", "1,204").delta("+38 this week"),
+                                        Stat::new("Disputed", "17")
+                                            .tone(Tone::Series(3))
+                                            .negative()
+                                            .delta("+4"),
+                                    ],
+                                    allocation: Some(InsightAllocation {
+                                        label: "Witnesses".into(),
+                                        value: "1,221".into(),
+                                        segments: vec![
+                                            InsightSegment::new("byz", "Byzantine", 780.)
+                                                .description(
+                                                    "Mostly minuscules from the ninth century on.",
+                                                ),
+                                            InsightSegment::new("alex", "Alexandrian", 290.)
+                                                .tone(Tone::Series(2))
+                                                .description(
+                                                    "The early papyri and the great uncials.",
+                                                ),
+                                            InsightSegment::new("west", "Western", 151.)
+                                                .tone(Tone::Series(4))
+                                                .description("Codex Bezae and the Old Latin."),
+                                        ],
+                                    }),
+                                    follow_up: Some("Which witnesses omit the verses?".into()),
+                                },
+                                Insight {
+                                    summary: "The verses are missing from the earliest papyri."
+                                        .into(),
+                                    stats: vec![Stat::new("Papyri", "3").tone(Tone::Series(2))],
+                                    allocation: None,
+                                    follow_up: Some("How old is the oldest witness?".into()),
+                                },
+                            ]),
+                        ),
+                    ),
+            )
+            .child(
+                div()
+                    .w(rems(40.))
+                    .child(RecordsTable::new("witnesses").rows([
+                        record(
+                            "bezae",
+                            "Codex Bezae",
+                            &[
+                                ("Uncial", TagTone::Purple),
+                                ("Western", TagTone::Amber),
+                                ("Bilingual", TagTone::Blue),
+                            ],
+                            "2 days ago",
+                            "Strong",
+                        ),
+                        record(
+                            "sinaiticus",
+                            "Codex Sinaiticus",
+                            &[("Uncial", TagTone::Purple), ("Alexandrian", TagTone::Green)],
+                            "Last week",
+                            "Strong",
+                        ),
+                        record(
+                            "p75",
+                            "Papyrus 75",
+                            &[("Papyrus", TagTone::Amber)],
+                            "3 weeks ago",
+                            "Weak",
+                        ),
+                    ])),
+            )
+    }
+
+    fn render_proposals(&self, cx: &mut Context<Self>) -> impl IntoElement {
+        use corpora_ui::atoms::SignalLevel;
+        use corpora_ui::composed::{Recommendation, RecommendationOption, RecommendationState};
+
+        let set = |state: RecommendationState| {
+            cx.listener(move |this, _: &ClickEvent, _, cx| {
+                this.proposal = state;
+                cx.notify();
+            })
+        };
+        Section::new("Composed: recommendations").child(
+            v_flex()
+                .w(rems(28.))
+                .gap_2()
+                .child(
+                    Recommendation::new("rec-base", "Use Codex Bezae as the base text")
+                        .description("It carries the longer reading in its first hand, for")
+                        .entity("Luke 22", "LK")
+                        .lead_time("2 min")
+                        .options([
+                            RecommendationOption {
+                                label: "Codex Sinaiticus".into(),
+                                status: Some("Corrected".into()),
+                                signal: SignalLevel::Medium,
+                            },
+                            RecommendationOption {
+                                label: "Papyrus 75".into(),
+                                status: Some("Omits".into()),
+                                signal: SignalLevel::Low,
+                            },
+                        ])
+                        .confidence(SignalLevel::Medium)
+                        .state(self.proposal)
+                        .on_accept(set(RecommendationState::Accepted))
+                        .on_reject(set(RecommendationState::Rejected))
+                        .on_undo(set(RecommendationState::Pending)),
+                )
+                .child(
+                    Recommendation::new("rec-running", "Align the Old Latin witnesses")
+                        .description("Running against the collation now.")
+                        .state(RecommendationState::Running)
+                        .collapsed(),
+                ),
+        )
+    }
+
+    fn render_attachments(&self) -> impl IntoElement {
+        use corpora_ui::composed::{Attachment, AttachmentKind, Markdown};
+
+        Section::new("Composed: attachments and markdown")
+            .child(
+                row()
+                    .items_start()
+                    .gap_4()
+                    .child(
+                        Attachment::new("att-chip", "bezae-collation.pdf")
+                            .meta("PDF · 2.4 MB")
+                            .on_remove(|_, _, _| {}),
+                    )
+                    .child(
+                        Attachment::new("att-image", "folio-205v.png")
+                            .kind(AttachmentKind::Image)
+                            .meta("PNG · 1.1 MB")
+                            .thumbnail("images/owl-avatar.png")
+                            .on_remove(|_, _, _| {}),
+                    )
+                    .child(
+                        Attachment::new("att-handle", "@grace")
+                            .kind(AttachmentKind::Handle {
+                                initials: "GH".into(),
+                            })
+                            .preview(),
+                    ),
+            )
+            .child(
+                row()
+                    .items_start()
+                    .gap_4()
+                    .child(
+                        Attachment::new("att-quote", "John 1:1")
+                            .kind(AttachmentKind::TextSelection {
+                                quote: "In the beginning was the Word, and the Word was with \
+                                        God, and the Word was God."
+                                    .into(),
+                            })
+                            .preview(),
+                    )
+                    .child(
+                        Attachment::new("att-reply", "Grace Hopper")
+                            .kind(AttachmentKind::ChatReply {
+                                time: Some("2 min ago".into()),
+                                body: "Where does this reading come from?".into(),
+                            })
+                            .preview(),
+                    )
+                    .child(
+                        Attachment::new("att-audio", "Reading of Luke 22")
+                            .kind(AttachmentKind::Audio {
+                                duration: Some("0:42".into()),
+                                waveform: Vec::new(),
+                            })
+                            .meta("Voice note")
+                            .on_action(|_, _, _| {})
+                            .preview(),
+                    ),
+            )
+            .child(
+                row()
+                    .items_start()
+                    .gap_4()
+                    .child(
+                        Attachment::new("att-link", "Codex Bezae Cantabrigiensis")
+                            .kind(AttachmentKind::Link {
+                                domain: "cudl.lib.cam.ac.uk".into(),
+                                description: Some(
+                                    "A bilingual Greek and Latin codex of the Gospels and Acts."
+                                        .into(),
+                                ),
+                                url: Some("https://cudl.lib.cam.ac.uk".into()),
+                            })
+                            .preview(),
+                    )
+                    .child(
+                        Attachment::new("att-video", "Imaging session")
+                            .kind(AttachmentKind::Video {
+                                duration: Some("3:15".into()),
+                            })
+                            .on_action(|_, _, _| {})
+                            .preview(),
+                    )
+                    .child(
+                        div().w(rems(24.)).child(
+                            Markdown::new(
+                                "notes",
+                                "## Collation notes\n\nThe longer reading stands in **Codex \
+                                 Bezae** and most of the Old Latin.\n\n- Papyrus 75 omits it\n- \
+                                 Sinaiticus marks it with `obeli`\n",
+                            )
+                            .on_expand(|_, _, _| {}),
+                        ),
+                    ),
+            )
+    }
+
     fn render_reading(&self, cx: &App) -> impl IntoElement {
         use corpora_ui::atoms::{TextPopover, TextSelection, Texture, TextureVariant};
         use corpora_ui::composed::{
@@ -1107,6 +1480,7 @@ impl Render for Gallery {
                 .child(self.render_badges())
                 .child(self.render_card())
                 .child(self.render_feedback())
+                .child(self.render_marks())
                 .child(self.render_avatars())
                 .child(self.render_chat(cx))
                 .child(self.render_fields(cx)),
@@ -1114,6 +1488,9 @@ impl Render for Gallery {
                 .child(self.render_people(cx))
                 .child(self.render_conversation(cx))
                 .child(self.render_reading(cx))
+                .child(self.render_data())
+                .child(self.render_attachments())
+                .child(self.render_proposals(cx))
                 .child(self.render_sign_in()),
             Page::Glass => sections.child(self.render_glass(cx)),
         };
@@ -1202,7 +1579,7 @@ fn snapshot(dir: &std::path::Path) {
     // Tall enough to show every section without scrolling.
     let bounds = Bounds {
         origin: Point::default(),
-        size: size(px(1400.), px(2400.)),
+        size: size(px(1400.), px(3600.)),
     };
     let mut cx = HeadlessAppContext::with_platform(
         gpui_kit::platform::current_platform(true).text_system(),
