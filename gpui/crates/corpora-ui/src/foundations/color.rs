@@ -8,7 +8,7 @@
 
 use gpui_kit::Hsla;
 use gpui_kit::component::{
-    amber, blue, emerald, fuchsia, indigo, neutral, oklch, red, violet, white, yellow, zinc,
+    amber, blue, emerald, fuchsia, indigo, neutral, oklch, orange, red, violet, white, yellow, zinc,
 };
 
 /// OKLCH color with an alpha channel, `oklch(l c h / alpha)` in CSS.
@@ -78,6 +78,10 @@ pub struct Palette {
     pub bubble_recipient_foreground: Hsla,
     /// The two ends of the ring around an avatar with live audio.
     pub audio_ring: [Hsla; 2],
+    /// The agent's own voice: its spark and the suggestions disclosure.
+    pub agent: Hsla,
+    /// Fill of the password strength meter at one to four requirements met.
+    pub strength: [Hsla; 4],
 }
 
 impl Palette {
@@ -126,6 +130,8 @@ impl Palette {
             bubble_recipient: neutral(100),
             bubble_recipient_foreground: oklch(0.145, 0., 0.),
             audio_ring: audio_ring(),
+            agent: violet(600),
+            strength: strength(),
         }
     }
 
@@ -174,6 +180,8 @@ impl Palette {
             bubble_recipient: neutral(800),
             bubble_recipient_foreground: oklch(0.985, 0., 0.),
             audio_ring: audio_ring(),
+            agent: violet(400),
+            strength: strength(),
         }
     }
 }
@@ -187,6 +195,11 @@ fn chart() -> [Hsla; 5] {
         oklch(0.491, 0.27, 292.581),
         oklch(0.432, 0.232, 292.759),
     ]
+}
+
+/// `bg-red-500` … `bg-emerald-500`, shared by both appearances.
+fn strength() -> [Hsla; 4] {
+    [red(500), orange(500), amber(500), emerald(500)]
 }
 
 /// `from-yellow-400 … to-violet-600`, shared by both appearances. The React

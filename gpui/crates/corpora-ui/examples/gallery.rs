@@ -10,6 +10,11 @@ use corpora_ui::atoms::{
     BubbleVariant, Button, Card, CardHeader, Chip, IconName, InputField, Kbd, Label, LabelLevel,
     Loader, Reference, SelectChip, Separator, Sizable as _, Skeleton, Spinner, Text,
 };
+use corpora_ui::composed::{
+    ActionBar, AiMessage, EmojiActionBar, Logo, PasswordInput, SendHint, SocialLayout,
+    SocialProviders, StreamToken, StreamingText, SuggestedPrompt, SuggestedPrompts, UserInfo,
+    UserMessage, UserPill,
+};
 use corpora_ui::foundations::{self, ActiveCorporaTheme as _, AtomSize, Radius};
 use gpui_kit::component::input::InputState;
 use gpui_kit::component::scroll::ScrollableElement as _;
@@ -94,6 +99,8 @@ struct Gallery {
     handle: Entity<InputState>,
     select_chip_open: bool,
     thumbs_up: bool,
+    password: Entity<InputState>,
+    logo_folded: bool,
 }
 
 impl Gallery {
@@ -103,6 +110,13 @@ impl Gallery {
             handle: cx.new(|cx| InputState::new(window, cx).default_value("ada lovelace")),
             select_chip_open: false,
             thumbs_up: true,
+            password: cx.new(|cx| {
+                InputState::new(window, cx)
+                    .masked(true)
+                    .placeholder("Enter your password")
+                    .default_value("Codex1")
+            }),
+            logo_folded: false,
         }
     }
 
@@ -266,6 +280,133 @@ impl Gallery {
                     .child(Text::label("Heading", LabelLevel::Heading))
                     .child(Text::label("Caption", LabelLevel::Caption)),
             )
+    }
+
+    fn render_people(&self, cx: &mut Context<Self>) -> impl IntoElement {
+        let grace = || AvatarUser::named("Grace", "Hopper").role("Editor");
+        Section::new("Composed: user and logo")
+            .child(
+                row()
+                    .gap_8()
+                    .child(UserInfo::new(grace()).description("Online now"))
+                    .child(
+                        UserInfo::new(AvatarUser::named("Ada", "Lovelace"))
+                            .description("2 min ago")
+                            .outgoing(true),
+                    )
+                    .child(UserPill::new("pill-grace", grace())),
+            )
+            .child(
+                row()
+                    .gap_8()
+                    .child(Logo::new("logo-monogram", "Corpora UI").folded(self.logo_folded))
+                    .child(
+                        Logo::new("logo-image", "Exegia")
+                            .src("images/owl-avatar.png")
+                            .folded(self.logo_folded),
+                    )
+                    .child(
+                        Button::new("fold-logos")
+                            .small()
+                            .label(if self.logo_folded {
+                                "Unfold logos"
+                            } else {
+                                "Fold logos"
+                            })
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                this.logo_folded = !this.logo_folded;
+                                cx.notify();
+                            })),
+                    ),
+            )
+    }
+
+    fn render_conversation(&self) -> impl IntoElement {
+        let mut answer = StreamToken::words("The longer reading appears in");
+        answer.push(StreamToken::Cite {
+            label: "Codex Bezae".into(),
+            href: None,
+            preview: Some("A fifth-century bilingual codex of the Gospels and Acts.".into()),
+        });
+        answer.extend(StreamToken::words(
+            "and the Old Latin. Most editors print the shorter text.",
+        ));
+
+        Section::new("Composed: conversation").child(
+            v_flex()
+                .w(rems(34.))
+                .child(
+                    UserMessage::new("thread-1", "Where does this reading come from?")
+                        .user(AvatarUser::named("Grace", "Hopper").role("Editor"))
+                        .description("2 min ago"),
+                )
+                .child(
+                    UserMessage::new("thread-2", "Asking the agent now.")
+                        .user(AvatarUser::named("Ada", "Lovelace"))
+                        .outgoing(true),
+                )
+                .child(
+                    AiMessage::new("thread-3")
+                        .child(StreamingText::new("thread-3-text", vec![answer]).streaming(true))
+                        .attachment(
+                            ActionBar::new("thread-3-actions")
+                                .action("copy", IconName::Copy, "Copy answer", |_, _, _| {})
+                                .separator()
+                                .action("delete", IconName::Delete, "Delete answer", |_, _, _| {}),
+                        ),
+                )
+                .child(
+                    v_flex()
+                        .gap_3()
+                        .child(
+                            SuggestedPrompts::new("suggestions")
+                                .child(SuggestedPrompt::new(
+                                    "prompt-witnesses",
+                                    "Which witnesses carry the longer reading?",
+                                ))
+                                .child(SuggestedPrompt::new(
+                                    "prompt-editors",
+                                    "Why do most editors print the shorter text?",
+                                ))
+                                .child(SuggestedPrompt::new(
+                                    "prompt-date",
+                                    "How old is Codex Bezae?",
+                                )),
+                        )
+                        .child(row().child(EmojiActionBar::new("reactions").on_more(|_, _, _| {})))
+                        .child(SendHint::new().compact(false))
+                        .child(SendHint::new()),
+                ),
+        )
+    }
+
+    fn render_sign_in(&self) -> impl IntoElement {
+        Section::new("Composed: sign-in").child(
+            row()
+                .items_start()
+                .gap_8()
+                .child(
+                    v_flex()
+                        .w(rems(18.))
+                        .gap_4()
+                        .child(SocialProviders::new("providers-stack"))
+                        .child(
+                            SocialProviders::new("providers-row")
+                                .layout(SocialLayout::Row)
+                                .providers([
+                                    corpora_ui::composed::SocialProvider::Google,
+                                    corpora_ui::composed::SocialProvider::Apple,
+                                    corpora_ui::composed::SocialProvider::Github,
+                                    corpora_ui::composed::SocialProvider::X,
+                                ]),
+                        ),
+                )
+                .child(
+                    div()
+                        .w(rems(18.))
+                        .child(PasswordInput::new(&self.password).show_strength(true)),
+                ),
+        )
     }
 
     fn render_colors(&self, cx: &App) -> impl IntoElement {
@@ -566,7 +707,10 @@ impl Render for Gallery {
                     .child(self.render_feedback())
                     .child(self.render_avatars())
                     .child(self.render_chat(cx))
-                    .child(self.render_fields(cx)),
+                    .child(self.render_fields(cx))
+                    .child(self.render_people(cx))
+                    .child(self.render_conversation())
+                    .child(self.render_sign_in()),
             )
     }
 }
@@ -591,7 +735,7 @@ fn snapshot(dir: &std::path::Path) {
     // Tall enough to show every section without scrolling.
     let bounds = Bounds {
         origin: Point::default(),
-        size: size(px(1000.), px(2400.)),
+        size: size(px(1000.), px(3500.)),
     };
     let mut cx = HeadlessAppContext::with_platform(
         gpui_kit::platform::current_platform(true).text_system(),

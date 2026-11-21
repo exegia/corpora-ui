@@ -43,6 +43,9 @@ pub struct AvatarUser {
     pub avatar_url: Option<SharedString>,
     pub verified: bool,
     pub status: Option<AvatarStatus>,
+    /// What the person does here, such as "Editor". Shown by
+    /// [`crate::composed::UserInfo`], not by the avatar.
+    pub role: Option<SharedString>,
 }
 
 impl AvatarUser {
@@ -66,6 +69,11 @@ impl AvatarUser {
 
     pub fn status(mut self, status: AvatarStatus) -> Self {
         self.status = Some(status);
+        self
+    }
+
+    pub fn role(mut self, role: impl Into<SharedString>) -> Self {
+        self.role = Some(role.into());
         self
     }
 

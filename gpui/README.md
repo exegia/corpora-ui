@@ -18,12 +18,13 @@ gpui/
 └── crates/corpora-ui/
     ├── src/
     │   ├── foundations/   # tokens: color, theme, radius, motion, shadow, size, typography
-    │   └── atoms/         # basic elements
+    │   ├── atoms/         # basic elements
+    │   └── composed/      # atoms assembled into one piece of interface
     ├── examples/gallery.rs
-    └── tests/atoms.rs
+    └── tests/         # atoms.rs, composed.rs
 ```
 
-`composed/` and `blocks/` will sit beside `atoms/` as they are ported.
+`blocks/` will sit beside `composed/` as it is ported.
 
 ## Usage
 
@@ -76,6 +77,36 @@ by hand. So the port has two halves:
 Not ported yet: `Texture`, the text-selection popovers, the `glass` button
 variant and the emoji picker behind a bubble's add-reaction button.
 
+### Composed
+
+| React | GPUI |
+| --- | --- |
+| `User.Info`, `User.Pill`, `User.Message` | `UserInfo`, `UserPill`, `UserMessage` |
+| `AI.Avatar`, `AI.Message` | `AiIdentity`, `AiMessage` |
+| `StreamingText` | `StreamingText`, `StreamToken` |
+| `SuggestedPrompt`, `SuggestedPrompts` | same names |
+| `ActionBar`, `EmojiActionBar` | same names |
+| `Logo` | `Logo` |
+| `PasswordInput` | `PasswordInput`, `password_strength` |
+| `SocialProviders` | `SocialProviders` |
+| `SendHint` | `SendHint` |
+
+```rust
+use corpora_ui::composed::{AiMessage, StreamingText, UserMessage};
+
+UserMessage::new("message-41", "Where does this reading come from?")
+    .user(AvatarUser::named("Grace", "Hopper").role("Editor"))
+    .description("2 min ago")
+
+AiMessage::new("message-42")
+    .child(StreamingText::from_text("message-42-text", [answer]).streaming(is_streaming))
+```
+
+Not ported yet: `Verse` (it needs the text-selection popovers), the research
+answer, the chat composer, attachments, markdown, charts, the flowchart,
+recommendation and insight cards, the tables, the reader, corpus navigation
+and the tree.
+
 ### Button
 
 `Button` is this crate's own atom. It wraps the stock button, which still
@@ -124,6 +155,24 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
   edge under the pointer. Both motions stop under reduced motion.
 
 ## Deliberate differences from React
+
+- **Composed components do not animate height.** GPUI cannot tween to an
+  intrinsic size, so the suggestions panel and the strength checklist appear
+  at once. A folded `Logo` fades its wordmark, then drops it from the layout.
+- **`SuggestedPrompts` is not tucked under a composer.** React pulls its
+  bottom edge behind the composer pill; that belongs to the composer, which is
+  not ported.
+- **`SocialProviders` draws every provider as an outline button.** React
+  fills Apple's black. The Apple and GitHub marks are Lucide's outlines, not
+  Remix's filled ones.
+- **`EmojiActionBar` is the quick row only.** "More emoji" calls your handler;
+  there is no full picker.
+- **`ActionBar` takes commands, not components**, and drops a separator that
+  has nothing on one side of it.
+- **`SendHint` shows the platform's keys**: ⌘↵ on macOS, Ctrl+Enter elsewhere.
+- **`StreamingText` fades words in without the blur**, and wraps word by
+  word, so a long citation chip moves to the next line whole.
+- **`PasswordInput` uses the stock show/hide toggle** and plays no sound.
 
 - **Register `corpora_ui::Assets`.** It serves GPUI Component's default icons
   plus the few the atoms add (`assets.rs`). With the stock asset source alone,

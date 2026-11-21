@@ -12,9 +12,9 @@ use gpui_kit::component::button::{Button as StockButton, ButtonRounded, ButtonVa
 use gpui_kit::component::{ActiveTheme as _, Disableable, Icon, Sizable, Size};
 use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
-    App, BoxShadow, ClickEvent, ElementId, Hsla, InteractiveElement as _, IntoElement, MouseButton,
-    ParentElement as _, Pixels, RenderOnce, SharedString, StatefulInteractiveElement as _,
-    Styled as _, Window, div, px, rems,
+    AnyElement, App, BoxShadow, ClickEvent, ElementId, Hsla, InteractiveElement as _, IntoElement,
+    MouseButton, ParentElement as _, Pixels, RenderOnce, SharedString,
+    StatefulInteractiveElement as _, Styled as _, Window, div, px, rems,
 };
 
 use crate::foundations::motion::{DURATION_FAST, DURATION_QUICK, EASE_OUT, SCALE_LARGE};
@@ -131,6 +131,9 @@ pub struct Button {
     label: Option<SharedString>,
     icon: Option<Icon>,
     trailing_icon: Option<Icon>,
+    start: Option<AnyElement>,
+    full_width: bool,
+    pill: bool,
     tooltip: Option<SharedString>,
     disabled: bool,
     loading: bool,
@@ -147,6 +150,9 @@ impl Button {
             label: None,
             icon: None,
             trailing_icon: None,
+            start: None,
+            full_width: false,
+            pill: false,
             tooltip: None,
             disabled: false,
             loading: false,
@@ -210,6 +216,27 @@ impl Button {
     /// It leans toward that edge under the pointer. Ignored without a label.
     pub fn trailing_icon(mut self, icon: impl Into<Icon>) -> Self {
         self.trailing_icon = Some(icon.into());
+        self
+    }
+
+    /// An element before the label in place of an icon, for a mark that is
+    /// not a one-color icon: an avatar, a brand logo.
+    pub fn start(mut self, start: impl IntoElement) -> Self {
+        self.start = Some(start.into_any_element());
+        self
+    }
+
+    /// Rounds a labelled button into a pill. An element given to
+    /// [`Self::start`] then sits against the leading edge, as the trailing
+    /// icon's well does against the other.
+    pub fn pill(mut self, pill: bool) -> Self {
+        self.pill = pill;
+        self
+    }
+
+    /// Stretches the button across its container.
+    pub fn full_width(mut self, full_width: bool) -> Self {
+        self.full_width = full_width;
         self
     }
 
@@ -322,14 +349,21 @@ impl RenderOnce for Button {
             }
         };
 
-        let radius = if icon_only { Radius::Full } else { Radius::Lg };
+        let radius = if icon_only || self.pill {
+            Radius::Full
+        } else {
+            Radius::Lg
+        };
+        let seated_start = self.pill && self.start.is_some() && !icon_only;
         let hover_emboss = self.kind.emboss(Emboss::Hover, cx);
         let stock = stock
             .rounded(ButtonRounded::Size(radius.resolve(cx)))
             .m(squeeze)
             .map(|this| {
                 if icon_only {
-                    this.size(height - squeeze * 2.)
+                    // A start element makes the stock button pad as if
+                    // labelled, which would squeeze the element.
+                    this.size(height - squeeze * 2.).px_0()
                 } else {
                     this.h(height - squeeze * 2.).px(padding - squeeze)
                 }
@@ -340,8 +374,18 @@ impl RenderOnce for Button {
                     .group(HOVER_GROUP)
                     .group_hover(HOVER_GROUP, |style| style.shadow(hover_emboss))
             })
+            .when(self.full_width, |this| this.flex_1())
+            .when(seated_start, |this| this.pl(padding / 4. - squeeze))
             .when_some(self.icon, |this, icon| this.icon(icon))
-            .when_some(self.label, |this, label| this.label(label))
+            .map(|this| match self.start {
+                // The stock button puts its label before its children, so a
+                // label that follows a start element is a child too.
+                Some(start) => this
+                    .gap_2()
+                    .child(div().flex().flex_none().child(start))
+                    .when_some(self.label, |this, label| this.child(label)),
+                None => this.when_some(self.label, |this, label| this.label(label)),
+            })
             .when_some(trailing_icon, |this, icon| {
                 let ink = self.kind.foreground(cx);
                 // The well sits as far from the trailing edge as from the top
@@ -395,7 +439,13 @@ impl RenderOnce for Button {
         div()
             .id(frame_id)
             .flex()
-            .flex_none()
+            .map(|this| {
+                if self.full_width {
+                    this.w_full()
+                } else {
+                    this.flex_none()
+                }
+            })
             .on_hover(move |hovered, _, cx| {
                 let hovered = *hovered;
                 interaction.update(cx, |interaction, cx| {

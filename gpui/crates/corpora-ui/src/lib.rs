@@ -21,6 +21,7 @@
 
 mod assets;
 pub mod atoms;
+pub mod composed;
 pub mod foundations;
 
 pub use assets::Assets;
