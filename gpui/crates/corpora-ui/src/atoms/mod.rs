@@ -43,6 +43,8 @@ mod reference;
 mod reveal;
 mod scaled;
 mod text;
+mod text_selection;
+mod texture;
 
 pub use avatar::{Avatar, AvatarAudio, AvatarStatus, AvatarUser};
 pub use badge::{Badge, BadgeAppearance, BadgeVariant};
@@ -60,6 +62,9 @@ pub use loader::{Loader, LoaderKind};
 pub use reference::Reference;
 pub use reveal::Reveal;
 pub use text::{LabelLevel, Text, TextSize, TextVariant};
+pub(crate) use text_selection::floating;
+pub use text_selection::{TextPopover, TextSelection};
+pub use texture::{Texture, TextureVariant};
 
 pub use gpui_kit::component::kbd::Kbd;
 pub use gpui_kit::component::label::Label;

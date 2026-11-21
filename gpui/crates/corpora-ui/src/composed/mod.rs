@@ -13,14 +13,19 @@
 //! | `PasswordInput` | [`PasswordInput`] |
 //! | `SocialProviders` | [`SocialProviders`] |
 //! | `SendHint` | [`SendHint`] |
+//! | `SelectionPopover` | [`SelectionCard`], inside a popover |
+//! | `SelectionHighlight`, `AppliedMark`, `ApplyToast` | [`SelectionHighlight`], [`AppliedMark`], [`ApplyToast`] |
+//! | `Verse`, `VerseSpan`, `VerseNote` | [`Verse`] and its `span` and `note` |
 
 mod action_bar;
 mod ai;
 mod hint;
 mod logo;
 mod password;
+mod reader;
 mod social;
 mod user;
+mod verse;
 
 pub use action_bar::{ActionBar, EmojiActionBar, ReactionPicker, quick_reactions};
 pub use ai::{
@@ -30,5 +35,10 @@ pub use ai::{
 pub use hint::SendHint;
 pub use logo::Logo;
 pub use password::{PASSWORD_REQUIREMENTS, PasswordInput, PasswordRequirement, password_strength};
+pub use reader::{
+    AppliedMark, ApplyToast, NodeSelection, ReaderSelection, SelectionCard, SelectionHighlight,
+    WordSelection,
+};
 pub use social::{SocialAction, SocialLayout, SocialProvider, SocialProviders};
 pub use user::{UserInfo, UserMessage, UserPill};
+pub use verse::Verse;

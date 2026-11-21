@@ -911,6 +911,146 @@ impl Gallery {
             .child(self.glass.clone())
     }
 
+    fn render_reading(&self, cx: &App) -> impl IntoElement {
+        use corpora_ui::atoms::{TextPopover, TextSelection, Texture, TextureVariant};
+        use corpora_ui::composed::{
+            AppliedMark, ApplyToast, NodeSelection, ReaderSelection, SelectionCard,
+            SelectionHighlight, Verse, WordSelection,
+        };
+        use gpui_kit::component::text::TextView;
+
+        let gloss = |text: &'static str| {
+            move |_: &mut Window, _: &mut App| Text::new(text).small().into_any_element()
+        };
+        let passage = v_flex()
+            .gap_2()
+            .p_6()
+            .max_w_128()
+            .child(
+                Verse::new("john-1-1")
+                    .chapter_popover("1:1", gloss("John, chapter 1, verse 1"))
+                    .text("In the beginning was ")
+                    .span("the Word", |_, _| {
+                        SelectionCard::new(
+                            "logos",
+                            ReaderSelection::Word(WordSelection {
+                                lemma: "λόγος".into(),
+                                part_of_speech: Some("noun".into()),
+                                frequency: Some(330),
+                            }),
+                        )
+                        .on_view_details(|_, _, _| {})
+                        .on_add_to_chat(|_, _, _| {})
+                        .into_any_element()
+                    })
+                    .text(", and the Word was with God")
+                    .note("a", gloss("Or: face to face with God"))
+                    .text(", and the Word was God."),
+            )
+            .child(
+                Verse::new("john-1-2")
+                    .chapter("1:2")
+                    .text("The same was in the beginning with God."),
+            )
+            .child(
+                Verse::new("john-1-3")
+                    .chapter("1:3")
+                    .text("All things were made by him; and without him was not ")
+                    .span("any thing", gloss("οὐδὲ ἕν: not even one thing"))
+                    .text(" made that was made."),
+            );
+
+        Section::new("Composed: reading")
+            .child(
+                row()
+                    .items_start()
+                    .gap_6()
+                    .children(
+                        [TextureVariant::Fabric, TextureVariant::Paper].map(|variant| {
+                            div()
+                                .w(rems(14.))
+                                .h(rems(8.))
+                                .rounded(Radius::Lg.resolve(cx))
+                                .border_1()
+                                .border_color(cx.theme().border)
+                                .overflow_hidden()
+                                .child(Texture::new().with_variant(variant).child(
+                                    div().p_4().child(Text::new(match variant {
+                                        TextureVariant::Fabric => "Fabric",
+                                        TextureVariant::Paper => "Paper",
+                                    })),
+                                ))
+                        }),
+                    )
+                    .child(
+                        TextPopover::new("gloss-logos", "Click for a gloss")
+                            .text_sm()
+                            .content(gloss("A popover that opens where the text was clicked.")),
+                    ),
+            )
+            .child(
+                div()
+                    .rounded(Radius::Lg.resolve(cx))
+                    .border_1()
+                    .border_color(cx.theme().border)
+                    .overflow_hidden()
+                    .child(
+                        Texture::new()
+                            .with_variant(TextureVariant::Paper)
+                            .child(passage),
+                    ),
+            )
+            .child(
+                row()
+                    .items_start()
+                    .gap_8()
+                    .child(
+                        div().w(rems(16.)).child(
+                            SelectionCard::new(
+                                "node-card",
+                                ReaderSelection::Node(NodeSelection {
+                                    range: "John 1:1–3".into(),
+                                    node_ids: vec!["v1".into(), "v2".into(), "v3".into()],
+                                    word_count: 52,
+                                }),
+                            )
+                            .on_add_to_chat(|_, _, _| {})
+                            .on_close(|_, _, _| {}),
+                        ),
+                    )
+                    .child(
+                        v_flex()
+                            .gap_3()
+                            .pl_4()
+                            .child(SelectionHighlight::new().child("the Word was with God"))
+                            .child(AppliedMark::new().child("and the Word was God"))
+                            .child(
+                                div()
+                                    .w(rems(26.))
+                                    .child(ApplyToast::new("apply-toast").on_undo(|_, _, _| {})),
+                            ),
+                    ),
+            )
+            .child(
+                TextSelection::new("selection-demo")
+                    .child(
+                        div().max_w_128().child(
+                            TextView::markdown(
+                                "selection-text",
+                                "Select any part of this sentence and a popover opens over \
+                                 the selection with what was selected.",
+                            )
+                            .selectable(true),
+                        ),
+                    )
+                    .popover(|selection, _, _| {
+                        Text::new(format!("Selected: {selection}"))
+                            .small()
+                            .into_any_element()
+                    }),
+            )
+    }
+
     fn render_text(&self) -> impl IntoElement {
         Section::new("Text")
             .child(Text::heading("Corpora"))
@@ -973,6 +1113,7 @@ impl Render for Gallery {
             Page::Composed => sections
                 .child(self.render_people(cx))
                 .child(self.render_conversation(cx))
+                .child(self.render_reading(cx))
                 .child(self.render_sign_in()),
             Page::Glass => sections.child(self.render_glass(cx)),
         };

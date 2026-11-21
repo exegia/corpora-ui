@@ -461,3 +461,55 @@ fn a_group_filter_scrolls_the_picker_to_that_group(cx: &mut TestAppContext) {
     assert_eq!(picked.borrow().len(), 1, "one emoji picked");
     assert_eq!(picked.borrow()[0].label, "waving hand");
 }
+
+struct GlossHost;
+
+impl Render for GlossHost {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        div()
+            .size_full()
+            .p(px(200.))
+            .child(div().id("gloss-trigger").test_support().child(
+                corpora_ui::atoms::TextPopover::new("gloss", "the Word").content(|_, _| {
+                    div()
+                        .id("gloss-content")
+                        .test_support()
+                        .child("word, reason")
+                        .into_any_element()
+                }),
+            ))
+    }
+}
+
+#[gpui_kit::test]
+fn clicked_text_opens_its_popover_and_escape_closes_it(cx: &mut TestAppContext) {
+    cx.update(corpora_ui::init);
+    let window = open(cx, |_, cx| cx.new(|_| GlossHost));
+    let trigger = cx
+        .update_window(window, |_, window, cx| {
+            window.render_frame(cx);
+            window.find("gloss-trigger").bounds()
+        })
+        .expect("window is open");
+
+    let mut visual = VisualTestContext::from_window(window, cx);
+    visual.simulate_mouse_move(trigger.center(), None, Modifiers::none());
+    visual.simulate_click(trigger.center(), Modifiers::none());
+    visual.run_until_parked();
+    let content = visual.update(|window, cx| {
+        window.render_frame(cx);
+        window.find("gloss-content").bounds()
+    });
+    assert!(
+        content.bottom() <= trigger.top(),
+        "the popover floats above the clicked text: {content:?} over {trigger:?}"
+    );
+
+    visual.simulate_keystrokes("escape");
+    visual.run_until_parked();
+    let still_open = visual.update(|window, cx| {
+        window.render_frame(cx);
+        window.try_find("gloss-content").is_some()
+    });
+    assert!(!still_open, "Escape closes the popover");
+}

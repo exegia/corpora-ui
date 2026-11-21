@@ -14,6 +14,9 @@ gpui_kit::assets::icon_assets!(AtomIcons, [Cone]);
 
 /// Path of the Exegia agent's portrait.
 pub(crate) const OWL_AVATAR: &str = "images/owl-avatar.png";
+/// Paths of the page materials [`crate::atoms::Texture`] tiles.
+pub(crate) const FABRIC_TEXTURE: &str = "images/fabric.png";
+pub(crate) const PAPER_TEXTURE: &str = "images/paper.png";
 /// Path of Google's four-color mark. Drawn as an image, not an icon, so it
 /// keeps its colors.
 pub(crate) const GOOGLE_MARK: &str = "brands/google.svg";
@@ -24,6 +27,8 @@ pub(crate) const X_MARK: &str = "brands/x.svg";
 fn embedded(path: &str) -> Option<&'static [u8]> {
     match path {
         OWL_AVATAR => Some(include_bytes!("../assets/images/owl-avatar.png")),
+        FABRIC_TEXTURE => Some(include_bytes!("../assets/images/fabric.png")),
+        PAPER_TEXTURE => Some(include_bytes!("../assets/images/paper.png")),
         GOOGLE_MARK => Some(include_bytes!("../assets/brands/google.svg")),
         X_MARK => Some(include_bytes!("../assets/brands/x.svg")),
         _ => None,

@@ -77,12 +77,13 @@ by hand. So the port has two halves:
 | `InputField` | `InputField` | this crate, on the stock input |
 | `SourceChip`, `SelectChip` | `Chip`, `SelectChip` | this crate, on the stock dropdown menu |
 | `EmojiPicker` | `EmojiPicker`, `EmojiPickerState`, `Emoji` | this crate, data from the `emojis` crate |
+| `Texture` | `Texture`, `TextureVariant` | this crate |
+| `TextSelection`, `TextClickPopover` | `TextSelection`, `TextPopover` | this crate, on GPUI Base's window text selection |
 | (height transitions) | `Reveal` | this crate, on GPUI Base's `MotionReveal` |
 | liquid glass surfaces | `GlassSpec`, `GlassEdges`, `GlassSurfaceExt`, `glass` | this crate, on the patched GPUI in `vendor/` |
 | `Label` (form), `Kbd`, `Separator`, `Skeleton`, `Spinner` | same names | GPUI Component |
 
-Not ported yet: `Texture`, the text-selection popovers and the `glass` button
-variant.
+Not ported yet: the `glass` button variant.
 
 ### Composed
 
@@ -110,10 +111,9 @@ AiMessage::new("message-42")
     .child(StreamingText::from_text("message-42-text", [answer]).streaming(is_streaming))
 ```
 
-Not ported yet: `Verse` (it needs the text-selection popovers), the research
-answer, the chat composer, attachments, markdown, charts, the flowchart,
-recommendation and insight cards, the tables, the reader, corpus navigation
-and the tree.
+Not ported yet: the research answer, the chat composer, attachments,
+markdown, charts, the flowchart, recommendation and insight cards, the
+tables, corpus navigation and the tree.
 
 ### Button
 
@@ -201,6 +201,21 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
   language and `IconName` keeps working. To add or remap an icon, edit the
   table in `scripts/reicon.mjs` and run it. A name Reicon does not draw
   (`cone`, the window controls, a few others) still gets Lucide's.
+- **A verse is one run of text.** `Verse` takes its reference, words, glosses
+  and notes as segments and lays them out as a single wrapped paragraph, so
+  React's `VerseSpan` and `VerseNote` are its `span` and `note` builders. GPUI
+  sets one type size per paragraph: the reference and the note marks are told
+  apart by color and weight, not by a raised, smaller size, and a gloss has a
+  solid underline, not a dotted one.
+- **Text popovers open at the pointer.** `TextSelection`, `TextPopover` and a
+  verse's popovers float above the point that was clicked or where the
+  selection ended, on frosted glass. They take the focus, and close on a press
+  outside or on Escape. `TextSelection` reads the window's text selection, so
+  its children must hold selectable text (`TextView::…selectable(true)`).
+- **The reader's selection card is content, not a popover.** React's
+  `SelectionPopover` is a hover card around its trigger; `SelectionCard` goes
+  inside whichever popover the reader opens. Its `⌘J` is shown as a hint: bind
+  the shortcut in the application.
 - **A glass rim is set side by side.** `GlassSpec::edges` takes a
   `GlassEdges`: `all` for an even rim, then `x` (left and right), `y` (top
   and bottom) or a single side, each with a width and a brightness. Corners
