@@ -4,6 +4,7 @@
 # CI calls these targets directly; every workflow step is a one-line `make`.
 
 REACT_DIR := react
+GPUI_DIR := gpui
 BUN := bun
 
 # `--frozen-lockfile` in CI, a plain install locally.
@@ -38,7 +39,7 @@ pkg_name = node -p "require('./$(REACT_DIR)/package.json').name"
 .DEFAULT_GOAL := help
 
 .PHONY: help install serve build preview test typecheck lint format check ci pack consumer-check \
-        clean distclean pkg-version next-version version-set release-notes \
+        gpui-gallery clean distclean pkg-version next-version version-set release-notes \
         pr-guard pr-types-sync release-pr release-branch delete-branch publish publish-github \
         tag-release rulesets-apply rulesets-diff \
         churn-info churn-bump bootstrap-lanes promote-pr cut-release \
@@ -85,6 +86,11 @@ clean: ## Remove build output and caches
 
 distclean: clean ## Also remove node_modules
 	rm -rf $(REACT_DIR)/node_modules
+
+# --- gpui -------------------------------------------------------------------
+
+gpui-gallery: ## Open the GPUI component gallery window
+	cd $(GPUI_DIR) && cargo run -p corpora-ui --example gallery
 
 # --- versions ---------------------------------------------------------------
 

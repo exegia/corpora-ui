@@ -3,6 +3,9 @@
 Repo root holds only tooling (Makefile, CI, docs). The app/library lives in
 `react/` — see `react/CLAUDE.md` and `react/ARCHITECTURE.md`.
 
+`gpui/` is the GPUI (Rust) port of the same library, a Cargo workspace built on
+`gpui-kit` — see `gpui/README.md`. Run cargo from `gpui/`.
+
 ## Dependencies
 
 Install node libraries ONLY in `react/` — never at the repo root. The root
