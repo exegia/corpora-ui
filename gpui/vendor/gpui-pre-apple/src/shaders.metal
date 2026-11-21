@@ -1414,8 +1414,18 @@ fragment float4 backdrop_blur_fragment(
   }
   float3 color = saturated(lensed, saturation) * gain + tint.rgb * tint.a;
 
-  // The lit rim, even the whole way round.
-  color += (1. - smoothstep(0., blur.edge_width, -distance)) * blur.edge;
+  // The lit rim. Each side states its own brightness and width; the outward
+  // normal picks the side, and a corner blends the two it joins.
+  float2 facing = outward * outward;
+  float edge =
+      (outward.x < 0. ? blur.edge.left : blur.edge.right) * facing.x +
+      (outward.y < 0. ? blur.edge.top : blur.edge.bottom) * facing.y;
+  float edge_width =
+      (outward.x < 0. ? blur.edge_width.left : blur.edge_width.right) *
+          facing.x +
+      (outward.y < 0. ? blur.edge_width.top : blur.edge_width.bottom) *
+          facing.y;
+  color += (1. - smoothstep(0., max(edge_width, 1e-3), -distance)) * edge;
 
   // The coverage the lens carries is the one it bent into place, so the band
   // hands the window the same transparency the flat interior does.

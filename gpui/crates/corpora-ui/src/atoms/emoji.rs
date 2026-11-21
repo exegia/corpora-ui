@@ -1,23 +1,33 @@
 //! EmojiPicker: `react/src/components/ui/emoji-picker.tsx`.
 
+use std::cell::Cell;
 use std::collections::HashSet;
 use std::ops::Range;
 use std::rc::Rc;
+use std::time::Duration;
 
 use gpui_kit::component::input::{Input, InputEvent, InputState};
 use gpui_kit::component::{ActiveTheme as _, Icon, IconName, Sizable as _, StyledExt as _, h_flex};
+use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
     AnyElement, App, AppContext as _, Context, Entity, Hsla, InteractiveElement as _, IntoElement,
     ParentElement as _, RenderOnce, SharedString, StatefulInteractiveElement as _, Styled as _,
-    Subscription, TextRun, Window, div, rems, uniform_list,
+    Subscription, Task, TextRun, UniformListScrollHandle, Window, div, point, px, rems,
+    uniform_list,
 };
 
-use crate::foundations::Radius;
+use super::{Button, GlassSpec, GlassSurfaceExt as _};
+use crate::foundations::{AtomSize, Radius};
 
 /// Emoji per row of the grid.
 const COLUMNS: usize = 9;
 /// Side of one emoji cell, and the height of every row, in rems.
 const CELL: f32 = 2.;
+/// Rows of the list the floating header covers: the search field and the
+/// group filters.
+const HEADER_ROWS: usize = 2;
+/// Frames a jump to a group takes.
+const SCROLL_FRAMES: u32 = 14;
 /// Height of the whole picker, in rems.
 const HEIGHT: f32 = 20.375;
 /// Width of the whole picker, in rems: the grid and its side insets.
@@ -69,11 +79,26 @@ fn group_label(group: emojis::Group) -> &'static str {
     }
 }
 
+/// The emoji that stands for a group on its filter.
+fn group_icon(group: emojis::Group) -> &'static str {
+    match group {
+        emojis::Group::SmileysAndEmotion => "😀",
+        emojis::Group::PeopleAndBody => "👋",
+        emojis::Group::AnimalsAndNature => "🐻",
+        emojis::Group::FoodAndDrink => "🍔",
+        emojis::Group::TravelAndPlaces => "🚗",
+        emojis::Group::Activities => "⚽",
+        emojis::Group::Objects => "💡",
+        emojis::Group::Symbols => "🔣",
+        emojis::Group::Flags => "🏁",
+    }
+}
+
 /// One line of the picker's list. Every line is the same height, so the list
 /// can skip the ones out of view.
 #[derive(Clone, Debug, PartialEq)]
 enum Row {
-    Header(&'static str),
+    Header(emojis::Group),
     Emojis(Vec<&'static emojis::Emoji>),
 }
 
@@ -132,7 +157,7 @@ fn rows(query: &str, missing: &Missing) -> Vec<Row> {
         if found.is_empty() {
             continue;
         }
-        rows.push(Row::Header(group_label(group)));
+        rows.push(Row::Header(group));
         rows.extend(
             found
                 .chunks(COLUMNS)
@@ -155,9 +180,16 @@ pub struct EmojiPickerState {
     rows: Rc<Vec<Row>>,
     missing: Rc<Missing>,
     active: Option<Emoji>,
+    scroll: UniformListScrollHandle,
+    /// The jump to a group in progress.
+    scrolling: Option<Task<()>>,
     /// Whether an [`crate::composed::EmojiActionBar`] bound to this state
     /// shows the full picker in place of its quick row.
     expanded: bool,
+    /// The width of a bound action bar's quick row, in rems, with the
+    /// number of commands it was measured for. The bar grows from this
+    /// width to the picker's.
+    pub(crate) row_width: Rc<Cell<Option<(usize, f32)>>>,
     _search_changed: Subscription,
 }
 
@@ -168,6 +200,7 @@ impl EmojiPickerState {
             if matches!(event, InputEvent::Change) {
                 this.rows = Rc::new(rows(&search.read(cx).value(), &this.missing));
                 this.active = None;
+                this.scroll_to_top();
                 cx.notify();
             }
         });
@@ -177,7 +210,10 @@ impl EmojiPickerState {
             rows: Rc::new(rows("", &missing)),
             missing,
             active: None,
+            scroll: UniformListScrollHandle::new(),
+            scrolling: None,
             expanded: false,
+            row_width: Rc::default(),
             _search_changed: search_changed,
         }
     }
@@ -203,7 +239,48 @@ impl EmojiPickerState {
         self.rows = Rc::new(rows("", &self.missing));
         self.active = None;
         self.expanded = false;
+        self.scroll_to_top();
         cx.notify();
+    }
+
+    fn scroll_to_top(&mut self) {
+        self.scrolling = None;
+        self.scroll
+            .0
+            .borrow()
+            .base_handle
+            .set_offset(point(px(0.), px(0.)));
+    }
+
+    /// Scrolls the list until a group's label sits just under the header.
+    /// Does nothing if the search has left the group out.
+    pub fn scroll_to_group(
+        &mut self,
+        group: emojis::Group,
+        window: &Window,
+        cx: &mut Context<Self>,
+    ) {
+        let Some(row) = self.rows.iter().position(|row| *row == Row::Header(group)) else {
+            return;
+        };
+        let list = self.scroll.0.borrow().base_handle.clone();
+        let from = list.offset().y;
+        // The list opens with one blank row per header row, so the row that
+        // follows them is at rest with no scroll at all.
+        let to = (-(window.rem_size() * CELL * row as f32)).max(-list.max_offset().y);
+        self.scrolling = Some(cx.spawn(async move |this, cx| {
+            for frame in 1..=SCROLL_FRAMES {
+                cx.background_executor()
+                    .timer(Duration::from_millis(16))
+                    .await;
+                let progress = frame as f32 / SCROLL_FRAMES as f32;
+                let eased = 1. - (1. - progress).powi(3);
+                list.set_offset(point(px(0.), from + (to - from) * eased));
+                if this.update(cx, |_, cx| cx.notify()).is_err() {
+                    break;
+                }
+            }
+        }));
     }
 
     fn set_active(&mut self, active: Option<Emoji>, cx: &mut Context<Self>) {
@@ -253,20 +330,101 @@ impl EmojiPicker {
 }
 
 impl RenderOnce for EmojiPicker {
-    fn render(self, _: &mut Window, cx: &mut App) -> impl IntoElement {
+    fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
         let theme = cx.theme();
-        let (search, rows, active) = {
+        let (search, rows, active, scroll) = {
             let state = self.state.read(cx);
             (
                 state.search.clone(),
                 state.rows.clone(),
                 state.active.clone(),
+                state.scroll.clone(),
             )
         };
         let accent = theme.accent;
         let muted = theme.muted_foreground;
         let header_ink = theme.secondary_foreground;
+        let border = theme.border;
+        // Over the frosted header the accent fill is too faint to read.
+        let marker = theme.foreground.opacity(0.12);
         let radius = Radius::Sm.resolve(cx);
+
+        // The group at the top of the list, just under the header.
+        let scrolled = -scroll.0.borrow().base_handle.offset().y / (window.rem_size() * CELL);
+        let top_row = scrolled.round().max(0.) as usize;
+        let current = rows
+            .iter()
+            .take(top_row + 1)
+            .rev()
+            .find_map(|row| match row {
+                Row::Header(group) => Some(*group),
+                Row::Emojis(_) => None,
+            });
+
+        let filters =
+            h_flex()
+                .h(rems(CELL))
+                .px_2()
+                .children(emojis::Group::iter().enumerate().map(|(index, group)| {
+                    let state = self.state.clone();
+                    // Marks the group in view.
+                    let marked = current == Some(group);
+                    div()
+                        .flex()
+                        .flex_none()
+                        .items_center()
+                        .justify_center()
+                        .size(rems(CELL))
+                        .rounded(radius)
+                        .when(marked, |this| this.bg(marker))
+                        .child(
+                            Button::new(("emoji-group", index))
+                                .ghost()
+                                .with_atom_size(AtomSize::Xs)
+                                .start(div().text_sm().child(group_icon(group)))
+                                .tooltip(group_label(group))
+                                .disabled(!rows.contains(&Row::Header(group)))
+                                .on_click(move |_, window, cx| {
+                                    state.update(cx, |state, cx| {
+                                        state.scroll_to_group(group, window, cx);
+                                    });
+                                }),
+                        )
+                }));
+
+        // The header floats over the list, which scrolls underneath it and
+        // shows through, blurred.
+        let header = div()
+            .absolute()
+            .top_0()
+            .left_0()
+            .right_0()
+            .h(rems(CELL * HEADER_ROWS as f32))
+            .flex()
+            .flex_col()
+            .rounded_t(Radius::Lg.resolve(cx))
+            .border_b_1()
+            .border_color(border)
+            // Rows under the header take no clicks, but the wheel still
+            // reaches the list.
+            .block_mouse_except_scroll()
+            .child(
+                h_flex()
+                    .h(rems(CELL))
+                    .flex_none()
+                    .gap_1()
+                    .px_1()
+                    .child(
+                        div().flex_1().min_w_0().child(
+                            Input::new(&search)
+                                .appearance(false)
+                                .prefix(Icon::new(IconName::Search).small().text_color(muted)),
+                        ),
+                    )
+                    .children(self.action),
+            )
+            .child(filters)
+            .glass_with(GlassSpec::scrim(cx));
 
         let list = if rows.is_empty() {
             div()
@@ -274,6 +432,7 @@ impl RenderOnce for EmojiPicker {
                 .flex()
                 .items_center()
                 .justify_center()
+                .pt(rems(CELL * HEADER_ROWS as f32))
                 .text_sm()
                 .text_color(muted)
                 .child("No emoji found.")
@@ -283,59 +442,68 @@ impl RenderOnce for EmojiPicker {
             let on_select = self.on_select.clone();
             uniform_list(
                 "emoji-picker-rows",
-                rows.len(),
+                rows.len() + HEADER_ROWS,
                 move |range: Range<usize>, _, _| {
                     range
-                        .map(|index| match &rows[index] {
-                            Row::Header(label) => h_flex()
-                                .h(rems(CELL))
-                                .px_1()
-                                .text_xs()
-                                .font_medium()
-                                .text_color(header_ink)
-                                .child(*label),
-                            Row::Emojis(emojis) => {
-                                h_flex().h(rems(CELL)).children(emojis.iter().map(|&emoji| {
-                                    let state = state.clone();
-                                    let on_select = on_select.clone();
-                                    let hovered = state.clone();
-                                    div()
-                                        .id(emoji.as_str())
-                                        .flex()
-                                        .flex_none()
-                                        .items_center()
-                                        .justify_center()
-                                        .size(rems(CELL))
-                                        .rounded(radius)
-                                        .cursor_pointer()
-                                        .text_xl()
-                                        .hover(move |style| style.bg(accent))
-                                        .child(emoji.as_str())
-                                        .on_hover(move |is_hovered, _, cx| {
-                                            let active = is_hovered.then(|| Emoji::from(emoji));
-                                            hovered.update(cx, |state, cx| {
-                                                // Leaving one cell must not clear
-                                                // the cell just entered.
-                                                if active.is_some()
-                                                    || state.active.as_ref()
-                                                        == Some(&Emoji::from(emoji))
-                                                {
-                                                    state.set_active(active, cx);
+                        .map(|index| {
+                            // The first rows are blank: they lie under the
+                            // header while the list is at rest.
+                            let row = index.checked_sub(HEADER_ROWS).map(|index| &rows[index]);
+                            match row {
+                                None => div().h(rems(CELL)),
+                                Some(Row::Header(group)) => h_flex()
+                                    .h(rems(CELL))
+                                    .px_1()
+                                    .text_xs()
+                                    .font_medium()
+                                    .text_color(header_ink)
+                                    .child(group_label(*group)),
+                                Some(Row::Emojis(emojis)) => {
+                                    h_flex().h(rems(CELL)).children(emojis.iter().map(|&emoji| {
+                                        let state = state.clone();
+                                        let on_select = on_select.clone();
+                                        let hovered = state.clone();
+                                        div()
+                                            .id(emoji.as_str())
+                                            .flex()
+                                            .flex_none()
+                                            .items_center()
+                                            .justify_center()
+                                            .size(rems(CELL))
+                                            .rounded(radius)
+                                            .cursor_pointer()
+                                            .text_xl()
+                                            .hover(move |style| style.bg(accent))
+                                            .child(emoji.as_str())
+                                            .on_hover(move |is_hovered, _, cx| {
+                                                let active = is_hovered.then(|| Emoji::from(emoji));
+                                                hovered.update(cx, |state, cx| {
+                                                    // Leaving one cell must not
+                                                    // clear the cell just entered.
+                                                    if active.is_some()
+                                                        || state.active.as_ref()
+                                                            == Some(&Emoji::from(emoji))
+                                                    {
+                                                        state.set_active(active, cx);
+                                                    }
+                                                });
+                                            })
+                                            .on_click(move |_, window, cx| {
+                                                if let Some(on_select) = &on_select {
+                                                    on_select(&Emoji::from(emoji), window, cx);
                                                 }
-                                            });
-                                        })
-                                        .on_click(move |_, window, cx| {
-                                            if let Some(on_select) = &on_select {
-                                                on_select(&Emoji::from(emoji), window, cx);
-                                            }
-                                            state.update(cx, |state, cx| state.reset(window, cx));
-                                        })
-                                }))
+                                                state.update(cx, |state, cx| {
+                                                    state.reset(window, cx)
+                                                });
+                                            })
+                                    }))
+                                }
                             }
                         })
                         .collect::<Vec<_>>()
                 },
             )
+            .track_scroll(&scroll)
             .flex_1()
             .into_any_element()
         };
@@ -369,25 +537,14 @@ impl RenderOnce for EmojiPicker {
         };
 
         div()
+            .relative()
             .flex()
             .flex_col()
             .w(rems(WIDTH))
             .h(rems(HEIGHT))
-            .text_color(theme.popover_foreground)
-            .child(
-                h_flex()
-                    .gap_1()
-                    .px_1()
-                    .pb_1()
-                    .child(
-                        div().flex_1().min_w_0().child(
-                            Input::new(&search)
-                                .appearance(false)
-                                .prefix(Icon::new(IconName::Search).small().text_color(muted)),
-                        ),
-                    )
-                    .children(self.action),
-            )
+            .text_color(cx.theme().popover_foreground)
+            // The wheel scrolls the list, not whatever the picker floats over.
+            .occlude()
             .child(
                 div()
                     .flex_1()
@@ -397,13 +554,8 @@ impl RenderOnce for EmojiPicker {
                     .px_2()
                     .child(list),
             )
-            .child(
-                div()
-                    .p_2()
-                    .border_t_1()
-                    .border_color(theme.border)
-                    .child(footer),
-            )
+            .child(div().p_2().border_t_1().border_color(border).child(footer))
+            .child(header)
     }
 }
 
@@ -423,7 +575,7 @@ mod tests {
     #[test]
     fn an_empty_query_lists_every_group_under_its_header() {
         let rows = rows("", &Missing::new());
-        assert_eq!(rows[0], Row::Header("Smileys & emotion"));
+        assert_eq!(rows[0], Row::Header(emojis::Group::SmileysAndEmotion));
         let headers = rows
             .iter()
             .filter(|row| matches!(row, Row::Header(_)))
@@ -442,7 +594,7 @@ mod tests {
         let all = Missing::new();
         let found = rows("  Thumbs UP ", &all);
         assert!(count(&found) >= 1);
-        assert_eq!(found[0], Row::Header("People & body"));
+        assert_eq!(found[0], Row::Header(emojis::Group::PeopleAndBody));
         // "tada" is only a shortcode of the party popper.
         assert!(count(&rows("tada", &all)) >= 1);
         assert!(rows("no such emoji at all", &all).is_empty());

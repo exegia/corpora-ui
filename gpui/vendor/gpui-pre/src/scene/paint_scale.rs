@@ -88,7 +88,10 @@ impl PaintScale {
         blur.blur_radius *= self.factor;
         blur.lens *= self.factor;
         blur.reach *= self.factor;
-        blur.edge_width *= self.factor;
+        blur.edge_width.top *= self.factor;
+        blur.edge_width.right *= self.factor;
+        blur.edge_width.bottom *= self.factor;
+        blur.edge_width.left *= self.factor;
         blur.edge_aa *= self.factor;
     }
 

@@ -17,6 +17,8 @@ moved to 0.3.12. Only these files differ from the published packages:
   Gaussian kernel and the glass draw. Rewritten against `objc2-metal`, which
   0.3.12 uses in place of the `metal` crate.
 - `gpui-pre-apple/src/shaders.metal`: Bezel's rounded lens, dispersion and rim.
+  The rim's brightness and width are per side here (`GlassEffect::edge` and
+  `edge_width` are `Edges`); upstream has one value for the whole outline.
 - `gpui-pre-apple/build.rs`: shader bindings are generated from the sibling
   `gpui-pre`, not from the copy the published crate embeds (omitted here).
 

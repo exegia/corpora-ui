@@ -841,7 +841,7 @@ impl Gallery {
     }
 
     fn render_glass(&self, cx: &App) -> impl IntoElement {
-        use corpora_ui::atoms::{GlassSpec, GlassSurfaceExt as _};
+        use corpora_ui::atoms::{GlassEdge, GlassEdges, GlassSpec, GlassSurfaceExt as _};
 
         let [first, second, third, ..] = cx.palette().chart;
         let pane = |label: &'static str| {
@@ -890,7 +890,22 @@ impl Gallery {
                             .child(pane("Blur").glass_with(GlassSpec::blur()))
                             .child(pane("Frosted").glass_with(GlassSpec::frosted(cx)))
                             .child(pane("Accent").glass_with(GlassSpec::accent(cx)))
-                            .child(pane("Destructive").glass_with(GlassSpec::destructive(cx))),
+                            .child(pane("Destructive").glass_with(GlassSpec::destructive(cx)))
+                            // The rim set side by side: lit from above only.
+                            .child(
+                                pane("Top lit").glass_with(
+                                    GlassSpec::default().edges(
+                                        GlassEdges::default().top(GlassEdge::new(px(4.), 0.7)),
+                                    ),
+                                ),
+                            )
+                            .child(
+                                pane("Side lit").glass_with(
+                                    GlassSpec::default().edges(
+                                        GlassEdges::default().x(GlassEdge::new(px(4.), 0.7)),
+                                    ),
+                                ),
+                            ),
                     ),
             )
             .child(self.glass.clone())
@@ -1080,6 +1095,16 @@ fn snapshot(dir: &std::path::Path) {
                 })
                 .expect("failed to open the offscreen gallery window");
             cx.run_until_parked();
+            // Some components measure themselves on their first frame and
+            // settle on a later one; draw those frames before the capture.
+            // A headless window draws only when asked to.
+            for _ in 0..3 {
+                cx.update_window(window, |_, window, _| window.refresh())
+                    .expect("the gallery window is open");
+                cx.capture_screenshot(window)
+                    .expect("offscreen rendering must be available");
+                cx.run_until_parked();
+            }
             let save = |cx: &mut HeadlessAppContext, suffix: &str| {
                 let path = dir.join(format!("gallery-{}-{mode_name}{suffix}.png", page.slug()));
                 cx.capture_screenshot(window)

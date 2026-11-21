@@ -1656,10 +1656,11 @@ pub struct GlassEffect {
     pub saturation: f32,
     /// Its offset, added.
     pub tint: Hsla,
-    /// How much white the lit rim adds, 0..1.
-    pub edge: f32,
-    /// How far in that light falls off to nothing.
-    pub edge_width: Pixels,
+    /// How much white the lit rim adds along each side, 0..1. Corners blend
+    /// the two sides they join.
+    pub edge: Edges<f32>,
+    /// How far in that light falls off to nothing, along each side.
+    pub edge_width: Edges<Pixels>,
     /// Width of the coverage ramp at the shape's boundary. Zero is a hard edge.
     pub edge_aa: Pixels,
 }

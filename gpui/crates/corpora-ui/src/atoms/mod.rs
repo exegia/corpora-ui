@@ -41,6 +41,7 @@ mod glass;
 mod loader;
 mod reference;
 mod reveal;
+mod scaled;
 mod text;
 
 pub use avatar::{Avatar, AvatarAudio, AvatarStatus, AvatarUser};
@@ -52,7 +53,9 @@ pub use chip::{Chip, SelectChip};
 pub(crate) use emoji::WIDTH as PICKER_WIDTH;
 pub use emoji::{Emoji, EmojiPicker, EmojiPickerState};
 pub use field::InputField;
-pub use glass::{GlassSpec, GlassSurface, GlassSurfaceExt, glass, neutral_tint};
+pub use glass::{
+    GlassEdge, GlassEdges, GlassSpec, GlassSurface, GlassSurfaceExt, glass, neutral_tint,
+};
 pub use loader::{Loader, LoaderKind};
 pub use reference::Reference;
 pub use reveal::Reveal;

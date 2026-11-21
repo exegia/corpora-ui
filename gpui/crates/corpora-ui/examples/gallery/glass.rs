@@ -4,7 +4,7 @@
 use std::cell::Cell;
 use std::rc::Rc;
 
-use corpora_ui::atoms::{Button, GlassSpec, GlassSurfaceExt as _, Text};
+use corpora_ui::atoms::{Button, GlassEdge, GlassSpec, GlassSurfaceExt as _, Text};
 use corpora_ui::foundations::{ActiveCorporaTheme as _, AtomSize, Radius};
 use gpui_kit::component::slider::{Slider, SliderEvent, SliderState};
 use gpui_kit::component::switch::Switch;
@@ -53,6 +53,55 @@ impl Preset {
             Self::Deep => "Deep",
             Self::Frosted => "Frosted",
             Self::Custom => "Custom",
+        }
+    }
+}
+
+/// The sides of the probe the two edge sliders set.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum EdgeTarget {
+    All,
+    X,
+    Y,
+    Top,
+    Right,
+    Bottom,
+    Left,
+}
+
+impl EdgeTarget {
+    const ALL: [Self; 7] = [
+        Self::All,
+        Self::X,
+        Self::Y,
+        Self::Top,
+        Self::Right,
+        Self::Bottom,
+        Self::Left,
+    ];
+
+    fn label(self) -> &'static str {
+        match self {
+            Self::All => "All sides",
+            Self::X => "Left and right",
+            Self::Y => "Top and bottom",
+            Self::Top => "Top",
+            Self::Right => "Right",
+            Self::Bottom => "Bottom",
+            Self::Left => "Left",
+        }
+    }
+
+    /// Whether the target covers each side: top, right, bottom, left.
+    fn sides(self) -> [bool; 4] {
+        match self {
+            Self::All => [true; 4],
+            Self::X => [false, true, false, true],
+            Self::Y => [true, false, true, false],
+            Self::Top => [true, false, false, false],
+            Self::Right => [false, true, false, false],
+            Self::Bottom => [false, false, true, false],
+            Self::Left => [false, false, false, true],
         }
     }
 }
@@ -187,6 +236,7 @@ pub struct GlassShowcase {
     lift: f32,
     tint_enabled: bool,
     tint_fill: f32,
+    edge_target: EdgeTarget,
     spec: GlassSpec,
     sliders: [Entity<SliderState>; 13],
     _subscriptions: Vec<Subscription>,
@@ -204,6 +254,7 @@ impl GlassShowcase {
             lift: DEFAULT_LIFT,
             tint_enabled: false,
             tint_fill: 0.34,
+            edge_target: EdgeTarget::All,
             spec: GlassSpec::default(),
             sliders: Control::ALL.map(|_| cx.new(|_| SliderState::new())),
             _subscriptions: Vec::new(),
@@ -236,6 +287,44 @@ impl GlassShowcase {
         this
     }
 
+    /// The first side the edge sliders are set to: the one they show.
+    fn edge(&self) -> GlassEdge {
+        let edges = self.spec.edges;
+        let sides = [edges.top, edges.right, edges.bottom, edges.left];
+        let covered = self.edge_target.sides();
+        let shown = covered.iter().position(|covered| *covered).unwrap_or(0);
+        sides[shown]
+    }
+
+    fn set_edge(&mut self, change: impl Fn(&mut GlassEdge)) {
+        let edges = &mut self.spec.edges;
+        let sides = [
+            &mut edges.top,
+            &mut edges.right,
+            &mut edges.bottom,
+            &mut edges.left,
+        ];
+        for (side, covered) in sides.into_iter().zip(self.edge_target.sides()) {
+            if covered {
+                change(side);
+            }
+        }
+    }
+
+    fn select_edge_target(
+        &mut self,
+        target: EdgeTarget,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        self.edge_target = target;
+        let preset = self.preset;
+        self.sync_sliders(window, cx);
+        // Showing another side's values is not a change to the material.
+        self.preset = preset;
+        cx.notify();
+    }
+
     fn value(&self, control: Control) -> f32 {
         match control {
             Control::Width => self.width,
@@ -248,8 +337,8 @@ impl GlassShowcase {
             Control::Saturation => self.spec.saturation,
             Control::Dispersion => self.spec.dispersion,
             Control::Lift => self.lift,
-            Control::Edge => self.spec.edge,
-            Control::EdgeWidth => self.spec.edge_width.into(),
+            Control::Edge => self.edge().brightness,
+            Control::EdgeWidth => self.edge().width.into(),
             Control::TintFill => self.tint_fill,
         }
     }
@@ -270,8 +359,8 @@ impl GlassShowcase {
             Control::Saturation => self.spec.saturation = value,
             Control::Dispersion => self.spec.dispersion = value,
             Control::Lift => self.lift = value,
-            Control::Edge => self.spec.edge = value,
-            Control::EdgeWidth => self.spec.edge_width = px(value),
+            Control::Edge => self.set_edge(|edge| edge.brightness = value),
+            Control::EdgeWidth => self.set_edge(|edge| edge.width = px(value)),
             Control::TintFill => self.tint_fill = value,
         }
         self.radius = self.radius.min(self.width.min(self.height) / 2.);
@@ -523,6 +612,20 @@ impl Render for GlassShowcase {
                 this.child(Text::new(Preset::Custom.label()).muted().small().ml_2())
             });
 
+        let edge_targets = h_flex()
+            .flex_wrap()
+            .gap_1()
+            .children(EdgeTarget::ALL.map(|target| {
+                choice(
+                    ("glass-edge-target", target as usize).into(),
+                    target.label(),
+                    self.edge_target == target,
+                )
+                .on_click(cx.listener(move |this, _, window, cx| {
+                    this.select_edge_target(target, window, cx);
+                }))
+            }));
+
         let owner = cx.entity().downgrade();
         let tint = h_flex().gap_4().child(
             Switch::new("glass-tint")
@@ -558,7 +661,16 @@ impl Render for GlassShowcase {
                             .min_w_0()
                             .gap_4()
                             .child(self.render_group("Size", &Control::SIZE, cx))
-                            .child(self.render_group("Edge", &Control::EDGE, cx))
+                            .child(
+                                v_flex()
+                                    .gap_1()
+                                    .child(Text::new("Edge").muted().small())
+                                    .child(edge_targets)
+                                    .children(
+                                        Control::EDGE
+                                            .map(|control| self.render_control(control, false, cx)),
+                                    ),
+                            )
                             .child(
                                 v_flex()
                                     .gap_1()

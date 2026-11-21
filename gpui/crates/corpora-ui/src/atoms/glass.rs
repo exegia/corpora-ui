@@ -15,6 +15,84 @@ use gpui_kit::{
     transparent_black, white,
 };
 
+/// The lit rim along one side of a glass surface.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct GlassEdge {
+    /// How far in from the side the light falls off to nothing.
+    pub width: Pixels,
+    /// How much white the rim adds, from 0 (none) to 1.
+    pub brightness: f32,
+}
+
+impl GlassEdge {
+    pub fn new(width: Pixels, brightness: f32) -> Self {
+        Self { width, brightness }
+    }
+}
+
+/// The lit rim of a glass surface, side by side. A corner blends the two
+/// sides it joins.
+///
+/// ```ignore
+/// // A bright top, as if lit from above, and no rim underneath.
+/// GlassEdges::all(GlassEdge::new(px(1.4), 0.2))
+///     .top(GlassEdge::new(px(2.), 0.5))
+///     .bottom(GlassEdge::default())
+/// ```
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct GlassEdges {
+    pub top: GlassEdge,
+    pub right: GlassEdge,
+    pub bottom: GlassEdge,
+    pub left: GlassEdge,
+}
+
+impl GlassEdges {
+    /// The same rim on every side.
+    pub fn all(edge: GlassEdge) -> Self {
+        Self {
+            top: edge,
+            right: edge,
+            bottom: edge,
+            left: edge,
+        }
+    }
+
+    /// Sets the left and right sides, as `px` does for padding.
+    pub fn x(mut self, edge: GlassEdge) -> Self {
+        self.left = edge;
+        self.right = edge;
+        self
+    }
+
+    /// Sets the top and bottom sides, as `py` does for padding.
+    pub fn y(mut self, edge: GlassEdge) -> Self {
+        self.top = edge;
+        self.bottom = edge;
+        self
+    }
+
+    pub fn top(mut self, edge: GlassEdge) -> Self {
+        self.top = edge;
+        self
+    }
+
+    pub fn right(mut self, edge: GlassEdge) -> Self {
+        self.right = edge;
+        self
+    }
+
+    pub fn bottom(mut self, edge: GlassEdge) -> Self {
+        self.bottom = edge;
+        self
+    }
+
+    pub fn left(mut self, edge: GlassEdge) -> Self {
+        self.left = edge;
+        self
+    }
+}
+
 /// The parameters of a glass surface: how far it frosts, bends and tints
 /// what lies behind it.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -38,9 +116,9 @@ pub struct GlassSpec {
     /// The color laid over the backdrop. `None` is the neutral lift of
     /// [`neutral_tint`].
     pub tint: Option<Hsla>,
-    /// Brightness of the lit rim.
-    pub edge: f32,
-    pub edge_width: Pixels,
+    /// The lit rim, side by side.
+    pub edges: GlassEdges,
+    /// Width of the antialiasing ramp at the surface's boundary.
     pub edge_aa: Pixels,
 }
 
@@ -57,8 +135,7 @@ impl Default for GlassSpec {
             gain_dark: 1.029,
             saturation: 1.,
             tint: None,
-            edge: 0.26,
-            edge_width: px(1.4),
+            edges: GlassEdges::all(GlassEdge::new(px(1.4), 0.26)),
             edge_aa: px(0.5),
         }
     }
@@ -70,8 +147,7 @@ impl GlassSpec {
         Self {
             magnify: 1.38,
             dispersion: 0.02,
-            edge: 0.34,
-            edge_width: px(2.),
+            edges: GlassEdges::all(GlassEdge::new(px(2.), 0.34)),
             ..Self::default()
         }
     }
@@ -83,8 +159,7 @@ impl GlassSpec {
             reach: px(0.),
             magnify: 0.,
             dispersion: 0.,
-            edge: 0.,
-            edge_width: px(0.),
+            edges: GlassEdges::all(GlassEdge::new(px(0.), 0.)),
             ..Self::default()
         }
     }
@@ -106,9 +181,25 @@ impl GlassSpec {
                     .popover
                     .opacity(if theme.is_dark() { 0.62 } else { 0.68 }),
             ),
-            edge: 0.22,
-            edge_width: px(1.2),
+            edges: GlassEdges::all(GlassEdge::new(px(1.2), 0.22)),
             ..Self::default()
+        }
+    }
+
+    /// A flat frost for a bar that floats over scrolling content, such as a
+    /// sticky header: no lens and no rim, so the bar reads as part of the
+    /// surface it sits on.
+    pub fn scrim(cx: &App) -> Self {
+        let theme = cx.theme();
+        Self {
+            blur_radius: px(14.),
+            saturation: 1.3,
+            tint: Some(
+                theme
+                    .popover
+                    .opacity(if theme.is_dark() { 0.55 } else { 0.6 }),
+            ),
+            ..Self::blur()
         }
     }
 
@@ -124,8 +215,7 @@ impl GlassSpec {
             gain_dark: 0.549,
             saturation: 1.,
             tint: Some(cx.theme().primary.opacity(0.8)),
-            edge: 0.2,
-            edge_width: px(2.7),
+            edges: GlassEdges::all(GlassEdge::new(px(2.7), 0.2)),
             edge_aa: px(0.8),
         }
     }
@@ -141,10 +231,17 @@ impl GlassSpec {
             gain_dark: 0.,
             saturation: 1.6,
             tint: Some(cx.theme().danger.opacity(0.58)),
-            edge: 0.16,
-            edge_width: px(6.3),
+            edges: GlassEdges::all(GlassEdge::new(px(6.3), 0.16)),
             ..Self::default()
         }
+    }
+
+    /// Replaces the lit rim. Pass [`GlassEdges::all`] for an even rim, or
+    /// set sides apart with its `x`, `y`, `top`, `right`, `bottom` and
+    /// `left`.
+    pub fn edges(mut self, edges: GlassEdges) -> Self {
+        self.edges = edges;
+        self
     }
 
     /// Replaces the tint.
@@ -206,8 +303,18 @@ fn paint(
                 },
                 saturation: spec.saturation,
                 tint,
-                edge: spec.edge,
-                edge_width: spec.edge_width,
+                edge: gpui_kit::Edges {
+                    top: spec.edges.top.brightness,
+                    right: spec.edges.right.brightness,
+                    bottom: spec.edges.bottom.brightness,
+                    left: spec.edges.left.brightness,
+                },
+                edge_width: gpui_kit::Edges {
+                    top: spec.edges.top.width,
+                    right: spec.edges.right.width,
+                    bottom: spec.edges.bottom.width,
+                    left: spec.edges.left.width,
+                },
                 edge_aa: spec.edge_aa,
             },
         );
@@ -354,13 +461,26 @@ mod tests {
     fn presets_differ_from_clear_glass_only_where_they_say() {
         let clear = GlassSpec::default();
         let deep = GlassSpec::deep();
-        assert!(deep.magnify > clear.magnify && deep.edge > clear.edge);
+        assert!(deep.magnify > clear.magnify);
+        assert!(deep.edges.top.brightness > clear.edges.top.brightness);
         assert_eq!(deep.blur_radius, clear.blur_radius);
 
         let blur = GlassSpec::blur();
         assert_eq!(blur.lens, px(0.));
-        assert_eq!(blur.edge, 0.);
+        assert_eq!(blur.edges, GlassEdges::default());
         assert_eq!(blur.blur_radius, clear.blur_radius);
+    }
+
+    #[test]
+    fn an_axis_sets_both_of_its_sides_and_a_side_only_itself() {
+        let thin = GlassEdge::new(px(1.), 0.1);
+        let lit = GlassEdge::new(px(3.), 0.6);
+        let edges = GlassEdges::all(thin).y(lit).bottom(GlassEdge::default());
+        assert_eq!(edges.top, lit);
+        assert_eq!(edges.bottom, GlassEdge::default());
+        assert_eq!((edges.left, edges.right), (thin, thin));
+        assert_eq!(GlassEdges::all(thin).x(lit).left, lit);
+        assert_eq!(GlassEdges::all(thin).x(lit).top, thin);
     }
 
     #[test]

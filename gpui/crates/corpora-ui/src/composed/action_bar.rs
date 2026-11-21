@@ -3,6 +3,7 @@
 use std::rc::Rc;
 use std::sync::Arc;
 
+use gpui_kit::base::motion::{Transition, transition};
 use gpui_kit::component::button::{Button as StockButton, ButtonVariants as _};
 use gpui_kit::component::popover::Popover;
 use gpui_kit::component::{ActiveTheme as _, Icon, IconName, Sizable as _, h_flex};
@@ -16,6 +17,7 @@ use crate::atoms::{
     Button, Emoji, EmojiPicker, EmojiPickerState, GlassSpec, GlassSurfaceExt as _, PICKER_WIDTH,
     Reveal,
 };
+use crate::foundations::motion::{DURATION_FAST, EASE_SMOOTH_OUT};
 use crate::foundations::{ActiveCorporaTheme as _, AtomSize, Radius};
 
 type ClickHandler = Rc<dyn Fn(&ClickEvent, &mut Window, &mut App)>;
@@ -240,7 +242,7 @@ impl EmojiActionBar {
 }
 
 impl RenderOnce for EmojiActionBar {
-    fn render(self, _: &mut Window, cx: &mut App) -> impl IntoElement {
+    fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
         let expanded = self
             .picker
             .as_ref()
@@ -248,7 +250,19 @@ impl RenderOnce for EmojiActionBar {
         let bar_id = ElementId::NamedChild(Arc::new(self.id.clone()), "bar".into());
         let reveal_id = ElementId::NamedChild(Arc::new(self.id.clone()), "picker".into());
         let row_id = ElementId::NamedChild(Arc::new(self.id.clone()), "row".into());
+        let width_id = self.id.clone();
         let close_id = ElementId::NamedChild(Arc::new(self.id), "close".into());
+
+        // The quick reactions plus "More emoji".
+        let commands = self.reactions.len() + 1;
+        let row_width = self.picker.as_ref().map(|picker| {
+            let cell = picker.read(cx).row_width.clone();
+            let measured = cell
+                .get()
+                .filter(|(measured_for, _)| *measured_for == commands)
+                .map(|(_, width)| width);
+            (cell, measured)
+        });
 
         let mut bar = ActionBar::new(bar_id);
         for reaction in self.reactions {
@@ -271,7 +285,6 @@ impl RenderOnce for EmojiActionBar {
             );
         }
 
-        let has_picker = self.picker.is_some();
         let full = self.picker.map(|picker| {
             let close = picker.clone();
             EmojiPicker::new(&picker)
@@ -290,15 +303,41 @@ impl RenderOnce for EmojiActionBar {
                 })
         });
 
-        // The row gives way to the picker: each folds as the other opens.
-        // With a picker the bar keeps the picker's width in both states, so
-        // only its height changes.
-        let content = div()
-            .flex()
-            .flex_col()
-            .when(has_picker, |this| this.w(rems(PICKER_WIDTH)))
-            .child(Reveal::new(row_id, !expanded).child(bar))
-            .children(full.map(|full| Reveal::new(reveal_id, expanded).child(full)));
+        // The row gives way to the picker: each folds as the other opens,
+        // and the bar grows from the row's width to the picker's.
+        let content = match row_width {
+            // No picker: the bar is only its row.
+            None => div().child(bar),
+            Some((cell, None)) => {
+                // First frame: measure the row, then draw again with it.
+                // A flex parent, so the row keeps its own width to be measured.
+                div()
+                    .flex()
+                    .on_children_prepainted(move |bounds, window, _| {
+                        if let Some(row) = bounds.first() {
+                            cell.set(Some((commands, row.size.width / window.rem_size())));
+                            window.refresh();
+                        }
+                    })
+                    .child(bar)
+            }
+            Some((_, Some(row_width))) => {
+                let progress = transition(
+                    (width_id, "width"),
+                    if expanded { 1.0_f32 } else { 0.0 },
+                    Transition::new(DURATION_FAST).easing(EASE_SMOOTH_OUT.easing()),
+                    window,
+                    cx,
+                );
+                div()
+                    .flex()
+                    .flex_col()
+                    .overflow_hidden()
+                    .w(rems(row_width + (PICKER_WIDTH - row_width) * progress))
+                    .child(Reveal::new(row_id, !expanded).child(bar))
+                    .children(full.map(|full| Reveal::new(reveal_id, expanded).child(full)))
+            }
+        };
 
         if !self.surface {
             return content.into_any_element();

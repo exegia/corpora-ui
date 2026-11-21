@@ -9,9 +9,9 @@ use corpora_ui::composed::{EmojiActionBar, Logo, ReactionPicker, SocialProvider,
 use gpui_kit::test::TestWindowExt as _;
 use gpui_kit::{
     AnyWindowHandle, App, AppContext as _, Bounds, Context, Entity, IntoElement, Modifiers,
-    ParentElement as _, Pixels, Point, Render, SharedString, Styled as _, TestAppContext,
-    TestSupportExt as _, VisualTestContext, Window, WindowBounds, WindowOptions, div, point,
-    prelude::*, px, size,
+    ParentElement as _, Pixels, Point, Render, ScrollDelta, ScrollEvent, SharedString, Styled as _,
+    TestAppContext, TestSupportExt as _, VisualTestContext, Window, WindowBounds, WindowOptions,
+    div, point, prelude::*, px, size,
 };
 
 /// The default rem base the geometry below is stated against.
@@ -268,9 +268,9 @@ fn the_emoji_bar_swaps_to_the_full_picker_and_back_on_a_pick(cx: &mut TestAppCon
     assert_px(bar.size.height, 20.375 * REM, "full picker height");
     assert_px(bar.size.width, 19. * REM, "full picker width");
 
-    // The first emoji of the first group: under the search field and the
-    // group's header.
-    let first = point(bar.origin.x + px(1.5 * REM), bar.origin.y + px(5.5 * REM));
+    // The first emoji of the first group: under the floating header (the
+    // search field and the group filters) and the group's label.
+    let first = point(bar.origin.x + px(1.5 * REM), bar.origin.y + px(7.25 * REM));
     let mut cx = VisualTestContext::from_window(window, cx);
     cx.simulate_click(first, Modifiers::none());
     assert_eq!(picked.borrow().len(), 1, "one emoji picked");
@@ -319,6 +319,12 @@ fn the_reaction_button_opens_quick_reactions_under_itself(cx: &mut TestAppContex
     let mut cx = VisualTestContext::from_window(window, cx);
     cx.simulate_click(trigger.center(), Modifiers::none());
     cx.run_until_parked();
+    // The bar measures its quick row on its first frame and settles on the
+    // next, as it does on screen before anyone can click.
+    cx.update(|window, cx| {
+        window.render_frame(cx);
+        window.render_frame(cx);
+    });
 
     // The popover hangs under the trigger, its quick row first: the heart
     // sits one popover inset in and half a button down.
@@ -335,4 +341,123 @@ fn the_reaction_button_opens_quick_reactions_under_itself(cx: &mut TestAppContex
             .collect::<Vec<_>>(),
         vec![SharedString::from("heart")]
     );
+}
+
+#[gpui_kit::test]
+fn the_emoji_bar_at_rest_is_as_wide_as_its_quick_row(cx: &mut TestAppContext) {
+    cx.update(corpora_ui::init);
+    let window = open(cx, |window, cx| {
+        let picker = cx.new(|cx| EmojiPickerState::new(window, cx));
+        cx.new(|_| PickerHost {
+            picker,
+            picked: Rc::default(),
+        })
+    });
+
+    let bar = cx
+        .update_window(window, |_, window, cx| {
+            // One frame to measure the row, one to settle on its width.
+            window.render_frame(cx);
+            window.render_frame(cx);
+            window.find("bar").bounds()
+        })
+        .expect("window is open");
+    assert_px(bar.size.height, 2. * REM, "quick row height");
+    assert!(
+        bar.size.width > px(8. * REM) && bar.size.width < px(19. * REM),
+        "the bar hugs its row instead of holding the picker's width: {:?}",
+        bar.size.width
+    );
+}
+
+/// A page that scrolls, with an open picker on it.
+struct ScrollHost {
+    picker: Entity<EmojiPickerState>,
+}
+
+impl Render for ScrollHost {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        div()
+            .id("page")
+            .size_full()
+            .overflow_y_scroll()
+            .child(
+                div()
+                    .id("bar")
+                    .test_support()
+                    .child(EmojiActionBar::new("reactions").picker(&self.picker)),
+            )
+            .child(div().h(px(2000.)))
+    }
+}
+
+#[gpui_kit::test]
+fn the_wheel_over_the_picker_scrolls_its_list_not_the_page(cx: &mut TestAppContext) {
+    cx.update(corpora_ui::init);
+    let window = open(cx, |window, cx| {
+        let picker = cx.new(|cx| EmojiPickerState::new(window, cx));
+        picker.update(cx, |picker, cx| picker.set_expanded(true, cx));
+        cx.new(|_| ScrollHost { picker })
+    });
+    let find_bar = |cx: &mut TestAppContext| {
+        cx.update_window(window, |_, window, cx| {
+            window.render_frame(cx);
+            window.render_frame(cx);
+            window.find("bar").bounds()
+        })
+        .expect("window is open")
+    };
+
+    let before = find_bar(cx);
+    let over_list = point(
+        before.origin.x + px(4. * REM),
+        before.origin.y + px(8. * REM),
+    );
+    let mut visual = VisualTestContext::from_window(window, cx);
+    visual.simulate_event(ScrollEvent {
+        position: over_list,
+        delta: ScrollDelta::Pixels(point(px(0.), px(-120.))),
+        ..Default::default()
+    });
+    visual.run_until_parked();
+
+    assert_eq!(find_bar(cx).origin, before.origin, "the page stayed put");
+}
+
+#[gpui_kit::test]
+fn a_group_filter_scrolls_the_picker_to_that_group(cx: &mut TestAppContext) {
+    cx.update(corpora_ui::init);
+    let picked = Rc::new(RefCell::new(Vec::new()));
+    let window = open(cx, {
+        let picked = picked.clone();
+        move |window, cx| {
+            let picker = cx.new(|cx| EmojiPickerState::new(window, cx));
+            picker.update(cx, |picker, cx| picker.set_expanded(true, cx));
+            cx.new(|_| PickerHost { picker, picked })
+        }
+    });
+    let bar = cx
+        .update_window(window, |_, window, cx| {
+            window.render_frame(cx);
+            window.find("bar").bounds()
+        })
+        .expect("window is open");
+
+    // The second filter, "People & body", in the row under the search field.
+    let filter = point(bar.origin.x + px(3.75 * REM), bar.origin.y + px(3.25 * REM));
+    let first = point(bar.origin.x + px(1.5 * REM), bar.origin.y + px(7.25 * REM));
+    let mut visual = VisualTestContext::from_window(window, cx);
+    visual.simulate_click(filter, Modifiers::none());
+    // The jump is animated; let it run out.
+    visual
+        .executor()
+        .advance_clock(std::time::Duration::from_millis(500));
+    visual.run_until_parked();
+    visual.update(|window, cx| window.render_frame(cx));
+
+    // The group's label now sits just under the header, so its first emoji
+    // is where the first group's was.
+    visual.simulate_click(first, Modifiers::none());
+    assert_eq!(picked.borrow().len(), 1, "one emoji picked");
+    assert_eq!(picked.borrow()[0].label, "waving hand");
 }

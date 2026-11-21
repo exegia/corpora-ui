@@ -2,6 +2,7 @@
 
 use std::rc::Rc;
 
+use gpui_kit::base::motion::{Transition, transition};
 use gpui_kit::component::{ActiveTheme as _, StyledExt as _, h_flex};
 use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
@@ -10,7 +11,9 @@ use gpui_kit::{
     Window, div, px, relative, rems,
 };
 
-use super::{Button, IconName};
+use super::scaled::Scaled;
+use super::{Button, GlassEdge, GlassEdges, GlassSpec, GlassSurfaceExt as _, IconName};
+use crate::foundations::motion::{DURATION_FAST, EASE_SMOOTH_OUT};
 use crate::foundations::shadow::{shadow_bubble, shadow_pill};
 use crate::foundations::{ActiveCorporaTheme as _, AtomSize, Radius};
 
@@ -68,6 +71,68 @@ impl BubbleReaction {
     pub fn reacted(mut self, reacted: bool) -> Self {
         self.reacted = reacted;
         self
+    }
+}
+
+/// How far the emoji of a reaction swells as its count turns over.
+const REACTION_PULSE: f32 = 0.35;
+
+/// The emoji and count of one reaction. When the count changes the emoji
+/// swells and settles, and the number rolls to its new value like an
+/// odometer: up for one more, down for one fewer.
+#[derive(IntoElement)]
+struct ReactionMark {
+    id: ElementId,
+    emoji: SharedString,
+    count: u32,
+}
+
+impl RenderOnce for ReactionMark {
+    fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
+        // The count as it travels from the last value to this one.
+        let value = transition(
+            (self.id, "count"),
+            self.count as f32,
+            Transition::new(DURATION_FAST).easing(EASE_SMOOTH_OUT.easing()),
+            window,
+            cx,
+        );
+        let low = value.floor();
+        // How far the number has turned from `low` toward the next one.
+        let turn = value - low;
+        let digits = |count: f32| SharedString::from((count as u32).to_string());
+
+        let pulse = 1. + REACTION_PULSE * (turn * std::f32::consts::PI).sin();
+        let number = div().relative().h(rems(1.)).line_height(rems(1.));
+        let number = if turn == 0. {
+            number.child(digits(low))
+        } else {
+            number
+                .overflow_hidden()
+                // Holds the width while the two numbers pass.
+                .child(div().opacity(0.).child(digits(self.count as f32)))
+                .child(
+                    div()
+                        .absolute()
+                        .left_0()
+                        .top(rems(-turn))
+                        .opacity(1. - turn)
+                        .child(digits(low)),
+                )
+                .child(
+                    div()
+                        .absolute()
+                        .left_0()
+                        .top(rems(1. - turn))
+                        .opacity(turn)
+                        .child(digits(low + 1.)),
+                )
+        };
+
+        h_flex()
+            .gap_1()
+            .child(Scaled::new(pulse, div().child(self.emoji)))
+            .when(self.count > 0 || turn > 0., |this| this.child(number))
     }
 }
 
@@ -281,7 +346,6 @@ impl RenderOnce for Bubble {
                 .px_1()
                 .gap_0p5()
                 .rounded(Radius::Lg.resolve(cx))
-                .bg(theme.popover)
                 .border_1()
                 .border_color(theme.border)
                 .shadow(shadow_pill())
@@ -307,9 +371,13 @@ impl RenderOnce for Bubble {
                         .text_color(ink)
                         .when(reaction.reacted, |this| this.bg(theme.accent))
                         .hover(|style| style.bg(theme.accent))
-                        .child(reaction.emoji.clone())
-                        .when(reaction.count > 0, |this| {
-                            this.child(reaction.count.to_string())
+                        .child(ReactionMark {
+                            id: ElementId::NamedChild(
+                                std::sync::Arc::new(child_id("reaction-mark")),
+                                reaction.id.clone(),
+                            ),
+                            emoji: reaction.emoji.clone(),
+                            count: reaction.count,
                         })
                         .on_click(move |_, window, cx| {
                             if let Some(on_toggle) = &on_toggle {
@@ -328,6 +396,14 @@ impl RenderOnce for Bubble {
                     )
                 })
                 .children(add_reaction)
+                // Frosted glass: the thread shows through the pill. The lens
+                // is kept shallow, as the pill is only a line of text tall.
+                .glass_with(GlassSpec {
+                    lens: px(5.),
+                    reach: px(8.),
+                    edges: GlassEdges::all(GlassEdge::new(px(1.), 0.18)),
+                    ..GlassSpec::frosted(cx)
+                })
         });
 
         let actions = self.actions.map(|actions| {

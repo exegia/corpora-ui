@@ -703,10 +703,10 @@ pub struct BackdropBlur {
     pub saturation: f32,
     /// Its offset. Transparent leaves the blur bare.
     pub tint: Hsla,
-    /// How much white the lit rim adds, 0..1.
-    pub edge: f32,
-    /// How far in that light falls off to nothing.
-    pub edge_width: ScaledPixels,
+    /// How much white the lit rim adds along each side, 0..1.
+    pub edge: Edges<f32>,
+    /// How far in that light falls off to nothing, along each side.
+    pub edge_width: Edges<ScaledPixels>,
     /// Width of the coverage ramp at the boundary. Zero is a hard edge.
     pub edge_aa: ScaledPixels,
     /// The element tree's opacity here. The pass replaces its region rather

@@ -78,7 +78,7 @@ by hand. So the port has two halves:
 | `SourceChip`, `SelectChip` | `Chip`, `SelectChip` | this crate, on the stock dropdown menu |
 | `EmojiPicker` | `EmojiPicker`, `EmojiPickerState`, `Emoji` | this crate, data from the `emojis` crate |
 | (height transitions) | `Reveal` | this crate, on GPUI Base's `MotionReveal` |
-| liquid glass surfaces | `GlassSpec`, `GlassSurfaceExt`, `glass` | this crate, on the patched GPUI in `vendor/` |
+| liquid glass surfaces | `GlassSpec`, `GlassEdges`, `GlassSurfaceExt`, `glass` | this crate, on the patched GPUI in `vendor/` |
 | `Label` (form), `Kbd`, `Separator`, `Skeleton`, `Spinner` | same names | GPUI Component |
 
 Not ported yet: `Texture`, the text-selection popovers and the `glass` button
@@ -173,10 +173,12 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
   not ported.
 - **`SocialProviders` draws every provider as an outline button.** React
   fills Apple's black. The Apple and GitHub marks are Reicon's brand marks.
-- **`EmojiActionBar` keeps the picker's width once it has a picker**, so the
-  swap between the quick row and the full picker changes its height only.
-  The picker groups emoji under plain headers that scroll with the list
-  (React's are sticky and blurred) and has no skin-tone control. An emoji
+- **`EmojiActionBar` is as wide as its quick row**, and grows to the picker's
+  width as the picker opens. It measures the row on its first frame.
+  The picker's search field floats over the list on a blurred band, with a
+  row of group filters under it; a filter scrolls the list to its group, and
+  the group in view is marked. Group labels scroll with the list (React's are
+  sticky), and there is no skin-tone control. An emoji
   newer than Emoji 15.1 is listed only if the text system has a glyph for it,
   so the list follows the machine's emoji font and never shows an empty box.
   Its surface is frosted glass.
@@ -199,6 +201,11 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
   language and `IconName` keeps working. To add or remap an icon, edit the
   table in `scripts/reicon.mjs` and run it. A name Reicon does not draw
   (`cone`, the window controls, a few others) still gets Lucide's.
+- **A glass rim is set side by side.** `GlassSpec::edges` takes a
+  `GlassEdges`: `all` for an even rim, then `x` (left and right), `y` (top
+  and bottom) or a single side, each with a width and a brightness. Corners
+  blend the two sides they join. The rim is part of the lens, so a surface
+  with no lens, such as `GlassSpec::blur`, has none.
 - **Glass needs the patched GPUI.** `glass` is a default feature that calls a
   backdrop pass added in `vendor/` (Metal only). An application outside this
   workspace must copy the `[patch.crates-io]` entries, or turn the feature
@@ -208,8 +215,9 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
   and styles the tail with a sibling selector. Here `Bubble` owns `header`,
   `message`, `actions` and the reactions, and the caller says which bubble of
   a run keeps its `tail`.
-- **The reaction pill is opaque.** React's is liquid glass; here it is the
-  popover surface with a border.
+- **The reaction pill is frosted glass**, as in React. When a reaction's
+  count changes its emoji swells and settles and the number rolls to the new
+  value, up for one more and down for one fewer.
 - **Avatar initials are tinted.** The stock avatar colors initials by name, so
   one person always gets one color. React's fallback is neutral. The audio
   ring breathes instead of spinning, and the verified mark is Reicon's
