@@ -114,6 +114,8 @@ pub struct Recommendation {
     on_reject: Option<ClickHandler>,
     on_undo: Option<ClickHandler>,
     on_select_option: Option<OptionHandler>,
+    /// Whether a card of the same stack sits directly above and below.
+    pub(crate) joined: (bool, bool),
     children: Vec<AnyElement>,
 }
 
@@ -139,6 +141,7 @@ impl Recommendation {
             on_reject: None,
             on_undo: None,
             on_select_option: None,
+            joined: (false, false),
             children: Vec::new(),
         }
     }
@@ -510,11 +513,16 @@ impl RenderOnce for Recommendation {
             .children(options)
             .child(footer);
 
+        let radius = Radius::Md.resolve(cx);
+        let (above, below) = self.joined;
         v_flex()
             .w_full()
             .overflow_hidden()
-            .rounded(Radius::Md.resolve(cx))
+            // Cards of one stack share an edge and square the corners on it.
+            .when(!above, |this| this.rounded_t(radius))
+            .when(!below, |this| this.rounded_b(radius))
             .border_1()
+            .when(above, |this| this.border_t_0())
             .border_color(border)
             .bg(theme.muted.opacity(FRAME_TINT))
             .child(heading)

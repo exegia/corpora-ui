@@ -21,6 +21,7 @@
 
 mod assets;
 pub mod atoms;
+pub mod blocks;
 pub mod composed;
 pub mod foundations;
 mod reicon;

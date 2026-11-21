@@ -108,17 +108,25 @@ enum Page {
     Foundations,
     Atoms,
     Composed,
+    Blocks,
     Glass,
 }
 
 impl Page {
-    const ALL: [Page; 4] = [Page::Foundations, Page::Atoms, Page::Composed, Page::Glass];
+    const ALL: [Page; 5] = [
+        Page::Foundations,
+        Page::Atoms,
+        Page::Composed,
+        Page::Blocks,
+        Page::Glass,
+    ];
 
     fn label(self) -> &'static str {
         match self {
             Page::Foundations => "Foundations",
             Page::Atoms => "Atoms",
             Page::Composed => "Composed",
+            Page::Blocks => "Blocks",
             Page::Glass => "Glass",
         }
     }
@@ -128,9 +136,52 @@ impl Page {
             Page::Foundations => "foundations",
             Page::Atoms => "atoms",
             Page::Composed => "composed",
+            Page::Blocks => "blocks",
             Page::Glass => "glass",
         }
     }
+}
+
+/// The sample corpus the navigation pieces browse.
+fn sample_corpus() -> corpora_ui::composed::CorpusData {
+    use corpora_ui::composed::{CorpusData, CorpusLevel, CorpusLevelKind, CorpusNode};
+
+    let book = |id: &'static str, label: &'static str, chapters: &[usize]| {
+        CorpusNode::new(id, "book", label).children(chapters.iter().enumerate().map(
+            |(index, verses)| {
+                let chapter = index + 1;
+                CorpusNode::new(format!("{id}-{chapter}"), "chapter", chapter.to_string())
+                    .reference(chapter.to_string())
+                    .children((1..=*verses).map(|verse| {
+                        CorpusNode::new(
+                            format!("{id}-{chapter}-{verse}"),
+                            "verse",
+                            verse.to_string(),
+                        )
+                        .reference(verse.to_string())
+                    }))
+            },
+        ))
+    };
+    CorpusData::new(
+        "New Testament",
+        [
+            CorpusLevel::new("group", "Group", CorpusLevelKind::Hierarchy),
+            CorpusLevel::new("book", "Book", CorpusLevelKind::Hierarchy),
+            CorpusLevel::new("chapter", "Chapter", CorpusLevelKind::Number),
+            CorpusLevel::new("verse", "Verse", CorpusLevelKind::Number),
+        ],
+        [
+            CorpusNode::new("gospels", "group", "Gospels").children([
+                book("john", "John", &[51, 25, 36, 54, 47, 71, 53]).aliases(["Jn"]),
+                book("luke", "Luke", &[80, 52, 38]).aliases(["Lk"]),
+            ]),
+            CorpusNode::new("letters", "group", "Letters").children([
+                book("romans", "Romans", &[32, 29]).aliases(["Rom"]),
+                book("jude", "Jude", &[25]).disabled(),
+            ]),
+        ],
+    )
 }
 
 struct Gallery {
@@ -148,6 +199,13 @@ struct Gallery {
     composer: Entity<corpora_ui::composed::Composer>,
     /// What the gallery's composer last reported.
     composed: SharedString,
+    /// The row picked in the gallery's trees.
+    tree_active: SharedString,
+    navigation: Entity<corpora_ui::composed::CorpusNavigation>,
+    /// The navigation behind the narrow navigator on the Blocks page.
+    folded_navigation: Entity<corpora_ui::composed::CorpusNavigation>,
+    /// The composer of the empty AI panel on the Blocks page.
+    panel_composer: Entity<corpora_ui::composed::Composer>,
     /// The picker behind the standalone emoji bar.
     bar_picker: Entity<EmojiPickerState>,
     last_emoji: Option<Emoji>,
@@ -187,6 +245,20 @@ impl Gallery {
                 }])
                 .safety_note("Answers can be wrong. Check them against the witnesses.")
         });
+        // Each set of navigation views needs an entity of its own: their
+        // element ids derive from it.
+        let navigate = |window: &mut Window, cx: &mut Context<Self>| {
+            cx.new(|cx| {
+                corpora_ui::composed::CorpusNavigation::new(sample_corpus(), window, cx)
+                    .location("john-3-16")
+            })
+        };
+        let navigation = navigate(window, cx);
+        let folded_navigation = navigate(window, cx);
+        cx.observe(&folded_navigation, |_, _, cx| cx.notify())
+            .detach();
+        cx.observe(&navigation, |_, _, cx| cx.notify()).detach();
+        let panel_composer = cx.new(|cx| Composer::new(window, cx));
         cx.subscribe(&composer, |this, _, event: &ComposerEvent, cx| {
             this.composed = match event {
                 ComposerEvent::Submit { text, attachments } => {
@@ -205,6 +277,10 @@ impl Gallery {
         Self {
             composer,
             composed: "Nothing sent yet".into(),
+            tree_active: "john-1".into(),
+            navigation,
+            folded_navigation,
+            panel_composer,
             page: Page::Foundations,
             page_changed: false,
             status: "Pending".into(),
@@ -1189,6 +1265,352 @@ impl Gallery {
             )
     }
 
+    fn render_ai_panel(&self, cx: &mut Context<Self>) -> impl IntoElement {
+        use corpora_ui::atoms::SignalLevel;
+        use corpora_ui::blocks::{
+            AiPanel, AiScope, AiScopeKind, DegradedBanner, LockedBanner, PinnedThreadBanner,
+            RecommendationStack, VersionHistoryEntry, VersionHistoryRecord,
+        };
+        use corpora_ui::composed::Recommendation;
+
+        let report = |what: &'static str| {
+            cx.listener(move |this, _: &ClickEvent, _, cx| {
+                this.composed = what.into();
+                cx.notify();
+            })
+        };
+        let mut scope = AiScope::new(AiScopeKind::Passage, "Luke");
+        scope.range = Some("22:43-44".into());
+        let thread = v_flex()
+            .gap_3()
+            .child(
+                div()
+                    .text_xs()
+                    .text_color(cx.theme().muted_foreground)
+                    .child(scope.label()),
+            )
+            .child(PinnedThreadBanner::new())
+            .child(DegradedBanner::new("panel-degraded").on_retry(report("Asked again")))
+            .child(
+                RecommendationStack::new()
+                    .child(
+                        Recommendation::new("stack-base", "Keep the longer reading")
+                            .description("The first hand of Bezae carries it.")
+                            .confidence(SignalLevel::High),
+                    )
+                    .child(
+                        Recommendation::new("stack-note", "Add a note on Papyrus 75")
+                            .description("It omits both verses.")
+                            .confidence(SignalLevel::Medium)
+                            .collapsed(),
+                    ),
+            )
+            .child(VersionHistoryRecord::new(VersionHistoryEntry {
+                response_id: "r-204".into(),
+                applying_user: Some("Grace Hopper".into()),
+                node_id: "lk-22-43".into(),
+                previous_value: "ὤφθη δὲ αὐτῷ ἄγγελος".into(),
+                timestamp: "21 Nov 2026, 10:42".into(),
+                version: "12".into(),
+            }));
+        let frame = |panel: AiPanel| {
+            div()
+                .w(rems(24.))
+                .h(rems(38.))
+                .rounded(Radius::Lg.resolve(cx))
+                .border_1()
+                .border_color(cx.theme().border)
+                .overflow_hidden()
+                .child(panel)
+        };
+        Section::new("Blocks: AI panel").child(
+            h_flex()
+                .items_start()
+                .gap_6()
+                .child(frame(
+                    AiPanel::new("panel-thread", &self.composer)
+                        .title("Curation")
+                        .on_new_thread(report("Started a new thread"))
+                        .thread(thread),
+                ))
+                .child(frame(
+                    AiPanel::new("panel-empty", &self.panel_composer)
+                        .title("Published edition")
+                        .locked(true)
+                        .prompts([
+                            "Summarise the witnesses for this passage",
+                            "Which manuscripts omit these verses?",
+                        ])
+                        .on_prompt_select(cx.listener(|this, prompt: &SharedString, _, cx| {
+                            this.composed = format!("Asked: {prompt}").into();
+                            cx.notify();
+                        })),
+                ))
+                .child(div().w(rems(22.)).child(LockedBanner::new())),
+        )
+    }
+
+    fn render_corpus_navigator(&self, cx: &mut Context<Self>) -> impl IntoElement {
+        use corpora_ui::blocks::CorpusNavigator;
+
+        let state = self.navigation.read(cx);
+        let reading = state
+            .data()
+            .format_reference(state.current().map(|id| id.as_ref()));
+        let muted = cx.theme().muted_foreground;
+        let passage = move |title: String| {
+            v_flex()
+                .gap_2()
+                .child(
+                    div()
+                        .text_lg()
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .child(title),
+                )
+                .child(div().text_color(muted).child(
+                    "Οὕτως γὰρ ἠγάπησεν ὁ θεὸς τὸν κόσμον, ὥστε τὸν υἱὸν τὸν μονογενῆ \
+                         ἔδωκεν, ἵνα πᾶς ὁ πιστεύων εἰς αὐτὸν μὴ ἀπόληται ἀλλ᾽ ἔχῃ ζωὴν αἰώνιον.",
+                ))
+        };
+        Section::new("Blocks: corpus navigator").child(
+            v_flex()
+                .gap_6()
+                .child(
+                    CorpusNavigator::new("navigator-wide", &self.navigation)
+                        .edition("SBLGNT")
+                        .context("Parallels: 1 John 4:9, Romans 5:8.")
+                        .child(passage(reading.clone())),
+                )
+                .child(
+                    div().w(rems(42.)).child(
+                        CorpusNavigator::new("navigator-folded", &self.folded_navigation)
+                            .edition("SBLGNT")
+                            .context("Parallels: 1 John 4:9, Romans 5:8.")
+                            .child(passage(reading)),
+                    ),
+                ),
+        )
+    }
+
+    fn render_corpus_navigation(&self, cx: &mut Context<Self>) -> impl IntoElement {
+        use corpora_ui::composed::{HierarchyPicker, LocationBar, LocationGrid, ReferenceCommand};
+
+        let navigation = self.navigation.clone();
+        let state = navigation.read(cx);
+        let draft = state
+            .data()
+            .format_reference(state.draft().map(|id| id.as_ref()));
+        let moved = state.draft() != state.current();
+        Section::new("Composed: corpus navigation").child(
+            v_flex()
+                .w(rems(44.))
+                .gap_4()
+                .child(LocationBar::new(&navigation))
+                .child(
+                    h_flex()
+                        .items_start()
+                        .gap_6()
+                        .child(
+                            v_flex()
+                                .w(rems(16.))
+                                .gap_4()
+                                .child(ReferenceCommand::new(&navigation))
+                                .child(HierarchyPicker::new(&navigation)),
+                        )
+                        .child(
+                            v_flex()
+                                .flex_1()
+                                .gap_4()
+                                .child(LocationGrid::new(&navigation, "chapter"))
+                                .child(LocationGrid::new(&navigation, "verse"))
+                                .child(
+                                    h_flex()
+                                        .justify_between()
+                                        .gap_3()
+                                        .child(
+                                            div()
+                                                .text_sm()
+                                                .text_color(cx.theme().muted_foreground)
+                                                .child(draft),
+                                        )
+                                        .child(
+                                            Button::new("corpus-go")
+                                                .primary()
+                                                .label("Go to location")
+                                                .disabled(!moved)
+                                                .on_click(move |_, _, cx| {
+                                                    navigation.update(cx, |state, cx| {
+                                                        state.commit(None, cx);
+                                                    });
+                                                }),
+                                        ),
+                                ),
+                        ),
+                ),
+        )
+    }
+
+    fn render_research_answer(&self, cx: &mut Context<Self>) -> impl IntoElement {
+        use corpora_ui::atoms::Reference;
+        use corpora_ui::composed::ResearchAnswer;
+
+        let report = |what: &'static str| {
+            cx.listener(move |this, _: &ClickEvent, _, cx| {
+                this.composed = what.into();
+                cx.notify();
+            })
+        };
+        Section::new("Composed: research answer").child(
+            h_flex()
+                .items_start()
+                .gap_6()
+                .child(
+                    ResearchAnswer::new("answer-wrath")
+                        .detail("Answered from 3 passages · 0.8 s")
+                        .child(
+                            "The poem opens on the wrath of Achilles, not on the war: \
+                             its first word names the anger that the rest of the book follows.",
+                        )
+                        .source(
+                            Reference::new("answer-source", "Iliad · Homer corpus")
+                                .preview("μῆνιν ἄειδε, θεά, Πηληϊάδεω Ἀχιλῆος"),
+                        )
+                        .date("8th century BCE")
+                        .authors("Homer")
+                        .on_copy(report("Copied the citation"))
+                        .on_share(report("Shared the answer"))
+                        .on_add_to_list(report("Added the answer to a list")),
+                )
+                .child(
+                    ResearchAnswer::new("answer-plain")
+                        .title("No dated source")
+                        .child("Nothing in the corpus dates this reading.")
+                        .source("Codex Bezae"),
+                ),
+        )
+    }
+
+    fn render_trees(&self, cx: &mut Context<Self>) -> impl IntoElement {
+        use corpora_ui::composed::{Tree, TreeNode, TreeVariant};
+        use gpui_kit::assets::IconName as Lucide;
+
+        let books = || {
+            [
+                TreeNode::new("gospels", "Gospels").children([
+                    TreeNode::new("john", "John").badge("21").children([
+                        TreeNode::new("john-1", "Chapter 1"),
+                        TreeNode::new("john-2", "Chapter 2"),
+                    ]),
+                    TreeNode::new("luke", "Luke")
+                        .badge("24")
+                        .children([TreeNode::new("luke-22", "Chapter 22")]),
+                ]),
+                TreeNode::new("letters", "Letters").children([
+                    TreeNode::new("romans", "Romans")
+                        .children([TreeNode::new("romans-1", "Chapter 1")]),
+                    TreeNode::new("jude", "Jude").disabled(true),
+                ]),
+            ]
+        };
+        let rail = || {
+            [
+                TreeNode::new("rail-read", "Read").icon(Lucide::BookOpen),
+                TreeNode::new("rail-search", "Search").icon(Lucide::Search),
+                TreeNode::new("rail-settings", "Settings").icon(Lucide::Settings),
+            ]
+        };
+        let pick = || {
+            cx.listener(|this, id: &SharedString, _, cx| {
+                this.tree_active = id.clone();
+                cx.notify();
+            })
+        };
+        let column = |label: &'static str, tree: Tree| {
+            v_flex()
+                .gap_1()
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(cx.theme().muted_foreground)
+                        .child(label),
+                )
+                .child(tree.active(self.tree_active.clone()).on_navigate(pick()))
+        };
+        Section::new("Composed: tree").child(
+            h_flex()
+                .items_start()
+                .gap_6()
+                .child(
+                    column(
+                        "Navigation",
+                        Tree::new("tree-nav", TreeVariant::Navigation).items(books()),
+                    )
+                    .w(rems(14.)),
+                )
+                .child(
+                    column(
+                        "Contents",
+                        Tree::new("tree-toc", TreeVariant::Toc).items(books()),
+                    )
+                    .w(rems(14.)),
+                )
+                .child(
+                    column(
+                        "Files",
+                        Tree::new("tree-files", TreeVariant::Files).items(books()),
+                    )
+                    .w(rems(14.)),
+                )
+                .child(
+                    column(
+                        "Rail",
+                        Tree::new("tree-rail", TreeVariant::Sidebar).items(rail()),
+                    )
+                    .w(rems(10.)),
+                )
+                .child(
+                    column(
+                        "Folded",
+                        Tree::new("tree-folded", TreeVariant::Sidebar)
+                            .items(rail())
+                            .collapsed(true),
+                    )
+                    .w(rems(2.5)),
+                ),
+        )
+    }
+
+    fn render_flowchart(&self) -> impl IntoElement {
+        use corpora_ui::atoms::Tone;
+        use corpora_ui::composed::{FlowEdge, FlowStep, Flowchart};
+
+        Section::new("Composed: flowchart").child(
+            div().w(rems(44.)).child(
+                Flowchart::new("pipeline")
+                    .steps([
+                        FlowStep::new("load", 0, "Iliad corpus loaded")
+                            .kind("Trigger")
+                            .caption("Homer · Greek epic corpus"),
+                        FlowStep::new("line", 1, "μῆνιν ἄειδε, θεά")
+                            .kind("Text node")
+                            .tone(Tone::Warning)
+                            .caption("Iliad 1.1 · 18 characters")
+                            .x(0.28),
+                        FlowStep::new("gloss", 1, "Sing, goddess, the wrath")
+                            .kind("Translation")
+                            .tone(Tone::Success)
+                            .caption("English · Lattimore")
+                            .x(0.74)
+                            .width(260.),
+                    ])
+                    .edges([
+                        FlowEdge::new("load", "line"),
+                        FlowEdge::new("load", "gloss"),
+                    ]),
+            ),
+        )
+    }
+
     fn render_charts(&self) -> impl IntoElement {
         use corpora_ui::composed::{Chart, ChartKind, ChartRow, ChartSeries};
 
@@ -1619,8 +2041,15 @@ impl Render for Gallery {
                 .child(self.render_attachments())
                 .child(self.render_proposals(cx))
                 .child(self.render_charts())
+                .child(self.render_flowchart())
+                .child(self.render_research_answer(cx))
+                .child(self.render_trees(cx))
+                .child(self.render_corpus_navigation(cx))
                 .child(self.render_composer(cx))
                 .child(self.render_sign_in()),
+            Page::Blocks => sections
+                .child(self.render_ai_panel(cx))
+                .child(self.render_corpus_navigator(cx)),
             Page::Glass => sections.child(self.render_glass(cx)),
         };
         // A page fades and rises into place when its tab is chosen.
@@ -1708,7 +2137,7 @@ fn snapshot(dir: &std::path::Path) {
     // Tall enough to show every section without scrolling.
     let bounds = Bounds {
         origin: Point::default(),
-        size: size(px(1400.), px(4300.)),
+        size: size(px(1400.), px(6250.)),
     };
     let mut cx = HeadlessAppContext::with_platform(
         gpui_kit::platform::current_platform(true).text_system(),
@@ -1777,18 +2206,34 @@ fn snapshot(dir: &std::path::Path) {
 
 fn main() {
     let mut args = std::env::args().skip(1);
-    if args.next().as_deref() == Some("--snapshot") {
-        let dir = args.next().expect("usage: gallery --snapshot <dir>");
-        snapshot(std::path::Path::new(&dir));
-        return;
+    let mut start = Page::Foundations;
+    match args.next().as_deref() {
+        Some("--snapshot") => {
+            let dir = args.next().expect("usage: gallery --snapshot <dir>");
+            snapshot(std::path::Path::new(&dir));
+            return;
+        }
+        // Opens on one page: `gallery --page blocks`.
+        Some("--page") => {
+            let slug = args.next().expect("usage: gallery --page <slug>");
+            start = Page::ALL
+                .into_iter()
+                .find(|page| page.slug() == slug)
+                .expect("no such page");
+        }
+        _ => {}
     }
 
     gpui_kit::application()
         .with_assets(corpora_ui::Assets)
-        .run(|cx| {
+        .run(move |cx| {
             corpora_ui::init(cx);
-            gpui_kit::open_window(window_options(None), cx, |window, cx| {
-                cx.new(|cx| Gallery::new(window, cx))
+            gpui_kit::open_window(window_options(None), cx, move |window, cx| {
+                cx.new(|cx| {
+                    let mut gallery = Gallery::new(window, cx);
+                    gallery.page = start;
+                    gallery
+                })
             })
             .expect("failed to open the gallery window");
             cx.activate(true);

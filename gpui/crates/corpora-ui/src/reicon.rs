@@ -60,6 +60,8 @@ pub(crate) const PATHS: &[&str] = &[
     "icons/info.svg",
     "icons/layout-dashboard.svg",
     "icons/link-2.svg",
+    "icons/lock.svg",
+    "icons/map-pin.svg",
     "icons/map.svg",
     "icons/maximize-2.svg",
     "icons/maximize.svg",
@@ -92,6 +94,7 @@ pub(crate) const PATHS: &[&str] = &[
     "icons/search.svg",
     "icons/settings-2.svg",
     "icons/settings.svg",
+    "icons/share-2.svg",
     "icons/sort-ascending.svg",
     "icons/sort-descending.svg",
     "icons/sparkle.svg",
@@ -109,6 +112,7 @@ pub(crate) const PATHS: &[&str] = &[
     "icons/undo-2.svg",
     "icons/undo.svg",
     "icons/user.svg",
+    "icons/users.svg",
 ];
 
 /// The Reicon drawing for a Lucide asset path, if the port ships one.
@@ -172,6 +176,8 @@ pub(crate) fn load(path: &str) -> Option<&'static [u8]> {
         "icons/info.svg" => include_bytes!("../assets/icons/info.svg"),
         "icons/layout-dashboard.svg" => include_bytes!("../assets/icons/layout-dashboard.svg"),
         "icons/link-2.svg" => include_bytes!("../assets/icons/link-2.svg"),
+        "icons/lock.svg" => include_bytes!("../assets/icons/lock.svg"),
+        "icons/map-pin.svg" => include_bytes!("../assets/icons/map-pin.svg"),
         "icons/map.svg" => include_bytes!("../assets/icons/map.svg"),
         "icons/maximize-2.svg" => include_bytes!("../assets/icons/maximize-2.svg"),
         "icons/maximize.svg" => include_bytes!("../assets/icons/maximize.svg"),
@@ -204,6 +210,7 @@ pub(crate) fn load(path: &str) -> Option<&'static [u8]> {
         "icons/search.svg" => include_bytes!("../assets/icons/search.svg"),
         "icons/settings-2.svg" => include_bytes!("../assets/icons/settings-2.svg"),
         "icons/settings.svg" => include_bytes!("../assets/icons/settings.svg"),
+        "icons/share-2.svg" => include_bytes!("../assets/icons/share-2.svg"),
         "icons/sort-ascending.svg" => include_bytes!("../assets/icons/sort-ascending.svg"),
         "icons/sort-descending.svg" => include_bytes!("../assets/icons/sort-descending.svg"),
         "icons/sparkle.svg" => include_bytes!("../assets/icons/sparkle.svg"),
@@ -221,6 +228,7 @@ pub(crate) fn load(path: &str) -> Option<&'static [u8]> {
         "icons/undo-2.svg" => include_bytes!("../assets/icons/undo-2.svg"),
         "icons/undo.svg" => include_bytes!("../assets/icons/undo.svg"),
         "icons/user.svg" => include_bytes!("../assets/icons/user.svg"),
+        "icons/users.svg" => include_bytes!("../assets/icons/users.svg"),
         _ => return None,
     })
 }

@@ -73,7 +73,9 @@ const ICONS = {
   info: 'InfoCircle',
   'layout-dashboard': 'Category',
   'link-2': 'Link2',
+  lock: 'Lock',
   map: 'Map',
+  'map-pin': 'Location',
   maximize: 'Maximize',
   'maximize-2': 'Maximize2',
   'memory-stick': 'Ram',
@@ -104,6 +106,7 @@ const ICONS = {
   'rotate-cw': 'RotateRight',
   search: 'Search',
   settings: 'Settings',
+  'share-2': 'Share',
   'settings-2': 'Settings2',
   'sort-ascending': 'SortAsc',
   'sort-descending': 'SortDesc',
@@ -122,6 +125,7 @@ const ICONS = {
   undo: 'Undo',
   'undo-2': 'Undo',
   user: 'User',
+  users: 'Users',
 };
 
 // Lucide file name -> Reicon brand mark.

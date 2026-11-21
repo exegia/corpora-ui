@@ -19,6 +19,10 @@
 //! | `Recommendation.Item`, `RecommendationCard` | [`Recommendation`] |
 //! | `Composer`, `SendButton`, `AddButton` | [`Composer`] |
 //! | `Chart` | [`Chart`] |
+//! | `Flowchart` | [`Flowchart`] |
+//! | `ResearchAnswer` | [`ResearchAnswer`] |
+//! | `Tree` | [`Tree`] |
+//! | `CorpusNavigation.*` | [`CorpusNavigation`], [`LocationBar`], [`HierarchyPicker`], [`LocationGrid`], [`ReferenceCommand`] |
 //! | `Markdown` | [`Markdown`] |
 //! | `InsightCards` | [`InsightCards`], [`Insight`] |
 //! | `FilterTable`, `RecordsTable` | [`FilterTable`], [`RecordsTable`] |
@@ -33,6 +37,8 @@ mod chart;
 mod code_block;
 mod composer;
 mod context_cards;
+mod corpus_navigation;
+mod flowchart;
 mod hint;
 mod insight;
 mod logo;
@@ -40,8 +46,10 @@ mod markdown;
 mod password;
 mod reader;
 mod recommendation;
+mod research_answer;
 mod social;
 mod tables;
+mod tree;
 mod user;
 mod verse;
 
@@ -57,6 +65,11 @@ pub use composer::{
     Composer, ComposerAttachment, ComposerEvent, ComposerModel, ComposerOption, ComposerShape,
 };
 pub use context_cards::{ContextCard, ContextCards};
+pub use corpus_navigation::{
+    CorpusData, CorpusLevel, CorpusLevelKind, CorpusNavigation, CorpusNavigationEvent, CorpusNode,
+    HierarchyPicker, LocationBar, LocationGrid, ReferenceCommand,
+};
+pub use flowchart::{FlowEdge, FlowStep, Flowchart};
 pub use hint::SendHint;
 pub use insight::{Insight, InsightAllocation, InsightCards, InsightSegment};
 pub use logo::Logo;
@@ -67,7 +80,9 @@ pub use reader::{
     WordSelection,
 };
 pub use recommendation::{Recommendation, RecommendationOption, RecommendationState};
+pub use research_answer::ResearchAnswer;
 pub use social::{SocialAction, SocialLayout, SocialProvider, SocialProviders};
 pub use tables::{FilterRow, FilterStatus, FilterTable, RecordColumn, RecordRow, RecordsTable};
+pub use tree::{Tree, TreeNode, TreeVariant};
 pub use user::{UserInfo, UserMessage, UserPill};
 pub use verse::Verse;

@@ -19,15 +19,14 @@ gpui/
 │   ├── src/
 │   │   ├── foundations/   # tokens: color, theme, radius, motion, shadow, size, typography
 │   │   ├── atoms/         # basic elements
-│   │   └── composed/      # atoms assembled into one piece of interface
+│   │   ├── composed/      # atoms assembled into one piece of interface
+│   │   └── blocks/        # composed pieces arranged into a region of an app
 │   ├── assets/            # fonts (Allo, Caudex), Reicon icons, brand marks, images
 │   ├── examples/gallery.rs
-│   └── tests/             # atoms.rs, composed.rs
+│   └── tests/             # atoms.rs, composed.rs, blocks.rs
 ├── scripts/reicon.mjs     # regenerates assets/icons and src/reicon.rs
 └── vendor/                # GPUI with the glass backdrop pass; see vendor/README.md
 ```
-
-`blocks/` will sit beside `composed/` as it is ported.
 
 ## Usage
 
@@ -107,6 +106,10 @@ Not ported yet: the `glass` button variant.
 | `SelectionHighlight`, `AppliedMark`, `ApplyToast` | `SelectionHighlight`, `AppliedMark`, `ApplyToast` |
 | `Attachment` | `Attachment`, `AttachmentKind` |
 | `Markdown` | `Markdown` |
+| `ResearchAnswer` | `ResearchAnswer` |
+| `Tree` | `Tree`, `TreeNode`, `TreeVariant` |
+| `CorpusNavigation.*` | `CorpusNavigation`, `LocationBar`, `HierarchyPicker`, `LocationGrid`, `ReferenceCommand`, `CorpusData`, `CorpusLevel`, `CorpusNode` |
+| `Flowchart` | `Flowchart`, `FlowStep`, `FlowEdge` |
 | `Chart` | `Chart`, `ChartKind`, `ChartRow`, `ChartSeries` |
 | `Composer`, `SendButton`, `AddButton` | `Composer` (an entity), `ComposerEvent`, `ComposerOption`, `ComposerModel`, `ComposerAttachment`, `ComposerShape` |
 | `Recommendation.Item`, `RecommendationCard` | `Recommendation`, `RecommendationOption`, `RecommendationState` |
@@ -127,9 +130,23 @@ AiMessage::new("message-42")
     .child(StreamingText::from_text("message-42-text", [answer]).streaming(is_streaming))
 ```
 
-Not ported yet: the research answer, the flowchart, corpus navigation and
-the tree. From `ui/chat`, the favicon, source chip, avatar
+Every composed piece is ported. From `ui/chat`, the favicon, source chip, avatar
 stack, waveform and thumbnail wait for the pieces that use them.
+
+### Blocks
+
+| React | GPUI |
+| --- | --- |
+| `CorpusNavigator`, `NavigationPicker` | `CorpusNavigator`, `NavigationPicker` |
+| `AiPanel`, `AiPanelHeader` | `AiPanel`, `AiPanelHeader` |
+| `SuggestedPrompts` (the panel's) | `PromptList` |
+| `RecommendationStack` | `RecommendationStack` |
+| `LockedBanner`, `PinnedThreadBanner`, `DegradedBanner` | same names |
+| `VersionHistoryRecord` | `VersionHistoryRecord`, `VersionHistoryEntry` |
+| `IAiScope`, `formatScopeLabel` | `AiScope`, `AiScope::label` |
+
+Not ported yet: `auth`, `profile`, `scaffold`, `shell`, `sidebar` and
+`sidebar-primitives`.
 
 ### Button
 
@@ -232,6 +249,53 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
   which. Rows carry their values in series order instead of keyed objects,
   values print with grouped thousands, and the header takes a text badge
   rather than a `Reference`. `InsightCards` still has no trend chart.
+- **The flowchart lays out, selects and drags; it does not edit.**
+  `Flowchart` draws the cards and connectors, selects a card on a click
+  (lighting its connectors) and moves it on a drag. Left out: zoom and
+  panning (GPUI has no scale transform for elements), the context menu,
+  adding, removing, renaming and duplicating cards, picking or re-routing
+  a connector and its toolbar, the if/else condition body, and the sample
+  steps React shows when given none. The canvas is as wide as its parent
+  rather than twice it, and a card is not narrowed to fit a small canvas.
+- **The tree is a view, not a controller.** `Tree` draws the four shapes
+  and remembers which branches are open; the owner holds the active id and
+  moves it in `on_navigate`, which receives the row's id. There is no
+  `useTree` controller, no rename, no drag-and-drop, no trailing row
+  actions and no arrow-key navigation between rows. `href` and `target`
+  have no counterpart: a contents row does not jump to an anchor.
+  `force_open` stands in for `expandAll` on a filtered tree.
+- **Corpus navigation is one entity and four views.** `CorpusNavigation`
+  holds the corpus, the reading location, the draft and the history; the
+  pieces take the entity instead of a `navigatorId`. A location is a node
+  id, not a `{corpusId, editionId, nodeId}` anchor: one entity is one
+  edition. `commit` is synchronous and emits `Navigate`; there is no
+  `onNavigate` promise, pending state, error or retry, no saved history
+  across editions, and no controlled mode. `ReferenceCommand` is an inline
+  field with its results beneath it, not a modal on Cmd-K, and it matches
+  references only: there is no text search. `LocationGrid` pages past 60
+  choices with arrows but has no filter field and no arrow-key movement
+  between cells. Right-to-left corpora are not mirrored.
+  Draw one set of views per entity: their element ids derive from it, so
+  two location bars on one entity collide.
+- **The AI panel takes the composer, not its props.** `AiPanel::new(id,
+  &composer)` renders an entity the host owns and subscribes to. `locked`
+  disables that composer when it changes, and re-enables it when it
+  clears. The lock shows only on a locked panel (React draws it on an
+  unlocked one). The panel's prompt list is `PromptList`, since
+  `SuggestedPrompts` is the composed folding list. The banners are drawn
+  by the block: there is no `Alert` atom yet. `VersionHistoryEntry` takes
+  its timestamp already formatted.
+- **The corpus navigator folds its picker in place.** Under 1100px of its
+  own width the picker opens beneath the location bar from the Browse
+  button, where React slides a drawer in from the side or the bottom. The
+  open state lives on `CorpusNavigation` (`picker_open`), and Cancel or a
+  commit closes it. The first frame assumes the wide layout, then measures.
+  The reading is passed as children, not as a render function over the
+  state: read the entity instead.
+- **A research answer shows only the commands it can run.** Copy, Share
+  and Add to list each appear when their handler is set, where React draws
+  all three regardless. A source or author is text or a `Reference` chip;
+  there is no `IResearchReference` object with a favicon preview.
 - **A recommendation is one card.** `Recommendation` folds on its own
   heading, so there is no `Recommendation.Group` accordion: stack cards in a
   column. Its state belongs to the owner, and the running mark is the stock

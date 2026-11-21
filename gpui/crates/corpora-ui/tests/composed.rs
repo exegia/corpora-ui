@@ -746,3 +746,304 @@ fn chart_legend_picks_a_series_and_lets_it_go(cx: &mut TestAppContext) {
     visual.simulate_click(greek, Modifiers::none());
     assert_eq!(picked.borrow().as_slice(), [Some("greek".into()), None]);
 }
+
+/// Each finished drag: the card and how far it sits from its place.
+type Drags = Rc<RefCell<Vec<(SharedString, (f32, f32))>>>;
+
+struct FlowHost {
+    selected: Rc<RefCell<Vec<Option<SharedString>>>>,
+    dragged: Drags,
+}
+
+impl Render for FlowHost {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        use corpora_ui::composed::{FlowStep, Flowchart};
+
+        let selected = self.selected.clone();
+        let dragged = self.dragged.clone();
+        div().size_full().flex().flex_col().items_start().child(
+            div().id("flow").test_support().w(px(500.)).child(
+                Flowchart::new("pipeline")
+                    .steps([
+                        FlowStep::new("load", 0, "Corpus loaded"),
+                        FlowStep::new("line", 1, "First line"),
+                    ])
+                    .on_select(move |id, _, _| selected.borrow_mut().push(id.cloned()))
+                    .on_drag(move |id, offset, _, _| {
+                        dragged.borrow_mut().push((id.clone(), offset));
+                    }),
+            ),
+        )
+    }
+}
+
+#[gpui_kit::test]
+fn flowchart_selects_on_a_click_and_moves_on_a_drag(cx: &mut TestAppContext) {
+    cx.update(corpora_ui::init);
+    let selected = Rc::new(RefCell::new(Vec::new()));
+    let dragged = Rc::new(RefCell::new(Vec::new()));
+    let host = (selected.clone(), dragged.clone());
+    let window = open(cx, |_, cx| {
+        cx.new(|_| FlowHost {
+            selected: host.0,
+            dragged: host.1,
+        })
+    });
+    let mut visual = VisualTestContext::from_window(window, cx);
+    let flow = visual.update(|window, cx| {
+        window.render_frame(cx);
+        window.render_frame(cx);
+        window.find("flow").bounds()
+    });
+    // The first card is centered, a row's padding below the top.
+    let card = point(flow.center().x, flow.top() + px(50.));
+
+    visual.simulate_click(card, Modifiers::none());
+    assert_eq!(selected.borrow().as_slice(), [Some("load".into())]);
+    visual.simulate_click(card, Modifiers::none());
+    assert_eq!(selected.borrow().as_slice(), [Some("load".into()), None]);
+
+    // Pressing and moving past the slop drags the card and selects nothing.
+    visual.simulate_mouse_down(card, gpui_kit::MouseButton::Left, Modifiers::none());
+    visual.simulate_mouse_move(
+        card + point(px(40.), px(10.)),
+        Some(gpui_kit::MouseButton::Left),
+        Modifiers::none(),
+    );
+    visual.simulate_mouse_up(
+        card + point(px(40.), px(10.)),
+        gpui_kit::MouseButton::Left,
+        Modifiers::none(),
+    );
+    assert_eq!(dragged.borrow().as_slice(), [("load".into(), (40., 10.))]);
+    assert_eq!(selected.borrow().len(), 2);
+}
+
+struct TreeHost {
+    picked: Rc<RefCell<Vec<SharedString>>>,
+}
+
+impl Render for TreeHost {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        use corpora_ui::composed::{Tree, TreeNode, TreeVariant};
+
+        let picked = self.picked.clone();
+        div().size_full().flex().flex_col().items_start().child(
+            div().id("tree").test_support().w(px(240.)).child(
+                Tree::new("books", TreeVariant::Files)
+                    .items([
+                        TreeNode::new("gospels", "Gospels").children([
+                            TreeNode::new("john", "John"),
+                            TreeNode::new("luke", "Luke"),
+                        ]),
+                        TreeNode::new("acts", "Acts"),
+                    ])
+                    .on_navigate(move |id, _, _| picked.borrow_mut().push(id.clone())),
+            ),
+        )
+    }
+}
+
+#[gpui_kit::test]
+fn tree_folders_fold_and_files_report_a_selection(cx: &mut TestAppContext) {
+    cx.update(corpora_ui::init);
+    // The branch opens at once, without its reveal.
+    cx.update(|cx| cx.set_reduce_motion(true));
+    let picked = Rc::new(RefCell::new(Vec::new()));
+    let host_picked = picked.clone();
+    let window = open(cx, |_, cx| {
+        cx.new(|_| TreeHost {
+            picked: host_picked,
+        })
+    });
+    let mut visual = VisualTestContext::from_window(window, cx);
+    let bounds = |visual: &mut VisualTestContext| {
+        visual.update(|window, cx| {
+            window.render_frame(cx);
+            window.render_frame(cx);
+            window.find("tree").bounds()
+        })
+    };
+    // Two rows while the folder is shut: 28px each and a 2px gap.
+    let shut = bounds(&mut visual);
+    assert_px(shut.size.height, 28. * 2. + 2., "folded tree height");
+
+    // A folder only opens; it does not report a selection.
+    let folder = point(shut.left() + px(60.), shut.top() + px(14.));
+    visual.simulate_click(folder, Modifiers::none());
+    visual.run_until_parked();
+    let open = bounds(&mut visual);
+    assert!(
+        open.size.height > shut.size.height,
+        "the folder opened: {open:?} from {shut:?}"
+    );
+    assert!(picked.borrow().is_empty());
+
+    // The last row is still the root file.
+    visual.simulate_click(
+        point(open.left() + px(60.), open.bottom() - px(14.)),
+        Modifiers::none(),
+    );
+    assert_eq!(picked.borrow().as_slice(), ["acts"]);
+}
+
+struct NavigationHost {
+    navigation: Entity<corpora_ui::composed::CorpusNavigation>,
+}
+
+impl Render for NavigationHost {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        use corpora_ui::composed::{HierarchyPicker, LocationBar, LocationGrid, ReferenceCommand};
+
+        div()
+            .size_full()
+            .flex()
+            .flex_col()
+            .child(LocationBar::new(&self.navigation))
+            .child(ReferenceCommand::new(&self.navigation))
+            .child(HierarchyPicker::new(&self.navigation))
+            .child(
+                div()
+                    .id("chapters")
+                    .test_support()
+                    .w(px(300.))
+                    .child(LocationGrid::new(&self.navigation, "chapter")),
+            )
+    }
+}
+
+#[gpui_kit::test]
+fn corpus_navigation_drafts_on_a_pick_and_moves_on_a_commit(cx: &mut TestAppContext) {
+    use corpora_ui::composed::{
+        CorpusData, CorpusLevel, CorpusLevelKind, CorpusNavigation, CorpusNavigationEvent,
+        CorpusNode,
+    };
+
+    cx.update(corpora_ui::init);
+    let held = Rc::new(RefCell::new(None));
+    let moves = Rc::new(RefCell::new(Vec::<SharedString>::new()));
+    let (host_held, host_moves) = (held.clone(), moves.clone());
+    let window = open(cx, move |window, cx| {
+        let data = CorpusData::new(
+            "Sample",
+            [
+                CorpusLevel::new("book", "Book", CorpusLevelKind::Hierarchy),
+                CorpusLevel::new("chapter", "Chapter", CorpusLevelKind::Number),
+            ],
+            [
+                CorpusNode::new("john", "book", "John").children((1..=7).map(|chapter| {
+                    CorpusNode::new(format!("john-{chapter}"), "chapter", chapter.to_string())
+                        .reference(chapter.to_string())
+                })),
+            ],
+        );
+        let navigation = cx.new(|cx| {
+            CorpusNavigation::new(data, window, cx)
+                .location("john-1")
+                .history_limit(2)
+        });
+        cx.subscribe(&navigation, move |_, event: &CorpusNavigationEvent, _| {
+            let CorpusNavigationEvent::Navigate(id) = event;
+            host_moves.borrow_mut().push(id.clone());
+        })
+        .detach();
+        *host_held.borrow_mut() = Some(navigation.clone());
+        cx.new(|_| NavigationHost { navigation })
+    });
+    let navigation = held.borrow().clone().unwrap();
+    let mut visual = VisualTestContext::from_window(window, cx);
+    let grid = visual.update(|window, cx| {
+        window.render_frame(cx);
+        window.render_frame(cx);
+        window.find("chapters").bounds()
+    });
+
+    // The second row holds chapters 6 and 7, in the first two of five columns.
+    visual.simulate_click(
+        point(grid.left() + px(90.), grid.bottom() - px(12.)),
+        Modifiers::none(),
+    );
+    visual.update(|_, cx| {
+        let state = navigation.read(cx);
+        assert_eq!(state.draft().map(|id| id.as_ref()), Some("john-7"));
+        assert_eq!(state.current().map(|id| id.as_ref()), Some("john-1"));
+    });
+    assert!(moves.borrow().is_empty(), "a pick does not navigate");
+
+    visual.update(|_, cx| {
+        navigation.update(cx, |state, cx| {
+            state.commit(None, cx);
+            state.commit(Some("john-3".into()), cx);
+            state.commit(Some("john-4".into()), cx);
+            // An unknown place is ignored.
+            state.commit(Some("mark-1".into()), cx);
+            // Only the last two places are remembered.
+            assert_eq!(state.history(), ["john-7", "john-3"]);
+            state.return_to_previous(cx);
+            assert_eq!(state.current().map(|id| id.as_ref()), Some("john-3"));
+            assert_eq!(state.history(), ["john-7"]);
+        });
+    });
+    assert_eq!(
+        moves.borrow().as_slice(),
+        ["john-7", "john-3", "john-4", "john-3"]
+    );
+}
+
+struct AnswerHost {
+    copies: Rc<RefCell<usize>>,
+}
+
+impl Render for AnswerHost {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        use corpora_ui::composed::ResearchAnswer;
+
+        let copies = self.copies.clone();
+        div()
+            .size_full()
+            .flex()
+            .flex_col()
+            .items_start()
+            .child(
+                div().id("wired").test_support().child(
+                    ResearchAnswer::new("wired-answer")
+                        .child("The poem opens on wrath.")
+                        .on_copy(move |_, _, _| *copies.borrow_mut() += 1),
+                ),
+            )
+            .child(
+                div()
+                    .id("plain")
+                    .test_support()
+                    .child(ResearchAnswer::new("plain-answer").child("The poem opens on wrath.")),
+            )
+    }
+}
+
+#[gpui_kit::test]
+fn research_answer_shows_a_command_only_when_it_is_wired(cx: &mut TestAppContext) {
+    cx.update(corpora_ui::init);
+    let copies = Rc::new(RefCell::new(0));
+    let host_copies = copies.clone();
+    let window = open(cx, |_, cx| {
+        cx.new(|_| AnswerHost {
+            copies: host_copies,
+        })
+    });
+    let mut visual = VisualTestContext::from_window(window, cx);
+    let (wired, plain) = visual.update(|window, cx| {
+        window.render_frame(cx);
+        window.render_frame(cx);
+        (window.find("wired").bounds(), window.find("plain").bounds())
+    });
+    // The command row is what makes the wired card the taller one.
+    assert!(
+        wired.size.height > plain.size.height + px(16.),
+        "{wired:?} against {plain:?}"
+    );
+    visual.simulate_click(
+        point(wired.left() + px(36.), wired.bottom() - px(20.)),
+        Modifiers::none(),
+    );
+    assert_eq!(*copies.borrow(), 1);
+}

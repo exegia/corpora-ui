@@ -10,7 +10,7 @@ use crate::reicon;
 // The Lucide icons the atoms draw that neither Reicon nor GPUI Component's
 // default bundle covers. Add an icon here only when `scripts/reicon.mjs`
 // has no Reicon drawing for it.
-gpui_kit::assets::icon_assets!(AtomIcons, [Cone, CornerDownLeft]);
+gpui_kit::assets::icon_assets!(AtomIcons, [Cone, CornerDownLeft, ListPlus]);
 
 /// Path of the Exegia agent's portrait.
 pub(crate) const OWL_AVATAR: &str = "images/owl-avatar.png";
