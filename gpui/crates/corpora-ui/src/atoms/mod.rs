@@ -18,6 +18,10 @@
 //! | `Reference` | [`Reference`] (this crate) |
 //! | `InputField` | [`InputField`] (this crate, on the stock input) |
 //! | `SourceChip`, `SelectChip` | [`Chip`], [`SelectChip`] (this crate) |
+//! | `EmojiPicker` | [`EmojiPicker`], [`EmojiPickerState`] |
+//! | `CardFrame` and its parts | [`CardFrame`], [`CardFrameHeader`] |
+//! | `Frame`, `FramePanel` | [`Frame`] |
+//! | (height transitions) | [`Reveal`] |
 //! | `Label` (text level) | [`Text::label`] with a [`LabelLevel`] |
 //! | `Label` | [`Label`] |
 //! | `Kbd` | [`Kbd`] |
@@ -31,20 +35,25 @@ mod bubble;
 mod button;
 mod card;
 mod chip;
+mod emoji;
 mod field;
 mod loader;
 mod reference;
+mod reveal;
 mod text;
 
 pub use avatar::{Avatar, AvatarAudio, AvatarStatus, AvatarUser};
 pub use badge::{Badge, BadgeAppearance, BadgeVariant};
 pub use bubble::{Bubble, BubbleReaction, BubbleVariant};
 pub use button::{Button, ButtonKind};
-pub use card::{Card, CardHeader};
+pub use card::{Card, CardFrame, CardFrameHeader, CardHeader, Frame};
 pub use chip::{Chip, SelectChip};
+pub(crate) use emoji::WIDTH as PICKER_WIDTH;
+pub use emoji::{Emoji, EmojiPicker, EmojiPickerState};
 pub use field::InputField;
 pub use loader::{Loader, LoaderKind};
 pub use reference::Reference;
+pub use reveal::Reveal;
 pub use text::{LabelLevel, Text, TextSize, TextVariant};
 
 pub use gpui_kit::component::kbd::Kbd;

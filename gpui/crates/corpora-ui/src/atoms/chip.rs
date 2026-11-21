@@ -3,11 +3,12 @@
 use std::rc::Rc;
 
 use gpui_kit::component::button::{Button as StockButton, ButtonRounded, ButtonVariants as _};
-use gpui_kit::component::{ActiveTheme as _, Icon, Selectable as _, Sizable as _, StyledExt as _};
+use gpui_kit::component::menu::{DropdownMenu as _, PopupMenuItem};
+use gpui_kit::component::{ActiveTheme as _, Icon, Sizable as _, StyledExt as _};
 use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
-    App, ClickEvent, ElementId, IntoElement, ParentElement as _, RenderOnce, SharedString,
-    Styled as _, Window, div, rems,
+    App, ElementId, IntoElement, ParentElement as _, RenderOnce, SharedString, Styled as _, Window,
+    div, rems,
 };
 
 use crate::foundations::shadow::shadow_xs;
@@ -64,26 +65,28 @@ impl RenderOnce for Chip {
     }
 }
 
-type ClickHandler = Rc<dyn Fn(&ClickEvent, &mut Window, &mut App)>;
+type PickHandler = Rc<dyn Fn(&SharedString, &mut Window, &mut App)>;
 
-/// A compact trigger showing the current choice of a menu. React's
-/// `SelectChip`.
-///
-/// The chip is only the trigger: the caller owns the open state and the menu.
+/// A compact value that opens a menu of the other values it can take.
 ///
 /// ```ignore
-/// SelectChip::new("status", "Pending")
-///     .dot(true)
-///     .open(self.status_menu_open)
-///     .on_click(cx.listener(|this, _, _, cx| this.toggle_status_menu(cx)))
+/// SelectChip::new("status", self.status.clone())
+///     .options(["Pending", "Paid", "Refunded"])
+///     .on_pick(cx.listener(|this, status, _, cx| {
+///         this.status = status.clone();
+///         cx.notify();
+///     }))
 /// ```
+///
+/// The current value is checked in the menu. Without options the chip is a
+/// plain button with no menu.
 #[derive(IntoElement)]
 pub struct SelectChip {
     id: ElementId,
     value: SharedString,
     dot: bool,
-    open: bool,
-    on_click: Option<ClickHandler>,
+    options: Vec<SharedString>,
+    on_pick: Option<PickHandler>,
 }
 
 impl SelectChip {
@@ -93,8 +96,8 @@ impl SelectChip {
             id: id.into(),
             value: value.into(),
             dot: false,
-            open: false,
-            on_click: None,
+            options: Vec::new(),
+            on_pick: None,
         }
     }
 
@@ -104,17 +107,18 @@ impl SelectChip {
         self
     }
 
-    /// Whether the menu this chip triggers is showing.
-    pub fn open(mut self, open: bool) -> Self {
-        self.open = open;
+    /// Every value the chip can take, the current one included.
+    pub fn options(mut self, options: impl IntoIterator<Item = impl Into<SharedString>>) -> Self {
+        self.options = options.into_iter().map(Into::into).collect();
         self
     }
 
-    pub fn on_click(
+    /// Called with the option picked from the menu.
+    pub fn on_pick(
         mut self,
-        handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
+        handler: impl Fn(&SharedString, &mut Window, &mut App) + 'static,
     ) -> Self {
-        self.on_click = Some(Rc::new(handler));
+        self.on_pick = Some(Rc::new(handler));
         self
     }
 }
@@ -122,14 +126,13 @@ impl SelectChip {
 impl RenderOnce for SelectChip {
     fn render(self, _: &mut Window, cx: &mut App) -> impl IntoElement {
         let warning = cx.palette().warning;
-        StockButton::new(self.id)
+        let trigger = StockButton::new(self.id)
             .secondary()
             .small()
             .rounded(ButtonRounded::Size(Radius::Sm.resolve(cx)))
             .px_1p5()
             .gap_1()
             .cursor_pointer()
-            .selected(self.open)
             .dropdown_caret(true)
             .when(self.dot, |this| {
                 this.child(div().flex_none().size_1p5().rounded_full().bg(warning))
@@ -140,10 +143,32 @@ impl RenderOnce for SelectChip {
                     .truncate()
                     .text_xs()
                     .font_medium()
-                    .child(self.value),
-            )
-            .when_some(self.on_click, |this, handler| {
-                this.on_click(move |event, window, cx| handler(event, window, cx))
+                    .child(self.value.clone()),
+            );
+        if self.options.is_empty() {
+            return trigger.into_any_element();
+        }
+
+        let value = self.value;
+        let options = self.options;
+        let on_pick = self.on_pick;
+        trigger
+            .dropdown_menu(move |mut menu, _, _| {
+                for option in &options {
+                    let on_pick = on_pick.clone();
+                    let picked = option.clone();
+                    menu = menu.item(
+                        PopupMenuItem::new(option.clone())
+                            .checked(*option == value)
+                            .on_click(move |_, window, cx| {
+                                if let Some(on_pick) = &on_pick {
+                                    on_pick(&picked, window, cx);
+                                }
+                            }),
+                    );
+                }
+                menu
             })
+            .into_any_element()
     }
 }

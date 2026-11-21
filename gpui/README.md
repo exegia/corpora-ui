@@ -6,7 +6,7 @@ Component and the default icons behind one dependency).
 
 ```sh
 cargo run -p corpora-ui --example gallery                      # open the gallery
-cargo run -p corpora-ui --example gallery -- --snapshot <dir>  # render it to PNGs, no window
+cargo run -p corpora-ui --example gallery -- --snapshot <dir>  # render every page to PNGs, no window
 cargo test -p corpora-ui
 cargo clippy -p corpora-ui --all-targets
 ```
@@ -64,6 +64,7 @@ by hand. So the port has two halves:
 | `Button` | `Button`, `ButtonKind` | this crate, on the stock button |
 | `Badge` | `Badge` | this crate |
 | `Card`, `CardHeader`, `CardPanel`, `CardFooter` | `Card`, `CardHeader` | this crate |
+| `CardFrame` and its parts, `Frame`, `FramePanel` | `CardFrame`, `CardFrameHeader`, `Frame` | this crate |
 | `Text`, `Heading`, `Paragraph`, `Span` | `Text` | this crate |
 | `Label` (text level) | `Text::label` with a `LabelLevel` | this crate |
 | `Loader` | `Loader` | this crate |
@@ -71,11 +72,13 @@ by hand. So the port has two halves:
 | `Bubble` and its parts | `Bubble`, `BubbleReaction` | this crate |
 | `Reference` | `Reference` | this crate, on the stock button and hover card |
 | `InputField` | `InputField` | this crate, on the stock input |
-| `SourceChip`, `SelectChip` | `Chip`, `SelectChip` | this crate |
+| `SourceChip`, `SelectChip` | `Chip`, `SelectChip` | this crate, on the stock dropdown menu |
+| `EmojiPicker` | `EmojiPicker`, `EmojiPickerState`, `Emoji` | this crate, data from the `emojis` crate |
+| (height transitions) | `Reveal` | this crate, on GPUI Base's `MotionReveal` |
 | `Label` (form), `Kbd`, `Separator`, `Skeleton`, `Spinner` | same names | GPUI Component |
 
-Not ported yet: `Texture`, the text-selection popovers, the `glass` button
-variant and the emoji picker behind a bubble's add-reaction button.
+Not ported yet: `Texture`, the text-selection popovers and the `glass` button
+variant.
 
 ### Composed
 
@@ -86,6 +89,7 @@ variant and the emoji picker behind a bubble's add-reaction button.
 | `StreamingText` | `StreamingText`, `StreamToken` |
 | `SuggestedPrompt`, `SuggestedPrompts` | same names |
 | `ActionBar`, `EmojiActionBar` | same names |
+| `Bubble.ReactionsButton` | `ReactionPicker` |
 | `Logo` | `Logo` |
 | `PasswordInput` | `PasswordInput`, `password_strength` |
 | `SocialProviders` | `SocialProviders` |
@@ -156,17 +160,24 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
 
 ## Deliberate differences from React
 
-- **Composed components do not animate height.** GPUI cannot tween to an
-  intrinsic size, so the suggestions panel and the strength checklist appear
-  at once. A folded `Logo` fades its wordmark, then drops it from the layout.
+- **Height changes go through `Reveal`.** GPUI cannot tween to an intrinsic
+  size, so `Reveal` measures its content and grows to it: the suggestions
+  panel, the strength checklist and the emoji picker all open and close this
+  way. A folded `Logo` fades its wordmark, then drops it from the layout.
 - **`SuggestedPrompts` is not tucked under a composer.** React pulls its
   bottom edge behind the composer pill; that belongs to the composer, which is
   not ported.
 - **`SocialProviders` draws every provider as an outline button.** React
   fills Apple's black. The Apple and GitHub marks are Lucide's outlines, not
   Remix's filled ones.
-- **`EmojiActionBar` is the quick row only.** "More emoji" calls your handler;
-  there is no full picker.
+- **`EmojiActionBar` keeps the picker's width once it has a picker**, so the
+  swap between the quick row and the full picker changes its height only.
+  The picker groups emoji under plain headers that scroll with the list
+  (React's are sticky and blurred), has no skin-tone control, and leaves out
+  emoji newer than Emoji 15.1, which older system fonts cannot draw.
+- **`SelectChip` owns its menu.** Pass `options` and `on_pick`; React's
+  `open`, `onToggle`, `width`, `align` and item `tag` are gone, and the stock
+  menu places itself.
 - **`ActionBar` takes commands, not components**, and drops a separator that
   has nothing on one side of it.
 - **`SendHint` shows the platform's keys**: ⌘↵ on macOS, Ctrl+Enter elsewhere.
@@ -192,7 +203,11 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
 
 - **Card insets are owned by `Card`.** React pads each part and corrects the
   seams with descendant selectors. Here `Card` takes `header`, `content` and
-  `footer` slots and resolves the insets itself.
+  `footer` slots and resolves the insets itself. `Card::divided` stands in
+  for `border-b` / `border-t` on the parts, and `CardFrame` takes its cards
+  through `.card(…)` so it can merge their borders with its own.
+- **One header type serves both frames.** `CardFrameHeader` heads a
+  `CardFrame` and a `Frame`; each sets its own insets.
 - **No `Text` link variant.** Use GPUI Component's `Link` for a URL and a
   `Button` for anything in-app.
 - **Badge `focus` variants are omitted.** They reference `--focus`, which

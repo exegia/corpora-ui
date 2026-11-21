@@ -101,6 +101,7 @@ pub struct Bubble {
     reactions: Vec<BubbleReaction>,
     on_toggle_reaction: Option<ToggleHandler>,
     on_add_reaction: Option<ClickHandler>,
+    add_reaction: Option<AnyElement>,
 }
 
 impl Bubble {
@@ -118,6 +119,7 @@ impl Bubble {
             reactions: Vec::new(),
             on_toggle_reaction: None,
             on_add_reaction: None,
+            add_reaction: None,
         }
     }
 
@@ -178,8 +180,16 @@ impl Bubble {
         self
     }
 
-    /// Adds an "Add reaction" button to the reaction pill. Open the emoji
-    /// picker from the handler.
+    /// Puts a control at the end of the reaction pill, in place of the plain
+    /// button of [`Self::on_add_reaction`]. Pass a
+    /// [`crate::composed::ReactionPicker`] to open the emoji picker from it.
+    pub fn add_reaction(mut self, control: impl IntoElement) -> Self {
+        self.add_reaction = Some(control.into_any_element());
+        self
+    }
+
+    /// Adds an "Add reaction" button to the reaction pill that only calls
+    /// the handler.
     pub fn on_add_reaction(
         mut self,
         handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
@@ -253,7 +263,8 @@ impl RenderOnce for Bubble {
 
         let on_toggle = self.on_toggle_reaction;
         let on_add = self.on_add_reaction;
-        let has_pill = !self.reactions.is_empty() || on_add.is_some();
+        let add_reaction = self.add_reaction;
+        let has_pill = !self.reactions.is_empty() || on_add.is_some() || add_reaction.is_some();
         let pill = has_pill.then(|| {
             h_flex()
                 .absolute()
@@ -306,7 +317,7 @@ impl RenderOnce for Bubble {
                             }
                         })
                 }))
-                .when_some(on_add, |this, on_add| {
+                .when_some(on_add.filter(|_| add_reaction.is_none()), |this, on_add| {
                     this.child(
                         Button::new(child_id("add-reaction"))
                             .ghost()
@@ -316,6 +327,7 @@ impl RenderOnce for Bubble {
                             .on_click(move |event, window, cx| on_add(event, window, cx)),
                     )
                 })
+                .children(add_reaction)
         });
 
         let actions = self.actions.map(|actions| {

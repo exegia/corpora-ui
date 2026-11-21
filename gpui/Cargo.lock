@@ -1185,6 +1185,7 @@ dependencies = [
 name = "corpora-ui"
 version = "0.1.0"
 dependencies = [
+ "emojis",
  "gpui-kit",
 ]
 
@@ -1535,6 +1536,15 @@ dependencies = [
  "toml 1.2.2+spec-1.1.0",
  "vswhom",
  "winreg",
+]
+
+[[package]]
+name = "emojis"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "589871e639330783bc20ad89d32ac1b049e02c273d96c907ca27478c8bc674a2"
+dependencies = [
+ "phf 0.13.1",
 ]
 
 [[package]]

@@ -569,21 +569,24 @@ impl RenderOnce for SuggestedPrompts {
             .flex_col()
             .w_full()
             .child(header)
-            .when(open, |this| {
-                this.child(
-                    div()
-                        .flex()
-                        .flex_col()
-                        .gap_0p5()
-                        .mt_1()
-                        .p_1p5()
-                        .rounded(Radius::Md.resolve(cx))
-                        .border_t_1()
-                        .border_color(theme.border)
-                        .bg(theme.secondary)
-                        .children(self.prompts),
-                )
-            })
+            .child(
+                crate::atoms::Reveal::new(child_id(&self.id, "panel"), open).child(
+                    // The gap above the panel is inside the reveal, so it
+                    // closes with it.
+                    div().pt_1().child(
+                        div()
+                            .flex()
+                            .flex_col()
+                            .gap_0p5()
+                            .p_1p5()
+                            .rounded(Radius::Md.resolve(cx))
+                            .border_t_1()
+                            .border_color(theme.border)
+                            .bg(theme.secondary)
+                            .children(self.prompts),
+                    ),
+                ),
+            )
             .into_any_element()
     }
 }

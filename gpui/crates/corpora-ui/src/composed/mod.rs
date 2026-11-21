@@ -8,6 +8,7 @@
 //! | `StreamingText` | [`StreamingText`], [`StreamToken`] |
 //! | `SuggestedPrompt`, `SuggestedPrompts` | [`SuggestedPrompt`], [`SuggestedPrompts`] |
 //! | `ActionBar`, `EmojiActionBar` | [`ActionBar`], [`EmojiActionBar`] |
+//! | `Bubble.ReactionsButton` | [`ReactionPicker`] |
 //! | `Logo` | [`Logo`] |
 //! | `PasswordInput` | [`PasswordInput`] |
 //! | `SocialProviders` | [`SocialProviders`] |
@@ -21,7 +22,7 @@ mod password;
 mod social;
 mod user;
 
-pub use action_bar::{ActionBar, Emoji, EmojiActionBar, quick_reactions};
+pub use action_bar::{ActionBar, EmojiActionBar, ReactionPicker, quick_reactions};
 pub use ai::{
     AiIdentity, AiMessage, STREAM_GAP, StreamToken, StreamingText, SuggestedPrompt,
     SuggestedPrompts,

@@ -8,6 +8,7 @@ use gpui_kit::{
     App, Entity, IntoElement, ParentElement as _, RenderOnce, Styled as _, Window, div, relative,
 };
 
+use crate::atoms::Reveal;
 use crate::foundations::ActiveCorporaTheme as _;
 use crate::foundations::motion::{DURATION_SLOW, EASE_SMOOTH_OUT};
 
@@ -120,11 +121,13 @@ impl RenderOnce for PasswordInput {
             .when(self.visibility_toggle, |this| this.mask_toggle())
             .disabled(self.disabled);
 
-        v_flex()
-            .w_full()
-            .gap_3()
-            .child(input)
-            .when(self.show_strength, |this| {
+        v_flex().w_full().child(input).child({
+            let this = v_flex().pt_3();
+            Reveal::new(
+                ("password-strength", self.state.entity_id()),
+                self.show_strength,
+            )
+            .child({
                 let meter = div()
                     .h_1()
                     .w_full()
@@ -162,6 +165,7 @@ impl RenderOnce for PasswordInput {
                         }));
                 this.child(v_flex().gap_2().child(meter).child(checklist))
             })
+        })
     }
 }
 
