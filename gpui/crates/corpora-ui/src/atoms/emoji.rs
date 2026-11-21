@@ -1,14 +1,15 @@
 //! EmojiPicker: `react/src/components/ui/emoji-picker.tsx`.
 
+use std::collections::HashSet;
 use std::ops::Range;
 use std::rc::Rc;
 
 use gpui_kit::component::input::{Input, InputEvent, InputState};
 use gpui_kit::component::{ActiveTheme as _, Icon, IconName, Sizable as _, StyledExt as _, h_flex};
 use gpui_kit::{
-    AnyElement, App, AppContext as _, Context, Entity, InteractiveElement as _, IntoElement,
+    AnyElement, App, AppContext as _, Context, Entity, Hsla, InteractiveElement as _, IntoElement,
     ParentElement as _, RenderOnce, SharedString, StatefulInteractiveElement as _, Styled as _,
-    Subscription, Window, div, rems, uniform_list,
+    Subscription, TextRun, Window, div, rems, uniform_list,
 };
 
 use crate::foundations::Radius;
@@ -22,10 +23,13 @@ const HEIGHT: f32 = 20.375;
 /// Width of the whole picker, in rems: the grid and its side insets.
 pub(crate) const WIDTH: f32 = CELL * COLUMNS as f32 + 1.;
 
-/// The newest Emoji version the picker lists, as (major, minor). Later emoji
-/// are missing from the system fonts of machines still in use, where they
-/// draw as an empty box.
-const NEWEST_VERSION: (u32, u32) = (15, 1);
+/// The newest Emoji version every supported system font draws, as (major,
+/// minor). A later emoji is listed only once the text system shows it has a
+/// glyph for it, so the picker never offers an empty box.
+const BASELINE_VERSION: (u32, u32) = (15, 1);
+
+/// The emoji this machine cannot draw.
+type Missing = HashSet<&'static str>;
 
 /// An emoji and its name.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -73,10 +77,38 @@ enum Row {
     Emojis(Vec<&'static emojis::Emoji>),
 }
 
-/// Whether the system font can be expected to draw an emoji.
-fn is_drawable(emoji: &emojis::Emoji) -> bool {
+/// Whether an emoji is newer than every system font can be trusted to draw.
+fn is_recent(emoji: &emojis::Emoji) -> bool {
     let version = emoji.emoji_version();
-    (version.major(), version.minor()) <= NEWEST_VERSION
+    (version.major(), version.minor()) > BASELINE_VERSION
+}
+
+/// The recent emoji the text system has no glyph for. A font that knows an
+/// emoji shapes it to a single color glyph; one that does not falls back to
+/// a placeholder or to the sequence's separate parts.
+fn missing(window: &Window) -> Missing {
+    let font = window.text_style().font();
+    let size = window.rem_size();
+    emojis::iter()
+        .filter(|emoji| is_recent(emoji))
+        .filter(|emoji| {
+            let text = emoji.as_str();
+            let run = TextRun {
+                len: text.len(),
+                font: font.clone(),
+                color: Hsla::default(),
+                background_color: None,
+                underline: None,
+                strikethrough: None,
+            };
+            let line = window
+                .text_system()
+                .shape_line(text.into(), size, &[run], None);
+            let mut glyphs = line.runs.iter().flat_map(|run| &run.glyphs);
+            !matches!((glyphs.next(), glyphs.next()), (Some(glyph), None) if glyph.is_emoji)
+        })
+        .map(|emoji| emoji.as_str())
+        .collect()
 }
 
 /// Whether an emoji answers a search: every word of the query must appear in
@@ -89,13 +121,13 @@ fn matches(emoji: &emojis::Emoji, query: &str) -> bool {
 
 /// The list for a query: each group's header, then its emoji in rows.
 /// Groups with no match are left out.
-fn rows(query: &str) -> Vec<Row> {
+fn rows(query: &str, missing: &Missing) -> Vec<Row> {
     let query = query.trim().to_lowercase();
     let mut rows = Vec::new();
     for group in emojis::Group::iter() {
         let found: Vec<_> = group
             .emojis()
-            .filter(|emoji| is_drawable(emoji) && matches(emoji, &query))
+            .filter(|emoji| !missing.contains(emoji.as_str()) && matches(emoji, &query))
             .collect();
         if found.is_empty() {
             continue;
@@ -121,6 +153,7 @@ fn rows(query: &str) -> Vec<Row> {
 pub struct EmojiPickerState {
     search: Entity<InputState>,
     rows: Rc<Vec<Row>>,
+    missing: Rc<Missing>,
     active: Option<Emoji>,
     /// Whether an [`crate::composed::EmojiActionBar`] bound to this state
     /// shows the full picker in place of its quick row.
@@ -133,14 +166,16 @@ impl EmojiPickerState {
         let search = cx.new(|cx| InputState::new(window, cx).placeholder("Search emoji"));
         let search_changed = cx.subscribe(&search, |this, search, event: &InputEvent, cx| {
             if matches!(event, InputEvent::Change) {
-                this.rows = Rc::new(rows(&search.read(cx).value()));
+                this.rows = Rc::new(rows(&search.read(cx).value(), &this.missing));
                 this.active = None;
                 cx.notify();
             }
         });
+        let missing = Rc::new(missing(window));
         Self {
             search,
-            rows: Rc::new(rows("")),
+            rows: Rc::new(rows("", &missing)),
+            missing,
             active: None,
             expanded: false,
             _search_changed: search_changed,
@@ -165,7 +200,7 @@ impl EmojiPickerState {
     pub fn reset(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         self.search
             .update(cx, |search, cx| search.set_value("", window, cx));
-        self.rows = Rc::new(rows(""));
+        self.rows = Rc::new(rows("", &self.missing));
         self.active = None;
         self.expanded = false;
         cx.notify();
@@ -387,17 +422,14 @@ mod tests {
 
     #[test]
     fn an_empty_query_lists_every_group_under_its_header() {
-        let rows = rows("");
+        let rows = rows("", &Missing::new());
         assert_eq!(rows[0], Row::Header("Smileys & emotion"));
         let headers = rows
             .iter()
             .filter(|row| matches!(row, Row::Header(_)))
             .count();
         assert_eq!(headers, 9);
-        assert_eq!(
-            count(&rows),
-            emojis::iter().filter(|e| is_drawable(e)).count()
-        );
+        assert_eq!(count(&rows), emojis::iter().count());
         assert!(count(&rows) > 1500);
         assert!(rows.iter().all(|row| match row {
             Row::Header(_) => true,
@@ -407,11 +439,23 @@ mod tests {
 
     #[test]
     fn a_query_matches_names_and_shortcodes_and_drops_empty_groups() {
-        let found = rows("  Thumbs UP ");
+        let all = Missing::new();
+        let found = rows("  Thumbs UP ", &all);
         assert!(count(&found) >= 1);
         assert_eq!(found[0], Row::Header("People & body"));
         // "tada" is only a shortcode of the party popper.
-        assert!(count(&rows("tada")) >= 1);
-        assert!(rows("no such emoji at all").is_empty());
+        assert!(count(&rows("tada", &all)) >= 1);
+        assert!(rows("no such emoji at all", &all).is_empty());
+    }
+
+    #[test]
+    fn an_emoji_the_machine_cannot_draw_is_left_out() {
+        let grinning = emojis::get_by_shortcode("grinning").unwrap();
+        let missing = Missing::from([grinning.as_str()]);
+        assert_eq!(count(&rows("", &missing)), emojis::iter().count() - 1);
+        assert!(rows("grinning face", &missing).iter().all(|row| match row {
+            Row::Header(_) => true,
+            Row::Emojis(emojis) => !emojis.contains(&grinning),
+        }));
     }
 }

@@ -12,7 +12,10 @@ use gpui_kit::{
     Styled as _, Window, div, rems,
 };
 
-use crate::atoms::{Button, Emoji, EmojiPicker, EmojiPickerState, PICKER_WIDTH, Reveal};
+use crate::atoms::{
+    Button, Emoji, EmojiPicker, EmojiPickerState, GlassSpec, GlassSurfaceExt as _, PICKER_WIDTH,
+    Reveal,
+};
 use crate::foundations::{ActiveCorporaTheme as _, AtomSize, Radius};
 
 type ClickHandler = Rc<dyn Fn(&ClickEvent, &mut Window, &mut App)>;
@@ -222,8 +225,8 @@ impl EmojiActionBar {
         self
     }
 
-    /// Draws the bar, and the picker it opens, on a card surface. Leave it
-    /// off inside a popover, which has its own.
+    /// Draws the bar, and the picker it opens, on a frosted glass surface.
+    /// Leave it off inside a popover that draws its own.
     pub fn surface(mut self, surface: bool) -> Self {
         self.surface = surface;
         self
@@ -290,22 +293,26 @@ impl RenderOnce for EmojiActionBar {
         // The row gives way to the picker: each folds as the other opens.
         // With a picker the bar keeps the picker's width in both states, so
         // only its height changes.
+        let content = div()
+            .flex()
+            .flex_col()
+            .when(has_picker, |this| this.w(rems(PICKER_WIDTH)))
+            .child(Reveal::new(row_id, !expanded).child(bar))
+            .children(full.map(|full| Reveal::new(reveal_id, expanded).child(full)));
+
+        if !self.surface {
+            return content.into_any_element();
+        }
+        // The surface is frosted glass: what lies behind the picker shows
+        // through, blurred, under the popover tint.
         div()
-            .when(self.surface, |this| {
-                this.p_1()
-                    .rounded(Radius::Xl.resolve(cx))
-                    .border_1()
-                    .border_color(cx.theme().border)
-                    .bg(cx.palette().card)
-            })
-            .child(
-                div()
-                    .flex()
-                    .flex_col()
-                    .when(has_picker, |this| this.w(rems(PICKER_WIDTH)))
-                    .child(Reveal::new(row_id, !expanded).child(bar))
-                    .children(full.map(|full| Reveal::new(reveal_id, expanded).child(full))),
-            )
+            .p_1()
+            .rounded(Radius::Xl.resolve(cx))
+            .border_1()
+            .border_color(cx.theme().border)
+            .child(content)
+            .glass_with(GlassSpec::frosted(cx))
+            .into_any_element()
     }
 }
 
@@ -369,11 +376,14 @@ impl RenderOnce for ReactionPicker {
                     reset.update(cx, |picker, cx| picker.reset(window, cx));
                 }
             })
+            // The bar brings its own glass surface.
+            .appearance(false)
             .content(move |_, _, cx| {
                 let popover = cx.entity();
                 let on_select = on_select.clone();
                 EmojiActionBar::new(bar_id.clone())
                     .picker(&picker)
+                    .surface(true)
                     .on_select(move |emoji, window, cx| {
                         if let Some(on_select) = &on_select {
                             on_select(emoji, window, cx);

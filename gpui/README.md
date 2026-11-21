@@ -15,13 +15,16 @@ cargo clippy -p corpora-ui --all-targets
 
 ```text
 gpui/
-└── crates/corpora-ui/
-    ├── src/
-    │   ├── foundations/   # tokens: color, theme, radius, motion, shadow, size, typography
-    │   ├── atoms/         # basic elements
-    │   └── composed/      # atoms assembled into one piece of interface
-    ├── examples/gallery.rs
-    └── tests/         # atoms.rs, composed.rs
+├── crates/corpora-ui/
+│   ├── src/
+│   │   ├── foundations/   # tokens: color, theme, radius, motion, shadow, size, typography
+│   │   ├── atoms/         # basic elements
+│   │   └── composed/      # atoms assembled into one piece of interface
+│   ├── assets/            # fonts (Allo, Caudex), Reicon icons, brand marks, images
+│   ├── examples/gallery.rs
+│   └── tests/             # atoms.rs, composed.rs
+├── scripts/reicon.mjs     # regenerates assets/icons and src/reicon.rs
+└── vendor/                # GPUI with the glass backdrop pass; see vendor/README.md
 ```
 
 `blocks/` will sit beside `composed/` as it is ported.
@@ -75,6 +78,7 @@ by hand. So the port has two halves:
 | `SourceChip`, `SelectChip` | `Chip`, `SelectChip` | this crate, on the stock dropdown menu |
 | `EmojiPicker` | `EmojiPicker`, `EmojiPickerState`, `Emoji` | this crate, data from the `emojis` crate |
 | (height transitions) | `Reveal` | this crate, on GPUI Base's `MotionReveal` |
+| liquid glass surfaces | `GlassSpec`, `GlassSurfaceExt`, `glass` | this crate, on the patched GPUI in `vendor/` |
 | `Label` (form), `Kbd`, `Separator`, `Skeleton`, `Spinner` | same names | GPUI Component |
 
 Not ported yet: `Texture`, the text-selection popovers and the `glass` button
@@ -168,13 +172,14 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
   bottom edge behind the composer pill; that belongs to the composer, which is
   not ported.
 - **`SocialProviders` draws every provider as an outline button.** React
-  fills Apple's black. The Apple and GitHub marks are Lucide's outlines, not
-  Remix's filled ones.
+  fills Apple's black. The Apple and GitHub marks are Reicon's brand marks.
 - **`EmojiActionBar` keeps the picker's width once it has a picker**, so the
   swap between the quick row and the full picker changes its height only.
   The picker groups emoji under plain headers that scroll with the list
-  (React's are sticky and blurred), has no skin-tone control, and leaves out
-  emoji newer than Emoji 15.1, which older system fonts cannot draw.
+  (React's are sticky and blurred) and has no skin-tone control. An emoji
+  newer than Emoji 15.1 is listed only if the text system has a glyph for it,
+  so the list follows the machine's emoji font and never shows an empty box.
+  Its surface is frosted glass.
 - **`SelectChip` owns its menu.** Pass `options` and `on_pick`; React's
   `open`, `onToggle`, `width`, `align` and item `tag` are gone, and the stock
   menu places itself.
@@ -185,9 +190,20 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
   word, so a long citation chip moves to the next line whole.
 - **`PasswordInput` uses the stock show/hide toggle** and plays no sound.
 
-- **Register `corpora_ui::Assets`.** It serves GPUI Component's default icons
-  plus the few the atoms add (`assets.rs`). With the stock asset source alone,
-  `Reference` and a verified `Avatar` draw a blank where their icon belongs.
+- **Register `corpora_ui::Assets`.** With the stock asset source alone the
+  icons are Lucide's, and `Reference` and a verified `Avatar` draw a blank
+  where their icon belongs.
+- **Icons are [Reicon](https://reicon.dev), served under Lucide names.** GPUI
+  Component asks its asset source for `icons/search.svg`; `Assets` answers
+  with Reicon's drawing, so stock components and Corpora ones share one icon
+  language and `IconName` keeps working. To add or remap an icon, edit the
+  table in `scripts/reicon.mjs` and run it. A name Reicon does not draw
+  (`cone`, the window controls, a few others) still gets Lucide's.
+- **Glass needs the patched GPUI.** `glass` is a default feature that calls a
+  backdrop pass added in `vendor/` (Metal only). An application outside this
+  workspace must copy the `[patch.crates-io]` entries, or turn the feature
+  off; glass then paints its tint as a translucent fill, as it does off
+  macOS.
 - **`Bubble` takes slots, not children.** React reads the variant from context
   and styles the tail with a sibling selector. Here `Bubble` owns `header`,
   `message`, `actions` and the reactions, and the caller says which bubble of
@@ -196,8 +212,8 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
   popover surface with a border.
 - **Avatar initials are tinted.** The stock avatar colors initials by name, so
   one person always gets one color. React's fallback is neutral. The audio
-  ring breathes instead of spinning, and the verified mark is Lucide's
-  `badge-check` outline rather than the filled rosette.
+  ring breathes instead of spinning, and the verified mark is Reicon's
+  outline rather than the filled rosette.
 - **`InputField` shows the error only while invalid**, and the description
   otherwise. React's version shows neither unless both are set.
 
@@ -214,5 +230,7 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
   `theme.css` does not define.
 - **Invert badge text on a light page** uses the foreground. React's
   `text-invert-foreground` is near-white there.
-- **Fonts are used only when installed.** Inter and Figtree are not bundled;
-  without them text falls back to the system UI font.
+- **Fonts are bundled, and differ from React's.** Interface text and headings
+  are set in Allo (React: Inter and Figtree); reading text, through
+  `Text::serif`, in Caudex. `corpora_ui::init` loads both from
+  `assets/fonts`, so neither has to be installed.

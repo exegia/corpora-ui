@@ -25,6 +25,11 @@ use gpui_kit::component::tab::{Tab, TabBar};
 use gpui_kit::component::{ActiveTheme as _, ThemeMode, h_flex, v_flex};
 use gpui_kit::*;
 
+#[path = "gallery/glass.rs"]
+mod glass;
+
+use glass::GlassShowcase;
+
 /// A titled band of the gallery.
 #[derive(IntoElement)]
 struct Section {
@@ -103,16 +108,18 @@ enum Page {
     Foundations,
     Atoms,
     Composed,
+    Glass,
 }
 
 impl Page {
-    const ALL: [Page; 3] = [Page::Foundations, Page::Atoms, Page::Composed];
+    const ALL: [Page; 4] = [Page::Foundations, Page::Atoms, Page::Composed, Page::Glass];
 
     fn label(self) -> &'static str {
         match self {
             Page::Foundations => "Foundations",
             Page::Atoms => "Atoms",
             Page::Composed => "Composed",
+            Page::Glass => "Glass",
         }
     }
 
@@ -121,6 +128,7 @@ impl Page {
             Page::Foundations => "foundations",
             Page::Atoms => "atoms",
             Page::Composed => "composed",
+            Page::Glass => "glass",
         }
     }
 }
@@ -140,6 +148,7 @@ struct Gallery {
     last_emoji: Option<Emoji>,
     password: Entity<InputState>,
     logo_folded: bool,
+    glass: Entity<GlassShowcase>,
 }
 
 impl Gallery {
@@ -165,6 +174,7 @@ impl Gallery {
                     .default_value("Codex1")
             }),
             logo_folded: false,
+            glass: cx.new(GlassShowcase::new),
         }
     }
 
@@ -830,12 +840,76 @@ impl Gallery {
             )
     }
 
+    fn render_glass(&self, cx: &App) -> impl IntoElement {
+        use corpora_ui::atoms::{GlassSpec, GlassSurfaceExt as _};
+
+        let [first, second, third, ..] = cx.palette().chart;
+        let pane = |label: &'static str| {
+            div()
+                .px_5()
+                .py_3()
+                .rounded(Radius::Xl.resolve(cx))
+                .text_sm()
+                .font_weight(FontWeight::SEMIBOLD)
+                .child(label)
+        };
+        Section::new("Glass")
+            .child(
+                Text::paragraph(
+                    "Glass bends and frosts what is painted behind it. Drag the pane over the \
+                     backdrop and tune its material.",
+                )
+                .max_w_128(),
+            )
+            .child(
+                div()
+                    .relative()
+                    .w_full()
+                    .rounded(Radius::Lg.resolve(cx))
+                    .overflow_hidden()
+                    .bg(linear_gradient(
+                        100.,
+                        linear_color_stop(first, 0.),
+                        linear_color_stop(third, 1.),
+                    ))
+                    .child(
+                        div().absolute().top_0().left_6().child(
+                            Text::heading("Corpora")
+                                .text_color(second)
+                                .text_size(rems(4.)),
+                        ),
+                    )
+                    .child(
+                        row()
+                            .relative()
+                            .px_6()
+                            .py_10()
+                            .gap_4()
+                            .child(pane("Clear").glass())
+                            .child(pane("Deep").glass_with(GlassSpec::deep()))
+                            .child(pane("Blur").glass_with(GlassSpec::blur()))
+                            .child(pane("Frosted").glass_with(GlassSpec::frosted(cx)))
+                            .child(pane("Accent").glass_with(GlassSpec::accent(cx)))
+                            .child(pane("Destructive").glass_with(GlassSpec::destructive(cx))),
+                    ),
+            )
+            .child(self.glass.clone())
+    }
+
     fn render_text(&self) -> impl IntoElement {
         Section::new("Text")
             .child(Text::heading("Corpora"))
             .child(
                 Text::paragraph("Annotated text collections, queried and read in one workspace.")
                     .max_w_96(),
+            )
+            .child(
+                Text::paragraph(
+                    "In the beginning was the Word, and the Word was with God, and the Word was God.",
+                )
+                .serif()
+                .text_lg()
+                .max_w_96(),
             )
             .child(Text::new("Updated 2 minutes ago").muted().small())
             .child(Text::subscript("Revision 14"))
@@ -885,6 +959,7 @@ impl Render for Gallery {
                 .child(self.render_people(cx))
                 .child(self.render_conversation(cx))
                 .child(self.render_sign_in()),
+            Page::Glass => sections.child(self.render_glass(cx)),
         };
         // A page fades and rises into place when its tab is chosen.
         let reduce_motion = cx.reduce_motion() || !self.page_changed;

@@ -23,6 +23,7 @@ mod assets;
 pub mod atoms;
 pub mod composed;
 pub mod foundations;
+mod reicon;
 
 pub use assets::Assets;
 

@@ -21,4 +21,4 @@ pub use color::Palette;
 pub use radius::{RADIUS_BASE_PX, Radius};
 pub use size::AtomSize;
 pub use theme::{ActiveCorporaTheme, CorporaTheme, DARK_THEME_NAME, LIGHT_THEME_NAME, set_mode};
-pub use typography::{FONT_HEADING, FONT_SANS, FontFamilies};
+pub use typography::{FONT_SANS, FONT_SERIF, FontFamilies};

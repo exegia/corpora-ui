@@ -63,6 +63,7 @@ pub struct Text {
     variant: TextVariant,
     size: Option<TextSize>,
     muted: bool,
+    serif: bool,
 }
 
 impl Text {
@@ -73,6 +74,7 @@ impl Text {
             variant: TextVariant::default(),
             size: None,
             muted: false,
+            serif: false,
         }
     }
 
@@ -113,6 +115,13 @@ impl Text {
     }
 
     /// Lowers the emphasis to the muted foreground, for secondary metadata.
+    /// Sets the text in the reading family (Caudex), for scripture and
+    /// long prose.
+    pub fn serif(mut self) -> Self {
+        self.serif = true;
+        self
+    }
+
     pub fn muted(mut self) -> Self {
         self.muted = true;
         self
@@ -130,9 +139,14 @@ impl RenderOnce for Text {
         let theme = cx.theme();
         let is_muted =
             self.muted || matches!(self.variant, TextVariant::Subscript | TextVariant::Label(_));
-        let heading_font = (self.variant == TextVariant::Heading)
-            .then(|| cx.corpora_theme().fonts().heading())
-            .flatten();
+        let fonts = cx.corpora_theme().fonts();
+        let family = if self.serif {
+            fonts.serif()
+        } else if self.variant == TextVariant::Heading {
+            fonts.heading()
+        } else {
+            None
+        };
 
         div()
             .text_color(if is_muted {
@@ -156,7 +170,7 @@ impl RenderOnce for Text {
                 TextSize::Medium => this.text_base(),
                 TextSize::Large => this.text_lg(),
             })
-            .when_some(heading_font, |this, family| this.font_family(family))
+            .when_some(family, |this, family| this.font_family(family))
             .refine_style(&self.style)
             .child(self.text)
     }
