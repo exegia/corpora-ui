@@ -13,23 +13,39 @@
 //! | `Card`, `CardHeader`, `CardPanel`, `CardFooter` | [`Card`], [`CardHeader`] (this crate) |
 //! | `Text`, `Heading`, `Paragraph` | [`Text`] (this crate) |
 //! | `Loader` | [`Loader`] (this crate) |
+//! | `Avatar` | [`Avatar`] (this crate, on the stock avatar) |
+//! | `Bubble` and its parts | [`Bubble`] (this crate) |
+//! | `Reference` | [`Reference`] (this crate) |
+//! | `InputField` | [`InputField`] (this crate, on the stock input) |
+//! | `SourceChip`, `SelectChip` | [`Chip`], [`SelectChip`] (this crate) |
+//! | `Label` (text level) | [`Text::label`] with a [`LabelLevel`] |
 //! | `Label` | [`Label`] |
 //! | `Kbd` | [`Kbd`] |
 //! | `Separator` | [`Separator`] |
 //! | `Skeleton` | [`Skeleton`] |
 //! | `Spinner` | [`Spinner`] |
 
+mod avatar;
 mod badge;
+mod bubble;
 mod button;
 mod card;
+mod chip;
+mod field;
 mod loader;
+mod reference;
 mod text;
 
+pub use avatar::{Avatar, AvatarAudio, AvatarStatus, AvatarUser};
 pub use badge::{Badge, BadgeAppearance, BadgeVariant};
+pub use bubble::{Bubble, BubbleReaction, BubbleVariant};
 pub use button::{Button, ButtonKind};
 pub use card::{Card, CardHeader};
+pub use chip::{Chip, SelectChip};
+pub use field::InputField;
 pub use loader::{Loader, LoaderKind};
-pub use text::{Text, TextSize, TextVariant};
+pub use reference::Reference;
+pub use text::{LabelLevel, Text, TextSize, TextVariant};
 
 pub use gpui_kit::component::kbd::Kbd;
 pub use gpui_kit::component::label::Label;

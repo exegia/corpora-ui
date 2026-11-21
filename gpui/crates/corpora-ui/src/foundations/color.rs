@@ -7,7 +7,9 @@
 //! `cx.theme()` and [`super::ActiveCorporaTheme::palette`].
 
 use gpui_kit::Hsla;
-use gpui_kit::component::{amber, blue, emerald, oklch, red, white, zinc};
+use gpui_kit::component::{
+    amber, blue, emerald, fuchsia, indigo, neutral, oklch, red, violet, white, yellow, zinc,
+};
 
 /// OKLCH color with an alpha channel, `oklch(l c h / alpha)` in CSS.
 fn oklcha(lightness: f32, chroma: f32, hue: f32, alpha: f32) -> Hsla {
@@ -68,6 +70,14 @@ pub struct Palette {
     pub invert_foreground: Hsla,
     /// Text on a solid status fill (`text-white` in the React variants).
     pub on_status: Hsla,
+    /// Surface of the current user's chat bubble.
+    pub bubble_sender: Hsla,
+    pub bubble_sender_foreground: Hsla,
+    /// Surface of another person's chat bubble.
+    pub bubble_recipient: Hsla,
+    pub bubble_recipient_foreground: Hsla,
+    /// The two ends of the ring around an avatar with live audio.
+    pub audio_ring: [Hsla; 2],
 }
 
 impl Palette {
@@ -111,6 +121,11 @@ impl Palette {
             invert: zinc(900),
             invert_foreground: zinc(50),
             on_status: white(),
+            bubble_sender: indigo(700),
+            bubble_sender_foreground: oklch(1., 0., 0.),
+            bubble_recipient: neutral(100),
+            bubble_recipient_foreground: oklch(0.145, 0., 0.),
+            audio_ring: audio_ring(),
         }
     }
 
@@ -154,6 +169,11 @@ impl Palette {
             invert: zinc(700),
             invert_foreground: zinc(50),
             on_status: white(),
+            bubble_sender: neutral(100),
+            bubble_sender_foreground: oklch(0.145, 0., 0.),
+            bubble_recipient: neutral(800),
+            bubble_recipient_foreground: oklch(0.985, 0., 0.),
+            audio_ring: audio_ring(),
         }
     }
 }
@@ -167,4 +187,12 @@ fn chart() -> [Hsla; 5] {
         oklch(0.491, 0.27, 292.581),
         oklch(0.432, 0.232, 292.759),
     ]
+}
+
+/// `from-yellow-400 … to-violet-600`, shared by both appearances. The React
+/// ring passes through fuchsia; a GPUI gradient has two stops, so the ends
+/// are the yellow and the midpoint of fuchsia and violet.
+fn audio_ring() -> [Hsla; 2] {
+    use gpui_kit::component::Colorize as _;
+    [yellow(400), fuchsia(500).mix(violet(600), 0.5)]
 }

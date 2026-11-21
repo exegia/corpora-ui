@@ -27,16 +27,22 @@ gpui/
 
 ## Usage
 
-Call `corpora_ui::init(cx)` once at startup, in place of `gpui_kit::init`. It
+Register `corpora_ui::Assets` and call `corpora_ui::init(cx)` once at startup,
+in place of `gpui_kit::assets::Assets` and `gpui_kit::init`. `init`
 initializes GPUI Kit and installs the Corpora light and dark themes.
 
 ```rust
-use corpora_ui::atoms::{Badge, Button, ButtonKinds as _, Card, CardHeader};
+use corpora_ui::atoms::{Button, Card, CardHeader};
+
+gpui_kit::application().with_assets(corpora_ui::Assets).run(|cx| {
+    corpora_ui::init(cx);
+    // open a window
+});
 
 Card::new()
     .header(CardHeader::new("Members").description("People with access"))
     .content(member_list)
-    .footer(Button::new("invite").primary_kind(cx).label("Invite"))
+    .footer(Button::new("invite").primary().label("Invite"))
 ```
 
 ## How the port works
@@ -54,12 +60,21 @@ by hand. So the port has two halves:
 
 | React | GPUI | Source |
 | --- | --- | --- |
-| `Button` | `Button` + `ButtonKind` | GPUI Component, kinds in this crate |
+| `Button` | `Button`, `ButtonKind` | this crate, on the stock button |
 | `Badge` | `Badge` | this crate |
 | `Card`, `CardHeader`, `CardPanel`, `CardFooter` | `Card`, `CardHeader` | this crate |
-| `Text`, `Heading`, `Paragraph` | `Text` | this crate |
+| `Text`, `Heading`, `Paragraph`, `Span` | `Text` | this crate |
+| `Label` (text level) | `Text::label` with a `LabelLevel` | this crate |
 | `Loader` | `Loader` | this crate |
-| `Label`, `Kbd`, `Separator`, `Skeleton`, `Spinner` | same names | GPUI Component |
+| `Avatar` | `Avatar`, `AvatarUser` | this crate, on the stock avatar |
+| `Bubble` and its parts | `Bubble`, `BubbleReaction` | this crate |
+| `Reference` | `Reference` | this crate, on the stock button and hover card |
+| `InputField` | `InputField` | this crate, on the stock input |
+| `SourceChip`, `SelectChip` | `Chip`, `SelectChip` | this crate |
+| `Label` (form), `Kbd`, `Separator`, `Skeleton`, `Spinner` | same names | GPUI Component |
+
+Not ported yet: `Texture`, the text-selection popovers, the `glass` button
+variant and the emoji picker behind a bubble's add-reaction button.
 
 ### Button
 
@@ -109,6 +124,22 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
   edge under the pointer. Both motions stop under reduced motion.
 
 ## Deliberate differences from React
+
+- **Register `corpora_ui::Assets`.** It serves GPUI Component's default icons
+  plus the few the atoms add (`assets.rs`). With the stock asset source alone,
+  `Reference` and a verified `Avatar` draw a blank where their icon belongs.
+- **`Bubble` takes slots, not children.** React reads the variant from context
+  and styles the tail with a sibling selector. Here `Bubble` owns `header`,
+  `message`, `actions` and the reactions, and the caller says which bubble of
+  a run keeps its `tail`.
+- **The reaction pill is opaque.** React's is liquid glass; here it is the
+  popover surface with a border.
+- **Avatar initials are tinted.** The stock avatar colors initials by name, so
+  one person always gets one color. React's fallback is neutral. The audio
+  ring breathes instead of spinning, and the verified mark is Lucide's
+  `badge-check` outline rather than the filled rosette.
+- **`InputField` shows the error only while invalid**, and the description
+  otherwise. React's version shows neither unless both are set.
 
 - **Card insets are owned by `Card`.** React pads each part and corrects the
   seams with descendant selectors. Here `Card` takes `header`, `content` and

@@ -131,3 +131,26 @@ pub fn shadow_raised_neutral(state: Emboss, cx: &App) -> Vec<BoxShadow> {
         ]
     }
 }
+
+/// The inset bezel of a chat bubble: light catching the top, shade under the
+/// base. `lit` is the bright treatment, which the sender's bubble takes on a
+/// light page and the recipient's on a dark one.
+pub fn shadow_bubble(lit: bool, cx: &App) -> Vec<BoxShadow> {
+    if !cx.theme().shadow {
+        return Vec::new();
+    }
+    // A saturated or pale surface: faint sheen, heavy base shade. A neutral
+    // one: strong sheen, faint shade.
+    let heavy = lit != cx.theme().is_dark();
+    if heavy {
+        vec![
+            layer(true, 0., 2., 3., white().opacity(0.14)),
+            layer(true, 0., -2., 3., black().opacity(0.78)),
+        ]
+    } else {
+        vec![
+            layer(true, 0., 2., 2., white().opacity(0.57)),
+            layer(true, 0., -2., 3., black().opacity(0.11)),
+        ]
+    }
+}

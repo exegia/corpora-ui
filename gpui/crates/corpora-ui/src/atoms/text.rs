@@ -21,6 +21,18 @@ pub enum TextVariant {
     Paragraph,
     /// Small supporting text.
     Subscript,
+    /// A quiet caption for a region or a control group: React's `Label`.
+    Label(LabelLevel),
+}
+
+/// The type scale of a [`TextVariant::Label`].
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+pub enum LabelLevel {
+    Heading,
+    #[default]
+    Title,
+    Subtitle,
+    Caption,
 }
 
 /// A named step of the type scale.
@@ -76,6 +88,11 @@ impl Text {
         Self::new(text).with_variant(TextVariant::Subscript)
     }
 
+    /// A quiet caption at one of the label levels.
+    pub fn label(text: impl Into<SharedString>, level: LabelLevel) -> Self {
+        Self::new(text).with_variant(TextVariant::Label(level))
+    }
+
     pub fn with_variant(mut self, variant: TextVariant) -> Self {
         self.variant = variant;
         self
@@ -111,7 +128,8 @@ impl Styled for Text {
 impl RenderOnce for Text {
     fn render(self, _: &mut Window, cx: &mut App) -> impl IntoElement {
         let theme = cx.theme();
-        let is_muted = self.muted || self.variant == TextVariant::Subscript;
+        let is_muted =
+            self.muted || matches!(self.variant, TextVariant::Subscript | TextVariant::Label(_));
         let heading_font = (self.variant == TextVariant::Heading)
             .then(|| cx.corpora_theme().fonts().heading())
             .flatten();
@@ -128,6 +146,10 @@ impl RenderOnce for Text {
                 // `leading-7`
                 TextVariant::Paragraph => this.line_height(rems(1.75)),
                 TextVariant::Subscript => this.text_xs(),
+                TextVariant::Label(LabelLevel::Heading) => this.text_sm(),
+                TextVariant::Label(LabelLevel::Title) => this.text_lg(),
+                TextVariant::Label(LabelLevel::Subtitle) => this.text_base(),
+                TextVariant::Label(LabelLevel::Caption) => this.text_xs(),
             })
             .when_some(self.size, |this, size| match size {
                 TextSize::Small => this.text_sm(),

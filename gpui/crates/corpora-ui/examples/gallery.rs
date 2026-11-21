@@ -6,10 +6,12 @@
 //! ```
 
 use corpora_ui::atoms::{
-    Badge, BadgeVariant, Button, Card, CardHeader, IconName, Kbd, Label, Loader, Separator,
-    Sizable as _, Skeleton, Spinner, Text,
+    Avatar, AvatarAudio, AvatarStatus, AvatarUser, Badge, BadgeVariant, Bubble, BubbleReaction,
+    BubbleVariant, Button, Card, CardHeader, Chip, IconName, InputField, Kbd, Label, LabelLevel,
+    Loader, Reference, SelectChip, Separator, Sizable as _, Skeleton, Spinner, Text,
 };
 use corpora_ui::foundations::{self, ActiveCorporaTheme as _, AtomSize, Radius};
+use gpui_kit::component::input::InputState;
 use gpui_kit::component::scroll::ScrollableElement as _;
 use gpui_kit::component::switch::Switch;
 use gpui_kit::component::{ActiveTheme as _, ThemeMode, h_flex, v_flex};
@@ -87,9 +89,185 @@ fn radius_sample(name: &'static str, radius: Radius, cx: &App) -> impl IntoEleme
         .child(Text::subscript(name))
 }
 
-struct Gallery;
+struct Gallery {
+    email: Entity<InputState>,
+    handle: Entity<InputState>,
+    select_chip_open: bool,
+    thumbs_up: bool,
+}
 
 impl Gallery {
+    fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
+        Self {
+            email: cx.new(|cx| InputState::new(window, cx).placeholder("you@example.com")),
+            handle: cx.new(|cx| InputState::new(window, cx).default_value("ada lovelace")),
+            select_chip_open: false,
+            thumbs_up: true,
+        }
+    }
+
+    fn render_avatars(&self) -> impl IntoElement {
+        let ada = || AvatarUser::named("Ada", "Lovelace");
+        Section::new("Avatar")
+            .child(
+                row()
+                    .items_end()
+                    .child(Avatar::new().user(ada()))
+                    .child(Avatar::new().user(ada()).with_atom_size(AtomSize::Md))
+                    .child(Avatar::new().user(ada()).with_atom_size(AtomSize::Lg))
+                    .child(Avatar::new().user(ada()).with_atom_size(AtomSize::Xl))
+                    .child(Avatar::new().user(ada()).with_atom_size(AtomSize::Xxl)),
+            )
+            .child(
+                row()
+                    .gap_5()
+                    .child(
+                        Avatar::new()
+                            .user(AvatarUser::named("Grace", "Hopper").status(AvatarStatus::Online))
+                            .with_atom_size(AtomSize::Lg),
+                    )
+                    .child(
+                        Avatar::new()
+                            .user(AvatarUser::named("Alan", "Turing").status(AvatarStatus::Idle))
+                            .with_atom_size(AtomSize::Lg),
+                    )
+                    .child(
+                        Avatar::new()
+                            .user(
+                                AvatarUser::named("Edsger", "Dijkstra")
+                                    .status(AvatarStatus::Offline)
+                                    .verified(true),
+                            )
+                            .with_atom_size(AtomSize::Lg),
+                    )
+                    .child(Avatar::new().with_atom_size(AtomSize::Lg))
+                    .child(
+                        Avatar::new()
+                            .user(ada())
+                            .with_atom_size(AtomSize::Lg)
+                            .loading(true),
+                    )
+                    .child(
+                        Avatar::new()
+                            .user(AvatarUser::named("Barbara", "Liskov"))
+                            .with_atom_size(AtomSize::Lg)
+                            .audio(AvatarAudio::Unmuted),
+                    )
+                    .child(
+                        Avatar::new()
+                            .user(AvatarUser::named("Donald", "Knuth"))
+                            .with_atom_size(AtomSize::Lg)
+                            .audio(AvatarAudio::Speaking),
+                    ),
+            )
+    }
+
+    fn render_chat(&self, cx: &mut Context<Self>) -> impl IntoElement {
+        Section::new("Bubble and reference").child(
+            v_flex()
+                .w(rems(34.))
+                .child(
+                    Bubble::new("message-1", BubbleVariant::Recipient)
+                        .header(Avatar::new().user(AvatarUser::named("Grace", "Hopper")))
+                        .header(Text::new("Grace").small().muted())
+                        .message("Where does this reading come from?")
+                        .tail(false),
+                )
+                .child(
+                    Bubble::new("message-2", BubbleVariant::Recipient)
+                        .continued(true)
+                        .message("I could not find it in the apparatus.")
+                        .reaction(
+                            BubbleReaction::new("thumbs-up", "👍", "thumbs up")
+                                .count(if self.thumbs_up { 2 } else { 1 })
+                                .reacted(self.thumbs_up),
+                        )
+                        .on_toggle_reaction(cx.listener(|this, _, _, cx| {
+                            this.thumbs_up = !this.thumbs_up;
+                            cx.notify();
+                        }))
+                        .on_add_reaction(|_, _, _| {}),
+                )
+                .child(
+                    Bubble::new("message-3", BubbleVariant::Sender)
+                        .header(Avatar::new().user(AvatarUser::named("Ada", "Lovelace")))
+                        .header(Text::new("You").small().muted())
+                        .message("It is the Western text. Two witnesses carry it.")
+                        .actions(
+                            Button::new("message-3-copy")
+                                .ghost()
+                                .xsmall()
+                                .icon(IconName::Copy)
+                                .tooltip("Copy message"),
+                        ),
+                )
+                .child(
+                    Bubble::new("message-4", BubbleVariant::Ai).message(
+                        v_flex()
+                            .gap_2()
+                            .child(
+                                "The longer reading appears in Codex Bezae and the Old Latin. \
+                                 Most editors print the shorter text.",
+                            )
+                            .child(
+                                row()
+                                    .gap_2()
+                                    .child(Reference::new("reference-1", "Codex Bezae").preview(
+                                        "A fifth-century bilingual codex of the Gospels and \
+                                         Acts, the chief Greek witness to the Western text.",
+                                    ))
+                                    .child(Reference::new("reference-2", "Old Latin")),
+                            ),
+                    ),
+                ),
+        )
+    }
+
+    fn render_fields(&self, cx: &mut Context<Self>) -> impl IntoElement {
+        Section::new("Field, chip and label")
+            .child(
+                row()
+                    .items_start()
+                    .gap_6()
+                    .child(
+                        InputField::new(&self.email)
+                            .small()
+                            .label("Email")
+                            .description("Used for sign-in only."),
+                    )
+                    .child(
+                        InputField::new(&self.handle)
+                            .small()
+                            .label("Handle")
+                            .description("Letters, digits and dashes.")
+                            .error("Remove the space: handles cannot contain spaces.")
+                            .invalid(true),
+                    ),
+            )
+            .child(
+                row()
+                    .child(Chip::new("order").icon(gpui_kit::assets::IconName::Cone))
+                    .child(
+                        SelectChip::new("status-chip", "Pending")
+                            .dot(true)
+                            .open(self.select_chip_open)
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                this.select_chip_open = !this.select_chip_open;
+                                cx.notify();
+                            })),
+                    ),
+            )
+            .child(
+                row()
+                    .items_end()
+                    .gap_6()
+                    .child(Text::label("Title", LabelLevel::Title))
+                    .child(Text::label("Subtitle", LabelLevel::Subtitle))
+                    .child(Text::label("Heading", LabelLevel::Heading))
+                    .child(Text::label("Caption", LabelLevel::Caption)),
+            )
+    }
+
     fn render_colors(&self, cx: &App) -> impl IntoElement {
         let theme = cx.theme();
         let palette = cx.palette();
@@ -385,7 +563,10 @@ impl Render for Gallery {
                     .child(self.render_badges())
                     .child(self.render_card())
                     .child(self.render_text())
-                    .child(self.render_feedback()),
+                    .child(self.render_feedback())
+                    .child(self.render_avatars())
+                    .child(self.render_chat(cx))
+                    .child(self.render_fields(cx)),
             )
     }
 }
@@ -410,11 +591,11 @@ fn snapshot(dir: &std::path::Path) {
     // Tall enough to show every section without scrolling.
     let bounds = Bounds {
         origin: Point::default(),
-        size: size(px(1000.), px(1500.)),
+        size: size(px(1000.), px(2400.)),
     };
     let mut cx = HeadlessAppContext::with_platform(
         gpui_kit::platform::current_platform(true).text_system(),
-        std::sync::Arc::new(gpui_kit::assets::Assets),
+        std::sync::Arc::new(corpora_ui::Assets),
         gpui_kit::platform::current_headless_renderer,
     );
     cx.update(corpora_ui::init);
@@ -429,7 +610,9 @@ fn snapshot(dir: &std::path::Path) {
                 let mut options = window_options(Some(bounds));
                 options.focus = false;
                 options.show = false;
-                gpui_kit::open_window(options, cx, |_, cx| cx.new(|_| Gallery))
+                gpui_kit::open_window(options, cx, |window, cx| {
+                    cx.new(|cx| Gallery::new(window, cx))
+                })
             })
             .expect("failed to open the offscreen gallery window");
         cx.run_until_parked();
@@ -464,11 +647,13 @@ fn main() {
     }
 
     gpui_kit::application()
-        .with_assets(gpui_kit::assets::Assets)
+        .with_assets(corpora_ui::Assets)
         .run(|cx| {
             corpora_ui::init(cx);
-            gpui_kit::open_window(window_options(None), cx, |_, cx| cx.new(|_| Gallery))
-                .expect("failed to open the gallery window");
+            gpui_kit::open_window(window_options(None), cx, |window, cx| {
+                cx.new(|cx| Gallery::new(window, cx))
+            })
+            .expect("failed to open the gallery window");
             cx.activate(true);
         });
 }
