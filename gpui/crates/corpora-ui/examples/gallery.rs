@@ -145,6 +145,9 @@ struct Gallery {
     reactions: Vec<BubbleReaction>,
     /// The picker behind the bubble's "Add reaction" button.
     reaction_picker: Entity<EmojiPickerState>,
+    composer: Entity<corpora_ui::composed::Composer>,
+    /// What the gallery's composer last reported.
+    composed: SharedString,
     /// The picker behind the standalone emoji bar.
     bar_picker: Entity<EmojiPickerState>,
     last_emoji: Option<Emoji>,
@@ -155,7 +158,53 @@ struct Gallery {
 
 impl Gallery {
     fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
+        use corpora_ui::composed::{
+            Composer, ComposerAttachment, ComposerEvent, ComposerModel, ComposerOption,
+        };
+        let composer = cx.new(|cx| {
+            Composer::new(window, cx)
+                .sources([
+                    ComposerOption::new("bezae", "Codex Bezae").description("Gospels and Acts"),
+                    ComposerOption::new("sinaiticus", "Codex Sinaiticus")
+                        .description("Complete New Testament"),
+                    ComposerOption::new("p75", "Papyrus 75").description("Luke and John"),
+                ])
+                .commands([
+                    ComposerOption::new("collate", "Collate")
+                        .description("Compare witnesses line by line"),
+                    ComposerOption::new("summarize", "Summarize")
+                        .description("Condense the passage"),
+                ])
+                .models([
+                    ComposerModel::new("auto", "Auto"),
+                    ComposerModel::new("scholar", "Scholar").description("Slower, cites more"),
+                ])
+                .attachments([ComposerAttachment {
+                    id: "collation".into(),
+                    title: "bezae-collation.pdf".into(),
+                    meta: Some("PDF".into()),
+                    ..Default::default()
+                }])
+                .safety_note("Answers can be wrong. Check them against the witnesses.")
+        });
+        cx.subscribe(&composer, |this, _, event: &ComposerEvent, cx| {
+            this.composed = match event {
+                ComposerEvent::Submit { text, attachments } => {
+                    format!("Sent “{text}” with {} attached", attachments.len())
+                }
+                ComposerEvent::Stop => "Stopped".to_string(),
+                ComposerEvent::SourcePicked(source) => format!("Mentioned {}", source.label),
+                ComposerEvent::Command(command) => format!("Ran /{}", command.id),
+                ComposerEvent::ModelChanged(model) => format!("Model: {model}"),
+                ComposerEvent::FilesAdded(paths) => format!("Added {} files", paths.len()),
+            }
+            .into();
+            cx.notify();
+        })
+        .detach();
         Self {
+            composer,
+            composed: "Nothing sent yet".into(),
             page: Page::Foundations,
             page_changed: false,
             status: "Pending".into(),
@@ -1140,6 +1189,84 @@ impl Gallery {
             )
     }
 
+    fn render_charts(&self) -> impl IntoElement {
+        use corpora_ui::composed::{Chart, ChartKind, ChartRow, ChartSeries};
+
+        let series = || {
+            [
+                ChartSeries::new("greek", "Greek"),
+                ChartSeries::new("latin", "Latin"),
+            ]
+        };
+        let centuries = || {
+            [
+                ChartRow::new("IV", [12., 3.]),
+                ChartRow::new("V", [18., 7.]),
+                ChartRow::new("VI", [15., 11.]),
+                ChartRow::new("VII", [22., 9.]),
+                ChartRow::new("VIII", [31., 14.]),
+                ChartRow::new("IX", [48., 12.]),
+            ]
+        };
+        // A still snapshot would catch the entrance at its first frame.
+        let still = std::env::args().any(|argument| argument == "--snapshot");
+        let card = |chart: Chart| div().w(rems(20.)).child(chart.appear(!still));
+        Section::new("Composed: charts").child(
+            h_flex()
+                .flex_wrap()
+                .items_start()
+                .gap_4()
+                .child(card(
+                    Chart::new("chart-line", ChartKind::Line)
+                        .title("Witnesses by century")
+                        .subtitle("Copies that survive")
+                        .series(series())
+                        .rows(centuries()),
+                ))
+                .child(card(
+                    Chart::new("chart-area", ChartKind::Area)
+                        .title("Witnesses by century")
+                        .series(series())
+                        .rows(centuries())
+                        .selected(Some("latin".into())),
+                ))
+                .child(card(
+                    Chart::new("chart-bar", ChartKind::Bar)
+                        .title("Greek witnesses")
+                        .series(series())
+                        .rows(centuries()),
+                ))
+                .child(card(
+                    Chart::new("chart-donut", ChartKind::Donut)
+                        .title("Text types")
+                        .badge("Share")
+                        .series([ChartSeries::new("count", "Witnesses")])
+                        .rows([
+                            ChartRow::new("Byzantine", [781.]),
+                            ChartRow::new("Alexandrian", [291.]),
+                            ChartRow::new("Western", [149.]),
+                        ])
+                        .center("1,221")
+                        .center_label("witnesses"),
+                )),
+        )
+    }
+
+    fn render_composer(&self, cx: &mut Context<Self>) -> impl IntoElement {
+        Section::new("Composed: composer").child(
+            v_flex()
+                .w(rems(34.))
+                .gap_2()
+                .child(self.composer.clone())
+                .child(
+                    div()
+                        .text_sm()
+                        .text_color(cx.theme().muted_foreground)
+                        .child(self.composed.clone()),
+                ),
+        )
+    }
+
     fn render_proposals(&self, cx: &mut Context<Self>) -> impl IntoElement {
         use corpora_ui::atoms::SignalLevel;
         use corpora_ui::composed::{Recommendation, RecommendationOption, RecommendationState};
@@ -1491,6 +1618,8 @@ impl Render for Gallery {
                 .child(self.render_data())
                 .child(self.render_attachments())
                 .child(self.render_proposals(cx))
+                .child(self.render_charts())
+                .child(self.render_composer(cx))
                 .child(self.render_sign_in()),
             Page::Glass => sections.child(self.render_glass(cx)),
         };
@@ -1579,7 +1708,7 @@ fn snapshot(dir: &std::path::Path) {
     // Tall enough to show every section without scrolling.
     let bounds = Bounds {
         origin: Point::default(),
-        size: size(px(1400.), px(3600.)),
+        size: size(px(1400.), px(4300.)),
     };
     let mut cx = HeadlessAppContext::with_platform(
         gpui_kit::platform::current_platform(true).text_system(),

@@ -107,6 +107,8 @@ Not ported yet: the `glass` button variant.
 | `SelectionHighlight`, `AppliedMark`, `ApplyToast` | `SelectionHighlight`, `AppliedMark`, `ApplyToast` |
 | `Attachment` | `Attachment`, `AttachmentKind` |
 | `Markdown` | `Markdown` |
+| `Chart` | `Chart`, `ChartKind`, `ChartRow`, `ChartSeries` |
+| `Composer`, `SendButton`, `AddButton` | `Composer` (an entity), `ComposerEvent`, `ComposerOption`, `ComposerModel`, `ComposerAttachment`, `ComposerShape` |
 | `Recommendation.Item`, `RecommendationCard` | `Recommendation`, `RecommendationOption`, `RecommendationState` |
 | `CodeBlock` | `CodeBlock`, `DiffLine`, `tokenize` |
 | `ContextCards` | `ContextCards`, `ContextCard` |
@@ -125,10 +127,9 @@ AiMessage::new("message-42")
     .child(StreamingText::from_text("message-42-text", [answer]).streaming(is_streaming))
 ```
 
-Not ported yet: the research answer, the chat composer, charts, the
-flowchart, corpus navigation and the tree. From `ui/chat`, the favicon, source chip, avatar stack,
-waveform, thumbnail and the composer's own buttons wait for the pieces that
-use them.
+Not ported yet: the research answer, the flowchart, corpus navigation and
+the tree. From `ui/chat`, the favicon, source chip, avatar
+stack, waveform and thumbnail wait for the pieces that use them.
 
 ### Button
 
@@ -216,6 +217,21 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
   language and `IconName` keeps working. To add or remap an icon, edit the
   table in `scripts/reicon.mjs` and run it. A name Reicon does not draw
   (`cone`, the window controls, a few others) still gets Lucide's.
+- **The composer is an entity that reports events.** `Composer` owns its
+  text, tray and menus, and emits `ComposerEvent` in place of React's
+  callback props. One menu above the field serves `@` sources, `/` commands
+  and the model choice. "Add photos & files" opens the system file dialog.
+  There is no dictation, no slot for a custom submit button or menu, and
+  the suggestions are not built in: put `SuggestedPrompts` above it. The
+  controls drop under the text only when the message has a line break or
+  `expanded` is set, not when a long line would crowd them.
+- **Charts are drawn by GPUI Component, not ECharts.** `Chart` lays one
+  stock line or area chart per series over a shared scale, so there are no
+  `stacked`, `percent` or `horizontal` variants, no brush and no
+  `chartOptions`. A bar chart shows one series at a time: the legend picks
+  which. Rows carry their values in series order instead of keyed objects,
+  values print with grouped thousands, and the header takes a text badge
+  rather than a `Reference`. `InsightCards` still has no trend chart.
 - **A recommendation is one card.** `Recommendation` folds on its own
   heading, so there is no `Recommendation.Group` accordion: stack cards in a
   column. Its state belongs to the owner, and the running mark is the stock

@@ -17,6 +17,8 @@
 //! | `ContextCards` | [`ContextCards`], [`ContextCard`] |
 //! | `Attachment` | [`Attachment`], [`AttachmentKind`] |
 //! | `Recommendation.Item`, `RecommendationCard` | [`Recommendation`] |
+//! | `Composer`, `SendButton`, `AddButton` | [`Composer`] |
+//! | `Chart` | [`Chart`] |
 //! | `Markdown` | [`Markdown`] |
 //! | `InsightCards` | [`InsightCards`], [`Insight`] |
 //! | `FilterTable`, `RecordsTable` | [`FilterTable`], [`RecordsTable`] |
@@ -27,7 +29,9 @@
 mod action_bar;
 mod ai;
 mod attachment;
+mod chart;
 mod code_block;
+mod composer;
 mod context_cards;
 mod hint;
 mod insight;
@@ -47,7 +51,11 @@ pub use ai::{
     SuggestedPrompts,
 };
 pub use attachment::{Attachment, AttachmentKind};
+pub use chart::{Chart, ChartKind, ChartRow, ChartSeries};
 pub use code_block::{CodeBlock, CodeToken, DiffKind, DiffLine, tokenize};
+pub use composer::{
+    Composer, ComposerAttachment, ComposerEvent, ComposerModel, ComposerOption, ComposerShape,
+};
 pub use context_cards::{ContextCard, ContextCards};
 pub use hint::SendHint;
 pub use insight::{Insight, InsightAllocation, InsightCards, InsightSegment};

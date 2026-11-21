@@ -631,3 +631,118 @@ fn data_pieces_report_the_view_filter_and_selection_picked(cx: &mut TestAppConte
         Some(vec!["bezae".into(), "p75".into()])
     );
 }
+
+#[gpui_kit::test]
+fn composer_picks_a_command_from_the_keyboard_and_sends(cx: &mut TestAppContext) {
+    use corpora_ui::composed::{Composer, ComposerEvent, ComposerOption};
+
+    cx.update(corpora_ui::init);
+    let events = Rc::new(RefCell::new(Vec::new()));
+    let seen = events.clone();
+    let held = Rc::new(RefCell::new(None));
+    let holder = held.clone();
+    let window = open(cx, |window, cx| {
+        let composer = cx.new(|cx| {
+            Composer::new(window, cx).commands([
+                ComposerOption::new("collate", "Collate"),
+                ComposerOption::new("summarize", "Summarize"),
+            ])
+        });
+        cx.subscribe(&composer, move |_, event: &ComposerEvent, _| {
+            seen.borrow_mut().push(event.clone());
+        })
+        .detach();
+        composer.update(cx, |composer, cx| composer.focus(window, cx));
+        *holder.borrow_mut() = Some(composer.clone());
+        composer
+    });
+    let composer = held.borrow().clone().expect("composer built");
+    let mut visual = VisualTestContext::from_window(window, cx);
+    let value = |visual: &mut VisualTestContext| {
+        visual.update(|_, cx| composer.read(cx).value(cx).to_string())
+    };
+
+    // "/" opens the commands; Down moves to the second and Enter takes it.
+    visual.simulate_input("/");
+    visual.simulate_keystrokes("down enter");
+    assert_eq!(value(&mut visual), "/summarize ");
+    assert_eq!(
+        events.borrow().as_slice(),
+        [ComposerEvent::Command(ComposerOption::new(
+            "summarize",
+            "Summarize"
+        ))]
+    );
+
+    // With the menu gone, Enter sends and the field clears.
+    visual.simulate_input("Luke 22");
+    visual.simulate_keystrokes("enter");
+    assert_eq!(
+        events.borrow().last(),
+        Some(&ComposerEvent::Submit {
+            text: "/summarize Luke 22".into(),
+            attachments: Vec::new(),
+        })
+    );
+    assert_eq!(value(&mut visual), "");
+
+    // Nothing to send: Enter is ignored.
+    visual.simulate_keystrokes("enter");
+    assert_eq!(events.borrow().len(), 2);
+}
+
+struct ChartHost {
+    picked: Rc<RefCell<Vec<Option<SharedString>>>>,
+}
+
+impl Render for ChartHost {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        use corpora_ui::composed::{Chart, ChartKind, ChartRow, ChartSeries};
+
+        let picked = self.picked.clone();
+        div().size_full().flex().flex_col().items_start().child(
+            div().id("chart").test_support().w(px(320.)).child(
+                Chart::new("witnesses", ChartKind::Line)
+                    .headerless()
+                    .appear(false)
+                    .series([
+                        ChartSeries::new("greek", "Greek"),
+                        ChartSeries::new("latin", "Latin"),
+                    ])
+                    .rows([
+                        ChartRow::new("IV", [12., 3.]),
+                        ChartRow::new("V", [18., 7.]),
+                    ])
+                    .on_selection_change(move |key, _, _| {
+                        picked.borrow_mut().push(key.cloned());
+                    }),
+            ),
+        )
+    }
+}
+
+#[gpui_kit::test]
+fn chart_legend_picks_a_series_and_lets_it_go(cx: &mut TestAppContext) {
+    cx.update(corpora_ui::init);
+    let picked = Rc::new(RefCell::new(Vec::new()));
+    let host_picked = picked.clone();
+    let window = open(cx, |_, cx| {
+        cx.new(|_| ChartHost {
+            picked: host_picked,
+        })
+    });
+    let mut visual = VisualTestContext::from_window(window, cx);
+    let chart = visual.update(|window, cx| {
+        window.render_frame(cx);
+        window.render_frame(cx);
+        window.find("chart").bounds()
+    });
+    // The legend is the last line; "Greek" is its first entry.
+    let greek = point(chart.left() + px(20.), chart.bottom() - px(8.));
+
+    visual.simulate_click(greek, Modifiers::none());
+    assert_eq!(picked.borrow().as_slice(), [Some("greek".into())]);
+    // A second click on the picked series clears the selection.
+    visual.simulate_click(greek, Modifiers::none());
+    assert_eq!(picked.borrow().as_slice(), [Some("greek".into()), None]);
+}
