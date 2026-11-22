@@ -1132,6 +1132,39 @@ impl Gallery {
                             .label("Destructive outline"),
                     ),
             )
+            .child({
+                use corpora_ui::blocks::AuthAccent;
+                let filled = |id: &'static str, label: &'static str, accent: AuthAccent| {
+                    Button::new(id)
+                        .primary()
+                        .label(label)
+                        .fill(accent.fill(), accent.foreground())
+                };
+                row()
+                    .child(filled(
+                        "button-fill-corpora",
+                        "Corpora fill",
+                        AuthAccent::Corpora,
+                    ))
+                    .child(filled(
+                        "button-fill-exegia",
+                        "Exegia fill",
+                        AuthAccent::Exegia,
+                    ))
+                    .child(
+                        filled("button-fill-icon", "Continue", AuthAccent::Exegia)
+                            .trailing_icon(IconName::ArrowRight),
+                    )
+                    .child(
+                        filled("button-fill-loading", "Signing in", AuthAccent::Exegia)
+                            .loading(true)
+                            .disabled(true),
+                    )
+                    .child(
+                        filled("button-fill-disabled", "Disabled", AuthAccent::Corpora)
+                            .disabled(true),
+                    )
+            })
             .child(
                 row()
                     .child(
@@ -2131,7 +2164,7 @@ impl Gallery {
     }
 
     fn render_auth_flow(&self, cx: &mut Context<Self>) -> impl IntoElement {
-        use corpora_ui::blocks::{AuthStep, SessionStatus};
+        use corpora_ui::blocks::{AuthAccent, AuthStep, SessionStatus};
         let session = self.auth_session.read(cx);
         let status: gpui_kit::SharedString = match (session.status(), session.user()) {
             (SessionStatus::Authenticated, Some(user)) => {
@@ -2149,6 +2182,16 @@ impl Gallery {
                 },
             ))
         };
+        let accent = |id: &'static str, label: &'static str, accent: Option<AuthAccent>| {
+            Button::new(id)
+                .outline()
+                .small()
+                .label(label)
+                .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
+                    this.auth_flow
+                        .update(cx, |flow, cx| flow.set_accent(accent, cx));
+                }))
+        };
         Section::new("Blocks: auth flow").child(
             h_flex()
                 .items_start()
@@ -2163,6 +2206,21 @@ impl Gallery {
                                 .text_sm()
                                 .text_color(cx.theme().muted_foreground)
                                 .child(status),
+                        )
+                        .child(
+                            h_flex()
+                                .gap_2()
+                                .child(accent("flow-accent-none", "Theme accent", None))
+                                .child(accent(
+                                    "flow-accent-corpora",
+                                    "Corpora",
+                                    Some(AuthAccent::Corpora),
+                                ))
+                                .child(accent(
+                                    "flow-accent-exegia",
+                                    "Exegia",
+                                    Some(AuthAccent::Exegia),
+                                )),
                         )
                         .child(jump("flow-login", "Go to login", AuthStep::Login))
                         .child(jump(

@@ -1039,8 +1039,8 @@ fn credentials_guard_the_last_way_in_and_confirm_a_deletion(cx: &mut TestAppCont
 #[gpui_kit::test]
 fn auth_flow_follows_its_directives_and_signs_the_session_in(cx: &mut TestAppContext) {
     use corpora_ui::blocks::{
-        AuthFlow, AuthFlowEvent, AuthSession, AuthStatus, AuthStep, AuthUser, CodeChannel,
-        LoginEvent, SessionStatus,
+        AuthAccent, AuthFlow, AuthFlowEvent, AuthSession, AuthStatus, AuthStep, AuthUser,
+        CodeChannel, LoginEvent, SessionStatus,
     };
 
     cx.update(corpora_ui::init);
@@ -1065,6 +1065,12 @@ fn auth_flow_follows_its_directives_and_signs_the_session_in(cx: &mut TestAppCon
     });
     let login = visual.update(|_, cx| flow.read(cx).login().clone());
     let code = visual.update(|_, cx| flow.read(cx).code().clone());
+
+    // An accent repaints the submit buttons and can be taken back.
+    for accent in [Some(AuthAccent::Exegia), Some(AuthAccent::Corpora), None] {
+        visual.update(|_, cx| flow.update(cx, |flow, cx| flow.set_accent(accent, cx)));
+        visual.run_until_parked();
+    }
 
     // The login block's links move the flow without the host.
     visual.update(|_, cx| login.update(cx, |_, cx| cx.emit(LoginEvent::Signup)));

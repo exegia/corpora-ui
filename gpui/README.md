@@ -157,11 +157,12 @@ stack, waveform and thumbnail wait for the pieces that use them.
 | `PasskeyManagerBlock`, `IPasskeyRecord` | `PasskeyManagerBlock`, `Passkey`, `PasskeyManagerEvent` |
 | `PasskeySignInBlock` | `PasskeySignInBlock`, `PasskeySignInEvent` |
 | `AuthFlowBlock`, `useAuthFlow`, `useAuthFlowActions` | `AuthFlow`, `AuthFlowEvent`, `AuthStep` |
+| `TAuthAccent`, `accent` | `AuthAccent`, `.accent()`, `set_accent`, `Button::fill` |
 | `useAuthSession`, `IAuthUser`, `maskAuthIdentifier` | `AuthSession`, `AuthSessionEvent`, `AuthUser`, `mask_identifier` |
 | `AISidebar`, `useAISidebar` | `ResourceSidebar`, `ResourceSidebarEvent` |
 | `ISidebarResource`, `ISidebarResourceMove` | `SidebarResource`, `ResourceKind`, `ResourceMove`, `DropPosition` |
 
-Not ported from `auth`: the per-block `accent`. `sidebar-primitives` is not ported on
+`sidebar-primitives` is not ported on
 purpose: GPUI Component's own `sidebar` module (`Sidebar`, `SidebarMenu`,
 `SidebarGroup`, `SidebarToggleButton`) is the same set of parts.
 
@@ -330,6 +331,11 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
   since the crate formats no dates. The delete confirmation names the
   passkey, and the add button reads "Add passkey". The passkey sign-in
   button's fingerprint takes the button's ink, not React's pink.
+- **An accent is a fill on the button.** React sets custom properties on
+  the card and a class string on its primary action. Here `AuthAccent`
+  hands `Button::fill` a background and an ink. GPUI's gradient takes two
+  stops, so Exegia's three are flattened to its outer two; hover lightens
+  the fill with a white veil, standing in for `brightness-110`.
 - **The auth flow is an entity with directives.** `AuthFlow` owns the
   six blocks and emits one `AuthFlowEvent` per attempt. The host answers
   with `complete(user, cx)`, `begin_verification(identifier, channel,

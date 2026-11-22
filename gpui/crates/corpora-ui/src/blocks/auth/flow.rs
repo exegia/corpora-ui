@@ -13,9 +13,9 @@ use super::super::onboarding::{
     OnboardingBlock, OnboardingEvent, OnboardingStep, OnboardingValues,
 };
 use super::{
-    AuthCard, AuthSuccess, CodeAuthBlock, CodeAuthEvent, CodeChannel, ForgotPasswordBlock,
-    ForgotPasswordEvent, LoginBlock, LoginEvent, LogoBuilder, SignupBlock, SignupEvent,
-    UpdatePasswordBlock, UpdatePasswordEvent,
+    AuthAccent, AuthCard, AuthSuccess, CodeAuthBlock, CodeAuthEvent, CodeChannel,
+    ForgotPasswordBlock, ForgotPasswordEvent, LoginBlock, LoginEvent, LogoBuilder, SignupBlock,
+    SignupEvent, UpdatePasswordBlock, UpdatePasswordEvent,
 };
 use crate::atoms::{AvatarUser, Reveal};
 use crate::composed::SocialProvider;
@@ -415,6 +415,27 @@ impl AuthFlow {
         self.signup
             .update(cx, |signup, cx| signup.set_providers(providers, cx));
         self
+    }
+
+    /// Paints every form's submit button in a brand accent.
+    pub fn accent(self, accent: AuthAccent, cx: &mut Context<Self>) -> Self {
+        self.set_accent(Some(accent), cx);
+        self
+    }
+
+    /// Changes the accent of every form's submit button. `None` returns
+    /// them to the theme's primary.
+    pub fn set_accent(&self, accent: Option<AuthAccent>, cx: &mut Context<Self>) {
+        self.login
+            .update(cx, |block, cx| block.set_accent(accent, cx));
+        self.signup
+            .update(cx, |block, cx| block.set_accent(accent, cx));
+        self.code
+            .update(cx, |block, cx| block.set_accent(accent, cx));
+        self.forgot_password
+            .update(cx, |block, cx| block.set_accent(accent, cx));
+        self.update_password
+            .update(cx, |block, cx| block.set_accent(accent, cx));
     }
 
     /// The brand mark drawn above every step's title.

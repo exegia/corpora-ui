@@ -35,9 +35,9 @@ mod shell;
 mod sidebar;
 
 pub use auth::{
-    AuthCard, AuthError, AuthSeparator, AuthStatus, AuthSuccess, CodeAuthBlock, CodeAuthEvent,
-    CodeChannel, ForgotPasswordBlock, ForgotPasswordEvent, LoginBlock, LoginEvent, SignupBlock,
-    SignupEvent, UpdatePasswordBlock, UpdatePasswordEvent, is_email,
+    AuthAccent, AuthCard, AuthError, AuthSeparator, AuthStatus, AuthSuccess, CodeAuthBlock,
+    CodeAuthEvent, CodeChannel, ForgotPasswordBlock, ForgotPasswordEvent, LoginBlock, LoginEvent,
+    SignupBlock, SignupEvent, UpdatePasswordBlock, UpdatePasswordEvent, is_email,
 };
 pub use auth::{
     AuthFlow, AuthFlowEvent, AuthSession, AuthSessionEvent, AuthStep, AuthUser, SessionStatus,

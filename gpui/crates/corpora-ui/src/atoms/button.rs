@@ -8,12 +8,14 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 use gpui_kit::base::motion::{Transition, transition};
-use gpui_kit::component::button::{Button as StockButton, ButtonRounded, ButtonVariants as _};
+use gpui_kit::component::button::{
+    Button as StockButton, ButtonCustomVariant, ButtonRounded, ButtonVariants as _,
+};
 use gpui_kit::component::{ActiveTheme as _, Disableable, Icon, Sizable, Size};
 use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
-    AnyElement, App, BoxShadow, ClickEvent, ElementId, Hsla, InteractiveElement as _, IntoElement,
-    MouseButton, ParentElement as _, Pixels, RenderOnce, SharedString,
+    AnyElement, App, Background, BoxShadow, ClickEvent, ElementId, Hsla, InteractiveElement as _,
+    IntoElement, MouseButton, ParentElement as _, Pixels, RenderOnce, SharedString,
     StatefulInteractiveElement as _, Styled as _, Window, div, px, rems,
 };
 
@@ -24,6 +26,10 @@ use crate::foundations::{AtomSize, Radius};
 /// Hover group every button forms with itself, so its emboss can respond to
 /// the pointer. Buttons never nest, so one name serves them all.
 const HOVER_GROUP: SharedString = SharedString::new_static("corpora-button");
+
+/// How much of a brand fill shows through a disabled button. React's
+/// `disabled:opacity-64`.
+const DISABLED_FILL: f32 = 0.64;
 
 /// How far the trailing icon travels toward the trailing edge under the
 /// pointer. Physical: a nudge, not a layout distance.
@@ -132,6 +138,7 @@ pub struct Button {
     icon: Option<Icon>,
     trailing_icon: Option<Icon>,
     start: Option<AnyElement>,
+    fill: Option<(Background, Hsla)>,
     full_width: bool,
     pill: bool,
     tooltip: Option<SharedString>,
@@ -151,6 +158,7 @@ impl Button {
             icon: None,
             trailing_icon: None,
             start: None,
+            fill: None,
             full_width: false,
             pill: false,
             tooltip: None,
@@ -260,6 +268,16 @@ impl Button {
         self
     }
 
+    /// Paints a brand fill in place of the kind's own, with `foreground` as
+    /// its ink. For a color the theme does not hold, such as a product accent;
+    /// the pair is constant, so it must read in both light and dark.
+    ///
+    /// The fill lightens under the pointer and fades when disabled.
+    pub fn fill(mut self, fill: impl Into<Background>, foreground: Hsla) -> Self {
+        self.fill = Some((fill.into(), foreground));
+        self
+    }
+
     /// Greys the button out, flattens it and stops it responding.
     pub fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
@@ -325,7 +343,25 @@ impl RenderOnce for Button {
 
         let theme = cx.theme();
         let stock = StockButton::new(self.id.clone()).with_size(Size::from(self.size));
+        let ink = match self.fill {
+            Some((_, foreground)) => foreground,
+            None => self.kind.foreground(cx),
+        };
         let stock = match self.kind {
+            // The stock button holds one solid per state, and a fill may be a
+            // gradient. So the stock surface goes clear, lightening under the
+            // pointer, and the fill is painted behind it below.
+            _ if self.fill.is_some() => {
+                let veil = gpui_kit::white().opacity(0.1);
+                stock
+                    .custom(
+                        ButtonCustomVariant::new(cx)
+                            .foreground(ink)
+                            .hover(veil)
+                            .active(veil),
+                    )
+                    .text_color(ink)
+            }
             ButtonKind::Primary => stock.primary(),
             ButtonKind::Secondary => stock.secondary(),
             // The stock default variant is the outlined one.
@@ -356,9 +392,11 @@ impl RenderOnce for Button {
         };
         let seated_start = self.pill && self.start.is_some() && !icon_only;
         let hover_emboss = self.kind.emboss(Emboss::Hover, cx);
+        let filled = self.fill.is_some();
+        let radius = radius.resolve(cx);
         let stock = stock
-            .rounded(ButtonRounded::Size(radius.resolve(cx)))
-            .m(squeeze)
+            .rounded(ButtonRounded::Size(radius))
+            .when(!filled, |this| this.m(squeeze))
             .map(|this| {
                 if icon_only {
                     // A start element makes the stock button pad as if
@@ -374,7 +412,7 @@ impl RenderOnce for Button {
                     .group(HOVER_GROUP)
                     .group_hover(HOVER_GROUP, |style| style.shadow(hover_emboss))
             })
-            .when(self.full_width, |this| this.flex_1())
+            .when(self.full_width || filled, |this| this.flex_1())
             .when(seated_start, |this| this.pl(padding / 4. - squeeze))
             .when_some(self.icon, |this, icon| this.icon(icon))
             .map(|this| match self.start {
@@ -384,10 +422,14 @@ impl RenderOnce for Button {
                     .gap_2()
                     .child(div().flex().flex_none().child(start))
                     .when_some(self.label, |this, label| this.child(label)),
+                // The stock button greys a disabled label; a fill keeps its
+                // own ink and fades as a whole instead.
+                None if filled => this.when_some(self.label, |this, label| {
+                    this.child(div().text_color(ink).child(label))
+                }),
                 None => this.when_some(self.label, |this, label| this.label(label)),
             })
             .when_some(trailing_icon, |this, icon| {
-                let ink = self.kind.foreground(cx);
                 // The well sits as far from the trailing edge as from the top
                 // and bottom, so it reads as seated in the button.
                 this.pr((height - well) / 2. - squeeze).child(
@@ -409,7 +451,9 @@ impl RenderOnce for Button {
                 )
             })
             .when_some(self.tooltip, |this, tooltip| this.tooltip(tooltip))
-            .disabled(self.disabled)
+            // Loading alone already stops the stock button responding, and
+            // leaves the spinner in the fill's ink.
+            .disabled(self.disabled && !(filled && self.loading))
             .loading(self.loading)
             .when_some(self.on_click, |this, handler| {
                 this.on_click(move |event, window, cx| handler(event, window, cx))
@@ -455,7 +499,21 @@ impl RenderOnce for Button {
                     }
                 });
             })
-            .child(stock)
+            .map(|this| match self.fill {
+                // The fill takes the squeeze, and the clear stock button
+                // fills it.
+                Some((fill, _)) => this.child(
+                    div()
+                        .flex()
+                        .when(self.full_width, |this| this.flex_1())
+                        .m(squeeze)
+                        .rounded(radius)
+                        .bg(fill)
+                        .when(self.disabled, |this| this.opacity(DISABLED_FILL))
+                        .child(stock),
+                ),
+                None => this.child(stock),
+            })
     }
 }
 
