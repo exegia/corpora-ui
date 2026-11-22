@@ -206,6 +206,23 @@ struct Gallery {
     folded_navigation: Entity<corpora_ui::composed::CorpusNavigation>,
     /// The composer of the empty AI panel on the Blocks page.
     panel_composer: Entity<corpora_ui::composed::Composer>,
+    /// Whether the Blocks page's rail, and the profile card at its foot, is folded.
+    rail_folded: bool,
+    /// The scaffold on the Blocks page, its open panels and whether the
+    /// first one still has its second card.
+    scaffold: Entity<corpora_ui::blocks::Scaffold>,
+    scaffold_panels: Vec<&'static str>,
+    scaffold_parallels: bool,
+    /// The sign-in screens on the Blocks page.
+    login: Entity<corpora_ui::blocks::LoginBlock>,
+    signup: Entity<corpora_ui::blocks::SignupBlock>,
+    forgot_password: Entity<corpora_ui::blocks::ForgotPasswordBlock>,
+    update_password: Entity<corpora_ui::blocks::UpdatePasswordBlock>,
+    code_auth: Entity<corpora_ui::blocks::CodeAuthBlock>,
+    /// The shell on the Blocks page.
+    shell: Entity<corpora_ui::blocks::Shell>,
+    /// The resource tree on the Blocks page.
+    resources: Entity<corpora_ui::blocks::ResourceSidebar>,
     /// The picker behind the standalone emoji bar.
     bar_picker: Entity<EmojiPickerState>,
     last_emoji: Option<Emoji>,
@@ -255,6 +272,147 @@ impl Gallery {
         };
         let navigation = navigate(window, cx);
         let folded_navigation = navigate(window, cx);
+        // The sign-in screens answer themselves after a beat, as a server
+        // would. The password "wrong" and the code 000000 are turned down.
+        let (login, signup, forgot_password, update_password, code_auth) = {
+            use corpora_ui::blocks::{
+                CodeAuthBlock, CodeAuthEvent, ForgotPasswordBlock, ForgotPasswordEvent, LoginBlock,
+                LoginEvent, SignupBlock, SignupEvent, UpdatePasswordBlock, UpdatePasswordEvent,
+            };
+            let beat = std::time::Duration::from_millis(900);
+            let login = cx.new(|cx| LoginBlock::new(window, cx));
+            cx.subscribe(&login, move |_, login, event: &LoginEvent, cx| {
+                let refused = matches!(event, LoginEvent::Submit { password, .. } if password.as_ref() == "wrong");
+                if matches!(event, LoginEvent::Submit { .. } | LoginEvent::Provider(_)) {
+                    cx.spawn(async move |_, cx| {
+                        cx.background_executor().timer(beat).await;
+                        login.update(cx, |login, cx| {
+                            if refused {
+                                login.fail("That email and password do not match.", cx)
+                            } else {
+                                login.succeed(cx)
+                            }
+                        });
+                    })
+                    .detach();
+                }
+            })
+            .detach();
+            let signup = cx.new(|cx| SignupBlock::new(window, cx));
+            cx.subscribe(&signup, move |_, signup, event: &SignupEvent, cx| {
+                if matches!(event, SignupEvent::Submit { .. } | SignupEvent::Provider(_)) {
+                    cx.spawn(async move |_, cx| {
+                        cx.background_executor().timer(beat).await;
+                        signup.update(cx, |signup, cx| signup.succeed(cx));
+                    })
+                    .detach();
+                }
+            })
+            .detach();
+            let forgot = cx.new(|cx| ForgotPasswordBlock::new(window, cx));
+            cx.subscribe(
+                &forgot,
+                move |_, forgot, event: &ForgotPasswordEvent, cx| {
+                    if matches!(event, ForgotPasswordEvent::Submit { .. }) {
+                        cx.spawn(async move |_, cx| {
+                            cx.background_executor().timer(beat).await;
+                            forgot.update(cx, |forgot, cx| forgot.succeed(cx));
+                        })
+                        .detach();
+                    }
+                },
+            )
+            .detach();
+            let update = cx.new(|cx| UpdatePasswordBlock::new(window, cx));
+            cx.subscribe(
+                &update,
+                move |_, update, event: &UpdatePasswordEvent, cx| {
+                    if matches!(event, UpdatePasswordEvent::Submit { .. }) {
+                        cx.spawn(async move |_, cx| {
+                            cx.background_executor().timer(beat).await;
+                            update.update(cx, |update, cx| update.succeed(cx));
+                        })
+                        .detach();
+                    }
+                },
+            )
+            .detach();
+            let code =
+                cx.new(|cx| CodeAuthBlock::new(6, window, cx).destination("a•••@exegia.app"));
+            cx.subscribe(&code, move |_, code, event: &CodeAuthEvent, cx| {
+                if let CodeAuthEvent::Verify(digits) = event {
+                    let refused = digits.as_ref() == "000000";
+                    cx.spawn(async move |_, cx| {
+                        cx.background_executor().timer(beat).await;
+                        code.update(cx, |code, cx| {
+                            if refused {
+                                code.fail("That code is not the one we sent.", cx)
+                            } else {
+                                code.succeed(cx)
+                            }
+                        });
+                    })
+                    .detach();
+                }
+            })
+            .detach();
+            (login, signup, forgot, update, code)
+        };
+        let scaffold = cx.new(|_| corpora_ui::blocks::Scaffold::new());
+        cx.observe(&scaffold, |_, _, cx| cx.notify()).detach();
+        let shell = cx.new(|_| corpora_ui::blocks::Shell::new().right_open(true));
+        cx.observe(&shell, |_, _, cx| cx.notify()).detach();
+        let resources = cx.new(|cx| {
+            use corpora_ui::blocks::{ResourceKind, ResourceSidebar, SidebarResource};
+            use gpui_kit::component::menu::PopupMenuItem;
+
+            ResourceSidebar::new(
+                [
+                    SidebarResource::new("gospels", "Gospels", ResourceKind::Project).children([
+                        SidebarResource::new("john-notes", "Notes on John", ResourceKind::File),
+                        SidebarResource::new(
+                            "synoptic",
+                            "Synoptic parallels",
+                            ResourceKind::Folder,
+                        )
+                        .children([SidebarResource::new(
+                            "agony",
+                            "The agony in the garden, Luke 22:43-44 across the witnesses",
+                            ResourceKind::File,
+                        )]),
+                    ]),
+                    SidebarResource::new("letters", "Letters", ResourceKind::Folder).children([
+                        SidebarResource::new("romans-5", "Romans 5:8", ResourceKind::Bookmark),
+                    ]),
+                    SidebarResource::new("john-3-16", "John 3:16", ResourceKind::Bookmark),
+                    SidebarResource::new("archive", "Archive", ResourceKind::Folder).disabled(true),
+                ],
+                cx,
+            )
+            .expanded(["gospels"])
+            .selected("john-notes")
+            .menu(|resource, menu, _, _| {
+                menu.separator()
+                    .item(PopupMenuItem::new(format!("Share “{}”", resource.label)))
+            })
+        });
+        cx.subscribe(&resources, |this, _, event, cx| {
+            use corpora_ui::blocks::ResourceSidebarEvent;
+
+            this.composed = match event {
+                ResourceSidebarEvent::Select(id) => format!("Opened {id}"),
+                ResourceSidebarEvent::Move(change) => format!(
+                    "Moved {} {:?} {}",
+                    change.item_id,
+                    change.position,
+                    change.target_id.as_deref().unwrap_or("the top level")
+                ),
+                ResourceSidebarEvent::Rename { id, label } => format!("Renamed {id} to “{label}”"),
+            }
+            .into();
+            cx.notify();
+        })
+        .detach();
         cx.observe(&folded_navigation, |_, _, cx| cx.notify())
             .detach();
         cx.observe(&navigation, |_, _, cx| cx.notify()).detach();
@@ -281,6 +439,17 @@ impl Gallery {
             navigation,
             folded_navigation,
             panel_composer,
+            rail_folded: false,
+            scaffold,
+            scaffold_panels: vec!["Text", "Apparatus"],
+            scaffold_parallels: true,
+            login,
+            signup,
+            forgot_password,
+            update_password,
+            code_auth,
+            shell,
+            resources,
             page: Page::Foundations,
             page_changed: false,
             status: "Pending".into(),
@@ -1350,6 +1519,410 @@ impl Gallery {
         )
     }
 
+    fn render_profile_card(&self, cx: &mut Context<Self>) -> impl IntoElement {
+        use corpora_ui::atoms::{AvatarStatus, AvatarUser};
+        use corpora_ui::blocks::{ProfileAction, ProfileCard, ProfileItem};
+        use gpui_kit::Anchor;
+        use gpui_kit::assets::IconName as LucideIcon;
+
+        let ada = || AvatarUser::named("Ada", "Lovelace").status(AvatarStatus::Online);
+        let muted = cx.theme().muted_foreground;
+        let caption = move |text: &'static str| div().text_xs().text_color(muted).child(text);
+        let entity = cx.entity();
+        let said = move |what: &'static str| {
+            let entity = entity.clone();
+            move |_: &mut Window, cx: &mut App| {
+                entity.update(cx, |this, cx| {
+                    this.composed = what.into();
+                    cx.notify();
+                });
+            }
+        };
+        let folded = self.rail_folded;
+        let border = cx.theme().border;
+        let sidebar = cx.theme().sidebar;
+        Section::new("Blocks: profile card")
+            .child(
+                h_flex()
+                    .items_start()
+                    .gap_8()
+                    .child(
+                        v_flex()
+                            .w(rems(16.))
+                            .gap_2()
+                            .child(caption("Default menu"))
+                            .child(
+                                ProfileCard::new("profile-default", ada())
+                                    .username("ada@exegia.app"),
+                            ),
+                    )
+                    .child(
+                        v_flex()
+                            .w(rems(16.))
+                            .gap_2()
+                            .child(caption("Own menu, shortcuts"))
+                            .child(
+                                ProfileCard::new(
+                                    "profile-own",
+                                    AvatarUser::named("Grace", "Hopper"),
+                                )
+                                .username("Editor")
+                                .items([
+                                    ProfileItem::Label("Grace Hopper".into()),
+                                    ProfileAction::new("settings", "Settings")
+                                        .icon(LucideIcon::Settings)
+                                        .shortcut("⌘,")
+                                        .on_select(said("Opened settings"))
+                                        .into(),
+                                    ProfileAction::new("billing", "Billing")
+                                        .disabled(true)
+                                        .into(),
+                                    ProfileItem::Separator,
+                                    ProfileAction::new("sign-out", "Log out")
+                                        .icon(LucideIcon::LogOut)
+                                        .shortcut("⇧⌘Q")
+                                        .destructive()
+                                        .on_select(said("Logged out"))
+                                        .into(),
+                                ]),
+                            ),
+                    )
+                    .child(
+                        v_flex()
+                            .w(rems(16.))
+                            .gap_2()
+                            .child(caption("Working"))
+                            .child(
+                                ProfileCard::new("profile-busy", ada())
+                                    .username("Signing out…")
+                                    .loading(true),
+                            ),
+                    )
+                    .child(
+                        v_flex()
+                            .gap_2()
+                            .child(caption("At the foot of a rail"))
+                            .child(
+                                h_flex()
+                                    .items_end()
+                                    .gap_3()
+                                    .child(
+                                        v_flex()
+                                            .w(rems(if folded { 3.5 } else { 15. }))
+                                            .h(rems(9.))
+                                            .justify_end()
+                                            .p_1p5()
+                                            .rounded(Radius::Lg.resolve(cx))
+                                            .border_1()
+                                            .border_color(border)
+                                            .bg(sidebar)
+                                            .child(
+                                                ProfileCard::new("profile-rail", ada())
+                                                    .username("ada@exegia.app")
+                                                    .collapsed(folded)
+                                                    .anchor(Anchor::BottomLeft),
+                                            ),
+                                    )
+                                    .child(
+                                        Button::new("profile-fold")
+                                            .outline()
+                                            .label(if folded { "Unfold rail" } else { "Fold rail" })
+                                            .on_click(cx.listener(
+                                                |this, _: &ClickEvent, _, cx| {
+                                                    this.rail_folded = !this.rail_folded;
+                                                    cx.notify();
+                                                },
+                                            )),
+                                    ),
+                            ),
+                    ),
+            )
+            .child(
+                div()
+                    .text_xs()
+                    .text_color(cx.theme().muted_foreground)
+                    .child(self.composed.clone()),
+            )
+    }
+
+    fn render_shell(&self, cx: &mut Context<Self>) -> impl IntoElement {
+        use corpora_ui::atoms::{AvatarStatus, AvatarUser};
+        use corpora_ui::blocks::{ProfileCard, ShellLayout, ShellVariant};
+        use gpui_kit::Anchor;
+        use gpui_kit::assets::IconName as LucideIcon;
+        use gpui_kit::component::{Icon, Sizable as _};
+        use gpui_kit::prelude::FluentBuilder as _;
+
+        let folded = self.shell.read(cx).collapsed();
+        let muted = cx.theme().muted_foreground;
+        let foreground = cx.theme().foreground;
+        let place = |icon: LucideIcon, label: &'static str| {
+            h_flex()
+                .h_9()
+                .gap_2p5()
+                .when(folded, |this| this.justify_center())
+                .when(!folded, |this| this.px_3())
+                .text_sm()
+                .text_color(muted)
+                .child(Icon::new(icon).small())
+                .when(!folded, |this| this.child(label))
+        };
+        let navigation = v_flex()
+            .size_full()
+            .justify_between()
+            .child(
+                v_flex()
+                    .gap_0p5()
+                    .child(place(LucideIcon::BookOpen, "Library"))
+                    .child(place(LucideIcon::Search, "Search"))
+                    .child(place(LucideIcon::Settings, "Settings")),
+            )
+            .child(
+                ProfileCard::new(
+                    "shell-account",
+                    AvatarUser::named("Ada", "Lovelace").status(AvatarStatus::Online),
+                )
+                .username("ada@exegia.app")
+                .collapsed(folded)
+                .anchor(Anchor::BottomLeft),
+            );
+        let inspector =
+            v_flex()
+                .p_4()
+                .gap_2()
+                .child(div().font_weight(FontWeight::SEMIBOLD).child("Witnesses"))
+                .child(div().text_sm().text_color(muted).child(
+                    "Codex Bezae carries the longer reading; Papyrus 75 omits both verses.",
+                ));
+        Section::new("Blocks: shell").child(
+            div()
+                .h(rems(26.))
+                .rounded(Radius::Lg.resolve(cx))
+                .overflow_hidden()
+                .border_1()
+                .border_color(cx.theme().border)
+                .child(
+                    ShellLayout::new("gallery-shell", &self.shell)
+                        .variant(ShellVariant::Web)
+                        .left(navigation)
+                        .right(inspector)
+                        .header(
+                            div()
+                                .text_sm()
+                                .font_weight(FontWeight::MEDIUM)
+                                .child("Luke 22"),
+                        )
+                        .trailing(Button::new("shell-share").outline().label("Share"))
+                        .child(
+                            v_flex()
+                                .p_6()
+                                .gap_2()
+                                .child(
+                                    div()
+                                        .text_lg()
+                                        .font_weight(FontWeight::SEMIBOLD)
+                                        .text_color(foreground)
+                                        .child("The agony in the garden"),
+                                )
+                                .child(div().text_color(muted).child(
+                                    "Drag the strip between two columns to resize them. The \
+                                     header buttons fold the rail and close the panel.",
+                                )),
+                        ),
+                ),
+        )
+    }
+
+    fn render_scaffold(&self, cx: &mut Context<Self>) -> impl IntoElement {
+        use corpora_ui::blocks::{
+            SCAFFOLD_PANEL_CAPACITY, ScaffoldLayout, ScaffoldPanel, ScaffoldTab,
+        };
+        use gpui_kit::assets::IconName as LucideIcon;
+        use gpui_kit::component::{Icon, Sizable as _};
+
+        use gpui_kit::prelude::FluentBuilder as _;
+
+        const ALL: [&str; 3] = ["Text", "Apparatus", "Notes"];
+        let muted = cx.theme().muted_foreground;
+        let page = |title: &'static str, body: &'static str| {
+            v_flex()
+                .p_4()
+                .gap_1()
+                .child(div().font_weight(FontWeight::SEMIBOLD).child(title))
+                .child(div().text_sm().text_color(muted).child(body))
+        };
+        let rail = v_flex()
+            .size_full()
+            .items_center()
+            .pt_4()
+            .gap_4()
+            .text_color(muted)
+            .child(Icon::new(LucideIcon::BookOpen).small())
+            .child(Icon::new(LucideIcon::Search).small())
+            .child(Icon::new(LucideIcon::Settings).small());
+
+        let scaffold = self.scaffold.clone();
+        let mut layout = ScaffoldLayout::new("gallery-scaffold", &self.scaffold)
+            .sidebar(rail)
+            .inspector(
+                "Inspector",
+                page("ὤφθη", "Aorist passive, third person singular: “appeared”."),
+            );
+        let closable = self.scaffold_panels.len() > 1;
+        for name in self.scaffold_panels.iter().copied() {
+            let mut tab = ScaffoldTab::new(name, name);
+            if closable {
+                tab = tab.on_close(cx.listener(move |this, _: &ClickEvent, _, cx| {
+                    this.scaffold_panels.retain(|open| *open != name);
+                    cx.notify();
+                }));
+            }
+            let inspect = scaffold.clone();
+            let mut panel = ScaffoldPanel::new(
+                name,
+                v_flex()
+                    .child(page(
+                        name,
+                        match name {
+                            "Text" => "Luke 22:43-44, the longer reading.",
+                            "Apparatus" => "Witnesses for and against the two verses.",
+                            _ => "Your notes on the passage.",
+                        },
+                    ))
+                    .when(name == "Text", |this| {
+                        this.child(
+                            div().px_4().child(
+                                Button::new("scaffold-inspect")
+                                    .outline()
+                                    .label("Toggle inspector")
+                                    .on_click(move |_, _, cx| {
+                                        inspect.update(cx, |this, cx| this.toggle_inspector(cx))
+                                    }),
+                            ),
+                        )
+                    }),
+            );
+            if name == "Text" && self.scaffold_parallels {
+                panel = panel
+                    .secondary(page("Parallels", "Matthew 26:39, Mark 14:35."))
+                    .on_swap(|_, _, _| {})
+                    .on_close_secondary(cx.listener(|this, _: &ClickEvent, _, cx| {
+                        this.scaffold_parallels = false;
+                        cx.notify();
+                    }));
+            }
+            layout = layout.tab(tab).panel(panel);
+        }
+        if self.scaffold_panels.len() < SCAFFOLD_PANEL_CAPACITY {
+            layout = layout.on_add(cx.listener(|this, _: &ClickEvent, _, cx| {
+                if let Some(next) = ALL.iter().find(|name| !this.scaffold_panels.contains(name)) {
+                    this.scaffold_panels.push(next);
+                    cx.notify();
+                }
+            }));
+        }
+        Section::new("Blocks: scaffold").child(
+            div()
+                .h(rems(28.))
+                .rounded(Radius::Lg.resolve(cx))
+                .overflow_hidden()
+                .border_1()
+                .border_color(cx.theme().border)
+                .child(layout),
+        )
+    }
+
+    fn render_auth(&self, cx: &mut Context<Self>) -> impl IntoElement {
+        let screen = |block: gpui_kit::AnyElement| div().w(rems(24.)).child(block);
+        Section::new("Blocks: auth")
+            .child(
+                h_flex()
+                    .flex_wrap()
+                    .items_start()
+                    .gap_6()
+                    .child(screen(self.login.clone().into_any_element()))
+                    .child(screen(self.signup.clone().into_any_element()))
+                    .child(screen(self.forgot_password.clone().into_any_element()))
+                    .child(screen(self.update_password.clone().into_any_element()))
+                    .child(screen(self.code_auth.clone().into_any_element())),
+            )
+            .child(
+                Button::new("auth-reset")
+                    .outline()
+                    .label("Reset the five screens")
+                    .on_click(cx.listener(|this, _: &ClickEvent, window, cx| {
+                        this.login.update(cx, |block, cx| block.reset(window, cx));
+                        this.signup.update(cx, |block, cx| block.reset(window, cx));
+                        this.forgot_password
+                            .update(cx, |block, cx| block.reset(window, cx));
+                        this.update_password
+                            .update(cx, |block, cx| block.reset(window, cx));
+                        this.code_auth
+                            .update(cx, |block, cx| block.reset(window, cx));
+                    })),
+            )
+    }
+
+    fn render_resource_sidebar(&self, cx: &mut Context<Self>) -> impl IntoElement {
+        let resources = self.resources.clone();
+        let fold = resources.clone();
+        Section::new("Blocks: resource sidebar").child(
+            h_flex()
+                .items_start()
+                .gap_6()
+                .child(
+                    div()
+                        .w(rems(17.))
+                        .p_1p5()
+                        .rounded(Radius::Lg.resolve(cx))
+                        .border_1()
+                        .border_color(cx.theme().border)
+                        .bg(cx.theme().sidebar)
+                        .child(resources.clone()),
+                )
+                .child(
+                    v_flex()
+                        .gap_2()
+                        .child(
+                            h_flex()
+                                .gap_2()
+                                .child(
+                                    Button::new("resources-open")
+                                        .outline()
+                                        .label("Expand all")
+                                        .on_click(move |_, _, cx| {
+                                            resources.update(cx, |this, cx| this.expand_all(cx))
+                                        }),
+                                )
+                                .child(
+                                    Button::new("resources-shut")
+                                        .outline()
+                                        .label("Collapse all")
+                                        .on_click(move |_, _, cx| {
+                                            fold.update(cx, |this, cx| this.collapse_all(cx))
+                                        }),
+                                ),
+                        )
+                        .child(
+                            div()
+                                .max_w(rems(24.))
+                                .text_xs()
+                                .text_color(cx.theme().muted_foreground)
+                                .child(
+                                    "Drag a row to reorder it. Arrow keys walk the tree, \
+                                         F2 renames, and Alt-Shift with an arrow moves the row.",
+                                ),
+                        )
+                        .child(
+                            div()
+                                .text_xs()
+                                .text_color(cx.theme().muted_foreground)
+                                .child(self.composed.clone()),
+                        ),
+                ),
+        )
+    }
+
     fn render_corpus_navigator(&self, cx: &mut Context<Self>) -> impl IntoElement {
         use corpora_ui::blocks::CorpusNavigator;
 
@@ -2048,6 +2621,11 @@ impl Render for Gallery {
                 .child(self.render_composer(cx))
                 .child(self.render_sign_in()),
             Page::Blocks => sections
+                .child(self.render_shell(cx))
+                .child(self.render_scaffold(cx))
+                .child(self.render_auth(cx))
+                .child(self.render_profile_card(cx))
+                .child(self.render_resource_sidebar(cx))
                 .child(self.render_ai_panel(cx))
                 .child(self.render_corpus_navigator(cx)),
             Page::Glass => sections.child(self.render_glass(cx)),

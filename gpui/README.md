@@ -144,9 +144,20 @@ stack, waveform and thumbnail wait for the pieces that use them.
 | `LockedBanner`, `PinnedThreadBanner`, `DegradedBanner` | same names |
 | `VersionHistoryRecord` | `VersionHistoryRecord`, `VersionHistoryEntry` |
 | `IAiScope`, `formatScopeLabel` | `AiScope`, `AiScope::label` |
+| `ProfileCardBlock`, `defaultProfileCardItems` | `ProfileCard`, `ProfileCard::default_items` |
+| `IProfileCardAction`, `TProfileCardItem` | `ProfileAction`, `ProfileItem` |
+| `ShellLayout`, `useShellPanels`, `useShellFitState` | `ShellLayout`, `Shell`, `ShellEvent` |
+| `SHELL_WIDTHS`, `IShellSidebarFit` | `ShellWidths`, `RailMode` |
+| `Scaffold.Root`, `.Canvas`, `.Actions`, `.Inspector`, `useScaffold` | `ScaffoldLayout`, `Scaffold`, `ScaffoldEvent` |
+| `Scaffold.Panel`, `Scaffold.Tab` | `ScaffoldPanel`, `ScaffoldTab` |
+| `AuthCard`, `AuthError`, `AuthSuccess`, `AuthSeparator` | same names |
+| `LoginBlock`, `SignupBlock`, `ForgotPasswordBlock`, `UpdatePasswordBlock`, `CodeAuthBlock` | same names, with `LoginEvent`, `SignupEvent`, `ForgotPasswordEvent`, `UpdatePasswordEvent`, `CodeAuthEvent` |
+| `AISidebar`, `useAISidebar` | `ResourceSidebar`, `ResourceSidebarEvent` |
+| `ISidebarResource`, `ISidebarResourceMove` | `SidebarResource`, `ResourceKind`, `ResourceMove`, `DropPosition` |
 
-Not ported yet: `auth`, `profile`, `scaffold`, `shell`, `sidebar` and
-`sidebar-primitives`.
+Not ported yet, from `auth`: the onboarding steps, the auth flow and its session store, the passkey sign-in and manager, linked accounts, and the per-block `accent`. `sidebar-primitives` is not ported on
+purpose: GPUI Component's own `sidebar` module (`Sidebar`, `SidebarMenu`,
+`SidebarGroup`, `SidebarToggleButton`) is the same set of parts.
 
 ### Button
 
@@ -277,6 +288,50 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
   between cells. Right-to-left corpora are not mirrored.
   Draw one set of views per entity: their element ids derive from it, so
   two location bars on one entity collide.
+- **The shell's state is an entity, its frame an element.** `Shell` holds
+  which sides are open and how wide; `ShellLayout::new(id, &shell)` draws
+  them. Widths are `ShellWidths` fields, not CSS variables. The rail's
+  content does not read a panel context: fold it on `shell.collapsed()`.
+  Panels are passed as elements (`left`, `right`); there is no `panels`
+  record and no `openPanel(side, component)`. A drag resizes a column
+  within its bounds and never folds it. The shell binds no key: bind one
+  to `Shell::toggle`. There is no mobile sheet, and the page behind the
+  columns is the flat sidebar color (React paints a gradient).
+- **Auth blocks emit and wait.** React awaits an `onSubmit` promise.
+  Here each block is an entity that emits a `Submit` event, locks its
+  fields, and stays locked until the host calls `succeed(cx)` or
+  `fail(message, cx)`. `reset(window, cx)` empties it for a second use,
+  where React remounts. The fields are reachable (`email_input()` and
+  the like) to prefill or focus. Email validity is `is_email`, a loose
+  shape check, in place of the browser's. In-card links ("Sign up",
+  "Forgot password?") are ghost buttons, since they are commands. The
+  success check and the error line appear without the drawn stroke and
+  the shake.
+- **The scaffold is one layout, not compound parts.** `ScaffoldLayout`
+  takes the rail, tabs, panels and inspector through builder methods, and
+  `Scaffold` holds what they share. Every panel and tab has an id. A
+  hidden panel is not drawn (React keeps it mounted), and panels appear
+  and leave without a morph; the inspector slide, the tab spotlight and
+  the tabs stepping aside are animated. The seam's Swap, Expand and Close
+  buttons show while the pointer is over the panel, with no collapsed
+  toggle and no linger timer. `on_swap` runs after the scaffold has
+  recorded the swap; the cards trade places without the host's help.
+- **The resource sidebar is an entity.** `ResourceSidebar` owns the tree,
+  the open rows, the selection and the rename field; there is no
+  controlled form. It emits `Select`, `Move` and `Rename` after applying
+  each change, and nothing waits on the host: to refuse one, call
+  `set_items` with the old tree. `menu` adds rows under Rename instead of
+  replacing the menu, and the actions button and row icons are fixed. A
+  long label truncates (no marquee), hover tints each row (no pill
+  travelling between rows), and rows do not slide when the order changes.
+  The menu opens by pointer only.
+- **The profile card holds no state of its own.** There is no store keyed
+  by card id: the host passes `collapsed` and `loading`, and the fold
+  animates between the two. An action's `on_select` returns nothing, so
+  the host sets `loading` itself while a command runs. The card does not
+  read a surrounding panel; pass the rail's fold to `collapsed`. The menu
+  opens from the stock dropdown, placed with `anchor`, and sizes to its
+  rows (there is no `menuWidth: "card"`). No sound cues.
 - **The AI panel takes the composer, not its props.** `AiPanel::new(id,
   &composer)` renders an entity the host owns and subscribes to. `locked`
   disables that composer when it changes, and re-enables it when it
