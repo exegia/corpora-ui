@@ -6,8 +6,8 @@ use std::sync::Arc;
 use gpui_kit::assets::IconName as LucideIcon;
 use gpui_kit::component::{Icon, Sizable as _, h_flex, v_flex};
 use gpui_kit::{
-    App, ElementId, IntoElement, ParentElement as _, RenderOnce, SharedString, Styled as _,
-    StyledImage as _, Window, img,
+    AnyElement, App, ElementId, IntoElement, ParentElement as _, RenderOnce, SharedString,
+    Styled as _, StyledImage as _, Window, img,
 };
 
 use crate::assets::{GOOGLE_MARK, X_MARK};
@@ -33,8 +33,23 @@ impl SocialProvider {
         }
     }
 
+    /// The provider's mark at icon size. Google's is the only one in
+    /// color, so it is an image; the others take the ink around them.
+    pub fn mark(self) -> AnyElement {
+        match self {
+            Self::Google => img(GOOGLE_MARK)
+                .size_4()
+                .flex_none()
+                .object_fit(gpui_kit::ObjectFit::Contain)
+                .into_any_element(),
+            Self::Apple => Icon::new(LucideIcon::Apple).small().into_any_element(),
+            Self::Github => Icon::new(LucideIcon::Github).small().into_any_element(),
+            Self::X => Icon::default().path(X_MARK).small().into_any_element(),
+        }
+    }
+
     /// Stable identity for element ids.
-    const fn slug(self) -> &'static str {
+    pub(crate) const fn slug(self) -> &'static str {
         match self {
             Self::Google => "google",
             Self::Apple => "apple",
@@ -170,19 +185,7 @@ impl RenderOnce for SocialProviders {
                     on_select(provider, window, cx);
                 }
             });
-            // Google's mark is the only one in color, so it is an image; the
-            // others take the button's ink.
-            let button = match provider {
-                SocialProvider::Google => button.start(
-                    img(GOOGLE_MARK)
-                        .size_4()
-                        .flex_none()
-                        .object_fit(gpui_kit::ObjectFit::Contain),
-                ),
-                SocialProvider::Apple => button.start(Icon::new(LucideIcon::Apple).small()),
-                SocialProvider::Github => button.start(Icon::new(LucideIcon::Github).small()),
-                SocialProvider::X => button.start(Icon::default().path(X_MARK).small()),
-            };
+            let button = button.start(provider.mark());
             if row {
                 button.tooltip(name)
             } else {

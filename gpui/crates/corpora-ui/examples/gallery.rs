@@ -219,6 +219,12 @@ struct Gallery {
     forgot_password: Entity<corpora_ui::blocks::ForgotPasswordBlock>,
     update_password: Entity<corpora_ui::blocks::UpdatePasswordBlock>,
     code_auth: Entity<corpora_ui::blocks::CodeAuthBlock>,
+    onboarding: Entity<corpora_ui::blocks::OnboardingBlock>,
+    auth_flow: Entity<corpora_ui::blocks::AuthFlow>,
+    auth_session: Entity<corpora_ui::blocks::AuthSession>,
+    linked_accounts: Entity<corpora_ui::blocks::LinkedAccountsBlock>,
+    passkeys: Entity<corpora_ui::blocks::PasskeyManagerBlock>,
+    passkey_sign_in: Entity<corpora_ui::blocks::PasskeySignInBlock>,
     /// The shell on the Blocks page.
     shell: Entity<corpora_ui::blocks::Shell>,
     /// The resource tree on the Blocks page.
@@ -358,6 +364,258 @@ impl Gallery {
             .detach();
             (login, signup, forgot, update, code)
         };
+        // The account screens answer themselves the same way. The display
+        // name "taken" is turned down, and so is every other passkey sign-in.
+        let (onboarding, linked_accounts, passkeys, passkey_sign_in) = {
+            use corpora_ui::blocks::{
+                LinkedAccountsBlock, LinkedAccountsEvent, LinkedIdentity, OnboardingBlock,
+                OnboardingEvent, OnboardingField, OnboardingStep, Passkey, PasskeyManagerBlock,
+                PasskeyManagerEvent, PasskeySignInBlock, PasskeySignInEvent,
+            };
+            use corpora_ui::composed::SocialProvider;
+            let beat = std::time::Duration::from_millis(900);
+            let onboarding = cx.new(|cx| {
+                OnboardingBlock::new(
+                    [
+                        OnboardingStep::new("profile", "Your profile")
+                            .description("How other readers will see you")
+                            .field(
+                                OnboardingField::text("display_name", "Display name")
+                                    .placeholder("Ada Lovelace")
+                                    .required(),
+                            )
+                            .field(
+                                OnboardingField::text("handle", "Handle")
+                                    .placeholder("ada")
+                                    .validate(|handle| {
+                                        (handle.chars().count() < 3)
+                                            .then(|| "Use at least 3 characters".into())
+                                    }),
+                            ),
+                        OnboardingStep::new("work", "Your work")
+                            .description("So we can suggest corpora that fit")
+                            .field(
+                                OnboardingField::select(
+                                    "role",
+                                    "Role",
+                                    [
+                                        ("scholar", "Scholar"),
+                                        ("student", "Student"),
+                                        ("translator", "Translator"),
+                                    ],
+                                )
+                                .required(),
+                            )
+                            .field(
+                                OnboardingField::url("website", "Website")
+                                    .placeholder("https://example.com"),
+                            )
+                            .field(
+                                OnboardingField::textarea("bio", "About you")
+                                    .placeholder("A few lines on what you read"),
+                            ),
+                        OnboardingStep::new("notices", "Notices")
+                            .field(OnboardingField::checkbox(
+                                "updates",
+                                "Email me when a corpus I follow changes",
+                            ))
+                            .field(
+                                OnboardingField::checkbox("terms", "I accept the terms").required(),
+                            ),
+                    ],
+                    window,
+                    cx,
+                )
+            });
+            cx.subscribe(
+                &onboarding,
+                move |_, onboarding, event: &OnboardingEvent, cx| {
+                    if let OnboardingEvent::Step { values, .. } = event {
+                        let refused = values.iter().any(|(name, value)| {
+                            name.as_ref() == "display_name" && value.as_text() == Some("taken")
+                        });
+                        cx.spawn(async move |_, cx| {
+                            cx.background_executor().timer(beat).await;
+                            onboarding.update(cx, |onboarding, cx| {
+                                if refused {
+                                    onboarding.fail("That display name is already in use.", cx)
+                                } else {
+                                    onboarding.advance(cx)
+                                }
+                            });
+                        })
+                        .detach();
+                    }
+                },
+            )
+            .detach();
+
+            let linked = cx.new(|_| {
+                LinkedAccountsBlock::new().identities([LinkedIdentity::new(
+                    "google",
+                    SocialProvider::Google,
+                )
+                .email("ada@exegia.app")])
+            });
+            cx.subscribe(
+                &linked,
+                move |_, linked, event: &LinkedAccountsEvent, cx| {
+                    let event = event.clone();
+                    cx.spawn(async move |_, cx| {
+                        cx.background_executor().timer(beat).await;
+                        linked.update(cx, |linked, cx| {
+                            let mut identities: Vec<LinkedIdentity> =
+                                linked.linked().cloned().collect();
+                            match event {
+                                LinkedAccountsEvent::Link(provider) => identities.push(
+                                    LinkedIdentity::new(provider.label().to_lowercase(), provider)
+                                        .email("ada@exegia.app"),
+                                ),
+                                LinkedAccountsEvent::Unlink(id) => {
+                                    identities.retain(|identity| identity.id != id)
+                                }
+                            }
+                            linked.settle(cx);
+                            linked.set_identities(identities, cx);
+                        });
+                    })
+                    .detach();
+                },
+            )
+            .detach();
+
+            let passkeys = cx.new(|cx| {
+                PasskeyManagerBlock::new(window, cx).passkeys([
+                    Passkey::new("macbook")
+                        .name("MacBook Pro")
+                        .created("3 May 2026")
+                        .last_used("19 November 2026"),
+                    Passkey::new("phone").created("12 August 2026"),
+                ])
+            });
+            let minted = std::rc::Rc::new(std::cell::Cell::new(0_u32));
+            cx.subscribe(
+                &passkeys,
+                move |_, passkeys, event: &PasskeyManagerEvent, cx| {
+                    let event = event.clone();
+                    let minted = minted.clone();
+                    cx.spawn(async move |_, cx| {
+                        cx.background_executor().timer(beat).await;
+                        passkeys.update(cx, |passkeys, cx| {
+                            let mut list: Vec<Passkey> = passkeys.registered().cloned().collect();
+                            match event {
+                                PasskeyManagerEvent::Register => {
+                                    minted.set(minted.get() + 1);
+                                    list.insert(
+                                        0,
+                                        Passkey::new(format!("new-{}", minted.get()))
+                                            .name("This device")
+                                            .created("21 November 2026"),
+                                    );
+                                }
+                                PasskeyManagerEvent::Rename { id, name } => {
+                                    for passkey in
+                                        list.iter_mut().filter(|passkey| passkey.id == id)
+                                    {
+                                        passkey.name = Some(name.clone());
+                                    }
+                                }
+                                PasskeyManagerEvent::Delete(id) => {
+                                    list.retain(|passkey| passkey.id != id)
+                                }
+                            }
+                            passkeys.settle(cx);
+                            passkeys.set_passkeys(list, cx);
+                        });
+                    })
+                    .detach();
+                },
+            )
+            .detach();
+
+            let sign_in = cx.new(|_| PasskeySignInBlock::new());
+            let attempts = std::rc::Rc::new(std::cell::Cell::new(0_u32));
+            cx.subscribe(&sign_in, move |_, sign_in, _: &PasskeySignInEvent, cx| {
+                attempts.set(attempts.get() + 1);
+                let refused = attempts.get() % 2 == 1;
+                cx.spawn(async move |_, cx| {
+                    cx.background_executor().timer(beat).await;
+                    sign_in.update(cx, |sign_in, cx| {
+                        if refused {
+                            sign_in.fail("No passkey on this device matches your account.", cx)
+                        } else {
+                            sign_in.settle(cx)
+                        }
+                    });
+                })
+                .detach();
+            })
+            .detach();
+            (onboarding, linked, passkeys, sign_in)
+        };
+        // The whole journey on one card. An email starting "mfa" is sent a
+        // code first; signing up always is, and then onboards.
+        let auth_session = cx.new(|_| corpora_ui::blocks::AuthSession::new());
+        cx.observe(&auth_session, |_, _, cx| cx.notify()).detach();
+        let auth_flow = {
+            use corpora_ui::blocks::{AuthFlow, AuthFlowEvent, AuthStep, AuthUser, CodeChannel};
+            let beat = std::time::Duration::from_millis(900);
+            let flow = cx.new(|cx| AuthFlow::new(window, cx).session(&auth_session, cx));
+            cx.subscribe(&flow, move |_, flow, event: &AuthFlowEvent, cx| {
+                if matches!(
+                    event,
+                    AuthFlowEvent::Step(_) | AuthFlowEvent::Terms | AuthFlowEvent::ResendCode
+                ) {
+                    return;
+                }
+                let event = event.clone();
+                cx.spawn(async move |_, cx| {
+                    cx.background_executor().timer(beat).await;
+                    flow.update(cx, |flow, cx| {
+                        let ada = || AuthUser::new("ada", "Ada Lovelace").email("ada@exegia.app");
+                        match event {
+                            AuthFlowEvent::Login { password, .. }
+                                if password.as_ref() == "wrong" =>
+                            {
+                                flow.fail("That email and password do not match.", cx)
+                            }
+                            AuthFlowEvent::Login { email, .. } if email.starts_with("mfa") => {
+                                flow.begin_verification(email, CodeChannel::Email, cx)
+                            }
+                            AuthFlowEvent::Login { .. } | AuthFlowEvent::Provider(_) => {
+                                flow.complete(Some(ada()), cx)
+                            }
+                            AuthFlowEvent::Signup { email, .. } => {
+                                flow.begin_verification(email, CodeChannel::Email, cx)
+                            }
+                            AuthFlowEvent::VerifyCode(code) if code.as_ref() == "000000" => {
+                                flow.fail("That code is not the one we sent.", cx)
+                            }
+                            AuthFlowEvent::VerifyCode(_) => {
+                                flow.go_to_step(AuthStep::Onboarding, cx)
+                            }
+                            AuthFlowEvent::OnboardingComplete(profile) => {
+                                let name = profile
+                                    .iter()
+                                    .find(|(name, _)| name.as_ref() == "display_name")
+                                    .and_then(|(_, value)| value.as_text())
+                                    .unwrap_or("Reader")
+                                    .to_string();
+                                flow.complete(Some(AuthUser::new("new", name)), cx)
+                            }
+                            AuthFlowEvent::RequestReset { .. }
+                            | AuthFlowEvent::UpdatePassword { .. } => flow.succeed(cx),
+                            AuthFlowEvent::Step(_)
+                            | AuthFlowEvent::Terms
+                            | AuthFlowEvent::ResendCode => {}
+                        }
+                    });
+                })
+                .detach();
+            })
+            .detach();
+            flow
+        };
         let scaffold = cx.new(|_| corpora_ui::blocks::Scaffold::new());
         cx.observe(&scaffold, |_, _, cx| cx.notify()).detach();
         let shell = cx.new(|_| corpora_ui::blocks::Shell::new().right_open(true));
@@ -448,6 +706,12 @@ impl Gallery {
             forgot_password,
             update_password,
             code_auth,
+            onboarding,
+            auth_flow,
+            auth_session,
+            linked_accounts,
+            passkeys,
+            passkey_sign_in,
             shell,
             resources,
             page: Page::Foundations,
@@ -1844,12 +2108,13 @@ impl Gallery {
                     .child(screen(self.signup.clone().into_any_element()))
                     .child(screen(self.forgot_password.clone().into_any_element()))
                     .child(screen(self.update_password.clone().into_any_element()))
-                    .child(screen(self.code_auth.clone().into_any_element())),
+                    .child(screen(self.code_auth.clone().into_any_element()))
+                    .child(screen(self.onboarding.clone().into_any_element())),
             )
             .child(
                 Button::new("auth-reset")
                     .outline()
-                    .label("Reset the five screens")
+                    .label("Reset the six screens")
                     .on_click(cx.listener(|this, _: &ClickEvent, window, cx| {
                         this.login.update(cx, |block, cx| block.reset(window, cx));
                         this.signup.update(cx, |block, cx| block.reset(window, cx));
@@ -1859,8 +2124,77 @@ impl Gallery {
                             .update(cx, |block, cx| block.reset(window, cx));
                         this.code_auth
                             .update(cx, |block, cx| block.reset(window, cx));
+                        this.onboarding
+                            .update(cx, |block, cx| block.reset(window, cx));
                     })),
             )
+    }
+
+    fn render_auth_flow(&self, cx: &mut Context<Self>) -> impl IntoElement {
+        use corpora_ui::blocks::{AuthStep, SessionStatus};
+        let session = self.auth_session.read(cx);
+        let status: gpui_kit::SharedString = match (session.status(), session.user()) {
+            (SessionStatus::Authenticated, Some(user)) => {
+                format!("Signed in as {}", user.name).into()
+            }
+            (SessionStatus::Unauthenticated, _) => "Signed out".into(),
+            _ => "No session yet".into(),
+        };
+        let signed_in = session.is_authenticated();
+        let jump = |id: &'static str, label: &'static str, step: AuthStep| {
+            Button::new(id).outline().label(label).on_click(cx.listener(
+                move |this, _: &ClickEvent, _, cx| {
+                    this.auth_flow
+                        .update(cx, |flow, cx| flow.go_to_step(step, cx));
+                },
+            ))
+        };
+        Section::new("Blocks: auth flow").child(
+            h_flex()
+                .items_start()
+                .gap_6()
+                .child(div().w(rems(24.)).child(self.auth_flow.clone()))
+                .child(
+                    v_flex()
+                        .items_start()
+                        .gap_2()
+                        .child(
+                            div()
+                                .text_sm()
+                                .text_color(cx.theme().muted_foreground)
+                                .child(status),
+                        )
+                        .child(jump("flow-login", "Go to login", AuthStep::Login))
+                        .child(jump(
+                            "flow-update",
+                            "Go to update password",
+                            AuthStep::UpdatePassword,
+                        ))
+                        .child(
+                            Button::new("flow-sign-out")
+                                .outline()
+                                .label("Sign out")
+                                .disabled(!signed_in)
+                                .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                                    this.auth_session
+                                        .update(cx, |session, cx| session.sign_out(cx));
+                                })),
+                        ),
+                ),
+        )
+    }
+
+    fn render_credentials(&self) -> impl IntoElement {
+        let panel = |block: gpui_kit::AnyElement| div().w(rems(28.)).child(block);
+        Section::new("Blocks: ways into an account").child(
+            h_flex()
+                .flex_wrap()
+                .items_start()
+                .gap_6()
+                .child(panel(self.linked_accounts.clone().into_any_element()))
+                .child(panel(self.passkeys.clone().into_any_element()))
+                .child(div().w(rems(24.)).child(self.passkey_sign_in.clone())),
+        )
     }
 
     fn render_resource_sidebar(&self, cx: &mut Context<Self>) -> impl IntoElement {
@@ -2624,6 +2958,8 @@ impl Render for Gallery {
                 .child(self.render_shell(cx))
                 .child(self.render_scaffold(cx))
                 .child(self.render_auth(cx))
+                .child(self.render_auth_flow(cx))
+                .child(self.render_credentials())
                 .child(self.render_profile_card(cx))
                 .child(self.render_resource_sidebar(cx))
                 .child(self.render_ai_panel(cx))

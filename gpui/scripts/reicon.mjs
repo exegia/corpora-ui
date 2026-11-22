@@ -23,6 +23,8 @@ const ICONS = {
   'arrow-left': 'ArrowLeft',
   'arrow-right': 'ArrowRight',
   'arrow-up': 'ArrowUp',
+  'fingerprint-pattern': 'Fingerprint',
+  'key-round': 'Key',
   mail: 'Sms',
   smartphone: 'Mobile',
   'arrow-up-down': 'SortV',

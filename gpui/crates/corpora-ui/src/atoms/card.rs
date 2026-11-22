@@ -1,6 +1,6 @@
 //! Card: `react/src/components/ui/card.tsx`.
 
-use gpui_kit::component::{ActiveTheme as _, StyledExt as _, h_flex, v_flex};
+use gpui_kit::component::{ActiveTheme as _, Icon, Sizable as _, StyledExt as _, h_flex, v_flex};
 use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
     AnyElement, App, IntoElement, ParentElement, RenderOnce, SharedString, StyleRefinement, Styled,
@@ -20,6 +20,7 @@ use crate::foundations::{ActiveCorporaTheme as _, Radius};
 #[derive(IntoElement)]
 pub struct CardHeader {
     title: SharedString,
+    icon: Option<Icon>,
     description: Option<SharedString>,
     action: Option<AnyElement>,
     /// Set by [`Card`]: tightens the bottom inset when content follows.
@@ -32,6 +33,7 @@ impl CardHeader {
     pub fn new(title: impl Into<SharedString>) -> Self {
         Self {
             title: title.into(),
+            icon: None,
             description: None,
             action: None,
             followed_by_content: false,
@@ -41,6 +43,12 @@ impl CardHeader {
 
     pub fn description(mut self, description: impl Into<SharedString>) -> Self {
         self.description = Some(description.into());
+        self
+    }
+
+    /// Drawn before the title, in its ink.
+    pub fn icon(mut self, icon: impl Into<Icon>) -> Self {
+        self.icon = Some(icon.into());
         self
     }
 
@@ -71,11 +79,13 @@ impl RenderOnce for CardHeader {
                     .min_w_0()
                     .gap_1p5()
                     .child(
-                        div()
+                        h_flex()
+                            .gap_1p5()
                             .text_lg()
                             .font_semibold()
                             .line_height(relative(1.))
                             .when_some(heading_font, |this, family| this.font_family(family))
+                            .when_some(self.icon, |this, icon| this.child(icon.small()))
                             .child(self.title),
                     )
                     .when_some(self.description, |this, description| {

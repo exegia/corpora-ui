@@ -745,3 +745,404 @@ fn signup_and_code_hold_back_what_is_not_ready(cx: &mut TestAppContext) {
     );
     assert_eq!(*verified.borrow(), [CodeAuthEvent::Verify("184312".into())]);
 }
+
+#[gpui_kit::test]
+fn onboarding_checks_a_step_before_sending_it_and_keeps_what_was_typed(cx: &mut TestAppContext) {
+    use corpora_ui::blocks::{
+        AuthStatus, OnboardingBlock, OnboardingEvent, OnboardingField, OnboardingStep,
+        OnboardingValue,
+    };
+
+    cx.update(corpora_ui::init);
+    cx.update(|cx| cx.set_reduce_motion(true));
+    let held = Rc::new(RefCell::new(None));
+    let host_held = held.clone();
+    let window = open(cx, px(480.), move |window, cx| {
+        let onboarding = cx.new(|cx| {
+            OnboardingBlock::new(
+                [
+                    OnboardingStep::new("profile", "Your profile")
+                        .field(OnboardingField::text("display_name", "Display name").required())
+                        .field(OnboardingField::url("website", "Website")),
+                    OnboardingStep::new("work", "Your work")
+                        .field(
+                            OnboardingField::select("role", "Role", [("scholar", "Scholar")])
+                                .required(),
+                        )
+                        .field(OnboardingField::checkbox("updates", "Send me updates")),
+                ],
+                window,
+                cx,
+            )
+        });
+        *host_held.borrow_mut() = Some(onboarding.clone());
+        onboarding
+    });
+    let onboarding = held.borrow().clone().unwrap();
+    let mut visual = VisualTestContext::from_window(window, cx);
+    let events = Rc::new(RefCell::new(Vec::new()));
+    let log = events.clone();
+    visual.update(|_, cx| {
+        cx.subscribe(&onboarding, move |_, event: &OnboardingEvent, _| {
+            log.borrow_mut().push(event.clone())
+        })
+        .detach()
+    });
+    let text = |value: &'static str| OnboardingValue::Text(value.into());
+
+    // A step that fails its checks says why and sends nothing.
+    visual.update(|window, cx| {
+        onboarding.update(cx, |onboarding, cx| {
+            let website = onboarding.text_input("website").unwrap();
+            website.update(cx, |input, cx| input.set_value("exegia.app", window, cx));
+            onboarding.submit(cx);
+            assert_eq!(
+                onboarding.field_error("display_name").map(|e| e.as_ref()),
+                Some("Display name is required")
+            );
+            assert_eq!(
+                onboarding.field_error("website").map(|e| e.as_ref()),
+                Some("Enter a valid URL")
+            );
+            assert_eq!(onboarding.status(), AuthStatus::Idle);
+            // The second step is out of reach until the first is saved.
+            onboarding.go_to(1, cx);
+            assert_eq!(onboarding.step_index(), 0);
+
+            let name = onboarding.text_input("display_name").unwrap();
+            name.update(cx, |input, cx| input.set_value("  Ada  ", window, cx));
+            website.update(cx, |input, cx| {
+                input.set_value("https://exegia.app", window, cx)
+            });
+            onboarding.submit(cx);
+            assert_eq!(onboarding.status(), AuthStatus::Loading);
+        })
+    });
+    assert_eq!(
+        *events.borrow(),
+        [OnboardingEvent::Step {
+            id: "profile".into(),
+            values: vec![
+                ("display_name".into(), text("Ada")),
+                ("website".into(), text("https://exegia.app")),
+            ],
+        }]
+    );
+
+    visual.update(|_, cx| {
+        onboarding.update(cx, |onboarding, cx| {
+            onboarding.fail("Try again.", cx);
+            assert_eq!(onboarding.step_index(), 0);
+            onboarding.submit(cx);
+            onboarding.advance(cx);
+            assert_eq!(onboarding.step_index(), 1);
+            assert_eq!(onboarding.error(), None);
+
+            // Going back keeps the fields, and the reached step stays open.
+            onboarding.back(cx);
+            assert_eq!(onboarding.step_index(), 0);
+            let name = onboarding.text_input("display_name").unwrap();
+            assert_eq!(name.read(cx).value().as_ref(), "  Ada  ");
+            onboarding.go_to(1, cx);
+            assert_eq!(onboarding.step_index(), 1);
+
+            onboarding.submit(cx);
+            assert_eq!(
+                onboarding.field_error("role").map(|e| e.as_ref()),
+                Some("Role is required")
+            );
+            onboarding.choose("role", Some("scholar".into()), cx);
+            assert_eq!(onboarding.field_error("role"), None);
+            onboarding.set_flag("updates", true, cx);
+            onboarding.submit(cx);
+            onboarding.advance(cx);
+            assert_eq!(onboarding.status(), AuthStatus::Success);
+        })
+    });
+    visual.run_until_parked();
+    let events = events.borrow();
+    assert_eq!(events.len(), 4);
+    assert_eq!(
+        events[3],
+        OnboardingEvent::Complete(vec![
+            ("display_name".into(), text("Ada")),
+            ("website".into(), text("https://exegia.app")),
+            ("role".into(), text("scholar")),
+            ("updates".into(), OnboardingValue::Flag(true)),
+        ])
+    );
+}
+
+#[gpui_kit::test]
+fn credentials_guard_the_last_way_in_and_confirm_a_deletion(cx: &mut TestAppContext) {
+    use corpora_ui::blocks::{
+        LinkedAccountsBlock, LinkedAccountsEvent, LinkedIdentity, Passkey, PasskeyManagerBlock,
+        PasskeyManagerEvent, PasskeySignInBlock, PasskeySignInEvent,
+    };
+    use corpora_ui::composed::SocialProvider;
+
+    struct Host {
+        linked: Entity<LinkedAccountsBlock>,
+        passkeys: Entity<PasskeyManagerBlock>,
+        sign_in: Entity<PasskeySignInBlock>,
+    }
+    impl Render for Host {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            div()
+                .flex()
+                .flex_col()
+                .child(self.linked.clone())
+                .child(self.passkeys.clone())
+                .child(self.sign_in.clone())
+        }
+    }
+
+    cx.update(corpora_ui::init);
+    cx.update(|cx| cx.set_reduce_motion(true));
+    let held = Rc::new(RefCell::new(None));
+    let host_held = held.clone();
+    let window = open(cx, px(560.), move |window, cx| {
+        let linked = cx.new(|_| {
+            LinkedAccountsBlock::new()
+                .identities([LinkedIdentity::new("g", SocialProvider::Google)])
+        });
+        let passkeys = cx.new(|cx| {
+            PasskeyManagerBlock::new(window, cx)
+                .passkeys([Passkey::new("mac").name("MacBook"), Passkey::new("phone")])
+        });
+        let sign_in = cx.new(|_| PasskeySignInBlock::new());
+        *host_held.borrow_mut() = Some((linked.clone(), passkeys.clone(), sign_in.clone()));
+        cx.new(|_| Host {
+            linked,
+            passkeys,
+            sign_in,
+        })
+    });
+    let (linked, passkeys, sign_in) = held.borrow().clone().unwrap();
+    let mut visual = VisualTestContext::from_window(window, cx);
+    let links = Rc::new(RefCell::new(Vec::new()));
+    let keys = Rc::new(RefCell::new(Vec::new()));
+    let entries = Rc::new(RefCell::new(0));
+    let (link_log, key_log, entry_log) = (links.clone(), keys.clone(), entries.clone());
+    visual.update(|_, cx| {
+        cx.subscribe(&linked, move |_, event: &LinkedAccountsEvent, _| {
+            link_log.borrow_mut().push(event.clone())
+        })
+        .detach();
+        cx.subscribe(&passkeys, move |_, event: &PasskeyManagerEvent, _| {
+            key_log.borrow_mut().push(event.clone())
+        })
+        .detach();
+        cx.subscribe(&sign_in, move |_, _: &PasskeySignInEvent, _| {
+            *entry_log.borrow_mut() += 1
+        })
+        .detach();
+    });
+
+    visual.update(|_, cx| {
+        linked.update(cx, |linked, cx| {
+            // The only identity stays.
+            assert!(linked.is_last_method());
+            linked.unlink("g", cx);
+            assert!(!linked.is_busy());
+
+            linked.link(SocialProvider::Github, cx);
+            // One request at a time.
+            linked.link(SocialProvider::Apple, cx);
+            linked.settle(cx);
+            linked.set_identities(
+                [
+                    LinkedIdentity::new("g", SocialProvider::Google),
+                    LinkedIdentity::new("gh", SocialProvider::Github),
+                ],
+                cx,
+            );
+            assert!(!linked.is_last_method());
+            linked.unlink("g", cx);
+            linked.fail("Could not disconnect.", cx);
+            assert_eq!(
+                linked.error().map(|error| error.as_ref()),
+                Some("Could not disconnect.")
+            );
+            assert_eq!(linked.linked().count(), 2);
+        });
+        sign_in.update(cx, |sign_in, cx| {
+            sign_in.sign_in(cx);
+            sign_in.sign_in(cx);
+            assert!(sign_in.is_loading());
+            sign_in.fail("No passkey found.", cx);
+            assert!(!sign_in.is_loading());
+        });
+    });
+    assert_eq!(
+        *links.borrow(),
+        [
+            LinkedAccountsEvent::Link(SocialProvider::Github),
+            LinkedAccountsEvent::Unlink("g".into()),
+        ]
+    );
+    assert_eq!(*entries.borrow(), 1);
+
+    visual.update(|window, cx| {
+        passkeys.update(cx, |passkeys, cx| {
+            // The field opens on the name it has; an empty one is refused.
+            passkeys.start_rename("mac", window, cx);
+            assert_eq!(passkeys.rename_input().read(cx).value().as_ref(), "MacBook");
+            passkeys
+                .rename_input()
+                .clone()
+                .update(cx, |input, cx| input.set_value("   ", window, cx));
+            passkeys.submit_rename(cx);
+            assert!(passkeys.rename_error().is_some());
+            assert!(!passkeys.is_busy());
+            passkeys
+                .rename_input()
+                .clone()
+                .update(cx, |input, cx| input.set_value(" Studio ", window, cx));
+            passkeys.submit_rename(cx);
+            assert!(passkeys.is_busy());
+            passkeys.settle(cx);
+            assert_eq!(passkeys.renaming(), None);
+
+            // Asking to delete closes a rename and sends nothing yet.
+            passkeys.start_rename("phone", window, cx);
+            passkeys.ask_delete("phone", cx);
+            assert_eq!(passkeys.renaming(), None);
+            assert_eq!(passkeys.confirming().map(|id| id.as_ref()), Some("phone"));
+            passkeys.cancel_delete(cx);
+            passkeys.confirm_delete(cx);
+            assert!(!passkeys.is_busy());
+
+            passkeys.ask_delete("phone", cx);
+            passkeys.confirm_delete(cx);
+            passkeys.settle(cx);
+            assert_eq!(passkeys.confirming(), None);
+            passkeys.set_passkeys([Passkey::new("mac").name("Studio")], cx);
+            assert_eq!(passkeys.registered().count(), 1);
+            passkeys.register(cx);
+        })
+    });
+    visual.run_until_parked();
+    assert_eq!(
+        *keys.borrow(),
+        [
+            PasskeyManagerEvent::Rename {
+                id: "mac".into(),
+                name: "Studio".into(),
+            },
+            PasskeyManagerEvent::Delete("phone".into()),
+            PasskeyManagerEvent::Register,
+        ]
+    );
+}
+
+#[gpui_kit::test]
+fn auth_flow_follows_its_directives_and_signs_the_session_in(cx: &mut TestAppContext) {
+    use corpora_ui::blocks::{
+        AuthFlow, AuthFlowEvent, AuthSession, AuthStatus, AuthStep, AuthUser, CodeChannel,
+        LoginEvent, SessionStatus,
+    };
+
+    cx.update(corpora_ui::init);
+    cx.update(|cx| cx.set_reduce_motion(true));
+    let held = Rc::new(RefCell::new(None));
+    let host_held = held.clone();
+    let window = open(cx, px(480.), move |window, cx| {
+        let session = cx.new(|_| AuthSession::new());
+        let flow = cx.new(|cx| AuthFlow::new(window, cx).session(&session, cx));
+        *host_held.borrow_mut() = Some((flow.clone(), session));
+        flow
+    });
+    let (flow, session) = held.borrow().clone().unwrap();
+    let mut visual = VisualTestContext::from_window(window, cx);
+    let events = Rc::new(RefCell::new(Vec::new()));
+    let log = events.clone();
+    visual.update(|_, cx| {
+        cx.subscribe(&flow, move |_, event: &AuthFlowEvent, _| {
+            log.borrow_mut().push(event.clone())
+        })
+        .detach()
+    });
+    let login = visual.update(|_, cx| flow.read(cx).login().clone());
+    let code = visual.update(|_, cx| flow.read(cx).code().clone());
+
+    // The login block's links move the flow without the host.
+    visual.update(|_, cx| login.update(cx, |_, cx| cx.emit(LoginEvent::Signup)));
+    visual.run_until_parked();
+    assert_eq!(
+        visual.update(|_, cx| flow.read(cx).step()),
+        AuthStep::Signup
+    );
+    visual.update(|_, cx| flow.update(cx, |flow, cx| flow.go_to_step(AuthStep::Login, cx)));
+    visual.run_until_parked();
+
+    visual.update(|window, cx| {
+        login.update(cx, |login, cx| {
+            let (email, password) = (login.email_input().clone(), login.password_input().clone());
+            email.update(cx, |input, cx| {
+                input.set_value("ada@exegia.app", window, cx)
+            });
+            password.update(cx, |input, cx| input.set_value("analytical", window, cx));
+            login.submit(cx);
+        })
+    });
+    visual.run_until_parked();
+    assert_eq!(
+        events.borrow().last(),
+        Some(&AuthFlowEvent::Login {
+            email: "ada@exegia.app".into(),
+            password: "analytical".into(),
+            remember: false,
+        })
+    );
+
+    // A failure lands in the block on screen.
+    visual.update(|_, cx| flow.update(cx, |flow, cx| flow.fail("No such account.", cx)));
+    assert_eq!(
+        visual.update(|_, cx| login.read(cx).error().cloned()),
+        Some("No such account.".into())
+    );
+
+    // A code went out: the flow remembers where, and shows it masked.
+    visual.update(|_, cx| {
+        flow.update(cx, |flow, cx| {
+            flow.begin_verification("ada@exegia.app", CodeChannel::Email, cx);
+            assert_eq!(flow.step(), AuthStep::VerifyCode);
+            assert_eq!(flow.masked_identifier().as_deref(), Some("a•••@exegia.app"));
+        })
+    });
+    visual.run_until_parked();
+    visual.update(|window, cx| {
+        code.update(cx, |code, cx| {
+            let digits = code.code_input().clone();
+            digits.update(cx, |input, cx| input.set_value("184312", window, cx));
+            code.verify(cx);
+        })
+    });
+    visual.run_until_parked();
+    assert_eq!(
+        events.borrow().last(),
+        Some(&AuthFlowEvent::VerifyCode("184312".into()))
+    );
+
+    visual.update(|_, cx| {
+        flow.update(cx, |flow, cx| {
+            flow.complete(Some(AuthUser::new("ada", "Ada Lovelace")), cx);
+            assert_eq!(flow.step(), AuthStep::Success);
+        });
+        assert_eq!(session.read(cx).status(), SessionStatus::Authenticated);
+        assert_eq!(
+            session.read(cx).user().map(|user| user.name.as_ref()),
+            Some("Ada Lovelace")
+        );
+        // Signing out sends the flow back to an empty login.
+        session.update(cx, |session, cx| session.sign_out(cx));
+    });
+    visual.run_until_parked();
+    visual.update(|_, cx| {
+        assert_eq!(flow.read(cx).step(), AuthStep::Login);
+        assert_eq!(flow.read(cx).identifier(), None);
+        assert_eq!(login.read(cx).status(), AuthStatus::Idle);
+        assert!(login.read(cx).email_input().read(cx).value().is_empty());
+    });
+}

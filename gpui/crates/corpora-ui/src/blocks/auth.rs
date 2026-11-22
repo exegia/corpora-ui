@@ -3,6 +3,13 @@
 //! Each block is an entity that owns its fields. It emits what the user
 //! asked for and waits: the host answers with `succeed` or `fail`.
 
+mod flow;
+
+pub use flow::{
+    AuthFlow, AuthFlowEvent, AuthSession, AuthSessionEvent, AuthStep, AuthUser, SessionStatus,
+    mask_identifier,
+};
+
 use std::rc::Rc;
 use std::time::Duration;
 
@@ -25,7 +32,7 @@ use crate::composed::{
 use crate::foundations::ActiveCorporaTheme as _;
 use crate::foundations::motion::{DURATION_FAST, EASE_SMOOTH_OUT};
 
-type LogoBuilder = Rc<dyn Fn(&mut Window, &mut App) -> AnyElement>;
+pub(super) type LogoBuilder = Rc<dyn Fn(&mut Window, &mut App) -> AnyElement>;
 
 /// Where an attempt stands.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
@@ -99,6 +106,18 @@ macro_rules! auth_block {
                 self
             }
 
+            /// Replaces what is drawn above the title.
+            pub fn set_logo<E: IntoElement>(
+                &mut self,
+                logo: impl Fn(&mut Window, &mut App) -> E + 'static,
+                cx: &mut Context<Self>,
+            ) {
+                self.chrome.logo = Some(Rc::new(move |window, cx| {
+                    logo(window, cx).into_any_element()
+                }));
+                cx.notify();
+            }
+
             pub fn status(&self) -> AuthStatus {
                 self.chrome.status
             }
@@ -150,7 +169,7 @@ pub fn is_email(text: &str) -> bool {
         })
 }
 
-fn text_input(
+pub(super) fn text_input(
     placeholder: &'static str,
     masked: bool,
     window: &mut Window,
@@ -253,7 +272,7 @@ impl RenderOnce for AuthCard {
 /// A [`Reveal`] for a column with a gap: folded, it gives its gap back, so
 /// the rows around it do not stand two gaps apart.
 #[derive(IntoElement)]
-struct Fold {
+pub(super) struct Fold {
     id: SharedString,
     open: bool,
     gap: f32,
@@ -261,7 +280,7 @@ struct Fold {
 }
 
 impl Fold {
-    fn new(id: impl Into<SharedString>, open: bool, child: impl IntoElement) -> Self {
+    pub(super) fn new(id: impl Into<SharedString>, open: bool, child: impl IntoElement) -> Self {
         Self {
             id: id.into(),
             open,
@@ -271,7 +290,7 @@ impl Fold {
     }
 
     /// The column's gap in rems. Defaults to 1, `gap_4`.
-    fn gap(mut self, gap: f32) -> Self {
+    pub(super) fn gap(mut self, gap: f32) -> Self {
         self.gap = gap;
         self
     }
@@ -424,7 +443,7 @@ impl RenderOnce for AuthSeparator {
 }
 
 /// The submit button every form ends with.
-fn submit(id: &'static str, label: &'static str, loading: bool) -> Button {
+pub(super) fn submit(id: &'static str, label: &'static str, loading: bool) -> Button {
     Button::new(id)
         .primary()
         .full_width(true)
@@ -512,6 +531,16 @@ impl LoginBlock {
     pub fn providers(mut self, providers: impl IntoIterator<Item = SocialProvider>) -> Self {
         self.providers = providers.into_iter().collect();
         self
+    }
+
+    /// Replaces the identity providers offered.
+    pub fn set_providers(
+        &mut self,
+        providers: impl IntoIterator<Item = SocialProvider>,
+        cx: &mut Context<Self>,
+    ) {
+        self.providers = providers.into_iter().collect();
+        cx.notify();
     }
 
     pub fn show_remember_me(mut self, show: bool) -> Self {
@@ -738,6 +767,16 @@ impl SignupBlock {
     pub fn providers(mut self, providers: impl IntoIterator<Item = SocialProvider>) -> Self {
         self.providers = providers.into_iter().collect();
         self
+    }
+
+    /// Replaces the identity providers offered.
+    pub fn set_providers(
+        &mut self,
+        providers: impl IntoIterator<Item = SocialProvider>,
+        cx: &mut Context<Self>,
+    ) {
+        self.providers = providers.into_iter().collect();
+        cx.notify();
     }
 
     pub fn show_name_field(mut self, show: bool) -> Self {
@@ -1254,6 +1293,18 @@ impl CodeAuthBlock {
     pub fn destination(mut self, destination: impl Into<SharedString>) -> Self {
         self.destination = Some(destination.into());
         self
+    }
+
+    /// Says where the next code went: the channel and the masked address.
+    pub fn set_destination(
+        &mut self,
+        channel: CodeChannel,
+        destination: Option<SharedString>,
+        cx: &mut Context<Self>,
+    ) {
+        self.channel = channel;
+        self.destination = destination;
+        cx.notify();
     }
 
     /// Whether the last digit verifies the code. Off, a Verify button shows.

@@ -152,10 +152,16 @@ stack, waveform and thumbnail wait for the pieces that use them.
 | `Scaffold.Panel`, `Scaffold.Tab` | `ScaffoldPanel`, `ScaffoldTab` |
 | `AuthCard`, `AuthError`, `AuthSuccess`, `AuthSeparator` | same names |
 | `LoginBlock`, `SignupBlock`, `ForgotPasswordBlock`, `UpdatePasswordBlock`, `CodeAuthBlock` | same names, with `LoginEvent`, `SignupEvent`, `ForgotPasswordEvent`, `UpdatePasswordEvent`, `CodeAuthEvent` |
+| `OnboardingBlock`, `IOnboardingStepConfig`, `TOnboardingFieldConfig` | `OnboardingBlock`, `OnboardingStep`, `OnboardingField`, `OnboardingValue`, `OnboardingEvent` |
+| `LinkedAccountsBlock`, `ILinkedIdentity` | `LinkedAccountsBlock`, `LinkedIdentity`, `LinkedAccountsEvent` |
+| `PasskeyManagerBlock`, `IPasskeyRecord` | `PasskeyManagerBlock`, `Passkey`, `PasskeyManagerEvent` |
+| `PasskeySignInBlock` | `PasskeySignInBlock`, `PasskeySignInEvent` |
+| `AuthFlowBlock`, `useAuthFlow`, `useAuthFlowActions` | `AuthFlow`, `AuthFlowEvent`, `AuthStep` |
+| `useAuthSession`, `IAuthUser`, `maskAuthIdentifier` | `AuthSession`, `AuthSessionEvent`, `AuthUser`, `mask_identifier` |
 | `AISidebar`, `useAISidebar` | `ResourceSidebar`, `ResourceSidebarEvent` |
 | `ISidebarResource`, `ISidebarResourceMove` | `SidebarResource`, `ResourceKind`, `ResourceMove`, `DropPosition` |
 
-Not ported yet, from `auth`: the onboarding steps, the auth flow and its session store, the passkey sign-in and manager, linked accounts, and the per-block `accent`. `sidebar-primitives` is not ported on
+Not ported from `auth`: the per-block `accent`. `sidebar-primitives` is not ported on
 purpose: GPUI Component's own `sidebar` module (`Sidebar`, `SidebarMenu`,
 `SidebarGroup`, `SidebarToggleButton`) is the same set of parts.
 
@@ -307,6 +313,36 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
   "Forgot password?") are ghost buttons, since they are commands. The
   success check and the error line appear without the drawn stroke and
   the shake.
+- **Onboarding answers one step at a time.** `OnboardingBlock` emits
+  `Step { id, values }` and waits for `advance(cx)` or `fail(message,
+  cx)`; after the last step it emits `Complete` with every value, which
+  is not awaited. Values are `OnboardingValue::Text` or `Flag`, in
+  declared order. The step menu and a select field are a button that
+  opens a menu, and the step menu is left out of a one-step flow. A URL
+  is checked loosely: a scheme, a colon and a rest. Typed fields survive
+  going back because each field keeps its own state, not through a draft
+  store.
+- **Account panels are told their lists.** `LinkedAccountsBlock` and
+  `PasskeyManagerBlock` emit a request and wait for `settle(cx)` or
+  `fail(message, cx)`; the host then hands over the new list with
+  `set_identities` or `set_passkeys`, and rows fold in and out. A
+  passkey's dates arrive already written out (`created`, `last_used`),
+  since the crate formats no dates. The delete confirmation names the
+  passkey, and the add button reads "Add passkey". The passkey sign-in
+  button's fingerprint takes the button's ink, not React's pink.
+- **The auth flow is an entity with directives.** `AuthFlow` owns the
+  six blocks and emits one `AuthFlowEvent` per attempt. The host answers
+  with `complete(user, cx)`, `begin_verification(identifier, channel,
+  cx)`, `go_to_step(step, cx)`, `succeed(cx)` or `fail(message, cx)`,
+  where React returns a directive from a handler. A block is emptied
+  each time the flow arrives at it. There are no flow ids: make a second
+  `AuthFlow` for a second surface. `AuthSession` is an entity the app
+  shares, not a store; attach it with `.session(&session, cx)` and
+  signing it out returns the flow to login. `renderStep`, the per-step
+  prop overrides and the flow-level `status` and `error` have no
+  counterpart: reach a block through `flow.login()` and the like.
+  `AuthUser` carries no `metadata` or `initials`. One screen folds away
+  as the next opens, where React morphs the card.
 - **The scaffold is one layout, not compound parts.** `ScaffoldLayout`
   takes the rail, tabs, panels and inspector through builder methods, and
   `Scaffold` holds what they share. Every panel and tab has an id. A

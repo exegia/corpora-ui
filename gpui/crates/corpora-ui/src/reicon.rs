@@ -48,6 +48,7 @@ pub(crate) const PATHS: &[&str] = &[
     "icons/file-text.svg",
     "icons/file.svg",
     "icons/film.svg",
+    "icons/fingerprint-pattern.svg",
     "icons/folder-closed.svg",
     "icons/folder-open.svg",
     "icons/folder.svg",
@@ -61,6 +62,7 @@ pub(crate) const PATHS: &[&str] = &[
     "icons/image.svg",
     "icons/inbox.svg",
     "icons/info.svg",
+    "icons/key-round.svg",
     "icons/layout-dashboard.svg",
     "icons/link-2.svg",
     "icons/lock.svg",
@@ -170,6 +172,9 @@ pub(crate) fn load(path: &str) -> Option<&'static [u8]> {
         "icons/file-text.svg" => include_bytes!("../assets/icons/file-text.svg"),
         "icons/file.svg" => include_bytes!("../assets/icons/file.svg"),
         "icons/film.svg" => include_bytes!("../assets/icons/film.svg"),
+        "icons/fingerprint-pattern.svg" => {
+            include_bytes!("../assets/icons/fingerprint-pattern.svg")
+        }
         "icons/folder-closed.svg" => include_bytes!("../assets/icons/folder-closed.svg"),
         "icons/folder-open.svg" => include_bytes!("../assets/icons/folder-open.svg"),
         "icons/folder.svg" => include_bytes!("../assets/icons/folder.svg"),
@@ -185,6 +190,7 @@ pub(crate) fn load(path: &str) -> Option<&'static [u8]> {
         "icons/image.svg" => include_bytes!("../assets/icons/image.svg"),
         "icons/inbox.svg" => include_bytes!("../assets/icons/inbox.svg"),
         "icons/info.svg" => include_bytes!("../assets/icons/info.svg"),
+        "icons/key-round.svg" => include_bytes!("../assets/icons/key-round.svg"),
         "icons/layout-dashboard.svg" => include_bytes!("../assets/icons/layout-dashboard.svg"),
         "icons/link-2.svg" => include_bytes!("../assets/icons/link-2.svg"),
         "icons/lock.svg" => include_bytes!("../assets/icons/lock.svg"),
