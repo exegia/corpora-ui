@@ -1,10 +1,18 @@
 //! Installs the Corpora palette into GPUI Component's theme and keeps the
 //! roles that theme has no slot for.
+//!
+//! This module is where every component gets its colors: stock roles through
+//! `cx.theme()`, the rest through [`ActiveCorporaTheme::palette`]. No
+//! component names a color of its own.
+//!
+//! The values of both appearances come from `theme.toml`, resolved against
+//! `palette.toml` by [`super::color`]. This module projects them onto the
+//! stock theme and derives the hover and pressed fills from them.
 
 use std::rc::Rc;
 
 use gpui_kit::component::{Colorize as _, Theme, ThemeConfig, ThemeConfigColors, ThemeMode};
-use gpui_kit::{App, Global, Hsla, SharedString, black, white};
+use gpui_kit::{App, Global, Hsla, SharedString};
 
 use super::color::Palette;
 use super::radius::RADIUS_BASE_PX;
@@ -134,18 +142,50 @@ fn hex(color: Hsla) -> Option<SharedString> {
     Some(color.to_hex().into())
 }
 
+/// The schema's colors with only the six base hues set.
+///
+/// The schema keeps those fields private, so its serde names are their only
+/// way in.
+fn base_hues(palette: &Palette) -> ThemeConfigColors {
+    [
+        ("base.red", palette.base_red),
+        ("base.green", palette.base_green),
+        ("base.blue", palette.base_blue),
+        ("base.yellow", palette.base_yellow),
+        ("base.magenta", palette.base_magenta),
+        ("base.cyan", palette.base_cyan),
+    ]
+    .into_iter()
+    .map(|(name, color)| (name.to_owned(), toml::Value::String(color.to_hex())))
+    .collect::<toml::Table>()
+    .try_into()
+    .expect("the theme schema takes each base hue as a string")
+}
+
 /// Projects a [`Palette`] onto GPUI Component's theme file schema.
 ///
-/// The roles `theme.css` defines are set, plus the button hover and pressed
+/// The roles `theme.toml` defines are set, plus the button hover and pressed
 /// fills (see [`Travel`]). Everything else — list, table and tab surfaces —
-/// is left to the schema's own fallbacks.
+/// is left to the schema's own fallbacks, which derive from the roles set
+/// here. The base hues and the overlay are set because their fallbacks are
+/// GPUI Component's own colors, not ours.
 fn theme_config(
     name: &'static str,
     mode: ThemeMode,
     palette: &Palette,
     fonts: &FontFamilies,
 ) -> ThemeConfig {
-    let mut colors = ThemeConfigColors::default();
+    // A fill under the pointer: deeper on a light page, lifted on a dark one.
+    let hover_ink = if mode.is_dark() {
+        palette.highlight
+    } else {
+        palette.shadow
+    };
+    let hovered = |fill: Hsla, travel: Travel| fill.blend(hover_ink.opacity(travel.hover));
+    // A pressed fill: sunk, in either appearance.
+    let pressed = |fill: Hsla, travel: Travel| fill.blend(palette.shadow.opacity(travel.active));
+
+    let mut colors = base_hues(palette);
     colors.background = hex(palette.background);
     colors.foreground = hex(palette.foreground);
     colors.border = hex(palette.border);
@@ -161,12 +201,12 @@ fn theme_config(
     colors.primary_foreground = hex(palette.primary_foreground);
     colors.secondary = hex(palette.secondary);
     colors.secondary_foreground = hex(palette.secondary_foreground);
-    colors.primary_hover = hex(hovered(palette.primary, FILLED_TRAVEL, mode));
+    colors.primary_hover = hex(hovered(palette.primary, FILLED_TRAVEL));
     colors.primary_active = hex(pressed(palette.primary, FILLED_TRAVEL));
-    colors.secondary_hover = hex(hovered(palette.secondary, NEUTRAL_TRAVEL, mode));
+    colors.secondary_hover = hex(hovered(palette.secondary, NEUTRAL_TRAVEL));
     colors.secondary_active = hex(pressed(palette.secondary, NEUTRAL_TRAVEL));
     // The outlined button rests on the page color.
-    colors.button_hover = hex(hovered(palette.background, NEUTRAL_TRAVEL, mode));
+    colors.button_hover = hex(hovered(palette.background, NEUTRAL_TRAVEL));
     colors.button_active = hex(pressed(palette.background, NEUTRAL_TRAVEL));
     colors.link = hex(palette.primary);
     colors.skeleton = hex(palette.muted);
@@ -188,7 +228,7 @@ fn theme_config(
     // solid fill with white text.
     colors.button_danger = hex(palette.destructive);
     colors.button_danger_foreground = hex(palette.on_status);
-    colors.button_danger_hover = hex(hovered(palette.destructive, FILLED_TRAVEL, mode));
+    colors.button_danger_hover = hex(hovered(palette.destructive, FILLED_TRAVEL));
     colors.button_danger_active = hex(pressed(palette.destructive, FILLED_TRAVEL));
 
     let [chart_1, chart_2, chart_3, chart_4, chart_5] = palette.chart;
@@ -206,6 +246,8 @@ fn theme_config(
     colors.sidebar_accent_foreground = hex(palette.sidebar_accent_foreground);
     colors.sidebar_border = hex(palette.sidebar_border);
 
+    colors.overlay = hex(palette.overlay);
+
     let mut config = ThemeConfig::default();
     config.name = name.into();
     config.mode = mode;
@@ -216,17 +258,6 @@ fn theme_config(
     config.shadow = Some(true);
     config.font_family = fonts.sans_override();
     config
-}
-
-/// A fill under the pointer: deeper on a light page, lifted on a dark one.
-fn hovered(fill: Hsla, travel: Travel, mode: ThemeMode) -> Hsla {
-    let ink = if mode.is_dark() { white() } else { black() };
-    fill.blend(ink.opacity(travel.hover))
-}
-
-/// A pressed fill: sunk, in either appearance.
-fn pressed(fill: Hsla, travel: Travel) -> Hsla {
-    fill.blend(black().opacity(travel.active))
 }
 
 #[cfg(test)]
@@ -250,6 +281,25 @@ mod tests {
             let parsed = gpui_kit::component::try_parse_color(&border).expect("hex parses");
             assert!((parsed.a - palette.border.a).abs() < 0.01);
         }
+    }
+
+    #[test]
+    fn hover_deepens_a_light_fill_and_lifts_a_dark_one() {
+        let fonts = FontFamilies::default();
+        let lightness = |value: &Option<SharedString>| {
+            let value = value.as_ref().expect("the fill is set");
+            gpui_kit::component::try_parse_color(value)
+                .expect("hex parses")
+                .l
+        };
+
+        let light = theme_config("test", ThemeMode::Light, &Palette::light(), &fonts).colors;
+        assert!(lightness(&light.primary_hover) < lightness(&light.primary));
+        assert!(lightness(&light.primary_active) < lightness(&light.primary_hover));
+
+        let dark = theme_config("test", ThemeMode::Dark, &Palette::dark(), &fonts).colors;
+        assert!(lightness(&dark.primary_hover) > lightness(&dark.primary));
+        assert!(lightness(&dark.primary_active) < lightness(&dark.primary));
     }
 
     #[test]

@@ -1,0 +1,309 @@
+# The Corpora theme. Every value references a scale.step (or a named color)
+# from palette.toml; `color.rs` turns those into concrete colors. A color no
+# scale holds, such as a brand color, is written as a raw `#rrggbb`.
+#
+# A role carries the name of its custom property in
+# react/src/assets/css/theme.css: `light` is the `:root` block and `dark` the
+# `.dark` block. A translucent color adds `light-alpha` or `dark-alpha`.
+name = "Corpora"
+description = "The Corpora light and dark themes."
+
+# Surfaces and the content that sits on them.
+[colors.background]
+description = "The page behind everything."
+light = "white"
+dark = "neutral.950"
+
+[colors.foreground]
+description = "Primary text and icons."
+light = "neutral.950"
+dark = "neutral.50"
+
+[colors.card]
+description = "Cards and panels raised off the page."
+light = "white"
+dark = "neutral.900"
+
+[colors.card-foreground]
+description = "Text and icons on a card."
+light = "neutral.950"
+dark = "neutral.50"
+
+[colors.popover]
+description = "Menus, popovers and dialogs floating above the page."
+light = "white"
+dark = "neutral.900"
+
+[colors.popover-foreground]
+description = "Text and icons on a popover."
+light = "neutral.950"
+dark = "neutral.50"
+
+# Fills of controls and the content placed on them.
+[colors.primary]
+description = "Fill of the main action."
+light = "indigo.700"
+dark = "indigo.800"
+
+[colors.primary-foreground]
+description = "Text and icons on a primary fill."
+light = "indigo.50"
+dark = "indigo.50"
+
+[colors.secondary]
+description = "Neutral fill of a secondary action."
+light = "zinc.100"
+dark = "zinc.800"
+
+[colors.secondary-foreground]
+description = "Text and icons on a secondary fill."
+light = "zinc.900"
+dark = "zinc.50"
+
+[colors.muted]
+description = "Quiet surface for wells, skeletons and inactive areas."
+light = "neutral.100"
+dark = "neutral.800"
+
+[colors.muted-foreground]
+description = "Secondary text and supporting labels."
+light = "neutral.500"
+dark = "neutral.400"
+
+[colors.accent]
+description = "Background of a hovered or selected item."
+light = "neutral.100"
+dark = "neutral.800"
+
+[colors.accent-foreground]
+description = "Text and icons on an accent background."
+light = "neutral.900"
+dark = "neutral.50"
+
+# Lines.
+[colors.border]
+description = "Dividers and outlines between regions."
+light = "neutral.200"
+dark = "white"
+dark-alpha = 0.10
+
+[colors.input]
+description = "Outline of a form control."
+light = "neutral.200"
+dark = "white"
+dark-alpha = 0.15
+
+[colors.ring]
+description = "Focus ring on keyboard-focused controls."
+light = "neutral.400"
+dark = "neutral.500"
+
+# The sidebar, which keeps its own copy of the surface roles.
+[colors.sidebar]
+description = "Navigation panel beside the page."
+light = "neutral.50"
+dark = "neutral.900"
+
+[colors.sidebar-foreground]
+description = "Text and icons in the sidebar."
+light = "neutral.950"
+dark = "neutral.50"
+
+[colors.sidebar-primary]
+description = "Fill of the active sidebar item."
+light = "indigo.600"
+dark = "indigo.500"
+
+[colors.sidebar-primary-foreground]
+description = "Text and icons on the active sidebar item."
+light = "indigo.50"
+dark = "indigo.50"
+
+[colors.sidebar-accent]
+description = "Background of a hovered sidebar item."
+light = "neutral.100"
+dark = "neutral.800"
+
+[colors.sidebar-accent-foreground]
+description = "Text and icons on a hovered sidebar item."
+light = "neutral.900"
+dark = "neutral.50"
+
+[colors.sidebar-border]
+description = "Dividers inside and around the sidebar."
+light = "neutral.200"
+dark = "white"
+dark-alpha = 0.10
+
+[colors.sidebar-ring]
+description = "Focus ring inside the sidebar."
+light = "neutral.400"
+dark = "neutral.500"
+
+# Status colors. The plain role is a solid fill; its `-foreground` is the text
+# shade for tinted and outlined surfaces.
+[colors.destructive]
+description = "Errors and destructive actions."
+light = "red.600"
+dark = "red.400"
+
+[colors.destructive-foreground]
+description = "Destructive text on a tinted or outlined surface."
+light = "red.700"
+dark = "red.400"
+
+[colors.info]
+description = "Neutral informational state."
+light = "blue.500"
+dark = "blue.500"
+
+[colors.info-foreground]
+description = "Info text on a tinted or outlined surface."
+light = "blue.700"
+dark = "blue.400"
+
+[colors.success]
+description = "Confirmation and healthy state."
+light = "emerald.500"
+dark = "emerald.500"
+
+[colors.success-foreground]
+description = "Success text on a tinted or outlined surface."
+light = "emerald.700"
+dark = "emerald.400"
+
+[colors.warning]
+description = "Caution that needs attention."
+light = "amber.500"
+dark = "amber.500"
+
+[colors.warning-foreground]
+description = "Warning text on a tinted or outlined surface."
+light = "amber.700"
+dark = "amber.400"
+
+[colors.on-status]
+description = "Text and icons on a solid status fill (`text-white` in React)."
+light = "white"
+dark = "white"
+
+# The inverted surface: dark on a light page.
+[colors.invert]
+description = "Inverted surface for tooltips and high-contrast badges."
+light = "zinc.900"
+dark = "zinc.700"
+
+[colors.invert-foreground]
+description = "Text and icons on an inverted surface."
+light = "zinc.50"
+dark = "zinc.50"
+
+# Roles theme.css has no property for: React components name these Tailwind
+# classes directly.
+[colors.bubble-sender]
+description = "Chat bubble of the current user."
+light = "indigo.700"
+dark = "neutral.100"
+
+[colors.bubble-sender-foreground]
+description = "Text in the current user's chat bubble."
+light = "white"
+dark = "neutral.950"
+
+[colors.bubble-recipient]
+description = "Chat bubble of another person."
+light = "neutral.100"
+dark = "neutral.800"
+
+[colors.bubble-recipient-foreground]
+description = "Text in another person's chat bubble."
+light = "neutral.950"
+dark = "neutral.50"
+
+[colors.agent]
+description = "The agent's own voice: its spark and the suggestions disclosure."
+light = "violet.600"
+dark = "violet.400"
+
+# Light and shade. Every shadow, emboss, glass lift and hover or pressed fill
+# is one of these two inks at some opacity.
+[colors.highlight]
+description = "Light catching a surface: the lit edge of an emboss, a glass lift."
+light = "white"
+dark = "white"
+
+[colors.shadow]
+description = "Shade: drop shadows, the dark edge of an emboss, a pressed fill."
+light = "black"
+dark = "black"
+
+[colors.overlay]
+description = "Backdrop behind a dialog or sheet."
+light = "black"
+dark = "black"
+light-alpha = 0.05
+dark-alpha = 0.20
+
+# The six base hues stock components derive from, for example a list's search
+# highlight and a chart's rising and falling colors.
+[colors.base-red]
+light = "red.600"
+dark = "red.400"
+
+[colors.base-green]
+light = "green.600"
+dark = "green.400"
+
+[colors.base-blue]
+light = "blue.600"
+dark = "blue.400"
+
+[colors.base-yellow]
+light = "yellow.600"
+dark = "yellow.400"
+
+[colors.base-magenta]
+light = "purple.600"
+dark = "purple.400"
+
+[colors.base-cyan]
+light = "cyan.600"
+dark = "cyan.400"
+
+# Brand accents (React's `TAuthAccent`). A brand color is a constant: it is
+# the same in both appearances and on no Tailwind scale.
+[colors.brand-corpora]
+description = "Corpora yellow."
+light = "#E8B124"
+dark = "#E8B124"
+
+[colors.brand-corpora-foreground]
+description = "Text and icons on Corpora yellow."
+light = "neutral.950"
+dark = "neutral.950"
+
+[colors.brand-exegia-foreground]
+description = "Text and icons on Exegia violet."
+light = "neutral.50"
+dark = "neutral.50"
+
+# Exegia violet, a gradient: its two stops.
+[brand-exegia]
+light = ["#2700B1", "#270050"]
+dark = ["#2700B1", "#270050"]
+
+# `--chart-1` to `--chart-5`.
+[chart]
+light = ["violet.300", "violet.500", "violet.600", "violet.700", "violet.800"]
+dark = ["violet.300", "violet.500", "violet.600", "violet.700", "violet.800"]
+
+# Fill of the password strength meter at one to four requirements met.
+[strength]
+light = ["red.500", "orange.500", "amber.500", "emerald.500"]
+dark = ["red.500", "orange.500", "amber.500", "emerald.500"]
+
+# Ring around an avatar with live audio: `from-yellow-400 via-fuchsia-500
+# to-violet-600`.
+[audio-ring]
+light = ["yellow.400", "fuchsia.500", "violet.600"]
+dark = ["yellow.400", "fuchsia.500", "violet.600"]

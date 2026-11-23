@@ -2,7 +2,7 @@
 //!
 //! | Module | React source |
 //! | --- | --- |
-//! | [`color`], [`theme`] | `assets/css/theme.css` (`:root`, `.dark`) |
+//! | [`color`], [`theme`] | `assets/css/theme.css` (`:root`, `.dark`), as `theme.toml` over `palette.toml` |
 //! | [`radius`] | `theme.css` (`--radius-*`) |
 //! | [`motion`] | `theme.css` (`@theme` motion scale), `lib/ease.ts` |
 //! | [`shadow`] | `assets/css/shadows.css` |
