@@ -29,6 +29,15 @@ The `hot-reload` feature is opt-in. Its optional `gpui-pre` dependency enables
 the feature on the same vendored GPUI already used by `gpui-kit` (0.10 does not
 forward it). Ordinary `cargo run` and release builds retain their normal behavior.
 
+Hot reload serves `crates/gallery`, a package whose only target is the gallery
+example's source built as a binary. dx patches every workspace crate except
+the package it serves, so the gallery has to live outside `corpora-ui` for an
+edit to a component to reach the running window. `cargo run -p corpora-ui
+--example gallery` still builds the same file.
+
+Colors are the exception: `theme.toml` and `palette.toml` are read once at
+startup, so restart the task after editing them.
+
 ## Layout
 
 ```text
@@ -42,6 +51,7 @@ gpui/
 │   ├── assets/            # fonts (Allo, Caudex), Reicon icons, brand marks, images
 │   ├── examples/gallery.rs
 │   └── tests/             # atoms.rs, composed.rs, blocks.rs
+├── crates/gallery/        # the gallery as its own package, for hot reload
 ├── scripts/reicon.mjs     # regenerates assets/icons and src/reicon.rs
 └── vendor/                # GPUI with the glass backdrop pass; see vendor/README.md
 ```
@@ -76,66 +86,78 @@ by hand. So the port has two halves:
    with no wrapper. Roles that theme has no slot for (`card`, `invert`, the
    status text shades) live in the `CorporaTheme` global, read with
    `cx.palette()`.
+
+   Colors are data: `foundations/theme.toml` gives each role a `scale.step`
+   for light and for dark, and `foundations/palette.toml` holds the scales
+   (the Tailwind palette). To change a color, edit `theme.toml`; to add a
+   role, add it there and to `Palette` in `foundations/color.rs`.
+
+   The theme is the only source of color. A component reads `cx.theme()`
+   or `cx.palette()` and never builds a color of its own: no `rgb(...)`,
+   no `white()`, no named scale. That holds for shadow and highlight inks
+   and for brand colors, which are roles too (`highlight`, `shadow`,
+   `brand-*`). `transparent_black()` is allowed, being no paint at all.
+
 2. **Atoms** re-export the stock elements that already match, and implement
    only what GPUI Component lacks.
 
-| React | GPUI | Source |
-| --- | --- | --- |
-| `Button` | `Button`, `ButtonKind` | this crate, on the stock button |
-| `Badge` | `Badge` | this crate |
-| `Card`, `CardHeader`, `CardPanel`, `CardFooter` | `Card`, `CardHeader` | this crate |
-| `CardFrame` and its parts, `Frame`, `FramePanel` | `CardFrame`, `CardFrameHeader`, `Frame` | this crate |
-| `Text`, `Heading`, `Paragraph`, `Span` | `Text` | this crate |
-| `Label` (text level) | `Text::label` with a `LabelLevel` | this crate |
-| `Loader` | `Loader` | this crate |
-| `Avatar` | `Avatar`, `AvatarUser` | this crate, on the stock avatar |
-| `Bubble` and its parts | `Bubble`, `BubbleReaction` | this crate |
-| `Reference` | `Reference` | this crate, on the stock button and hover card |
-| `InputField` | `InputField` | this crate, on the stock input |
-| `SourceChip`, `SelectChip` | `Chip`, `SelectChip` | this crate, on the stock dropdown menu |
-| `EmojiPicker` | `EmojiPicker`, `EmojiPickerState`, `Emoji` | this crate, data from the `emojis` crate |
-| `Texture` | `Texture`, `TextureVariant` | this crate |
-| `Dot`, `Pill`, `Tag`, `FileTypeBadge` (`ui/chat`) | `Dot`, `Pill`, `Tag`, `FileTypeBadge`, with `Tone` and `TagTone` | this crate |
-| `Stat`, `FollowUpRow`, `Signal` (`ui/chat`) | `Stat`, `FollowUpRow`, `Signal` | this crate |
-| `SegmentedToggle` (`ui/chat`) | `SegmentedToggle` | this crate |
-| `TextSelection`, `TextClickPopover` | `TextSelection`, `TextPopover` | this crate, on GPUI Base's window text selection |
-| (height transitions) | `Reveal` | this crate, on GPUI Base's `MotionReveal` |
-| liquid glass surfaces | `GlassSpec`, `GlassEdges`, `GlassSurfaceExt`, `glass` | this crate, on the patched GPUI in `vendor/` |
-| `Label` (form), `Kbd`, `Separator`, `Skeleton`, `Spinner` | same names | GPUI Component |
+| React                                                     | GPUI                                                             | Source                                           |
+| --------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------ |
+| `Button`                                                  | `Button`, `ButtonKind`                                           | this crate, on the stock button                  |
+| `Badge`                                                   | `Badge`                                                          | this crate                                       |
+| `Card`, `CardHeader`, `CardPanel`, `CardFooter`           | `Card`, `CardHeader`                                             | this crate                                       |
+| `CardFrame` and its parts, `Frame`, `FramePanel`          | `CardFrame`, `CardFrameHeader`, `Frame`                          | this crate                                       |
+| `Text`, `Heading`, `Paragraph`, `Span`                    | `Text`                                                           | this crate                                       |
+| `Label` (text level)                                      | `Text::label` with a `LabelLevel`                                | this crate                                       |
+| `Loader`                                                  | `Loader`                                                         | this crate                                       |
+| `Avatar`                                                  | `Avatar`, `AvatarUser`                                           | this crate, on the stock avatar                  |
+| `Bubble` and its parts                                    | `Bubble`, `BubbleReaction`                                       | this crate                                       |
+| `Reference`                                               | `Reference`                                                      | this crate, on the stock button and hover card   |
+| `InputField`                                              | `InputField`                                                     | this crate, on the stock input                   |
+| `SourceChip`, `SelectChip`                                | `Chip`, `SelectChip`                                             | this crate, on the stock dropdown menu           |
+| `EmojiPicker`                                             | `EmojiPicker`, `EmojiPickerState`, `Emoji`                       | this crate, data from the `emojis` crate         |
+| `Texture`                                                 | `Texture`, `TextureVariant`                                      | this crate                                       |
+| `Dot`, `Pill`, `Tag`, `FileTypeBadge` (`ui/chat`)         | `Dot`, `Pill`, `Tag`, `FileTypeBadge`, with `Tone` and `TagTone` | this crate                                       |
+| `Stat`, `FollowUpRow`, `Signal` (`ui/chat`)               | `Stat`, `FollowUpRow`, `Signal`                                  | this crate                                       |
+| `SegmentedToggle` (`ui/chat`)                             | `SegmentedToggle`                                                | this crate                                       |
+| `TextSelection`, `TextClickPopover`                       | `TextSelection`, `TextPopover`                                   | this crate, on GPUI Base's window text selection |
+| (height transitions)                                      | `Reveal`                                                         | this crate, on GPUI Base's `MotionReveal`        |
+| liquid glass surfaces                                     | `GlassSpec`, `GlassEdges`, `GlassSurfaceExt`, `glass`            | this crate, on the patched GPUI in `vendor/`     |
+| `Label` (form), `Kbd`, `Separator`, `Skeleton`, `Spinner` | same names                                                       | GPUI Component                                   |
 
 Not ported yet: the `glass` button variant.
 
 ### Composed
 
-| React | GPUI |
-| --- | --- |
-| `User.Info`, `User.Pill`, `User.Message` | `UserInfo`, `UserPill`, `UserMessage` |
-| `AI.Avatar`, `AI.Message` | `AiIdentity`, `AiMessage` |
-| `StreamingText` | `StreamingText`, `StreamToken` |
-| `SuggestedPrompt`, `SuggestedPrompts` | same names |
-| `ActionBar`, `EmojiActionBar` | same names |
-| `Bubble.ReactionsButton` | `ReactionPicker` |
-| `Logo` | `Logo` |
-| `PasswordInput` | `PasswordInput`, `password_strength` |
-| `SocialProviders` | `SocialProviders` |
-| `SendHint` | `SendHint` |
-| `Verse`, `VerseSpan`, `VerseNote` | `Verse` and its `span` and `note` |
-| `SelectionPopover` | `SelectionCard`, `ReaderSelection`, inside a popover |
-| `SelectionHighlight`, `AppliedMark`, `ApplyToast` | `SelectionHighlight`, `AppliedMark`, `ApplyToast` |
-| `Attachment` | `Attachment`, `AttachmentKind` |
-| `Markdown` | `Markdown` |
-| `ResearchAnswer` | `ResearchAnswer` |
-| `Tree` | `Tree`, `TreeNode`, `TreeVariant` |
-| `CorpusNavigation.*` | `CorpusNavigation`, `LocationBar`, `HierarchyPicker`, `LocationGrid`, `ReferenceCommand`, `CorpusData`, `CorpusLevel`, `CorpusNode` |
-| `Flowchart` | `Flowchart`, `FlowStep`, `FlowEdge` |
-| `Chart` | `Chart`, `ChartKind`, `ChartRow`, `ChartSeries` |
-| `Composer`, `SendButton`, `AddButton` | `Composer` (an entity), `ComposerEvent`, `ComposerOption`, `ComposerModel`, `ComposerAttachment`, `ComposerShape` |
-| `Recommendation.Item`, `RecommendationCard` | `Recommendation`, `RecommendationOption`, `RecommendationState` |
-| `CodeBlock` | `CodeBlock`, `DiffLine`, `tokenize` |
-| `ContextCards` | `ContextCards`, `ContextCard` |
-| `FilterTable` | `FilterTable`, `FilterStatus`, `FilterRow` |
-| `RecordsTable` | `RecordsTable`, `RecordRow`, `RecordColumn` |
-| `InsightCards` | `InsightCards`, `Insight`, `InsightAllocation`, `InsightSegment` |
+| React                                             | GPUI                                                                                                                                |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `User.Info`, `User.Pill`, `User.Message`          | `UserInfo`, `UserPill`, `UserMessage`                                                                                               |
+| `AI.Avatar`, `AI.Message`                         | `AiIdentity`, `AiMessage`                                                                                                           |
+| `StreamingText`                                   | `StreamingText`, `StreamToken`                                                                                                      |
+| `SuggestedPrompt`, `SuggestedPrompts`             | same names                                                                                                                          |
+| `ActionBar`, `EmojiActionBar`                     | same names                                                                                                                          |
+| `Bubble.ReactionsButton`                          | `ReactionPicker`                                                                                                                    |
+| `Logo`                                            | `Logo`                                                                                                                              |
+| `PasswordInput`                                   | `PasswordInput`, `password_strength`                                                                                                |
+| `SocialProviders`                                 | `SocialProviders`                                                                                                                   |
+| `SendHint`                                        | `SendHint`                                                                                                                          |
+| `Verse`, `VerseSpan`, `VerseNote`                 | `Verse` and its `span` and `note`                                                                                                   |
+| `SelectionPopover`                                | `SelectionCard`, `ReaderSelection`, inside a popover                                                                                |
+| `SelectionHighlight`, `AppliedMark`, `ApplyToast` | `SelectionHighlight`, `AppliedMark`, `ApplyToast`                                                                                   |
+| `Attachment`                                      | `Attachment`, `AttachmentKind`                                                                                                      |
+| `Markdown`                                        | `Markdown`                                                                                                                          |
+| `ResearchAnswer`                                  | `ResearchAnswer`                                                                                                                    |
+| `Tree`                                            | `Tree`, `TreeNode`, `TreeVariant`                                                                                                   |
+| `CorpusNavigation.*`                              | `CorpusNavigation`, `LocationBar`, `HierarchyPicker`, `LocationGrid`, `ReferenceCommand`, `CorpusData`, `CorpusLevel`, `CorpusNode` |
+| `Flowchart`                                       | `Flowchart`, `FlowStep`, `FlowEdge`                                                                                                 |
+| `Chart`                                           | `Chart`, `ChartKind`, `ChartRow`, `ChartSeries`                                                                                     |
+| `Composer`, `SendButton`, `AddButton`             | `Composer` (an entity), `ComposerEvent`, `ComposerOption`, `ComposerModel`, `ComposerAttachment`, `ComposerShape`                   |
+| `Recommendation.Item`, `RecommendationCard`       | `Recommendation`, `RecommendationOption`, `RecommendationState`                                                                     |
+| `CodeBlock`                                       | `CodeBlock`, `DiffLine`, `tokenize`                                                                                                 |
+| `ContextCards`                                    | `ContextCards`, `ContextCard`                                                                                                       |
+| `FilterTable`                                     | `FilterTable`, `FilterStatus`, `FilterRow`                                                                                          |
+| `RecordsTable`                                    | `RecordsTable`, `RecordRow`, `RecordColumn`                                                                                         |
+| `InsightCards`                                    | `InsightCards`, `Insight`, `InsightAllocation`, `InsightSegment`                                                                    |
 
 ```rust
 use corpora_ui::composed::{AiMessage, StreamingText, UserMessage};
@@ -153,32 +175,32 @@ stack, waveform and thumbnail wait for the pieces that use them.
 
 ### Blocks
 
-| React | GPUI |
-| --- | --- |
-| `CorpusNavigator`, `NavigationPicker` | `CorpusNavigator`, `NavigationPicker` |
-| `AiPanel`, `AiPanelHeader` | `AiPanel`, `AiPanelHeader` |
-| `SuggestedPrompts` (the panel's) | `PromptList` |
-| `RecommendationStack` | `RecommendationStack` |
-| `LockedBanner`, `PinnedThreadBanner`, `DegradedBanner` | same names |
-| `VersionHistoryRecord` | `VersionHistoryRecord`, `VersionHistoryEntry` |
-| `IAiScope`, `formatScopeLabel` | `AiScope`, `AiScope::label` |
-| `ProfileCardBlock`, `defaultProfileCardItems` | `ProfileCard`, `ProfileCard::default_items` |
-| `IProfileCardAction`, `TProfileCardItem` | `ProfileAction`, `ProfileItem` |
-| `ShellLayout`, `useShellPanels`, `useShellFitState` | `ShellLayout`, `Shell`, `ShellEvent` |
-| `SHELL_WIDTHS`, `IShellSidebarFit` | `ShellWidths`, `RailMode` |
-| `Scaffold.Root`, `.Canvas`, `.Actions`, `.Inspector`, `useScaffold` | `ScaffoldLayout`, `Scaffold`, `ScaffoldEvent` |
-| `Scaffold.Panel`, `Scaffold.Tab` | `ScaffoldPanel`, `ScaffoldTab` |
-| `AuthCard`, `AuthError`, `AuthSuccess`, `AuthSeparator` | same names |
+| React                                                                                      | GPUI                                                                                                        |
+| ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `CorpusNavigator`, `NavigationPicker`                                                      | `CorpusNavigator`, `NavigationPicker`                                                                       |
+| `AiPanel`, `AiPanelHeader`                                                                 | `AiPanel`, `AiPanelHeader`                                                                                  |
+| `SuggestedPrompts` (the panel's)                                                           | `PromptList`                                                                                                |
+| `RecommendationStack`                                                                      | `RecommendationStack`                                                                                       |
+| `LockedBanner`, `PinnedThreadBanner`, `DegradedBanner`                                     | same names                                                                                                  |
+| `VersionHistoryRecord`                                                                     | `VersionHistoryRecord`, `VersionHistoryEntry`                                                               |
+| `IAiScope`, `formatScopeLabel`                                                             | `AiScope`, `AiScope::label`                                                                                 |
+| `ProfileCardBlock`, `defaultProfileCardItems`                                              | `ProfileCard`, `ProfileCard::default_items`                                                                 |
+| `IProfileCardAction`, `TProfileCardItem`                                                   | `ProfileAction`, `ProfileItem`                                                                              |
+| `ShellLayout`, `useShellPanels`, `useShellFitState`                                        | `ShellLayout`, `Shell`, `ShellEvent`                                                                        |
+| `SHELL_WIDTHS`, `IShellSidebarFit`                                                         | `ShellWidths`, `RailMode`                                                                                   |
+| `Scaffold.Root`, `.Canvas`, `.Actions`, `.Inspector`, `useScaffold`                        | `ScaffoldLayout`, `Scaffold`, `ScaffoldEvent`                                                               |
+| `Scaffold.Panel`, `Scaffold.Tab`                                                           | `ScaffoldPanel`, `ScaffoldTab`                                                                              |
+| `AuthCard`, `AuthError`, `AuthSuccess`, `AuthSeparator`                                    | same names                                                                                                  |
 | `LoginBlock`, `SignupBlock`, `ForgotPasswordBlock`, `UpdatePasswordBlock`, `CodeAuthBlock` | same names, with `LoginEvent`, `SignupEvent`, `ForgotPasswordEvent`, `UpdatePasswordEvent`, `CodeAuthEvent` |
-| `OnboardingBlock`, `IOnboardingStepConfig`, `TOnboardingFieldConfig` | `OnboardingBlock`, `OnboardingStep`, `OnboardingField`, `OnboardingValue`, `OnboardingEvent` |
-| `LinkedAccountsBlock`, `ILinkedIdentity` | `LinkedAccountsBlock`, `LinkedIdentity`, `LinkedAccountsEvent` |
-| `PasskeyManagerBlock`, `IPasskeyRecord` | `PasskeyManagerBlock`, `Passkey`, `PasskeyManagerEvent` |
-| `PasskeySignInBlock` | `PasskeySignInBlock`, `PasskeySignInEvent` |
-| `AuthFlowBlock`, `useAuthFlow`, `useAuthFlowActions` | `AuthFlow`, `AuthFlowEvent`, `AuthStep` |
-| `TAuthAccent`, `accent` | `AuthAccent`, `.accent()`, `set_accent`, `Button::fill` |
-| `useAuthSession`, `IAuthUser`, `maskAuthIdentifier` | `AuthSession`, `AuthSessionEvent`, `AuthUser`, `mask_identifier` |
-| `AISidebar`, `useAISidebar` | `ResourceSidebar`, `ResourceSidebarEvent` |
-| `ISidebarResource`, `ISidebarResourceMove` | `SidebarResource`, `ResourceKind`, `ResourceMove`, `DropPosition` |
+| `OnboardingBlock`, `IOnboardingStepConfig`, `TOnboardingFieldConfig`                       | `OnboardingBlock`, `OnboardingStep`, `OnboardingField`, `OnboardingValue`, `OnboardingEvent`                |
+| `LinkedAccountsBlock`, `ILinkedIdentity`                                                   | `LinkedAccountsBlock`, `LinkedIdentity`, `LinkedAccountsEvent`                                              |
+| `PasskeyManagerBlock`, `IPasskeyRecord`                                                    | `PasskeyManagerBlock`, `Passkey`, `PasskeyManagerEvent`                                                     |
+| `PasskeySignInBlock`                                                                       | `PasskeySignInBlock`, `PasskeySignInEvent`                                                                  |
+| `AuthFlowBlock`, `useAuthFlow`, `useAuthFlowActions`                                       | `AuthFlow`, `AuthFlowEvent`, `AuthStep`                                                                     |
+| `TAuthAccent`, `accent`                                                                    | `AuthAccent`, `.accent()`, `set_accent`, `Button::fill`                                                     |
+| `useAuthSession`, `IAuthUser`, `maskAuthIdentifier`                                        | `AuthSession`, `AuthSessionEvent`, `AuthUser`, `mask_identifier`                                            |
+| `AISidebar`, `useAISidebar`                                                                | `ResourceSidebar`, `ResourceSidebarEvent`                                                                   |
+| `ISidebarResource`, `ISidebarResourceMove`                                                 | `SidebarResource`, `ResourceKind`, `ResourceMove`, `DropPosition`                                           |
 
 `sidebar-primitives` is not ported on
 purpose: GPUI Component's own `sidebar` module (`Sidebar`, `SidebarMenu`,
@@ -188,8 +210,8 @@ purpose: GPUI Component's own `sidebar` module (`Sidebar`, `SidebarMenu`,
 
 `Button` is this crate's own atom. It wraps the stock button, which still
 supplies focus, keyboard activation, accessibility and the variant colors, and
-adds the embossed surface, the size scale, the press squeeze and the trailing
-icon.
+adds the embossed surface, the glass one, the size scale, the press squeeze
+and the trailing icon.
 
 ```rust
 Button::new("invite").primary().label("Invite")
@@ -197,24 +219,24 @@ Button::new("next").label("Continue").trailing_icon(IconName::ArrowRight)
 Button::new("search").icon(IconName::Search).tooltip("Search")
 ```
 
-| React `variant` | Builder | Surface |
-| --- | --- | --- |
-| `default` | `.primary()` | embossed accent fill |
-| `secondary` | `.secondary()` | embossed neutral fill |
-| `outline` | `.outline()` (the default) | embossed, on the page color with a border |
-| `ghost` | `.ghost()` | flat |
-| `destructive` | `.destructive()` | as primary |
-| `destructive-outline` | `.destructive_outline()` | as outline, red text |
-| `link` | GPUI Component's `Link`, for URLs only | |
-| `glass` | not ported yet | |
+| React `variant`       | Builder                                | Surface                                                        |
+| --------------------- | -------------------------------------- | -------------------------------------------------------------- |
+| `default`             | `.primary()`                           | embossed accent fill                                           |
+| `secondary`           | `.secondary()`                         | embossed neutral fill                                          |
+| `outline`             | `.outline()` (the default)             | embossed, on the page color with a border                      |
+| `ghost`               | `.ghost()`                             | flat                                                           |
+| `destructive`         | `.destructive()`                       | as primary                                                     |
+| `destructive-outline` | `.destructive_outline()`               | as outline, red text                                           |
+| `link`                | GPUI Component's `Link`, for URLs only |                                                                |
+| `glass`               | `.glass()`                             | `GlassSpec::button`: a primary-tinted lens, lit top and bottom |
 
-| React `size` | Builder | Height | Inline padding |
-| --- | --- | --- | --- |
-| `xs` | `.xsmall()` | 20px (React: 24px) | 8px |
-| `sm` | `.small()` | 24px (React: 28px) | 12px |
-| `default` | none | 32px | 16px |
-| `lg` | `.large()` | 32px (React: 36px) | 20px |
-| `xl` | `.with_atom_size(AtomSize::Xl)` | 40px | 24px |
+| React `size` | Builder                         | Height             | Inline padding |
+| ------------ | ------------------------------- | ------------------ | -------------- |
+| `xs`         | `.xsmall()`                     | 20px (React: 24px) | 8px            |
+| `sm`         | `.small()`                      | 24px (React: 28px) | 12px           |
+| `default`    | none                            | 32px               | 16px           |
+| `lg`         | `.large()`                      | 32px (React: 36px) | 20px           |
+| `xl`         | `.with_atom_size(AtomSize::Xl)` | 40px               | 24px           |
 
 Heights keep GPUI Component's desktop density. Everything is in rems.
 
@@ -334,7 +356,7 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
   the shake.
 - **Onboarding answers one step at a time.** `OnboardingBlock` emits
   `Step { id, values }` and waits for `advance(cx)` or `fail(message,
-  cx)`; after the last step it emits `Complete` with every value, which
+cx)`; after the last step it emits `Complete` with every value, which
   is not awaited. Values are `OnboardingValue::Text` or `Flag`, in
   declared order. The step menu and a select field are a button that
   opens a menu, and the step menu is left out of a one-step flow. A URL
@@ -351,13 +373,14 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
   button's fingerprint takes the button's ink, not React's pink.
 - **An accent is a fill on the button.** React sets custom properties on
   the card and a class string on its primary action. Here `AuthAccent`
-  hands `Button::fill` a background and an ink. GPUI's gradient takes two
-  stops, so Exegia's three are flattened to its outer two; hover lightens
-  the fill with a white veil, standing in for `brightness-110`.
+  hands `Button::fill` a background and an ink, both read from the theme's
+  `brand-*` roles. GPUI's gradient takes two stops, so Exegia's three are
+  flattened to its outer two; hover lightens the fill with a veil of the
+  theme's highlight, standing in for `brightness-110`.
 - **The auth flow is an entity with directives.** `AuthFlow` owns the
   six blocks and emits one `AuthFlowEvent` per attempt. The host answers
   with `complete(user, cx)`, `begin_verification(identifier, channel,
-  cx)`, `go_to_step(step, cx)`, `succeed(cx)` or `fail(message, cx)`,
+cx)`, `go_to_step(step, cx)`, `succeed(cx)` or `fail(message, cx)`,
   where React returns a directive from a handler. A block is emptied
   each time the flow arrives at it. There are no flow ids: make a second
   `AuthFlow` for a second surface. `AuthSession` is an entity the app
@@ -393,7 +416,7 @@ Heights keep GPUI Component's desktop density. Everything is in rems.
   opens from the stock dropdown, placed with `anchor`, and sizes to its
   rows (there is no `menuWidth: "card"`). No sound cues.
 - **The AI panel takes the composer, not its props.** `AiPanel::new(id,
-  &composer)` renders an entity the host owns and subscribes to. `locked`
+&composer)` renders an entity the host owns and subscribes to. `locked`
   disables that composer when it changes, and re-enables it when it
   clears. The lock shows only on a locked panel (React draws it on an
   unlocked one). The panel's prompt list is `PromptList`, since

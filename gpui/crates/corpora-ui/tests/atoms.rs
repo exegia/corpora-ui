@@ -84,6 +84,41 @@ fn init_installs_the_corpora_theme_in_both_appearances(cx: &mut TestAppContext) 
     });
 }
 
+/// The slots whose fallback is GPUI Component's own color, not one derived
+/// from a Corpora role. The theme has to set each of them.
+#[gpui_kit::test]
+fn no_stock_color_leaks_into_the_theme(cx: &mut TestAppContext) {
+    cx.update(|cx| {
+        corpora_ui::init(cx);
+
+        for mode in [ThemeMode::Light, ThemeMode::Dark] {
+            foundations::set_mode(mode, cx);
+            let theme = cx.theme();
+            let palette = cx.palette();
+            for (actual, expected, what) in [
+                (theme.overlay, palette.overlay, "overlay"),
+                (theme.red, palette.base_red, "base red"),
+                (theme.green, palette.base_green, "base green"),
+                (theme.blue, palette.base_blue, "base blue"),
+                (theme.yellow, palette.base_yellow, "base yellow"),
+                (theme.magenta, palette.base_magenta, "base magenta"),
+                (theme.cyan, palette.base_cyan, "base cyan"),
+            ] {
+                // Hue matters here, so compare the channels that get painted.
+                let (actual, expected) = (actual.to_rgb(), expected.to_rgb());
+                let close = |a: f32, b: f32| (a - b).abs() < 0.01;
+                assert!(
+                    close(actual.r, expected.r)
+                        && close(actual.g, expected.g)
+                        && close(actual.b, expected.b)
+                        && close(actual.a, expected.a),
+                    "{mode:?} {what}: expected {expected:?}, got {actual:?}"
+                );
+            }
+        }
+    });
+}
+
 struct CardHost;
 
 impl Render for CardHost {
@@ -227,6 +262,7 @@ impl Render for ButtonHost {
                 Button::new("xl").with_atom_size(AtomSize::Xl).label("Go"),
             ))
             .child(host("host-icon", Button::new("icon").icon(IconName::Plus)))
+            .child(host("host-glass", Button::new("glass").glass().label("Go")))
     }
 }
 
@@ -238,7 +274,12 @@ fn button_frames_follow_the_size_scale_and_hold_still_when_pressed(cx: &mut Test
     let pressed_at = cx
         .update_window(window, |_, window, cx| {
             window.render_frame(cx);
-            for (id, height) in [("host-xs", 20.), ("host-md", 32.), ("host-xl", 40.)] {
+            for (id, height) in [
+                ("host-xs", 20.),
+                ("host-md", 32.),
+                ("host-xl", 40.),
+                ("host-glass", 32.),
+            ] {
                 assert_px(window.find(id).bounds().size.height, height, id);
             }
             let icon = window.find("host-icon").bounds();

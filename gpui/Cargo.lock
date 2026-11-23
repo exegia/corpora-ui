@@ -1225,6 +1225,16 @@ dependencies = [
  "emojis",
  "gpui-kit",
  "gpui-pre",
+ "serde",
+ "toml 1.2.2+spec-1.1.0",
+]
+
+[[package]]
+name = "corpora-ui-gallery"
+version = "0.1.0"
+dependencies = [
+ "corpora-ui",
+ "gpui-kit",
 ]
 
 [[package]]

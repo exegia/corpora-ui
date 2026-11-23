@@ -93,8 +93,14 @@ distclean: clean ## Also remove node_modules
 gpui-gallery: ## Open the GPUI component gallery window
 	cd $(GPUI_DIR) && cargo run -p corpora-ui --example gallery
 
+# Serves the `corpora-ui-gallery` package, not `corpora-ui --example gallery`:
+# dx hot-patches every workspace crate except the package it serves, so served
+# as an example the gallery would ignore every edit under crates/corpora-ui/src.
+# DIOXUS_FORCE_ENTRY makes dx launch a fresh copy of the executable each time.
+# Without it macOS kills the app relaunched by a full rebuild (`r`) with
+# "Code Signature Invalid", because dx overwrites the running binary in place.
 gpui-gallery-dev: ## Open the GPUI gallery with Rust hot reload (Dioxus CLI 0.7.10)
-	cd $(GPUI_DIR) && "$(DX)" serve --platform desktop --package corpora-ui --example gallery --features hot-reload --hot-patch --addr 127.0.0.1 --open false
+	cd $(GPUI_DIR) && DIOXUS_FORCE_ENTRY=1 "$(DX)" serve --platform desktop --package corpora-ui-gallery --features hot-reload --hot-patch --addr 127.0.0.1 --open false
 
 # --- versions ---------------------------------------------------------------
 

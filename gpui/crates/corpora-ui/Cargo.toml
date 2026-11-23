@@ -20,6 +20,9 @@ hot-reload = ["dep:gpui-hot-reload"]
 emojis = "0.9.1"
 gpui-kit.workspace = true
 gpui-hot-reload = { package = "gpui-pre", version = "=0.3.12", default-features = false, features = ["hot-reload"], optional = true }
+# Read `foundations/palette.toml` and `foundations/theme.toml`.
+serde = { version = "1", features = ["derive"] }
+toml = { version = "1", default-features = false, features = ["std", "parse", "serde"] }
 
 [dev-dependencies]
 gpui-kit = { workspace = true, features = ["test-support"] }
