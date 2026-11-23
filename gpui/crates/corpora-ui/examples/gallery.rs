@@ -561,6 +561,7 @@ impl Gallery {
             use corpora_ui::blocks::{AuthFlow, AuthFlowEvent, AuthStep, AuthUser, CodeChannel};
             let beat = std::time::Duration::from_millis(900);
             let flow = cx.new(|cx| AuthFlow::new(window, cx).session(&auth_session, cx));
+            let verification_is_signup = std::cell::Cell::new(false);
             cx.subscribe(&flow, move |_, flow, event: &AuthFlowEvent, cx| {
                 if matches!(
                     event,
@@ -568,6 +569,13 @@ impl Gallery {
                 ) {
                     return;
                 }
+                // Verification shares one screen, but only signup needs onboarding.
+                match event {
+                    AuthFlowEvent::Login { .. } => verification_is_signup.set(false),
+                    AuthFlowEvent::Signup { .. } => verification_is_signup.set(true),
+                    _ => {}
+                }
+                let signup_verification = verification_is_signup.get();
                 let event = event.clone();
                 cx.spawn(async move |_, cx| {
                     cx.background_executor().timer(beat).await;
@@ -591,9 +599,10 @@ impl Gallery {
                             AuthFlowEvent::VerifyCode(code) if code.as_ref() == "000000" => {
                                 flow.fail("That code is not the one we sent.", cx)
                             }
-                            AuthFlowEvent::VerifyCode(_) => {
+                            AuthFlowEvent::VerifyCode(_) if signup_verification => {
                                 flow.go_to_step(AuthStep::Onboarding, cx)
                             }
+                            AuthFlowEvent::VerifyCode(_) => flow.complete(Some(ada()), cx),
                             AuthFlowEvent::OnboardingComplete(profile) => {
                                 let name = profile
                                     .iter()

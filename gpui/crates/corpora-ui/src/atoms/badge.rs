@@ -71,6 +71,9 @@ impl BadgeVariant {
         let theme = cx.theme();
         let palette = cx.palette();
         match self {
+            Self::Primary if theme.is_dark() => {
+                theme.primary.blend(theme.primary_foreground.opacity(0.6))
+            }
             Self::Primary => theme.primary,
             Self::Secondary | Self::Outline => theme.foreground,
             Self::Info => palette.info_foreground,
@@ -118,8 +121,13 @@ impl BadgeVariant {
             },
             (variant, BadgeAppearance::Light) => BadgeColors {
                 background: fill.opacity(if is_dark { 0.15 } else { 0.10 }),
-                // Dark tints are too dim for the text shade; use the role itself.
-                foreground: if is_dark { fill } else { variant.text(cx) },
+                // Status fills are bright enough on dark tints; Primary needs
+                // its lighter text shade rather than its dark solid fill.
+                foreground: if is_dark && variant != Self::Primary {
+                    fill
+                } else {
+                    variant.text(cx)
+                },
                 border: fill.opacity(match (is_dark, variant) {
                     (true, _) => 0.25,
                     (false, Self::Primary) => 0.10,

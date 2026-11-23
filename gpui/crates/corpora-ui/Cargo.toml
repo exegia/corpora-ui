@@ -13,10 +13,13 @@ default = ["glass"]
 # GPUI in `gpui/vendor`: an application outside this workspace must carry the
 # same `[patch.crates-io]` entries, or turn this off to get a translucent fill.
 glass = []
+# gpui-kit 0.10 does not forward this vendored GPUI feature yet.
+hot-reload = ["dep:gpui-hot-reload"]
 
 [dependencies]
 emojis = "0.9.1"
 gpui-kit.workspace = true
+gpui-hot-reload = { package = "gpui-pre", version = "=0.3.12", default-features = false, features = ["hot-reload"], optional = true }
 
 [dev-dependencies]
 gpui-kit = { workspace = true, features = ["test-support"] }

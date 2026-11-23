@@ -184,7 +184,8 @@ impl RenderOnce for Avatar {
             .size(diameter)
             // Identity stays hidden until it has loaded.
             .when(!self.loading, |this| {
-                this.when_some(user.avatar_url.clone(), |this, url| this.src(url))
+                this.placeholder(Icon::new(LucideIcon::User).text_color(theme.secondary_foreground))
+                    .when_some(user.avatar_url.clone(), |this, url| this.src(url))
                     .when_some(name, |this, name| this.name(name))
             });
 
