@@ -5,8 +5,7 @@ use std::rc::Rc;
 use gpui_kit::component::{ActiveTheme as _, StyledExt as _, h_flex, v_flex};
 use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
-    AnyElement, App, ClickEvent, ElementId, IntoElement, ParentElement as _, RenderOnce,
-    SharedString, Styled as _, Window, div,
+    AnyElement, App, ClickEvent, ElementId, IntoElement, ParentElement as _, RenderOnce, SharedString, Styled, Window, div, px,
 };
 
 use crate::atoms::{
@@ -91,22 +90,25 @@ impl RenderOnce for UserInfo {
 
         h_flex()
             .gap_1p5()
+            .items_center()
             .when(outgoing, |this| this.flex_row_reverse())
             .child(avatar)
             .child(
                 v_flex()
                     .when(outgoing, |this| this.items_end())
+                    .gap_0()
+                    .justify_center()
                     .child(
                         h_flex()
                             .gap_1p5()
                             .when(outgoing, |this| this.flex_row_reverse())
-                            .child(div().text_sm().font_semibold().child(name))
+                            .child(div().text_sm().font_semibold().line_height(px(18.)).child(name))
                             .when_some(role, |this, role| {
                                 this.child(Badge::invert().with_atom_size(AtomSize::Xs).child(role))
                             }),
                     )
                     .when_some(self.description, |this, description| {
-                        this.child(div().text_xs().text_color(muted).child(description))
+                        this.child(div().text_xs().text_color(muted).line_height(px(12.)).child(description))
                     }),
             )
     }

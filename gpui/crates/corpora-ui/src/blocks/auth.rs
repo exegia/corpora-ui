@@ -22,7 +22,7 @@ use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
     AnyElement, App, AppContext as _, Background, Context, Entity, EventEmitter, FontWeight, Hsla,
     IntoElement, ParentElement, Render, RenderOnce, SharedString, Styled as _, Task, Window, div,
-    linear_color_stop, linear_gradient, rems, rgb,
+    linear_color_stop, linear_gradient, rems,
 };
 
 use crate::atoms::{Button, Card, InputField, Reveal};
@@ -48,7 +48,8 @@ pub enum AuthStatus {
 /// A brand accent for a block's submit button, in place of the theme's
 /// primary. React's `TAuthAccent`.
 ///
-/// An accent is a constant, so its ink is too: neither follows the theme.
+/// The colors are the theme's `brand-*` roles. A brand color is a constant,
+/// so the theme gives it, and its ink, the same value in both appearances.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum AuthAccent {
     /// Corpora yellow, with dark ink.
@@ -59,25 +60,30 @@ pub enum AuthAccent {
 
 impl AuthAccent {
     /// What the button is painted with.
-    pub fn fill(self) -> Background {
+    pub fn fill(self, cx: &App) -> Background {
+        let palette = cx.palette();
         match self {
-            Self::Corpora => Hsla::from(rgb(0xE8B124)).into(),
-            // React's gradient has three stops over `#3B0080`. GPUI's takes
-            // two, so these are its outer stops flattened onto that solid;
-            // their midpoint lands on it.
-            Self::Exegia => linear_gradient(
-                44.,
-                linear_color_stop(rgb(0x2700B1), 0.03),
-                linear_color_stop(rgb(0x270050), 0.98),
-            ),
+            Self::Corpora => palette.brand_corpora.into(),
+            // React's gradient has three stops over one solid. GPUI's takes
+            // two, so the theme holds its outer stops flattened onto that
+            // solid; their midpoint lands on it.
+            Self::Exegia => {
+                let [from, to] = palette.brand_exegia;
+                linear_gradient(
+                    44.,
+                    linear_color_stop(from, 0.03),
+                    linear_color_stop(to, 0.98),
+                )
+            }
         }
     }
 
     /// The ink that reads on [`fill`](Self::fill).
-    pub fn foreground(self) -> Hsla {
+    pub fn foreground(self, cx: &App) -> Hsla {
+        let palette = cx.palette();
         match self {
-            Self::Corpora => rgb(0x0A0A0A).into(),
-            Self::Exegia => rgb(0xFAFAFA).into(),
+            Self::Corpora => palette.brand_corpora_foreground,
+            Self::Exegia => palette.brand_exegia_foreground,
         }
     }
 }
@@ -506,9 +512,9 @@ pub(super) fn submit(id: &'static str, label: &'static str, loading: bool) -> Bu
 }
 
 /// A submit button in the block's accent, when it has one.
-fn accented(button: Button, accent: Option<AuthAccent>) -> Button {
+fn accented(button: Button, accent: Option<AuthAccent>, cx: &App) -> Button {
     match accent {
-        Some(accent) => button.fill(accent.fill(), accent.foreground()),
+        Some(accent) => button.fill(accent.fill(cx), accent.foreground(cx)),
         None => button,
     }
 }
@@ -728,6 +734,7 @@ impl Render for LoginBlock {
                     accented(
                         submit("login-button", "Login", self.chrome.loading()),
                         self.chrome.accent,
+                        cx,
                     )
                     .on_click(cx.listener(|this, _, _, cx| this.submit(cx))),
                 ))
@@ -1025,6 +1032,7 @@ impl Render for SignupBlock {
                     accented(
                         submit("signup-button", "Create account", self.chrome.loading()),
                         self.chrome.accent,
+                        cx,
                     )
                     .on_click(cx.listener(|this, _, _, cx| this.submit(cx))),
                 )),
@@ -1127,6 +1135,7 @@ impl Render for ForgotPasswordBlock {
                     accented(
                         submit("forgot-button", "Send reset link", loading),
                         self.chrome.accent,
+                        cx,
                     )
                     .disabled(loading || !valid)
                     .on_click(cx.listener(|this, _, _, cx| this.submit(cx))),
@@ -1286,6 +1295,7 @@ impl Render for UpdatePasswordBlock {
                     accented(
                         submit("update-button", "Update password", loading),
                         self.chrome.accent,
+                        cx,
                     )
                     .on_click(cx.listener(|this, _, _, cx| this.submit(cx))),
                 )),
@@ -1492,9 +1502,13 @@ impl Render for CodeAuthBlock {
                 .child(AuthError::new("code-error", self.chrome.error.clone()))
                 .when(!self.auto_submit, |this| {
                     this.child(
-                        accented(submit("code-verify", "Verify", loading), self.chrome.accent)
-                            .disabled(loading || !complete)
-                            .on_click(cx.listener(|this, _, _, cx| this.verify(cx))),
+                        accented(
+                            submit("code-verify", "Verify", loading),
+                            self.chrome.accent,
+                            cx,
+                        )
+                        .disabled(loading || !complete)
+                        .on_click(cx.listener(|this, _, _, cx| this.verify(cx))),
                     )
                 })
                 .child(
