@@ -1118,7 +1118,7 @@ impl Gallery {
         )
     }
 
-    fn render_buttons(&self) -> impl IntoElement {
+    fn render_buttons(&self, cx: &App) -> impl IntoElement {
         Section::new("Button")
             .child(
                 row()
@@ -1139,7 +1139,8 @@ impl Gallery {
                         Button::new("button-destructive-outline")
                             .destructive_outline()
                             .label("Destructive outline"),
-                    ),
+                    )
+                    .child(Button::new("button-glass").glass().label("Glass")),
             )
             .child({
                 use corpora_ui::blocks::AuthAccent;
@@ -1147,7 +1148,7 @@ impl Gallery {
                     Button::new(id)
                         .primary()
                         .label(label)
-                        .fill(accent.fill(), accent.foreground())
+                        .fill(accent.fill(cx), accent.foreground(cx))
                 };
                 row()
                     .child(filled(
@@ -1508,6 +1509,13 @@ impl Gallery {
                                         GlassEdges::default().x(GlassEdge::new(px(4.), 0.7)),
                                     ),
                                 ),
+                            )
+                            .child(Button::new("glass-button").glass().label("Button"))
+                            .child(
+                                Button::new("glass-button-disabled")
+                                    .glass()
+                                    .label("Disabled")
+                                    .disabled(true),
                             ),
                     ),
             )
@@ -1949,193 +1957,6 @@ impl Gallery {
                     .text_color(cx.theme().muted_foreground)
                     .child(self.composed.clone()),
             )
-    }
-
-    fn render_shell(&self, cx: &mut Context<Self>) -> impl IntoElement {
-        use corpora_ui::atoms::{AvatarStatus, AvatarUser};
-        use corpora_ui::blocks::{ProfileCard, ShellLayout, ShellVariant};
-        use gpui_kit::Anchor;
-        use gpui_kit::assets::IconName as LucideIcon;
-        use gpui_kit::component::{Icon, Sizable as _};
-        use gpui_kit::prelude::FluentBuilder as _;
-
-        let folded = self.shell.read(cx).collapsed();
-        let muted = cx.theme().muted_foreground;
-        let foreground = cx.theme().foreground;
-        let place = |icon: LucideIcon, label: &'static str| {
-            h_flex()
-                .h_9()
-                .gap_2p5()
-                .when(folded, |this| this.justify_center())
-                .when(!folded, |this| this.px_3())
-                .text_sm()
-                .text_color(muted)
-                .child(Icon::new(icon).small())
-                .when(!folded, |this| this.child(label))
-        };
-        let navigation = v_flex()
-            .size_full()
-            .justify_between()
-            .child(
-                v_flex()
-                    .gap_0p5()
-                    .child(place(LucideIcon::BookOpen, "Library"))
-                    .child(place(LucideIcon::Search, "Search"))
-                    .child(place(LucideIcon::Settings, "Settings")),
-            )
-            .child(
-                ProfileCard::new(
-                    "shell-account",
-                    AvatarUser::named("Ada", "Lovelace").status(AvatarStatus::Online),
-                )
-                .username("ada@exegia.app")
-                .collapsed(folded)
-                .anchor(Anchor::BottomLeft),
-            );
-        let inspector =
-            v_flex()
-                .p_4()
-                .gap_2()
-                .child(div().font_weight(FontWeight::SEMIBOLD).child("Witnesses"))
-                .child(div().text_sm().text_color(muted).child(
-                    "Codex Bezae carries the longer reading; Papyrus 75 omits both verses.",
-                ));
-        Section::new("Blocks: shell").child(
-            div()
-                .h(rems(26.))
-                .rounded(Radius::Lg.resolve(cx))
-                .overflow_hidden()
-                .border_1()
-                .border_color(cx.theme().border)
-                .child(
-                    ShellLayout::new("gallery-shell", &self.shell)
-                        .variant(ShellVariant::Web)
-                        .left(navigation)
-                        .right(inspector)
-                        .header(
-                            div()
-                                .text_sm()
-                                .font_weight(FontWeight::MEDIUM)
-                                .child("Luke 22"),
-                        )
-                        .trailing(Button::new("shell-share").outline().label("Share"))
-                        .child(
-                            v_flex()
-                                .p_6()
-                                .gap_2()
-                                .child(
-                                    div()
-                                        .text_lg()
-                                        .font_weight(FontWeight::SEMIBOLD)
-                                        .text_color(foreground)
-                                        .child("The agony in the garden"),
-                                )
-                                .child(div().text_color(muted).child(
-                                    "Drag the strip between two columns to resize them. The \
-                                     header buttons fold the rail and close the panel.",
-                                )),
-                        ),
-                ),
-        )
-    }
-
-    fn render_scaffold(&self, cx: &mut Context<Self>) -> impl IntoElement {
-        use corpora_ui::blocks::{
-            SCAFFOLD_PANEL_CAPACITY, ScaffoldLayout, ScaffoldPanel, ScaffoldTab,
-        };
-        use gpui_kit::assets::IconName as LucideIcon;
-        use gpui_kit::component::{Icon, Sizable as _};
-
-        use gpui_kit::prelude::FluentBuilder as _;
-
-        const ALL: [&str; 3] = ["Text", "Apparatus", "Notes"];
-        let muted = cx.theme().muted_foreground;
-        let page = |title: &'static str, body: &'static str| {
-            v_flex()
-                .p_4()
-                .gap_1()
-                .child(div().font_weight(FontWeight::SEMIBOLD).child(title))
-                .child(div().text_sm().text_color(muted).child(body))
-        };
-        let rail = v_flex()
-            .size_full()
-            .items_center()
-            .pt_4()
-            .gap_4()
-            .text_color(muted)
-            .child(Icon::new(LucideIcon::BookOpen).small())
-            .child(Icon::new(LucideIcon::Search).small())
-            .child(Icon::new(LucideIcon::Settings).small());
-
-        let scaffold = self.scaffold.clone();
-        let mut layout = ScaffoldLayout::new("gallery-scaffold", &self.scaffold)
-            .sidebar(rail)
-            .inspector(
-                "Inspector",
-                page("ὤφθη", "Aorist passive, third person singular: “appeared”."),
-            );
-        let closable = self.scaffold_panels.len() > 1;
-        for name in self.scaffold_panels.iter().copied() {
-            let mut tab = ScaffoldTab::new(name, name);
-            if closable {
-                tab = tab.on_close(cx.listener(move |this, _: &ClickEvent, _, cx| {
-                    this.scaffold_panels.retain(|open| *open != name);
-                    cx.notify();
-                }));
-            }
-            let inspect = scaffold.clone();
-            let mut panel = ScaffoldPanel::new(
-                name,
-                v_flex()
-                    .child(page(
-                        name,
-                        match name {
-                            "Text" => "Luke 22:43-44, the longer reading.",
-                            "Apparatus" => "Witnesses for and against the two verses.",
-                            _ => "Your notes on the passage.",
-                        },
-                    ))
-                    .when(name == "Text", |this| {
-                        this.child(
-                            div().px_4().child(
-                                Button::new("scaffold-inspect")
-                                    .outline()
-                                    .label("Toggle inspector")
-                                    .on_click(move |_, _, cx| {
-                                        inspect.update(cx, |this, cx| this.toggle_inspector(cx))
-                                    }),
-                            ),
-                        )
-                    }),
-            );
-            if name == "Text" && self.scaffold_parallels {
-                panel = panel
-                    .secondary(page("Parallels", "Matthew 26:39, Mark 14:35."))
-                    .on_swap(|_, _, _| {})
-                    .on_close_secondary(cx.listener(|this, _: &ClickEvent, _, cx| {
-                        this.scaffold_parallels = false;
-                        cx.notify();
-                    }));
-            }
-            layout = layout.tab(tab).panel(panel);
-        }
-        if self.scaffold_panels.len() < SCAFFOLD_PANEL_CAPACITY {
-            layout = layout.on_add(cx.listener(|this, _: &ClickEvent, _, cx| {
-                if let Some(next) = ALL.iter().find(|name| !this.scaffold_panels.contains(name)) {
-                    this.scaffold_panels.push(next);
-                    cx.notify();
-                }
-            }));
-        }
-        Section::new("Blocks: scaffold").child(
-            div()
-                .h(rems(28.))
-                .rounded(Radius::Lg.resolve(cx))
-                .overflow_hidden()
-                .border_1()
-                .border_color(cx.theme().border)
-                .child(layout),
-        )
     }
 
     fn render_auth(&self, cx: &mut Context<Self>) -> impl IntoElement {
@@ -2999,7 +2820,7 @@ impl Render for Gallery {
                 .child(self.render_radius(cx))
                 .child(self.render_text()),
             Page::Atoms => sections
-                .child(self.render_buttons())
+                .child(self.render_buttons(cx))
                 .child(self.render_badges())
                 .child(self.render_card())
                 .child(self.render_feedback())
@@ -3022,8 +2843,6 @@ impl Render for Gallery {
                 .child(self.render_composer(cx))
                 .child(self.render_sign_in()),
             Page::Blocks => sections
-                .child(self.render_shell(cx))
-                .child(self.render_scaffold(cx))
                 .child(self.render_auth(cx))
                 .child(self.render_auth_flow(cx))
                 .child(self.render_credentials())

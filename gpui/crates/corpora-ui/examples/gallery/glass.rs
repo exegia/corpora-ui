@@ -5,6 +5,7 @@ use std::cell::Cell;
 use std::rc::Rc;
 
 use corpora_ui::atoms::{Button, GlassEdge, GlassSpec, GlassSurfaceExt as _, Text};
+use corpora_ui::composed::CodeBlock;
 use corpora_ui::foundations::{ActiveCorporaTheme as _, AtomSize, Radius};
 use gpui_kit::component::slider::{Slider, SliderEvent, SliderState};
 use gpui_kit::component::switch::Switch;
@@ -210,6 +211,30 @@ impl Control {
 const DEFAULT_LIFT: f32 = 18.8 / 255.;
 const STAGE_HEIGHT: f32 = 400.;
 
+/// A float as Rust source: at most three decimals, no trailing zeros, and a
+/// bare point on a whole number.
+fn literal(value: f32) -> String {
+    let text = format!("{value:.3}");
+    let text = text.trim_end_matches('0');
+    if text == "-0." {
+        "0.".into()
+    } else {
+        text.into()
+    }
+}
+
+fn pixels_source(value: Pixels) -> String {
+    format!("px({})", literal(value.into()))
+}
+
+fn edge_source(edge: GlassEdge) -> String {
+    format!(
+        "GlassEdge::new({}, {})",
+        pixels_source(edge.width),
+        literal(edge.brightness)
+    )
+}
+
 /// The pointer position a drag of the probe started from, and where the
 /// probe was then.
 struct DragProbe {
@@ -402,6 +427,48 @@ impl GlassShowcase {
         cx.notify();
     }
 
+    /// The probe's material as the Rust that builds it.
+    fn spec_source(&self) -> String {
+        let spec = self.spec;
+        let tint = if self.tint_enabled {
+            format!("cx.theme().primary.opacity({})", literal(self.tint_fill))
+        } else {
+            format!("cx.palette().highlight.opacity({})", literal(self.lift))
+        };
+        let edges = spec.edges;
+        let even = [edges.right, edges.bottom, edges.left]
+            .iter()
+            .all(|side| *side == edges.top);
+        let edges = if even {
+            format!("GlassEdges::all({})", edge_source(edges.top))
+        } else {
+            format!(
+                "GlassEdges {{\n        top: {},\n        right: {},\n        bottom: {},\n        \
+                 left: {},\n    }}",
+                edge_source(edges.top),
+                edge_source(edges.right),
+                edge_source(edges.bottom),
+                edge_source(edges.left),
+            )
+        };
+        [
+            "GlassSpec {".to_string(),
+            format!("    blur_radius: {},", pixels_source(spec.blur_radius)),
+            format!("    lens: {},", pixels_source(spec.lens)),
+            format!("    reach: {},", pixels_source(spec.reach)),
+            format!("    magnify: {},", literal(spec.magnify)),
+            format!("    dispersion: {},", literal(spec.dispersion)),
+            format!("    gain_light: {},", literal(spec.gain_light)),
+            format!("    gain_dark: {},", literal(spec.gain_dark)),
+            format!("    saturation: {},", literal(spec.saturation)),
+            format!("    tint: Some({tint}),"),
+            format!("    edges: {edges},"),
+            format!("    edge_aa: {},", pixels_source(spec.edge_aa)),
+            "}".to_string(),
+        ]
+        .join("\n")
+    }
+
     fn render_backdrop(&self, cx: &App) -> AnyElement {
         let theme = cx.theme();
         let base = div().absolute().inset_0();
@@ -513,7 +580,7 @@ impl Render for GlassShowcase {
         let spec = self.spec.tint(if self.tint_enabled {
             theme.primary.opacity(self.tint_fill)
         } else {
-            white().opacity(self.lift)
+            cx.palette().highlight.opacity(self.lift)
         });
 
         let drag = Rc::new(DragProbe {
@@ -683,6 +750,11 @@ impl Render for GlassShowcase {
                                     )),
                             ),
                     ),
+            )
+            .child(
+                CodeBlock::new("glass-spec-code", self.spec_source())
+                    .filename("GlassSpec")
+                    .keywords(["Some"]),
             )
     }
 }
