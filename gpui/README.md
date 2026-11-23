@@ -11,6 +11,24 @@ cargo test -p corpora-ui
 cargo clippy -p corpora-ui --all-targets
 ```
 
+## Gallery hot reload
+
+From the repository root, run `make gpui-gallery-dev`. In Zed, open the
+repository root and run **GPUI gallery: hot reload** from `task: spawn`.
+Saving Rust render code rebuilds and patches the running gallery through
+GPUI's Subsecond integration, preserving its existing view state. Changes to
+state layouts or startup code may require a full restart; stop and rerun the
+task in that case. This is a development-only, experimental hot-patch mode.
+
+Install the matching CLI with `cargo install dioxus-cli --version 0.7.10 --locked`.
+The target uses `~/.cargo/bin/dx` explicitly because Deno also provides a `dx`
+command. Override it with `make gpui-gallery-dev DX=/path/to/dioxus/dx` if needed.
+The official macOS prebuilt CLI additionally needs `brew install openssl@3`.
+
+The `hot-reload` feature is opt-in. Its optional `gpui-pre` dependency enables
+the feature on the same vendored GPUI already used by `gpui-kit` (0.10 does not
+forward it). Ordinary `cargo run` and release builds retain their normal behavior.
+
 ## Layout
 
 ```text
