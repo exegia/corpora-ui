@@ -12,7 +12,8 @@ use gpui_kit::{
 };
 
 use super::scaled::Scaled;
-use super::{Button, GlassEdge, GlassEdges, GlassSpec, GlassSurfaceExt as _, IconName};
+use super::{Button, GlassSpec, GlassSurfaceExt as _, IconName};
+use crate::atoms::{GlassEdge, GlassEdges};
 use crate::foundations::motion::{DURATION_FAST, EASE_SMOOTH_OUT};
 use crate::foundations::shadow::{shadow_bubble, shadow_pill};
 use crate::foundations::{ActiveCorporaTheme as _, AtomSize, Radius};
@@ -330,6 +331,24 @@ impl RenderOnce for Bubble {
         let on_add = self.on_add_reaction;
         let add_reaction = self.add_reaction;
         let has_pill = !self.reactions.is_empty() || on_add.is_some() || add_reaction.is_some();
+        let glass_spec = GlassSpec {
+            blur_radius: px(2.9),
+            lens: px(80.5),
+            reach: px(0.),
+            magnify: 0.06,
+            dispersion: 0.,
+            gain_light: 0.882,
+            gain_dark: 0.912,
+            saturation: 1.02,
+            tint: Some(cx.palette().highlight.opacity(0.1)),
+            edges: GlassEdges {
+                top: GlassEdge::new(px(4.), 0.28),
+                right: GlassEdge::new(px(0.), 0.),
+                bottom: GlassEdge::new(px(4.), 0.18),
+                left: GlassEdge::new(px(0.), 0.),
+            },
+            edge_aa: px(0.8),
+        };
         let pill = has_pill.then(|| {
             h_flex()
                 .absolute()
@@ -342,13 +361,12 @@ impl RenderOnce for Bubble {
                         this.right_4()
                     }
                 })
-                .h_7()
+                .h_8()
                 .px_1()
                 .gap_0p5()
                 .rounded(Radius::Lg.resolve(cx))
                 .border_1()
-                .border_color(theme.border)
-                .shadow(shadow_pill())
+                .border_color(theme.border.opacity(0.5))
                 .children(self.reactions.into_iter().map(|reaction| {
                     let on_toggle = on_toggle.clone();
                     let ink = if reaction.reacted {
@@ -369,7 +387,7 @@ impl RenderOnce for Bubble {
                         .text_xs()
                         .font_bold()
                         .text_color(ink)
-                        .when(reaction.reacted, |this| this.bg(theme.accent))
+                        .when(reaction.reacted, |this| this.bg(theme.accent.alpha(0.1)))
                         .hover(|style| style.bg(theme.accent))
                         .child(ReactionMark {
                             id: ElementId::NamedChild(
@@ -398,12 +416,7 @@ impl RenderOnce for Bubble {
                 .children(add_reaction)
                 // Frosted glass: the thread shows through the pill. The lens
                 // is kept shallow, as the pill is only a line of text tall.
-                .glass_with(GlassSpec {
-                    lens: px(5.),
-                    reach: px(8.),
-                    edges: GlassEdges::all(GlassEdge::new(px(1.), 0.18)),
-                    ..GlassSpec::frosted(cx)
-                })
+                .glass_with(glass_spec)
         });
 
         let actions = self.actions.map(|actions| {

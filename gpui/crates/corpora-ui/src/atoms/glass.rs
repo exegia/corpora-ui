@@ -12,8 +12,10 @@ use gpui_kit::component::ActiveTheme as _;
 use gpui_kit::{
     AbsoluteLength, AnyElement, App, Bounds, Corners, Element, ElementId, GlobalElementId, Hsla,
     InspectorElementId, IntoElement, LayoutId, Pixels, Styled, Window, canvas, px,
-    transparent_black, white,
+    transparent_black,
 };
+
+use crate::foundations::ActiveCorporaTheme as _;
 
 /// The lit rim along one side of a glass surface.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -236,6 +238,24 @@ impl GlassSpec {
         }
     }
 
+    /// Glass for a button: a deep lens tinted with the primary color, lit
+    /// along its top and bottom so the rim reads as a bevel.
+    pub fn button(cx: &App) -> Self {
+        Self {
+            blur_radius: px(7.7),
+            lens: px(102.),
+            reach: px(0.),
+            magnify: 10.66,
+            dispersion: 0.,
+            gain_light: 0.912,
+            gain_dark: 0.912,
+            saturation: 0.99,
+            tint: Some(cx.theme().primary.opacity(0.53)),
+            edges: GlassEdges::default().y(GlassEdge::new(px(3.3), 0.27)),
+            edge_aa: px(0.5),
+        }
+    }
+
     /// Replaces the lit rim. Pass [`GlassEdges::all`] for an even rim, or
     /// set sides apart with its `x`, `y`, `top`, `right`, `bottom` and
     /// `left`.
@@ -252,9 +272,9 @@ impl GlassSpec {
 }
 
 /// The tint a glass surface paints when its spec supplies none: a faint
-/// white lift.
+/// lift in the theme's highlight.
 pub fn neutral_tint(cx: &App) -> Hsla {
-    white().opacity(if cx.theme().is_dark() {
+    cx.palette().highlight.opacity(if cx.theme().is_dark() {
         16. / 255.
     } else {
         18.8 / 255.
@@ -486,7 +506,8 @@ mod tests {
     #[test]
     fn tint_replaces_the_neutral_lift() {
         assert_eq!(GlassSpec::default().tint, None);
-        let tinted = GlassSpec::default().tint(white());
-        assert_eq!(tinted.tint, Some(white()));
+        let tint = Hsla::default();
+        let tinted = GlassSpec::default().tint(tint);
+        assert_eq!(tinted.tint, Some(tint));
     }
 }

@@ -2,7 +2,8 @@
 //!
 //! The stock button supplies focus, keyboard activation, accessibility and
 //! the variant colors. This atom owns what the stock one has no hook for: the
-//! embossed surface, the size scale, the press squeeze and the trailing icon.
+//! embossed surface, the glass one, the size scale, the press squeeze and the
+//! trailing icon.
 
 use std::rc::Rc;
 use std::sync::Arc;
@@ -19,9 +20,10 @@ use gpui_kit::{
     StatefulInteractiveElement as _, Styled as _, Window, div, px, rems,
 };
 
+use super::{GlassSpec, GlassSurfaceExt as _};
 use crate::foundations::motion::{DURATION_FAST, DURATION_QUICK, EASE_OUT, SCALE_LARGE};
 use crate::foundations::shadow::{Emboss, shadow_raised, shadow_raised_neutral};
-use crate::foundations::{AtomSize, Radius};
+use crate::foundations::{ActiveCorporaTheme as _, AtomSize, Radius};
 
 /// Hover group every button forms with itself, so its emboss can respond to
 /// the pointer. Buttons never nest, so one name serves them all.
@@ -47,13 +49,15 @@ pub enum ButtonKind {
     Ghost,
     Destructive,
     DestructiveOutline,
+    /// A lens over what lies behind the button: [`GlassSpec::button`].
+    Glass,
 }
 
 impl ButtonKind {
-    /// Whether the kind is a raised surface with an embossed edge. Only the
-    /// ghost button is flat.
+    /// Whether the kind is a raised surface with an embossed edge. The ghost
+    /// button is flat, and the glass one is lit by its own rim.
     pub const fn is_embossed(self) -> bool {
-        !matches!(self, Self::Ghost)
+        !matches!(self, Self::Ghost | Self::Glass)
     }
 
     /// Whether the kind is a solid accent fill, rather than a pale surface.
@@ -67,7 +71,7 @@ impl ButtonKind {
         match self {
             Self::Primary => theme.primary_foreground,
             Self::Secondary => theme.secondary_foreground,
-            Self::Outline | Self::Ghost => theme.foreground,
+            Self::Outline | Self::Ghost | Self::Glass => theme.foreground,
             Self::Destructive => theme.danger_foreground,
             Self::DestructiveOutline => theme.danger,
         }
@@ -201,6 +205,11 @@ impl Button {
     /// [`ButtonKind::DestructiveOutline`].
     pub fn destructive_outline(self) -> Self {
         self.with_kind(ButtonKind::DestructiveOutline)
+    }
+
+    /// [`ButtonKind::Glass`].
+    pub fn glass(self) -> Self {
+        self.with_kind(ButtonKind::Glass)
     }
 
     /// Any tier of the atom scale, including the two above the stock `large`.
@@ -347,12 +356,17 @@ impl RenderOnce for Button {
             Some((_, foreground)) => foreground,
             None => self.kind.foreground(cx),
         };
+        // A fill replaces the kind's surface, glass included.
+        let glass = self.fill.is_none() && self.kind == ButtonKind::Glass;
+        // Whether the surface is painted behind a clear stock button.
+        let backed = self.fill.is_some() || glass;
         let stock = match self.kind {
-            // The stock button holds one solid per state, and a fill may be a
-            // gradient. So the stock surface goes clear, lightening under the
-            // pointer, and the fill is painted behind it below.
-            _ if self.fill.is_some() => {
-                let veil = gpui_kit::white().opacity(0.1);
+            // The stock button holds one solid per state: a fill may be a
+            // gradient, and glass is no color at all. So the stock surface
+            // goes clear, lightening under the pointer, and the fill or the
+            // glass is painted behind it below.
+            _ if backed => {
+                let veil = cx.palette().highlight.opacity(0.1);
                 stock
                     .custom(
                         ButtonCustomVariant::new(cx)
@@ -366,7 +380,8 @@ impl RenderOnce for Button {
             ButtonKind::Secondary => stock.secondary(),
             // The stock default variant is the outlined one.
             ButtonKind::Outline => stock,
-            ButtonKind::Ghost => stock.ghost(),
+            // Glass is always backed, so this is the arm above.
+            ButtonKind::Ghost | ButtonKind::Glass => stock.ghost(),
             ButtonKind::Destructive => stock.danger(),
             ButtonKind::DestructiveOutline => {
                 // The stock danger outline is a red tint. Corpora's sits on
@@ -392,11 +407,10 @@ impl RenderOnce for Button {
         };
         let seated_start = self.pill && self.start.is_some() && !icon_only;
         let hover_emboss = self.kind.emboss(Emboss::Hover, cx);
-        let filled = self.fill.is_some();
         let radius = radius.resolve(cx);
         let stock = stock
             .rounded(ButtonRounded::Size(radius))
-            .when(!filled, |this| this.m(squeeze))
+            .when(!backed, |this| this.m(squeeze))
             .map(|this| {
                 if icon_only {
                     // A start element makes the stock button pad as if
@@ -412,7 +426,7 @@ impl RenderOnce for Button {
                     .group(HOVER_GROUP)
                     .group_hover(HOVER_GROUP, |style| style.shadow(hover_emboss))
             })
-            .when(self.full_width || filled, |this| this.flex_1())
+            .when(self.full_width || backed, |this| this.flex_1())
             .when(seated_start, |this| this.pl(padding / 4. - squeeze))
             .when_some(self.icon, |this, icon| this.icon(icon))
             .map(|this| match self.start {
@@ -422,9 +436,9 @@ impl RenderOnce for Button {
                     .gap_2()
                     .child(div().flex().flex_none().child(start))
                     .when_some(self.label, |this, label| this.child(label)),
-                // The stock button greys a disabled label; a fill keeps its
-                // own ink and fades as a whole instead.
-                None if filled => this.when_some(self.label, |this, label| {
+                // The stock button greys a disabled label; a fill or glass
+                // keeps its own ink and fades as a whole instead.
+                None if backed => this.when_some(self.label, |this, label| {
                     this.child(div().text_color(ink).child(label))
                 }),
                 None => this.when_some(self.label, |this, label| this.label(label)),
@@ -452,8 +466,8 @@ impl RenderOnce for Button {
             })
             .when_some(self.tooltip, |this, tooltip| this.tooltip(tooltip))
             // Loading alone already stops the stock button responding, and
-            // leaves the spinner in the fill's ink.
-            .disabled(self.disabled && !(filled && self.loading))
+            // leaves the spinner in the surface's ink.
+            .disabled(self.disabled && !(backed && self.loading))
             .loading(self.loading)
             .when_some(self.on_click, |this, handler| {
                 this.on_click(move |event, window, cx| handler(event, window, cx))
@@ -499,20 +513,30 @@ impl RenderOnce for Button {
                     }
                 });
             })
-            .map(|this| match self.fill {
-                // The fill takes the squeeze, and the clear stock button
+            .map(|this| {
+                if !backed {
+                    return this.child(stock);
+                }
+                // The surface takes the squeeze, and the clear stock button
                 // fills it.
-                Some((fill, _)) => this.child(
-                    div()
-                        .flex()
-                        .when(self.full_width, |this| this.flex_1())
-                        .m(squeeze)
-                        .rounded(radius)
-                        .bg(fill)
-                        .when(self.disabled, |this| this.opacity(DISABLED_FILL))
-                        .child(stock),
-                ),
-                None => this.child(stock),
+                let surface = div()
+                    .flex()
+                    .when(self.full_width, |this| this.flex_1())
+                    .m(squeeze)
+                    .rounded(radius)
+                    .when(self.disabled, |this| this.opacity(DISABLED_FILL));
+                match self.fill {
+                    Some((fill, _)) => this.child(surface.bg(fill).child(stock)),
+                    None => {
+                        // Opacity reaches the label, not the glass painted
+                        // under it, so the tint fades to match.
+                        let mut spec = GlassSpec::button(cx);
+                        if self.disabled {
+                            spec.tint = spec.tint.map(|tint| tint.opacity(DISABLED_FILL));
+                        }
+                        this.child(surface.child(stock).glass_with(spec))
+                    }
+                }
             })
     }
 }

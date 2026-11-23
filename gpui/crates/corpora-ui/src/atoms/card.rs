@@ -10,7 +10,7 @@ use gpui_kit::{
 /// Opacity of the muted tint behind a frame's header and footer.
 pub(crate) const FRAME_TINT: f32 = 0.72;
 
-use crate::foundations::shadow::shadow_xs;
+use crate::foundations::shadow::{shadow_inset, shadow_xs};
 use crate::foundations::{ActiveCorporaTheme as _, Radius};
 
 /// The title row of a [`Card`]: a title, an optional description beneath it,
@@ -205,7 +205,7 @@ impl RenderOnce for Card {
             .text_color(palette.card_foreground)
             .border_1()
             .border_color(border)
-            .rounded(Radius::Md.resolve(cx))
+            .rounded(Radius::Lg.resolve(cx))
             .map(|this| match self.framed {
                 None => this.shadow(shadow_xs(cx)),
                 // Inside a frame the card lies over the frame's own border,
@@ -392,14 +392,17 @@ impl RenderOnce for CardFrame {
         let theme = cx.theme();
         let has_footer = self.footer.is_some();
         let count = self.cards.len();
+        let radius = Radius::Md.resolve(cx);
 
         v_flex()
             .bg(theme.muted.opacity(FRAME_TINT))
             .text_color(cx.palette().card_foreground)
             .border_1()
             .border_color(theme.border)
-            .rounded(Radius::Md.resolve(cx))
-            .shadow(shadow_xs(cx))
+            // Concentric with the panels: their radius plus the tray's inset.
+            .rounded(radius + gpui_kit::rems(0.25).to_pixels(gpui_kit::px(16.)))
+            .shadow(shadow_inset(cx))
+            .p_0p5()
             .refine_style(&self.style)
             .when_some(self.header, |this, header| {
                 this.child(div().px_6().py_4().child(header))
@@ -408,7 +411,7 @@ impl RenderOnce for CardFrame {
                 card.framed = Some(Framed {
                     last: ix + 1 == count && !has_footer,
                 });
-                card
+                card.shadow_xs()
             }))
             .when_some(self.footer, |this, footer| {
                 this.child(div().px_6().py_4().child(footer))
@@ -481,9 +484,12 @@ impl RenderOnce for Frame {
         let shadow = shadow_xs(cx);
 
         v_flex()
-            .gap_1()
+            .gap_0()
             .p_1()
             .bg(theme.muted.opacity(FRAME_TINT))
+            .border_1()
+            .border_color(border)
+            .shadow(shadow_inset(cx))
             // Concentric with the panels: their radius plus the tray's inset.
             .rounded(radius + gpui_kit::rems(0.25).to_pixels(gpui_kit::px(16.)))
             .refine_style(&self.style)
