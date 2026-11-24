@@ -35,8 +35,11 @@ the package it serves, so the gallery has to live outside `corpora-ui` for an
 edit to a component to reach the running window. `cargo run -p corpora-ui
 --example gallery` still builds the same file.
 
-Colors are the exception: `theme.toml` and `palette.toml` are read once at
-startup, so restart the task after editing them.
+Colors reload by another route. `theme.toml` and `palette.toml` are compiled
+in, so a patch cannot carry an edit to them; under `hot-reload` the running
+gallery reads both files from the source tree a few times a second and
+installs each version that resolves. One that does not resolve is reported on
+stderr, and the last good colors stay.
 
 ## Layout
 
@@ -486,6 +489,11 @@ cx)`, `go_to_step(step, cx)`, `succeed(cx)` or `fail(message, cx)`,
   and bottom) or a single side, each with a width and a brightness. Corners
   blend the two sides they join. The rim is part of the lens, so a surface
   with no lens, such as `GlassSpec::blur`, has none.
+- **The text caret is 2px wide.** GPUI Base draws it 1px wide from a
+  private constant, with no theme setting. The workspace patches `gpui-base`
+  with a fork that changes that one line (`[patch.crates-io]` in
+  `Cargo.toml`). An application outside this workspace gets the 1px caret
+  unless it copies the entry.
 - **Glass needs the patched GPUI.** `glass` is a default feature that calls a
   backdrop pass added in `vendor/` (Metal only). An application outside this
   workspace must copy the `[patch.crates-io]` entries, or turn the feature

@@ -20,8 +20,8 @@ use gpui_kit::component::{Colorize as _, ThemeMode, oklch};
 use gpui_kit::{Hsla, Rgba};
 use serde::Deserialize;
 
-const PALETTE_TOML: &str = include_str!("palette.toml");
-const THEME_TOML: &str = include_str!("theme.toml");
+pub(super) const PALETTE_TOML: &str = include_str!("palette.toml");
+pub(super) const THEME_TOML: &str = include_str!("theme.toml");
 
 /// One appearance of the Corpora palette: the `light` or `dark` column of
 /// `theme.toml`.
@@ -131,22 +131,28 @@ impl Palette {
 fn embedded(mode: ThemeMode) -> Palette {
     static PALETTES: OnceLock<(Palette, Palette)> = OnceLock::new();
     let (light, dark) = PALETTES.get_or_init(|| {
-        let load = || -> Result<_, ColorError> {
-            let scales = Scales::parse(PALETTE_TOML)?;
-            let theme = ThemeDocument::parse(THEME_TOML)?;
-            Ok((
-                theme.palette(&scales, ThemeMode::Light)?,
-                theme.palette(&scales, ThemeMode::Dark)?,
-            ))
-        };
-        load().unwrap_or_else(|error| panic!("the embedded Corpora theme is invalid: {error}"))
+        resolve(PALETTE_TOML, THEME_TOML)
+            .unwrap_or_else(|error| panic!("the embedded Corpora theme is invalid: {error}"))
     });
     if mode.is_dark() { *dark } else { *light }
 }
 
+/// The light and dark palettes of a `palette.toml` and `theme.toml` pair.
+pub(super) fn resolve(
+    palette_toml: &str,
+    theme_toml: &str,
+) -> Result<(Palette, Palette), ColorError> {
+    let scales = Scales::parse(palette_toml)?;
+    let theme = ThemeDocument::parse(theme_toml)?;
+    Ok((
+        theme.palette(&scales, ThemeMode::Light)?,
+        theme.palette(&scales, ThemeMode::Dark)?,
+    ))
+}
+
 /// Why `palette.toml` or `theme.toml` cannot be turned into a [`Palette`].
 #[derive(Debug)]
-enum ColorError {
+pub(super) enum ColorError {
     /// The file is not valid TOML, or not the shape this module reads.
     Syntax {
         file: &'static str,

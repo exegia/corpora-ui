@@ -105,10 +105,15 @@ impl ActiveCorporaTheme for App {
 /// GPUI Component must already be initialized. Call [`crate::init`] rather
 /// than this directly.
 pub fn init(cx: &mut App) {
-    let light = Palette::light();
-    let dark = Palette::dark();
     let fonts = FontFamilies::resolve(cx);
+    install(Palette::light(), Palette::dark(), fonts, cx);
+    #[cfg(feature = "hot-reload")]
+    super::reload::watch(cx);
+}
 
+/// Makes `light` and `dark` the Corpora themes and applies the one matching
+/// the current mode.
+pub(super) fn install(light: Palette, dark: Palette, fonts: FontFamilies, cx: &mut App) {
     let light_config = Rc::new(theme_config(
         LIGHT_THEME_NAME,
         ThemeMode::Light,
