@@ -240,6 +240,10 @@ impl GlassSpec {
 
     /// Glass for a button: a deep lens tinted with the primary color, lit
     /// along its top and bottom so the rim reads as a bevel.
+    ///
+    /// The tint is added to the backdrop, so the light appearance dims the
+    /// backdrop first: over a white page an undimmed one clips to white and
+    /// the button disappears.
     pub fn button(cx: &App) -> Self {
         Self {
             blur_radius: px(7.7),
@@ -247,7 +251,7 @@ impl GlassSpec {
             reach: px(0.),
             magnify: 10.66,
             dispersion: 0.,
-            gain_light: 0.912,
+            gain_light: 0.549,
             gain_dark: 0.912,
             saturation: 0.99,
             tint: Some(cx.theme().primary.opacity(0.53)),
