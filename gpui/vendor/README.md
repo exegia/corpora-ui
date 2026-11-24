@@ -22,10 +22,18 @@ moved to 0.3.12. Only these files differ from the published packages:
 - `gpui-pre-apple/build.rs`: shader bindings are generated from the sibling
   `gpui-pre`, not from the copy the published crate embeds (omitted here).
 
+`gpui-pre`'s examples are left out to keep this directory small: the
+`examples/` sources and their sample images, and the 44 `[[example]]` entries
+of `gpui-pre/Cargo.toml`. One image stays,
+`gpui-pre/examples/image/exif-orientation-rotate-180.jpg`, because a test in
+`src/platform.rs` embeds it. `Cargo.toml.orig` still lists the examples, as
+published; Cargo does not read it.
+
 The glass material values come from
 [`crabtalk/bezel`](https://github.com/crabtalk/bezel), under its
 [MIT license](LICENSE-BEZEL). Only Metal implements the pass; other renderers
 ignore the call and the atom falls back to a translucent fill.
 
 To move to a newer GPUI, diff these files against the published 0.3.12
-packages and apply the result to the new version.
+packages and apply the result to the new version, then drop the examples
+again.

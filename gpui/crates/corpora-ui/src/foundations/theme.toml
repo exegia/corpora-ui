@@ -43,7 +43,7 @@ dark = "neutral.50"
 [colors.primary]
 description = "Fill of the main action."
 light = "indigo.700"
-dark = "indigo.800"
+dark = "indigo.500"
 
 [colors.primary-foreground]
 description = "Text and icons on a primary fill."
