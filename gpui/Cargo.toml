@@ -24,3 +24,7 @@ debug = "limited"
 [patch.crates-io]
 gpui-pre = { path = "vendor/gpui-pre" }
 gpui-pre-apple = { path = "vendor/gpui-pre-apple" }
+# The text caret is 1.5px wide. GPUI Base draws it from a private constant, so
+# this is gpui-base 0.10.0 (f697c31) with that one line changed, on the fork's
+# `corpora/caret-width-0.10` branch.
+gpui-base = { git = "https://github.com/emmanuel-defreitas/gpui-kit", rev = "b1cdba732d3c98ba673bfc3ff71d2acc524c6471" }

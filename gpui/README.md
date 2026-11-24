@@ -489,6 +489,11 @@ cx)`, `go_to_step(step, cx)`, `succeed(cx)` or `fail(message, cx)`,
   and bottom) or a single side, each with a width and a brightness. Corners
   blend the two sides they join. The rim is part of the lens, so a surface
   with no lens, such as `GlassSpec::blur`, has none.
+- **The text caret is 1.5px wide.** GPUI Base draws it 1px wide from a
+  private constant, with no theme setting. The workspace patches `gpui-base`
+  with a fork that changes that one line (`[patch.crates-io]` in
+  `Cargo.toml`). An application outside this workspace gets the 1px caret
+  unless it copies the entry.
 - **Glass needs the patched GPUI.** `glass` is a default feature that calls a
   backdrop pass added in `vendor/` (Metal only). An application outside this
   workspace must copy the `[patch.crates-io]` entries, or turn the feature
