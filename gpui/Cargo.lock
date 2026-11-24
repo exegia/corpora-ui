@@ -2311,7 +2311,7 @@ dependencies = [
 [[package]]
 name = "gpui-base"
 version = "0.10.0"
-source = "git+https://github.com/emmanuel-defreitas/gpui-kit?rev=b1cdba732d3c98ba673bfc3ff71d2acc524c6471#b1cdba732d3c98ba673bfc3ff71d2acc524c6471"
+source = "git+https://github.com/emmanuel-defreitas/gpui-kit?rev=0b1e12150d768416451ffd134833321d2c927539#0b1e12150d768416451ffd134833321d2c927539"
 dependencies = [
  "aho-corasick",
  "anyhow",
