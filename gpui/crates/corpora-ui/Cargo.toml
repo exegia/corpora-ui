@@ -13,7 +13,9 @@ default = ["glass"]
 # GPUI in `gpui/vendor`: an application outside this workspace must carry the
 # same `[patch.crates-io]` entries, or turn this off to get a translucent fill.
 glass = []
-# gpui-kit 0.10 does not forward this vendored GPUI feature yet.
+# gpui-kit 0.10 does not forward this vendored GPUI feature yet. It also makes
+# `init` re-read `foundations/palette.toml` and `theme.toml` from this source
+# tree while the application runs.
 hot-reload = ["dep:gpui-hot-reload"]
 
 [dependencies]

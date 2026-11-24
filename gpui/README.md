@@ -35,8 +35,11 @@ the package it serves, so the gallery has to live outside `corpora-ui` for an
 edit to a component to reach the running window. `cargo run -p corpora-ui
 --example gallery` still builds the same file.
 
-Colors are the exception: `theme.toml` and `palette.toml` are read once at
-startup, so restart the task after editing them.
+Colors reload by another route. `theme.toml` and `palette.toml` are compiled
+in, so a patch cannot carry an edit to them; under `hot-reload` the running
+gallery reads both files from the source tree a few times a second and
+installs each version that resolves. One that does not resolve is reported on
+stderr, and the last good colors stay.
 
 ## Layout
 

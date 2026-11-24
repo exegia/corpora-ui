@@ -12,6 +12,8 @@
 pub mod color;
 pub mod motion;
 pub mod radius;
+#[cfg(feature = "hot-reload")]
+mod reload;
 pub mod shadow;
 pub mod size;
 pub mod theme;
