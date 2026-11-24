@@ -6,6 +6,7 @@ export { SuggestedPrompts } from "./suggested-prompts"
 export { RecommendationStack } from "./recommendation-stack"
 export { DegradedBanner, LockedBanner, PinnedThreadBanner } from "./banners"
 export { VersionHistoryRecord } from "./version-history-record"
+export type * from "./type"
 
 export {
   AppliedMark,
@@ -19,19 +20,5 @@ export type {
   ISelectionHighlightProps,
   ISelectionPopoverProps,
 } from "@/components/composed/reader"
-export type {
-  IAiPanelHeaderProps,
-  IAiPanelProps,
-  ILockedBannerProps,
-  IAiScope,
-  TAiScopeKind,
-  TComposerMode,
-  IDiffRow,
-  INodeSelection,
-  TSuggestionState,
-  IVersionHistoryEntry,
-  ISuggestedPromptsProps,
-  IWordSelection,
-} from "./type"
 
 export default AiPanel

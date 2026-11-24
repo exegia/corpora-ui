@@ -1,6 +1,6 @@
 "use client"
 
-import { ScrollArea } from "@/ui/scroll-area"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 import { defineStory } from "@/registry/story"
 

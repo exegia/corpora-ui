@@ -1,40 +1,34 @@
+import { Reader } from "@exegia/corpora-ui/reader"
 import { useState } from "react"
 import { Button } from "@exegia/corpora-ui/button"
-import {
-  CorpusNavigator,
-  corpusSchemas,
-  useCorpusNavigationActions,
-  useCorpusNavigationState,
-  type CorpusData,
-} from "@exegia/corpora-ui/corpus-navigation"
-const data: CorpusData = {
-  corpusId: "consumer-paper",
-  editionId: "Illustrative print map",
-  label: "Research paper",
-  schema: corpusSchemas.paper,
-  nodes: Array.from({ length: 12 }, (_, i) => ({
-    id: `page-${i + 1}`,
-    level: "page",
-    label: String(i + 1),
-    reference: String(i + 1),
-  })),
-}
+import { CanonGrid, useCanon, type TCanonItem } from "@exegia/corpora-ui/toc"
+
+const chapters: readonly TCanonItem[] = Array.from({ length: 12 }, (_, i) => ({
+  id: `chapter-${i + 1}`,
+  type: "chapter",
+  level: 2,
+  label: String(i + 1),
+  number: i + 1,
+  link: `#consumer-${i + 1}-chapter`,
+}))
+
 function RemoteNavigation() {
-  const state = useCorpusNavigationState("consumer-navigation")
-  const actions = useCorpusNavigationActions("consumer-navigation")
+  const canon = useCanon("consumer-navigation")
   return (
     <div className="navigation-remote">
-      <Button variant="outline" onClick={actions.openPicker}>
-        Browse from external hook
+      <Button variant="outline" onClick={() => canon.select(chapters[0])}>
+        Select first chapter from external hook
       </Button>
       <span data-testid="navigation-anchor">
-        {state.location?.nodeId ?? "Choose a location"}
+        {canon.selectedLink ?? "Choose a chapter"}
       </span>
     </div>
   )
 }
+
 export default function CorpusNavigationExample() {
   const [narrow, setNarrow] = useState(false)
+  const canon = useCanon("consumer-navigation")
   return (
     <section
       aria-label="Corpus navigation example"
@@ -42,29 +36,23 @@ export default function CorpusNavigationExample() {
     >
       <h2>Navigate a corpus</h2>
       <p>
-        This illustrative map exercises the published package, shared store and
-        inherited theme.
+        This illustrative map exercises the published Canon grid, shared store
+        and Reader.
       </p>
       <Button variant="outline" onClick={() => setNarrow(!narrow)}>
         {narrow ? "Use full width" : "Embed at 390px"}
       </Button>
       <RemoteNavigation />
       <div style={{ width: narrow ? 390 : "100%", maxWidth: "100%" }}>
-        <CorpusNavigator
-          navigatorId="consumer-navigation"
-          data={data}
-          defaultLocation={{
-            corpusId: data.corpusId,
-            editionId: data.editionId,
-            nodeId: "page-1",
-          }}
-        >
-          {(state) => (
-            <p>
-              Host reading content for {state.location?.nodeId ?? "no page"}.
-            </p>
-          )}
-        </CorpusNavigator>
+        <CanonGrid
+          items={chapters}
+          selectedLink={canon.selectedLink}
+          onLinkClick={canon.select}
+          title="Chapters"
+        />
+        <Reader onVerseSelect={canon.select}>
+          <p>Host reading content for {canon.selectedLink ?? "no chapter"}.</p>
+        </Reader>
       </div>
     </section>
   )

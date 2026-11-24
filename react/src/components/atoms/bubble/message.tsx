@@ -3,7 +3,7 @@
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { useBubbleVariant } from "./context"
-import type { TBubbleMessageProps } from "./types"
+import type { TBubbleMessageProps } from "./type"
 import { twBubbleMessageClasses } from "./utils"
 import { containsOnlyAttachments } from "@/lib/attachment-content"
 

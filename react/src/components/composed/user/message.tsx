@@ -2,7 +2,7 @@
 
 import { Bubble } from "@/components/atoms"
 import { Info } from "./info"
-import type { IUserMessageProps } from "./types"
+import type { IUserMessageProps } from "./type"
 
 export function Message({
   children,

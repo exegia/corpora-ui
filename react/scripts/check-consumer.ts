@@ -156,13 +156,16 @@ try {
       for (const entry of Object.keys(manifest.default.exports).filter(path => path.startsWith("./ui/"))) {
         const focused = await import("@exegia/corpora-ui" + entry.slice(1));
         for (const [name, value] of Object.entries(focused)) {
-          assert.strictEqual(root.UI[name], value, entry + ": duplicate or missing UI export " + name);
+          const rootName = name === "Avatar" ? "AvatarRoot"
+            : entry === "./ui/breadcrumb" && name === "default" ? "Breadcrumb"
+            : name;
+          assert.strictEqual(root[rootName], value, entry + ": duplicate or missing UI export " + name);
         }
       }
-      for (const entry of ["button", "card", "input", "label", "state", "overlays", "shell", "scaffold", "corpus-navigation"]) {
+      for (const entry of ["button", "card", "input", "label", "state", "overlays", "shell", "scaffold", "toc", "reader"]) {
         const focused = await import("@exegia/corpora-ui/" + entry);
         for (const [name, value] of Object.entries(focused)) {
-          const rootName = entry === "shell" && name === "default" ? "ShellLayout" : name;
+          const rootName = entry === "shell" && name === "default" ? "ShellLayout" : entry === "toc" && name === "default" ? "TOC" : name;
           assert.strictEqual(root[rootName], value, entry + ": duplicate or missing " + name);
         }
       }

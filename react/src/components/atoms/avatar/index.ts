@@ -7,4 +7,4 @@ export type {
   TAvatarSize,
   TAvatarStatus,
   TUserType,
-} from "./types"
+} from "./type"

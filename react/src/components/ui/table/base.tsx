@@ -1,10 +1,10 @@
-"use client";
+"use client"
 
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
-import type React from "react";
-import { cn } from "@/lib/utils";
-import type { TableProps } from "./types";
+import { mergeProps } from "@base-ui/react/merge-props"
+import { useRender } from "@base-ui/react/use-render"
+import type React from "react"
+import { cn } from "@/lib/utils"
+import type { TableProps } from "./type"
 
 export default function Table({
   className,
@@ -16,8 +16,8 @@ export default function Table({
     children: (
       <table
         className={cn(
-          "w-full caption-bottom in-data-[variant=card]:border-separate in-data-[variant=card]:border-spacing-0 text-sm",
-          className,
+          "in-data-[variant=card]:border-spacing-0 text-sm w-full caption-bottom in-data-[variant=card]:border-separate",
+          className
         )}
         data-slot="table"
         {...props}
@@ -26,11 +26,11 @@ export default function Table({
     className: "relative w-full overflow-x-auto",
     "data-slot": "table-container",
     "data-variant": variant,
-  };
+  }
 
   return useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(defaultProps, {}),
     render,
-  });
+  })
 }

@@ -1,4 +1,4 @@
-import type { IFileIconProps } from "./types"
+import type { IFileIconProps } from "./type"
 
 /**
  * XML file icon — wordmark variant.

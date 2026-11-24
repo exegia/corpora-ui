@@ -1,6 +1,6 @@
 "use client"
 
-import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyContent } from "@/ui/empty"
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyContent } from "@/components/ui/empty"
 
 import { defineStory } from "@/registry/story"
 

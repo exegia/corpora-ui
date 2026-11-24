@@ -1,60 +1,60 @@
-import type { TSocialProvider } from "@/components/composed/types";
-import type { TAuthAccent } from "@/lib/auth-accent";
+import type { TSocialProvider } from "@/components/composed/type"
+import type { TAuthAccent } from "@/lib/auth-accent"
 
 export interface IUpdatePasswordBlockProps {
-  title?: string;
-  description?: string;
+  title?: string
+  description?: string
   /** Brand mark rendered above the title. Omit for no logo row at all. */
-  logo?: React.ReactNode;
+  logo?: React.ReactNode
   /** Brand accent for the primary action. Omit to keep the default primary. */
-  accent?: TAuthAccent;
+  accent?: TAuthAccent
   /**
    * Minimum strength (0-4, as scored by `getPasswordStrength`) the new
    * password must reach before the confirm field is revealed. 0 disables the
    * gate.
    */
-  minStrength?: number;
+  minStrength?: number
   /** Reject (or throw) to show the error state with the error's message. */
-  onSubmit?: (data: { password: string }) => Promise<void> | void;
-  onDone?: () => void;
+  onSubmit?: (data: { password: string }) => Promise<void> | void
+  onDone?: () => void
 }
 
 export interface ISignupBlockProps {
-  title?: string;
-  description?: string;
+  title?: string
+  description?: string
   /**
    * Replaces the built-in "terms" link inside the consent label — pass your
    * own dialog trigger to render it inline instead of wiring `onTerms`.
    */
-  termsComponent?: React.ReactNode;
+  termsComponent?: React.ReactNode
   /** Brand mark rendered above the title. Omit for no logo row at all. */
-  logo?: React.ReactNode;
+  logo?: React.ReactNode
   /** Brand accent for the primary action. Omit keeping the default primary. */
-  accent?: TAuthAccent;
-  providers?: TSocialProvider[];
-  showNameField?: boolean;
+  accent?: TAuthAccent
+  providers?: TSocialProvider[]
+  showNameField?: boolean
   /** Require the term checkbox before submitting. */
-  showTerms?: boolean;
+  showTerms?: boolean
   /**
    * Controls the term checkbox. Pass it with `onTermsCheckedChange` when
    * something outside the block has to tick the box — an "I agree" action in
    * your own terms dialog, say. Omit letting the block own the state.
    */
-  termsChecked?: boolean;
+  termsChecked?: boolean
   /** Starting state of the term checkbox while it is uncontrolled. */
-  defaultTermsChecked?: boolean;
+  defaultTermsChecked?: boolean
   /** Fires on every change, controlled or not. */
-  onTermsCheckedChange?: (checked: boolean) => void;
+  onTermsCheckedChange?: (checked: boolean) => void
   /** Block submission until every password requirement is met. */
-  enforceStrongPassword?: boolean;
+  enforceStrongPassword?: boolean
   onSubmit?: (data: {
-    name: string;
-    email: string;
-    password: string;
-  }) => Promise<void> | void;
-  onProviderSelect?: (provider: TSocialProvider) => Promise<void> | void;
-  onLogin?: () => void;
-  onTerms?: () => void;
+    name: string
+    email: string
+    password: string
+  }) => Promise<void> | void
+  onProviderSelect?: (provider: TSocialProvider) => Promise<void> | void
+  onLogin?: () => void
+  onTerms?: () => void
 }
 
 export interface IPasskeySignInBlockProps {
@@ -62,18 +62,18 @@ export interface IPasskeySignInBlockProps {
    * Whether this device can use passkeys. `false` renders nothing at all —
    * a passkey button that is guaranteed to fail is worse than no button.
    */
-  available?: boolean;
+  available?: boolean
   /** Button label. */
-  label?: string;
+  label?: string
   /**
    * Reject (or throw) to show the inline error. Resolving with
    * `{ cancelled: true }` returns silently to idle — a dismissed OS prompt is
    * not a failure and must not surface an error.
    */
-  onSignIn?: () => Promise<{ cancelled?: boolean } | void> | void;
+  onSignIn?: () => Promise<{ cancelled?: boolean } | void> | void
   /** Hint shown under an error, pointing at the remaining sign-in methods. */
-  fallbackHint?: React.ReactNode;
-  className?: string;
+  fallbackHint?: React.ReactNode
+  className?: string
 }
 
 /** One registered passkey, as rendered by {@link PasskeyManagerBlock}. */
@@ -87,95 +87,95 @@ export interface IPasskeyRecord {
 }
 
 /** Value a single onboarding field can hold. */
-export type TOnboardingValue = string | boolean;
+export type TOnboardingValue = string | boolean
 
 export interface IOnboardingSelectOption {
-  value: string;
-  label: string;
+  value: string
+  label: string
 }
 
 interface IOnboardingFieldBase {
   /** Key the value is collected under; unique within the flow. */
-  name: string;
-  label: string;
+  name: string
+  label: string
   /** Required fields gate the step's advance. */
-  required?: boolean;
-  placeholder?: string;
+  required?: boolean
+  placeholder?: string
   /** Extra validation; return a message to reject, `null` to accept. */
-  validate?: (value: string) => string | null;
+  validate?: (value: string) => string | null
 }
 
 export interface IOnboardingTextField extends IOnboardingFieldBase {
-  kind: "text" | "textarea" | "url";
+  kind: "text" | "textarea" | "url"
 }
 
 export interface IOnboardingCheckboxField extends IOnboardingFieldBase {
-  kind: "checkbox";
+  kind: "checkbox"
 }
 
 export interface IOnboardingSelectField extends IOnboardingFieldBase {
-  kind: "select";
-  options: IOnboardingSelectOption[];
+  kind: "select"
+  options: IOnboardingSelectOption[]
 }
 
 /** Discriminated on `kind`. */
 export type TOnboardingFieldConfig =
-  | IOnboardingTextField
-  | IOnboardingCheckboxField
-  | IOnboardingSelectField;
+  IOnboardingTextField | IOnboardingCheckboxField | IOnboardingSelectField
 
 export interface IOnboardingStepConfig {
   /** Unique within the flow and stable across releases. */
-  id: string;
-  title: string;
-  description?: string;
-  fields: TOnboardingFieldConfig[];
+  id: string
+  title: string
+  description?: string
+  fields: TOnboardingFieldConfig[]
 }
 
 export interface IOnboardingBlockProps {
   /** Declared profile steps. */
-  steps?: IOnboardingStepConfig[];
+  steps?: IOnboardingStepConfig[]
   /** Brand mark rendered above the title. Omit for no logo row at all. */
-  logo?: React.ReactNode;
+  logo?: React.ReactNode
   /** Brand accent for the primary action. Omit to keep the default primary. */
-  accent?: TAuthAccent;
+  accent?: TAuthAccent
   /**
    * Fires per step as it is submitted. Reject (or throw) to keep the user on
    * the step and show the error.
    */
   onStepSubmit?: (
     stepId: string,
-    values: Record<string, TOnboardingValue>,
-  ) => Promise<void> | void;
+    values: Record<string, TOnboardingValue>
+  ) => Promise<void> | void
   /** Fires once, after the final step is accepted, with the merged profile. */
-  onComplete?: (profile: Record<string, TOnboardingValue>) => Promise<void> | void;
+  onComplete?: (
+    profile: Record<string, TOnboardingValue>
+  ) => Promise<void> | void
   /** Shows a brief success screen once onboarding completes. */
-  showCompleteScreen?: boolean;
+  showCompleteScreen?: boolean
   /** Move focus to step headings. Disable when embedding a gallery preview. */
-  autoFocus?: boolean;
-  className?: string;
+  autoFocus?: boolean
+  className?: string
 }
 
 export interface ILoginBlockProps {
-  title?: string;
-  description?: string;
+  title?: string
+  description?: string
   /** Brand mark rendered above the title. Omit for no logo row at all. */
-  logo?: React.ReactNode;
+  logo?: React.ReactNode
   /** Brand accent for the primary action. Omit to keep the default primary. */
-  accent?: TAuthAccent;
+  accent?: TAuthAccent
   /** Social providers to offer; empty array hides the social section. */
-  providers?: TSocialProvider[];
-  showRememberMe?: boolean;
-  showForgotPassword?: boolean;
+  providers?: TSocialProvider[]
+  showRememberMe?: boolean
+  showForgotPassword?: boolean
   /** Reject (or throw) to show the error state with the error's message. */
   onSubmit?: (data: {
-    email: string;
-    password: string;
-    remember: boolean;
-  }) => Promise<void> | void;
-  onProviderSelect?: (provider: TSocialProvider) => Promise<void> | void;
-  onForgotPassword?: () => void;
-  onSignup?: () => void;
+    email: string
+    password: string
+    remember: boolean
+  }) => Promise<void> | void
+  onProviderSelect?: (provider: TSocialProvider) => Promise<void> | void
+  onForgotPassword?: () => void
+  onSignup?: () => void
 }
 
 /** One sign-in identity attached to the account. */
@@ -207,39 +207,36 @@ export interface ILinkedAccountsBlockProps {
   className?: string
 }
 
-
 export interface IForgotPasswordBlockProps {
-  title?: string;
-  description?: string;
+  title?: string
+  description?: string
   /** Brand mark rendered above the title. Omit for no logo row at all. */
-  logo?: React.ReactNode;
+  logo?: React.ReactNode
   /** Brand accent for the primary action. Omit to keep the default primary. */
-  accent?: TAuthAccent;
-  onSubmit?: (data: { email: string }) => Promise<void> | void;
-  onBackToLogin?: () => void;
+  accent?: TAuthAccent
+  onSubmit?: (data: { email: string }) => Promise<void> | void
+  onBackToLogin?: () => void
 }
-
 
 export interface ICodeAuthBlockProps {
   /** Brand mark rendered above the title. Omit for no logo row at all. */
-  logo?: React.ReactNode;
+  logo?: React.ReactNode
   /** Brand accent for the primary action. Omit to keep the default primary. */
-  accent?: TAuthAccent;
+  accent?: TAuthAccent
   /** Where the code was sent; drives copy and icon. */
-  channel?: "email" | "sms";
+  channel?: "email" | "sms"
   /** Masked destination shown in the description, e.g. "y•••@example.com". */
-  destination?: string;
-  length?: number;
+  destination?: string
+  length?: number
   /** Submit automatically once all digits are entered. */
-  autoSubmit?: boolean;
+  autoSubmit?: boolean
   /** Seconds before "Resend code" becomes available. 0 disables the wait. */
-  resendSeconds?: number;
+  resendSeconds?: number
   /** Reject (or throw) to show the error shake and clear the code. */
-  onVerify?: (code: string) => Promise<void> | void;
-  onResend?: () => Promise<void> | void;
-  onBack?: () => void;
+  onVerify?: (code: string) => Promise<void> | void
+  onResend?: () => Promise<void> | void
+  onBack?: () => void
 }
-
 
 export type TAuthFlowId = string
 
@@ -328,7 +325,7 @@ export interface IAuthSessionActions {
   signOut: () => void
 }
 
-export type TAuthStatus = "idle" | "loading" | "success" | "error";
+export type TAuthStatus = "idle" | "loading" | "success" | "error"
 
 export type TAuthFlowDirective =
   | { user: IAuthUser }
@@ -404,15 +401,15 @@ export interface IAuthFlowBlockProps {
 }
 
 export interface IProfileStepProps {
-  step: IOnboardingStepConfig;
+  step: IOnboardingStepConfig
   /** Seed values, so drafts survive back/forward navigation. */
-  values: Record<string, TOnboardingValue>;
-  submitting?: boolean;
-  submitLabel: string;
-  onSubmit: (values: Record<string, TOnboardingValue>) => void | Promise<void>;
-  onBack?: () => void;
+  values: Record<string, TOnboardingValue>
+  submitting?: boolean
+  submitLabel: string
+  onSubmit: (values: Record<string, TOnboardingValue>) => void | Promise<void>
+  onBack?: () => void
   /** Reports every edit so the flow can restore drafts across navigation. */
-  onDraftChange?: (name: string, value: TOnboardingValue) => void;
+  onDraftChange?: (name: string, value: TOnboardingValue) => void
 }
 
 export interface IPasskeyManagerBlockProps {
@@ -433,4 +430,3 @@ export interface IPasskeyManagerBlockProps {
   onDelete?: (id: string) => Promise<void> | void
   className?: string
 }
-

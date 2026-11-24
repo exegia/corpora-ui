@@ -3,7 +3,7 @@
 import type * as React from "react"
 import { cn } from "@/lib/utils"
 import { BubbleContext } from "./context"
-import type { IBubbleProps } from "./types"
+import type { IBubbleProps } from "./type"
 import { twBubbleAlignClasses, twBubbleColumnClasses } from "./utils"
 
 export function Bubble({
@@ -20,7 +20,7 @@ export function Bubble({
           // Full width, not `w-fit`: a fit-content root anchors left, so a
           // short sender message would sit mid-thread with its column
           // right-aligned inside its own box instead of hugging the edge.
-          "group/bubble relative my-3 flex w-full flex-col gap-y-3",
+          "group/bubble my-3 gap-y-3 relative flex w-full flex-col",
           // 12px bottom margin above minus 10px: a 2px seam between run bubbles.
           continued && "-mt-2.5",
           twBubbleAlignClasses[variant],
@@ -33,7 +33,7 @@ export function Bubble({
       >
         <div
           className={cn(
-            "relative flex flex-col gap-y-2 select-none",
+            "gap-y-2 relative flex flex-col select-none",
             twBubbleColumnClasses[variant]
           )}
           data-slot="bubble-column"

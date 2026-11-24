@@ -136,7 +136,9 @@ export function ProfileStep({
                   id={controlId}
                   checked={value === true}
                   disabled={submitting}
-                  onCheckedChange={(checked) => setValue(field.name, checked)}
+                  onCheckedChange={(details) =>
+                    setValue(field.name, details.checked === true)
+                  }
                 />
                 <Label htmlFor={controlId} className="font-normal">
                   {field.label}

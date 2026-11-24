@@ -22,6 +22,12 @@ Use the controls to explore the component's props.
 | `chapterPopover / renderChapterPopover` | `ReactNode \| (props: ITextPopoverRenderProps) => ReactNode` | —          | Popover opened by clicking the chapter reference. Without it the chapter is a plain link.  |
 | `size`                                  | `"small" \| "medium" \| "large" \| number`                  | `"medium"` | Type scale for the verse. Nested VerseSpan/VerseNote inherit it unless they set their own. |
 
+Spans and notes that carry popover content are keyboard targets
+(`role="button"`, Enter/Space open) and expose `aria-expanded`. The chapter
+stays a plain link: Enter activates it as a link would, and a modifier or
+middle click navigates instead of opening. One popover per verse renders
+whichever part was activated, below it.
+
 ## Example
 
 <Demo />

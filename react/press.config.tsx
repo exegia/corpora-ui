@@ -9,6 +9,9 @@ import { lucideIconsPlugin } from "fumadocs-core/source/plugins/lucide-icons"
 import { Link } from "fumapress/client"
 import { ExegiaProvider } from "./src/lib/state/exegia-provider"
 
+import { SidebarProvider, SidebarTrigger, useSidebar } from "fumadocs-ui/layouts/docs/slots/sidebar"
+import { DocsSidebar } from "./src/components/docs/sidebar"
+
 const SITE_URL = process.env.SITE_URL ?? "http://192.168.0.225:4000"
 const RootLayout = createRootLayout()
 
@@ -16,7 +19,16 @@ const DocsLayout = createDocsLayoutPage<typeof config.$context>({
   async render(page) {
     return {
       ...page,
+      layoutProps: {
+        containerProps: {
+          className: "[--fd-layout-width:100%]",
+        },
+        tabMode: "top",
+        slots: { sidebar: { root: DocsSidebar, provider: SidebarProvider, trigger: SidebarTrigger, useSidebar } },
+      },
       pageProps: {
+        className: "max-w-none",
+        full: true,
         tableOfContent: {
           style: "clerk",
         },

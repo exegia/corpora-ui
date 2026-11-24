@@ -10,8 +10,7 @@ import type * as React from "react"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import type { TSocialProvider } from "./types"
-
+import type { TSocialProvider } from "./type"
 
 /** Google's four-color "G" — the only provider whose mark isn't monochrome. */
 function GoogleColorIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -57,25 +56,26 @@ export const SOCIAL_PROVIDERS: Record<
     label: "Google",
     Icon: RiGoogleFill,
     BrandIcon: GoogleColorIcon,
-    brandClassName: "fill-black dark:fill-white"
+    brandClassName: "fill-black dark:fill-white",
   },
   apple: {
     label: "Apple",
     Icon: RiAppleFill,
     BrandIcon: RiAppleFill,
     brandClassName: "fill-white! dark:fill-black!",
-    buttonClassName: "bg-neutral-950 hover:bg-black dark:bg-white dark:hover:bg-neutral-100 shadow-bezel dark:shadow-bubble-dim border-border dark:border-muted",
-    labelClassName: "text-white dark:text-black"
+    buttonClassName:
+      "bg-neutral-950 hover:bg-black dark:bg-white dark:hover:bg-neutral-100 shadow-bezel dark:shadow-bubble-dim border-border dark:border-muted",
+    labelClassName: "text-white dark:text-black",
   },
   github: {
     label: "GitHub",
     Icon: RiGithubFill,
-    BrandIcon: RiGithubFill
+    BrandIcon: RiGithubFill,
   },
   x: {
     label: "X",
     Icon: RiTwitterXFill,
-    BrandIcon: RiTwitterXFill
+    BrandIcon: RiTwitterXFill,
   },
 }
 
@@ -113,7 +113,7 @@ export function SocialProviders({
   return (
     <div
       className={cn(
-        "flex w-full gap-2",
+        "gap-2 flex w-full",
         row ? "flex-row justify-center" : "flex-col",
         className
       )}

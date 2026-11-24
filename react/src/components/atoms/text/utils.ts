@@ -1,5 +1,5 @@
 import type { ClassValue } from "clsx"
-import type { TLabelProps } from "./types"
+import type { TLabelProps } from "./type"
 
 export const twClasses: Record<string, ClassValue> = {
   default: "selection:text-amber-500 dark:selection:text-amber-400",
@@ -12,5 +12,5 @@ export const twLabelClasses: Record<
   title: "text-lg text-neutral-500",
   subtitle: "text-md text-neutral-500",
   caption: "text-xs text-neutral-400 dark:text-neutral-700",
-  heading: "text-sm text-neutral-500"
+  heading: "text-sm text-neutral-500",
 }

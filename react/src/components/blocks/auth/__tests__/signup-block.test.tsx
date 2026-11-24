@@ -14,8 +14,8 @@ async function fillForm(user: ReturnType<typeof userEvent.setup>) {
   await user.type(await screen.findByLabelText("Password"), STRONG);
 }
 
-// Base UI renders a hidden native input beside the Checkbox root, so the box is
-// queried by role and read from aria-checked (see CLAUDE.md).
+// The Ark Checkbox's hidden native input is the accessible checkbox, so the box
+// is queried by role and its state read from `checked` (see CLAUDE.md).
 const checkbox = () => screen.getByRole("checkbox");
 
 describe("SignupBlock terms checkbox", () => {
@@ -23,17 +23,17 @@ describe("SignupBlock terms checkbox", () => {
     const user = userEvent.setup();
     render(<SignupBlock />);
 
-    expect(checkbox().getAttribute("aria-checked")).toBe("false");
+    expect((checkbox() as HTMLInputElement).checked).toBe(false);
 
     await user.click(checkbox());
     await waitFor(() =>
-      expect(checkbox().getAttribute("aria-checked")).toBe("true"),
+      expect((checkbox() as HTMLInputElement).checked).toBe(true),
     );
   });
 
   test("starts from defaultTermsChecked", () => {
     render(<SignupBlock defaultTermsChecked />);
-    expect(checkbox().getAttribute("aria-checked")).toBe("true");
+    expect((checkbox() as HTMLInputElement).checked).toBe(true);
   });
 
   test("reports changes through onTermsCheckedChange while uncontrolled", async () => {
@@ -53,8 +53,12 @@ describe("SignupBlock terms checkbox", () => {
     await user.click(checkbox());
 
     // The click is reported, but the box only moves if the owner says so.
+    // Ark leaves the native input's own `checked` toggled here (it only
+    // re-syncs it when its state changes), so read the rendered state.
     expect(onChange).toHaveBeenCalledWith(true);
-    expect(checkbox().getAttribute("aria-checked")).toBe("false");
+    expect(
+      checkbox().closest('[data-slot="checkbox"]')?.getAttribute("data-state"),
+    ).toBe("unchecked");
   });
 
   test("lets an outside action tick the box and unblock submit", async () => {
@@ -83,7 +87,7 @@ describe("SignupBlock terms checkbox", () => {
     await fillForm(user);
     await user.click(await screen.findByRole("button", { name: "I agree" }));
     await waitFor(() =>
-      expect(checkbox().getAttribute("aria-checked")).toBe("true"),
+      expect((checkbox() as HTMLInputElement).checked).toBe(true),
     );
 
     await user.click(screen.getByRole("button", { name: "Create account" }));
