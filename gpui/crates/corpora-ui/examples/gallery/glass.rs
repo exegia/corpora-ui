@@ -469,6 +469,19 @@ impl GlassShowcase {
         .join("\n")
     }
 
+    /// The probe as the Rust that builds it: its frame, then its material.
+    fn usage_source(&self) -> String {
+        let radius = self.radius.min(self.width.min(self.height) / 2.);
+        format!(
+            "div()\n    .w({})\n    .h({})\n    .rounded({})\n    .glass_with({})",
+            pixels_source(px(self.width)),
+            pixels_source(px(self.height)),
+            pixels_source(px(radius)),
+            // The spec sits one level in, under the builder chain.
+            self.spec_source().replace('\n', "\n    "),
+        )
+    }
+
     fn render_backdrop(&self, cx: &App) -> AnyElement {
         let theme = cx.theme();
         let base = div().absolute().inset_0();
@@ -752,8 +765,8 @@ impl Render for GlassShowcase {
                     ),
             )
             .child(
-                CodeBlock::new("glass-spec-code", self.spec_source())
-                    .filename("GlassSpec")
+                CodeBlock::new("glass-spec-code", self.usage_source())
+                    .filename("Glass surface")
                     .keywords(["Some"]),
             )
     }
