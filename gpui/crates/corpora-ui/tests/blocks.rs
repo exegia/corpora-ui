@@ -436,6 +436,55 @@ fn resource_sidebar_opens_selects_moves_and_renames(cx: &mut TestAppContext) {
     );
 }
 
+#[gpui_kit::test]
+fn resource_sidebar_carries_an_open_folder_down_past_its_own_rows(cx: &mut TestAppContext) {
+    use corpora_ui::blocks::{ResourceKind, ResourceSidebar, SidebarResource};
+
+    cx.update(corpora_ui::init);
+    let held = Rc::new(RefCell::new(None));
+    let host_held = held.clone();
+    let window = open(cx, px(600.), move |_, cx| {
+        let sidebar = cx.new(|cx| {
+            ResourceSidebar::new(
+                [
+                    SidebarResource::new("notes", "Notes", ResourceKind::Folder).children([
+                        SidebarResource::new("draft", "Draft", ResourceKind::File),
+                        SidebarResource::new("memo", "Memo", ResourceKind::File),
+                    ]),
+                    SidebarResource::new("john", "John 3:16", ResourceKind::Bookmark),
+                ],
+                cx,
+            )
+        });
+        *host_held.borrow_mut() = Some(sidebar.clone());
+        cx.new(|_| SidebarHost { sidebar })
+    });
+    let sidebar = held.borrow().clone().unwrap();
+    let mut visual = VisualTestContext::from_window(window, cx);
+    let shut = frame(&mut visual, "sidebar");
+
+    // A click opens the folder and leaves the keyboard on it, so the row
+    // after it is its own first file.
+    visual.simulate_click(
+        shut.origin + gpui_kit::point(px(60.), px(18.)),
+        Default::default(),
+    );
+    visual.update(|_, cx| {
+        assert_eq!(
+            sidebar.read(cx).focused_id().map(|id| id.as_ref()),
+            Some("notes")
+        );
+    });
+
+    visual.simulate_keystrokes("alt-shift-down");
+    visual.update(|_, cx| {
+        let state = sidebar.read(cx);
+        let top: Vec<&str> = state.items().iter().map(|item| item.id.as_ref()).collect();
+        assert_eq!(top, ["john", "notes"], "the folder went below its sibling");
+        assert_eq!(state.item("notes").unwrap().children.len(), 2);
+    });
+}
+
 struct ShellHost {
     shell: Entity<corpora_ui::blocks::Shell>,
 }
