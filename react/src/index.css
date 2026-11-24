@@ -5,4 +5,70 @@
 
 @import "motion-icons-react/style.css";
 
+@custom-variant dark (&:is(.dark *));
+
 @plugin "./specular.js";
+
+@theme inline {
+    --animate-slide-up: slideUp 0.2s ease-out;
+    --animate-slide-down: slideDown 0.2s ease-out;
+    --color-warning-foreground: var(--warning-foreground);
+    --color-warning: var(--warning);
+    --color-success-foreground: var(--success-foreground);
+    --color-success: var(--success);
+    --color-info-foreground: var(--info-foreground);
+    --color-info: var(--info);
+    --color-destructive-foreground: var(--destructive-foreground);
+  @keyframes slideUp {
+  from {
+    height: var(--height);
+        }
+  to {
+    height: 0;
+        }
+    }
+  @keyframes slideDown {
+  from {
+    height: 0;
+        }
+  to {
+    height: var(--height);
+        }
+    }
+  @keyframes expand {
+  from {
+    height: var(--collapsed-height, 0);
+        }
+  to {
+    height: var(--height);
+        }
+    }
+  @keyframes collapse {
+  from {
+    height: var(--height);
+        }
+  to {
+    height: var(--collapsed-height, 0);
+        }
+    }
+}
+
+:root {
+    --destructive-foreground: var(--color-red-700);
+    --info: var(--color-blue-500);
+    --info-foreground: var(--color-blue-700);
+    --success: var(--color-emerald-500);
+    --success-foreground: var(--color-emerald-700);
+    --warning: var(--color-amber-500);
+    --warning-foreground: var(--color-amber-700);
+}
+
+.dark {
+    --destructive-foreground: var(--color-red-400);
+    --info: var(--color-blue-500);
+    --info-foreground: var(--color-blue-400);
+    --success: var(--color-emerald-500);
+    --success-foreground: var(--color-emerald-400);
+    --warning: var(--color-amber-500);
+    --warning-foreground: var(--color-amber-400);
+}

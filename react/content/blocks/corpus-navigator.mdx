@@ -1,54 +1,69 @@
 ---
 title: Corpus navigator
-description: One reading-navigation block that responds to its container and corpus schema.
+description: A Shell-based reader with breadcrumb popovers for canonical and document navigation.
 ---
 
-import WorkspaceDemo from "@/registry/demos/corpus-navigation-workspace-demo"
+import { Preview } from "@/components/stories/corpus-navigation.story"
 
-import Demo from "@/registry/demos/corpus-navigation-demo"
+<Preview />
 
-<Demo />
+## Breadcrumb navigation
+
+The preview uses the shared browser-window frame. Inside it, `CorpusNavigator`
+composes `ShellLayout` with the updated breadcrumb in its header; no extra Shell
+wrapper is required. The demo fills its available width.
+
+Open the chevron beside a breadcrumb to browse without moving the reader.
+Bible books, chapters and verses use the canonical TOC grid for the selected
+level. Regular documents and other schemas use the searchable TOC tree.
+Only nodes supplied by the edition are shown: the Bible sample is a John 1
+excerpt, not a complete Bible index. Choose **Go to location** to commit,
+**Cancel** to discard the draft, or **Return** to restore the previous location.
 
 ## Presentation
 
 The containing element determines layout: below 600 px uses a bottom sheet, 600–1099 px uses a side drawer, and 1100 px or more keeps navigation inline. A 390 px panel on a wide screen still uses the compact presentation. Browse changes draft only; Go commits; Cancel keeps the current location. Return restores the previous committed anchor.
 
-The block provides navigation, not a reader engine. Use `children` (or a state render function) for text, `contextSlot` for supporting content and `corpusSlot` for a corpus chooser. Host callbacks own routing, scrolling and fetching. Reading content is never scrolled automatically.
+The Shell contains the reading surface, browsing controls and optional context. The block provides navigation, not a reader engine. Use `children` (or a state render function) for text, `contextSlot` for supporting content and `corpusSlot` for a corpus chooser. Host callbacks own routing, scrolling and fetching. Reading content is never scrolled automatically.
 
 ```tsx
 import { useState } from "react"
-import { CorpusNavigator, type CorpusAnchor, type CorpusData } from "@exegia/corpora-ui/corpus-navigation"
+import {
+  CorpusNavigator,
+  type CorpusAnchor,
+  type CorpusData,
+} from "@exegia/corpora-ui/corpus-navigation"
 
 function ControlledReader({ data }: { data: CorpusData }) {
   const [location, setLocation] = useState<CorpusAnchor | null>(null)
-  return <CorpusNavigator
-    navigatorId="reader"
-    data={data}
-    location={location}
-    onNavigate={setLocation}
-    shortcut="focused"
-  >
-    {state => <p>Host reading anchor: {state.location?.nodeId ?? "None"}</p>}
-  </CorpusNavigator>
+  return (
+    <CorpusNavigator
+      navigatorId="reader"
+      data={data}
+      location={location}
+      onNavigate={setLocation}
+      shortcut="focused"
+    >
+      {(state) => (
+        <p>Host reading anchor: {state.location?.nodeId ?? "None"}</p>
+      )}
+    </CorpusNavigator>
+  )
 }
 ```
 
-## Research workspace
-
-<WorkspaceDemo />
-
 ## Props
 
-| Prop | Default | Responsibility |
-| --- | --- | --- |
-| `data` | required | Immutable edition/schema/index and optional resolver/search |
-| `location`, `onNavigate` | uncontrolled | Host-owned anchor, or a notification for uncontrolled mode |
-| `defaultLocation` | none | Initial uncontrolled anchor |
-| `navigatorId` | generated | Shared hooks and explicit lifecycle |
-| `historyLimit` | 20 | Bounded Return history |
-| `shortcut` | focused | `focused`, `global`, or `false` |
-| `portalProps` | inherited | Existing Drawer/Modal portal props, including container overrides |
-| `children`, `contextSlot`, `corpusSlot` | empty | Host content slots |
+| Prop                                    | Default      | Responsibility                                                                  |
+| --------------------------------------- | ------------ | ------------------------------------------------------------------------------- |
+| `data`                                  | required     | Immutable edition/schema/index and optional resolver/search                     |
+| `location`, `onNavigate`                | uncontrolled | Host-owned anchor, or a notification for uncontrolled mode                      |
+| `defaultLocation`                       | none         | Initial uncontrolled anchor                                                     |
+| `navigatorId`                           | generated    | Shared hooks and explicit lifecycle                                             |
+| `historyLimit`                          | 20           | Bounded Return history                                                          |
+| `shortcut`                              | focused      | `focused`, `global`, or `false`                                                 |
+| `portalProps`                           | inherited    | Breadcrumb popover and Drawer/Modal portal props, including container overrides |
+| `children`, `contextSlot`, `corpusSlot` | empty        | Host content slots                                                              |
 
 The `portalProps.container` override follows existing overlay behavior: omit to inherit the provider destination; pass an element/ref for an explicit destination; pass `null` to defer portal mounting until a container is ready. Pass `document.body` explicitly to target the body. Keep overlay targets inside the appropriate themed/direction subtree.
 
@@ -56,7 +71,7 @@ For a wider research workspace, compose the block inside existing `Scaffold.Root
 
 ## Keyboard and accessibility
 
-Tree uses its established arrow behavior; grid arrows move focus, Enter/Space select a draft, and Home/End reach range boundaries. The command uses Cmd/Ctrl K where opted in, arrows to highlight, Enter to commit and Escape to dismiss. Dialogs restore their trigger focus. Current reading location, selected draft and keyboard focus are separate states. Controls have 44 px minimum targets and references use bidirectional isolation.
+Tree uses its established arrow behavior; grid arrows move focus, Enter/Space select a draft, and Home/End reach range boundaries. The command uses Cmd/Ctrl K where opted in, arrows to highlight, Enter to commit and Escape to dismiss. Dialogs restore their trigger focus. Current reading location, selected draft and keyboard focus are separate states. Browse and previous/next controls have 44 px minimum targets; breadcrumb overlays use compact labelled chevrons. References use bidirectional isolation.
 
 The sheet targets 240 ms and commit feedback 180 ms; reduced-motion transitions are disabled. Layout changes keep the same navigator state and never mount two active picker dialogs. Safe-area padding and bounded scrolling keep the action row reachable. Test your own long localized labels, provider portal target, virtual keyboard and host scroll behavior.
 

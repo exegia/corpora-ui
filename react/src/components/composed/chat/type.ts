@@ -3,7 +3,7 @@ import type * as React from "react"
 import type { IMenuCommandItem } from "@/components/ui/menu-command"
 import type { TAttachmentProps } from "./attachment"
 import type { HTMLMotionProps } from "motion/react"
-import type { TAtomSize } from "@/components/atoms/types"
+import type { TAtomSize } from "@/components/atoms/type"
 
 export type TComposerMode = "answer" | "fix" | "ask"
 

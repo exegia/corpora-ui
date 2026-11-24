@@ -1,5 +1,5 @@
 import { ToolbarButton, ToolbarSeparator } from "@/components/ui/toolbar"
-import type { IActionButtonProps } from "./types"
+import type { IActionButtonProps } from "./type"
 import { TooltipTrigger } from "@/components/ui/tooltip"
 import { useContext } from "react"
 import { ActionTooltipContext } from "./utils"

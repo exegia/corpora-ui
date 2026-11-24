@@ -1,33 +1,33 @@
-import { cn } from "@/lib/utils";
-import { Spinner } from "@/components/ui/spinner";
-import type { TAtomSize, ILoaderProps } from "./types";
+import { cn } from "@/lib/utils"
+import { Spinner } from "@/components/ui"
+import type { TAtomSize, ILoaderProps } from "./type"
 
 const sizeMap: Record<TAtomSize, string> = {
-  xs: 'w-0.5 h-0.5',
-  sm: 'w-1 h-1',
-  default: 'w-2 h-2',
-  lg: 'w-3 h-3',
-  xl: 'w-4 h-4',
-  xxl: 'w-5 h-5',
-} as const;
+  xs: "w-0.5 h-0.5",
+  sm: "w-1 h-1",
+  default: "w-2 h-2",
+  lg: "w-3 h-3",
+  xl: "w-4 h-4",
+  xxl: "w-5 h-5",
+} as const
 
 export function Loader({ type = "spinner", className, size }: ILoaderProps) {
-
   if (type === "dots") {
     return (
-      <div className={cn('flex gap-1 justify-center items-center', className)}>
+      <div className={cn("gap-1 flex items-center justify-center", className)}>
         {[0, 1, 2].map((i) => (
-          <span 
+          <span
             key={i}
-            className={cn("bg-foreground animate-bounce rounded-full", sizeMap[size ?? 'default'])}
+            className={cn(
+              "animate-bounce rounded-full bg-foreground",
+              sizeMap[size ?? "default"]
+            )}
             style={{ animationDelay: `${i * 0.15}s` }}
           />
         ))}
       </div>
-    );
+    )
   }
-  
-  return (
-    <Spinner className={cn('text-foreground', className)} size={size} />
-  );
+
+  return <Spinner className={cn("text-foreground", className)} />
 }

@@ -222,13 +222,8 @@ export interface ITreeController {
   dnd: ITreeDndContextValue
 }
 
-/** @internal What a row needs from the root, threaded through context so
- * the recursive rows stay prop-light.
- *
- * Deliberately free of tree state. Rows read state from per-node atoms, so
- * this value keeps its identity for the life of the tree and expanding one
- * branch no longer re-renders every row through context. */
-export interface ITreeContextValue {
+/** @internal Rendering scope. Mutable state lives in the shared Jotai store. */
+export interface ITreeRowScope {
   treeId: TTreeInstanceId
   renderTrailing?: (node: ITreeNode) => React.ReactNode
   dnd: ITreeDndHandlers

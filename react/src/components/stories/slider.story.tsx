@@ -1,6 +1,6 @@
 "use client"
 
-import { Slider, SliderValue } from "@/ui/slider"
+import { Slider, SliderValue } from "@/components/ui/slider"
 
 import { defineStory } from "@/registry/story"
 

@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext } from "react"
-import type { TBubbleVariant } from "./types"
+import type { TBubbleVariant } from "./type"
 
 export const BubbleContext = createContext<TBubbleVariant>("recipient")
 

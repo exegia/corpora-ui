@@ -17,3 +17,5 @@ dist-pack/
 .claude/settings.local.json
 react/.env
 .alias-refactor/
+docs/superpowers/
+.superpowers/

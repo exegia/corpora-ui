@@ -1,6 +1,6 @@
 "use client"
 
-import { Switch } from "@/ui/switch"
+import { Switch } from "@/components/ui/switch"
 
 import { defineStory } from "@/registry/story"
 

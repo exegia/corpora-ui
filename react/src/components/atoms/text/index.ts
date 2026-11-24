@@ -10,7 +10,7 @@ export type {
   TTextProps,
   TTextSize,
   TTextVariant,
-} from "./types"
+} from "./type"
 
 export const Text = {
   /** The polymorphic base the presets below are built on — the only member
@@ -25,4 +25,3 @@ export const Text = {
 }
 
 export { TextDefault as default }
-

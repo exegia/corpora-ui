@@ -6,15 +6,19 @@ import {
   FileTextIcon,
   FolderIcon,
   LibraryIcon,
+  PencilIcon,
   SearchIcon,
   SettingsIcon,
   TagsIcon,
-  Trash2Icon,
 } from "lucide-react"
 import * as React from "react"
 
 import { Tree, type ITreeNode, useTree } from "@/components/composed/tree"
-import { DemoStage } from "@/components/docs/demo-controls"
+import {
+  DemoSelect,
+  DemoStage,
+  DemoToggle,
+} from "@/components/docs/demo-controls"
 import { Button } from "@/components/ui/button"
 
 /** 3 levels — `navigation` promotes the top level to section names. */
@@ -106,26 +110,83 @@ const FILES: ITreeNode[] = [
 
 type TDemoVariant = "navigation" | "toc" | "sidebar" | "files"
 
+const VARIANTS = ["navigation", "toc", "sidebar", "files"] as const
+
 export default function TreeDemo() {
-  const [variant] = React.useState<TDemoVariant>("navigation")
-  const [collapsed] = React.useState(false)
+  const [variant, setVariant] = React.useState<TDemoVariant>("navigation")
+  const [collapsed, setCollapsed] = React.useState(false)
   const [activeId, setActiveId] = React.useState<string | undefined>("reading")
   // The `files` shape runs off a controller instead of props: it owns the
   // data, so rename and drag-and-drop apply themselves, and the buttons
   // below drive the same tree from outside it.
   const files = useTree({
+    treeId: "demo-files",
     variant: "files",
     defaultItems: FILES,
     activeId,
     onNavigate: (node) => setActiveId(node.id),
   })
+
+  function handleVariantChange(next: TDemoVariant) {
+    setVariant(next)
+    setActiveId(
+      next === "toc"
+        ? "getting-started"
+        : next === "files"
+          ? "readme"
+          : "reading"
+    )
+  }
+
   return (
-    <DemoStage canvasClassName="flex w-full justify-center">
+    <DemoStage
+      canvasClassName="flex min-h-80 w-full items-center justify-center p-6"
+      controls={
+        <>
+          <DemoSelect
+            label="variant"
+            value={variant}
+            options={VARIANTS}
+            onChange={handleVariantChange}
+          />
+          {variant === "sidebar" && (
+            <DemoToggle
+              label="collapsed"
+              checked={collapsed}
+              onChange={setCollapsed}
+            />
+          )}
+          {variant === "files" && (
+            <div className="flex w-full gap-1">
+              <Button
+                className="flex-1"
+                onClick={files.expandAll}
+                size="xs"
+                variant="outline"
+              >
+                Expand all
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={files.reset}
+                size="xs"
+                variant="outline"
+              >
+                Reset
+              </Button>
+            </div>
+          )}
+          <span className="text-xs text-muted-foreground">
+            {activeId ? `selected: ${activeId}` : "select a row"}
+          </span>
+        </>
+      }
+    >
       <div
         className={
           variant === "sidebar" && collapsed
-            ? "w-16 p-2 rounded-lg border"
-            : "max-w-64 p-2 w-full rounded-lg border"
+            ? "w-16 rounded-lg border bg-card p-2 shadow-sm"
+            : "w-full max-w-64 rounded-lg border bg-card p-2 shadow-sm"
         }
       >
         {variant === "navigation" && (
@@ -159,11 +220,12 @@ export default function TreeDemo() {
             tree={files}
             renderTrailing={(node) => (
               <Button
-                aria-label={`Delete ${node.label}`}
+                aria-label={`Rename ${node.label}`}
+                onClick={() => files.startRename(node.id)}
                 size="icon-xs"
                 variant="ghost"
               >
-                <Trash2Icon className="size-3" />
+                <PencilIcon className="size-3" />
               </Button>
             )}
           />

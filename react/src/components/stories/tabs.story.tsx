@@ -1,14 +1,22 @@
 "use client"
 
-import { Tabs, TabsList, TabsTab, TabsPanel } from "@/ui/tabs"
+import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs"
 
 import { defineStory } from "@/registry/story"
 
 function ComponentPreview({ variant }: { variant: "default" | "underline" }) {
-
   return (
-    <div className="relative mx-auto w-full max-w-lg p-6">
-      <Tabs defaultValue="text"><TabsList variant={variant}><TabsTab value="text">Text</TabsTab><TabsTab value="notes">Notes</TabsTab></TabsList><TabsPanel value="text">Read the selected passage.</TabsPanel><TabsPanel value="notes">Review the editorial annotations.</TabsPanel></Tabs>
+    <div className="max-w-lg p-6 relative mx-auto w-full">
+      <Tabs defaultValue="text">
+        <TabsList variant={variant}>
+          <TabsTrigger value="text">Text</TabsTrigger>
+          <TabsTrigger value="notes">Notes</TabsTrigger>
+        </TabsList>
+        <TabsContent value="text">Read the selected passage.</TabsContent>
+        <TabsContent value="notes">
+          Review the editorial annotations.
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

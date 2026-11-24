@@ -127,6 +127,16 @@ fn flatten(
     }
 }
 
+/// The first row after `rows[index]` that is not inside it: where a move
+/// down takes a row. An open folder's own rows follow it, and a row cannot
+/// land in itself.
+fn row_below(rows: &[FlatRow], index: usize) -> Option<&FlatRow> {
+    let source = &rows[index].item;
+    rows[index + 1..]
+        .iter()
+        .find(|row| !source.contains(&row.item.id))
+}
+
 fn find<'a>(items: &'a [SidebarResource], id: &str) -> Option<&'a SidebarResource> {
     items.iter().find_map(|item| {
         if item.id.as_ref() == id {
@@ -663,8 +673,8 @@ impl ResourceSidebar {
                 true
             }
             "down" => {
-                if let Some(next) = next {
-                    self.move_resource(reorder(&next.item.id, DropPosition::After), cx);
+                if let Some(below) = row_below(&rows, index) {
+                    self.move_resource(reorder(&below.item.id, DropPosition::After), cx);
                 }
                 true
             }
@@ -1079,6 +1089,19 @@ mod tests {
         assert_eq!(ids(&next, &all)[2..5], ["·old", "··memo", "··john"]);
         let next = moved(&tree(), &change("memo", None, DropPosition::After)).unwrap();
         assert_eq!(ids(&next, &all).last().unwrap(), "memo");
+    }
+
+    #[test]
+    fn a_move_down_skips_the_rows_inside_the_one_moved() {
+        let expanded = ["notes", "old"].map(SharedString::from).into();
+        let mut rows = Vec::new();
+        flatten(&tree(), &expanded, 0, None, &mut rows);
+        let below = |index: usize| row_below(&rows, index).map(|row| row.item.id.as_ref());
+        // notes, ·draft, ·old, ··memo, john, locked
+        assert_eq!(below(0), Some("john"), "past all of the open folder");
+        assert_eq!(below(1), Some("old"), "a file takes the very next row");
+        assert_eq!(below(2), Some("john"), "past the nested folder's file");
+        assert_eq!(below(rows.len() - 1), None);
     }
 
     #[test]

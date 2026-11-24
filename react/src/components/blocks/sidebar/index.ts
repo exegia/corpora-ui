@@ -2,12 +2,12 @@ import { AISidebar } from "./ai-sidebar"
 import { MarqueeLabel } from "./marquee-label.tsx"
 import { ResourceRow } from "./sidebar-row.tsx"
 import { SidebarIcon } from "./sidebar-icon.tsx"
-export { useAISidebar, type IUseAISidebarOptions } from "./use-ai-sidebar.ts"
+export { useAISidebar } from "./use-ai-sidebar.ts"
 export {
   useAISidebarActions,
   useAISidebarState,
 } from "./use-ai-sidebar-state.ts"
-export type * from "./type.ts"
+
 // The public atom surface. `@internal` atoms (config, handlers, mount, the
 // projections, the owned-* loop guards) stay unexported on purpose —
 // `export *` would make every internal a breaking-change surface for

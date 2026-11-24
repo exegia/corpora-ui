@@ -64,6 +64,20 @@ impl ChartRow {
     }
 }
 
+/// The value range the line and area charts share. It always holds zero, so
+/// positive data keeps its baseline and data below zero is not cut off.
+fn value_domain(rows: &[ChartRow]) -> (f64, f64) {
+    let values = || rows.iter().flat_map(|row| row.values.iter().copied());
+    let low = values().fold(0_f64, f64::min);
+    let high = values().fold(0_f64, f64::max);
+    // The stock charts draw nothing over an empty range.
+    if low == high {
+        (low, low + 1.)
+    } else {
+        (low, high)
+    }
+}
+
 /// One measure plotted across the rows.
 #[derive(Clone, Debug, PartialEq)]
 pub struct ChartSeries {
@@ -307,11 +321,7 @@ impl RenderOnce for Chart {
             .iter()
             .position(|series| selected.as_ref() == Some(&series.key))
             .unwrap_or(0);
-        let peak = self
-            .rows
-            .iter()
-            .flat_map(|row| row.values.iter().copied())
-            .fold(0_f64, f64::max);
+        let (low, high) = value_domain(&self.rows);
         let interactive = self.interactive;
         let appear = self.appear;
 
@@ -410,7 +420,7 @@ impl RenderOnce for Chart {
                             .name(series.label.clone())
                             .x(|row: &ChartRow| row.label.clone())
                             .y(move |row: &ChartRow| row.value(index))
-                            .y_domain(0., peak)
+                            .y_domain(low, high)
                             .natural()
                             .grid(layer == 0)
                             .stroke(color)
@@ -424,7 +434,7 @@ impl RenderOnce for Chart {
                             .name(series.label.clone())
                             .x(|row: &ChartRow| row.label.clone())
                             .y(move |row: &ChartRow| row.value(index))
-                            .y_domain(0., peak)
+                            .y_domain(low, high)
                             .natural()
                             .grid(layer == 0)
                             .stroke(color)
@@ -545,6 +555,19 @@ mod tests {
         assert_eq!(format_value(1_000_000.), "1,000,000");
         assert_eq!(format_value(-12.5), "-12.5");
         assert_eq!(format_value(0.), "0");
+    }
+
+    #[test]
+    fn the_shared_domain_holds_zero_and_every_value() {
+        let row = |values: &[f64]| ChartRow::new("row", values.iter().copied());
+        // Positive data keeps its zero baseline.
+        assert_eq!(value_domain(&[row(&[12., 3.]), row(&[48., 7.])]), (0., 48.));
+        assert_eq!(value_domain(&[row(&[-5., 3.])]), (-5., 3.));
+        // All below zero: the range still reaches up to it.
+        assert_eq!(value_domain(&[row(&[-5.]), row(&[-2.])]), (-5., 0.));
+        // The stock charts draw nothing over an empty range.
+        assert_eq!(value_domain(&[row(&[0., 0.])]), (0., 1.));
+        assert_eq!(value_domain(&[]), (0., 1.));
     }
 
     #[test]
