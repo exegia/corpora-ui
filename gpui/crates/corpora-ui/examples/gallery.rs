@@ -25,9 +25,12 @@ use gpui_kit::component::tab::{Tab, TabBar};
 use gpui_kit::component::{ActiveTheme as _, ThemeMode, h_flex, v_flex};
 use gpui_kit::*;
 
+#[path = "gallery/devtools.rs"]
+mod devtools;
 #[path = "gallery/glass.rs"]
 mod glass;
 
+use devtools::Devtools;
 use glass::GlassShowcase;
 
 /// A titled band of the gallery.
@@ -129,6 +132,11 @@ impl Page {
             Page::Blocks => "Blocks",
             Page::Glass => "Glass",
         }
+    }
+
+    /// Where the page's annotations are kept.
+    fn route(self) -> String {
+        format!("gpui://corpora-ui/{}", self.slug())
     }
 
     fn slug(self) -> &'static str {
@@ -235,6 +243,7 @@ struct Gallery {
     password: Entity<InputState>,
     logo_folded: bool,
     glass: Entity<GlassShowcase>,
+    devtools: Devtools,
 }
 
 impl Gallery {
@@ -745,6 +754,7 @@ impl Gallery {
             }),
             logo_folded: false,
             glass: cx.new(GlassShowcase::new),
+            devtools: Devtools::unmounted(),
         }
     }
 
@@ -2808,7 +2818,7 @@ impl Gallery {
 }
 
 impl Render for Gallery {
-    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let is_dark = cx.theme().is_dark();
         let page = self.page;
         let selected = Page::ALL.iter().position(|p| *p == page).unwrap_or(0);
@@ -2866,7 +2876,7 @@ impl Render for Gallery {
             },
         );
 
-        v_flex()
+        let body = v_flex()
             .size_full()
             .bg(cx.theme().background)
             .text_color(cx.theme().foreground)
@@ -2884,9 +2894,10 @@ impl Render for Gallery {
                             .segmented()
                             .selected_index(selected)
                             .children(Page::ALL.map(|page| Tab::new().label(page.label())))
-                            .on_click(cx.listener(|this, index: &usize, _, cx| {
+                            .on_click(cx.listener(|this, index: &usize, window, cx| {
                                 this.page = Page::ALL[*index];
                                 this.page_changed = true;
+                                this.devtools.set_route(&this.page.route(), window, cx);
                                 cx.notify();
                             })),
                     )
@@ -2913,7 +2924,8 @@ impl Render for Gallery {
                     .p_6()
                     .overflow_y_scrollbar()
                     .child(sections),
-            )
+            );
+        self.devtools.frame(body, window, cx)
     }
 }
 
@@ -3024,18 +3036,18 @@ fn main() {
         _ => {}
     }
 
-    gpui_kit::application()
-        .with_assets(corpora_ui::Assets)
-        .run(move |cx| {
-            corpora_ui::init(cx);
-            gpui_kit::open_window(window_options(None), cx, move |window, cx| {
-                cx.new(|cx| {
-                    let mut gallery = Gallery::new(window, cx);
-                    gallery.page = start;
-                    gallery
-                })
+    Devtools::application(gpui_kit::application()).run(move |cx| {
+        corpora_ui::init(cx);
+        Devtools::init(cx);
+        gpui_kit::open_window(window_options(None), cx, move |window, cx| {
+            cx.new(|cx| {
+                let mut gallery = Gallery::new(window, cx);
+                gallery.page = start;
+                gallery.devtools = Devtools::mount(&start.route(), window, cx);
+                gallery
             })
-            .expect("failed to open the gallery window");
-            cx.activate(true);
-        });
+        })
+        .expect("failed to open the gallery window");
+        cx.activate(true);
+    });
 }

@@ -28,3 +28,8 @@ toml = { version = "1", default-features = false, features = ["std", "parse", "s
 
 [dev-dependencies]
 gpui-kit = { workspace = true, features = ["test-support"] }
+
+# The gallery example's annotation tools. A dev-dependency never reaches an
+# application that depends on this library.
+[target.'cfg(target_os = "macos")'.dev-dependencies]
+gpui-agentation.workspace = true

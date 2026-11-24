@@ -41,6 +41,31 @@ gallery reads both files from the source tree a few times a second and
 installs each version that resolves. One that does not resolve is reported on
 stderr, and the last good colors stay.
 
+## Gallery annotations
+
+A debug build of the gallery on macOS carries
+[`gpui-agentation`](https://github.com/emmanuel-defreitas/gpui-agentation):
+a toolbar window docked to the gallery's right edge and a **Debug** menu, for
+pinning comments to elements and handing them to a coding agent over MCP.
+**Inspect** picks any element; nothing in the library is wrapped for it.
+
+- Notes are kept per page (`gpui://corpora-ui/<page>`) in
+  `target/agentation/feedback.json`, which Git ignores.
+- The gallery serves them on `http://127.0.0.1:4751` while it runs.
+  **Settings** in the toolbar shows the `/mcp` endpoint and a client config
+  to copy.
+- A second gallery process finds the port busy and keeps its notes local.
+
+All of it lives in `crates/corpora-ui/examples/gallery/devtools.rs`. The
+crate is a dev-dependency of `corpora-ui` and a dependency of the gallery
+package, so no application that uses the library gets it. A release build of
+the gallery compiles the same file to calls that do nothing, and the
+`--snapshot` run mounts no tools.
+
+Published Agentation needs Kit 0.11. This workspace is on Kit 0.10, so it
+pins the `kit-0.10` branch of that repository: the 0.7.0 API on Kit 0.10.
+Move back to a published release when the workspace moves to Kit 0.11.
+
 ## Layout
 
 ```text
