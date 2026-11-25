@@ -5,13 +5,18 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-publish.workspace = true
+publish = ["crates-io"]
+repository = "https://github.com/exegia/corpora-ui"
+documentation = "https://docs.rs/corpora-ui"
+readme = "README.md"
+include = ["/src/**", "/assets/**", "/README.md", "/LICENSE", "/Cargo.toml"]
 
 [features]
-default = ["glass"]
+default = []
 # Paints `atoms::glass` with the renderer's backdrop pass. It needs the patched
 # GPUI in `gpui/vendor`: an application outside this workspace must carry the
-# same `[patch.crates-io]` entries, or turn this off to get a translucent fill.
+# same `[patch.crates-io]` entries. Off by default so registry-only consumers
+# build without renderer overrides. See README.md for the full glass setup.
 glass = []
 # gpui-kit 0.10 does not forward this vendored GPUI feature yet. It also makes
 # `init` re-read `foundations/palette.toml` and `theme.toml` from this source

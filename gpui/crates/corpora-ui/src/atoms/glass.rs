@@ -460,7 +460,7 @@ impl Element for GlassSurface {
         }
         .clamp_radii_for_quad_size(bounds.size);
         let spec = self.spec;
-        window.with_paint_scale(bounds.center(), self.scale, |window| {
+        super::scaled::paint_scaled(bounds, self.scale, window, |window| {
             window.paint_layer(bounds, |window| {
                 paint(bounds, corners, spec, window, cx);
                 self.child.paint(window, cx);

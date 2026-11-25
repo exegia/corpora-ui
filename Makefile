@@ -6,6 +6,7 @@
 REACT_DIR := react
 GPUI_DIR := gpui
 DX ?= $(HOME)/.cargo/bin/dx
+GPUI_PYTHON ?= python3
 BUN := bun
 
 # `--frozen-lockfile` in CI, a plain install locally.
@@ -91,7 +92,10 @@ distclean: clean ## Also remove node_modules
 # --- gpui -------------------------------------------------------------------
 
 gpui-gallery: ## Open the GPUI component gallery window
-	cd $(GPUI_DIR) && cargo run -p corpora-ui --example gallery
+	cd $(GPUI_DIR) && cargo run -p corpora-ui --example gallery --features glass
+
+gpui-package-check: ## Verify the Rust package as an independent consumer
+	$(GPUI_PYTHON) gpui/scripts/package_check.py
 
 # Serves the `corpora-ui-gallery` package, not `corpora-ui --example gallery`:
 # dx hot-patches every workspace crate except the package it serves, so served
