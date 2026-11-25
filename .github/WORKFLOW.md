@@ -87,7 +87,6 @@ It does **not** cut the next release branch. That waits for the next promote.
 | `pr-merged.yml`               | push to `release/v*`       | upsert the draft release PR into `main`                  |
 | `release.yml`                 | PR merged into `main`      | publish to npm, tag, sync lanes, cleanup                 |
 | `publish-github-packages.yml` | PR merged into `main`      | mirror the release to GitHub Packages                    |
-| `opencode.yml`                | `/oc` comment              | repo-specific agent trigger                              |
 
 Every step is a `make` target, so anything CI does can be reproduced locally.
 

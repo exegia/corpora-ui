@@ -1,0 +1,23 @@
+[package]
+name = "corpora-ui-gallery"
+description = "The corpora-ui gallery as its own package, for `dx serve --hot-patch`."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# The same source as `cargo run -p corpora-ui --example gallery`. It is built
+# from here too because dx hot-patches every workspace crate except the
+# package it serves: served as an example of `corpora-ui`, an edit to a
+# component would never reach the running gallery.
+[[bin]]
+name = "gallery"
+path = "../corpora-ui/examples/gallery.rs"
+
+[features]
+hot-reload = ["corpora-ui/hot-reload"]
+
+[dependencies]
+corpora-ui = { path = "../corpora-ui" }
+gpui-kit = { workspace = true, features = ["test-support"] }

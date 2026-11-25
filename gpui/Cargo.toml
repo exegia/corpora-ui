@@ -1,0 +1,30 @@
+[workspace]
+members = ["crates/*"]
+exclude = ["vendor/gpui-pre", "vendor/gpui-pre-apple"]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+license = "MIT"
+publish = false
+
+[workspace.dependencies]
+# One dependency for GPUI, GPUI Base, GPUI Component and the default icons.
+# GPUI itself ships as the `gpui-pre-*` family that gpui-kit pins for us, so
+# no crate in this workspace lists GPUI directly.
+gpui-kit = "0.10"
+
+[profile.dev]
+debug = "limited"
+
+# Glass needs a backdrop pass the published GPUI does not have. These are the
+# published 0.3.12 sources with that pass added; see `vendor/README.md`.
+[patch.crates-io]
+gpui-pre = { path = "vendor/gpui-pre" }
+gpui-pre-apple = { path = "vendor/gpui-pre-apple" }
+# The text caret is 2px wide. GPUI Base draws it from a private constant, so
+# this is gpui-base 0.10.0 (f697c31) with that one line changed, on the fork's
+# `corpora/caret-width-0.10` branch.
+gpui-base = { git = "https://github.com/emmanuel-defreitas/gpui-kit", rev = "0b1e12150d768416451ffd134833321d2c927539" }
