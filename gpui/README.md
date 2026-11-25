@@ -5,8 +5,8 @@ The GPUI counterpart of the React library in `../react`, built on
 Component and the default icons behind one dependency).
 
 ```sh
-cargo run -p corpora-ui --example gallery                      # open the gallery
-cargo run -p corpora-ui --example gallery -- --snapshot <dir>  # render every page to PNGs, no window
+cargo run -p corpora-ui --example gallery --features glass                      # open the gallery
+cargo run -p corpora-ui --example gallery --features glass -- --snapshot <dir>  # render every page to PNGs, no window
 cargo test -p corpora-ui
 cargo clippy -p corpora-ui --all-targets
 ```
@@ -520,11 +520,11 @@ cx)`, `go_to_step(step, cx)`, `succeed(cx)` or `fail(message, cx)`,
   with a fork that changes that one line (`[patch.crates-io]` in
   `Cargo.toml`). An application outside this workspace gets the 1px caret
   unless it copies the entry.
-- **Glass needs the patched GPUI.** `glass` is a default feature that calls a
-  backdrop pass added in `vendor/` (Metal only). An application outside this
-  workspace must copy the `[patch.crates-io]` entries, or turn the feature
-  off; glass then paints its tint as a translucent fill, as it does off
-  macOS.
+- **Full glass is optional.** The default library uses translucent surfaces.
+  The gallery enables `glass`, which calls the backdrop pass added in `vendor/`
+  (Metal only) and enables painted scale pulses. Applications outside this
+  workspace follow the [crate's renderer setup](crates/corpora-ui/README.md#optional-full-glass-on-macos).
+  The separate [Rust publishing workflow](PUBLISHING.md) verifies both modes.
 - **`Bubble` takes slots, not children.** React reads the variant from context
   and styles the tail with a sibling selector. Here `Bubble` owns `header`,
   `message`, `actions` and the reactions, and the caller says which bubble of

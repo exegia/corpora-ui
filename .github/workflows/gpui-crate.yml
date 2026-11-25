@@ -1,0 +1,86 @@
+name: GPUI crate
+
+on:
+  pull_request:
+    branches: [dev]
+    paths: ["gpui/**", ".github/workflows/gpui-crate.yml"]
+  push:
+    branches: [dev]
+    tags: ["gpui-v*"]
+    paths: ["gpui/**", ".github/workflows/gpui-crate.yml"]
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish a gpui-vVERSION tag after verification"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gpui-crate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.99.1"
+          components: rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: gpui
+      - name: Check release tag
+        if: startsWith(github.ref, 'refs/tags/') || inputs.publish
+        env:
+          RELEASE_REF: ${{ github.ref }}
+        run: |
+          version=$(python3 -c 'import tomllib; print(tomllib.load(open("gpui/Cargo.toml", "rb"))["workspace"]["package"]["version"])')
+          test "$RELEASE_REF" = "refs/tags/gpui-v$version" || { echo "Select the gpui-v$version tag to publish"; exit 1; }
+          git merge-base --is-ancestor HEAD origin/dev
+      - name: Check formatting and components with gallery renderer
+        working-directory: gpui
+        run: |
+          cargo fmt -p corpora-ui --check
+          cargo test --locked -p corpora-ui --features glass
+          cargo check --locked -p corpora-ui-gallery
+      - name: Verify packaged default and full-glass consumers
+        run: python3 gpui/scripts/package_check.py
+      - name: Rehearse registry upload
+        working-directory: gpui
+        run: cargo publish --dry-run --no-verify --locked -p corpora-ui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: corpora-ui-crate
+          path: gpui/target/package/corpora-ui-*.crate
+          if-no-files-found: error
+
+  publish:
+    needs: verify
+    if: startsWith(github.ref, 'refs/tags/gpui-v') && (github.event_name == 'push' || inputs.publish)
+    runs-on: macos-15
+    environment: crates-io
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.99.1"
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: gpui
+      - name: Publish library to crates.io
+        working-directory: gpui
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          test -n "$CARGO_REGISTRY_TOKEN" || { echo "Configure CARGO_REGISTRY_TOKEN in the crates-io environment"; exit 1; }
+          cargo publish --locked --no-verify -p corpora-ui
