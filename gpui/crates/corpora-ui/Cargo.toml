@@ -28,3 +28,17 @@ toml = { version = "1", default-features = false, features = ["std", "parse", "s
 
 [dev-dependencies]
 gpui-kit = { workspace = true, features = ["test-support"] }
+
+# The gallery example's annotation tools. A dev-dependency never reaches an
+# application that depends on this library.
+[target.'cfg(target_os = "macos")'.dev-dependencies]
+gpui-agentation.workspace = true
+
+# Native playback is confined to the gallery, not the component library.
+objc2 = "0.6"
+objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSArray", "NSDictionary", "NSError", "NSValue", "NSString", "NSURL"] }
+objc2-av-foundation = { version = "0.3.2", default-features = false, features = ["std", "AVPlayer", "AVPlayerItem", "AVPlayerItemOutput", "objc2-core-media", "objc2-core-video"] }
+objc2-core-media = { version = "0.3", default-features = false, features = ["std", "CMTime"] }
+objc2-core-video = { version = "0.3", default-features = false, features = ["std", "CVPixelBuffer", "CVReturn"] }
+image = { version = "0.25", default-features = false }
+tempfile = "3"

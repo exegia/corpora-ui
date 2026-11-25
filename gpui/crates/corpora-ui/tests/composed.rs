@@ -960,7 +960,7 @@ fn corpus_navigation_drafts_on_a_pick_and_moves_on_a_commit(cx: &mut TestAppCont
 
     // The second row holds chapters 6 and 7, in the first two of five columns.
     visual.simulate_click(
-        point(grid.left() + px(90.), grid.bottom() - px(12.)),
+        point(grid.left() + px(88.), grid.bottom() - px(28.)),
         Modifiers::none(),
     );
     visual.update(|_, cx| {

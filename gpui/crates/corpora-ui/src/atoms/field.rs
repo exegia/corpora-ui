@@ -123,9 +123,8 @@ impl RenderOnce for InputField {
                     .focus_ring(false)
                     .with_size(Size::from(self.size))
                     .disabled(self.disabled)
-                    .when(focused, |input| input.border_color(theme.primary))
-                    // An invalid field stays red while it is being fixed.
-                    .when(error.is_some(), |input| input.border_color(theme.danger)),
+                    .when(error.is_some(), |input| input.border_color(theme.danger))
+                    .when(focused, |input| input.border_color(theme.primary)),
             )
             .when_some(error, |this, error| {
                 this.child(div().text_sm().text_color(theme.danger).child(error))

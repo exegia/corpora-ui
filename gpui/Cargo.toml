@@ -15,6 +15,10 @@ publish = false
 # GPUI itself ships as the `gpui-pre-*` family that gpui-kit pins for us, so
 # no crate in this workspace lists GPUI directly.
 gpui-kit = "0.10"
+# Development annotations for the gallery, debug builds on macOS only: see
+# `crates/corpora-ui/examples/gallery/devtools.rs`. Published releases need
+# Kit 0.11, so this is the `kit-0.10` branch, the 0.7.0 API on Kit 0.10.
+gpui-agentation = { git = "https://github.com/emmanuel-defreitas/gpui-agentation", rev = "d1b481b93fe85ce6cbed5654d53f214154699e36", default-features = false, features = ["native"] }
 
 [profile.dev]
 debug = "limited"

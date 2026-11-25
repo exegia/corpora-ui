@@ -224,6 +224,7 @@ impl RenderOnce for ResearchAnswer {
             let handler = handler?;
             Some(
                 Button::new(child_id(name))
+                    .when(name == "copy", Button::copy_feedback)
                     .ghost()
                     .xsmall()
                     .icon(icon)
