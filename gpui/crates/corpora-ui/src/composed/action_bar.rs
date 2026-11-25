@@ -135,9 +135,11 @@ impl RenderOnce for ActionBar {
         let bar_id = Arc::new(self.id);
         let groups = group(self.items.into_iter().map(|item| {
             item.map(|action| {
+                let copy = action.id.as_ref() == "copy";
                 let on_click = action.on_click;
                 let button = Button::new(ElementId::NamedChild(bar_id.clone(), action.id))
                     .ghost()
+                    .when(copy, Button::copy_feedback)
                     .tooltip(action.tooltip)
                     .on_click(move |event, window, cx| on_click(event, window, cx));
                 match action.glyph {

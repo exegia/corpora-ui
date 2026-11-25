@@ -63,6 +63,7 @@ fn init_installs_the_corpora_theme_in_both_appearances(cx: &mut TestAppContext) 
         let light = Palette::light();
         assert_eq!(cx.theme().theme_name().as_ref(), LIGHT_THEME_NAME);
         assert_same_color(cx.theme().primary, light.primary, "light primary");
+        assert_same_color(cx.theme().ring, light.primary, "light focus border");
         assert_same_color(cx.theme().danger, light.destructive, "light destructive");
         assert_same_color(cx.palette().card, light.card, "light card");
         assert_px(Radius::Lg.resolve(cx), 14., "base radius");
@@ -71,6 +72,7 @@ fn init_installs_the_corpora_theme_in_both_appearances(cx: &mut TestAppContext) 
         foundations::set_mode(ThemeMode::Dark, cx);
 
         let dark = Palette::dark();
+        assert_same_color(cx.theme().ring, dark.primary, "dark focus border");
         assert_eq!(cx.theme().theme_name().as_ref(), DARK_THEME_NAME);
         assert_same_color(cx.theme().background, dark.background, "dark background");
         // Dark borders are translucent white; the alpha has to survive the trip.

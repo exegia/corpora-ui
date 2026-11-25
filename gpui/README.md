@@ -398,7 +398,8 @@ cx)`; after the last step it emits `Complete` with every value, which
   passkey's dates arrive already written out (`created`, `last_used`),
   since the crate formats no dates. The delete confirmation names the
   passkey, and the add button reads "Add passkey". The passkey sign-in
-  button's fingerprint takes the button's ink, not React's pink.
+  button places its pink fingerprint at the leading edge, with the label
+  centered in the remaining space.
 - **An accent is a fill on the button.** React sets custom properties on
   the card and a class string on its primary action. Here `AuthAccent`
   hands `Button::fill` a background and an ink, both read from the theme's

@@ -3,7 +3,10 @@
 use std::rc::Rc;
 use std::sync::Arc;
 
+use crate::atoms::{GlassSpec, GlassSurfaceExt as _};
 use gpui_kit::component::chart::{AreaChart, BarChart, LineChart, PieChart};
+use gpui_kit::component::plot::tooltip::{CrossLine, Dot as PlotDot, Tooltip};
+use gpui_kit::component::plot::{Plot, PlotAppear, PlotElement, PlotHover, TooltipState};
 use gpui_kit::component::{ActiveTheme as _, h_flex, v_flex};
 use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
@@ -11,6 +14,7 @@ use gpui_kit::{
     ParentElement as _, Pixels, RenderOnce, SharedString, StatefulInteractiveElement as _,
     Styled as _, Window, div, px,
 };
+use gpui_kit::{Bounds, Hsla, Point};
 
 use crate::atoms::{Card, CardFrame, CardFrameHeader, Dot, Pill, Tone};
 
@@ -282,6 +286,121 @@ impl Chart {
     }
 }
 
+/// Keep stock hit testing, animation and marker motion, replacing only the
+/// opaque tooltip surface with the gallery's backdrop blur material.
+struct GlassPlot<P> {
+    plot: P,
+    rows: Vec<ChartRow>,
+    label: SharedString,
+    value_index: usize,
+    color: Hsla,
+    round: bool,
+}
+impl<P: Plot + 'static> IntoElement for GlassPlot<P> {
+    type Element = PlotElement<Self>;
+    fn into_element(self) -> Self::Element {
+        PlotElement::new(self)
+    }
+}
+impl<P: Plot + 'static> Plot for GlassPlot<P> {
+    fn prepaint(&mut self, b: Bounds<Pixels>, w: &mut Window, cx: &mut App) -> Vec<AnyElement> {
+        self.plot.prepaint(b, w, cx)
+    }
+    fn paint(&mut self, b: Bounds<Pixels>, w: &mut Window, cx: &mut App) {
+        self.plot.paint(b, w, cx);
+    }
+    fn id(&self) -> Option<ElementId> {
+        self.plot.id()
+    }
+    fn interactive(&self) -> bool {
+        self.plot.interactive()
+    }
+    fn appear(&mut self, a: PlotAppear, w: &mut Window, cx: &mut App) {
+        self.plot.appear(a, w, cx);
+    }
+    fn appear_generation(&self) -> Option<u64> {
+        self.plot.appear_generation()
+    }
+    fn tooltip_state(&self, p: Point<Pixels>, b: Bounds<Pixels>, cx: &App) -> Option<TooltipState> {
+        self.plot.tooltip_state(p, b, cx)
+    }
+    fn hover(&mut self, h: Option<&PlotHover>, w: &mut Window, cx: &mut App) {
+        self.plot.hover(h, w, cx);
+    }
+    fn tooltip(
+        &self,
+        state: &TooltipState,
+        cursor: Point<Pixels>,
+        bounds: Bounds<Pixels>,
+        _: &mut Window,
+        cx: &mut App,
+    ) -> Option<AnyElement> {
+        let row = self.rows.get(state.index)?;
+        let color = if self.round {
+            tone_at(state.index).color(cx)
+        } else {
+            self.color
+        };
+        let spec = GlassSpec {
+            blur_radius: px(18.),
+            tint: Some(cx.theme().popover.opacity(0.25)),
+            ..GlassSpec::blur()
+        };
+        let content = v_flex()
+            .min_w(px(150.))
+            .p_2()
+            .gap_1()
+            .rounded_lg()
+            .text_color(cx.theme().popover_foreground)
+            .child(
+                div()
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .child(row.label.clone()),
+            )
+            .child(
+                h_flex()
+                    .gap_2()
+                    .child(div().size_2().rounded_full().bg(color))
+                    .child(div().flex_1().child(self.label.clone()))
+                    .child(format_value(row.value(self.value_index))),
+            )
+            .glass_with(spec);
+        let positioned = div()
+            .absolute()
+            .child(content)
+            .map(|d| {
+                if cursor.x < bounds.size.width * 0.5 {
+                    d.left(cursor.x + px(8.))
+                } else {
+                    d.right(bounds.size.width - cursor.x + px(8.))
+                }
+            })
+            .map(|d| {
+                if cursor.y < bounds.size.height * 0.5 {
+                    d.top(cursor.y + px(8.))
+                } else {
+                    d.bottom(bounds.size.height - cursor.y + px(8.))
+                }
+            });
+        Some(
+            Tooltip::new(cursor, bounds.size)
+                .appearance(false)
+                .when(!self.round, |t| {
+                    t.cross_line(CrossLine::new(state.cross_line))
+                })
+                .dots(state.dots.iter().map(|point| {
+                    PlotDot::new(*point)
+                        .size(px(8.))
+                        .halo(px(20.))
+                        .stroke(cx.theme().background)
+                        .fill(color)
+                }))
+                .child(positioned)
+                .into_any_element(),
+        )
+    }
+}
+
 impl RenderOnce for Chart {
     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
         let id = Arc::new(self.id);
@@ -357,7 +476,14 @@ impl RenderOnce for Chart {
                 .relative()
                 .flex_none()
                 .size(height)
-                .child(pie)
+                .child(GlassPlot {
+                    plot: pie,
+                    rows: self.rows.clone(),
+                    label: self.series[0].label.clone(),
+                    value_index: 0,
+                    color: colors[0],
+                    round: true,
+                })
                 .when_some(self.center, |this, (value, label)| {
                     this.child(
                         v_flex()
@@ -390,7 +516,15 @@ impl RenderOnce for Chart {
                         .name(self.series[top].label.clone())
                         .band(|row: &ChartRow| row.label.clone())
                         .value(move |row: &ChartRow| row.value(top))
-                        .fill(move |_, _, _, _| color),
+                        .fill(move |_, _, _, _| color)
+                        .map(|plot| GlassPlot {
+                            plot,
+                            rows: self.rows.clone(),
+                            label: self.series[top].label.clone(),
+                            value_index: top,
+                            color,
+                            round: false,
+                        }),
                 )
                 .into_any_element()
         } else {
@@ -425,6 +559,14 @@ impl RenderOnce for Chart {
                             .grid(layer == 0)
                             .stroke(color)
                             .fill(color.opacity(0.18 * color.a))
+                            .map(|plot| GlassPlot {
+                                plot,
+                                rows: self.rows.clone(),
+                                label: series.label.clone(),
+                                value_index: index,
+                                color,
+                                round: false,
+                            })
                             .into_any_element()
                     } else {
                         LineChart::new(self.rows.clone())
@@ -438,6 +580,14 @@ impl RenderOnce for Chart {
                             .natural()
                             .grid(layer == 0)
                             .stroke(color)
+                            .map(|plot| GlassPlot {
+                                plot,
+                                rows: self.rows.clone(),
+                                label: series.label.clone(),
+                                value_index: index,
+                                color,
+                                round: false,
+                            })
                             .into_any_element()
                     };
                     div().absolute().inset_0().child(layer_plot)

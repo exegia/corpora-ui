@@ -29,6 +29,8 @@ use gpui_kit::*;
 mod devtools;
 #[path = "gallery/glass.rs"]
 mod glass;
+#[path = "gallery/media.rs"]
+mod media;
 
 use devtools::Devtools;
 use glass::GlassShowcase;
@@ -243,6 +245,8 @@ struct Gallery {
     password: Entity<InputState>,
     logo_folded: bool,
     glass: Entity<GlassShowcase>,
+    sample_video: Entity<media::MediaExample>,
+    sample_audio: Entity<media::MediaExample>,
     devtools: Devtools,
 }
 
@@ -754,6 +758,8 @@ impl Gallery {
             }),
             logo_folded: false,
             glass: cx.new(GlassShowcase::new),
+            sample_video: cx.new(|cx| media::MediaExample::new(media::Sample::Video, cx)),
+            sample_audio: cx.new(|cx| media::MediaExample::new(media::Sample::Audio, cx)),
             devtools: Devtools::unmounted(),
         }
     }
@@ -1013,7 +1019,9 @@ impl Gallery {
                         .child(StreamingText::new("thread-3-text", vec![answer]).streaming(true))
                         .attachment(
                             ActionBar::new("thread-3-actions")
-                                .action("copy", IconName::Copy, "Copy answer", |_, _, _| {})
+                                .action("copy", IconName::Copy, "Copy answer", |_, _, cx| {
+                                    cx.write_to_clipboard(ClipboardItem::new_string("The longer reading appears in Codex Bezae and the Old Latin. Most editors print the shorter text.".into()));
+                                })
                                 .separator()
                                 .action("delete", IconName::Delete, "Delete answer", |_, _, _| {}),
                         ),
@@ -1593,7 +1601,7 @@ impl Gallery {
             Insight, InsightAllocation, InsightCards, InsightSegment, RecordRow, RecordsTable,
         };
 
-        let code = "export async function collate(witnesses) {\n  const base = witnesses[0]\n  return witnesses.map((w) => diff(base, w, \"word\"))\n}";
+        let code = "export async function collate(witnesses) {\n  const base = witnesses[0]\n  return witnesses.map((w) => diff(base, w, \"word\", { normalizeUnicode: \"NFC\", ignoreWhitespace: true }))\n}";
         let record = |id: &'static str,
                       name: &'static str,
                       tags: &[(&'static str, TagTone)],
@@ -1624,7 +1632,7 @@ impl Gallery {
                                     DiffLine::removed("  const base = witnesses[0]"),
                                     DiffLine::added("  const base = pickBase(witnesses)"),
                                     DiffLine::context(
-                                        "  return witnesses.map((w) => diff(base, w, \"word\"))",
+                                        "  return witnesses.map((w) => diff(base, w, \"word\", { normalizeUnicode: \"NFC\", ignoreWhitespace: true }))",
                                     ),
                                     DiffLine::context("}"),
                                 ]),
@@ -1808,6 +1816,7 @@ impl Gallery {
             }));
         let frame = |panel: AiPanel| {
             div()
+                .relative()
                 .w(rems(24.))
                 .h(rems(38.))
                 .rounded(Radius::Lg.resolve(cx))
@@ -1815,6 +1824,11 @@ impl Gallery {
                 .border_color(cx.theme().border)
                 .overflow_hidden()
                 .child(panel)
+                .child(
+                    gpui_kit::base::RoundedFrameCover::uniform(Radius::Lg.resolve(cx))
+                        .frame_border(px(1.))
+                        .backdrop(cx.theme().background),
+                )
         };
         Section::new("Blocks: AI panel").child(
             h_flex()
@@ -2589,16 +2603,7 @@ impl Gallery {
                             })
                             .preview(),
                     )
-                    .child(
-                        Attachment::new("att-audio", "Reading of Luke 22")
-                            .kind(AttachmentKind::Audio {
-                                duration: Some("0:42".into()),
-                                waveform: Vec::new(),
-                            })
-                            .meta("Voice note")
-                            .on_action(|_, _, _| {})
-                            .preview(),
-                    ),
+                    .child(self.sample_audio.clone()),
             )
             .child(
                 row()
@@ -2616,14 +2621,7 @@ impl Gallery {
                             })
                             .preview(),
                     )
-                    .child(
-                        Attachment::new("att-video", "Imaging session")
-                            .kind(AttachmentKind::Video {
-                                duration: Some("3:15".into()),
-                            })
-                            .on_action(|_, _, _| {})
-                            .preview(),
-                    )
+                    .child(self.sample_video.clone())
                     .child(
                         div().w(rems(24.)).child(
                             Markdown::new(
@@ -2895,6 +2893,8 @@ impl Render for Gallery {
                             .selected_index(selected)
                             .children(Page::ALL.map(|page| Tab::new().label(page.label())))
                             .on_click(cx.listener(|this, index: &usize, window, cx| {
+                                this.sample_audio.update(cx, |player, cx| player.pause(cx));
+                                this.sample_video.update(cx, |player, cx| player.pause(cx));
                                 this.page = Page::ALL[*index];
                                 this.page_changed = true;
                                 this.devtools.set_route(&this.page.route(), window, cx);
@@ -3020,6 +3020,11 @@ fn main() {
     let mut args = std::env::args().skip(1);
     let mut start = Page::Foundations;
     match args.next().as_deref() {
+        #[cfg(target_os = "macos")]
+        Some("--verify-media") => {
+            gpui_kit::application().run(media::verify_playback);
+            return;
+        }
         Some("--snapshot") => {
             let dir = args.next().expect("usage: gallery --snapshot <dir>");
             snapshot(std::path::Path::new(&dir));

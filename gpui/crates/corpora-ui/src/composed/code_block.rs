@@ -157,6 +157,8 @@ pub struct CodeBlock {
     diff: Vec<DiffLine>,
     keywords: Vec<SharedString>,
     on_copy: Option<CopyHandler>,
+    #[cfg(test)]
+    scroll: Option<gpui_kit::ScrollHandle>,
 }
 
 impl CodeBlock {
@@ -169,6 +171,8 @@ impl CodeBlock {
             diff: Vec::new(),
             keywords: Vec::new(),
             on_copy: None,
+            #[cfg(test)]
+            scroll: None,
         }
     }
 
@@ -215,7 +219,11 @@ impl RenderOnce for CodeBlock {
         let border = theme.border;
         let added = theme.success.opacity(0.12);
         let removed = theme.danger.opacity(0.12);
-        let surface = theme.muted.opacity(0.5);
+        let surface = if theme.is_dark() {
+            theme.background
+        } else {
+            theme.muted
+        };
         let mono = theme.mono_font_family.clone();
 
         let lines: Vec<DiffLine> = if show_diff {
@@ -223,6 +231,28 @@ impl RenderOnce for CodeBlock {
         } else {
             self.code.lines().map(DiffLine::context).collect()
         };
+        // Give the scroll child its actual unwrapped width. Descendant text
+        // overflow alone does not enlarge GPUI's scrollable content bounds.
+        let content_width = lines
+            .iter()
+            .map(|line| {
+                window
+                    .text_system()
+                    .shape_line(
+                        line.text.clone(),
+                        rems(0.75).to_pixels(window.rem_size()),
+                        &[gpui_kit::TextRun {
+                            len: line.text.len(),
+                            font: gpui_kit::font(mono.clone()),
+                            color: muted,
+                            ..Default::default()
+                        }],
+                        None,
+                    )
+                    .width
+            })
+            .fold(gpui_kit::px(0.), |max, width| max.max(width))
+            + rems(4.25).to_pixels(window.rem_size());
         let keywords = self.keywords;
         let rows = lines.into_iter().enumerate().map(|(index, line)| {
             let highlights = tokenize(&line.text, &keywords)
@@ -297,6 +327,7 @@ impl RenderOnce for CodeBlock {
             })
             .child(
                 Button::new(child_id("copy"))
+                    .copy_feedback()
                     .ghost()
                     .with_atom_size(AtomSize::Xs)
                     .icon(Icon::new(LucideIcon::Copy))
@@ -315,13 +346,23 @@ impl RenderOnce for CodeBlock {
                 Card::new().overflow_hidden().child(
                     div()
                         .id(child_id("lines"))
+                        .w_full()
+                        .min_w_0()
                         .overflow_x_scroll()
+                        .map(|this| {
+                            #[cfg(test)]
+                            if let Some(scroll) = &self.scroll {
+                                return this.track_scroll(scroll);
+                            }
+                            this
+                        })
+                        .overflow_y_hidden()
                         .py_3()
                         .bg(surface)
                         .font_family(mono)
                         .text_xs()
                         .line_height(rems(1.3125))
-                        .child(v_flex().children(rows)),
+                        .child(v_flex().w(content_width).min_w_full().children(rows)),
                 ),
             )
     }
@@ -330,6 +371,54 @@ impl RenderOnce for CodeBlock {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[gpui_kit::test]
+    fn long_code_scrolls_horizontally(cx: &mut gpui_kit::TestAppContext) {
+        use gpui_kit::test::TestWindowExt as _;
+        use gpui_kit::{
+            AppContext as _, Context, Render, ScrollDelta, ScrollEvent, TestSupportExt as _,
+            VisualTestContext, point, px,
+        };
+        struct Host(gpui_kit::ScrollHandle);
+        impl Render for Host {
+            fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+                let mut block = CodeBlock::new(
+                    "code",
+                    "return witnesses.map((w) => diff(base, w, \"word\", { normalizeUnicode: \"NFC\", ignoreWhitespace: true }))",
+                );
+                block.scroll = Some(self.0.clone());
+                div().id("host").test_support().w(px(300.)).child(block)
+            }
+        }
+        cx.update(crate::init);
+        let scroll = gpui_kit::ScrollHandle::new();
+        let window = cx.update(|cx| {
+            gpui_kit::open_window(Default::default(), cx, |_, cx| {
+                cx.new(|_| Host(scroll.clone()))
+            })
+            .unwrap()
+            .0
+        });
+        let bounds = cx
+            .update_window(window, |_, window, cx| {
+                window.render_frame(cx);
+                window.find("host").bounds()
+            })
+            .unwrap();
+        let mut visual = VisualTestContext::from_window(window, cx);
+        visual.simulate_event(ScrollEvent {
+            position: point(bounds.origin.x + px(150.), bounds.bottom() - px(20.)),
+            delta: ScrollDelta::Pixels(point(px(-150.), px(0.))),
+            ..Default::default()
+        });
+        visual.run_until_parked();
+        assert!(
+            scroll.offset().x < px(-100.),
+            "long code must scroll, got {:?}",
+            scroll.offset()
+        );
+        assert_eq!(scroll.offset().y, px(0.));
+    }
 
     fn tokens(line: &str) -> Vec<(&str, CodeToken)> {
         tokenize(line, &[])

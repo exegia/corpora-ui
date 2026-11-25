@@ -117,6 +117,7 @@ impl RenderOnce for Markdown {
             })
             .child(
                 Button::new(child_id("copy"))
+                    .copy_feedback()
                     .ghost()
                     .with_atom_size(AtomSize::Xs)
                     .icon(Icon::new(LucideIcon::Copy))
