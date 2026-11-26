@@ -5,6 +5,20 @@ use gpui_kit::{
     LayoutId, Pixels, Window,
 };
 
+/// Paint transforms are part of the optional renderer patch too. Registry
+/// consumers keep layout and interactions, without the painted scale pulse.
+pub(crate) fn paint_scaled(
+    _bounds: Bounds<Pixels>,
+    _scale: f32,
+    window: &mut Window,
+    paint: impl FnOnce(&mut Window),
+) {
+    #[cfg(feature = "glass")]
+    window.with_paint_scale(_bounds.center(), _scale, paint);
+    #[cfg(not(feature = "glass"))]
+    paint(window);
+}
+
 /// An element painted at a scale about its own center. Layout and hit
 /// testing keep the unscaled bounds, so a pulse never pushes its neighbors.
 pub(crate) struct Scaled {
@@ -65,7 +79,7 @@ impl Element for Scaled {
         window: &mut Window,
         cx: &mut App,
     ) {
-        window.with_paint_scale(bounds.center(), self.scale, |window| {
+        paint_scaled(bounds, self.scale, window, |window| {
             self.child.paint(window, cx);
         });
     }

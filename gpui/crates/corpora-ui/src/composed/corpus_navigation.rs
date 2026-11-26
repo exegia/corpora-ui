@@ -9,12 +9,12 @@ use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
     App, AppContext as _, Context, ElementId, Entity, EventEmitter, FontWeight, IntoElement,
     ParentElement as _, RenderOnce, SharedString, Styled as _, Subscription, Window, div, px,
-    relative,
+    relative, rems,
 };
 
 use super::tree::{Tree, TreeNode, TreeVariant};
 use crate::atoms::{Button, IconName};
-use crate::foundations::AtomSize;
+use crate::foundations::{AtomSize, Radius};
 
 /// How a level of a corpus is picked.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
@@ -325,7 +325,6 @@ pub enum CorpusNavigationEvent {
 
 /// How many choices a [`LocationGrid`] shows at a time.
 const PAGE_SIZE: usize = 60;
-const COLUMNS: usize = 5;
 /// The most names a [`HierarchyPicker`] lists before asking for a filter.
 const NAME_LIMIT: usize = 100;
 
@@ -844,8 +843,8 @@ impl RenderOnce for LocationGrid {
             let dot = if is_selected { on_primary } else { foreground };
             div()
                 .relative()
-                .flex_1()
-                .min_w_0()
+                .flex_none()
+                .w(rems(3.5))
                 .child(
                     Button::new(child_id(&id, format!("cell-{}", node.id)))
                         .map(|button| {
@@ -856,6 +855,9 @@ impl RenderOnce for LocationGrid {
                             }
                         })
                         .full_width(true)
+                        .height(rems(3.5))
+                        .radius(Radius::Sm)
+                        .content_padding(px(0.), px(0.))
                         .label(node.label.clone())
                         .disabled(node.disabled)
                         .on_click(move |_, _, cx| {
@@ -876,13 +878,6 @@ impl RenderOnce for LocationGrid {
                     )
                 })
         };
-        let rows = visible.chunks(COLUMNS).map(|row| {
-            h_flex()
-                .gap_1()
-                .children(row.iter().map(|node| cell(node)))
-                // Blank cells keep a short last row on the same columns.
-                .children((row.len()..COLUMNS).map(|_| div().flex_1()))
-        });
         let turn = |name: &'static str, tip: &'static str, icon, target: Option<usize>| {
             let navigation = self.navigation.clone();
             let scope = scope.clone();
@@ -929,7 +924,15 @@ impl RenderOnce for LocationGrid {
                             .child(format!("{} available", candidates.len())),
                     ),
             )
-            .child(v_flex().gap_1().children(rows))
+            .child(
+                h_flex()
+                    .w_full()
+                    // Five columns when space permits; narrower rails wrap.
+                    .max_w(rems(18.5))
+                    .flex_wrap()
+                    .gap_1()
+                    .children(visible.iter().copied().map(cell)),
+            )
             .when(pages > 1, |this| {
                 this.child(
                     h_flex()

@@ -3,8 +3,8 @@
 use gpui_kit::component::{ActiveTheme as _, Icon, Sizable as _, StyledExt as _, h_flex, v_flex};
 use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
-    AnyElement, App, IntoElement, ParentElement, RenderOnce, SharedString, StyleRefinement, Styled,
-    Window, div, relative,
+    AnyElement, App, BoxShadow, IntoElement, ParentElement, RenderOnce, SharedString,
+    StyleRefinement, Styled, Window, div, px, relative,
 };
 
 /// Opacity of the muted tint behind a frame's header and footer.
@@ -12,6 +12,19 @@ pub(crate) const FRAME_TINT: f32 = 0.72;
 
 use crate::foundations::shadow::{shadow_inset, shadow_xs};
 use crate::foundations::{ActiveCorporaTheme as _, Radius};
+
+/// Inner panels keep the frame's edge color, at half strength and one pixel.
+fn inner_frame_inset(cx: &App) -> Vec<BoxShadow> {
+    shadow_inset(cx)
+        .into_iter()
+        .map(|mut edge| {
+            edge.offset.y = px(1.);
+            edge.blur_radius = px(0.);
+            edge.color.a *= 0.5;
+            edge
+        })
+        .collect()
+}
 
 /// The title row of a [`Card`]: a title, an optional description beneath it,
 /// and an optional trailing action.
@@ -199,6 +212,12 @@ impl RenderOnce for Card {
         let has_footer = self.footer.is_some();
         let divided = self.divided;
         let border = cx.theme().border;
+        let mut shadow = shadow_xs(cx);
+        shadow.extend(if self.framed.is_some() {
+            inner_frame_inset(cx)
+        } else {
+            shadow_inset(cx)
+        });
 
         v_flex()
             .bg(palette.card)
@@ -206,8 +225,9 @@ impl RenderOnce for Card {
             .border_1()
             .border_color(border)
             .rounded(Radius::Lg.resolve(cx))
+            .shadow(shadow)
             .map(|this| match self.framed {
-                None => this.shadow(shadow_xs(cx)),
+                None => this,
                 // Inside a frame the card lies over the frame's own border,
                 // so the two read as one line, and neighbours share an edge.
                 Some(framed) => this
@@ -411,7 +431,7 @@ impl RenderOnce for CardFrame {
                 card.framed = Some(Framed {
                     last: ix + 1 == count && !has_footer,
                 });
-                card.shadow_xs()
+                card
             }))
             .when_some(self.footer, |this, footer| {
                 this.child(div().px_6().py_4().child(footer))
@@ -481,7 +501,8 @@ impl RenderOnce for Frame {
         let border = theme.border;
         let background = theme.background;
         let radius = Radius::Md.resolve(cx);
-        let shadow = shadow_xs(cx);
+        let mut shadow = shadow_xs(cx);
+        shadow.extend(inner_frame_inset(cx));
 
         v_flex()
             .gap_0()

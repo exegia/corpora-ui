@@ -11,7 +11,7 @@ use gpui_kit::{
     Window, div, px, rems,
 };
 
-use crate::foundations::Radius;
+use crate::foundations::{ActiveCorporaTheme as _, Radius};
 
 /// The quiet fill behind pills, toggles and hovered rows: `surface-subtle`.
 pub(crate) fn subtle(cx: &App) -> Hsla {
@@ -166,11 +166,20 @@ impl Tag {
 impl RenderOnce for Tag {
     fn render(self, _: &mut Window, cx: &mut App) -> impl IntoElement {
         let theme = cx.theme();
-        let color = match self.tone {
-            TagTone::Amber => theme.warning,
-            TagTone::Purple => theme.chart_4,
-            TagTone::Blue => theme.info,
-            TagTone::Green => theme.success,
+        let color = if theme.is_dark() {
+            match self.tone {
+                TagTone::Amber => cx.palette().warning_foreground,
+                TagTone::Purple => cx.palette().base_magenta,
+                TagTone::Blue => cx.palette().info_foreground,
+                TagTone::Green => cx.palette().success_foreground,
+            }
+        } else {
+            match self.tone {
+                TagTone::Amber => theme.warning,
+                TagTone::Purple => theme.chart_4,
+                TagTone::Blue => theme.info,
+                TagTone::Green => theme.success,
+            }
         };
         h_flex()
             .flex_none()
@@ -178,7 +187,7 @@ impl RenderOnce for Tag {
             .px_2()
             .rounded(Radius::Md.resolve(cx))
             .border_1()
-            .border_color(color.opacity(0.35))
+            .border_color(color.opacity(if theme.is_dark() { 0.55 } else { 0.35 }))
             .bg(color.opacity(0.15))
             .text_xs()
             .font_weight(FontWeight::MEDIUM)

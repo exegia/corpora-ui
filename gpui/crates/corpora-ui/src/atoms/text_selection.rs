@@ -55,6 +55,7 @@ pub(crate) fn floating(
         .border_1()
         .border_color(cx.theme().border)
         .text_sm()
+        .font_family(cx.theme().font_family.clone())
         .text_color(cx.theme().popover_foreground)
         .child(content)
         .glass_with(GlassSpec::frosted(cx));

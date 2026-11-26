@@ -172,7 +172,7 @@ impl RenderOnce for UserPill {
             .map(|name| SharedString::from(format!("@{name}")));
 
         Button::new(self.id)
-            .primary()
+            .secondary()
             .pill(true)
             .start(Avatar::new().user(self.user).with_atom_size(AtomSize::Sm))
             .when_some(handle, |this, handle| this.label(handle))

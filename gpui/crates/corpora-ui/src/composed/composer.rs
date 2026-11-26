@@ -623,7 +623,7 @@ impl Render for Composer {
 
         let send = Button::new("composer-send")
             .primary()
-            .with_atom_size(AtomSize::Sm)
+            .with_atom_size(AtomSize::Md)
             .icon(Icon::new(if streaming {
                 LucideIcon::Square
             } else {
@@ -804,7 +804,11 @@ impl Render for Composer {
             .gap_1p5()
             .p_1p5()
             .border_1()
-            .border_color(foreground.opacity(if focused { 0.25 } else { 0.1 }))
+            .border_color(if focused {
+                theme.primary
+            } else {
+                foreground.opacity(0.1)
+            })
             .bg(background)
             .shadow_xs()
             .map(|this| match self.shape {

@@ -195,7 +195,8 @@ fn theme_config(
     colors.foreground = hex(palette.foreground);
     colors.border = hex(palette.border);
     colors.input = hex(palette.input);
-    colors.ring = hex(palette.ring);
+    // Stock inputs take their focused border from this shared focus role.
+    colors.ring = hex(palette.primary);
     colors.muted = hex(palette.muted);
     colors.muted_foreground = hex(palette.muted_foreground);
     colors.accent = hex(palette.accent);

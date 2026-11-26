@@ -1,15 +1,20 @@
 //! Verse: `react/src/components/composed/verse`.
 
+#[cfg(test)]
 use std::ops::Range;
 use std::rc::Rc;
 
 use gpui_kit::component::ActiveTheme as _;
+use gpui_kit::component::text::{
+    InlineElement, InlineRenderContext, MarkdownNode, MarkdownParseContext, MarkdownPlugin,
+    TextView, markdown_ast,
+};
 use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
-    AnyElement, App, ElementId, FontWeight, HighlightStyle, InteractiveText, IntoElement,
-    ParentElement as _, Pixels, Point, RenderOnce, SharedString, Styled as _, StyledText,
-    UnderlineStyle, Window, div, px, rems,
+    AnyElement, App, ElementId, FontWeight, InteractiveText, IntoElement, ParentElement as _,
+    Pixels, Point, RenderOnce, SharedString, Styled as _, StyledText, Window, div, rems,
 };
+use gpui_kit::{Entity, InteractiveElement as _, StatefulInteractiveElement as _};
 
 use crate::atoms::{TextSize, floating};
 use crate::foundations::ActiveCorporaTheme as _;
@@ -38,6 +43,7 @@ struct Segment {
 /// The verse as one string, with the byte range and role of each segment.
 /// The chapter and each note are set off by a space so they never fuse with
 /// the word beside them.
+#[cfg(test)]
 fn compose(segments: &[Segment]) -> (String, Vec<Range<usize>>) {
     let mut text = String::new();
     let mut ranges = Vec::with_capacity(segments.len());
@@ -60,6 +66,92 @@ fn compose(segments: &[Segment]) -> (String, Vec<Range<usize>>) {
 /// The segment whose popover is open, and where it was clicked.
 #[derive(Default)]
 struct Open(Option<(usize, Point<Pixels>)>);
+
+struct NotePlugin {
+    open: Entity<Open>,
+    marks: Vec<(usize, SharedString)>,
+    serif: SharedString,
+}
+
+impl MarkdownPlugin for NotePlugin {
+    fn name(&self) -> &str {
+        "verse-note"
+    }
+    fn parse(
+        &self,
+        node: &markdown_ast::Node,
+        _: &MarkdownParseContext<'_>,
+    ) -> Option<MarkdownNode> {
+        let markdown_ast::Node::Link(link) = node else {
+            return None;
+        };
+        let index: usize = link.url.strip_prefix("verse-note:")?.parse().ok()?;
+        let (_, text) = self.marks.iter().find(|(id, _)| *id == index)?;
+        Some(
+            MarkdownNode::new("verse-note", index)
+                .text(text.clone())
+                .accessibility_label(format!("Note {text}")),
+        )
+    }
+    fn render_inline(
+        &self,
+        node: &MarkdownNode,
+        context: &InlineRenderContext,
+        _: &mut Window,
+        cx: &mut App,
+    ) -> Option<InlineElement> {
+        let index = *node.data::<usize>()?;
+        let open = self.open.clone();
+        Some(
+            InlineElement::new(
+                div()
+                    .id(("verse-note", index))
+                    .font_family(self.serif.clone())
+                    .h(context.font_size())
+                    .text_size(context.font_size() * 0.65)
+                    .line_height(context.font_size() * 0.8)
+                    .text_color(cx.theme().primary)
+                    .whitespace_nowrap()
+                    .cursor_pointer()
+                    .child(node.as_text().to_owned())
+                    .on_click(move |_, window, cx| {
+                        let at = window.mouse_position();
+                        open.update(cx, |open, cx| {
+                            open.0 = Some((index, at));
+                            cx.notify();
+                        });
+                    }),
+            )
+            .with_baseline(context.font_size() * 0.95),
+        )
+    }
+}
+
+fn escape_markdown(text: &str) -> String {
+    let mut escaped = String::with_capacity(text.len());
+    for ch in text.replace("\r\n", "\n").replace('\r', "\n").chars() {
+        match ch {
+            '\n' => {
+                escaped.push_str("\\\n");
+                continue;
+            }
+            ' ' => {
+                escaped.push_str("&#32;");
+                continue;
+            }
+            '\t' => {
+                escaped.push_str("&#9;");
+                continue;
+            }
+            _ => {}
+        }
+        if ch.is_ascii_punctuation() {
+            escaped.push('\\');
+        }
+        escaped.push(ch);
+    }
+    escaped
+}
 
 /// One verse of a text: its reference, its words, and the glosses and notes
 /// that hang on them.
@@ -163,59 +255,85 @@ impl RenderOnce for Verse {
         let open = state.read(cx).0;
 
         let theme = cx.theme();
-        let (text, ranges) = compose(&self.segments);
-        let highlights = self
+        let reference = self
             .segments
-            .iter()
-            .zip(&ranges)
-            .filter_map(|(segment, range)| {
-                let style = match segment.role {
-                    Role::Text => return None,
-                    Role::Chapter => HighlightStyle {
-                        color: Some(theme.primary),
-                        font_weight: Some(FontWeight::MEDIUM),
-                        ..HighlightStyle::default()
-                    },
-                    Role::Span => HighlightStyle {
-                        underline: Some(UnderlineStyle {
-                            thickness: px(1.),
-                            color: Some(theme.muted_foreground.opacity(0.5)),
-                            wavy: false,
-                        }),
-                        ..HighlightStyle::default()
-                    },
-                    Role::Note => HighlightStyle {
-                        color: Some(theme.muted_foreground),
-                        font_weight: Some(FontWeight::MEDIUM),
-                        ..HighlightStyle::default()
-                    },
-                };
-                Some((range.clone(), style))
-            });
-        let styled = StyledText::new(text).with_highlights(highlights.collect::<Vec<_>>());
-
-        // Only segments with a popover take clicks.
-        let clickable: Vec<(usize, Range<usize>)> = self
-            .segments
-            .iter()
-            .zip(&ranges)
-            .enumerate()
-            .filter(|(_, (segment, _))| segment.popover.is_some())
-            .map(|(index, (_, range))| (index, range.clone()))
-            .collect();
-        let targets: Vec<usize> = clickable.iter().map(|(index, _)| *index).collect();
+            .first()
+            .filter(|segment| segment.role == Role::Chapter);
+        let body_start = usize::from(reference.is_some());
+        let body = &self.segments[body_start..];
+        let mut source = String::new();
+        let mut marks = Vec::new();
+        for (offset, segment) in body.iter().enumerate() {
+            let index = offset + body_start;
+            let label = escape_markdown(&segment.text);
+            if segment.role == Role::Note {
+                source.push_str(&format!("\u{202F}[{label}](verse-note:{index})"));
+                marks.push((index, segment.text.clone()));
+            } else if segment.popover.is_some() {
+                source.push_str(&format!("[{label}](verse-segment:{index})"));
+            } else {
+                source.push_str(&label);
+            }
+        }
         let opened = state.clone();
-        let words = InteractiveText::new(child_id("text"), styled).on_click(
-            clickable.into_iter().map(|(_, range)| range).collect(),
-            move |clicked, window, cx| {
-                let position = window.mouse_position();
-                let segment = targets[clicked];
+        let words = TextView::markdown(child_id("text"), source)
+            .plugin(NotePlugin {
+                open: state.clone(),
+                marks,
+                serif: cx
+                    .corpora_theme()
+                    .fonts()
+                    .serif()
+                    .unwrap_or_else(|| theme.font_family.clone()),
+            })
+            .on_link_click(move |url, _, window, cx| {
+                let Some(segment) = url
+                    .strip_prefix("verse-segment:")
+                    .and_then(|id| id.parse().ok())
+                else {
+                    return;
+                };
+                let at = window.mouse_position();
                 opened.update(cx, |open, cx| {
-                    open.0 = Some((segment, position));
+                    open.0 = Some((segment, at));
                     cx.notify();
                 });
-            },
-        );
+            });
+
+        let reference = reference.map(|reference| {
+            let opened = state.clone();
+            let clickable = if reference.popover.is_some() {
+                vec![0..reference.text.len()]
+            } else {
+                Vec::new()
+            };
+            let size = match self.size {
+                TextSize::Small => 0.875,
+                TextSize::Medium => 1.,
+                TextSize::Large => 1.125,
+            };
+            div()
+                .flex_none()
+                .relative()
+                .top(rems(0.1875))
+                .font_family(theme.font_family.clone())
+                .text_size(rems(size * 0.75))
+                .text_color(theme.primary)
+                .font_weight(FontWeight::MEDIUM)
+                .child(
+                    InteractiveText::new(
+                        child_id("reference"),
+                        StyledText::new(reference.text.clone()),
+                    )
+                    .on_click(clickable, move |_, window, cx| {
+                        let position = window.mouse_position();
+                        opened.update(cx, |open, cx| {
+                            open.0 = Some((0, position));
+                            cx.notify();
+                        });
+                    }),
+                )
+        });
 
         let popover = open.and_then(|(segment, at)| {
             let content = self.segments.get(segment)?.popover.clone()?;
@@ -242,6 +360,9 @@ impl RenderOnce for Verse {
             .then(|| cx.corpora_theme().fonts().serif())
             .flatten();
         div()
+            .flex()
+            .items_start()
+            .gap_1()
             .text_color(cx.theme().foreground)
             // `leading-7`
             .line_height(rems(1.75))
@@ -251,7 +372,8 @@ impl RenderOnce for Verse {
                 TextSize::Large => this.text_lg(),
             })
             .when_some(family, |this, family| this.font_family(family))
-            .child(words)
+            .children(reference)
+            .child(div().flex_1().min_w_0().child(words))
             .children(popover)
     }
 }
