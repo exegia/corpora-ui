@@ -1,5 +1,5 @@
 import type { ClassValue } from "clsx"
-import type { IBubbleReaction, TBubbleVariant } from "./types"
+import type { IBubbleReaction, TBubbleVariant } from "./type"
 import { cn } from "@/lib/utils"
 
 /** Returns a stable key for a reaction, falling back to the emoji label if no ID is provided. */
@@ -35,12 +35,16 @@ export const twBubbleColumnClasses: Record<TBubbleVariant, ClassValue> = {
  * a person's message.
  */
 
-const defaultClasses = "w-fit  rounded-full text-xs leading-4 font-medium relative"
+const defaultClasses =
+  "w-fit  rounded-full text-xs leading-4 font-medium relative"
 export const twBubbleMessageClasses: Record<TBubbleVariant, ClassValue> = {
-  sender: cn(defaultClasses,
-    "bezel-lit-t-2 bezel-lit-blur-3 bezel-lit/14 bezel-dim-b-2 bezel-dim-blur-3 bezel-dim/78 dark:bezel-lit-blur-2 dark:bezel-lit/57 dark:bezel-dim/11 rounded-br-[8px] group-has-[+[data-continued]]/bubble:rounded-br-full has-[[data-slot=attachment]]:rounded-b-md has-[[data-slot=attachment]]:rounded-t-md bg-indigo-700 dark:bg-neutral-100 text-background chat-bubble bubble-sender text-left pl-6 pr-4 py-3"),
-  recipient: cn(defaultClasses,
-    "bezel-lit-t-2 bezel-lit-blur-2 bezel-lit/57 bezel-dim-b-2 bezel-dim-blur-3 bezel-dim/11 dark:bezel-lit-blur-3 dark:bezel-lit/14 dark:bezel-dim/78 rounded-bl-[8px] group-has-[+[data-continued]]/bubble:rounded-bl-full has-[[data-slot=attachment]]:rounded-b-md has-[[data-slot=attachment]]:rounded-t-md bg-neutral-100 dark:bg-neutral-800 text-foreground chat-bubble bubble-recipient text-right pl-4 pr-6 py-3"),
-  ai: cn(defaultClasses,
-    "text-sm leading-5 my-1 text-foreground w-full"),
+  sender: cn(
+    defaultClasses,
+    "bg-indigo-700 dark:bg-neutral-100 chat-bubble bubble-sender pl-6 pr-4 py-3 rounded-br-[8px] text-left text-background bezel-dim-b-2 bezel-dim-blur-3 bezel-dim/78 bezel-lit-blur-3 bezel-lit-t-2 bezel-lit/14 group-has-[+[data-continued]]/bubble:rounded-br-full has-[[data-slot=attachment]]:rounded-t-md has-[[data-slot=attachment]]:rounded-b-md dark:bezel-dim/11 dark:bezel-lit-blur-2 dark:bezel-lit/57"
+  ),
+  recipient: cn(
+    defaultClasses,
+    "bg-neutral-100 dark:bg-neutral-800 chat-bubble bubble-recipient pl-4 pr-6 py-3 rounded-bl-[8px] text-right text-foreground bezel-dim-b-2 bezel-dim-blur-3 bezel-dim/11 bezel-lit-blur-2 bezel-lit-t-2 bezel-lit/57 group-has-[+[data-continued]]/bubble:rounded-bl-full has-[[data-slot=attachment]]:rounded-t-md has-[[data-slot=attachment]]:rounded-b-md dark:bezel-dim/78 dark:bezel-lit-blur-3 dark:bezel-lit/14"
+  ),
+  ai: cn(defaultClasses, "text-sm leading-5 my-1 w-full text-foreground"),
 }

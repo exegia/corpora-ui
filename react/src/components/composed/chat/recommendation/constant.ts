@@ -1,5 +1,5 @@
 import type { TSignalLevel, TTagTone } from "@/components/ui/chat"
-import type { TRecommendationState } from "./types"
+import type { TRecommendationState } from "./type"
 import { EASE_IN_OUT, EASE_OUT_STRONG } from "@/lib/ease"
 
 export const CONFIDENCE: Record<TSignalLevel, string> = {

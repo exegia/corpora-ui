@@ -50,7 +50,7 @@ export function BrowserFrame({
     >
       <div className="relative flex min-h-32 w-full flex-col overflow-hidden rounded-lg border border-border bg-secondary shadow-lg">
         <div
-          id="title-bar"
+          data-slot="browser-title-bar"
           className={cn(
             "z-20 flex flex-1 items-center gap-2 px-4 py-3",
             titleBarStyle(titleStyle, "title")
@@ -78,7 +78,7 @@ export function BrowserFrame({
             </div>
           )}
         </div>
-        <div className={cn("flex flex-1", titleBarStyle(titleStyle, "frame"))}>
+        <div className={cn("flex min-h-0 flex-1", titleBarStyle(titleStyle, "frame"))}>
           {children}
         </div>
       </div>

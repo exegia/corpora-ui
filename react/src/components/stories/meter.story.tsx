@@ -1,6 +1,6 @@
 "use client"
 
-import { Meter, MeterLabel, MeterTrack, MeterIndicator, MeterValue } from "@/ui/meter"
+import { Meter, MeterLabel, MeterTrack, MeterIndicator, MeterValue } from "@/components/ui/meter"
 
 import { defineStory } from "@/registry/story"
 

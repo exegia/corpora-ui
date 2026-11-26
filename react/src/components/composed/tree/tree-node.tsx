@@ -36,8 +36,7 @@ import {
   treeSoundAtom,
   treeVariantAtom,
 } from "./tree-atom"
-import { useTreeContext } from "./tree-context"
-import type { ITreeNode } from "./type"
+import type { ITreeNode, ITreeRowScope } from "./type"
 import { EASE_OUT } from "@/lib/ease.ts"
 import { Button } from "@/components/ui/button"
 
@@ -46,7 +45,7 @@ type TRowKind =
   | "section" // navigation depth 0 with 3-level data — heading, toggles
   | "toggle" // expands/collapses on row press (nav parents, files folders)
   | "link" // navigates; may still carry a chevron that toggles separately
-export interface ITreeRowProps {
+export interface ITreeRowProps extends ITreeRowScope {
   node: ITreeNode
   depth: number
 }
@@ -67,8 +66,13 @@ function rowKindOf(
   return variant === "toc" ? "link" : "toggle"
 }
 
-function TreeRowImpl({ node, depth }: ITreeRowProps): React.ReactElement {
-  const { treeId, renderTrailing, dnd } = useTreeContext()
+function TreeRowImpl({
+  node,
+  depth,
+  treeId,
+  renderTrailing,
+  dnd,
+}: ITreeRowProps): React.ReactElement {
   const reduce = useReducedMotion()
 
   // One subscription per field, per node. A row re-renders when its own
@@ -460,11 +464,18 @@ function TreeRowImpl({ node, depth }: ITreeRowProps): React.ReactElement {
               initial={reduce ? { opacity: 0 } : "closed"}
               key="branch"
               role="group"
-              transition={reduce ? { duration: 0.12 } : undefined}
+              transition={reduce ? { duration: 0 } : undefined}
               variants={reduce ? undefined : TREE_BRANCH_VARIANTS}
             >
               {children.map((child) => (
-                <TreeRow depth={depth + 1} key={child.id} node={child} />
+                <TreeRow
+                  depth={depth + 1}
+                  key={child.id}
+                  node={child}
+                  treeId={treeId}
+                  renderTrailing={renderTrailing}
+                  dnd={dnd}
+                />
               ))}
             </motion.ul>
           )}

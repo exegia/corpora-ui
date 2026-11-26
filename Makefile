@@ -4,6 +4,9 @@
 # CI calls these targets directly; every workflow step is a one-line `make`.
 
 REACT_DIR := react
+GPUI_DIR := gpui
+DX ?= $(HOME)/.cargo/bin/dx
+GPUI_PYTHON ?= python3
 BUN := bun
 
 # `--frozen-lockfile` in CI, a plain install locally.
@@ -38,7 +41,7 @@ pkg_name = node -p "require('./$(REACT_DIR)/package.json').name"
 .DEFAULT_GOAL := help
 
 .PHONY: help install serve build preview test typecheck lint format check ci pack consumer-check \
-        clean distclean pkg-version next-version version-set release-notes \
+        gpui-gallery gpui-gallery-dev clean distclean pkg-version next-version version-set release-notes \
         pr-guard pr-types-sync release-pr release-branch delete-branch publish publish-github \
         tag-release rulesets-apply rulesets-diff \
         churn-info churn-bump bootstrap-lanes promote-pr cut-release \
@@ -81,10 +84,27 @@ consumer-check: ## Build the library and verify its tarball in an isolated React
 	cd $(REACT_DIR) && $(BUN) run check:consumer
 
 clean: ## Remove build output and caches
-	rm -rf $(REACT_DIR)/dist $(REACT_DIR)/dist-lib $(REACT_DIR)/node_modules/.vite dist-pack
+	rm -rf $(REACT_DIR)/dist $(REACT_DIR)/dist-lib $(REACT_DIR)/node_modules/.** dist-pack
 
 distclean: clean ## Also remove node_modules
 	rm -rf $(REACT_DIR)/node_modules
+
+# --- gpui -------------------------------------------------------------------
+
+gpui-gallery: ## Open the GPUI component gallery window
+	cd $(GPUI_DIR) && cargo run -p corpora-ui --example gallery --features glass
+
+gpui-package-check: ## Verify the Rust package as an independent consumer
+	$(GPUI_PYTHON) gpui/scripts/package_check.py
+
+# Serves the `corpora-ui-gallery` package, not `corpora-ui --example gallery`:
+# dx hot-patches every workspace crate except the package it serves, so served
+# as an example the gallery would ignore every edit under crates/corpora-ui/src.
+# DIOXUS_FORCE_ENTRY makes dx launch a fresh copy of the executable each time.
+# Without it macOS kills the app relaunched by a full rebuild (`r`) with
+# "Code Signature Invalid", because dx overwrites the running binary in place.
+gpui-gallery-dev: ## Open the GPUI gallery with Rust hot reload (Dioxus CLI 0.7.10)
+	cd $(GPUI_DIR) && DIOXUS_FORCE_ENTRY=1 "$(DX)" serve --platform desktop --package corpora-ui-gallery --features hot-reload --hot-patch --addr 127.0.0.1 --open false
 
 # --- versions ---------------------------------------------------------------
 

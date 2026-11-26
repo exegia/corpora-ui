@@ -38,6 +38,7 @@ export { Preview as ResearchAnswerStory } from "./research-answer.story"
 export { Preview as SocialProvidersStory } from "./social-providers.story"
 export { Preview as StreamingTextStory } from "./streaming-text.story"
 export { Preview as TreeStory } from "./tree.story"
+export { Preview as TableOfContentStory } from "./toc.story"
 export { Preview as UserStory } from "./user.story"
 export { Preview as VerseStory } from "./verse.story"
 

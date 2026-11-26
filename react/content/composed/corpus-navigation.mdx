@@ -1,0 +1,91 @@
+---
+title: Corpus navigation
+description: Schema-driven locations, hierarchy pickers and reference search with shared Jotai state.
+---
+
+import { Preview } from "@/components/stories/corpus-navigation.story"
+
+## Preview
+
+<Preview />
+
+This feature is proposed in the corpus-navigation PR stack; it is not yet an npm release.
+
+## Layers and reuse
+
+Atoms remain the existing Button, Input, Breadcrumb, Command, Modal and Drawer. A numbered cell is a Button. The composed layer provides `LocationBar`, `HierarchyPicker`, `LocationGrid` and `ReferenceCommand`; the [CorpusNavigator block](/blocks/corpus-navigator) arranges them.
+
+Files stay grouped under `components/composed/corpus-navigation/`: dependency-free `types.ts`, pure `utils.ts`, vocabulary presets in `adapters/`, module-level actions in `corpus-navigation-atom.ts`, binding and read/action hooks in separate files. The block has its own folder. There is no duplicate provider or feature store.
+
+## Required setup
+
+Use the existing provider once and import its stylesheet once. No extra Tailwind preset is required.
+
+```tsx
+import { ExegiaProvider } from "@exegia/corpora-ui/state"
+import "@exegia/corpora-ui/index.css"
+import { CorpusNavigator, corpusSchemas } from "@exegia/corpora-ui/corpus-navigation"
+
+const paper = {
+  corpusId: "my-paper", editionId: "print-1", label: "My paper",
+  schema: corpusSchemas.paper,
+  nodes: [{ id: "p1", level: "page", label: "1", reference: "1" }],
+}
+
+<ExegiaProvider>
+  <CorpusNavigator data={paper}>
+    Your reading content
+  </CorpusNavigator>
+</ExegiaProvider>
+```
+
+Root imports export the same component and atom identities as the focused entry. Jotai remains a peer dependency.
+
+## Data and adapters
+
+| Preset | Available hierarchy |
+| --- | --- |
+| `bible`, `bookOfMormon` | Book → Chapter → optional Verse |
+| `quran` | Surah → optional Ayah |
+| `library` | Optional Section → Chapter → Page → Paragraph |
+| `booklet` | Optional Chapter → Page → optional Paragraph |
+| `paper` | Page → optional Paragraph |
+
+Presets supply vocabulary, never counts or a database. Provide stable corpus, edition and node IDs; schema-ordered nodes; localized labels; reference tokens; optional aliases; and `direction`. Nodes may omit optional levels. Required intermediate levels cannot be skipped. Custom schemas use ordered `{ id, label, kind, optional }` levels, with `kind` equal to `hierarchy` or `number`.
+
+`referenceResults(data, query)` accepts exact paths such as `John 1:5`, `Alma 32:21`, `112:3`, and `Page 4 Paragraph 2` when those nodes exist. A partial ancestor such as `John 1` is a valid destination. Out-of-bounds inputs return no match; values are never clamped. Display paths derive from labels; stable identity is `{ corpusId, editionId, nodeId }`.
+
+An optional `search(query, signal)` returns text matches. An optional `resolve(anchor, signal)` verifies a jump asynchronously. Returned anchors must belong to supplied nodes in this edition. Respect AbortSignal where possible; the library also rejects obsolete completions. Supply immutable data objects when their content changes. Page/paragraph maps must come from an actual edition or extraction; omit levels when unavailable.
+
+## State and external controls
+
+Mount `useCorpusNavigation(options)` once per navigator, or use the block that mounts it for you. Observers and commands use separate hooks:
+
+```tsx
+import { useCorpusNavigationActions, useCorpusNavigationState } from "@exegia/corpora-ui/corpus-navigation"
+
+function RemoteControls() {
+  const state = useCorpusNavigationState("reader")
+  const actions = useCorpusNavigationActions("reader")
+  return <button onClick={actions.openPicker}>Browse from {state.location?.nodeId}</button>
+}
+```
+
+`select` previews; `commit` validates and invokes `onNavigate` once; `cancel` preserves reading position; `returnToPrevious` restores a valid anchor. History defaults to 20 entries (`historyLimit={0}` disables it). Search, draft and overlay state are separate from the committed location. Changing corpus/edition clears incompatible requests and restores an earlier uncontrolled location for that corpus/edition if still valid.
+
+`location={anchor}` or `location={null}` makes the host authoritative. `onNavigate` proposes a location; update the prop to accept it. Until accepted, committed location and history stay unchanged. Cancel permits retry of an unaccepted proposal. Uncontrolled usage accepts `defaultLocation`; changes to a default after mount are ignored.
+
+Generated IDs clean up automatically. An explicit `navigatorId` persists across remounts. After all consumers unmount, call `removeCorpusNavigationInstance(id)` on logout/teardown; call `actions.cancel()` before teardown to abort requests. Separate `ExegiaProvider store={createStore()}` trees isolate even matching IDs. Never add a per-navigator provider.
+
+`corpusNavigationStateAtom(id)` and `corpusNavigationDataAtom(id)` are read-only selectors. Public action atoms are explicitly exported; internal binding/proposal atoms are not part of the public barrel. Action-only hooks do not subscribe to state. Tree owns expansion under `corpus-navigation/{navigatorId}/hierarchy`; its active item projects the shared draft.
+
+## Compositions
+
+| Component | Required props | Behavior |
+| --- | --- | --- |
+| `LocationBar` | `navigatorId` | Current ancestors; draft preview and explicit previous/next jumps |
+| `HierarchyPicker` | `navigatorId` | Existing Tree; bounded names/filter and independent expansion |
+| `LocationGrid` | `navigatorId`, `levelId` | 60 choices per range, direct filtering, arrow/Home/End focus |
+| `ReferenceCommand` | `navigatorId` | References before text matches, loading/error/retry |
+
+`ReferenceCommand` defaults to `shortcut="focused"`; use `"global"` for document-level ownership or `false` to opt out. One matching navigator wins each event; composing events and editable targets are ignored. Base UI owns selection, dialog containment and Escape. Existing semantic tokens, fonts, radii, direction and provider-aware portals are inherited.

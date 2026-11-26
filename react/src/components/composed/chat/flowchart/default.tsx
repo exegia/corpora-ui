@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { Minus, Plus } from "lucide-react"
-import type { IFlowchartProps, TStepNode } from "./types"
+import type { IFlowchartProps, TStepNode } from "./type"
 import { FlowchartContext, useFlowchart } from "./hooks"
 import { AMBER, PURPLE } from "./constant"
 import { Connector } from "./connector"
@@ -50,14 +50,69 @@ const NODES: TStepNode[] = [
  *
  * @sketch "Component / Flowchart"
  */
-export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, height, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, onRename, onDuplicate, className, children }: IFlowchartProps) {
+export default function Flowchart({
+  steps = NODES,
+  edges,
+  readOnly,
+  zoomable,
+  height,
+  onDrag,
+  onAdd,
+  onRemove,
+  onEdgeRemove,
+  onEdgeConnect,
+  onEdgeChange,
+  onRename,
+  onDuplicate,
+  className,
+  children,
+}: IFlowchartProps) {
   const canvasRef = useRef<HTMLDivElement>(null)
   const nodeRefs = useRef(new Map<string, HTMLElement>())
-  const chart = useFlowchart({ steps, edges, readOnly, zoomable, onDrag, onAdd, onRemove, onEdgeRemove, onEdgeConnect, onEdgeChange, onRename, onDuplicate, canvasRef })
+  const chart = useFlowchart({
+    steps,
+    edges,
+    readOnly,
+    zoomable,
+    onDrag,
+    onAdd,
+    onRemove,
+    onEdgeRemove,
+    onEdgeConnect,
+    onEdgeChange,
+    onRename,
+    onDuplicate,
+    canvasRef,
+  })
   const {
-    updateHeights, updateFrame, canvasHeight, worldHeight, isLit, bezierCurve, connectorWidth, scale, view, zoomBy, resetZoom, pendingRemove, commitRemove, cancelRemove,
-    onCanvasPointerDown, onCanvasPointerMove, onCanvasPointerUp, isPanning,
-    editableEdges, selectedEdge, selectEdge, edgeDrag, edgeEnds, onEdgeHandleDown, onEdgeHandleMove, onEdgeHandleUp, ghostCurve, removeEdge,
+    updateHeights,
+    updateFrame,
+    canvasHeight,
+    worldHeight,
+    isLit,
+    bezierCurve,
+    connectorWidth,
+    scale,
+    view,
+    zoomBy,
+    resetZoom,
+    pendingRemove,
+    commitRemove,
+    cancelRemove,
+    onCanvasPointerDown,
+    onCanvasPointerMove,
+    onCanvasPointerUp,
+    isPanning,
+    editableEdges,
+    selectedEdge,
+    selectEdge,
+    edgeDrag,
+    edgeEnds,
+    onEdgeHandleDown,
+    onEdgeHandleMove,
+    onEdgeHandleUp,
+    ghostCurve,
+    removeEdge,
   } = chart
   // The canvas fills its parent; its floor is the content height it loaded with
   // (or `height`), so zooming out or removing a card never collapses it.
@@ -115,10 +170,10 @@ export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, he
         data-slot="flowchart"
         data-readonly={readOnly || undefined}
         className={cn(
-          "rounded-card bg-page shadow-hairline relative h-full w-full touch-none overflow-hidden select-none",
+          "relative h-full w-full touch-none overflow-hidden rounded-card bg-page shadow-hairline select-none",
           "transition-[background-size,background-position] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
           isPanning() ? "cursor-grabbing" : "cursor-grab",
-          className,
+          className
         )}
         onPointerDown={onCanvasPointerDown}
         onPointerMove={onCanvasPointerMove}
@@ -126,7 +181,8 @@ export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, he
         onPointerCancel={onCanvasPointerUp}
         style={{
           minHeight,
-          backgroundImage: "radial-gradient(var(--line-strong) 1px, transparent 1.25px)",
+          backgroundImage:
+            "radial-gradient(var(--line-strong) 1px, transparent 1.25px)",
           backgroundSize: `${22 * scale}px ${22 * scale}px`,
           backgroundPosition: `${view.x}px ${view.y}px`,
         }}
@@ -134,10 +190,22 @@ export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, he
         {children}
         <div
           data-slot="flowchart-world"
-          className={cn("absolute top-0 left-0 origin-top-left", !isPanning() && "transition-transform duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none")}
-          style={{ width: connectorWidth, height: worldHeight, transform: `translate(${view.x}px, ${view.y}px) scale(${scale})` }}
+          className={cn(
+            "top-0 left-0 absolute origin-top-left",
+            !isPanning() &&
+              "transition-transform duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none"
+          )}
+          style={{
+            width: connectorWidth,
+            height: worldHeight,
+            transform: `translate(${view.x}px, ${view.y}px) scale(${scale})`,
+          }}
         >
-          <svg width={connectorWidth} height={worldHeight} className="pointer-events-none absolute inset-0 overflow-visible">
+          <svg
+            width={connectorWidth}
+            height={worldHeight}
+            className="inset-0 pointer-events-none absolute overflow-visible"
+          >
             {chart.edges.map((edge) => (
               <Connector
                 key={edge.id}
@@ -169,16 +237,35 @@ export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, he
             />
           ))}
           {/* Above the cards, so the grab handles are reachable at a card's edge. */}
-          <svg width={connectorWidth} height={worldHeight} className="pointer-events-none absolute inset-0 z-10 overflow-visible">
+          <svg
+            width={connectorWidth}
+            height={worldHeight}
+            className="inset-0 pointer-events-none absolute z-10 overflow-visible"
+          >
             {edgeDrag ? (
-              <path data-edge-ghost fill="none" stroke="var(--accent-default)" strokeWidth={1.5} strokeDasharray="4 3" d={ghostCurve()} />
+              <path
+                data-edge-ghost
+                fill="none"
+                stroke="var(--accent-default)"
+                strokeWidth={1.5}
+                strokeDasharray="4 3"
+                d={ghostCurve()}
+              />
             ) : null}
             {selectedEdgeObj && selectedEnds && onEdgeConnect
               ? (["source", "target"] as const).map((end) => {
-                  const p = end === "source" ? selectedEnds.from : selectedEnds.to
+                  const p =
+                    end === "source" ? selectedEnds.from : selectedEnds.to
                   return (
                     <g key={end}>
-                      <circle cx={p.x} cy={p.y} r={5} fill="var(--surface)" stroke="var(--accent-default)" strokeWidth={1.5} />
+                      <circle
+                        cx={p.x}
+                        cy={p.y}
+                        r={5}
+                        fill="var(--surface)"
+                        stroke="var(--accent-default)"
+                        strokeWidth={1.5}
+                      />
                       {/* Generous invisible grab target over the 5px dot. */}
                       <circle
                         data-edge-handle={end}
@@ -198,16 +285,32 @@ export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, he
           </svg>
         </div>
         {zoomable ? (
-          <div data-ui className="absolute right-2 bottom-2 flex items-center gap-0.5 rounded-md bg-surface p-0.5 shadow-btn">
-            <IconButton aria-label="Zoom out" onClick={() => zoomBy(1 / 1.25)}><Minus /></IconButton>
-            <button type="button" onClick={resetZoom} className="min-w-10 text-center text-[11px] tabular-nums text-ink-2">
+          <div
+            data-ui
+            className="right-2 bottom-2 gap-0.5 p-0.5 absolute flex items-center rounded-md bg-surface shadow-btn"
+          >
+            <IconButton aria-label="Zoom out" onClick={() => zoomBy(1 / 1.25)}>
+              <Minus />
+            </IconButton>
+            <button
+              type="button"
+              onClick={resetZoom}
+              className="min-w-10 text-center text-[11px] text-ink-2 tabular-nums"
+            >
               {Math.round(scale * 100)}%
             </button>
-            <IconButton aria-label="Zoom in" onClick={() => zoomBy(1.25)}><Plus /></IconButton>
+            <IconButton aria-label="Zoom in" onClick={() => zoomBy(1.25)}>
+              <Plus />
+            </IconButton>
           </div>
         ) : null}
       </div>
-      <AlertDialog open={pendingRemove !== null} onOpenChange={(open) => { if (!open) cancelRemove() }}>
+      <AlertDialog
+        open={pendingRemove !== null}
+        onOpenChange={(open) => {
+          if (!open) cancelRemove()
+        }}
+      >
         <AlertDialogPopup>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this node?</AlertDialogTitle>
@@ -218,8 +321,13 @@ export default function Flowchart({ steps = NODES, edges, readOnly, zoomable, he
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogClose render={<Button variant="ghost" />}>Cancel</AlertDialogClose>
-            <Button variant="destructive" onClick={() => pendingRemove && commitRemove(pendingRemove.id)}>
+            <AlertDialogClose render={<Button variant="ghost" />}>
+              Cancel
+            </AlertDialogClose>
+            <Button
+              variant="destructive"
+              onClick={() => pendingRemove && commitRemove(pendingRemove.id)}
+            >
               Delete anyway
             </Button>
           </AlertDialogFooter>

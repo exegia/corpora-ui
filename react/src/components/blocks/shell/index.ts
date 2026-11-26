@@ -1,7 +1,6 @@
 import { ShellLayout } from "./shell-layout"
 export { ShellLayout }
 
-export type * from "./type"
 export * from "./shell-metrics"
 export * from "./use-shell-panels"
 export { useShellFit } from "./use-shell-fit"

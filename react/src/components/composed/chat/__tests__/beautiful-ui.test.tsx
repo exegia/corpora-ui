@@ -1,5 +1,6 @@
 import { describe, expect, mock, test } from "bun:test"
 import { fireEvent, render, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { Provider } from "jotai"
 
 import { FilterTable, RecordsTable } from "../index"
@@ -42,16 +43,19 @@ describe("FilterTable", () => {
 })
 
 describe("RecordsTable", () => {
-  test("row and select-all checkboxes drive the selection", () => {
+  test("row and select-all checkboxes drive the selection", async () => {
+    // The Ark checkbox is a native input: a bare `click` event does not toggle
+    // it in happy-dom, so drive it like a user would.
+    const user = userEvent.setup()
     const onSelectionChange = mock((_selected: ReadonlySet<string>) => {})
     render(
       <Provider>
         <RecordsTable rows={[{ id: "a", name: "A" }, { id: "b", name: "B" }]} onSelectionChange={onSelectionChange} />
       </Provider>
     )
-    fireEvent.click(screen.getByRole("checkbox", { name: "Select row 1" }))
+    await user.click(screen.getByRole("checkbox", { name: "Select row 1" }))
     expect([...onSelectionChange.mock.calls.at(-1)![0]]).toEqual(["a"])
-    fireEvent.click(screen.getByRole("checkbox", { name: "Select all" }))
+    await user.click(screen.getByRole("checkbox", { name: "Select all" }))
     expect([...onSelectionChange.mock.calls.at(-1)![0]].sort()).toEqual(["a", "b"])
   })
 })

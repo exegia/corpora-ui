@@ -1,0 +1,327 @@
+---
+title: "Table of content"
+description: "Browse canonical books in a grid or explore a book's hierarchy with tree navigation."
+---
+
+import { Preview, RegularTreePreview, CompactPreviewRail } from "@/components/stories/toc.story"
+
+## Canon book grid
+
+Browse the Old and New Testament books using their OSIS abbreviations. Select a book to open its chapters, then a chapter to open its verses. The highlighted header returns to books; the back button returns one level. Neighbor buttons switch books. The demo uses KJV chapter and verse counts. The search input is a UI preview; it does not filter the books yet.
+
+<Preview />
+
+### Reproduce this preview
+
+Install `@exegia/corpora-ui` with its React and Jotai peers, then use this
+component. If your app already mounts `ExegiaProvider`, keep that provider and
+render only the contents below it.
+
+```tsx
+"use client"
+
+import { useState } from "react"
+import { TOC, type TCanonItem } from "@exegia/corpora-ui"
+import { ExegiaProvider } from "@exegia/corpora-ui/state"
+import "@exegia/corpora-ui/index.css"
+
+const books = {
+  OT: [
+    ["Gen", "Genesis"],
+    ["Exod", "Exodus"],
+    ["Lev", "Leviticus"],
+    ["Num", "Numbers"],
+    ["Deut", "Deuteronomy"],
+    ["Josh", "Joshua"],
+    ["Judg", "Judges"],
+    ["Ruth", "Ruth"],
+    ["1Sam", "1 Samuel"],
+    ["2Sam", "2 Samuel"],
+    ["1Kgs", "1 Kings"],
+    ["2Kgs", "2 Kings"],
+    ["1Chr", "1 Chronicles"],
+    ["2Chr", "2 Chronicles"],
+    ["Ezra", "Ezra"],
+    ["Neh", "Nehemiah"],
+    ["Esth", "Esther"],
+    ["Job", "Job"],
+    ["Ps", "Psalms"],
+    ["Prov", "Proverbs"],
+    ["Eccl", "Ecclesiastes"],
+    ["Song", "Song of Solomon"],
+    ["Isa", "Isaiah"],
+    ["Jer", "Jeremiah"],
+    ["Lam", "Lamentations"],
+    ["Ezek", "Ezekiel"],
+    ["Dan", "Daniel"],
+    ["Hos", "Hosea"],
+    ["Joel", "Joel"],
+    ["Amos", "Amos"],
+    ["Obad", "Obadiah"],
+    ["Jonah", "Jonah"],
+    ["Mic", "Micah"],
+    ["Nah", "Nahum"],
+    ["Hab", "Habakkuk"],
+    ["Zeph", "Zephaniah"],
+    ["Hag", "Haggai"],
+    ["Zech", "Zechariah"],
+    ["Mal", "Malachi"],
+  ],
+  NT: [
+    ["Matt", "Matthew"],
+    ["Mark", "Mark"],
+    ["Luke", "Luke"],
+    ["John", "John"],
+    ["Acts", "Acts"],
+    ["Rom", "Romans"],
+    ["1Cor", "1 Corinthians"],
+    ["2Cor", "2 Corinthians"],
+    ["Gal", "Galatians"],
+    ["Eph", "Ephesians"],
+    ["Phil", "Philippians"],
+    ["Col", "Colossians"],
+    ["1Thess", "1 Thessalonians"],
+    ["2Thess", "2 Thessalonians"],
+    ["1Tim", "1 Timothy"],
+    ["2Tim", "2 Timothy"],
+    ["Titus", "Titus"],
+    ["Phlm", "Philemon"],
+    ["Heb", "Hebrews"],
+    ["Jas", "James"],
+    ["1Pet", "1 Peter"],
+    ["2Pet", "2 Peter"],
+    ["1John", "1 John"],
+    ["2John", "2 John"],
+    ["3John", "3 John"],
+    ["Jude", "Jude"],
+    ["Rev", "Revelation"],
+  ],
+} as const
+
+const items: TCanonItem[] = (["OT", "NT"] as const).map((testament) => ({
+  id: testament,
+  label: testament === "OT" ? "Old Testament" : "New Testament",
+  link: `#${testament}-section`,
+  level: 1,
+  type: "section",
+  nodes: books[testament].map(([abbreviation, label]) => ({
+    id: abbreviation,
+    label,
+    abbreviation,
+    link: `#demo-${abbreviation}-book`,
+    level: 2,
+    type: "book",
+    // A short Exodus excerpt; supply your edition’s full hierarchy here.
+    nodes: abbreviation === "Exod" ? [22, 25].map((count, index) => ({
+      id: `Exod-${index + 1}`,
+      label: `Exodus ${index + 1}`,
+      link: `#Exod-${index + 1}-chapter`,
+      type: "chapter",
+      level: 3,
+      number: index + 1,
+      nodes: Array.from({ length: count }, (_, verse) => ({
+        id: `Exod-${index + 1}-${verse + 1}`,
+        label: `Exodus ${index + 1}:${verse + 1}`,
+        link: `#Exod-${index + 1}-${verse + 1}-verse`,
+        type: "verse",
+        level: 4,
+        number: verse + 1,
+      })),
+    })) : undefined,
+  })),
+}))
+
+export default function CanonExample() {
+  const [message, setMessage] = useState("")
+
+  return (
+    <ExegiaProvider>
+      <div className="relative mx-auto w-full max-w-lg p-6">
+        <TOC.Canonical
+          className="h-[32rem]"
+          items={items}
+          onLinkClick={() => {}}
+          contextMenuItems={[
+            {
+              id: "open",
+              label: "Open book",
+              onSelect: (item) => setMessage(`Opened ${String(item.label)}`),
+            },
+            {
+              id: "bookmark",
+              label: "Bookmark book",
+              onSelect: (item) => setMessage(`Bookmarked ${String(item.label)}`),
+            },
+          ]}
+        />
+        <p role="status" className="mt-2 text-sm text-muted-foreground">
+          {message}
+        </p>
+      </div>
+    </ExegiaProvider>
+  )
+}
+```
+
+
+## Regular tree navigation
+
+Expand the research handbook to explore its sections, chapters, and paragraphs. This example uses the regular TOC tree rows.
+
+<RegularTreePreview />
+
+## Shared canonical state
+
+Give `TOC.Canonical` a stable `canonId` to read and update its state elsewhere
+under the same `ExegiaProvider`. Omit the ID for an isolated component instance.
+Tree already supports the equivalent `treeId` API and shares this store.
+
+```tsx
+import { TOC } from "@exegia/corpora-ui"
+import { ExegiaProvider, useCanon } from "@exegia/corpora-ui/state"
+import { createStore } from "jotai"
+
+// Create once per app instance (once per request for SSR).
+const store = createStore()
+
+function ResetCanon() {
+  const { reset } = useCanon("reader")
+  return <button onClick={reset}>Reset navigation</button>
+}
+
+// `items` is your canonical collection.
+<ExegiaProvider store={store}>
+  <TOC.Canonical canonId="reader" items={items} />
+  <ResetCanon />
+</ExegiaProvider>
+```
+
+Every atom below is a stable family keyed by `canonId`, exported from
+`@exegia/corpora-ui/state` with `CanonState` and `CanonProps`.
+
+| Atom | Kind | Value or action argument |
+| --- | --- | --- |
+| `canonSelectedLinkAtom(id)` | Derived | `string \| undefined` |
+| `canonExpandedIdsAtom(id)` | Primitive | `ReadonlySet<string>` |
+| `canonActiveSectionIdAtom(id)` | Primitive | `string \| undefined` |
+| `canonStateAtom(id)` | Derived | `CanonState` |
+| `selectCanonItemAtom(id)` | Action | `TCanonItem` |
+| `setCanonSectionAtom(id)` | Action | `string \| undefined` |
+| `resetCanonAtom(id)` | Action | No argument |
+
+The `activeLink` prop remains authoritative when supplied. Reset clears owned
+selection and expansion and returns the mounted navigator to its first section;
+it does not override a controlled selection. Selection actions update state;
+navigation callbacks and sound run only for UI interactions.
+
+Named instances persist across remounts. Call `removeCanonInstance(id)` only
+after all consumers of that ID have unmounted. Jotai is already a peer dependency,
+and the package shares atom definitions across its root and state entrypoints.
+
+## Book context menu
+
+Right-click a book in the preview to try its actions. Supply `contextMenuItems`
+as an array, or a function returning actions for the selected book. Each action
+receives the original `TCanonItem`; opening the menu does not select or navigate.
+Omit the prop (or return an empty array) to keep the browser's native menu.
+
+```tsx
+<TOC.Canonical
+  items={items}
+  contextMenuItems={(book) => [
+    {
+      id: "bookmark",
+      label: "Bookmark book",
+      disabled: bookmarkedIds.has(book.id),
+      onSelect: (item) => bookmark(item.id),
+    },
+  ]}
+/>
+```
+
+Actions also accept an `icon` and `variant="destructive"`.
+`CanonContextMenuItem` and `CanonContextMenuItems` are exported from the package.
+
+## Search the regular tree
+
+`TOC.Root` includes a search input that filters labels without changing the
+source items. Matching descendants keep their ancestors and are expanded
+automatically. Matching branches retain their full subtree. Clear the input to
+restore the previous expansion state; an empty result shows “No results found.”
+
+
+## Compact preview rail
+
+<CompactPreviewRail />
+
+`TOC.Compact` uses beUI's [Preview Rail](https://beui.dev/components/motion/preview-rail)
+(MIT). It accepts the same nested items as the regular TOC, including canonical
+items. Every destination appears in document order; shorter ticks indicate deeper
+nodes. Hover or keyboard focus reveals its title, ancestor path, and description.
+
+```tsx
+import { TOC, type TTocItem } from "@exegia/corpora-ui"
+import { useState } from "react"
+
+const items: TTocItem[] = [{
+  id: "intro", label: "Introduction", link: "#intro-section",
+  type: "section", level: 1,
+  nodes: [{
+    id: "sources", label: "Sources", link: "#sources-chapter",
+    type: "chapter", level: 2, description: "Primary texts and editions.",
+  }],
+}]
+
+export function CompactOutline() {
+  const [activeLink, setActiveLink] = useState<TTocItem>(items[0])
+  return <TOC.Compact items={items} activeLink={activeLink} onLinkClick={setActiveLink} />
+}
+```
+
+With `onLinkClick`, your application handles navigation and receives the original
+item. Omit it to follow each item's hash link (on touch, the first tap previews,
+the second follows). Supply `activeLink` to synchronize with the reader.
+
+Use `orientation="horizontal"` for a horizontal rail, `previewSide="before"`
+for previews on the opposite side, or `showPreview={false}` for ticks alone.
+`itemSize` defaults to 24 pixels. Reserve room beside the rail for its floating
+preview; avoid clipping ancestors. Labels include the full ancestor path for
+screen readers. Motion respects the reduced-motion preference.
+
+### Nested canonical navigation
+
+Supply chapters in each book’s `nodes` and verses in each chapter’s `nodes`.
+Counts come from your data; the component never invents missing chapters or verses.
+The snippet above contains an Exodus excerpt; the live demo includes all KJV books.
+`onLinkClick` receives the original item at every level. Without a callback, only
+leaf selections navigate to their hash. Items without children remain selectable.
+
+`useCanon(canonId)` exposes `browseLink` and `browse(link)` alongside selection.
+Call `browse(undefined)` to return to books without clearing the selected verse.
+Changing testament or calling `reset()` returns to the book grid. Motion respects
+reduced-motion preferences.
+
+Set `className="h-[32rem]"` (or give the parent a fixed height) to constrain the canonical navigator. The Coss ScrollArea scrolls the tiles while the search, tabs, and navigation header stay visible. Without a height constraint, the grid grows with its contents. Missing neighboring books are omitted so the current-book tile fills the available space.
+
+### Reuse the chapter or verse picker
+
+`TOC.CanonGrid` (also exported as `CanonGrid`) is the standalone heading, back
+control, and scrollable tile panel. Place it inside a breadcrumb popover and pass
+that book’s chapters or that chapter’s verses. It has no dependency on canonical
+store state; the host controls selection and navigation.
+
+```tsx
+<TOC.CanonGrid
+  className="h-72 w-80 flex-none"
+  title="Verses"
+  items={chapter.nodes ?? []}
+  selectedLink={selectedVerse?.link}
+  onLinkClick={setSelectedVerse}
+  backLabel="Chapters"
+  onBack={showChapters}
+/>
+```
+
+The scroll surface has outer spacing, padded tiles, and a neutral background
+(`dark:bg-neutral-950`). `contextMenuItems` supports the same actions as the full
+canonical navigator. Omit `onBack` to hide the back control.

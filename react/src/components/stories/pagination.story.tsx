@@ -1,6 +1,6 @@
 "use client"
 
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext } from "@/ui/pagination"
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext } from "@/components/ui/pagination"
 
 import { defineStory } from "@/registry/story"
 

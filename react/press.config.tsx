@@ -9,14 +9,26 @@ import { lucideIconsPlugin } from "fumadocs-core/source/plugins/lucide-icons"
 import { Link } from "fumapress/client"
 import { ExegiaProvider } from "./src/lib/state/exegia-provider"
 
-const SITE_URL = process.env.SITE_URL ?? "http://localhost:3000"
+import { SidebarProvider, SidebarTrigger, useSidebar } from "fumadocs-ui/layouts/docs/slots/sidebar"
+import { DocsSidebar } from "./src/components/docs/sidebar"
+
+const SITE_URL = process.env.SITE_URL ?? "http://192.168.0.225:4000"
 const RootLayout = createRootLayout()
 
 const DocsLayout = createDocsLayoutPage<typeof config.$context>({
   async render(page) {
     return {
       ...page,
+      layoutProps: {
+        containerProps: {
+          className: "[--fd-layout-width:100%]",
+        },
+        tabMode: "top",
+        slots: { sidebar: { root: DocsSidebar, provider: SidebarProvider, trigger: SidebarTrigger, useSidebar } },
+      },
       pageProps: {
+        className: "max-w-none",
+        full: true,
         tableOfContent: {
           style: "clerk",
         },
@@ -79,10 +91,13 @@ const config = defineConfig({
   defaultLayoutProps: {
     nav: {
       title: (
-        <span className="inline-flex items-center gap-2">
+        <span className="gap-2 inline-flex items-center">
           <img src="/logo.svg" alt="" className="size-6" />
           <span className="font-serif text-xl font-medium tracking-tight">
-            Corpora <span className="font-sans text-xs font-bold text-background px-1 py-[0.5px] rounded bg-foreground uppercase">UI</span>
+            Corpora{" "}
+            <span className="text-xs font-bold px-1 rounded bg-foreground py-[0.5px] font-sans text-background uppercase">
+              UI
+            </span>
           </span>
         </span>
       ),

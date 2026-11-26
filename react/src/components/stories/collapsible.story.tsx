@@ -1,6 +1,6 @@
 "use client"
 
-import { Collapsible, CollapsibleTrigger, CollapsiblePanel } from "@/ui/collapsible"
+import { Collapsible, CollapsibleTrigger, CollapsiblePanel } from "@/components/ui/collapsible"
 
 import { defineStory } from "@/registry/story"
 

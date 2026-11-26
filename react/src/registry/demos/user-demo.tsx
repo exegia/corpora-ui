@@ -3,7 +3,7 @@
 import * as React from "react"
 
 import User from "@/components/composed/user"
-import type { TUserType } from "@/components/atoms/types"
+import type { TUserType } from "@/components/atoms/type"
 import { CodeBlock } from "@/components/docs/code-block"
 import { DemoStage } from "@/components/docs/demo-controls"
 
@@ -31,9 +31,9 @@ function Example({
   children: React.ReactNode
 }) {
   return (
-    <section className="flex w-full flex-col gap-2">
+    <section className="gap-2 flex w-full flex-col">
       <h3 className="text-xs font-medium text-muted-foreground">{title}</h3>
-      <div className="flex w-full flex-wrap items-center justify-center gap-6 rounded-lg border border-border-default bg-background/40 p-6">
+      <div className="gap-6 p-6 flex w-full flex-wrap items-center justify-center rounded-lg border border-border-default bg-background/40">
         {children}
       </div>
       <CodeBlock code={code} />

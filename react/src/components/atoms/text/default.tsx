@@ -1,6 +1,6 @@
 import { createElement, type ReactElement } from "react"
 import { cn } from "@/lib/utils"
-import type { TTextProps, TTextSize, TTextVariant } from "./types"
+import type { TTextProps, TTextSize, TTextVariant } from "./type"
 
 const variantClasses: Record<TTextVariant, string> = {
   default: "text-foreground",

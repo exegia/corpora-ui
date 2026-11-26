@@ -29,7 +29,7 @@ describe("Recommendation content", () => {
       "Check the section features in",
       { exact: false }
     )
-    expect(description.closest('[data-slot="accordion-panel"]')).not.toBeNull()
+    expect(description.closest('[data-slot="accordion-content"]')).not.toBeNull()
     expect(within(trigger).queryByText("Iliad")).toBeNull()
     expect(screen.getByText("Iliad")).toBeDefined()
     expect(screen.getByText("2 min")).toBeDefined()

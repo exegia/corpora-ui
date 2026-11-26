@@ -1,6 +1,6 @@
 "use client"
 
-import { Calendar } from "@/ui/calendar"
+import { Calendar } from "@/components/ui/calendar"
 import { useState } from "react"
 import { defineStory } from "@/registry/story"
 

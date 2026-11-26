@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { ActionTooltipContext, useActionBar } from "./utils"
-import type { IActionBarProps } from "./types"
+import type { IActionBarProps } from "./type"
 
 /**
  * Toolbar chrome. "default" keeps the bordered card surface; "ghost" and

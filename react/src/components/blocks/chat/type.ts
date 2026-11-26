@@ -1,5 +1,5 @@
-import type * as React from "react"
-import type { IComposerProps } from "@/components/composed/chat/composer"
+import type { IComposerProps } from "@/components/composed/chat"
+import type { ComponentPropsWithoutRef, ReactNode } from "react"
 
 export type TAiScopeKind =
   "word" | "passage" | "articulus" | "quaestio" | "corpus"
@@ -15,9 +15,8 @@ export interface IAiScope {
   pinned?: boolean
 }
 
-export interface IRecommendationStackProps
-  extends React.ComponentPropsWithoutRef<"div"> {
-  children: React.ReactNode
+export interface IRecommendationStackProps extends ComponentPropsWithoutRef<"div"> {
+  children: ReactNode
 }
 
 export interface IPinnedThreadBannerProps {
@@ -25,27 +24,30 @@ export interface IPinnedThreadBannerProps {
 }
 
 export interface IDegradedBannerProps {
-  reason?: React.ReactNode
+  reason?: ReactNode
   onRetry?: () => void
   className?: string
 }
 
 // The reader selection shapes moved with `SelectionPopover` to
 // `composed/reader`; re-exported so the block's surface stays whole.
-export type { INodeSelection, IWordSelection } from "@/components/composed/reader"
+export type {
+  INodeSelection,
+  IWordSelection,
+} from "@/components/composed/reader"
 
 export interface IAiPanelProps extends Omit<
-  React.ComponentPropsWithoutRef<"aside">,
+  ComponentPropsWithoutRef<"aside">,
   "title"
 > {
   scope: IAiScope
   onNewThread?: () => void
   onScopeChange?: (kind: IAiScope["kind"]) => void
   onRemoveScope?: () => void
-  thread?: React.ReactNode
+  thread?: ReactNode
   /** Transient confirmation (e.g. ApplyToast), anchored to the bottom of the
    * thread and sized slightly narrower than the composer. */
-  toast?: React.ReactNode
+  toast?: ReactNode
   prompts?: string[]
   onPromptSelect?: (prompt: string) => void
   composerProps?: IComposerProps
@@ -63,7 +65,7 @@ export interface IAiPanelHeaderProps {
 }
 
 export type { TComposerMode } from "@/components/composed/chat/composer"
-export type { IDiffRow, TSuggestionState } from "@/components/composed/ai/types"
+export type { IDiffRow, TSuggestionState } from "@/components/composed/ai/type"
 
 export interface IVersionHistoryEntry {
   id?: string
@@ -89,8 +91,7 @@ export interface IVersionHistoryRecordProps {
   className?: string
 }
 
-
 export interface ILockedBannerProps {
-  children?: React.ReactNode
+  children?: ReactNode
   className?: string
 }

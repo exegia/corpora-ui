@@ -4,7 +4,7 @@ import { useId } from "react"
 import type * as React from "react"
 import { Group } from "./group"
 import { Item } from "./item"
-import type { IRecommendationCardProps } from "./types"
+import type { IRecommendationCardProps } from "./type"
 
 /**
  * One-card convenience: a Group with a single Item, so existing

@@ -1,0 +1,49 @@
+[package]
+name = "corpora-ui"
+description = "Corpora UI for GPUI: foundations, atoms, composed components and blocks."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = ["crates-io"]
+repository = "https://github.com/exegia/corpora-ui"
+documentation = "https://docs.rs/corpora-ui"
+readme = "README.md"
+include = ["/src/**", "/assets/**", "/README.md", "/LICENSE", "/Cargo.toml"]
+
+[features]
+default = []
+# Paints `atoms::glass` with the renderer's backdrop pass. It needs the patched
+# GPUI in `gpui/vendor`: an application outside this workspace must carry the
+# same `[patch.crates-io]` entries. Off by default so registry-only consumers
+# build without renderer overrides. See README.md for the full glass setup.
+glass = []
+# gpui-kit 0.10 does not forward this vendored GPUI feature yet. It also makes
+# `init` re-read `foundations/palette.toml` and `theme.toml` from this source
+# tree while the application runs.
+hot-reload = ["dep:gpui-hot-reload"]
+
+[dependencies]
+emojis = "0.9.1"
+gpui-kit.workspace = true
+gpui-hot-reload = { package = "gpui-pre", version = "=0.3.12", default-features = false, features = ["hot-reload"], optional = true }
+# Read `foundations/palette.toml` and `foundations/theme.toml`.
+serde = { version = "1", features = ["derive"] }
+toml = { version = "1", default-features = false, features = ["std", "parse", "serde"] }
+
+[dev-dependencies]
+gpui-kit = { workspace = true, features = ["test-support"] }
+
+# The gallery example's annotation tools. A dev-dependency never reaches an
+# application that depends on this library.
+[target.'cfg(target_os = "macos")'.dev-dependencies]
+gpui-agentation.workspace = true
+
+# Native playback is confined to the gallery, not the component library.
+objc2 = "0.6"
+objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSArray", "NSDictionary", "NSError", "NSValue", "NSString", "NSURL"] }
+objc2-av-foundation = { version = "0.3.2", default-features = false, features = ["std", "AVPlayer", "AVPlayerItem", "AVPlayerItemOutput", "objc2-core-media", "objc2-core-video"] }
+objc2-core-media = { version = "0.3", default-features = false, features = ["std", "CMTime"] }
+objc2-core-video = { version = "0.3", default-features = false, features = ["std", "CVPixelBuffer", "CVReturn"] }
+image = { version = "0.25", default-features = false }
+tempfile = "3"

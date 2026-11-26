@@ -212,6 +212,8 @@ export interface IScaffoldInspectorProps extends TMotionSafe<
   Omit<ComponentProps<"aside">, "children">
 > {
   children?: ReactNode
+  minWidth?: number
+  surface?: "glass" | "solid"
   /** Accessible name of the drawer region. */
   name?: string
 }

@@ -5,7 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import type * as React from "react"
 import { EASE_OUT_STRONG } from "@/lib/ease"
 import { cn } from "@/lib/utils"
-import type { IRecommendationCheckboxProps } from "./types"
+import type { IRecommendationCheckboxProps } from "./type"
 import { SIZE, STROKE, R, C } from "./constant"
 
 /**
@@ -47,7 +47,7 @@ export function Checkbox({
           >
             <Sparkle
               aria-hidden="true"
-              className="size-4 fill-indigo-500/25 stroke-[1.75] text-indigo-600 dark:text-indigo-400"
+              className="size-4 fill-indigo-500/25 text-indigo-600 dark:text-indigo-400 stroke-[1.75]"
             />
           </motion.span>
         ) : state === "running" ? (
@@ -63,7 +63,7 @@ export function Checkbox({
             <svg
               aria-hidden="true"
               className={cn(
-                "absolute inset-0",
+                "inset-0 absolute",
                 !reduceMotion && "animate-spin [animation-duration:1.1s]"
               )}
               height={SIZE}
@@ -89,7 +89,7 @@ export function Checkbox({
               />
             </svg>
             {step !== undefined ? (
-              <span className="relative text-[9px] font-semibold text-text-primary tabular-nums">
+              <span className="font-semibold relative text-[9px] text-text-primary tabular-nums">
                 {step}
               </span>
             ) : null}
@@ -99,7 +99,7 @@ export function Checkbox({
             key={state}
             animate={{ scale: 1, opacity: 1 }}
             className={cn(
-              "inline-grid place-items-center rounded-full text-white [grid-area:1/1]",
+              "text-white inline-grid place-items-center rounded-full [grid-area:1/1]",
               state === "accepted"
                 ? "bg-semantic-success"
                 : "bg-semantic-danger"
