@@ -15,7 +15,7 @@ use super::scaled::Scaled;
 use super::{Button, GlassSpec, GlassSurfaceExt as _, IconName};
 use crate::atoms::{GlassEdge, GlassEdges};
 use crate::foundations::motion::{DURATION_FAST, EASE_SMOOTH_OUT};
-use crate::foundations::shadow::{shadow_bubble, shadow_pill};
+use crate::foundations::shadow::shadow_bubble;
 use crate::foundations::{ActiveCorporaTheme as _, AtomSize, Radius};
 
 /// Hover group a bubble forms so its actions can appear with the pointer.

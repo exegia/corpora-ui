@@ -16,7 +16,7 @@ use gpui_kit::component::{ActiveTheme as _, Disableable, Icon, Sizable, Size};
 use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
     AnyElement, App, Background, BoxShadow, ClickEvent, ElementId, Hsla, InteractiveElement as _,
-    IntoElement, MouseButton, ParentElement as _, Pixels, RenderOnce, SharedString,
+    IntoElement, MouseButton, ParentElement as _, Pixels, Rems, RenderOnce, SharedString,
     StatefulInteractiveElement as _, Styled as _, Window, div, px, rems,
 };
 
@@ -119,6 +119,27 @@ impl ButtonMetrics {
 struct Interaction {
     hovered: bool,
     pressed: bool,
+    copied_at: Option<std::time::Instant>,
+}
+
+impl Interaction {
+    fn copied(&mut self, cx: &mut gpui_kit::Context<Self>) {
+        let started = std::time::Instant::now();
+        self.copied_at = Some(started);
+        cx.notify();
+        cx.spawn(async move |state, cx| {
+            cx.background_executor()
+                .timer(std::time::Duration::from_secs(2))
+                .await;
+            let _ = state.update(cx, |state, cx| {
+                if state.copied_at == Some(started) {
+                    state.copied_at = None;
+                    cx.notify();
+                }
+            });
+        })
+        .detach();
+    }
 }
 
 type ClickHandler = Rc<dyn Fn(&ClickEvent, &mut Window, &mut App)>;
@@ -138,6 +159,9 @@ pub struct Button {
     id: ElementId,
     kind: ButtonKind,
     size: AtomSize,
+    height: Option<Rems>,
+    content_padding: Option<(Pixels, Pixels)>,
+    stretch_label: bool,
     label: Option<SharedString>,
     icon: Option<Icon>,
     trailing_icon: Option<Icon>,
@@ -145,10 +169,13 @@ pub struct Button {
     fill: Option<(Background, Hsla)>,
     full_width: bool,
     pill: bool,
+    radius: Option<Radius>,
     tooltip: Option<SharedString>,
     disabled: bool,
     loading: bool,
     on_click: Option<ClickHandler>,
+    copy_feedback: bool,
+    glass_spec: Option<GlassSpec>,
 }
 
 impl Button {
@@ -158,6 +185,9 @@ impl Button {
             id: id.into(),
             kind: ButtonKind::default(),
             size: AtomSize::default(),
+            height: None,
+            content_padding: None,
+            stretch_label: false,
             label: None,
             icon: None,
             trailing_icon: None,
@@ -165,11 +195,28 @@ impl Button {
             fill: None,
             full_width: false,
             pill: false,
+            radius: None,
             tooltip: None,
             disabled: false,
             loading: false,
             on_click: None,
+            copy_feedback: false,
+            glass_spec: None,
         }
+    }
+
+    /// Shows a checkmark for two seconds after activation. Repeated clicks
+    /// restart the interval; the supplied handler still owns the copy operation.
+    pub fn copy_feedback(mut self) -> Self {
+        self.copy_feedback = true;
+        self
+    }
+
+    /// Uses a custom glass material without changing other glass buttons.
+    pub fn glass_spec(mut self, spec: GlassSpec) -> Self {
+        self.kind = ButtonKind::Glass;
+        self.glass_spec = Some(spec);
+        self
     }
 
     pub fn with_kind(mut self, kind: ButtonKind) -> Self {
@@ -223,6 +270,24 @@ impl Button {
         self
     }
 
+    /// Overrides the frame height (and diameter for an icon-only button).
+    pub fn height(mut self, height: Rems) -> Self {
+        self.height = Some(height);
+        self
+    }
+
+    /// Explicit horizontal and vertical content insets for a compact control.
+    pub fn content_padding(mut self, horizontal: Pixels, vertical: Pixels) -> Self {
+        self.content_padding = Some((horizontal, vertical));
+        self
+    }
+
+    /// Centers the label in the space remaining after the leading icon.
+    pub fn stretch_label(mut self, stretch: bool) -> Self {
+        self.stretch_label = stretch;
+        self
+    }
+
     /// An icon before the label. With no label the button is icon-only.
     pub fn icon(mut self, icon: impl Into<Icon>) -> Self {
         self.icon = Some(icon.into());
@@ -248,6 +313,12 @@ impl Button {
     /// icon's well does against the other.
     pub fn pill(mut self, pill: bool) -> Self {
         self.pill = pill;
+        self
+    }
+
+    /// Overrides the default corner radius, including for icon-only controls.
+    pub fn radius(mut self, radius: Radius) -> Self {
+        self.radius = Some(radius);
         self
     }
 
@@ -308,7 +379,7 @@ impl Sizable for Button {
 }
 
 impl RenderOnce for Button {
-    fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
+    fn render(mut self, window: &mut Window, cx: &mut App) -> impl IntoElement {
         let interactive = !self.disabled && !self.loading;
         let icon_only = self.label.is_none();
         let trailing_icon = self.trailing_icon.filter(|_| !icon_only);
@@ -319,6 +390,10 @@ impl RenderOnce for Button {
             cx,
             |_, _| Interaction::default(),
         );
+        if self.copy_feedback && interaction.read(cx).copied_at.is_some() {
+            self.icon = Some(Icon::new(gpui_kit::assets::IconName::Check));
+        }
+        let feedback = self.copy_feedback.then(|| interaction.clone());
         let (hovered, pressed) = {
             let interaction = interaction.read(cx);
             (interaction.hovered, interaction.pressed)
@@ -341,7 +416,10 @@ impl RenderOnce for Button {
 
         let rem_size = window.rem_size();
         let metrics = ButtonMetrics::of(self.size);
-        let height = rems(metrics.height).to_pixels(rem_size);
+        let height = self
+            .height
+            .unwrap_or(rems(metrics.height))
+            .to_pixels(rem_size);
         let padding = rems(metrics.padding).to_pixels(rem_size);
         let well = rems(metrics.well).to_pixels(rem_size);
         // GPUI has no element transform, so a press squeezes the surface in
@@ -400,12 +478,14 @@ impl RenderOnce for Button {
             }
         };
 
-        let radius = if icon_only || self.pill {
+        let radius = self.radius.unwrap_or(if icon_only || self.pill {
             Radius::Full
         } else {
             Radius::Lg
-        };
+        });
         let seated_start = self.pill && self.start.is_some() && !icon_only;
+        let has_leading_icon =
+            !icon_only && (self.icon.is_some() || self.start.is_some() || self.loading);
         let hover_emboss = self.kind.emboss(Emboss::Hover, cx);
         let radius = radius.resolve(cx);
         let stock = stock
@@ -427,8 +507,12 @@ impl RenderOnce for Button {
                     .group_hover(HOVER_GROUP, |style| style.shadow(hover_emboss))
             })
             .when(self.full_width || backed, |this| this.flex_1())
+            .when(has_leading_icon, |this| this.pl(padding / 2. - squeeze))
             .when(seated_start, |this| this.pl(padding / 4. - squeeze))
             .when_some(self.icon, |this, icon| this.icon(icon))
+            .when_some(self.label.clone(), |this, label| {
+                this.accessibility_label(label)
+            })
             .map(|this| match self.start {
                 // The stock button puts its label before its children, so a
                 // label that follows a start element is a child too.
@@ -440,6 +524,9 @@ impl RenderOnce for Button {
                 // keeps its own ink and fades as a whole instead.
                 None if backed => this.when_some(self.label, |this, label| {
                     this.child(div().text_color(ink).child(label))
+                }),
+                None if self.stretch_label => this.when_some(self.label, |this, label| {
+                    this.child(div().flex_1().text_center().child(label))
                 }),
                 None => this.when_some(self.label, |this, label| this.label(label)),
             })
@@ -464,13 +551,21 @@ impl RenderOnce for Button {
                         ),
                 )
             })
+            .when_some(self.content_padding, |this, (horizontal, vertical)| {
+                this.px(horizontal).py(vertical)
+            })
             .when_some(self.tooltip, |this, tooltip| this.tooltip(tooltip))
             // Loading alone already stops the stock button responding, and
             // leaves the spinner in the surface's ink.
             .disabled(self.disabled && !(backed && self.loading))
             .loading(self.loading)
             .when_some(self.on_click, |this, handler| {
-                this.on_click(move |event, window, cx| handler(event, window, cx))
+                this.on_click(move |event, window, cx| {
+                    handler(event, window, cx);
+                    if let Some(feedback) = &feedback {
+                        feedback.update(cx, Interaction::copied);
+                    }
+                })
             })
             .capture_any_mouse_down({
                 let interaction = interaction.clone();
@@ -530,7 +625,7 @@ impl RenderOnce for Button {
                     None => {
                         // Opacity reaches the label, not the glass painted
                         // under it, so the tint fades to match.
-                        let mut spec = GlassSpec::button(cx);
+                        let mut spec = self.glass_spec.unwrap_or_else(|| GlassSpec::button(cx));
                         if self.disabled {
                             spec.tint = spec.tint.map(|tint| tint.opacity(DISABLED_FILL));
                         }
@@ -548,4 +643,30 @@ fn release(interaction: &gpui_kit::Entity<Interaction>, cx: &mut App) {
             cx.notify();
         }
     });
+}
+
+#[cfg(test)]
+mod feedback_tests {
+    use super::Interaction;
+    use gpui_kit::{AppContext as _, TestAppContext};
+    use std::time::Duration;
+
+    #[gpui_kit::test]
+    fn copy_feedback_lasts_two_seconds_from_the_latest_click(cx: &mut TestAppContext) {
+        let feedback = cx.new(|_| Interaction::default());
+        feedback.update(cx, Interaction::copied);
+        cx.run_until_parked();
+        cx.executor().advance_clock(Duration::from_millis(1000));
+        feedback.update(cx, Interaction::copied);
+        cx.run_until_parked();
+        cx.executor().advance_clock(Duration::from_millis(1000));
+        cx.run_until_parked();
+        assert!(feedback.read_with(cx, |state, _| state.copied_at.is_some()));
+        cx.executor().advance_clock(Duration::from_millis(999));
+        cx.run_until_parked();
+        assert!(feedback.read_with(cx, |state, _| state.copied_at.is_some()));
+        cx.executor().advance_clock(Duration::from_millis(1));
+        cx.run_until_parked();
+        assert!(feedback.read_with(cx, |state, _| state.copied_at.is_none()));
+    }
 }

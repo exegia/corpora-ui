@@ -115,6 +115,7 @@ impl RenderOnce for ContextCards {
                         Button::new(open_id)
                             .secondary()
                             .with_atom_size(AtomSize::Xs)
+                            .content_padding(gpui_kit::px(4.), gpui_kit::px(2.))
                             .start(FileTypeBadge::new(kind))
                             .label(name)
                             .trailing_icon(Icon::new(LucideIcon::ExternalLink))

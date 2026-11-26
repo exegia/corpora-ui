@@ -5,7 +5,7 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-publish.workspace = true
+publish = false
 
 # The same source as `cargo run -p corpora-ui --example gallery`. It is built
 # from here too because dx hot-patches every workspace crate except the
@@ -19,5 +19,18 @@ path = "../corpora-ui/examples/gallery.rs"
 hot-reload = ["corpora-ui/hot-reload"]
 
 [dependencies]
-corpora-ui = { path = "../corpora-ui" }
+corpora-ui = { path = "../corpora-ui", features = ["glass"] }
 gpui-kit = { workspace = true, features = ["test-support"] }
+
+# The gallery's annotation tools, as in `corpora-ui`'s dev-dependencies.
+[target.'cfg(target_os = "macos")'.dependencies]
+gpui-agentation.workspace = true
+
+# Native playback is confined to the gallery, not the component library.
+objc2 = "0.6"
+objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSArray", "NSDictionary", "NSError", "NSValue", "NSString", "NSURL"] }
+objc2-av-foundation = { version = "0.3.2", default-features = false, features = ["std", "AVPlayer", "AVPlayerItem", "AVPlayerItemOutput", "objc2-core-media", "objc2-core-video"] }
+objc2-core-media = { version = "0.3", default-features = false, features = ["std", "CMTime"] }
+objc2-core-video = { version = "0.3", default-features = false, features = ["std", "CVPixelBuffer", "CVReturn"] }
+image = { version = "0.25", default-features = false }
+tempfile = "3"

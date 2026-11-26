@@ -444,7 +444,7 @@ impl RenderOnce for Recommendation {
                     Button::new(child_id("reject".into()))
                         .outline()
                         .with_atom_size(AtomSize::Xs)
-                        .pill(true)
+                        .radius(Radius::Sm)
                         .icon(Icon::new(IconName::Close))
                         .label(self.reject_label)
                         .on_click(click(self.on_reject)),
@@ -452,6 +452,7 @@ impl RenderOnce for Recommendation {
                 .child(
                     Button::new(child_id("accept".into()))
                         .primary()
+                        .radius(Radius::Sm)
                         .with_atom_size(AtomSize::Xs)
                         .icon(Icon::new(IconName::Check))
                         .label(self.accept_label)
@@ -461,6 +462,7 @@ impl RenderOnce for Recommendation {
                 this.child(
                     Button::new(child_id("undo".into()))
                         .ghost()
+                        .radius(Radius::Sm)
                         .with_atom_size(AtomSize::Xs)
                         .icon(Icon::new(IconName::Undo2))
                         .label("Undo")
@@ -476,12 +478,16 @@ impl RenderOnce for Recommendation {
             }
             .into()
         });
-        let footer = h_flex()
+        let footer = v_flex()
             .gap_2()
             .px_4()
             .py_3()
-            .child(Signal::new(self.confidence))
-            .child(div().flex_1().text_sm().child(confidence))
+            .child(
+                h_flex()
+                    .gap_2()
+                    .child(Signal::new(self.confidence))
+                    .child(div().flex_1().text_sm().child(confidence)),
+            )
             .child(actions.relative().with_animation(
                 child_id(format!("actions-{state:?}").into()),
                 Animation::new(DURATION_FAST),

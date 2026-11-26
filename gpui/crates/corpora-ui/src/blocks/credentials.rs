@@ -14,7 +14,7 @@ use gpui_kit::component::{ActiveTheme as _, Icon, Sizable as _, h_flex, v_flex};
 use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
     AnyElement, App, Context, Empty, Entity, EventEmitter, FontWeight, IntoElement,
-    ParentElement as _, Render, SharedString, Styled as _, Task, Window, div,
+    ParentElement as _, Render, SharedString, Styled as _, Task, Window, div, rgb,
 };
 
 use super::auth::{AuthError, Fold, text_input};
@@ -235,7 +235,14 @@ impl Render for PasskeySignInBlock {
                 Button::new("passkey-sign-in")
                     .outline()
                     .full_width(true)
-                    .icon(Icon::new(LucideIcon::FingerprintPattern))
+                    .icon(Icon::new(LucideIcon::FingerprintPattern).text_color(rgb(
+                        if cx.theme().is_dark() {
+                            0xf472b6
+                        } else {
+                            0xbe185d
+                        },
+                    )))
+                    .stretch_label(true)
                     .label(self.label.clone())
                     .loading(self.loading)
                     .disabled(self.loading)

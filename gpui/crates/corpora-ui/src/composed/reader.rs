@@ -12,7 +12,7 @@ use gpui_kit::{
 
 use crate::atoms::{Button, IconName};
 use crate::foundations::motion::DURATION_MEDIUM;
-use crate::foundations::{AtomSize, Radius};
+use crate::foundations::{ActiveCorporaTheme as _, AtomSize, Radius};
 
 type ClickHandler = Rc<dyn Fn(&ClickEvent, &mut Window, &mut App)>;
 
@@ -139,7 +139,11 @@ impl ApplyToast {
 impl RenderOnce for ApplyToast {
     fn render(self, _: &mut Window, cx: &mut App) -> impl IntoElement {
         let theme = cx.theme();
-        let success = theme.success;
+        let success = if theme.is_dark() {
+            cx.palette().success_foreground
+        } else {
+            theme.success
+        };
         let reduce_motion = cx.reduce_motion();
         let undo_id = ElementId::NamedChild(std::sync::Arc::new(self.id.clone()), "undo".into());
 
@@ -151,7 +155,7 @@ impl RenderOnce for ApplyToast {
             .py_2p5()
             .rounded(Radius::Sm.resolve(cx))
             .border_1()
-            .border_color(success.opacity(0.32))
+            .border_color(success.opacity(if theme.is_dark() { 0.7 } else { 0.32 }))
             .bg(theme.popover)
             .shadow_lg()
             .text_xs()
